@@ -1,0 +1,4 @@
+<launch>
+<node pkg="cv_camera" type="cv_camera_node" name="cv_camera_node"/>
+  <node pkg="tf" type="static_transform_publisher" name="cv_camera_tf" args="0 0 0 0 0 0 1 camera base_footprint 100" />
+</launch>
