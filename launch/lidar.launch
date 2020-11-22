@@ -1,0 +1,5 @@
+<launch>
+  <include file="$(find rplidar_ros)/launch/rplidar.launch" />
+  <node pkg="tf" type="static_transform_publisher" name="rplidar_tf" args="0 0 0 0 0 0 1 base_link laser 100" />
+</launch>
+
