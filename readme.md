@@ -1,1 +1,3 @@
-okay, hey! this is the repo for ros system.
+### purdue_lunabotics
+
+This is the git repo of the best Lunabotics software team.
