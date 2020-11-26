@@ -1,6 +1,6 @@
 # purdue_lunabotics
 
-This is the git repo of the best Lunabotics software team.
+This is the git repo of the best Lunabotics software team 2020-2021
 
 ## Getting Started
 
