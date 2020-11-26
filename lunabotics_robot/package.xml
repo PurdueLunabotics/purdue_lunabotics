@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>lunabotics_21</name>
+  <name>lunabotics_robot</name>
   <version>0.0.0</version>
-  <description>The purdue_lunabotics_ros package</description>
+  <description>The Purdue Lunabotics ROS package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
