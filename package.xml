@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>purdue_lunabotics_ros</name>
+  <name>lunabotics_21</name>
   <version>0.0.0</version>
   <description>The purdue_lunabotics_ros package</description>
 
