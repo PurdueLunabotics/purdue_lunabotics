@@ -1,20 +1,9 @@
 <launch>
-  <include file="$(find purdue_lunabotics_ros)/launch/camera.launch" />
-  <include file="$(find purdue_lunabotics_ros)/launch/lidar.launch" />
-  <arg name="model" default="turtle_test_bot" />
-  <arg name="turtle_model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
-  
-  <arg name="multi_robot_name" default=""/>
-
-  <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
-    <arg name="model" value="$(arg turtle_model)" />
-    <arg name="multi_robot_name" value="$(arg multi_robot_name)"/>
-  </include>
-
+  <!-- <include file="$(find lunabotics_robot)/launch/camera.launch" /> -->
+  <!-- <include file="$(find lunabotics_robot)/launch/lidar.launch" /> -->
+  <include file="$(find lunabotics_sim_v2_description)/launch/display.launch" />
   <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher">
     <param name="use_gui" value="true"/>
     <param name="rate" value="50"/>
   </node>
-
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find purdue_lunabotics_ros)/rviz/$(arg model).rviz"/>
 </launch>
