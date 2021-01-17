@@ -11,7 +11,7 @@ This is the git repo of the best Lunabotics software team 2020-2021
 ### Setup 
 1. Clone this repo into src of ROS catkin workspace
 ```
-git clone https://github.com/PurdueLunabotics/Software_2020-2021_ros.git
+git clone https://github.com/PurdueLunabotics/lunabotics_21.git
 ```
 2. Build workspace
 ```
@@ -26,9 +26,14 @@ catkin_make
 ```
 source ~/catkin_ws/devel/setup.bash
 ```
-### Launch robot with all sensors in Rviz
-1. Launch Robot (defaults to the turtlebot for now)
+### Launch simulation robot
 ```
-roslaunch purdue_lunabotics_ros robot.launch # Optional: model:=[name_of_rviz_model]
+roslaunch lunabotics_robot robot.launch
 ```
+
+### Launch on real robot
+```
+roslaunch lunabotics_robot robot.launch real:=true
+```
+
 
