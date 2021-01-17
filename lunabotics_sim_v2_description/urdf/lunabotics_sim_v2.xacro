@@ -1,0 +1,140 @@
+<?xml version="1.0" ?>
+<robot name="lunabotics_sim_v2" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:include filename="$(find lunabotics_sim_v2_description)/urdf/materials.xacro" />
+<xacro:include filename="$(find lunabotics_sim_v2_description)/urdf/lunabotics_sim_v2.trans" />
+<xacro:include filename="$(find lunabotics_sim_v2_description)/urdf/lunabotics_sim_v2.gazebo" />
+<link name="base_link">
+  <inertial>
+    <origin rpy="0 0 0" xyz="0.032149571312981434 -0.00401726346553819 0.27839649110935255"/>
+    <mass value="1186.026353003764"/>
+    <inertia ixx="31.965427" ixy="-0.000718" ixz="4.905722" iyy="103.623463" iyz="0.003158" izz="102.537669"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://lunabotics_sim_v2_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://lunabotics_sim_v2_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="back_right_wheel_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-0.2804869184835052 -0.23793697378054496 0.11715710503979594"/>
+    <mass value="1.5625153961807745"/>
+    <inertia ixx="0.011616" ixy="-0.0" ixz="-0.0" iyy="0.022862" iyz="-0.0" izz="0.011628"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.0 0.0 -0.01905"/>
+    <geometry>
+      <mesh filename="package://lunabotics_sim_v2_description/meshes/back_right_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.0 0.0 -0.01905"/>
+    <geometry>
+      <mesh filename="package://lunabotics_sim_v2_description/meshes/back_right_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="front_left_wheel_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="0.40951338717119623 0.23396302621944895 0.15525710503979598"/>
+    <mass value="1.5625153961807745"/>
+    <inertia ixx="0.011616" ixy="-0.0" ixz="-0.0" iyy="0.022862" iyz="-0.0" izz="0.011628"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.0 -0.0 0.01905"/>
+    <geometry>
+      <mesh filename="package://lunabotics_sim_v2_description/meshes/front_left_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.0 -0.0 0.01905"/>
+    <geometry>
+      <mesh filename="package://lunabotics_sim_v2_description/meshes/front_left_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="front_right_wheel_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="0.40951338717119184 -0.23793697378055145 0.11715710503979597"/>
+    <mass value="1.5625153961807745"/>
+    <inertia ixx="0.011616" ixy="-0.0" ixz="-0.0" iyy="0.022862" iyz="-0.0" izz="0.011628"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.0 0.0 -0.01905"/>
+    <geometry>
+      <mesh filename="package://lunabotics_sim_v2_description/meshes/front_right_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.0 0.0 -0.01905"/>
+    <geometry>
+      <mesh filename="package://lunabotics_sim_v2_description/meshes/front_right_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="back_left_wheel_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-0.28048691848350027 0.23396302621945503 0.15525710503979598"/>
+    <mass value="1.5625153961807745"/>
+    <inertia ixx="0.011616" ixy="-0.0" ixz="-0.0" iyy="0.022862" iyz="-0.0" izz="0.011628"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.0 -0.0 0.01905"/>
+    <geometry>
+      <mesh filename="package://lunabotics_sim_v2_description/meshes/back_left_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.0 -0.0 0.01905"/>
+    <geometry>
+      <mesh filename="package://lunabotics_sim_v2_description/meshes/back_left_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<joint name="back_right" type="continuous">
+  <origin rpy="0 0 0" xyz="0.0 0.0 0.01905"/>
+  <parent link="base_link"/>
+  <child link="back_right_wheel_1"/>
+  <axis xyz="-0.0 -1.0 -0.0"/>
+</joint>
+
+<joint name="front_left" type="continuous">
+  <origin rpy="0 0 0" xyz="0.0 0.0 -0.01905"/>
+  <parent link="base_link"/>
+  <child link="front_left_wheel_1"/>
+  <axis xyz="0.0 1.0 0.0"/>
+</joint>
+
+<joint name="front_right" type="continuous">
+  <origin rpy="0 0 0" xyz="0.0 0.0 0.01905"/>
+  <parent link="base_link"/>
+  <child link="front_right_wheel_1"/>
+  <axis xyz="-0.0 -1.0 -0.0"/>
+</joint>
+
+<joint name="back_left" type="continuous">
+  <origin rpy="0 0 0" xyz="0.0 0.0 -0.01905"/>
+  <parent link="base_link"/>
+  <child link="back_left_wheel_1"/>
+  <axis xyz="0.0 1.0 0.0"/>
+</joint>
+
+</robot>
