@@ -1,9 +1,6 @@
 <launch>
   <!-- <include file="$(find lunabotics_robot)/launch/camera.launch" /> -->
-  <!-- <include file="$(find lunabotics_robot)/launch/lidar.launch" /> -->
-  <include file="$(find lunabotics_sim_v2_description)/launch/display.launch" />
-  <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher">
-    <param name="use_gui" value="true"/>
-    <param name="rate" value="50"/>
-  </node>
+  <!-- <include file="$(find lunabotics_robot)/launch/lidar.launch" /> -->  
+	<include file="$(find lunabotics_sim_v2_description)/launch/display.launch" />
+<node pkg="lunabotics_robot" type="sensors_tf_broadcaster" name="sensors_tf_broadcaster"/>
 </launch>
