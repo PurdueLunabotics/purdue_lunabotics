@@ -49,8 +49,11 @@
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-
-
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
+  <depend>tf</depend>
+  <depend>geometry_msgs</depend>
+  
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->
