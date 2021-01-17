@@ -1,0 +1,23 @@
+lunabotics_sim_controller:
+  # Publish all joint states -----------------------------------
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50
+
+  # Position Controllers --------------------------------------
+  back_right_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: back_right
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+  front_left_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: front_left
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+  front_right_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: front_right
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+  back_left_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: back_left
+    pid: {p: 100.0, i: 0.01, d: 10.0}
