@@ -1,5 +1,5 @@
 <launch>
-  <node pkg="cv_camera" type="cv_camera_node" name="cv_camera_node"/>
-  <node name="image_proc" pkg="image_proc" type="image_proc" ns="cv_camera_node" respawn="true" />
-  <node pkg="tf" type="static_transform_publisher" name="cv_camera_tf" args="0 0 0 0 0 0 1 base_link camera 100" />
+	<arg name="camera">
+  <node pkg="cv_camera" type="cv_camera_node" name="$(arg camera)"/>
+  <node name="image_proc" pkg="image_proc" type="image_proc" ns="$(arg camera)_node" respawn="true" />
 </launch>

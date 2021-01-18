@@ -1,8 +1,9 @@
 <launch>
-  <arg name="real" default="0"/>
+	<arg name="real" default="0"/>
 	<group if="$(arg real)">
-		<include file="$(find lunabotics_robot)/launch/camera.launch" />
-  	<include file="$(find lunabotics_robot)/launch/lidar.launch" />  
+		<include file="$(find lunabotics_robot)/launch/camera.launch" arg="$camera:=left_camera"/>
+  	<include file="$(find lunabotics_robot)/launch/camera.launch" arg="$camera:=right_camera"/>
+ <include file="$(find lunabotics_robot)/launch/lidar.launch" />  
 	</group>
 	<include file="$(find lunabotics_sim_v2_description)/launch/display.launch" />
 <node pkg="lunabotics_robot" type="sensors_tf_broadcaster" name="sensors_tf_broadcaster"/>
