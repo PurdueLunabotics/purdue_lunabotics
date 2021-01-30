@@ -1,0 +1,13 @@
+Test Motor Control
+--------------------
+Ranges
+v : [-1,1]
+theta : [-1,1]
+----------
+(v, theta) : "Expected outcome"
+----------
+(0.5,1) : "Half speed sharp right turn"
+(0.5, 0.5) "Half speed medium right turn"
+(0.5, 0) "Half speed move straight"
+(0.5, -0.5) "Half speed medium left turn"
+(0.5, -1) : "Half speed sharp left turn"

@@ -10,19 +10,20 @@ const int directionPins[NUMDIRECTION] = {5, 9, 3, 7};
 ros::NodeHandle node_handle;
 
 void subscriberCallback(const geometry_msgs::Twist& command) {
-  // this code uses only the linear vector of the twist to define
-  // the velocity of the robot. the y component is forward and
-  // backward motion and the x component is left and right turning.
-  // both y and x have magnitude 1 or less. positive x is turning to
-  // the right
+  /*
 
-  // more math is needed to refine the motion
+		Skid-steering configuration is implemented.
+ 
+		Uses the twist to define the velocity components of the robot. the lin component is the heading forward and backward velocity
+		and the angular z (ang) is the heading angle.
+		Both lin and ang have magnitude [-1,1]. 
+	*/
 
-  double lin = command.linear.y;
-  double ang = command.linear.x;
+  double lin_v = command.linear.x; // heading velocity
+  double ang = command.angular.z; // heading angle
 
-  int vel_l = lin * 128 + ang * 128;
-  int vel_r = lin * 128 - ang * 128;
+  int vel_l = constrain(lin * 128 - ang * 128, -255, 255); // Range from [-255,255]
+  int vel_r = constrain(lin * 128 + ang * 128, -255, 255); // Range from [-255,255]
 
   if(vel_l > 0) {
     digitalWrite(directionPins[0], HIGH);
@@ -67,5 +68,5 @@ void setup()
 void loop()
 { 
   node_handle.spinOnce();
-  delay(100);
+  delay(20);
 }
