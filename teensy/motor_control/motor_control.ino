@@ -1,13 +1,40 @@
+// include ROS and all messages
 #include <ros.h>
 #include <geometry_msgs/Twist.h>
 
+// chassis motor counts
 const int NUMMOTOR = 4;
 const int NUMDIRECTION = 4;
 
-const int motorPins[NUMMOTOR] = {4, 8, 2, 6};           //fl fr bl br
+// chassis motor indices
+// corresponding entries are for the same motor
+const int motorPins[NUMMOTOR] = {4, 8, 2, 6};           //order: front left, front right, back left, back right
 const int directionPins[NUMDIRECTION] = {5, 9, 3, 7};
 
+// create node handle
 ros::NodeHandle node_handle;
+
+// enums for determining motor pin index
+#define FRONT 0
+#define BACK 2
+#define LEFT 0
+#define RIGHT 1
+
+// logic for running a motor
+void moveMotor(int front_or_back, int left_or_right, int vel) {
+  // index is found from adding the front/back and left/right enums
+  int ind = front_or_back + left_or_right;
+
+  // if velocity is negative, reverse the motor
+  if(vel > 0) {
+    digitalWrite(directionPins[ind], HIGH);
+  } else {
+    digitalWrite(directionPins[ind], LOW);
+  }
+
+  // write the velocity to the pwm pin
+  analogWrite(motorPins[ind], abs(vel));
+}
 
 void subscriberCallback(const geometry_msgs::Twist& command) {
   // this code uses only the linear vector of the twist to define
@@ -18,40 +45,27 @@ void subscriberCallback(const geometry_msgs::Twist& command) {
 
   // more math is needed to refine the motion
 
+  // extract velocity components from twist
   double lin = command.linear.y;
   double ang = command.linear.x;
 
-  int vel_l = lin * 128 + ang * 128;
-  int vel_r = lin * 128 - ang * 128;
+  // calculate left and right chassis velocities
+  int vel_l = lin * 127 + ang * 127;
+  int vel_r = lin * 127 - ang * 127;
 
-  if(vel_l > 0) {
-    digitalWrite(directionPins[0], HIGH);
-    digitalWrite(directionPins[2], HIGH);
-  } else {
-    digitalWrite(directionPins[0], LOW);
-    digitalWrite(directionPins[2], LOW);
-  }
-
-  analogWrite(motorPins[0], abs(vel_l));
-  analogWrite(motorPins[2], abs(vel_l));
-
-  if(vel_r > 0) {
-    digitalWrite(directionPins[1], HIGH);
-    digitalWrite(directionPins[3], HIGH);
-  } else {
-    digitalWrite(directionPins[1], LOW);
-    digitalWrite(directionPins[3], LOW);
-  }
-
-  analogWrite(motorPins[1], abs(vel_r));
-  analogWrite(motorPins[3], abs(vel_r));
+  // move each motor to the specified velocity
+  moveMotor(FRONT, LEFT, vel_l);
+  moveMotor(BACK, LEFT, vel_l);
+  moveMotor(FRONT, RIGHT, vel_r);
+  moveMotor(BACK, RIGHT, vel_r);
 
 }
 
+// create subscriber node
 ros::Subscriber<geometry_msgs::Twist> comm_subscriber("motor_command", subscriberCallback);
 
-void setup()
-{
+void setup() {
+  // set all pwm and direction pins to output
   for(int i = 0; i < NUMMOTOR; i++) {
     pinMode(motorPins[i], OUTPUT);
   }
@@ -59,13 +73,14 @@ void setup()
   for(int i = 0; i < NUMDIRECTION; i++) {
     pinMode(directionPins[i], OUTPUT);
   }
-  
+
+  // initialize the node and add subscriber
   node_handle.initNode();
   node_handle.subscribe(comm_subscriber);
 }
 
-void loop()
-{ 
+void loop() {
+  // spin up the node once in the loop
   node_handle.spinOnce();
   delay(100);
 }
