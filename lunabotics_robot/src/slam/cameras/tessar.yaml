@@ -1,0 +1,20 @@
+image_width: 1600
+image_height: 1200
+camera_name: tessar
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [1528.333082121942, 0, 633.0406278691419, 0, 1521.893423916154, 520.7385546801298, 0, 0, 1]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [0.04281216754912642, -0.1129298828784006, 0.002282419151736994, -0.007788223741507938, 0]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1, 0, 0, 0, 1, 0, 0, 0, 1]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [1521.572875976562, 0, 620.0756804931189, 0, 0, 1534.076293945312, 521.7800684557333, 0, 0, 0, 1, 0]
