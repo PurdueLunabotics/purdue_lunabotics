@@ -22,5 +22,8 @@ include_directories(
 add_executable(sensors_tf_broadcaster src/tf/sensors_tf_broadcaster.cpp)
 target_link_libraries(sensors_tf_broadcaster ${catkin_LIBRARIES})
 
+add_executable(joy_to_motor_control src/controller/manual_control_node.cpp)
+target_link_libraries(joy_to_motor_control ${catkin_LIBRARIES})
+
 add_executable(laser_to_point_cloud src/slam/laser_to_point_cloud.cpp)
 target_link_libraries(laser_to_point_cloud ${catkin_LIBRARIES})
