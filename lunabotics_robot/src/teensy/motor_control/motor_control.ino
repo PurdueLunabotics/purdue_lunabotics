@@ -46,7 +46,7 @@ void subscriberCallback(const geometry_msgs::Twist& command) {
 		Both lin and ang have range of [-1,1]. 
 	*/
 
-  double lin_v = command.linear.x; // heading velocity
+  double lin = command.linear.x; // heading velocity
   double ang = command.angular.z; // heading angle
 
   // calculate left and right chassis velocities
