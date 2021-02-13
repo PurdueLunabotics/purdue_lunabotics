@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>lunabotics_robot</name>
+  <name>camera_tracking</name>
   <version>0.0.0</version>
-  <description>The Purdue Lunabotics ROS package</description>
+  <description>The camera_tracking package for Lunabotic</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/purdue_lunabotics_ros</url> -->
+  <!-- <url type="website">http://wiki.ros.org/camera-tracking</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -49,12 +49,8 @@
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-  <depend>roscpp</depend>
-  <depend>rospy</depend>
-  <depend>tf2_ros</depend>
-  <depend>std_msgs</depend>
-	<depend>geometry_msgs</depend>
-	<depend>laser_geometry</depend>  
+	<depend>image_proc</depend>
+  <depend>apriltag_ros</depend>
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->

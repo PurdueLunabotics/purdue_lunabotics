@@ -1,5 +1,7 @@
 <launch>
-	<arg name="camera">
-  <node pkg="cv_camera" type="cv_camera_node" name="$(arg camera)"/>
-  <node name="image_proc" pkg="image_proc" type="image_proc" ns="$(arg camera)_node" respawn="true" />
+	<arg name="camera" default="unzano"/>
+  <node pkg="cv_camera" type="cv_camera_node" name="$(arg camera)">
+		<param name="frame_id" value="$(arg camera)"/>
+	</node>
+ 	<node name="image_proc" pkg="image_proc" type="image_proc" ns="$(arg camera)" respawn="true" />
 </launch>
