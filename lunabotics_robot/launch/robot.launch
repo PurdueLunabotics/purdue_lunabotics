@@ -5,13 +5,13 @@
 	<arg name="lidar" default="1"/>
 	<group if="$(arg real)">
 		<group if="$(arg left)">
-			<include file="$(find lunabotics_robot)/launch/camera.launch">
-				<arg name="camera" value="tessar" />	
+			<include file="$(find camera_tracking)/launch/single_camera.launch">
+				<arg name="camera_name" value="tessar" />	
 			</include>
   	</group>
 	  <group if="$(arg right)">
-      <include file="$(find lunabotics_robot)/launch/camera.launch">
-        <arg name="camera" value="unzano" />
+			<include file="$(find camera_tracking)/launch/single_camera.launch">
+        <arg name="camera_name" value="unzano" />
       </include>
     </group>
 		<group if="$(arg lidar)">

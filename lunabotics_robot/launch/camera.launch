@@ -1,5 +1,5 @@
 <launch>
-	<arg name="camera"/>
+	<arg name="camera" default="unzano"/>
   <node pkg="cv_camera" type="cv_camera_node" name="$(arg camera)">
 		<param name="frame_id" value="$(arg camera)"/>
 	</node>
