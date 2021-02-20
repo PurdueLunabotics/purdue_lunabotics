@@ -36,4 +36,8 @@ roslaunch lunabotics_robot robot.launch
 roslaunch lunabotics_robot robot.launch real:=true
 ```
 
-
+#### Params
+- real:=false (default) determines if you have hardware or just a simulation
+- left:=true (default) determines if right camera is connected
+- right:=true (default) determines if left camera is connected
+- lidar:=true (default) determines if lidar is connected
