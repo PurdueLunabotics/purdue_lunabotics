@@ -55,6 +55,7 @@
   <depend>std_msgs</depend>
 	<depend>geometry_msgs</depend>
 	<depend>laser_geometry</depend>  
+	<depend>apriltag_ros</depend>  
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->
