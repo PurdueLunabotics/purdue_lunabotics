@@ -97,10 +97,32 @@ Visualization Manager:
       Value: true
       Visual Enabled: true
     - Class: rviz/TF
-      Enabled: false
+      Enabled: true
       Frame Timeout: 15
       Frames:
         All Enabled: true
+        back_left_wheel_1:
+          Value: true
+        back_right_wheel_1:
+          Value: true
+        base_link:
+          Value: true
+        front_left_wheel_1:
+          Value: true
+        front_right_wheel_1:
+          Value: true
+        tag_0:
+          Value: true
+        tag_1:
+          Value: true
+        tag_2:
+          Value: true
+        tag_3:
+          Value: true
+        tessar:
+          Value: true
+        unzano:
+          Value: true
       Marker Alpha: 1
       Marker Scale: 0.5
       Name: TF
@@ -108,9 +130,28 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        {}
+        base_link:
+          back_left_wheel_1:
+            {}
+          back_right_wheel_1:
+            {}
+          front_left_wheel_1:
+            {}
+          front_right_wheel_1:
+            {}
+          tessar:
+            tag_0:
+              {}
+            tag_1:
+              {}
+            tag_2:
+              {}
+            tag_3:
+              {}
+          unzano:
+            {}
       Update Interval: 0
-      Value: false
+      Value: true
     - Class: rviz/Camera
       Enabled: true
       Image Rendering: background and overlay
@@ -155,7 +196,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.752536416053772
+      Distance: 5.534846782684326
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -171,9 +212,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5003969073295593
+      Pitch: 0.9003965854644775
       Target Frame: <Fixed Frame>
-      Yaw: 1.0335822105407715
+      Yaw: 0.9235824942588806
     Saved: ~
 Window Geometry:
   Camera:
