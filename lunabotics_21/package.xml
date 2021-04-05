@@ -17,8 +17,7 @@
 
 
   <buildtool_depend>catkin</buildtool_depend>
-  <exec_depend>lunabotics_robot</exec_depend>
-  <exec_depend>lunabotics_sim_v1_description</exec_depend>
+  <exec_depend>lunabotics_sim_v2_description</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

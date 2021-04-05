@@ -1,15 +1,13 @@
 <launch>
 	<arg name="real" default="0"/>
-	<arg name="left" default="1"/>
-	<arg name="right" default="1"/>
+	<arg name="t265" default="1"/>
+	<arg name="unzano" default="1"/>
 	<arg name="lidar" default="1"/>
 	<group if="$(arg real)">
-		<group if="$(arg left)">
-			<include file="$(find camera_tracking)/launch/single_camera.launch">
-				<arg name="camera_name" value="tessar" />	
-			</include>
+		<group if="$(arg t265)">
+			<include file="$(find realsense2_camera)/launch/rs_t265.launch"/>
   	</group>
-	  <group if="$(arg right)">
+	  <group if="$(arg unzano)">
 			<include file="$(find camera_tracking)/launch/single_camera.launch">
         <arg name="camera_name" value="unzano" />
       </include>
@@ -20,7 +18,7 @@
 	</group>
 	<include file="$(find lunabotics_sim_v2_description)/launch/display.launch" />
 	
-<node pkg="lunabotics_robot" type="laser_to_point_cloud" name="sensors_to_point_cloud"/>
+	<node pkg="lunabotics_robot" type="laser_to_point_cloud" name="sensors_to_point_cloud"/>
 
-<node pkg="lunabotics_robot" type="sensors_tf_broadcaster" name="sensors_tf_broadcaster"/>
+	<node pkg="lunabotics_robot" type="sensors_tf_broadcaster" name="sensors_tf_broadcaster"/>
 </launch>

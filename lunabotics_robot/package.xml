@@ -54,6 +54,7 @@
   <depend>tf2_ros</depend>
   <depend>std_msgs</depend>
 	<depend>geometry_msgs</depend>
+	<depend>robot_localization</depend>
 	<depend>laser_geometry</depend>  
 	<depend>apriltag_ros</depend>  
   <!-- The export tag contains other, unspecified, tags -->
