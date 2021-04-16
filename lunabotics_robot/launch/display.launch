@@ -1,7 +1,6 @@
 <launch>
-	<arg name="gazebo" default="1"/>
+	<arg name="gazebo" default="false"/>
 	<include file="$(find dummy_bot_description)/launch/display.launch" />
-	<include file="$(find lunabotics_robot)/launch/sensors_tf.launch" />
 	<include file="$(find lunabotics_robot)/launch/gazebo.launch" >
 		<arg name="gazebo" value="$(arg gazebo)"/>
 	</include>

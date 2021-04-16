@@ -11,8 +11,8 @@ float head_ang; // Heading angle
 void joyCallback(const sensor_msgs::Joy& joy)
 {
 	motor_cmd = geometry_msgs::Twist();
-	motor_cmd.linear.x = joy.axes[3];
-	motor_cmd.angular.z = joy.axes[1];
+	motor_cmd.linear.x = joy.axes[1];
+	motor_cmd.angular.z = joy.axes[3];
 
 	motor_cmd_pub.publish(motor_cmd);	
 }

@@ -7,36 +7,38 @@ const int NUMMOTOR = 4;
 const int NUMDIRECTION = 4;
 
 // chassis motor indices
-// corresponding entries are for the same motor
-const int motorPins[NUMMOTOR] = {4, 8, 2, 6};           //order: front left, front right, back left, back right
-const int directionPins[NUMDIRECTION] = {5, 9, 3, 7};
+// corresponding entries are for the same motors
+const int motorPins[NUMMOTOR] = {0, 4, 2, 6};           //order: front left, front right, back left, back right
+const int directionPins[NUMDIRECTION] = {1, 5, 3, 7};
 
 // create node handle
-ros::NodeHandle node_handle;
+ros::NodeHandle nh;
 
 // enums for determining motor pin index
 #define FRONT 0
 #define BACK 2
 #define LEFT 0
 #define RIGHT 1
+#define MAX_VEL 1
 
 // logic for running a motor
 void moveMotor(int front_or_back, int left_or_right, int vel) {
   // index is found from adding the front/back and left/right enums
   int ind = front_or_back + left_or_right;
-
+  int forward = (!left_or_right) ? HIGH : LOW; // left motors are opposite
   // if velocity is negative, reverse the motor
+  
   if(vel > 0) {
-    digitalWrite(directionPins[ind], HIGH);
+    digitalWrite(directionPins[ind], forward);
   } else {
-    digitalWrite(directionPins[ind], LOW);
+    digitalWrite(directionPins[ind], !forward);
   }
 
   // write the velocity to the pwm pin
   analogWrite(motorPins[ind], abs(vel));
 }
 
-void subscriberCallback(const geometry_msgs::Twist& command) {
+void subscriberCallback(const geometry_msgs::Twist& cmd_vel) {
   /*
 
 		Skid-steering configuration is implemented.
@@ -46,13 +48,19 @@ void subscriberCallback(const geometry_msgs::Twist& command) {
 		Both lin and ang have range of [-1,1]. 
 	*/
 
-  double lin_v = command.linear.x; // heading velocity
-  double ang = command.angular.z; // heading angle
+  double lin_v = cmd_vel.linear.x; // heading velocity
+  double ang_v = cmd_vel.angular.z; // heading angle
 
   // calculate left and right chassis velocities
-  int vel_l = constrain(lin * 128 - ang * 128, -255, 255); // Range from [-255,255]
-  int vel_r = constrain(lin * 128 + ang * 128, -255, 255); // Range from [-255,255]
+  int vel_l = map(lin_v - ang_v, -MAX_VEL, MAX_VEL, -255, 255); // Range from [-255,255]
+  int vel_r = map(lin_v + ang_v, -MAX_VEL, MAX_VEL, -255, 255); // Range from [-255,255]
+	vel_l = constrain(vel_l, -255, 255);
+  vel_r = constrain(vel_r, -255, 255);
 
+	nh.logerror("left_vel:");	
+  nh.logerror(String(vel_l).c_str());
+	nh.logerror("right_vel:");	
+  nh.logerror(String(vel_r).c_str());
   // move each motor to the specified velocity
   moveMotor(FRONT, LEFT, vel_l);
   moveMotor(BACK, LEFT, vel_l);
@@ -62,7 +70,7 @@ void subscriberCallback(const geometry_msgs::Twist& command) {
 }
 
 // create subscriber node
-ros::Subscriber<geometry_msgs::Twist> comm_subscriber("motor_command", subscriberCallback);
+ros::Subscriber<geometry_msgs::Twist> comm_subscriber("cmd_vel", subscriberCallback);
 
 void setup() {
   // set all pwm and direction pins to output
@@ -75,12 +83,12 @@ void setup() {
   }
 
   // initialize the node and add subscriber
-  node_handle.initNode();
-  node_handle.subscribe(comm_subscriber);
+  nh.initNode();
+  nh.subscribe(comm_subscriber);
 }
 
 void loop() {
   // spin up the node once in the loop
-  node_handle.spinOnce();
+  nh.spinOnce();
   delay(20);
 }
