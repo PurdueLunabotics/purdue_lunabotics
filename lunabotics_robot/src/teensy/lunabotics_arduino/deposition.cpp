@@ -1,27 +1,28 @@
 #include "deposition.h"
 
-Deposition::Deposition(ros::NodeHandle& nh): nh_(nh), deposition_sub_("deposition", &Deposition::_deposition_cb, this) {
-	nh_.subscribe(deposition_sub_);
+namespace deposition { 
+	void init() {
+		// set all pwm and direction pins to output
+			pinMode(drive_pin_, OUTPUT);
+			pinMode(direction_pin_, OUTPUT);
+	}
 
-  pinMode(drive_pin_, OUTPUT);
+	// logic for running a motor
+	void _move_motor(int speed) {
+		// (HIGH (CW and moves DOWN), LOW (CCW and moves UP))
+		int direction = (speed > 0) ? LOW : HIGH;
+		digitalWrite(direction_pin_, direction);
 
-  pinMode(direction_pin_, OUTPUT);
-}
+		analogWrite(drive_pin_, abs(speed));
+	}
 
-// logic for running a motor
-void Deposition::_move_motor(int depose) {
-	// (HIGH (CW and moves DOWN), LOW (CCW and moves UP))
-	int direction = (depose > 0) ? LOW : HIGH;
-	digitalWrite(direction_pin_, direction);
+	// Negative value - move DOWN, 0 - STOP, positive value - move UP, range - [-1,1]
+	void run_deposition(const std_msgs::Float64& speed, ros::NodeHandle nh) {
+		int bin_move_speed = map(speed.data, -MAX_SPEED, MAX_SPEED, -255, 255); // Range from [-255,255]
 
-  analogWrite(drive_pin_, FIXED_SPEED);
-}
+		nh.logerror("Deposition:");  
+		nh.logerror(String(bin_move_speed).c_str());
 
-// Negative value - move DOWN, 0 - STOP, positive value - move UP 
-void Deposition::_deposition_cb(const std_msgs::Int32& depose) {
-
-  nh_.logerror("Deposition:");  
-  nh_.logerror(String(depose.data).c_str());
-
-  //_move_motor(depose.data);
+		//_move_motor(bin_move_speed);
+	}
 }

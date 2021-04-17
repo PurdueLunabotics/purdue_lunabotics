@@ -1,65 +1,63 @@
-/*
 #include "drivetrain.h"
 
-Drivetrain::Drivetrain() : drivetrain_sub_("cmd_vel", &Drivetrain::_drivetrain_cb, this) {
-	nh_->subscribe(drivetrain_sub_);
+namespace drivetrain { 
+	void init() {
+		// set all pwm and direction pins to output
+		for(int i = 0; i < MOTOR_CNT; i++) {
+			pinMode(drive_pins_[i], OUTPUT);
+		}
+
+		for(int i = 0; i < MOTOR_CNT; i++) {
+			pinMode(direction_pins_[i], OUTPUT);
+		}
+	}
+
+	void _move_motor(motor_dir_t motor, int vel) {
+		vel *= (motor % 2 == 0) ? -1 : 1; // Forward rotation of left motor is opposite to right 
+		
+		if(vel > 0) {
+			digitalWrite(direction_pins_[motor], HIGH); // CW - HIGH, CCW - LOW 
+		} else {
+			digitalWrite(direction_pins_[motor], LOW);
+		}
+
+		// write the velocity to the pwm pin
+		analogWrite(drive_pins_[motor], abs(vel));
+	}
+
+	void run_drivetrain(const geometry_msgs::Twist& cmd_vel, ros::NodeHandle& nh) {
+		/*
+
+			Skid-steering configuration is implemented.
+	 
+			Uses the twist to define the velocity components of the robot. the lin component is the heading forward and backward velocity
+			and the angular z (ang) is the heading angle.
+			Both lin and ang have range of [-1,1]. 
+		*/
+
+		double lin_v = cmd_vel.linear.x; // heading velocity
+		double ang_v = cmd_vel.angular.z; // heading angle
+
+		// calculate left and right chassis velocities
+		int vel_l = map(lin_v - ang_v, -MAX_SPEED, MAX_SPEED, -255, 255); // Range from [-255,255]
+		int vel_r = map(lin_v + ang_v, -MAX_SPEED, MAX_SPEED, -255, 255); // Range from [-255,255]
+		vel_l = constrain(vel_l, -255, 255);
+		vel_r = constrain(vel_r, -255, 255);
+
+		nh.logerror("left_vel:");	
+		nh.logerror(String(vel_l).c_str());
+		nh.logerror("right_vel:");	
+		nh.logerror(String(vel_r).c_str());
+
+		// Order: FRONT_LEFT, FRONT_RIGHT, BACK_LEFT, BACK_RIGHT
+		// move each motor to the specified velocity
+		for (int motor = FRONT_LEFT; motor <= BACK_RIGHT; motor++) {
+			if(motor % 2 == 0) { // moves left motors
+				_move_motor((motor_dir_t) motor, vel_l);
+			}
+			else {
+				_move_motor((motor_dir_t) motor, vel_r); // moves right motors
+			}
+		}
+	}
 }
-
-Drivetrain::Drivetrain(ros::NodeHandle* nodehandle) {
-	nh_ = nodehandle;
-
-  for(int i = 0; i < MOTOR_CNT_; i++) {
-    pinMode(drive_pins_[i], OUTPUT);
-  }
-
-  for(int i = 0; i < MOTOR_CNT_; i++) {
-    pinMode(direction_pins_[i], OUTPUT);
-  }  
-}
-
-// logic for running a motor
-void Drivetrain::_move_motor(int front_or_back, int left_or_right, int vel) {
-  // index is found from adding the front/back and left/right enums
-  int ind = front_or_back + left_or_right;
-  int forward = (!left_or_right) ? HIGH : LOW; // left motors are opposite
-  // if velocity is negative, reverse the motor
-  
-  if(vel > 0) {
-    digitalWrite(direction_pins_[ind], forward);
-  } else {
-    digitalWrite(direction_pins_[ind], !forward);
-  }
-
-  // write the velocity to the pwm pin
-  analogWrite(drive_pins_[ind], abs(vel));
-}
-
-void Drivetrain::_drivetrain_cb(const geometry_msgs::Twist& cmd_vel) {
-
-    Skid-steering configuration is implemented.
- 
-    Uses the twist to define the velocity components of the robot. the lin component is the heading forward and backward velocity
-    and the angular z (ang) is the heading angle.
-    Both lin and ang have range of [-1,1]. 
-
-  double lin_v = cmd_vel.linear.x; // heading velocity
-  double ang_v = cmd_vel.angular.z; // heading angle
-
-  // calculate left and right chassis velocities
-  int vel_l = map(lin_v - ang_v, -MAX_VEL, MAX_VEL, -255, 255); // Range from [-255,255]
-  int vel_r = map(lin_v + ang_v, -MAX_VEL, MAX_VEL, -255, 255); // Range from [-255,255]
-  vel_l = constrain(vel_l, -255, 255);
-  vel_r = constrain(vel_r, -255, 255);
-
-  nh_->logerror("left_vel:"); 
-  nh_->logerror(String(vel_l).c_str());
-  nh_->logerror("right_vel:");  
-  nh_->logerror(String(vel_r).c_str());
-
-  // move each motor to the specified velocity
- // _move_motor(FRONT, LEFT, vel_l);
- // _move_motor(BACK, LEFT, vel_l);
- // _move_motor(FRONT, RIGHT, vel_r);
- // _move_motor(BACK, RIGHT, vel_r);
-}
-*/

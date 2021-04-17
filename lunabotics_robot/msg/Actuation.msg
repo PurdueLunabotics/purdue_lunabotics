@@ -1,0 +1,2 @@
+float64 lead_screw_actuation
+float64 angle_actuation

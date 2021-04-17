@@ -1,27 +1,25 @@
-/*
 #include "excavation.h"
 
-Excavation::Excavation(ros::NodeHandle* nodehandle) {
-	_nh = nodehandle;
- 	excavation_sub_ = nh_.subscribe("excavation", 5, &Excavation::_excavation_cb, this);
+namespace excavation {
+	void init() {
+		// set all pwm and direction pins to output
+			pinMode(drive_pin_, OUTPUT);
+			pinMode(direction_pin_, OUTPUT);
+	}
 
-  pinMode(drive_pin_, OUTPUT);
+	// logic for running the excavation motor
+	void _move_motor(unsigned int speed) {
 
-  pinMode(direction_pin_, OUTPUT);
+		digitalWrite(direction_pin_, FIXED_DIRECTION);
+		analogWrite(drive_pin_, abs(speed));
+	}
+
+	void run_excavation(const std_msgs::Float64& speed, ros::NodeHandle nh) {
+		unsigned int excavate_speed = abs(map(speed.data, -MAX_SPEED, MAX_SPEED, -255, 255)); // Range from [-255,255]
+
+		nh.logerror("Excavation:");  
+		nh.logerror(String(excavate_speed).c_str());
+
+		//_move_motor(excavate_speed);
+	}
 }
-
-// logic for running a motor
-void Excavation::_move_motor() {
-
-  digitalWrite(direction_pin_, FIXED_DIRECTION);
-  analogWrite(drive_pin_, FIXED_SPEED);
-}
-
-void Excavation::_excavation_cb(const std_msgs::Byte& excavate) {
-
-  nh_.logerror("Excavation:");  
-  nh_.logerror(String(excavate).c_str());
-
-  //_move_motor();
-}
-*/
