@@ -20,6 +20,6 @@ namespace excavation {
 		nh.logerror("Excavation:");  
 		nh.logerror(String(excavate_speed).c_str());
 
-		//_move_motor(excavate_speed);
+		_move_motor(excavate_speed);
 	}
 }

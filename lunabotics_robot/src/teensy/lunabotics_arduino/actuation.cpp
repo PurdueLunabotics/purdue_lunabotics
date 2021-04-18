@@ -7,8 +7,7 @@ namespace actuation {
 			pinMode(drive_pins_[i], OUTPUT);
 		}
 
-		for(int i = 0; i < MOTOR_CNT; i++) {
-			pinMode(direction_pins_[i], OUTPUT);
+		for(int i = 0; i < MOTOR_CNT; i++) { pinMode(direction_pins_[i], OUTPUT);
 		}
 	}
 
@@ -40,7 +39,7 @@ namespace actuation {
 		nh.logerror("  lead screw:");  
 		nh.logerror(String(lead_screw_speed).c_str());
 
-		//_move_angle(lead_screw_speed);
-		//_move_lead_screw(angle_speed);
+		_move_angle(lead_screw_speed);
+		_move_lead_screw(angle_speed);
 	}
 }

@@ -7,7 +7,7 @@ void excavation_cb(const std_msgs::Float64& speed) {
 	excavation::run_excavation(speed, nh);
 }
 
-ros::Subscriber<std_msgs::Float64> excavation_sub("excavation", excavation_cb);
+ros::Subscriber<std_msgs::Float64> excavation_sub("/excavation", excavation_cb, 500);
 
 void setup() {
   nh.initNode();
@@ -17,5 +17,5 @@ void setup() {
 
 void loop() {
   nh.spinOnce();
-  delay(20);
+  delay(3);
 }

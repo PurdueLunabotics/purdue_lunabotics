@@ -1,6 +1,8 @@
 <launch>
-    <node name="serial_node"        pkg="rosserial_python"      type="serial_node.py" output="screen">
+    <node name="teensy_drive" ns="teensy_drive"       pkg="rosserial_python"      type="serial_node.py" output="screen">
 	    <param name="port"              type="string"               value="/dev/ttyACM0"/>
-	    <param name="baud"              type="int"                  value="57600"/>
+    </node>
+    <node name="teensy_excavate"   ns="teensy_excavate"     pkg="rosserial_python"      type="serial_node.py" output="screen">
+	    <param name="port"              type="string"               value="/dev/ttyACM1"/>
     </node>
 </launch>

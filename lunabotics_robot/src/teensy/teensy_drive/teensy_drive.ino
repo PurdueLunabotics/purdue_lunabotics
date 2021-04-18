@@ -15,9 +15,9 @@ void drivetrain_cb(const geometry_msgs::Twist& cmd_vel) {
 	drivetrain::run_drivetrain(cmd_vel, nh);
 }
 
-ros::Subscriber<std_msgs::Float64> deposition_sub("deposition", deposition_cb);
-ros::Subscriber<lunabotics_robot::Actuation> actuation_sub("actuation", actuation_cb);
-ros::Subscriber<geometry_msgs::Twist> drivetrain_sub("cmd_vel", drivetrain_cb);
+ros::Subscriber<std_msgs::Float64> deposition_sub("/deposition", deposition_cb);
+ros::Subscriber<lunabotics_robot::Actuation> actuation_sub("/actuation", actuation_cb);
+ros::Subscriber<geometry_msgs::Twist> drivetrain_sub("/cmd_vel", drivetrain_cb);
 
 void setup() {
   nh.initNode();

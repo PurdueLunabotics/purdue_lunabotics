@@ -23,6 +23,6 @@ namespace deposition {
 		nh.logerror("Deposition:");  
 		nh.logerror(String(bin_move_speed).c_str());
 
-		//_move_motor(bin_move_speed);
+		_move_motor(bin_move_speed);
 	}
 }
