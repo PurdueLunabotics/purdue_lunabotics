@@ -36,4 +36,8 @@ roslaunch lunabotics_robot robot.launch
 roslaunch lunabotics_robot robot.launch real:=true
 ```
 
-
+#### Params
+- real:=false (default) determines if you have hardware or just a simulation
+- tessar:=true (default) determines if unzano camera (unzano) is connected
+- unzano:=true (default) determines if tessar camera (tessar) is connected
+- lidar:=true (default) determines if lidar is connected

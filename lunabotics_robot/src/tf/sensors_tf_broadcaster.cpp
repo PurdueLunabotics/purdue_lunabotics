@@ -66,7 +66,7 @@ int main(int argc, char** argv){
 	ros::Subscriber lidar_angle_sub = n.subscribe("lidar_angle", 1000, lidar_angle_cb);	
 	double camera_left_trans[3] = {-0.495,0.127,0.172};
 	double camera_right_trans[3] = {-0.495, -0.127, 0.172};
-	double camera_rot[3] = {0,0,M_PI};
+	double camera_rot[3] = {-M_PI/2,0,M_PI/2};
 	
 	sendStaticTransform(camera_left_trans, camera_rot, "unzano", "base_link");
 	sendStaticTransform(camera_right_trans, camera_rot, "tessar", "base_link");

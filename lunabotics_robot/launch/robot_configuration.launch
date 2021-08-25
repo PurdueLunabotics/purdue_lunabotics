@@ -1,0 +1,23 @@
+<launch>
+	<arg name="real" default="0"/>
+	<arg name="t265" default="1"/>
+	<arg name="unzano" default="1"/>
+	<arg name="lidar" default="1"/>
+	<group if="$(arg real)">
+		<group if="$(arg t265)">
+			<include file="$(find realsense2_camera)/launch/rs_t265.launch">
+				<arg name="camera" value="t265"/>
+			</include>
+  	</group>
+	  <group if="$(arg unzano)">
+			<include file="$(find camera_tracking)/launch/single_camera.launch">
+        <arg name="camera_name" value="unzano" />
+      </include>
+    </group>
+		<group if="$(arg lidar)">
+			<include file="$(find lunabotics_robot)/launch/lidar.launch" />  
+		</group>
+	</group>
+	<node pkg="lunabotics_robot" type="laser_to_point_cloud" name="sensors_to_point_cloud"/>
+
+</launch>

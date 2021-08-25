@@ -3,19 +3,37 @@ project(lunabotics_robot)
 
 find_package(catkin REQUIRED COMPONENTS
  geometry_msgs
+ std_msgs
  roscpp
- tf
+ robot_localization
+ message_generation
+ tf2_ros
+ laser_geometry
+ sensor_msgs 
+)
+
+include_directories(
+	#include
+  ${catkin_INCLUDE_DIRS}
+)
+
+## Generate messages in the 'msg' folder
+add_message_files(FILES
+  Actuation.msg
+)
+
+## Generate added messages and services with any dependencies listed here
+generate_messages(DEPENDENCIES
+   std_msgs  # Or other packages containing msgs
 )
 
 catkin_package(
    #INCLUDE_DIRS include
    LIBRARIES ${PROJECT_NAME}
-   CATKIN_DEPENDS roscpp rospy geometry_msgs tf
+   CATKIN_DEPENDS std_msgs roscpp rospy geometry_msgs message_runtime tf2_ros laser_geometry sensor_msgs 
 )
 
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
 
-add_executable(sensors_tf_broadcaster src/tf/sensors_tf_broadcaster.cpp)
-target_link_libraries(sensors_tf_broadcaster ${catkin_LIBRARIES})
+
+add_executable(laser_to_point_cloud src/slam/laser_to_point_cloud.cpp)
+target_link_libraries(laser_to_point_cloud ${catkin_LIBRARIES})
