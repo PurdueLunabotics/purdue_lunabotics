@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="apriltag_camera" default="t265"/>
+
+  <group ns="t265">
+    <include file="$(find realsense2_camera)/launch/rs_t265.launch"/>
+  </group>
+
+  <!-- Apriltag detection -->
+  <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" ns="$(arg apriltag_camera)" name="apriltag" output="screen">
+    <param name="camera_frame" type="str" value="$(arg apriltag_camera)" />
+    <param name="publish_tag_detections_image" type="bool" value="true" />
+
+    <rosparam command="load" file="$(find lunabot_localization)/config/apriltags/config/settings.yaml" />
+    <rosparam command="load" file="$(find lunabot_localization)/config/apriltags/config/tags.yaml" />
+  </node>
+</launch>

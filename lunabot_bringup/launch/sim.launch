@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+	<include file="$(find dummy_bot_description)/launch/display.launch" />
+  <arg name="world_name" default="worlds/empty.world"/>
+		<!-- Gazebo specific options -->
+		<arg name="gazebo_gui" default="true"/>
+		<arg name="paused" default="false"/>
+
+  	<!-- startup simulated world -->
+		<include file="$(find gazebo_ros)/launch/empty_world.launch">
+			<arg name="world_name" value="$(arg world_name)"/>
+			<arg name="paused" value="$(arg paused)"/>
+			<arg name="gui" value="$(arg gazebo_gui)"/>
+		</include>
+
+		<!-- push robot_description to factory and spawn robot in gazebo -->
+		<node name="spawn_gazebo_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model robot -x 0 -y 0 -z 0.1"
+			respawn="false" output="screen" />
+</launch>
