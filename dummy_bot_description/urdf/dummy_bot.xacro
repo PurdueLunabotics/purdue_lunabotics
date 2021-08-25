@@ -1,0 +1,140 @@
+<?xml version="1.0" ?>
+<robot name="dummy_bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:include filename="$(find dummy_bot_description)/urdf/materials.xacro" />
+<xacro:include filename="$(find dummy_bot_description)/urdf/dummy_bot.trans" />
+<xacro:include filename="$(find dummy_bot_description)/urdf/dummy_bot.gazebo" />
+<link name="base_link">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-1.667754803659369e-10 0.0 0.08835894305363262"/>
+    <mass value="369.7501727616167"/>
+    <inertia ixx="8.465112" ixy="0.0" ixz="0.0" iyy="18.141277" iyz="0.0" izz="25.579367"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://dummy_bot_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://dummy_bot_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="wheel_right_front_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-4.3576253716537394e-14 -0.022224999999999995 -2.736260904245835e-07"/>
+    <mass value="43.1518870370614"/>
+    <inertia ixx="0.445692" ixy="0.0" ixz="0.0" iyy="0.877173" iyz="0.0" izz="0.445692"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.254 0.254 -0.101276"/>
+    <geometry>
+      <mesh filename="package://dummy_bot_description/meshes/wheel_right_front_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.254 0.254 -0.101276"/>
+    <geometry>
+      <mesh filename="package://dummy_bot_description/meshes/wheel_right_front_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="wheel_1_left_front_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-4.3576253716537394e-14 0.02222499999999994 -2.736260904245835e-07"/>
+    <mass value="43.1518870370614"/>
+    <inertia ixx="0.445692" ixy="-0.0" ixz="0.0" iyy="0.877173" iyz="0.0" izz="0.445692"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.254 -0.254 -0.101276"/>
+    <geometry>
+      <mesh filename="package://dummy_bot_description/meshes/wheel_1_left_front_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.254 -0.254 -0.101276"/>
+    <geometry>
+      <mesh filename="package://dummy_bot_description/meshes/wheel_1_left_front_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="wheel_left_back_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-4.346523141407488e-14 0.02222499999999994 -2.7362609036907237e-07"/>
+    <mass value="43.1518870370614"/>
+    <inertia ixx="0.445692" ixy="-0.0" ixz="0.0" iyy="0.877173" iyz="0.0" izz="0.445692"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="0.254 -0.254 -0.101276"/>
+    <geometry>
+      <mesh filename="package://dummy_bot_description/meshes/wheel_left_back_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="0.254 -0.254 -0.101276"/>
+    <geometry>
+      <mesh filename="package://dummy_bot_description/meshes/wheel_left_back_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="wheel_right_back_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-4.3520742565306136e-14 -0.022224999999999995 -2.736260904245835e-07"/>
+    <mass value="43.1518870370614"/>
+    <inertia ixx="0.445692" ixy="-0.0" ixz="0.0" iyy="0.877173" iyz="0.0" izz="0.445692"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="0.254 0.254 -0.101276"/>
+    <geometry>
+      <mesh filename="package://dummy_bot_description/meshes/wheel_right_back_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="0.254 0.254 -0.101276"/>
+    <geometry>
+      <mesh filename="package://dummy_bot_description/meshes/wheel_right_back_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<joint name="Rev1" type="continuous">
+  <origin rpy="0 0 0" xyz="0.254 -0.254 0.101276"/>
+  <parent link="base_link"/>
+  <child link="wheel_right_front_1"/>
+  <axis xyz="0.0 1.0 0.0"/>
+</joint>
+
+<joint name="Rev2" type="continuous">
+  <origin rpy="0 0 0" xyz="0.254 0.254 0.101276"/>
+  <parent link="base_link"/>
+  <child link="wheel_1_left_front_1"/>
+  <axis xyz="0.0 -1.0 0.0"/>
+</joint>
+
+<joint name="Rev3" type="continuous">
+  <origin rpy="0 0 0" xyz="-0.254 0.254 0.101276"/>
+  <parent link="base_link"/>
+  <child link="wheel_left_back_1"/>
+  <axis xyz="0.0 -1.0 0.0"/>
+</joint>
+
+<joint name="Rev4" type="continuous">
+  <origin rpy="0 0 0" xyz="-0.254 -0.254 0.101276"/>
+  <parent link="base_link"/>
+  <child link="wheel_right_back_1"/>
+  <axis xyz="0.0 1.0 0.0"/>
+</joint>
+
+</robot>
