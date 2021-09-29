@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <node pkg="lunabotics_robot" type="manual_controller" name="manual_control" output="screen"/>
+  <node pkg="lunabot_control" type="manual_controller" name="manual_control" output="screen"/>
 
  <!-- joy node -->
   <node respawn="true" pkg="joy" type="joy_node" name="joy" output="screen">

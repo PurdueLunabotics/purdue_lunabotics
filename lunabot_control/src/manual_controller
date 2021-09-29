@@ -5,7 +5,7 @@ import sys
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64 
 from sensor_msgs.msg import Joy 
-from lunabotics_robot.msg import Actuation
+from lunabot_msgs.msg import Actuation
 
 class ManualController:
 	'''ManualController
