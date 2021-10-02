@@ -3,7 +3,7 @@
   <arg name="apriltag_camera" default="t265"/>
 
   <group ns="t265">
-    <include file="$(find realsense2_camera)/launch/rs_t265.launch"/>
+    <include file="$(find realsense2_camera)/launch/demo_t265.launch"/>
   </group>
 
   <!-- Apriltag detection -->
