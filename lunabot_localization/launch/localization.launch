@@ -1,15 +1,38 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="apriltag_camera" default="t265"/>
+  <arg name="serial_no_d435"    			default="939622074382"/> 		
+  <arg name="serial_no_t265"    			default="943222111167"/> 	
+  <arg name="initial_reset"             default="false"/>
 
   <group ns="t265">
-    <include file="$(find realsense2_camera)/launch/demo_t265.launch"/>
+    <include file="$(find realsense2_camera)/launch/rs_t265.launch">
+      <param name="serial_no" type="str" value="$(arg serial_no_t265)" />
+      <param name="tf_prefix" type="str" value="t265" />
+      <param name="base_frame_id" type="str" value="t265_base" />
+      <param name="odom_frame_id" type="str" value="t265_odom" />
+      <arg name="initial_reset"         value="$(arg initial_reset)"/>
+    </include>
   </group>
 
+  <group ns="d435">
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+      <param name="serial_no" type="str" value="$(arg serial_no_d435)" />
+      <param name="tf_prefix" type="str" value="d435" />
+      <param name="base_frame_id" type="str" value="d435_base" />
+      <param name="odom_frame_id" type="str" value="d435_odom" />
+      <arg name="initial_reset"         value="$(arg initial_reset)"/>
+    </include>
+  </group>
+
+  <node pkg="image_proc" ns="/d435/camera/color/" type="image_proc" name="image_proc" args="image:=/d435/camera/color/image_raw"/>
+
   <!-- Apriltag detection -->
-  <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" ns="$(arg apriltag_camera)" name="apriltag" output="screen">
-    <param name="camera_frame" type="str" value="$(arg apriltag_camera)" />
+  <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" name="apriltag" output="screen">
+    <param name="camera_frame" type="str" value="d435_base" />
     <param name="publish_tag_detections_image" type="bool" value="true" />
+
+    <remap from="image_rect" to="/d435/camera/color/image_rect_color" />
+    <remap from="camera_info" to="/d435/camera/color/camera_info" />
 
     <rosparam command="load" file="$(find lunabot_localization)/config/apriltags/config/settings.yaml" />
     <rosparam command="load" file="$(find lunabot_localization)/config/apriltags/config/tags.yaml" />

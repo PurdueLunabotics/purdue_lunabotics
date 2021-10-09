@@ -50,6 +50,8 @@
   <!--   <doc_depend>doxygen</doc_depend> -->
     <!--<depend>apriltag_ros</depend> -->
 	<depend>realsense2_camera</depend>  
+	<depend>image_proc</depend>  
+	<depend>apriltag_ros</depend>  
   <buildtool_depend>catkin</buildtool_depend>
 
 
