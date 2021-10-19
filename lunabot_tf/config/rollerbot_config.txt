@@ -1,0 +1,7 @@
+Measurements in INCHES
+height: 32
+Width: 16.25
+Length: 28.125
+height above ground: 4.5
+d435: (8.75,-0.625,31.5)
+t265 transform from d435: (7.75, 4.375, 0)

@@ -48,8 +48,10 @@
   <!--   <test_depend>gtest</test_depend> -->
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
+    <!--<depend>apriltag_ros</depend> -->
+	<depend>realsense2_camera</depend>  
+	<depend>image_proc</depend>  
 	<depend>apriltag_ros</depend>  
-	<depend>realsense_ros</depend>  
   <buildtool_depend>catkin</buildtool_depend>
 
 
