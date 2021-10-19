@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+import rospy
+from sensor_msgs.msg import LaserScan
+from std_msgs.msg import Float64
+from std_msgs.msg import Float64MultiArray
+
+'''
+Class to detect obstacles using the LIDAR
+Note: Currently just returns ranges that obstacle is detected, will be changed to update mapping system when thats implemented
+'''
+class ObstacleDetector:
+
+    def __init__(self):
+        #Constants
+        self.threshold = 0 #Maximum distance an obstacle can reasonably be at (if its too far of a measurement, probably detecting wall)
+        self.angle_min = 0 #Minimum angle that lidar can scan for objects (since part of lidar scans will detect the robot)
+        self.angle_max = 0 # Maximum angle that lidar can scan for objects
+
+        #Ros Node Setup
+        rospy.init_node('obstacle_detections')
+        rospy.Subscriber('rplidar/scan', LaserScan, self.find_obstacle)
+        self.obstacle_publisher = rospy.Publisher('lunabot_nav/obstacle_detector', Float64MultiArray, queue_size=1)
+        rospy.spin()
+
+    def find_obstacle(self, laser_scan):
+        #Setup
+        obstacles = []
+        currentAngle = laser_scan.angle_min
+        hasObstacle = False
+        startAngle = 0
+
+        #Checking each angle for obstacles
+        for range in laser_scan.ranges:
+            
+            if(currentAngle >= self.angle_min and currentAngle <= self.angle_max): #only bothers w/ calculations if inside desired range
+                
+                if(range < self.threshold and not hasObstacle): #Finds start of obstacle
+                    hasObstacle = True
+                    startAngle = currentAngle
+            
+                elif(range > self.threshold and hasObstacle): #Finds end of obstacle, adds range to data
+                    hasObstacle = False
+                    obstacles.append(self.__make__Float64(startAngle))
+                    obstacles.append(self.__make__Float64(currentAngle))
+            
+            currentAngle += laser_scan.angle_increment #increments angle
+
+        #Edge Case if obstacle starts in range but goes out of range
+        if(hasObstacle):
+            obstacles.append(self.__make__Float64(startAngle))
+            obstacles.append(self.__make__Float64(currentAngle))
+        
+        #Publishing Data TODO: convert to updating general navigation mapping
+        published_obsatacle = Float64MultiArray()
+        published_obsatacle.data = obstacles
+        self.obstacle_publisher.publish(published_obsatacle)
+    
+    #Converts float to Float64 object
+    def __make__Float64(self, value):
+        float64 = Float64()
+        float64.data = value
+        return float64
+
+if __name__ == "main":
+    ObstacleDetector()
