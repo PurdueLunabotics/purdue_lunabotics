@@ -1,4 +1,4 @@
-#include <cmath>
+#include <lunabot_localization/laterate.h>
 
 //These are the centers of the three points for trilateration
 #define UY 0.0

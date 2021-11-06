@@ -1,46 +1,20 @@
-#include <string.h>
-#include <vector>
-#include <chrono>
-#include <ctime>
-
-#include <bluetooth/bluetooth.h>
-#include <bluetooth/hci.h>
-#include <bluetooth/hci_lib.h>
-
-#include <blepp/logging.h>
-#include <blepp/pretty_printers.h>
-#include <blepp/blestatemachine.h>
-#include <blepp/lescan.h>
-#include <blepp/uuid.h>
+#include <lunabot_localization/bt_manager.h>
 
 using namespace BLEPP;
 
-//UUIDs of BLE beacons
-const BLEPP::bt_uuid_t UUID1;
-const BLEPP::bt_uuid_t UUID2;
-const BLEPP::bt_uuid_t UUID3;
-
-struct btevent //Stores information when a given UUID is detected
+BTManager::BTManager() 
 {
-    unsigned char r_id = 0;
-    bt_uuid_t UUID;
-    std::chrono::time_point<std::chrono::system_clock> t; //Time of event
-    int8_t rssi; //RSSI of signal
-};
-
-HCIScanner* scanSetup() 
-{
-    //Scan setup
-    HCIScanner::ScanType type = HCIScanner::ScanType::Active;
-    HCIScanner::FilterDuplicates filter = HCIScanner::FilterDuplicates::Off; //Needs testing
-    HCIScanner scanner(true, filter, type);
-    //Probably this should send errors and results somewhere (this will be part of ROS wrapper)
-    return &scanner;
+  //Scan setup
+  HCIScanner::ScanType type = HCIScanner::ScanType::Active;
+  HCIScanner::FilterDuplicates filter = HCIScanner::FilterDuplicates::Off; //Needs testing
+  HCIScanner scanner(true, filter, type);
+  //Probably this should send errors and results somewhere (this will be part of ROS wrapper)
+  this->scanner = &scanner;
 }
 
-std::vector<btevent> getResults(HCIScanner scanner) //Run this when you want to get scan results
+std::vector<btevent> BTManager::getResults() //Run this when you want to get scan results
 {
-    std::vector<AdvertisingResponse> responses = scanner.get_advertisements();
+    std::vector<AdvertisingResponse> responses = this->scanner->get_advertisements();
     std::vector<btevent> events = std::vector<btevent>();
     bool w1, w2, w3 = false;
     AdvertisingResponse test_event;
