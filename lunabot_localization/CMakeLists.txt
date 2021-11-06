@@ -7,10 +7,14 @@ project(lunabot_localization)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  geometry_msgs  
+  std_msgs
+)
 
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+find_package(PkgConfig)
+pkg_check_modules(BLEPP REQUIRED libblepp)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -40,6 +44,7 @@ find_package(catkin REQUIRED)
 ##   * uncomment the add_*_files sections below as needed
 ##     and list every .msg/.srv/.action file to be processed
 ##   * uncomment the generate_messages entry below
+
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
@@ -101,7 +106,7 @@ find_package(catkin REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES lunabot_localization
-#  CATKIN_DEPENDS other_catkin_pkg
+  CATKIN_DEPENDS roscpp std_msgs geometry_msgs
 #  DEPENDS system_lib
 )
 
@@ -113,7 +118,8 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
  include
- # ${catkin_INCLUDE_DIRS}
+ ${catkin_INCLUDE_DIRS}
+ ${BLEPP_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -129,7 +135,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME}_ble_loc_node src/ble_loc_wrapper_node.cpp)
+add_executable(${PROJECT_NAME}_ble_loc_node src/bt_localization_node.cpp src/bt_manager.cpp src/laterate.cpp src/bt_localization.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -144,6 +150,7 @@ add_dependencies(${PROJECT_NAME}_ble_loc_node ${${PROJECT_NAME}_EXPORTED_TARGETS
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_ble_loc_node
   ${catkin_LIBRARIES}
+  ${BLEPP_LIBRARIES}
 )
 
 #############

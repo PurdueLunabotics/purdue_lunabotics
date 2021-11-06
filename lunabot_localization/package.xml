@@ -52,6 +52,9 @@
 	<depend>realsense2_camera</depend>  
 	<depend>image_proc</depend>  
 	<depend>apriltag_ros</depend>  
+	<depend>roscpp</depend>  
+	<depend>std_msgs</depend>  
+	<depend>geometry_msgs</depend>  
   <buildtool_depend>catkin</buildtool_depend>
 
 
