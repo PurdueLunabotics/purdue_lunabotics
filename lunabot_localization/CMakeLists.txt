@@ -3,7 +3,6 @@ project(lunabot_localization)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
-
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -25,8 +24,7 @@ find_package(catkin REQUIRED)
 ## To declare and build messages, services or actions from within this
 ## package, follow these steps:
 ## * Let MSG_DEP_SET be the set of packages whose message types you use in
-##   your messages/services/actions (e.g. std_msgs, actionlib_msgs, ...).
-## * In the file package.xml:
+##   your messages/services/actions (e.g. std_msgs, actionlib_msgs, ...).  ## * In the file package.xml:
 ##   * add a build_depend tag for "message_generation"
 ##   * add a build_depend and a exec_depend tag for each package in MSG_DEP_SET
 ##   * If MSG_DEP_SET isn't empty the following dependency has been pulled in
@@ -125,26 +123,19 @@ include_directories(
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
 # add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+if(NOT APPLE)
+  add_executable(${PROJECT_NAME}_ble_loc_node src/ble_loc_wrapper_node.cpp)
 
-## Declare a C++ executable
-## With catkin_make all packages are built within a single CMake context
-## The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME}_ble_loc_node src/ble_loc_wrapper_node.cpp)
+  set_target_properties(${PROJECT_NAME}_ble_loc_node PROPERTIES OUTPUT_NAME ble_loc_node PREFIX "")
 
-## Rename C++ executable without prefix
-## The above recommended prefix causes long target names, the following renames the
-## target back to the shorter version for ease of user use
-## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
-set_target_properties(${PROJECT_NAME}_ble_loc_node PROPERTIES OUTPUT_NAME ble_loc_node PREFIX "")
+  add_dependencies(${PROJECT_NAME}_ble_loc_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-## Add cmake target dependencies of the executable
-## same as for the library above
-add_dependencies(${PROJECT_NAME}_ble_loc_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+  ## Specify libraries to link a library or executable target against
+  target_link_libraries(${PROJECT_NAME}_ble_loc_node
+    ${catkin_LIBRARIES}
+  )
+endif()
 
-## Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME}_ble_loc_node
-  ${catkin_LIBRARIES}
-)
 
 #############
 ## Install ##
