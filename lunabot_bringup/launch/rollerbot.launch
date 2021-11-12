@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <include file="$(find lunabot_nav)/launch/lidar.launch" />
   <include file="$(find lunabot_localization)/launch/localization.launch" />
   <include file="$(find lunabot_tf)/launch/sensors_rollerbot.launch" />
+  <node type="rviz" name="rviz" pkg="rviz" args="-d $(find lunabot_bringup)/rviz/tf.rviz" />
 </launch>
