@@ -8,6 +8,8 @@ Panels:
         - /Status1
         - /TF1/Frames1
         - /Odometry1
+        - /DepthCloud1
+        - /DepthCloud1/Auto Size1
       Splitter Ratio: 0.5
     Tree Height: 438
   - Class: rviz/Selection
@@ -55,10 +57,46 @@ Visualization Manager:
       Reference Frame: <Fixed Frame>
       Value: true
     - Class: rviz/TF
-      Enabled: false
+      Enabled: true
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        base_link:
+          Value: true
+        d435_color_frame:
+          Value: true
+        d435_color_optical_frame:
+          Value: true
+        d435_depth_frame:
+          Value: true
+        d435_depth_optical_frame:
+          Value: true
+        d435_link:
+          Value: true
+        map:
+          Value: true
+        t265_accel_frame:
+          Value: true
+        t265_accel_optical_frame:
+          Value: true
+        t265_gyro_frame:
+          Value: true
+        t265_gyro_optical_frame:
+          Value: true
+        t265_link:
+          Value: true
+        t265_odom_frame:
+          Value: true
+        t265_pose_frame:
+          Value: true
+        tag_0:
+          Value: true
+        tag_1:
+          Value: true
+        tag_2:
+          Value: true
+        tag_3:
+          Value: true
       Marker Alpha: 1
       Marker Scale: 1
       Name: TF
@@ -66,9 +104,28 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        {}
+        map:
+          base_link:
+            d435_color_frame:
+              d435_color_optical_frame:
+                tag_0:
+                  {}
+                tag_1:
+                  {}
+                tag_2:
+                  {}
+                tag_3:
+                  {}
+          t265_pose_frame:
+            t265_link:
+              t265_accel_frame:
+                t265_accel_optical_frame:
+                  {}
+              t265_gyro_frame:
+                t265_gyro_optical_frame:
+                  {}
       Update Interval: 0
-      Value: false
+      Value: true
     - Angle Tolerance: 0.10000000149011612
       Class: rviz/Odometry
       Covariance:
@@ -86,7 +143,7 @@ Visualization Manager:
           Scale: 1
           Value: true
         Value: true
-      Enabled: true
+      Enabled: false
       Keep: 100
       Name: Odometry
       Position Tolerance: 0.10000000149011612
@@ -103,6 +160,42 @@ Visualization Manager:
         Value: Arrow
       Topic: /odom
       Unreliable: false
+      Value: false
+    - Alpha: 1
+      Auto Size:
+        Auto Size Factor: 1
+        Value: true
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/DepthCloud
+      Color: 255; 255; 255
+      Color Image Topic: /d435/camera/color/image_raw
+      Color Transformer: RGB8
+      Color Transport Hint: raw
+      Decay Time: 0
+      Depth Map Topic: /d435/camera/depth/image_rect_raw
+      Depth Map Transport Hint: raw
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: DepthCloud
+      Occlusion Compensation:
+        Occlusion Time-Out: 30
+        Value: false
+      Position Transformer: ""
+      Queue Size: 5
+      Selectable: true
+      Size (Pixels): 3
+      Style: Flat Squares
+      Topic Filter: true
+      Use Fixed Frame: true
+      Use rainbow: true
       Value: true
   Enabled: true
   Global Options:
@@ -132,7 +225,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 5.125466346740723
+      Distance: 6.551820278167725
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -148,9 +241,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.9203975796699524
+      Pitch: 0.765398383140564
       Target Frame: <Fixed Frame>
-      Yaw: 1.8554095029830933
+      Yaw: 5.028571605682373
     Saved: ~
 Window Geometry:
   Displays:

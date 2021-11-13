@@ -9,7 +9,6 @@
       See: https://discourse.ros.org/t/is-it-a-good-practice-to-force-rpath-to-be-embedded-in-the-installed-targets/1335
       and https://answers.ros.org/question/366380/ubuntu1804ros2-dashing-failed-to-load-entry-point-issue/?answer=366439#post-id-366439
       -->
-  <env name="LD_LIBRARY_PATH" value="/home/purdue/catkin_ws/devel/lib:/opt/ros/noetic/lib:/opt/ros/noetic/lib/x86_64-linux-gnu" />
 
   <group ns="t265">
     <include file="$(find realsense2_camera)/launch/rs_t265.launch">
@@ -23,6 +22,21 @@
     <include file="$(find realsense2_camera)/launch/rs_camera.launch">
       <arg name="serial_no" value="$(arg serial_no_d435)" />
       <arg name="tf_prefix" value="d435" />
+      <arg name="depth_width"       value="640"/>
+      <arg name="depth_height"      value="480"/>
+      <arg name="depth_fps"         value="30"/>
+      <arg name="color_width"       value="640"/>
+      <arg name="color_height"      value="480"/>
+      <arg name="color_fps"         value="30"/>
+      <arg name="enable_depth"      value="true"/>
+      <arg name="enable_color"      value="true"/>
+      <arg name="enable_infra1"     value="false"/>
+      <arg name="enable_infra2"     value="false"/>
+      <arg name="enable_fisheye"    value="false"/>
+      <arg name="enable_gyro"       value="false"/>
+      <arg name="enable_accel"      value="false"/>
+      <arg name="enable_pointcloud" value="true"/>
+      <arg name="enable_sync"       value="true"/>
       <arg name="initial_reset" value="$(arg initial_reset)"/>
     </include>
   </group>
