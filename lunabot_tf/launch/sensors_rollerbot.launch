@@ -2,7 +2,7 @@
 <launch>
 	<node pkg="tf" type="static_transform_publisher" name="d435_broadcaster" args="0.22225 -0.015875 0.80 0 0.7071068 -0.7071068 0 base_link d435_color_frame 100" />
 
-	<node pkg="tf" type="static_transform_publisher" name="t265_broadcaster" args="0.419 0.095 0.800 0.500 0.500 -0.500 -0.500 map t265_pose_frame 100" />
+	<node pkg="tf" type="static_transform_publisher" name="t265_broadcaster" args="0.419 0.095 0.800 0 -1 0 0 map t265_pose_frame 100" />
   <!--
 	<node pkg="tf" type="static_transform_publisher" name="laser_broadcaster" args="0.03175 0.0 0.073 0.1830127 -0.1830127 0.6830127 0.6830127 lidar_stepper laser 100" />
   -->

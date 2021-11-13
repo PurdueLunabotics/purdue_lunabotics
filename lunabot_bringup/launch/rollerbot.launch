@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <launch>
+  <env name="LD_LIBRARY_PATH" value="/home/purdue/catkin_ws/devel/lib:/opt/ros/noetic/lib:/opt/ros/noetic/lib/x86_64-linux-gnu" />
+
   <include file="$(find lunabot_localization)/launch/localization.launch" />
   <include file="$(find lunabot_tf)/launch/sensors_rollerbot.launch" />
-  <node type="rviz" name="rviz" pkg="rviz" args="-d $(find lunabot_bringup)/rviz/tf.rviz" />
+  <include file="$(find lunabot_bringup)/launch/rviz.launch" />
 </launch>

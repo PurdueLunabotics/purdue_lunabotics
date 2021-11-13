@@ -65,30 +65,28 @@ class BasePoseManager:
   def init_base_tf(self):
     while self._map_to_t265_start is None:
       try:
-        tf = self._tf_buffer.lookup_transform('map', 't265_pose_frame', rospy.Time())
+        tf = self._tf_buffer.lookup_transform('t265_pose_frame', 'map', rospy.Time(0))
       except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
         continue
-      print(tf)
-      t265_to_base = pose_to_np_matrix(tf.transform.translation, tf.transform.rotation)
-      self._map_to_t265_start = np.linalg.inv(t265_to_base)
+      self._map_to_t265_start = pose_to_np_matrix(tf.transform.translation, tf.transform.rotation)  
 
   def pub_odom(self):
-    start_to_t265 = pose_to_np_matrix(self._t265_odom.pose.pose.position,
+    t265_start_to_t265 = pose_to_np_matrix(self._t265_odom.pose.pose.position,
                                           self._t265_odom.pose.pose.orientation) 
 
-    t265_tf = self._map_to_t265_start @ start_to_t265
+    base_to_t265 = self._map_to_t265_start
 
-    base_link_tf = t265_tf @ np.linalg.inv(self._map_to_t265_start)
+    base_to_t265_start = base_to_t265 @ np.linalg.inv(t265_start_to_t265) 
+    map_to_base_link = np.linalg.inv(base_to_t265_start) @ np.linalg.inv(self._map_to_t265_start)
 
-    base_link_pose = np_to_pose(base_link_tf)
-    base_link_tf = np_to_tf(base_link_tf)
-    t265_tf = np_to_tf(t265_tf)
+    base_link_pose = np_to_pose(map_to_base_link)
+    map_to_base_link = np_to_tf(map_to_base_link)
 
     base_tf_msg = TransformStamped()
     base_tf_msg.header.frame_id = "map"
     base_tf_msg.header.stamp = rospy.Time.now()
     base_tf_msg.child_frame_id = "base_link"
-    base_tf_msg.transform = base_link_tf
+    base_tf_msg.transform = map_to_base_link 
 
     odom_msg = Odometry()
 
