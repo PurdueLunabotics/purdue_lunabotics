@@ -1,5 +1,5 @@
 #include <ros.h>
-#include <lunabotics_robot/Actuation.h>
+#include <lunabot_msgs/Actuation.h>
 
 #ifndef ACTUATION_H
 #define ACTUATION_H
@@ -19,7 +19,7 @@ namespace actuation {
   void init();
 	void _move_angle(int speed);
 	void _move_lead_screw(int speed);
-	void run_actuation(const lunabotics_robot::Actuation& actuation, ros::NodeHandle nh);  
+	void run_actuation(const lunabot_msgs::Actuation& actuation, ros::NodeHandle nh);  
 }
 
 #endif
