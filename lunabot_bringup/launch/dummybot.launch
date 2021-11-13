@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+
+	<node name="teensy_drive" ns="teensy_drive" pkg="rosserial_python" type="serial_node.py" output="screen">
+	    <param name="port" type="string" value="/dev/ttyACM0"/>
+	</node>
+
+  <include file="$(find lunabot_localization)/launch/localization.launch" />
+  <include file="$(find lunabot_tf)/launch/sensors_rollerbot.launch" />
+  <include file="$(find lunabot_bringup)/launch/view_tf.launch" />
+</launch>
