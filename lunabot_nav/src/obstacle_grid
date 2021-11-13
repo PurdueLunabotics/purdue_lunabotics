@@ -1,10 +1,21 @@
 #!/usr/bin/env python3
+import numpy as np
 import math
+
+from numpy.core.defchararray import array
 import rospy
-from nav.msgs import OccupancyGrid
-from nav.msgs import MapMetaData
-from nav.msgs import Odometry
+from nav_msgs.msg import OccupancyGrid
+from nav_msgs.msg import MapMetaData
+from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
+from scripts.conversions import prob_to_log
+from scripts.conversions import log_to_prob
+from scripts.conversions import quat_to_euler
+from scripts.conversions import euler_to_quat
+from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Quaternion
+from geometry_msgs.msg import Vector3
+# Helper Functions to calculate the probabilities
 
 """ Class that creates an Occupancy Grid that interfaces with devices to update probabilities and positions
  
@@ -23,9 +34,9 @@ class ObstacleGrid:
     :param p_free: The probability needed to confidently say a space is free
     """
 
-    def __init__(self, width, height, cell_size, p_prior=0.5, p_occ=1, p_free=0):
+    def __init__(self, width, height, cell_size, p_prior=0.5, p_occ=0.75, p_free=0.45):
         # Node Initialization
-        rospy.init()
+        rospy.init_node('obstacle_grid')
 
         # Map Meta Data Initialization
         self.map_meta_deta = MapMetaData()
@@ -33,26 +44,33 @@ class ObstacleGrid:
         self.map_meta_deta.height = height
         self.map_meta_deta.resolution = cell_size
 
+        self.width = width
+        self.height = height
         self.cell_size = cell_size
 
         # Probability Initialization (use log odds to simplify math)
-        self.p_prior = __probToLog(p_prior)
-        self.p_occ = __probToLog(p_occ)
-        self.p_free = __probToLog(p_free)
+        self.p_prior = prob_to_log(p_prior)
+        self.p_occ = prob_to_log(p_occ)
+        self.p_free = prob_to_log(p_free)
 
         # Grid Initialization
-        self.grid = [[p_prior] * width] * height
+        self.grid = [[self.p_prior] * self.width] * self.height
 
         # Odometry Initialization
         self.odometry = Odometry()
+        self.odometry.pose.pose.orientation = Quaternion()
 
         # Ros Publisher Initialization
         self.occupancy_grid_publisher = rospy.Publisher('lunabot_nav/obstacle_grid', OccupancyGrid, queue_size=1)
 
         # Ros Subscriber Initialization
-        rospy.Subscriber('scan', LaserScan, self.update_occupancy_grid)
+        rospy.Subscriber('/scan', LaserScan, self.update_occupancy_grid)
         rospy.Subscriber('t265/odom', Odometry,
                          self.update_local_position)  # TODO use kalman filter instead of camera odometry
+        
+        rospy.Subscriber('cmd_vel', Twist, self.update_cmd_vel_ps)
+
+        rospy.spin()
 
     """ Updates the occupancy grid based on lidar data and publishes the occupancy grid
     
@@ -68,6 +86,25 @@ class ObstacleGrid:
 
     def update_local_position(self, odometry):
         self.odometry = odometry
+    
+    def update_cmd_vel_ps(self, twist):
+        odometry = self.odometry
+        odometry.pose.pose.position.x += twist.linear.x
+        odometry.pose.pose.position.y += twist.linear.y
+        odometry.pose.pose.position.z += twist.linear.z
+        orientation = odometry.pose.pose.orientation
+        angle = quat_to_euler(np.array([orientation.w, orientation.x, orientation.y, orientation.z]))
+        angle[0] += twist.angular.x
+        angle[1] += twist.angular.y
+        angle[2] += twist.angular.z
+        new_orientation = euler_to_quat(angle)
+        orientation.w = new_orientation[0]
+        orientation.x = new_orientation[1]
+        orientation.y = new_orientation[2]
+        orientation.z = new_orientation[3]
+        odometry.pose.pose.orientation = orientation
+        self.odometry = odometry
+
 
     """ Publishes occupancy grid data as a nav.msgs/OccupancyGrid message
 
@@ -79,21 +116,22 @@ class ObstacleGrid:
         data = []
         for row in self.grid:
             for val in row:
-                data.append(int(__log_to_prob(val) * 100))
+                data.append(int(log_to_prob(val) * 100))
         occupancy_grid.data = data
+        print(data)
         self.occupancy_grid_publisher.publish(occupancy_grid)
 
     """ Updates the occupancy grid using lidar data
     
     """
 
-    def __inverse_sensor_model_lidar(self, laser_scans, min_angle=-3.14, max_angle=3.14, max_dist=10):
+    def __inverse_sensor_model_lidar(self, laser_scans, min_angle=1, max_angle=2, max_dist=5):
         # Setup
         p_occ = self.p_occ
         p_free = self.p_free
         p_prior = self.p_prior
         angle = laser_scans.angle_min
-        occupied_grid = [[0] * width] * height
+        occupied_grid = [[0] * self.width] * self.height
         grid = self.grid
         odometry = self.odometry
         position = odometry.pose.pose.position
@@ -104,10 +142,10 @@ class ObstacleGrid:
 
             # Checking to see if scan is in valid range
             if min_angle < angle < max_angle and scan < max_dist:
-
                 # Calculating Detected Obstacle Position
-                robot_twist = __quat_to_euler(odometry.pose.pose.quaternion)
-                global_twist = robot_twist + angle
+                orientation = odometry.pose.pose.orientation
+                robot_twist = quat_to_euler(np.array([orientation.w, orientation.x, orientation.y, orientation.z]))
+                global_twist = robot_twist[2] + angle
                 global_twist *= math.pi / 180
                 x_pos = position.x
                 y_pos = position.y
@@ -115,27 +153,28 @@ class ObstacleGrid:
                 y_dir = math.sin(global_twist)
                 obstacle_location = self.__get_grid_location_from_coordinates(x_pos + x_dir * scan,
                                                                               y_pos + y_dir * scan)
-                occupied_grid[obstacle_location[0]][obstacle_location[1]] = 2
+                if obstacle_location[0] != -1:
+                    occupied_grid[obstacle_location[0]][obstacle_location[1]] = 2
 
                 # Calculating empty squares in between obstacle
                 current_square = self.__get_grid_location_from_coordinates(x_pos, y_pos)
                 while not current_square[0] == obstacle_location[0] or not current_square[1] == obstacle_location[1]:
                     x_pos += x_dir * cell_size  # Moves at most 1 cell at a time, ensures all cells are accounted for
-                    y_pos += y_pos * cell_size
+                    y_pos += y_dir * cell_size
                     current_square = self.__get_grid_location_from_coordinates(x_pos, y_pos)
-                    if occupied_grid[obstacle_location[0]][obstacle_location[1]] == 0:
-                        occupied_grid[obstacle_location[0]][obstacle_location[1]] = 1
+                    if current_square != -1 and occupied_grid[current_square[0]][current_square[1]] == 0:
+                        occupied_grid[current_square[0]][current_square[1]] = 1
 
             # Incrementing Angle
             angle += laser_scans.angle_increment
-
+        #self.__print_grid()
         # Updating Occupancy Grid
         for i in range(len(grid)):
             for j in range(len(grid[i])):
                 if occupied_grid[i][j] == 2:
                     grid[i][j] = grid[i][j] + p_occ - p_prior
                 elif occupied_grid[i][j] == 1:
-                    grid[i][j] = grid[i][j] - p_free - p_prior
+                    grid[i][j] = grid[i][j] + p_free - p_prior
 
     """ Converts real life (x, y) coordinates to grid coordinates
     
@@ -145,51 +184,22 @@ class ObstacleGrid:
     :param y_0: The real y coordinate at the grid space [0, 0]
     """
 
-    def __get_grid_location_from_coordinates(self, x_coordinate, y_coordinate, x_0=0, y_0=0):
-        return [int((x_coordinate - x_0) / self.cell_size), int((y_coordinate - y_0) / self.cell_size)]
+    def __get_grid_location_from_coordinates(self, x_coordinate, y_coordinate, x_0=-1, y_0=-1):
+        x = int((x_coordinate - x_0) / self.cell_size)
+        y = int((y_coordinate - y_0) / self.cell_size)
+        if x < 0 or x >= self.width or y < 0 or y >= self.height:
+            return [-1, -1]
+        return [y, x]
+    
+
+    def __print_grid(self):
+        for i in range(len(self.grid)):
+            for j in range(len(self.grid[0])):
+                print(str(self.grid[i][j]) + ", ", end = " ")
+            print()
+        for i in range(100):
+            print()
 
 
-# Helper Functions to calculate the probabilities
-
-""" Converts a probability value to log odds notation
-
-:param value: The value to convert to log odds from pure probability
-"""
-
-
-def __prob_to_log(value):
-    return math.log(value / (1 - value))
-
-
-""" Converts a logg odds value to probability notation
-
-:param value: The value to convert to probability from log odds
-"""
-
-
-def __log_to_prob(value):
-    return 1 - 1 / (1 + math.pow(math.e, value))
-
-
-""" Converts a quaternion to euler angles
-
-:param quat: The quaternion to convert to euler angles
-"""
-
-
-def __quat_to_euler(quat):
-    angles = {}
-    sinr_cosp = 2 * (quat.w * quat.x + quat.y * quat.z)
-    cosr_cosp = 1 - 2 * (quat.x * quat.x + quat.y * quat.y)
-    angles['x'] = math.atan2(sinr_cosp, cosr_cosp)
-
-    sinp = 2 * (quat.w * quat.y - quat.z * quat.x)
-    if abs(sinp) > 1:
-        angles['y'] = math.copysign(math.pi / 2, sinp)
-    else:
-        angles['y'] = math.asin(sinp)
-
-    siny_cosp = 2 * (quat.w * quat.z + quat.x * quat.y)
-    cosy_cosp = 1 - 2 * (quat.y * quat.y + quat.z * quat.z)
-    angles['z'] = math.atan2(siny_cosp, cosy_cosp)
-    return angles
+#if __name__ == "main":
+ObstacleGrid(320, 120, .1)
