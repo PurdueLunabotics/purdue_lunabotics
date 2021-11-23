@@ -116,7 +116,12 @@ class ObstacleGrid:
         data = []
         for row in self.grid:
             for val in row:
-                data.append(int(log_to_prob(val) * 100))
+                prob = int(log_to_prob(val) * 100)
+                # if(prob > 95):
+                #     prob = 100
+                # elif(prob < 5):
+                #     prob = 0
+                data.append(prob)
         occupancy_grid.data = data
         print(data)
         self.occupancy_grid_publisher.publish(occupancy_grid)
@@ -125,7 +130,7 @@ class ObstacleGrid:
     
     """
 
-    def __inverse_sensor_model_lidar(self, laser_scans, min_angle=1, max_angle=2, max_dist=5):
+    def __inverse_sensor_model_lidar(self, laser_scans, min_angle=-3.14, max_angle=3.14, max_dist=20):
         # Setup
         p_occ = self.p_occ
         p_free = self.p_free
