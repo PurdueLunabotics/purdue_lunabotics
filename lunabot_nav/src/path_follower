@@ -1,0 +1,95 @@
+#!/usr/bin/env python3
+
+import numpy as np
+import rospy
+from nav_msgs.msg import Path
+from std_msgs.msg import Float32MultiArray
+
+#Currently uses Besier Curve, needs to be tested if other methods are better
+class Spline:
+    def __init__(self, path):
+        self.path = path
+    
+    def position_at_time(self, t): # Parameterized for 0 < t < 1
+        ans = [0, 0]
+        i = 0
+        for point in self.path:
+            mult = self.__b(t, i)
+            ans[0] += point.pose.position.x * mult
+            ans[1] += point.pose.position.y * mult
+            i += 1
+        return ans
+    
+    def velocity_at_time(self, t): # Paramterized for 0 < t < 1
+        ans = [0, 0]
+        for i in range(len(self.path) - 1):
+            mult = self.__b(t, i)
+            ans[0] += mult * (self.path[i + 1].pose.position.x - self.path[i].pose.position.x)
+            ans[1] += mult * (self.path[i + 1].pose.position.y - self.path[i].pose.position.y)
+        ans[0] *= len(self.path)
+        ans[1] *= len(self.path)
+        return ans
+    
+    def __b(self, t, i):
+        n = len(self.path)
+        return self.__combination(n, i) * (t ** i) * ((1 - t) ** (n - i))
+
+    def __combination(self, n, m):
+        if m * 2 > n:
+            return self.__combination(n, n - m)
+        ans = 1
+        for i in range(m):
+            ans *= (n - i)
+        for i in range(1, m + 1):
+            ans /= i
+        return ans
+
+class PathFollower:
+    def __init__(self, lookahead, dt, speed, width):
+        rospy.Subscriber('lunabot_nav/path_generator', Path, self.__generate_spline)
+        self.spline = None
+        publisher = rospy.Publisher('robot_velocity_speed', Float32MultiArray)
+        self.lookahead = lookahead
+        self.dt = dt
+        self.speed = speed
+        self.width = width
+
+    def __generate_spline(self, path):
+        self.spline = Spline(path.poses)
+        t = 0
+        dist = 0
+        pos = self.spline.position_at_time(0)
+        start_pos = pos
+        #Finding Lookahead point
+        while dist < self.lookahead * self.lookahead and t < 1:
+            t += self.dt
+            temp_pos = self.spline.position_at_time(t)
+            dist += (temp_pos[0] - pos[0]) ** 2 + (temp_pos[1] - pos[1]) ** 2
+            pos = temp_pos
+        
+        #Transforming to Vehicle Coordinates
+        pos[0] -= start_pos[0]
+        pos[1] -= start_pos[1]
+        vel = self.spline.velocity_at_time(0)
+        vel_mag = np.sqrt(vel[0] * vel[0] + vel[1] * vel[1])
+        new_x = (vel[0] * pos[0] - vel[1] * pos[1]) / vel_mag
+        new_y = (vel[1] * pos[0] + vel[0] * pos[1]) / vel_mag
+        pos[0] = new_x #TODO check if order of translation & rotation is correct
+        pos[1] = new_y
+
+        #Calculating radius (1 / curvature)
+        r = (dist * dist) / (2 * pos[0])
+
+        #Calculating wheel velocities
+        wheel_vel = [0, 0]
+        ui = r - self.width / 2
+        ud = r + self.width / 2
+        wheel_vel[0] = ui / ud * self.speed
+        wheel_vel[1] = self.speed
+        wheel_vel[0] *= dist / self.lookahead
+        wheel_vel[1] *= dist / self.lookahead
+        if pos[1] < 0:
+            temp = wheel_vel[0]
+            wheel_vel[0] = wheel_vel[1]
+            wheel_vel[1] = temp
+        return wheel_vel

@@ -30,7 +30,7 @@ class PathGenerator:
         rospy.Subscriber('lunabot_nav/obstacle_grid', OccupancyGrid, self.__generate_path)
         rospy.Subscriber('t265/odom', Odometry, self.__update_position)
 
-        self.publisher = rospy.Publisher('lunabot_nav/path_follower', Path)
+        self.publisher = rospy.Publisher('lunabot_nav/path_generator', Path)
     
     def __generate_path(self, occupancy_grid):
         #Generating Grid
@@ -123,7 +123,7 @@ class PathGenerator:
         if(len(open_list) > 0):
             while(current_node != None):
                 pose = PoseStamped()
-                pose.pose.position.x = current_node.x
+                pose.pose.position.x = current_node.x #TODO convert to real life coordinates, not grid coordinates
                 pose.pose.position.y = current_node.y
                 poses.append(pose)
                 current_node = current_node.parent
