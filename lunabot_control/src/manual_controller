@@ -39,8 +39,8 @@ class ManualController:
     
     def run_drivetrain(self, joy):
         cmd_vel = Twist()
-        cmd_vel.linear.x = joy.axes[1]
-        cmd_vel.angular.z = joy.axes[3]
+        cmd_vel.linear.x = -1 * joy.axes[1]
+        cmd_vel.angular.z = -1 * joy.axes[3]
         self._drivetrain_pub.publish(cmd_vel)
 
     def run_actuation(self, joy):

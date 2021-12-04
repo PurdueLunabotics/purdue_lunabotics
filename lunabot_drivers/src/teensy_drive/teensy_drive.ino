@@ -1,7 +1,7 @@
 // include ROS and all messages
-#include <drivetrain.h>
 #include <deposition.h>
 #include <actuation.h>
+#include <drivetrain.h>
 
 ros::NodeHandle nh;
 
@@ -31,5 +31,5 @@ void setup() {
 
 void loop() {
   nh.spinOnce();
-  delay(20);
+  delay(1);
 }

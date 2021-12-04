@@ -1,21 +1,24 @@
 #!/usr/bin/env python3
 
 import rospy
-from beacontools import BeaconScanner, EddystoneTLMFrame, EddystoneFilter, \
-                        EddystoneUIDFrame, EddystoneURLFrame, BluetoothAddressType
-                    
+from beacontools import (BeaconScanner, BluetoothAddressType, EddystoneFilter,
+                         EddystoneTLMFrame, EddystoneUIDFrame,
+                         EddystoneURLFrame)
+
+
 def callback(bt_addr, rssi, packet, additional_info):
     print("<%s, %d> %s %s" % (bt_addr, rssi, packet, additional_info))
 
 if __name__ == '__main__':
-    rospy.init_node('bt_beacon_scanner')
+    #rospy.init_node('bt_beacon_scanner')
 
     scanner = BeaconScanner(
         callback,
         scan_parameters={"address_type": BluetoothAddressType.PUBLIC}
     )
     scanner.start()
-    rospy.sleep(20.)
+    #rospy.sleep(20.)
+    time.sleep(20)
     scanner.stop()
 
-    rospy.spin()
+    #rospy.spin()

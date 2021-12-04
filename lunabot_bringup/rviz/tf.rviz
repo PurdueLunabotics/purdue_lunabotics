@@ -7,8 +7,6 @@ Panels:
         - /Global Options1
         - /Status1
         - /TF1/Frames1
-        - /Odometry1
-        - /DepthCloud1
         - /DepthCloud1/Auto Size1
       Splitter Ratio: 0.5
     Tree Height: 438
@@ -97,6 +95,14 @@ Visualization Manager:
           Value: true
         tag_3:
           Value: true
+        wheel_1_left_front_1:
+          Value: true
+        wheel_left_back_1:
+          Value: true
+        wheel_right_back_1:
+          Value: true
+        wheel_right_front_1:
+          Value: true
       Marker Alpha: 1
       Marker Scale: 1
       Name: TF
@@ -106,16 +112,28 @@ Visualization Manager:
       Tree:
         map:
           base_link:
-            d435_color_frame:
-              d435_color_optical_frame:
-                tag_0:
+            d435_link:
+              d435_color_frame:
+                d435_color_optical_frame:
+                  tag_0:
+                    {}
+                  tag_1:
+                    {}
+                  tag_2:
+                    {}
+                  tag_3:
+                    {}
+              d435_depth_frame:
+                d435_depth_optical_frame:
                   {}
-                tag_1:
-                  {}
-                tag_2:
-                  {}
-                tag_3:
-                  {}
+            wheel_1_left_front_1:
+              {}
+            wheel_left_back_1:
+              {}
+            wheel_right_back_1:
+              {}
+            wheel_right_front_1:
+              {}
           t265_pose_frame:
             t265_link:
               t265_accel_frame:
@@ -197,6 +215,47 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Alpha: 1
+      Class: rviz/RobotModel
+      Collision Enabled: false
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        wheel_1_left_front_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        wheel_left_back_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        wheel_right_back_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        wheel_right_front_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+      Name: RobotModel
+      Robot Description: robot_description
+      TF Prefix: ""
+      Update Interval: 0
+      Value: true
+      Visual Enabled: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -225,7 +284,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 6.551820278167725
+      Distance: 4.247819900512695
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -241,9 +300,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.765398383140564
+      Pitch: 0.3753991425037384
       Target Frame: <Fixed Frame>
-      Yaw: 5.028571605682373
+      Yaw: 4.198567867279053
     Saved: ~
 Window Geometry:
   Displays:

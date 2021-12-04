@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <launch>
+	<node pkg="tf" type="static_transform_publisher" name="map" args="0 0 0 0 0 0 1 base_link map 100" />
 	<node pkg="tf" type="static_transform_publisher" name="d435_broadcaster" args="-0.04 0 0.880 0 0 0 1 base_link d435_link 100" />
 
 	<node pkg="tf" type="static_transform_publisher" name="t265_broadcaster" args="-0.04 0 0.850 -0.7071068 0.7071068 0 0 map t265_pose_frame 100" />
