@@ -1,4 +1,4 @@
 bags
 matlab*
 *.bag
-ros_ip_setup.sh
+*ros_ip_setup.sh
