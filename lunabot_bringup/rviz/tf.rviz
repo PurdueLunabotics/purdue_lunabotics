@@ -61,6 +61,40 @@ Visualization Manager:
         All Enabled: false
         base_link:
           Value: true
+        d435_color_frame:
+          Value: true
+        d435_color_optical_frame:
+          Value: true
+        d435_depth_frame:
+          Value: true
+        d435_depth_optical_frame:
+          Value: true
+        d435_link:
+          Value: true
+        map:
+          Value: true
+        t265_accel_frame:
+          Value: true
+        t265_accel_optical_frame:
+          Value: true
+        t265_gyro_frame:
+          Value: true
+        t265_gyro_optical_frame:
+          Value: true
+        t265_link:
+          Value: true
+        t265_odom_frame:
+          Value: true
+        t265_pose_frame:
+          Value: true
+        tag_0:
+          Value: true
+        tag_1:
+          Value: true
+        tag_2:
+          Value: true
+        tag_3:
+          Value: true
         wheel_1_left_front_1:
           Value: true
         wheel_left_back_1:
@@ -76,15 +110,38 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        base_link:
-          wheel_1_left_front_1:
-            {}
-          wheel_left_back_1:
-            {}
-          wheel_right_back_1:
-            {}
-          wheel_right_front_1:
-            {}
+        map:
+          base_link:
+            d435_link:
+              d435_color_frame:
+                d435_color_optical_frame:
+                  tag_0:
+                    {}
+                  tag_1:
+                    {}
+                  tag_2:
+                    {}
+                  tag_3:
+                    {}
+              d435_depth_frame:
+                d435_depth_optical_frame:
+                  {}
+            wheel_1_left_front_1:
+              {}
+            wheel_left_back_1:
+              {}
+            wheel_right_back_1:
+              {}
+            wheel_right_front_1:
+              {}
+          t265_pose_frame:
+            t265_link:
+              t265_accel_frame:
+                t265_accel_optical_frame:
+                  {}
+              t265_gyro_frame:
+                t265_gyro_optical_frame:
+                  {}
       Update Interval: 0
       Value: true
     - Angle Tolerance: 0.10000000149011612
@@ -203,7 +260,7 @@ Visualization Manager:
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: base_link
+    Fixed Frame: map
     Frame Rate: 30
   Name: root
   Tools:
