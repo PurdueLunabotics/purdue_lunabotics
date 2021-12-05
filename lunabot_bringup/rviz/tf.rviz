@@ -218,7 +218,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /d435/camera/color/image_rect_color
+      Image Topic: /tag_detections_image
       Max Value: 1
       Median window: 5
       Min Value: 0
