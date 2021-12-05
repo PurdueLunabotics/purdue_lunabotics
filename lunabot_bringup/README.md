@@ -43,4 +43,4 @@ That's it! Things should be running now.
 #### More Info
 
 - Can find all the exact alias commands in `~/.bash_aliases`
-- During testing, we want the computer to be the ros master and the jetson to be a device that pushes messages to the computer, this is reflected in the `ros_ip_setup.sh` shell file in this package
+- During testing, we want the computer to be the ros master and the jetson to be a device that pushes messages to the computer, this is reflected in the `launch/ros_ip_setup.sh` shell file in this package
