@@ -6,7 +6,7 @@
 2. Launch rviz
 
 ```
-roslaunch lunabot_bringup view_rviz.launch
+roslaunch lunabot_bringup view_tf.launch
 ```
 3. Play the rosbag
 ```

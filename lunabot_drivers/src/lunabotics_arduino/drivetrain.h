@@ -1,5 +1,5 @@
 #include <ros.h>
-#include <geometry_msgs/Twist.h>
+#include <lunabot_msgs/Drivetrain.h>
 
 #ifndef DRIVETRAIN_H
 #define DRIVETRAIN_H
@@ -18,7 +18,7 @@ namespace drivetrain {
 
 	// DRIVETRAIN FUNCTIONS
   void init();
-	void run_drivetrain(const geometry_msgs::Twist& cmd_vel, ros::NodeHandle& nh); 
+	void run_drivetrain(const lunabot_msgs::Drivetrain& drive_msg, ros::NodeHandle& nh); 
 	void _move_motor(motor_dir_t motor, int vel);
 }
 

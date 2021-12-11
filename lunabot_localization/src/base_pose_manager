@@ -87,6 +87,7 @@ class BasePoseManager:
     base_tf_msg.child_frame_id = "base_link"
     base_tf_msg.transform = map_to_base_link 
     base_tf_msg.transform.translation.x *= -1
+    base_tf_msg.transform.translation.y *= -1
 
     odom_msg = Odometry()
 
@@ -95,6 +96,7 @@ class BasePoseManager:
     odom_msg.child_frame_id = "base_link"
     odom_msg.pose.pose = base_link_pose
     odom_msg.pose.pose.position.x *= -1
+    odom_msg.pose.pose.position.y *= -1
     odom_msg.pose.covariance = self._t265_odom.pose.covariance
     odom_msg.twist = self._t265_odom.twist
 

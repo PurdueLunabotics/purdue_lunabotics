@@ -25,22 +25,17 @@ namespace drivetrain {
 		analogWrite(drive_pins_[motor], abs(vel));
 	}
 
-	void run_drivetrain(const geometry_msgs::Twist& cmd_vel, ros::NodeHandle& nh) {
+	void run_drivetrain(const lunabot_msgs::Drivetrain& drive_msg, ros::NodeHandle& nh) {
 		/*
-
-			Skid-steering configuration is implemented.
-	 
-			Uses the twist to define the velocity components of the robot. the lin component is the heading forward and backward velocity
-			and the angular z (ang) is the heading angle.
-			Both lin and ang have range of [-1,1]. 
+			Tank drive steering
 		*/
 
-		double lin_v = cmd_vel.linear.x; // heading velocity
-		double ang_v = cmd_vel.angular.z; // heading angle
+		int8_t left_wheel = drive_msg.left; // left wheel vel 
+		int8_t right_wheel = drive_msg.right; // right wheel vel 
 
 		// calculate left and right chassis velocities
-		int vel_l = map(lin_v - ang_v, -MAX_SPEED, MAX_SPEED, -255, 255); // Range from [-255,255]
-		int vel_r = map(lin_v + ang_v, -MAX_SPEED, MAX_SPEED, -255, 255); // Range from [-255,255]
+		int vel_l = map(left_wheel, -128, 127, -255, 255); // Range from [-255,255]
+		int vel_r = map(right_wheel, -128, 127, -255, 255); // Range from [-255,255]
 		vel_l = constrain(vel_l, -255, 255);
 		vel_r = constrain(vel_r, -255, 255);
 
@@ -49,7 +44,7 @@ namespace drivetrain {
 		nh.logerror("right_vel:");	
 		nh.logerror(String(vel_r).c_str());
 
-		// Order: FRONT_LEFT, FRONT_RIGHT, BACK_LEFT, BACK_RIGHT
+		// Order: FRONT_LEFT 0, FRONT_RIGHT 1, BACK_LEFT 2, BACK_RIGHT 3
 		// move each motor to the specified velocity
 		for (int motor = FRONT_LEFT; motor <= BACK_RIGHT; motor++) {
 			if(motor % 2 == 0) { // moves left motors
