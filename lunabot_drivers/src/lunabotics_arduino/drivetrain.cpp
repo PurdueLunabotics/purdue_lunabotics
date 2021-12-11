@@ -29,7 +29,6 @@ namespace drivetrain {
 		/*
 			Tank drive steering
 		*/
-
 		int8_t left_wheel = drive_msg.left; // left wheel vel 
 		int8_t right_wheel = drive_msg.right; // right wheel vel 
 
