@@ -5,79 +5,79 @@ import sys
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64 
 from sensor_msgs.msg import Joy 
-from lunabotics_robot.msg import Actuation
+from lunabot_msgs.msg import Actuation
 
 class ManualController:
-	'''ManualController
-	Implements joystick control of lunabotics robot
-	'''
+    '''ManualController
+    Implements joystick control of lunabotics robot
+    '''
 
-	def __init__(self):
-		self.subsystems = ['drivetrain', 'actuation', 'excavation', 'deposition']
-		self.curr_subsystem = 'drivetrain'
+    def __init__(self):
+        self.subsystems = ['drivetrain', 'actuation', 'excavation', 'deposition']
+        self.curr_subsystem = 'drivetrain'
 
-		self._joy_sub = rospy.Subscriber('joy', Joy, self.joy_cb);
-		self.actions = {'drivetrain': self.run_drivetrain, 'actuation': self.run_actuation, 'excavation': self.run_excavation, 'deposition': self.run_deposition}
+        self._joy_sub = rospy.Subscriber('joy', Joy, self.joy_cb);
+        self.actions = {'drivetrain': self.run_drivetrain, 'actuation': self.run_actuation, 'excavation': self.run_excavation, 'deposition': self.run_deposition}
 
-		self._drivetrain_pub = rospy.Publisher('cmd_vel', Twist, queue_size=1000);
-		self._excavation_pub = rospy.Publisher('excavation', Float64, queue_size=1000);
-		self._deposition_pub = rospy.Publisher('deposition', Float64, queue_size=1000);
-		self._actuation_pub = rospy.Publisher('actuation', Actuation, queue_size=1000);
+        self._drivetrain_pub = rospy.Publisher('cmd_vel', Twist, queue_size=1000);
+        self._excavation_pub = rospy.Publisher('excavation', Float64, queue_size=1000);
+        self._deposition_pub = rospy.Publisher('deposition', Float64, queue_size=1000);
+        self._actuation_pub = rospy.Publisher('actuation', Actuation, queue_size=1000);
 
-	def joy_cb(self, joy):
-		if joy.buttons[0]: # 'A' button -- switches the active subsystem
-			new_index = 0 if self.curr_subsystem == 'deposition' else self.subsystems.index(self.curr_subsystem) + 1 	
-			self.curr_subsystem = self.subsystems[new_index]
-			rospy.loginfo("Switch to Subsystem: %s", self.curr_subsystem)
+    def joy_cb(self, joy):
+        if joy.buttons[0]: # 'A' button -- switches the active subsystem
+            new_index = 0 if self.curr_subsystem == 'deposition' else self.subsystems.index(self.curr_subsystem) + 1 	
+            self.curr_subsystem = self.subsystems[new_index]
+            rospy.loginfo("Switch to Subsystem: %s", self.curr_subsystem)
 
-		elif joy.buttons[1]:
-			self.stop()
-			rospy.logerr("STOPPED")
-			return
+        elif joy.buttons[1]:
+            self.stop()
+            rospy.logerr("STOPPED")
+            return
 
-		self.actions[self.curr_subsystem](joy)
-	
-	def run_drivetrain(self, joy):
-		cmd_vel = Twist()
-		cmd_vel.linear.x = joy.axes[1]
-		cmd_vel.angular.z = joy.axes[3]
-		self._drivetrain_pub.publish(cmd_vel)
+        self.actions[self.curr_subsystem](joy)
+    
+    def run_drivetrain(self, joy):
+        cmd_vel = Twist()
+        cmd_vel.linear.x = -1 * joy.axes[1]
+        cmd_vel.angular.z = -1 * joy.axes[3]
+        self._drivetrain_pub.publish(cmd_vel)
 
-	def run_actuation(self, joy):
-		actuation_msg = Actuation()
-		actuation_msg.lead_screw_actuation = joy.axes[1]
-		actuation_msg.angle_actuation = joy.axes[4]
-		self._actuation_pub.publish(actuation_msg)
-		
-	def run_excavation(self, joy):
-		excavation_msg = Float64()
-		excavation_msg.data = joy.axes[1]
-		self._excavation_pub.publish(excavation_msg)
-		
-	def run_deposition(self, joy):
-		deposition_msg = Float64()
-		deposition_msg.data = joy.axes[1]
-		self._deposition_pub.publish(deposition_msg)
+    def run_actuation(self, joy):
+        actuation_msg = Actuation()
+        actuation_msg.lead_screw_actuation = joy.axes[1]
+        actuation_msg.angle_actuation = joy.axes[4]
+        self._actuation_pub.publish(actuation_msg)
+        
+    def run_excavation(self, joy):
+        excavation_msg = Float64()
+        excavation_msg.data = joy.axes[1]
+        self._excavation_pub.publish(excavation_msg)
+        
+    def run_deposition(self, joy):
+        deposition_msg = Float64()
+        deposition_msg.data = joy.axes[1]
+        self._deposition_pub.publish(deposition_msg)
 
-	def stop(self):
-		cmd_vel_stop = Twist()
-		cmd_vel_stop.linear.x = 0
-		cmd_vel_stop.angular.z = 0
-		actuation_stop = Actuation()
-		actuation_stop.lead_screw_actuation = 0
-		actuation_stop.angle_actuation = 0
-		excavation_stop = Float64()
-		excavation_stop.data = 0
-		deposition_stop = Float64()
-		deposition_stop.data = 0
+    def stop(self):
+        cmd_vel_stop = Twist()
+        cmd_vel_stop.linear.x = 0
+        cmd_vel_stop.angular.z = 0
+        actuation_stop = Actuation()
+        actuation_stop.lead_screw_actuation = 0
+        actuation_stop.angle_actuation = 0
+        excavation_stop = Float64()
+        excavation_stop.data = 0
+        deposition_stop = Float64()
+        deposition_stop.data = 0
 
-		self._drivetrain_pub.publish(cmd_vel_stop)
-		self._actuation_pub.publish(actuation_stop)
-		self._excavation_pub.publish(excavation_stop)
-		self._deposition_pub.publish(deposition_stop)
+        self._drivetrain_pub.publish(cmd_vel_stop)
+        self._actuation_pub.publish(actuation_stop)
+        self._excavation_pub.publish(excavation_stop)
+        self._deposition_pub.publish(deposition_stop)
 
 if __name__ == '__main__':
-	rospy.init_node('manual_controller_node')
+    rospy.init_node('manual_controller_node')
 
-	vs = ManualController()
-	rospy.spin()
+    vs = ManualController()
+    rospy.spin()

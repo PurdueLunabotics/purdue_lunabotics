@@ -1,11 +1,11 @@
 // include ROS and all messages
-#include <drivetrain.h>
 #include <deposition.h>
 #include <actuation.h>
+#include <drivetrain.h>
 
 ros::NodeHandle nh;
 
-void actuation_cb(const lunabotics_robot::Actuation& actuation) {
+void actuation_cb(const lunabot_msgs::Actuation& actuation) {
 	actuation::run_actuation(actuation, nh);
 }
 void deposition_cb(const std_msgs::Float64& command) {
@@ -16,7 +16,7 @@ void drivetrain_cb(const geometry_msgs::Twist& cmd_vel) {
 }
 
 ros::Subscriber<std_msgs::Float64> deposition_sub("/deposition", deposition_cb);
-ros::Subscriber<lunabotics_robot::Actuation> actuation_sub("/actuation", actuation_cb);
+ros::Subscriber<lunabot_msgs::Actuation> actuation_sub("/actuation", actuation_cb);
 ros::Subscriber<geometry_msgs::Twist> drivetrain_sub("/cmd_vel", drivetrain_cb);
 
 void setup() {
@@ -31,5 +31,5 @@ void setup() {
 
 void loop() {
   nh.spinOnce();
-  delay(20);
+  delay(1);
 }
