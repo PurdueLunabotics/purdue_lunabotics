@@ -3,7 +3,7 @@
 import numpy as np
 import rospy
 from nav_msgs.msg import Path
-from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Int32
 
 #Currently uses Besier Curve, needs to be tested if other methods are better
 class Spline:
@@ -48,7 +48,8 @@ class PathFollower:
     def __init__(self, lookahead, dt, speed, width):
         rospy.Subscriber('lunabot_nav/path_generator', Path, self.__generate_spline)
         self.spline = None
-        publisher = rospy.Publisher('robot_velocity_speed', Float32MultiArray)
+        self.left_publisher = rospy.Publisher('left_vel', Int32)
+        self.right_publisher = rospy.Publisher('right_vel', Int32)
         self.lookahead = lookahead
         self.dt = dt
         self.speed = speed
@@ -92,4 +93,5 @@ class PathFollower:
             temp = wheel_vel[0]
             wheel_vel[0] = wheel_vel[1]
             wheel_vel[1] = temp
-        return wheel_vel
+        self.left_publisher.publish(wheel_vel[0])
+        self.right_publisher.publish(wheel_vel[1])

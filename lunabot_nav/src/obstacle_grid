@@ -68,7 +68,7 @@ class ObstacleGrid:
         rospy.Subscriber('t265/odom', Odometry,
                          self.update_local_position)  # TODO use kalman filter instead of camera odometry
         
-        rospy.Subscriber('cmd_vel', Twist, self.update_cmd_vel_ps)
+        #rospy.Subscriber('cmd_vel', Twist, self.update_cmd_vel_ps)
 
         rospy.spin()
 
@@ -130,7 +130,7 @@ class ObstacleGrid:
     
     """
 
-    def __inverse_sensor_model_lidar(self, laser_scans, min_angle=-3.14, max_angle=3.14, max_dist=20):
+    def __inverse_sensor_model_lidar(self, laser_scans, min_angle=-3.14, max_angle=3.14, max_dist=20, min_dist = 1):
         # Setup
         p_occ = self.p_occ
         p_free = self.p_free
@@ -146,7 +146,7 @@ class ObstacleGrid:
         for scan in laser_scans.ranges:
 
             # Checking to see if scan is in valid range
-            if min_angle < angle < max_angle and scan < max_dist:
+            if min_angle < angle < max_angle and min_dist < scan < max_dist:
                 # Calculating Detected Obstacle Position
                 orientation = odometry.pose.pose.orientation
                 robot_twist = quat_to_euler(np.array([orientation.w, orientation.x, orientation.y, orientation.z]))
