@@ -4,10 +4,10 @@ from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Float64
 from std_msgs.msg import Float64MultiArray
 
-'''
+"""
 Class to detect obstacles using the LIDAR
 Note: Currently just returns ranges that obstacle is detected, will be changed to update mapping system when thats implemented
-'''
+"""
 
 
 def __make__Float64(value):
@@ -17,17 +17,22 @@ def __make__Float64(value):
 
 
 class ObstacleDetector:
-
     def __init__(self):
         # Constants
-        self.threshold = 0  # Maximum distance an obstacle can reasonably be at (if its too far of a measurement, probably detecting wall)
-        self.angle_min = 0  # Minimum angle that lidar can scan for objects (since part of lidar scans will detect the robot)
+        self.threshold = (
+            0
+        )  # Maximum distance an obstacle can reasonably be at (if its too far of a measurement, probably detecting wall)
+        self.angle_min = (
+            0
+        )  # Minimum angle that lidar can scan for objects (since part of lidar scans will detect the robot)
         self.angle_max = 0  # Maximum angle that lidar can scan for objects
 
         # Ros Node Setup
-        rospy.init_node('obstacle_detections')
-        rospy.Subscriber('rplidar/scan', LaserScan, self.find_obstacle)
-        self.obstacle_publisher = rospy.Publisher('lunabot_nav/obstacle_detector', Float64MultiArray, queue_size=1)
+        rospy.init_node("obstacle_detections")
+        rospy.Subscriber("rplidar/scan", LaserScan, self.find_obstacle)
+        self.obstacle_publisher = rospy.Publisher(
+            "lunabot_nav/obstacle_detector", Float64MultiArray, queue_size=1
+        )
         rospy.spin()
 
     def find_obstacle(self, laser_scan):
@@ -40,13 +45,19 @@ class ObstacleDetector:
         # Checking each angle for obstacles
         for laser_range in laser_scan.ranges:
 
-            if self.angle_min <= current_angle <= self.angle_max:  # only bothers w/ calculations if inside desired range
+            if (
+                self.angle_min <= current_angle <= self.angle_max
+            ):  # only bothers w/ calculations if inside desired range
 
-                if laser_range < self.threshold and not has_obstacle:  # Finds start of obstacle
+                if (
+                    laser_range < self.threshold and not has_obstacle
+                ):  # Finds start of obstacle
                     has_obstacle = True
                     start_angle = current_angle
 
-                elif laser_range > self.threshold and has_obstacle:  # Finds end of obstacle, adds range to data
+                elif (
+                    laser_range > self.threshold and has_obstacle
+                ):  # Finds end of obstacle, adds range to data
                     has_obstacle = False
                     obstacles.append(__make__Float64(start_angle))
                     obstacles.append(__make__Float64(current_angle))
