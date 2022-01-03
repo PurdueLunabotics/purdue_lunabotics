@@ -2,5 +2,5 @@
 <launch>
     <param name="use_sim_time" value="true"/>
 
-    <node name="test_node" pkg="lunabot_nav" type="test_node"/>
+    <node name="test_node" pkg="lunabot_nav" type="test_node" output="screen"/>
 </launch>

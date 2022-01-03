@@ -82,8 +82,8 @@ while not rospy.is_shutdown():
         t.x += 1
     if not move == 'n':
         data = Odometry()
-        data.pose.pose.position.x = x
-        data.pose.pose.position.y = y
+        data.pose.pose.position.x = t.x
+        data.pose.pose.position.y = t.y
         data.pose.pose.position.z = 0
         t.position_publisher.publish(data)
     t.__calculate_lidar_scan(t.x, t.y, grid, t.size, t.lidar_publisher)
