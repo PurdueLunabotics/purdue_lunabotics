@@ -18,21 +18,16 @@ def __make__Float64(value):
 
 class ObstacleDetector:
     def __init__(self):
+        rospy.init_node('obstacle_detector')
         # Constants
-        self.threshold = (
-            0
-        )  # Maximum distance an obstacle can reasonably be at (if its too far of a measurement, probably detecting wall)
-        self.angle_min = (
-            0
-        )  # Minimum angle that lidar can scan for objects (since part of lidar scans will detect the robot)
-        self.angle_max = 0  # Maximum angle that lidar can scan for objects
+        self.threshold = 10  # Maximum distance an obstacle can reasonably be at (if its too far of a measurement, probably detecting wall)
+        self.angle_min = 1  # Minimum angle that lidar can scan for objects (since part of lidar scans will detect the robot)
+        self.angle_max =  3 # Maximum angle that lidar can scan for objects
 
         # Ros Node Setup
-        rospy.init_node("obstacle_detections")
-        rospy.Subscriber("rplidar/scan", LaserScan, self.find_obstacle)
-        self.obstacle_publisher = rospy.Publisher(
-            "lunabot_nav/obstacle_detector", Float64MultiArray, queue_size=1
-        )
+        rospy.init_node('obstacle_detections')
+        rospy.Subscriber('/scan', LaserScan, self.find_obstacle)
+        self.obstacle_publisher = rospy.Publisher('lunabot_nav/obstacle_detector', Float64MultiArray, queue_size=1)
         rospy.spin()
 
     def find_obstacle(self, laser_scan):

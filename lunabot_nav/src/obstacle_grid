@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 import numpy as np
+from scripts.conversions import log_to_prob, prob_to_log
 import rospy
 
 from tf.transformations import quaternion_from_euler, euler_from_quaternion 
 from nav_msgs.msg import OccupancyGrid
+from std_msgs.msg import UInt8
 from nav_msgs.msg import MapMetaData
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
-from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Quaternion
 
 # Helper Functions to calculate the probabilities
@@ -23,7 +24,7 @@ class ObstacleGrid:
 
     :param width: The width (amount of rows) in the occupancy grid
     :param height: The height (amount of columns) in the occupancy grid
-    :param cell_size: The width and length of each cell in the occupancy grid
+    :param cell_size: The width and length of each cell in the occupancy grid (meters)
     :param p_prior: The default probability when a grid space is unknown
     :param p_occ: The probability needed to confidently say a space is occupied
     :param p_free: The probability needed to confidently say a space is free
@@ -31,7 +32,6 @@ class ObstacleGrid:
 
     def __init__(self, width, height, cell_size, p_prior=0.5, p_occ=0.75, p_free=0.45):
         # Node Initialization
-        rospy.init_node("obstacle_grid")
 
         # Map Meta Data Initialization
         self.map_meta_deta = MapMetaData()
@@ -44,9 +44,9 @@ class ObstacleGrid:
         self.cell_size = cell_size
 
         # Probability Initialization (use log odds to simplify math)
-        self.p_prior = np.log(p_prior)
-        self.p_occ = np.log(p_occ)
-        self.p_free = np.log(p_free)
+        self.p_prior = prob_to_log(p_prior)
+        self.p_occ = prob_to_log(p_occ)
+        self.p_free = prob_to_log(p_free)
 
         # Grid Initialization
         self.grid = [[self.p_prior] * self.width] * self.height
@@ -57,18 +57,17 @@ class ObstacleGrid:
 
         # Ros Publisher Initialization
         self.occupancy_grid_publisher = rospy.Publisher(
-            "lunabot_nav/obstacle_grid", OccupancyGrid, queue_size=1
+            "/lunabot_nav/obstacle_grid", OccupancyGrid, queue_size=100
         )
 
         # Ros Subscriber Initialization
         rospy.Subscriber("/scan", LaserScan, self.update_occupancy_grid)
         rospy.Subscriber(
-            "odom", Odometry, self.update_local_position
+            "/odom", Odometry, self.update_local_position
         )  # TODO use kalman filter instead of camera odometry
 
-        rospy.Subscriber("cmd_vel", Twist, self.update_cmd_vel_ps)
+        #rospy.Subscriber("cmd_vel", Twist, self.update_cmd_vel_ps)
 
-        rospy.spin()
 
     """ Updates the occupancy grid based on lidar data and publishes the occupancy grid
     
@@ -111,27 +110,27 @@ class ObstacleGrid:
 
     def publish_occupancy_grid(self):
         occupancy_grid = OccupancyGrid()
+        occupancy_grid.header.frame_id = "map"
+        occupancy_grid.header.stamp = rospy.Time.now()
         occupancy_grid.info = self.map_meta_deta
         data = []
         for row in self.grid:
             for val in row:
-                prob = int(np.exp(val) * 100)
+                prob = UInt8()
+                prob.data = np.uint8(log_to_prob(val) * 100)
                 # if(prob > 95):
                 #     prob = 100
                 # elif(prob < 5):
                 #     prob = 0
-                data.append(prob)
+                data.append(prob.data)
         occupancy_grid.data = data
-        print(data)
         self.occupancy_grid_publisher.publish(occupancy_grid)
 
     """ Updates the occupancy grid using lidar data
     
     """
 
-    def __inverse_sensor_model_lidar(
-        self, laser_scans, min_angle=-3.14, max_angle=3.14, max_dist=20
-    ):
+    def __inverse_sensor_model_lidar(self, laser_scans, min_angle=-3.14, max_angle=3.14, max_dist=20, min_dist = 1):
         # Setup
         p_occ = self.p_occ
         p_free = self.p_free
@@ -147,7 +146,7 @@ class ObstacleGrid:
         for scan in laser_scans.ranges:
 
             # Checking to see if scan is in valid range
-            if min_angle < angle < max_angle and scan < max_dist:
+            if min_angle < angle < max_angle and min_dist < scan < max_dist:
                 # Calculating Detected Obstacle Position
                 orientation = odometry.pose.pose.orientation
                 robot_twist = euler_from_quaternion(
@@ -206,7 +205,7 @@ class ObstacleGrid:
     """
 
     def __get_grid_location_from_coordinates(
-        self, x_coordinate, y_coordinate, x_0=-1, y_0=-1
+        self, x_coordinate, y_coordinate, x_0=0, y_0=0
     ):
         x = int((x_coordinate - x_0) / self.cell_size)
         y = int((y_coordinate - y_0) / self.cell_size)
@@ -223,5 +222,10 @@ class ObstacleGrid:
             print()
 
 
-# if __name__ == "main":
-ObstacleGrid(320, 120, 0.1)
+if __name__ == "__main__":
+
+    rospy.init_node("obstacle_grid")
+
+    ObstacleGrid(60, 20, 0.1)
+
+    rospy.spin()
