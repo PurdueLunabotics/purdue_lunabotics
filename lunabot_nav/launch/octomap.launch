@@ -1,18 +1,23 @@
 <launch>
+
+    <!-- Builds map --> 
     <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
-    <param name="resolution" value="0.05" />
+        <param name="resolution" value="0.05" />
 
-    <param name="frame_id" type="string" value="map" />
-    <param name="base_frame_id" type="string" value="base_link" />
+        <!-- Map frame id --> 
+        <param name="frame_id" type="string" value="map" />
 
-    <!-- maximum range to integrate (speedup!) -->
-    <param name="sensor_model/max_range" value="5.0" />
+        <!-- Robot base_link frame id --> 
+        <param name="base_frame_id" type="string" value="base_link" />
 
-    <!-- data source to integrate (PointCloud2) -->
-    <remap from="cloud_in" to="/d435/camera/depth/points" />
+        <!-- maximum range to integrate (speedup!) -->
+        <param name="sensor_model/max_range" value="5.0" />
 
+        <!-- data source to integrate (PointCloud2) -->
+        <remap from="cloud_in" to="/d435/camera/depth/points" />
     </node>
   
+    <!-- Converts depth images to point clouds -->
     <include file="$(find lunabot_nav)/launch/pointcloud.launch" />
     
 </launch>
