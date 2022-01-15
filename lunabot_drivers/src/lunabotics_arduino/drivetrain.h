@@ -15,7 +15,7 @@ namespace drivetrain {
 	// corresponding entries are for the same motors
 	const uint8_t drive_pins_[MOTOR_CNT] = {0, 4, 2, 6};    //order: front left, front right, back left, back right
 	const uint8_t direction_pins_[MOTOR_CNT] = {1, 5, 3, 7};
-
+    const bool direction_pins_inversions_[MOTOR_CNT] = {false, false, false, false}
 	// DRIVETRAIN FUNCTIONS
   void init();
 	void run_drivetrain(const lunabot_msgs::Drivetrain& drive_msg, ros::NodeHandle& nh); 

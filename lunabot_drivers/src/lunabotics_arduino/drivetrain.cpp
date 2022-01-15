@@ -16,9 +16,9 @@ namespace drivetrain {
 		vel *= (motor % 2 == 0) ? -1 : 1; // Forward rotation of left motor is opposite to right 
 		
 		if(vel > 0) {
-			digitalWrite(direction_pins_[motor], HIGH); // CW - HIGH, CCW - LOW 
+			digitalWrite(direction_pins_[motor], (direction_pins_inversions_[motor] ? LOW : HIGH)); // CW - HIGH, CCW - LOW 
 		} else {
-			digitalWrite(direction_pins_[motor], LOW);
+			digitalWrite(direction_pins_[motor], (direction_pins_inversions_[motor] ? HIGH : LOW));
 		}
 
 		// write the velocity to the pwm pin

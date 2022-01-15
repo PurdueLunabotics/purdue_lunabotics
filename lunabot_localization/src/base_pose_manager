@@ -1,49 +1,22 @@
 #!/usr/bin/env python3
+"""Publishes pose of base_link of robot from t265 tracking camera
+"""
+
+import numpy as np
 
 import rospy
-from tf.transformations import quaternion_matrix, quaternion_from_matrix,rotation_matrix
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import Pose, Transform, TransformStamped 
-import numpy as np
+from geometry_msgs.msg import TransformStamped
 import tf2_ros
 
-def np_to_tf(tf_matrix):
-  tf = Transform()
-  quat = quaternion_from_matrix(tf_matrix)
-  trans = tf_matrix[:,-1]
-  tf.rotation.x = quat[0]
-  tf.rotation.y = quat[1]
-  tf.rotation.z = quat[2]
-  tf.rotation.w = quat[3]
-  tf.translation.x = trans[0]
-  tf.translation.y = trans[1]
-  tf.translation.z = trans[2]
-  return tf
+from scripts.conversions import np_to_pose, np_to_tf, pose_to_np_matrix
 
-def np_to_pose(tf_matrix):
-  pose = Pose()
-  quat = quaternion_from_matrix(tf_matrix)
-  trans = tf_matrix[:,-1]
-  pose.orientation.x = quat[0]
-  pose.orientation.y = quat[1]
-  pose.orientation.z = quat[2]
-  pose.orientation.w = quat[3]
-  pose.position.x = trans[0]
-  pose.position.y = trans[1]
-  pose.position.z = trans[2]
-  return pose
-
-def pose_to_np_matrix(trans,rot):
-  trans = np.array([trans.x, trans.y, trans.z,1])
-  rot = np.array([rot.x, rot.y, rot.z,rot.w])
-  matrix = quaternion_matrix(rot)
-  matrix[:,-1] = trans
-  return matrix
 
 def get_param(name, default):
     val = rospy.get_param(name, default)
-    rospy.loginfo('  %s: %s', name, str(val))
+    rospy.loginfo("  %s: %s", name, str(val))
     return val
+
 
 class BasePoseManager:
   def __init__(self):
@@ -112,8 +85,8 @@ if __name__ == '__main__':
     manager = BasePoseManager()
     manager.init_base_tf()
     while not rospy.is_shutdown():
-      if manager.t265_started:
-        manager.pub_odom() 
-      manager.odom_rate_hz.sleep()
+        if manager.t265_started:
+            manager.pub_odom()
+        manager.odom_rate_hz.sleep()
 
     rospy.spin()

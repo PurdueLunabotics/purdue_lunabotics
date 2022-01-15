@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+import rospy
+from nav_msgs.msg import Odometry
+from sensor_msgs.msg import LaserScan
+import math
+from pynput.keyboard import Key
+from pynput import keyboard
+class TestNode:
+    def __init__(self, grid, x = 0, y = 0, size = 1, hz = 10):
+        rospy.init_node('test_node')
+
+        lidar_publisher = rospy.Publisher('/scan', LaserScan, queue_size=1)
+        position_publisher = rospy.Publisher('t265/odom', Odometry, queue_size=1)
+    
+    def __calculate_lidar_scan(self, x, y, grid, size, lidar_publisher):
+        max_x = len(grid) * size
+        max_y = len(grid[0]) * size
+        angle_min = -3.14
+        angle_max = 3.14
+        angle_inc = 0.0628
+        distances = []
+        for angle in range(angle_min, angle_max, angle_inc):
+            new_x = x
+            new_y = y
+            while(grid[new_x / size][new_y / size] == 0):
+                new_x += x * math.cos(angle) * size
+                new_y += y * math.sin(angle) * size
+                if(new_x < 0 or new_x > max_x or new_y < 0 or new_y > max_y):
+                    new_x = math.inf
+                    break
+            if(new_x == math.inf):
+                distances.append(math.inf)
+            else:
+                new_x -= x
+                new_y -= y
+                distances.append(math.sqrt(new_x * new_x + new_y * new_y)) #TODO find real point of intersection
+        data = LaserScan()
+        data.angle_min = angle_min
+        data.angle_increment = angle_inc
+        data.angle_max = angle_max
+        data.range_min = min(distances)
+        data.range_max = max(distances)
+        data.intensities = [0] * len(distances)
+        data.ranges = distances
+        lidar_publisher.publish(data)
+
+grid = [
+    [0, 0, 1, 1, 1],
+    [0, 0, 0, 1, 1],
+    [0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0],
+    [1, 1, 0, 0, 0]
+    ]
+t = TestNode(grid)
+move = 'n'
+def on_press(key):
+    if key == Key.up:
+        move = 'u'
+    elif key == Key.down:
+        move = 'd'
+    elif key == Key.left:
+        move = 'l'
+    elif key == Key.right:
+        move = 'r'
+        
+def on_release(key):
+    move = 'n'
+
+with keyboard.Listener(
+        on_press=on_press,
+        on_release=on_release) as listener:
+    listener.join()
+rate = rospy.Rate(t.hz)
+while not rospy.is_shutdown():
+    if move == 'u':
+        t.y -= 1
+    elif move == 'd':
+        t.y += 1
+    elif move == 'l':
+        t.x -= 1
+    elif move == 'r':
+        t.x += 1
+    if not move == 'n':
+        data = Odometry()
+        data.pose.pose.position.x = t.x
+        data.pose.pose.position.y = t.y
+        data.pose.pose.position.z = 0
+        t.position_publisher.publish(data)
+    t.__calculate_lidar_scan(t.x, t.y, grid, t.size, t.lidar_publisher)
+    rate.sleep()
+print("END")
