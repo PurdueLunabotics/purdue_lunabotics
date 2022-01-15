@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="lunabot_localization" type="bt_test" name="bt_test" output="screen"/> 
+</launch>
