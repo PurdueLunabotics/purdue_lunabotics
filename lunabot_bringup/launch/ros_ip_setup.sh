@@ -1,7 +1,7 @@
 #!/bin/bash
 
 TESTING=true
-IS_COMPUTER=true
+IS_COMPUTER=false
 COMPUTER_IP=192.168.1.11
 ROBOT_IP=192.168.1.10
 
