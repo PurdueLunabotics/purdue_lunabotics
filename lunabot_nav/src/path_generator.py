@@ -22,19 +22,22 @@ class PathGenerator:
     def __init__(self, x, y, width, height, cell_size, filled_prob):
         self.x = x
         self.y = y
-        self.width = width
-        self.height = height
+        self.width = int(width/cell_size)
+        self.height = int(height/cell_size)
         self.cell_size = cell_size
         self.filled_prob = filled_prob
         self.odometry = Odometry()
         self.grid = [[0] * self.width] * self.height
 
         rospy.Subscriber(
-            "lunabot_nav/obstacle_grid", OccupancyGrid, self.__generate_path
+            "/map", OccupancyGrid, self.__generate_path
         )
-        rospy.Subscriber("t265/odom", Odometry, self.__update_position)
 
-        self.publisher = rospy.Publisher("lunabot_nav/path_generator", Path)
+        rospy.Subscriber("/odometry/filtered", Odometry, self.__update_position)
+
+        self.publisher = rospy.Publisher("/path", Path,queue_size=10)
+
+        rospy.spin()
 
     def __generate_path(self, occupancy_grid):
         # Generating Grid
@@ -137,19 +140,24 @@ class PathGenerator:
                     ) * (self.y - new_node.y)
                     new_node.f = new_node.g + new_node.h
                     open_list.append(new_node)
-
+        print('here')
         # Creating and Publishing Path
         poses = []
-        if len(open_list) > 0:
+        if len(closed_list) > 0:
+            print('here 147')
             while current_node != None:
                 pose = PoseStamped()
+                pose.header.frame_id = "path"
+                pose.header.stamp = rospy.Time.now()
                 pose.pose.position.x = (
-                    current_node.x
+                    current_node.x * self.cell_size
                 )  # TODO convert to real life coordinates, not grid coordinates
-                pose.pose.position.y = current_node.y
+                pose.pose.position.y = current_node.y * self.cell_size
                 poses.append(pose)
                 current_node = current_node.parent
         path = Path()
+        path.header.stamp = rospy.Time.now()
+        path.header.frame_id = "base_link"
         path.poses = poses
         self.publisher.publish(path)
 
@@ -157,7 +165,7 @@ class PathGenerator:
         self.odometry = odometry
 
     def __get_grid_location_from_coordinates(
-        self, x_coordinate, y_coordinate, x_0=-1, y_0=-1
+        self, x_coordinate, y_coordinate, x_0=0, y_0=0
     ):
         x = int((x_coordinate - x_0) / self.cell_size)
         y = int((y_coordinate - y_0) / self.cell_size)

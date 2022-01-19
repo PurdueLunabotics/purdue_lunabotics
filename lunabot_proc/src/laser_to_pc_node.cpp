@@ -24,7 +24,7 @@ public:
     laser_notifier_.registerCallback(
       boost::bind(&LaserScanToPointCloud::scanCallback, this, _1,_laser_frame_id));
     laser_notifier_.setTolerance(ros::Duration(0.01));
-    scan_pub_ = n_.advertise<sensor_msgs::PointCloud>("/point_cloud",1);
+    scan_pub_ = n_.advertise<sensor_msgs::PointCloud>("/lidar_point_cloud",1);
   }
 
   void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_in, std::string _laser_frame_id)
@@ -40,8 +40,6 @@ public:
         std::cout << e.what();
         return;
     }
-    
-    // Do something with cloud.
 
     scan_pub_.publish(cloud);
 

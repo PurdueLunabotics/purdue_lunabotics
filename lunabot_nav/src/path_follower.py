@@ -51,7 +51,7 @@ class Spline:
 
 class PathFollower:
     def __init__(self, lookahead, dt, speed, width):
-        rospy.Subscriber("lunabot_nav/path_generator", Path, self.__generate_spline)
+        rospy.Subscriber("/path", Path, self.__generate_spline)
         self.spline = None
         self.left_publisher = rospy.Publisher('left_vel', Int32)
         self.right_publisher = rospy.Publisher('right_vel', Int32)
