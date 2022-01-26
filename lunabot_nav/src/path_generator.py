@@ -20,12 +20,13 @@ class GridNode:
 
 class PathGenerator:
     def __init__(self, x, y, width, height, cell_size, filled_prob):
-        self.x = x
-        self.y = y
         self.width = int(width/cell_size)
         self.height = int(height/cell_size)
         self.cell_size = cell_size
         self.filled_prob = filled_prob
+        coords = self.__get_grid_location_from_coordinates(x, y)
+        self.x = coords[1]
+        self.y = coords[0]
         self.odometry = Odometry()
         self.grid = [[0] * self.width] * self.height
 
@@ -74,16 +75,20 @@ class PathGenerator:
 
             # Finding node w/ smallest F
             current_node = open_list[0]
-            for node in open_list:
+            current_idx = 0
+            for i in range(1, len(open_list)):
+                node = open_list[i]
                 if node.f < current_node.f:
                     current_node = node
+                    current_idx = i
+            
+
+            open_list.pop(current_idx)
+            closed_list.append(current_node)
 
             # Stopping if end is found
             if current_node.x == self.x and current_node.y == self.y:
                 break
-
-            open_list.remove(current_node)
-            closed_list.append(current_node)
 
             # Going Through all move options
             move_options = [[1, 0], [-1, 0], [0, 1], [0, -1]]
@@ -165,10 +170,10 @@ class PathGenerator:
         self.odometry = odometry
 
     def __get_grid_location_from_coordinates(
-        self, x_coordinate, y_coordinate, x_0=0, y_0=0
+        self, x_coordinate, y_coordinate, x_0=-100, y_0=-100
     ):
         x = int((x_coordinate - x_0) / self.cell_size)
         y = int((y_coordinate - y_0) / self.cell_size)
         if x < 0 or x >= self.width or y < 0 or y >= self.height:
             return [-1, -1]
-        return [y, x]
+        return [x, y]
