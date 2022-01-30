@@ -31,17 +31,21 @@ class PathGenerator:
         self.grid = [[0] * self.width] * self.height
 
         rospy.Subscriber(
-            "/map", OccupancyGrid, self.__generate_path
+            "/map", OccupancyGrid, self.__generate_path, buff_size=2**24,queue_size=1000
         )
 
-        rospy.Subscriber("/odometry/filtered", Odometry, self.__update_position)
+        rospy.Subscriber("/odometry/filtered", Odometry, self.__update_position, buff_size=2**24,queue_size=1000)
 
         self.publisher = rospy.Publisher("/path", Path,queue_size=10)
 
         rospy.spin()
 
+    def __test(self, grid):
+        print('here')
+
     def __generate_path(self, occupancy_grid):
         # Generating Grid
+        print("Begin")
         row = 0
         col = 0
         for val in occupancy_grid.data:
@@ -145,14 +149,13 @@ class PathGenerator:
                     ) * (self.y - new_node.y)
                     new_node.f = new_node.g + new_node.h
                     open_list.append(new_node)
-        print('here')
+        
         # Creating and Publishing Path
         poses = []
         if len(closed_list) > 0:
-            print('here 147')
             while current_node != None:
                 pose = PoseStamped()
-                pose.header.frame_id = "path"
+                pose.header.frame_id = "odom"
                 pose.header.stamp = rospy.Time.now()
                 pose.pose.position.x = (
                     current_node.x * self.cell_size
@@ -162,8 +165,9 @@ class PathGenerator:
                 current_node = current_node.parent
         path = Path()
         path.header.stamp = rospy.Time.now()
-        path.header.frame_id = "base_link"
+        path.header.frame_id = "map"
         path.poses = poses
+        print("End")
         self.publisher.publish(path)
 
     def __update_position(self, odometry):
