@@ -44,6 +44,22 @@ class PathGenerator:
         while not rospy.is_shutdown():
             self.__calculate_path()
             self.publisher.publish(self.path)
+            # path = Path()
+            # pose = PoseStamped()
+            # pose.header.frame_id = "odom"
+            # pose.header.stamp = rospy.Time.now()
+            # pose.pose.position.x = 0
+            # pose.pose.position.y = 0
+            # path.poses.append(pose)
+            # pose2 = PoseStamped()
+            # pose2.header.frame_id = "odom"
+            # pose2.header.stamp = rospy.Time.now()
+            # pose2.pose.position.x = 10
+            # pose2.pose.position.y = 10
+            # path.poses.append(pose2)
+            # path.header.stamp = rospy.Time.now()
+            # path.header.frame_id = "map"
+            # self.publisher.publish(path)
             rate.sleep()
 
     def __generate_path(self, occupancy_grid):
@@ -54,14 +70,14 @@ class PathGenerator:
             self.grid[row][col] = 0
             if val > self.filled_prob:
                 self.grid[row][col] = 1
-            if row > 0:
-                self.grid[row - 1][col] = 1
-            if col > 0:
-                self.grid[row][col - 1] = 1
-            if row < self.height - 1:
-                self.grid[row + 1][col] = 1
-            if col < self.width - 1:
-                self.grid[row][col + 1] = 1
+            # if row > 0:
+            #     self.grid[row - 1][col] = 1
+            # if col > 0:
+            #     self.grid[row][col - 1] = 1
+            # if row < self.height - 1:
+            #     self.grid[row + 1][col] = 1
+            # if col < self.width - 1:
+            #     self.grid[row][col + 1] = 1
             col += 1
             if col == self.width:
                 col = 0
@@ -177,6 +193,7 @@ class PathGenerator:
         path.header.stamp = rospy.Time.now()
         path.header.frame_id = "map"
         path.poses = poses
+        print(len(poses))
         self.path = path
 
     def __update_position(self, odometry):
