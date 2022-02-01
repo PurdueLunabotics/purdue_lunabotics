@@ -29,6 +29,7 @@ class PathGenerator:
         self.y = coords[0]
         self.odometry = Odometry()
         self.grid = [[0] * self.width] * self.height
+        self.path = None
 
         rospy.Subscriber(
             "/map", OccupancyGrid, self.__generate_path, buff_size=2**24,queue_size=1000
@@ -38,26 +39,35 @@ class PathGenerator:
 
         self.publisher = rospy.Publisher("/path", Path,queue_size=10)
 
-        rospy.spin()
+        rate = rospy.Rate(1)
 
-    def __test(self, grid):
-        print('here')
+        while not rospy.is_shutdown():
+            self.__calculate_path()
+            self.publisher.publish(self.path)
+            rate.sleep()
 
     def __generate_path(self, occupancy_grid):
         # Generating Grid
-        print("Begin")
         row = 0
         col = 0
         for val in occupancy_grid.data:
+            self.grid[row][col] = 0
             if val > self.filled_prob:
                 self.grid[row][col] = 1
-            else:
-                self.grid[row][col] = 0
+            if row > 0:
+                self.grid[row - 1][col] = 1
+            if col > 0:
+                self.grid[row][col - 1] = 1
+            if row < self.height - 1:
+                self.grid[row + 1][col] = 1
+            if col < self.width - 1:
+                self.grid[row][col + 1] = 1
             col += 1
             if col == self.width:
                 col = 0
                 row += 1
 
+    def __calculate_path(self):
         # Getting Starting Location
         pos_x = self.odometry.pose.pose.position.x
         pos_y = self.odometry.pose.pose.position.y
@@ -158,17 +168,16 @@ class PathGenerator:
                 pose.header.frame_id = "odom"
                 pose.header.stamp = rospy.Time.now()
                 pose.pose.position.x = (
-                    current_node.x * self.cell_size
+                    current_node.x * self.cell_size - 100
                 )  # TODO convert to real life coordinates, not grid coordinates
-                pose.pose.position.y = current_node.y * self.cell_size
+                pose.pose.position.y = current_node.y * self.cell_size - 100
                 poses.append(pose)
                 current_node = current_node.parent
         path = Path()
         path.header.stamp = rospy.Time.now()
         path.header.frame_id = "map"
         path.poses = poses
-        print("End")
-        self.publisher.publish(path)
+        self.path = path
 
     def __update_position(self, odometry):
         self.odometry = odometry
