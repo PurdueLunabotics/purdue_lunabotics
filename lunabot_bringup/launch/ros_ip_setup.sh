@@ -4,7 +4,6 @@ TESTING=true
 IS_COMPUTER=false
 COMPUTER_IP=192.168.1.11
 ROBOT_IP=192.168.1.10
->>>>>>> Stashed changes
 
 # RUN `. ./ros_ip_setup.sh` in your terminal after setting the above variables, check by doing `export | grep ROS`
 

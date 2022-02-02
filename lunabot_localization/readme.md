@@ -55,7 +55,18 @@ rostopic list
 rostopic echo /tag_detections 
 ```
 
+## Bluetooth
+
+After editing code, run `catkin build`. then set permissions of binary created:
+
+```
+# $BT_EXEC_NODE_PATH is the executable folder path for lunabot_localization
+sudo setcap cap_net_raw+eip $BT_EXEC_NODE_PATH/<name of ros node>
+```
+
 ## More information
 
 Check out the [apriltag_ros](http://wiki.ros.org/apriltag_ros) package
 Check out the [realsense_ros](https://github.com/IntelRealSense/realsense-ros#using-t265) package
+
+

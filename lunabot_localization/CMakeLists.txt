@@ -107,7 +107,7 @@ catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES lunabot_localization
   CATKIN_DEPENDS roscpp std_msgs geometry_msgs
-#  DEPENDS system_lib
+  DEPENDS BLEPP
 )
 
 ###########

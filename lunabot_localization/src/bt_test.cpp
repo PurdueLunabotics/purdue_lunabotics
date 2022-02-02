@@ -1,3 +1,4 @@
+#include <ros/ros.h>
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
@@ -17,7 +18,7 @@
 
 #include <blepp/logging.h>
 #include <blepp/pretty_printers.h>
-#include <blepp/blestatemachine.h> //for UUID. FIXME mofo
+#include <blepp/blestatemachine.h>
 #include <blepp/lescan.h>
 
 using namespace std;
@@ -26,6 +27,7 @@ using namespace BLEPP;
 void catch_function(int)
 {
 	cerr << "\nInterrupted!\n";
+  ros::shutdown();
 }
 
 int main(int argc, char** argv)
@@ -55,7 +57,7 @@ int main(int argc, char** argv)
 
 	int i=0;
   
-  ros::Rate sleep(10);
+  ros::Rate loop(10);
 
 	while (ros::ok()) {
 		//Check to see if there's anything to read from the HCI
