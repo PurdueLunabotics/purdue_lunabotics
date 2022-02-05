@@ -1,0 +1,3 @@
+[submodule "nimbro_network"]
+	path = nimbro_network
+	url = https://github.com/AIS-Bonn/nimbro_network

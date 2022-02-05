@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="jetson_ip" default="192.168.1.10"/>
+
+  <include file="$(find lunabot_bringup)/launch/view_tf.launch" />
+  <include file="$(find lunabot_control)/launch/manual_control.launch" />
+
+  <include file="$(find nimbro_topic_transport)/launch/udp_sender.launch" >
+    <arg name="target" value="$(arg jetson_ip)" />
+  </include>
+</launch>

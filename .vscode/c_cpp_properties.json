@@ -6,7 +6,8 @@
                 "${workspaceFolder}/**",
                 "/opt/ros/noetic/include",
                 "/opt/ros/noetic/include/ros",
-                "~/Arduino/libraries/ros_lib"
+                "~/Arduino/libraries/ros_lib",
+                "/usr/include/eigen3"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

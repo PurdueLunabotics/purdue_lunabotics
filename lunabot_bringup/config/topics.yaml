@@ -1,0 +1,40 @@
+topics:
+ - name: "/my_first_topic"
+   compress: true # enable bz2 compression
+   rate: 1.0 # rate limit at 1Hz
+ - name: "/my_second_topic"
+/clock
+/cmd_vel
+/d435/camera/color/camera_info
+/d435/camera/color/image_rect_color
+/d435/camera/depth/camera_info
+/d435/camera/depth/color/points
+/diagnostics
+/free_cells_vis_array
+/initialpose
+/joy
+/move_base_simple/goal
+/occupied_cells_vis_array
+/octomap_binary
+/octomap_full
+/octomap_point_cloud_centers
+/octomap_server/parameter_descriptions
+/octomap_server/parameter_updates
+/odom
+/projected_map
+/projected_map_updates
+/rosout
+/rosout_agg
+/scan
+/t265/camera/accel/imu_info
+/t265/camera/accel/sample
+/t265/camera/gyro/imu_info
+/t265/camera/gyro/sample
+/t265/camera/odom/sample
+/t265/camera/realsense2_camera_manager/bond
+/t265/camera/tracking_module/parameter_descriptions
+/t265/camera/tracking_module/parameter_updates
+/tag_detections
+/tag_detections_image
+/tf
+/tf_static
