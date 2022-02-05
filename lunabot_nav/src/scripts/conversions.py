@@ -51,6 +51,7 @@ def quat_to_euler(quat):
     z1 = math.atan2(siny_cosp, cosy_cosp)
     return np.array([x1, y1, z1])
 
+
 def euler_to_quat(euler):
     pitch = euler[0]
     roll = euler[1]
