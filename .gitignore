@@ -1,6 +1,7 @@
 bags
 matlab*
 *.bag
+*.vscode*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
