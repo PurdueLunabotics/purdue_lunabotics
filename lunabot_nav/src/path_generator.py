@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import math
 import numpy as np
 import rospy
 from nav_msgs.msg import OccupancyGrid
@@ -132,7 +133,8 @@ class PathGenerator:
                     or node_x >= self.width
                     or node_y < 0
                     or node_y >= self.height
-                    or self.grid[node_x][node_y] == 1
+                    or self.grid[node_x][node_y] == 1 
+                    #TODO write a function here checking all the grids in the circle as well
                 ):
                     continue
 
@@ -206,4 +208,53 @@ class PathGenerator:
         y = int((y_coordinate - y_0) / self.cell_size)
         if x < 0 or x >= self.width or y < 0 or y >= self.height:
             return [-1, -1]
-        return [x, y]
+        return [x, y] #grid corrdinate
+
+    # get actual coordinate from grid location
+    def __get_coordinates_from_grid_location(
+        self, x_grid_loc, y_grid_loc, x_0=100, y_0=100
+    ):
+        x = x_grid_loc * self.cell_size - x_0
+        y = y_grid_loc * self.cell_size - y_0
+        return [x,y]
+
+    def __check_collision(self, node_x, node_y, radius):
+        destin_loc = self.__get_coordinates_from_grid_location(node_x, node_y)
+        y_top_loc = destin_loc[1] + radius 
+        y_bottom_loc = destin_loc[1] - radius
+        x_left_loc= destin_loc[0] - radius
+        x_right_loc = destin_loc[0] + radius
+        top_grid = self.__get_grid_location_from_coordinates(destin_loc[0], y_top_loc)
+        bottom_grid = self.__get_grid_location_from_coordinates(destin_loc[0], y_bottom_loc)
+        left_grid = self.__get_grid_location_from_coordinates(x_left_loc, destin_loc[1])
+        right_grid = self.__get_grid_location_from_coordinates(x_right_loc, destin_loc[1])
+        #check for out-of-bound
+        if (
+            top_grid[1] > self.height
+            or bottom_grid[1] < 0
+            or left_grid[0] < 0
+            or right_grid[0] > self.width
+        ): return True
+        #Check obstacles
+        row = bottom_grid[1]
+        col = left_grid[0]
+        elimin_const = math.ceil(1 - math.sqrt(2) / 2) * radius
+        for row in (bottom_grid[1], top_grid[1]):
+            for col in (left_grid[0], right_grid[0]):
+                if (
+                    col > left_grid[0] and col < (left_grid[0] + elimin_const) and row < top_grid[1] and row > (top_grid[1] - elimin_const)
+                    or col < right_grid[0] and col > (right_grid[0] - elimin_const) and row < top_grid[1] and row > (top_grid[1] - elimin_const)
+                    or col > left_grid[0] and col < (left_grid[0] + elimin_const) and row > bottom_grid[1] and row > (bottom_grid[1] + elimin_const)
+                    or col < right_grid[0] and col > (right_grid[0] - elimin_const) and row > bottom_grid[1] and row > (bottom_grid[1] + elimin_const)
+                ): continue
+                if self.grid[row][col] == 1:
+                    return True
+                col += 1
+        row += 1
+        col = left_grid[0]
+        return False
+
+
+        
+
+        
