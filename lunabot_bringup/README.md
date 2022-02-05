@@ -1,16 +1,18 @@
 # lunabot_bringup
 
-### Run rosbag
+### Run rosbags
 
-1. Download rosbag (in Discord)
-2. Launch rviz
+1. Download `localization_testing.bag` (link in Discord)
+2. Make `lunabot_bringup/bags` folder and put the rosbag in there
 
+#### View Localization
 ```
-roslaunch lunabot_bringup view_rviz.launch
+roslaunch lunabot_bringup test_localization.launch
 ```
-3. Play the rosbag
+
+#### View Map Building
 ```
-rosbag play <path to rosbag>
+roslaunch lunabot_bringup test_mapping.launch
 ```
 
 ### Run the robot

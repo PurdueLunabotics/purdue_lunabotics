@@ -22,6 +22,8 @@
     <include file="$(find realsense2_camera)/launch/rs_camera.launch">
       <arg name="serial_no" value="$(arg serial_no_d435)" />
       <arg name="tf_prefix" value="d435" />
+      <arg name="filters" value="disparity,decimation"/>
+      <arg name="enable_pointcloud" value="true"/>
       <arg name="initial_reset" value="$(arg initial_reset)"/>
     </include>
   </group>

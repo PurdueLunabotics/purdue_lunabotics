@@ -11,13 +11,13 @@ void actuation_cb(const lunabot_msgs::Actuation& actuation) {
 void deposition_cb(const std_msgs::Float64& command) {
 	deposition::run_deposition(command, nh);
 }
-void drivetrain_cb(const geometry_msgs::Twist& cmd_vel) {
-	drivetrain::run_drivetrain(cmd_vel, nh);
+void drivetrain_cb(const lunabot_msgs::Drivetrain& drive_msg) {
+	drivetrain::run_drivetrain(drive_msg, nh);
 }
 
 ros::Subscriber<std_msgs::Float64> deposition_sub("/deposition", deposition_cb);
 ros::Subscriber<lunabot_msgs::Actuation> actuation_sub("/actuation", actuation_cb);
-ros::Subscriber<geometry_msgs::Twist> drivetrain_sub("/cmd_vel", drivetrain_cb);
+ros::Subscriber<lunabot_msgs::Drivetrain> drivetrain_sub("/cmd_vel", drivetrain_cb);
 
 void setup() {
   nh.initNode();
