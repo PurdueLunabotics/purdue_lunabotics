@@ -2,8 +2,12 @@
 
 using namespace BLEPP;
 
-BTManager::BTManager() 
+BTManager::BTManager(uint128_t UUID1_, uint128_t UUID2_, uint128_t UUID3_) 
 {
+  //Turn provided UUID chars into UUIDs
+  bt_uuid128_create(&this->UUID1, UUID1_);
+  bt_uuid128_create(&this->UUID2, UUID2_);
+  bt_uuid128_create(&this->UUID3, UUID3_);
   //Scan setup
   HCIScanner::ScanType type = HCIScanner::ScanType::Active;
   HCIScanner::FilterDuplicates filter = HCIScanner::FilterDuplicates::Off; //Needs testing

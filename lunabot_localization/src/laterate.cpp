@@ -1,17 +1,10 @@
 #include <lunabot_localization/laterate.h>
 
-//These are the centers of the three points for trilateration
-#define UY 0.0
-#define UZ 0.0
-#define VY 0.0
-#define VZ 0.0
-#define WY 0.0
-#define WZ 0.0
 //Error threshold - not currently working
 //#define ETHRESH 0.00001
 
 
-unsigned char bilaterate_r3(float *_x, float *_y, float *_z, float r1, float r2, float z) 
+unsigned char bilaterate_r3(float UY, float UZ, float VY, float VZ, float WY, float WZ, float *_x, float *_y, float *_z, float r1, float r2, float z) 
 {
     //Determines x and y with a known z and r1 and r2, but no r3
     //We then calculate y by subtracting the two sphere equations
@@ -34,7 +27,7 @@ unsigned char bilaterate_r3(float *_x, float *_y, float *_z, float r1, float r2,
     }
 }
 
-unsigned char bilaterate_r2(float *_x, float *_y, float *_z, float r1, float r3, float z) 
+unsigned char bilaterate_r2(float UY, float UZ, float VY, float VZ, float WY, float WZ, float *_x, float *_y, float *_z, float r1, float r3, float z) 
 {
     //Determines x and y with a known z and r1 and r3, but no r2
     //We then calculate y by subtracting the two sphere equations
@@ -57,7 +50,7 @@ unsigned char bilaterate_r2(float *_x, float *_y, float *_z, float r1, float r3,
     }
 }
 
-unsigned char bilaterate_r1(float *_x, float *_y, float *_z, float r2, float r3, float z)
+unsigned char bilaterate_r1(float UY, float UZ, float VY, float VZ, float WY, float WZ, float *_x, float *_y, float *_z, float r2, float r3, float z)
 {
     //Determines x and y with a known z and r2 and r3, but no r1
     //We then calculate y by subtracting the two sphere equations
@@ -81,7 +74,7 @@ unsigned char bilaterate_r1(float *_x, float *_y, float *_z, float r2, float r3,
 }
 
 
-unsigned char trilaterate(float *_x, float *_y, float *_z, float r1, float r2, float r3) 
+unsigned char trilaterate(float UY, float UZ, float VY, float VZ, float WY, float WZ, float *_x, float *_y, float *_z, float r1, float r2, float r3) 
 {
     //See https://www.iri.upc.edu/files/scidoc/743-Revisiting-trilateration-for-robot-localization.pdf
     //By Thomas and Ros, 2005
@@ -125,7 +118,7 @@ unsigned char trilaterate(float *_x, float *_y, float *_z, float r1, float r2, f
     }
 }
 
-unsigned char test_range(float r, unsigned char rn, float x, float y, float z) 
+unsigned char test_range(float UY, float UZ, float VY, float VZ, float WY, float WZ, float r, unsigned char rn, float x, float y, float z) 
 {
     double dy, dz;
     switch (rn)
@@ -146,7 +139,7 @@ unsigned char test_range(float r, unsigned char rn, float x, float y, float z)
     return r*r == x*x + (y-dy) * (y-dy) + (z-dz) * (z-dz) ? 3 : 4;
 }
 
-unsigned char multilaterate(float *_x, float *_y, float *_z, float r1, float r2, float r3, float x, float y, float z, unsigned char mode) 
+unsigned char multilaterate(float UY, float UZ, float VY, float VZ, float WY, float WZ, float *_x, float *_y, float *_z, float r1, float r2, float r3, float x, float y, float z, unsigned char mode) 
 {
     //Mode determines how bilateration works
     //0 - test values yourself
@@ -190,28 +183,28 @@ unsigned char multilaterate(float *_x, float *_y, float *_z, float r1, float r2,
     switch(mode) 
     {
         case 1:
-            return bilaterate_r1(_x, _y, _z, r2, r3, z);
+            return bilaterate_r1(UY, UZ, VY, VZ, WY, WZ, _x, _y, _z, r2, r3, z);
             break;
         case 2:
-            return bilaterate_r2(_x, _y, _z, r1, r3, z);
+            return bilaterate_r2(UY, UZ, VY, VZ, WY, WZ, _x, _y, _z, r1, r3, z);
             break;
         case 3:
-            return bilaterate_r3(_x, _y, _z, r1, r2, z);
+            return bilaterate_r3(UY, UZ, VY, VZ, WY, WZ, _x, _y, _z, r1, r2, z);
             break;
         case 4:
-            return trilaterate(_x, _y, _z, r1, r2, r3);
+            return trilaterate(UY, UZ, VY, VZ, WY, WZ, _x, _y, _z, r1, r2, r3);
             break;
         case 5:
             rn = 1;
-            return test_range(r1, rn, x, y, z);
+            return test_range(UY, UZ, VY, VZ, WY, WZ, r1, rn, x, y, z);
             break;
         case 6:
             rn = 2;
-            return test_range(r2, rn, x, y, z);
+            return test_range(UY, UZ, VY, VZ, WY, WZ, r2, rn, x, y, z);
             break;
         case 7:
             rn = 3;
-            return test_range(r3, rn, x, y, z);
+            return test_range(UY, UZ, VY, VZ, WY, WZ, r3, rn, x, y, z);
             break;
         default:
             return 2;

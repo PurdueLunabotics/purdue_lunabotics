@@ -1,8 +1,15 @@
 #include <lunabot_localization/bt_localization.h>
 
-BTLocalization::BTLocalization() 
+BTLocalization::BTLocalization(uint128_t UUID1_, uint128_t UUID2_, uint128_t UUID3_) 
 {
-    this->manager.reset(new BTManager);
+    this->manager.reset(new BTManager(UUID1_, UUID2_, UUID3_));
+}
+
+float BTLocalization::rssiConv(float s)
+{
+    //Convert rssi to linear, positive = stronger format
+    //Dummy for now
+    return s;
 }
 
 float BTLocalization::fastInvSqrt(float x) 
@@ -32,25 +39,48 @@ void BTLocalization::getRadii(float s1, float s2, float s3)
     this->r3 = calcRadius(s3, this->k3);
 }
 
-void BTLocalization::getPos() 
+void BTLocalization::calibrate(float r1, float r2, float r3) //Calibrate- solve calcRadius for k
 {
-    std::vector<btevent> events = this->manager->getResults();
-    float s1, s2, s3; //I am assuming that RSSI scales linearly- needs testing
+    float s1, s2, s3 = 0;
+    getStrs(&s1, &s2, &s3);
+    if (s1 != 0)
+    {
+        this->k1 = r1 * s1 * s1;
+    }
+    if (s2 != 0)
+    {
+        this->k2 = r2 * s2 * s2;
+    }
+    if (s3 != 0)
+    {
+        this->k3 = r3 * s3 * s3;
+    }
+}
+
+void BTLocalization::getStrs(float* s1, float* s2, float* s3) //Get strengths
+{
+    std::vector<btevent> events = this->manager->getResults(); //Get the result list
     for (btevent event : events) 
     {
         switch(event.r_id) 
         {
         case 1:
-            s1 = event.rssi;
+            *s1 = event.rssi;
             break;
         case 2:
-            s2 = event.rssi;
+            *s2 = event.rssi;
             break;
         case 3:
-            s3 = event.rssi;
+            *s3 = event.rssi;
             break;
         }
     }
+}
+
+void BTLocalization::getPos() 
+{
+    float s1, s2, s3 = 0;
+    getStrs(&s1, &s2, &s3); //Get strengths
     getRadii(s1, s2, s3);
 
     multilaterate(&this->x, &this->y, &this->z, this->r1, this->r2, this->r3, this->x, this->y, this->z, 0);

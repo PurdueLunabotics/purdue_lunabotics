@@ -1,14 +1,26 @@
 #include <ros/ros.h>
 #include <lunabot_localization/bt_localization.h>
 #include <memory>
+#include <std_msgs/Float64.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Point.h>
+
+/*
+ROS parameters:
+bt_UUID1 - UUID of tag 1
+bt_UUID2 - UUID of tag 2
+bt_UUID3 - UUID of tag 3
+
+
+*/
 
 class BTLocalizationNode 
 {
 private:
     //Get settings from params
     std::unique_ptr<BTLocalization> bt;
-    ros::Subscriber bt_command_subscriber;
+
+    ros::Subscriber calibrate_command_subscriber_;
     ros::Publisher current_pos_publisher_;
     ros::Timer current_pos_timer_;
 
@@ -25,10 +37,16 @@ public:
       */
 
       publish_current_pos_frequency_ = 2.0;
-      bt.reset(new BTLocalization);
+      //Get UUIDs from parameters, pass them down
+      uint128_t UUID1, UUID2, UUID3;
+      ros::param::get("~bt_UUID1", &UUID1);
+      ros::param::get("~bt_UUID2", &UUID2);
+      ros::param::get("~bt_UUID3", &UUID3);
+      bt.reset(new BTLocalization(UUID1, UUID2, UUID3));
 
       current_pos_publisher_ = nh->advertise<geometry_msgs::PoseStamped>("current_pos", 10);
       current_pos_timer_ = nh->createTimer(ros::Duration(1.0 / publish_current_pos_frequency_), &BTLocalizationNode::publishCurrentPos, this);
+      calibrate_command_subscriber_ = nh->subscribe("bt_calibrate_command", 3, &BTLocalizationNode::callbackCalibrate, this);
     }
 
     void publishCurrentPos(const ros::TimerEvent &event) 
@@ -46,6 +64,17 @@ public:
         pose.header.frame_id = "ble_frame";
 
         current_pos_publisher_.publish(pose);
+    }
+
+    void callbackCalibrate(geometry_msgs::Point btt1, geometry_msgs::Point btt2, geometry_msgs::Point btt3) //For calibrating strength of bluetooth tags
+    {
+        //Get the node positions from parameters
+        //Calculate ranges
+        float r1 = sqrt(btt1.x * btt1.x + btt1.y * btt1.y + btt1.z * btt1.z);
+        float r2 = sqrt(btt2.x * btt2.x + btt2.y * btt2.y + btt2.z * btt2.z);
+        float r3 = sqrt(btt3.x * btt3.x + btt3.y * btt3.y + btt3.z * btt3.z);
+        //Calibrate each tag
+        bt.calibrate(r1, r2, r3);
     }
 
     void stop()
