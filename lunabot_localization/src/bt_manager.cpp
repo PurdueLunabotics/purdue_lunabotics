@@ -12,6 +12,13 @@ BTManager::BTManager(uint128_t UUID1_, uint128_t UUID2_, uint128_t UUID3_)
   HCIScanner::ScanType type = HCIScanner::ScanType::Active;
   HCIScanner::FilterDuplicates filter = HCIScanner::FilterDuplicates::Off; //Needs testing
   HCIScanner scanner(true, filter, type);
+  //Boilerplate code
+  log_level = LogLevels::Warning;
+  HCIScanner scanner(true, filter, type);
+  //Catch the interrupt signal. If the scanner is not
+  //cleaned up properly, then it doesn't reset the HCI state.
+  signal(SIGINT, catch_function)
+
   //Probably this should send errors and results somewhere (this will be part of ROS wrapper)
   this->scanner = &scanner;
 }
