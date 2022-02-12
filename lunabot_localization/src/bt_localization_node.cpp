@@ -42,7 +42,14 @@ public:
       ros::param::get("~bt_UUID1", &UUID1);
       ros::param::get("~bt_UUID2", &UUID2);
       ros::param::get("~bt_UUID3", &UUID3);
-      bt.reset(new BTLocalization(UUID1, UUID2, UUID3));
+      //Get bluetooth tag locations
+      geometry_msgs::Point U, V, W;
+      ros::param::get("~tag1pos", &U);
+      ros::param::get("~tag2pos", &V);
+      ros::param::get("~tag3pos", &W);
+      bt.reset(new BTLocalization(UUID1, UUID2, UUID3, U, V, W));
+
+      
 
       current_pos_publisher_ = nh->advertise<geometry_msgs::PoseStamped>("current_pos", 10);
       current_pos_timer_ = nh->createTimer(ros::Duration(1.0 / publish_current_pos_frequency_), &BTLocalizationNode::publishCurrentPos, this);

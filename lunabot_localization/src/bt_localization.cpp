@@ -1,8 +1,50 @@
 #include <lunabot_localization/bt_localization.h>
 
-BTLocalization::BTLocalization(uint128_t UUID1_, uint128_t UUID2_, uint128_t UUID3_) 
+BTLocalization::BTLocalization(uint128_t UUID1_, uint128_t UUID2_, uint128_t UUID3_, geometry_msgs::Point U, geometry_msgs::Point V, geometry_msgs::Point W) 
 {
     this->manager.reset(new BTManager(UUID1_, UUID2_, UUID3_));
+    //Convert points to share an "x" value
+    //Create first basis vector
+    float UVdx = V.x - U.x;
+    float UVdy = V.y - U.y;
+    float UVdz = V.z - U.z;
+    float mUV = sqrt(UVdx * UVdx + UVdy * UVdy + UVdz * UVdz);
+    //Create second basis vector
+    float UWdx = W.x - U.x;
+    float UWdy = W.y - U.y;
+    float UWdz = W.z - U.z;
+    //Orthogonalize second basis vector
+    float dotUVUW = UVdx * UWdx + UVdy * UWdy + UVdz * UWdz;
+    UWdz = UWdx - UVdx * dotUVUW;
+    UWdy = UWdy - UVdy * dotUVUW;
+    UWdz = UWdz - UVdz * dotUVUW;
+    float mUW = sqrt(UWdx * UWdx + UWdy * UWdy + UWdz * UWdz);
+    //Turn first and second vectors into unit vectors
+    UVdx /= mUV; UVdy /= mUV; UVdz /= mUV;
+    UWdx /= mUW; UWdy /= mUW; UWdz /- mUW;
+    //Take cross product to get third vector, N - it is already orthogonal
+    float Ndx = UVdy * UWdz - UVdz * UWdy;
+    float Ndy = UVdz * UWdx - UVdx * UWdz;
+    float Ndz = UVdx * UWdy - UVdy * UWdx;
+    //Store values
+    this->bAnchor =  vector::vector(U.x, U.y, U.z);
+    this->bAnchor.x = U.x; this->bAnchor.y = U.y; this->bAnchor.z = U.z;
+    this->b1 = vector::vector(Ndx, Ndy, Ndz);
+    this->b2 = vector::vector(UVdx, UVdy, UVdz);
+    this->b3 = vector::vector(UWdx, UWdy, UWdz);
+    //Store beacon positions
+    float Ab1 = dot(this->b1, U);
+    float Ab2 = dot(this->b2, U);
+    float Ab3 = dot(this->b3, U);
+    this->A = vector::vector(Ab1, Ab2, Ab3);
+    float Bb1 = dot(this->b1, V);
+    float Bb2 = dot(this->b2, V);
+    float Bb3 = dot(this->b3, V);
+    this->B = vector::vector(Bb1, Bb2, Bb3);
+    float Cb1 = dot(this->b1, W);
+    float Cb2 = dot(this->b2, W);
+    float Cb3 = dot(this->b3, W);
+    this->C = vector::vector(Cb1, Cb2, Cb3);
 }
 
 float BTLocalization::rssiConv(float s)
@@ -82,8 +124,27 @@ void BTLocalization::getPos()
     float s1, s2, s3 = 0;
     getStrs(&s1, &s2, &s3); //Get strengths
     getRadii(s1, s2, s3);
-
-    multilaterate(&this->x, &this->y, &this->z, this->r1, this->r2, this->r3, this->x, this->y, this->z, 0);
+    float sx, sy, sz = 0;
+    multilaterate(&sx, &sy, &sz, this->r1, this->r2, this->r3, sx, sy, sz, 0);
+    vector::vector s = (sx, sy, sz);
+    //Find amount of each vector
+    this.x = s.x * this->b1.x + s.y * this->b2.x + s.z * this->b3.x + this->bAnchor.x;
+    this.y = s.x * this->b1.y + s.y * this->b2.y + s.z * this->b3.y + this->bAnchor.y;
+    this.z = s.x * this->b1.z + s.y * this->b2.z + s.z * this->b3.z + this->bAnchor.z;
 }
 
-//This is where ROS wrappers should attach!
+vector vector::vector(float x_, float y_, float z_)
+{
+    this->x = x_; this->y = y_; this->z = z_;
+}
+
+//Vector functions
+int dot(vector::vector v1, vector::vector v2)
+{
+    return v1.x * v2.x + v1.y + v2.y + v1.z * v2.z;
+}
+
+int dot(vector::vector v1, geometry_msgs::Point p1)
+{
+    return v1.x * p1.x + v1.y * p1.y + v1.z * p1.z;
+}
