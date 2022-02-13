@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 import numpy as np
-from scripts.conversions import log_to_prob, prob_to_log
 import rospy
-
-from tf.transformations import quaternion_from_euler, euler_from_quaternion 
-from nav_msgs.msg import OccupancyGrid
-from std_msgs.msg import UInt8
-from nav_msgs.msg import MapMetaData
-from nav_msgs.msg import Odometry
-from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Quaternion
+from nav_msgs.msg import MapMetaData, OccupancyGrid, Odometry
+from sensor_msgs.msg import LaserScan
+from std_msgs.msg import UInt8
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
+
+from scripts.conversions import log_to_prob, prob_to_log
 
 # Helper Functions to calculate the probabilities
 

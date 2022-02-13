@@ -2,10 +2,8 @@
 
 import numpy as np
 import rospy
-from nav_msgs.msg import OccupancyGrid
-from nav_msgs.msg import Odometry
-from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped
+from nav_msgs.msg import OccupancyGrid, Odometry, Path
 
 
 class GridNode:

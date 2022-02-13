@@ -5,6 +5,7 @@ import rospy
 from nav_msgs.msg import Path
 from std_msgs.msg import Int32
 
+
 # Currently uses Besier Curve, needs to be tested if other methods are better
 class Spline:
     def __init__(self, path):
