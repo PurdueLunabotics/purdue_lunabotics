@@ -8,6 +8,7 @@ import copy
 import math
 import random
 from geometry_msgs.msg import PolygonStamped, PoseStamped 
+from collections import deque
 
 import numpy as np
 import rospy
@@ -35,7 +36,7 @@ def rotate(pts, rad, rotate_pt):
 
 class RRTStarPlanner:
     def __init__(
-        self, disc_step=0.05, goal_sample_rate=5, max_iter=100, ignore_theta=True
+        self, disc_step=0.1, goal_sample_rate=5, max_iter=30, ignore_theta=True
     ):
         """ Args:
             disc_step (float, optional): [description]. Defaults to 0.05.
@@ -52,7 +53,7 @@ class RRTStarPlanner:
         self.goal = (
             None
         )  # np.array [x,y,theta] in meters and radians, (theta is ignored)
-        self.node_list = []
+        self.node_list = deque([])
         self.ignore_theta = ignore_theta
 
         # samples positions in the window +/- from the robot's current position
@@ -65,6 +66,7 @@ class RRTStarPlanner:
         self.goalfound = False
         self.solution_set = set()
         self.is_planning = False
+        self.plan_start = 0
 
         rospy.Subscriber("/projected_map", OccupancyGrid, self.__occ_grid_cb)
         rospy.Subscriber("/odom", Odometry, self.__odom_cb)
@@ -83,9 +85,8 @@ class RRTStarPlanner:
             self.maxheight = grid_msg.info.height  # m/cell
 
     def __odom_cb(self, odom_msg):
-        if not self.is_planning:
-            pos, ori = pose_to_array(odom_msg.pose.pose)
-            self.curr = np.array([pos[0],pos[1],ori[0]])
+        pos, ori = pose_to_array(odom_msg.pose.pose)
+        self.curr = np.array([pos[0],pos[1],ori[0]])
 
     def publish_footprint(self):
         footprint = PolygonStamped()
@@ -107,9 +108,6 @@ class RRTStarPlanner:
             self.goal = np.array([pos[0],pos[1],ori[0]])
             self.plan()
 
-    def get_prob_at(self,x,y):
-        return self.grid[x * self.maxwidth + y]
-
     def plan(self):
         """
         Implements the RTT (or RTT*) algorithm, following the pseudocode in the handout.
@@ -121,8 +119,10 @@ class RRTStarPlanner:
 
         print('planning')
         self.is_planning = True
-
+        self.plan_start = rospy.Time.now().secs
+        #self.node_list.appendleft(Node(self.curr))
         self.node_list = [Node(self.curr)]
+
         for i in range(self.max_iter):
             rnd = self.generate_sample()
             nind = self.nearest_list_index(self.node_list, rnd)
@@ -164,6 +164,8 @@ class RRTStarPlanner:
         path = self.get_path_to_goal()
         if path is not None:
             print('publishing path')
+            plan_time = rospy.Time.now().secs - self.plan_start
+            print("plan time: {}".format(plan_time))
             self.publish_path(path)
         else:
             print('path not found')
@@ -206,9 +208,7 @@ class RRTStarPlanner:
         """
 
         newNode = copy.deepcopy(source)
-
         DISCRETIZATION_STEP = self.disc_step
-
         dists = dest.state - source.state
         distTotal = np.linalg.norm(dists)
 
@@ -240,10 +240,10 @@ class RRTStarPlanner:
         returns: random c-space vector
         """
         if random.randint(0, 100) > self.goal_sample_rate:
-            x_max = min(self.sample_window_h + self.curr[0],self.maxheight) 
-            x_min = max(self.sample_window_h - self.curr[0],0)
-            y_max = min(self.sample_window_w + self.curr[1],self.maxwidth) 
-            y_min = max(self.sample_window_w - self.curr[1],0)
+            x_max = min(self.curr[0] + self.sample_window_h,self.maxheight) 
+            x_min = max(self.curr[0] - self.sample_window_h,0)
+            y_max = min(self.curr[1] + self.sample_window_w,self.maxwidth) 
+            y_min = max(self.curr[1] - self.sample_window_w,0)
 
             sample = [
                 np.random.uniform(x_min, x_max),
@@ -262,7 +262,6 @@ class RRTStarPlanner:
         Returns: True if node is within 5 units of the goal state; False otherwise
         """
         d = np.linalg.norm(node.state - self.goal)
-        print(d)
         if d < 0.1:
             return True
         return False
@@ -307,7 +306,7 @@ class RRTStarPlanner:
         Returns: a list of indices of nearby nodes.
         """
         # Use this value of gamma
-        GAMMA = 50
+        GAMMA = 10
         i = len(self.node_list)
         upper_bound = GAMMA * (np.log(i) / i) ** (1.0 / self.dof)
         near_nodes = []
@@ -381,7 +380,7 @@ class RRTStarPlanner:
         occupied_i = np.array(np.nonzero(self.grid > 0.5)) # flat coords of obstacles
         occupied_i = np.vstack((occupied_i / self.robot_w,occupied_i % self.robot_w)) # xy coords
         occupied_i *= self.resolution # maps to real-world coordinates 
-        occupied_i += self.origin[0:2].reshape(2,1) # maps to map frame in 2d
+        occupied_i -= self.origin[0:2].reshape(2,1) # maps to map frame in 2d
         occupied_i = rotate(occupied_i,-node.state[-1],pos.reshape(2,1)) # rotate points onto robot to check collisions at angle
 
         is_colliding = np.any((occupied_i>=r_bnds[:2].reshape(2,1)) & (occupied_i<=r_bnds[2:].reshape(2,1))) # colliding 
@@ -427,7 +426,7 @@ class Node:
 def main():
     rospy.init_node("global_path_planner")
 
-    rrt = RRTStarPlanner(max_iter=50)
+    rrt = RRTStarPlanner(max_iter=30,disc_step=0.05,goal_sample_rate=10)
     rate = rospy.Rate(10)
 
     while not rospy.is_shutdown():
