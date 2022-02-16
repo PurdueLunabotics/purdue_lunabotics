@@ -11,6 +11,7 @@ on:
       - master 
 
 jobs:
+
   run-linters:
     name: Run linters
     runs-on: ubuntu-latest
@@ -31,4 +32,9 @@ jobs:
         uses: wearerequired/lint-action@v1
         with:
           black: true
+          auto_fix: true
           flake8: true
+          flake8_args: "--extend-ignore=E501,E203"
+
+      - name: clang-tidy check
+        uses: muxee/clang-tidy-action@0.0.1-rc1
