@@ -91,4 +91,5 @@ class MPC:
 
             means = torch.mean(states.keys())
             std_devs = torch.std(states.keys())
-        
+
+        #TODO calculate velocities to return
