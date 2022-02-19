@@ -37,7 +37,7 @@ def rotate(pts, rad, rotate_pt):
 
 class RRTStarPlanner:
     def __init__(
-        self, disc_step=0.1, goal_sample_rate=5, max_iter=30, ignore_theta=True
+        self, disc_step=0.05, goal_sample_rate=5, max_iter=30
     ):
         """Args:
         disc_step (float, optional): [description]. Defaults to 0.05.
@@ -65,11 +65,12 @@ class RRTStarPlanner:
             None  # np.array [x,y,theta] in meters and radians, (theta is ignored)
         )
         self.node_list = deque([])
-        self.ignore_theta = ignore_theta
 
         # samples positions in the window +/- from the robot's current position
         self.sample_window_h = 3.0
         self.sample_window_w = 3.0
+
+        self.min_dist_to_goal = 0.1
 
         self.disc_step = disc_step
         self.goal_sample_rate = goal_sample_rate
@@ -251,12 +252,11 @@ class RRTStarPlanner:
 
     def generate_sample(self):
         """
-        Randomly generates a sample, to be used as a new node.
-        This sample may be invalid - if so, call generatesample() again.
+        Randomly generates a sample within a sample_window around the current position to minimize the search space, to be used as a new node.
+        This sample may be invalid - if so, call generate_sample() again.
 
-        You will need to modify this function for question 3 (if self.geom == 'rectangle')
-
-        returns: random c-space vector
+        Returns:
+            Node(state=np.array(dof)): random sample  
         """
         if random.randint(0, 100) > self.goal_sample_rate:
             x_max = min(self.curr[0] + self.sample_window_h, self.maxheight)
@@ -275,28 +275,19 @@ class RRTStarPlanner:
         return rnd
 
     def is_near_goal(self, node):
-        """
-        node: the location to check
+        """_summary_
+        Checks whether node is within self.min_dist_to_goal of goal
 
-        Returns: True if node is within 5 units of the goal state; False otherwise
+        Args:
+            node (Node): location to check 
+ 
+        Returns:
+            bool: true or false 
         """
         d = np.linalg.norm(node.state - self.goal)
-        if d < 0.1:
+        if d < self.min_dist_to_goal:
             return True
         return False
-
-    @staticmethod
-    def get_path_len(path):
-        """
-        path: a list of coordinates
-
-        Returns: total length of the path
-        """
-        pathLen = 0
-        for i in range(1, len(path)):
-            pathLen += np.linalg.norm(path[i] - path[i - 1])
-
-        return pathLen
 
     def gen_final_course(self, goalind):
         """
