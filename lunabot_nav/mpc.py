@@ -1,8 +1,9 @@
+from os import stat
 import numpy as np
 from tf.transformations import euler_from_quaternion
 
 class MPC:
-    def __init__(self, g, k, w_linear, w_angular, w_goal, w_line, w_occupied, horizon_t):
+    def __init__(self, g, k, w_linear, w_angular, w_goal, w_line, w_occupied, horizon_t, dt):
         self.g = g
         self.k = k
         self.w_linear = w_linear
@@ -15,6 +16,7 @@ class MPC:
         self.goal = None
         self.robot_pos = None # [x, y, theta]
         self.horizon_t = horizon_t
+        self.dt = dt
 
     def __check_collision(self, robot_pos): #TODO check collision
         pass
@@ -55,35 +57,57 @@ class MPC:
             cost += self.w_occupied * self.__check_collision(robot_pos)
         return cost
 
-    def __calculate_model(self, prev_state, input): #TODO implement proper model
-        pass
+    def __calculate_model(self, state): #TODO implement proper model
+        positions = np.zeros(self.horizon_t, 3) #x, y, theta
+        current_pos = self.robot_pos
+        A = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+        for i in range(self.horizon_t):
+            #Adding new position
+            positions[i] = current_pos
+
+            B = np.array([[np.cos(current_pos[2]) * self.dt, 0], [np.sin(current_pos[2]) * self.dt, 0], [0, self.dt]]) #TODO unsure if this works
+
+            current_pos = A @ current_pos + B @ state[i]
+        return positions
 
     def calculate_velocity(self):
         if self.robot_pos == None or self.goal == None: #Cannot calculate w/o these
             return None
 
-        means = np.zeros(3, self.horizon_t) #x, y, theta
-        std_devs = np.ones(3, self.horizon_t)
+        means = np.zeros(self.horizon_t, 2) #v, omega
+        std_devs = np.ones(self.horizon_t, 2) #v, omega
         counter = 0
         states = {}
+        actions = {}
         while(counter < self.current_g):
-            random_states = np.random.normal(means, std_devs, self.current_g - counter)
-            for state in random_states:
-                states[state] = self.__calculate_cost(state)
-            states = dict(sorted(states.items(), key=lambda item: item[1])) #Sorting my cost
+            #Generating random velocities
+            random_velocities = np.random.normal(means, std_devs, self.current_g - counter)
+
+            #Generating new states and costs
+            for i in range(len(random_velocities)):
+                calculated_state = self.__calculate_cost(random_velocities[i])
+                states[calculated_state] = self.__calculate_cost(calculated_state)
+                actions[calculated_state] = random_velocities[i]
+            states = dict(sorted(states.items(), key=lambda item: item[1])) #Sorting the costs
             
             counter += self.k
             #Finding good states
             new_states = {}
+            new_actions = {}
             temp_counter = 0
             for key, value in states:
                 if temp_counter == counter:
                     break
                 temp_counter += 1
                 new_states[key] = value
+                new_actions[key] = actions[key]
             states = new_states
+            actions = new_actions
 
-            means = np.mean(states.keys())
-            std_devs = np.std(states.keys())
+            #Calculating new means
+            means = np.mean(new_actions.keys())
+            std_devs = np.std(new_actions.keys())
 
-        #TODO calculate velocities to return
+        #Returning velocities
+        best_state = list(states.keys())[0]
+        return [actions[best_state][0], actions[best_state][1]]
