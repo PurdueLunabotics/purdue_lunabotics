@@ -1,5 +1,4 @@
 import numpy as np
-import torch
 from tf.transformations import euler_from_quaternion
 
 class MPC:
@@ -23,13 +22,8 @@ class MPC:
     def __find_closest_point(self, robot_pos): #TODO find closest point on path
         pass
 
-    def update_grid(self, grid): #Takes in Occupancy Grid msg
-        self.grid = np.zeros((grid.info.width, grid.info.height))
-        idx = 0
-        for i in range(grid.info.width):
-            for j in range(grid.info.height):
-                grid[i][j] = grid.data[idx]
-                idx += 1
+    def update_grid(self, grid_msg): #Takes in Occupancy Grid msg
+        self.grid = np.array(grid_msg.data)
 
     def update_path(self, path): #Takes in Path msg
         self.path = np.zeros((len(path.poses), 2))
@@ -73,7 +67,7 @@ class MPC:
         counter = 0
         states = {}
         while(counter < self.current_g):
-            random_states = torch.normal(means, std_devs, self.current_g - counter)
+            random_states = np.random.normal(means, std_devs, self.current_g - counter)
             for state in random_states:
                 states[state] = self.__calculate_cost(state)
             states = dict(sorted(states.items(), key=lambda item: item[1])) #Sorting my cost
@@ -89,7 +83,7 @@ class MPC:
                 new_states[key] = value
             states = new_states
 
-            means = torch.mean(states.keys())
-            std_devs = torch.std(states.keys())
+            means = np.mean(states.keys())
+            std_devs = np.std(states.keys())
 
         #TODO calculate velocities to return
