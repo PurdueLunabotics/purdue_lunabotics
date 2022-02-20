@@ -40,7 +40,7 @@ int main(int argc, char** argv)
   spinner.start();
 
 	HCIScanner::ScanType type = HCIScanner::ScanType::Active;
-	HCIScanner::FilterDuplicates filter = HCIScanner::FilterDuplicates::Software;
+	HCIScanner::FilterDuplicates filter = HCIScanner::FilterDuplicates::Off;
 
 	log_level = LogLevels::Warning;
 	HCIScanner scanner(true, filter, type);
@@ -57,7 +57,7 @@ int main(int argc, char** argv)
 
 	int i=0;
   
-  ros::Rate loop(10);
+  	ros::Rate loop(10);
 
 	while (ros::ok()) {
 		//Check to see if there's anything to read from the HCI
@@ -94,8 +94,9 @@ int main(int argc, char** argv)
 					cout << "Non connectable" << endl;
 				else
 					cout << "Scan response" << endl;
-				for(const auto& uuid: ad.UUIDs)
+				for(const auto& uuid: ad.UUIDs) {
 					cout << "  Service: " << to_str(uuid) << endl;
+				}
 				if(ad.local_name)
 					cout << "  Name: " << ad.local_name->name << endl;
 				if(ad.rssi == 127)

@@ -2,22 +2,19 @@
 
 using namespace BLEPP;
 
-BTManager::BTManager(uint128_t UUID1_, uint128_t UUID2_, uint128_t UUID3_) 
+BTManager::BTManager(uint16_t UUID1_, uint16_t UUID2_, uint16_t UUID3_) 
 {
   //Turn provided UUID chars into UUIDs
-  bt_uuid128_create(&this->UUID1, UUID1_);
-  bt_uuid128_create(&this->UUID2, UUID2_);
-  bt_uuid128_create(&this->UUID3, UUID3_);
+  bt_uuid16_create(&this->UUID1, UUID1_);
+  bt_uuid16_create(&this->UUID2, UUID2_);
+  bt_uuid16_create(&this->UUID3, UUID3_);
+
   //Scan setup
   HCIScanner::ScanType type = HCIScanner::ScanType::Active;
   HCIScanner::FilterDuplicates filter = HCIScanner::FilterDuplicates::Off; //Needs testing
   HCIScanner scanner(true, filter, type);
   //Boilerplate code
   log_level = LogLevels::Warning;
-  HCIScanner scanner(true, filter, type);
-  //Catch the interrupt signal. If the scanner is not
-  //cleaned up properly, then it doesn't reset the HCI state.
-  signal(SIGINT, catch_function)
 
   //Probably this should send errors and results somewhere (this will be part of ROS wrapper)
   this->scanner = &scanner;

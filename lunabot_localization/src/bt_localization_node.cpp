@@ -10,8 +10,6 @@ ROS parameters:
 bt_UUID1 - UUID of tag 1
 bt_UUID2 - UUID of tag 2
 bt_UUID3 - UUID of tag 3
-
-
 */
 
 class BTLocalizationNode 
@@ -20,6 +18,7 @@ private:
     //Get settings from params
     std::unique_ptr<BTLocalization> bt;
 
+    ros::Subscriber calibrate_command_subscriber_;
     ros::Subscriber calibrate_command_subscriber_;
     ros::Publisher current_pos_publisher_;
     ros::Timer current_pos_timer_;
@@ -38,18 +37,18 @@ public:
 
       publish_current_pos_frequency_ = 2.0;
       //Get UUIDs from parameters, pass them down
-      uint128_t UUID1, UUID2, UUID3;
-      ros::param::get("~bt_UUID1", &UUID1);
-      ros::param::get("~bt_UUID2", &UUID2);
-      ros::param::get("~bt_UUID3", &UUID3);
-      //Get bluetooth tag locations
-      geometry_msgs::Point U, V, W;
-      ros::param::get("~tag1pos", &U);
-      ros::param::get("~tag2pos", &V);
-      ros::param::get("~tag3pos", &W);
-      bt.reset(new BTLocalization(UUID1, UUID2, UUID3, U, V, W));
+      int UUID1, UUID2, UUID3;
+      nh->getParam("~beac_UUID1", UUID1);
+      nh->getParam("~beac_UUID2", UUID2);
+      nh->getParam("~beac_UUID3", UUID3);
 
-      
+      //Get bluetooth tag locations in fixed reference frame (apriltag frame)
+      std::vector<double> U, V, W; 
+      nh->getParam("~beac1pos", U); // [x,y,z]
+      nh->getParam("~beac2pos", V);
+      nh->getParam("~beac3pos", W);
+
+      bt.reset(new BTLocalization((uint16_t) UUID1, (uint16_t) UUID2, (uint16_t) UUID3, U, V, W));
 
       current_pos_publisher_ = nh->advertise<geometry_msgs::PoseStamped>("current_pos", 10);
       current_pos_timer_ = nh->createTimer(ros::Duration(1.0 / publish_current_pos_frequency_), &BTLocalizationNode::publishCurrentPos, this);
@@ -73,7 +72,7 @@ public:
         current_pos_publisher_.publish(pose);
     }
 
-    void callbackCalibrate(geometry_msgs::Point btt1, geometry_msgs::Point btt2, geometry_msgs::Point btt3) //For calibrating strength of bluetooth tags
+    void apriltagCb(apriltag_ros::AprilTagDetectionArrayConstPtr msg) //For calibrating strength of bluetooth tags
     {
         //Get the node positions from parameters
         //Calculate ranges
@@ -81,7 +80,7 @@ public:
         float r2 = sqrt(btt2.x * btt2.x + btt2.y * btt2.y + btt2.z * btt2.z);
         float r3 = sqrt(btt3.x * btt3.x + btt3.y * btt3.y + btt3.z * btt3.z);
         //Calibrate each tag
-        bt.calibrate(r1, r2, r3);
+        bt->calibrate(r1, r2, r3);
     }
 
     void stop()

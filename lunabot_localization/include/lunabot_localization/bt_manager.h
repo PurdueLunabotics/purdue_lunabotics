@@ -37,7 +37,7 @@ struct btevent //Stores information when a given UUID is detected
 
 class BTManager {
   public:
-    BTManager(uint128_t UUID1_, uint128_t UUID2_, uint128_t UUID3_);
+    BTManager(uint16_t UUID1_, uint16_t UUID2_, uint16_t UUID3_);
     std::vector<btevent> getResults(); //Run this when you want to get scan results
     
   private:
