@@ -43,13 +43,10 @@ enum beac_id {
 
 class BeaconScannerNode {
 	private:
-		HCIScanner::ScanType type = HCIScanner::ScanType::Active;
-		HCIScanner::FilterDuplicates filter = HCIScanner::FilterDuplicates::Off;
-		HCIScanner scanner;
 		ros::NodeHandle* _nh;
-    	ros::Publisher scans_publisher_;
-		BLEPP::UUID _UUID1, _UUID2, _UUID3;
-		void process_scan(int beac_id, int8_t rssi, int16_t uuid, lunabot_msgs::BeaconScan* scan);
+    ros::Publisher scans_publisher_;
+    std::string _addr1, _addr2, _addr3;
+		void process_scan(int beac_id, int8_t rssi, lunabot_msgs::BeaconScan* scan);
 	public:
 		BeaconScannerNode(ros::NodeHandle* nh);
 		void scan();
