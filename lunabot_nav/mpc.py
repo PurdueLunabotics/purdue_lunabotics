@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 from os import stat
 import numpy as np
 from tf.transformations import euler_from_quaternion
@@ -21,8 +22,32 @@ class MPC:
     def __check_collision(self, robot_pos): #TODO check collision
         pass
 
-    def __find_closest_point(self, robot_pos): #TODO find closest point on path
-        pass
+    def __find_closest_distance(self, robot_pos):
+        path = self.path
+        if path == None:
+            return -1.0
+        p1 = [path.poses[0].pose.position.x, path.poses[0].pose.position.y]
+        dist = -1.0
+        for i in range(1, len(path.poses)):
+            p2 = [path.poses[i].pose.position.x, path.poses[i].pose.position.y]
+            #Building parametric between points (0 < t < 1)
+            y_vel = p2[1] - p1[1]
+            x_vel = p2[0] - p1[0]
+
+            x_pos = p1[0]
+            y_pos = p1[1]
+
+            t = (x_vel * (robot_pos[0] - x_pos) + y_vel * (robot_pos[1] - y_pos)) / (x_vel ** 2 + y_vel ** 2)
+            if t < 0:
+                t = 0
+            elif t > 1:
+                t = 1
+            
+            line_pos = [x_pos + t * x_vel, y_pos + t * y_vel]
+            temp_dist = (line_pos[0] - robot_pos[0]) ** 2 + (line_pos[1] - robot_pos[1]) ** 2 #Using squared since can just change weight later, saves computation
+            if dist == -1 or temp_dist < dist:
+                dist = temp_dist
+        return dist
 
     def update_grid(self, grid_msg): #Takes in Occupancy Grid msg
         self.grid = np.array(grid_msg.data)
@@ -52,12 +77,11 @@ class MPC:
             cost += self.w_angular * (robot_pos[2] - self.robot_pos[2]) ** 2
             cost += self.w_goal * ((self.goal[0] - robot_pos[0]) ** 2 + (self.goal[1] - robot_pos[1]) ** 2)
 
-            line_pos = self.__find_closest_point(robot_pos)
-            cost += self.w_line * ((line_pos[0] - robot_pos[0]) ** 2 + (line_pos[1] - robot_pos[1]) ** 2)
+            cost += self.w_line * self.__find_closest_distance(robot_pos)
             cost += self.w_occupied * self.__check_collision(robot_pos)
         return cost
 
-    def __calculate_model(self, state): #TODO implement proper model
+    def __calculate_model(self, state):
         positions = np.zeros(self.horizon_t, 3) #x, y, theta
         current_pos = self.robot_pos
         A = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
