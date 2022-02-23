@@ -36,9 +36,7 @@ def rotate(pts, rad, rotate_pt):
 
 
 class RRTStarPlanner:
-    def __init__(
-        self, disc_step=0.05, goal_sample_rate=5, max_iter=30
-    ):
+    def __init__(self, disc_step=0.05, goal_sample_rate=5, max_iter=30):
         """Args:
         disc_step (float, optional): [description]. Defaults to 0.05.
         goal_sample_rate (int, optional): . Defaults to 5.
@@ -256,7 +254,7 @@ class RRTStarPlanner:
         This sample may be invalid - if so, call generate_sample() again.
 
         Returns:
-            Node(state=np.array(dof)): random sample  
+            Node(state=np.array(dof)): random sample
         """
         if random.randint(0, 100) > self.goal_sample_rate:
             x_max = min(self.curr[0] + self.sample_window_h, self.maxheight)
@@ -279,10 +277,10 @@ class RRTStarPlanner:
         Checks whether node is within self.min_dist_to_goal of goal
 
         Args:
-            node (Node): location to check 
- 
+            node (Node): location to check
+
         Returns:
-            bool: true or false 
+            bool: true or false
         """
         d = np.linalg.norm(node.state - self.goal)
         if d < self.min_dist_to_goal:
@@ -381,7 +379,6 @@ class RRTStarPlanner:
 
         You will need to modify this for question 2 (if self.geom == 'circle') and question 3 (if self.geom == 'rectangle')
         """
-
         pos = node.state[0:2] - self.origin[0:2]
         translated_robot = self.footprint + pos  # maps to origin in 2d
         # robot bounding box = [x_min,y_min, x_max,y_max]
