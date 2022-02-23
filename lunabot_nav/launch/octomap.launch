@@ -1,0 +1,27 @@
+<launch>
+
+    <!-- Builds map --> 
+    <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
+        <param name="resolution" value="0.05" />
+        <param name="sensor_model/max_range" value="3.0" />
+        <param name="filter_speckles" value="true" />
+        <param name="pointcloud_min_z" type="double" value="0.0" />
+        <param name="pointcloud_max_z" type="double" value="0.8" />
+        <param name="occupancy_min_z" value="0.1" />
+        <param name="occupancy_max_z" value="0.5" />
+
+        <!-- Map frame id --> 
+        <param name="frame_id" type="string" value="map" />
+
+        <!-- Robot base_link frame id --> 
+        <param name="base_frame_id" type="string" value="base_link" />
+
+        <!-- maximum range to integrate (speedup!) -->
+        <param name="sensor_model/max_range" value="3.0" />
+
+        <!-- data source to integrate (PointCloud2) -->
+        <remap from="cloud_in" to="/d435/camera/depth/color/points" />
+        <remap from="cloud_in2" to="/cloud" />
+    </node>
+    
+</launch>

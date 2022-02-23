@@ -4,27 +4,35 @@
   <arg name="serial_no_t265"    			default="943222111167"/> 	
   <arg name="initial_reset"             default="false"/>
 
+  <!--The Bluetooth node requires root access to the low-level sockets using setcap.
+      As a security feature, this removes the LD_LIBRARY_PATH that other nodes need for accessing the shared libraries 
+      See: https://discourse.ros.org/t/is-it-a-good-practice-to-force-rpath-to-be-embedded-in-the-installed-targets/1335
+      and https://answers.ros.org/question/366380/ubuntu1804ros2-dashing-failed-to-load-entry-point-issue/?answer=366439#post-id-366439
+      -->
+
   <group ns="t265">
     <include file="$(find realsense2_camera)/launch/rs_t265.launch">
-      <param name="serial_no" type="str" value="$(arg serial_no_t265)" />
-      <param name="tf_prefix" type="str" value="t265" />
-      <param name="base_frame_id" type="str" value="t265_base" />
-      <param name="odom_frame_id" type="str" value="t265_odom" />
-      <arg name="initial_reset"         value="$(arg initial_reset)"/>
+      <arg name="serial_no" value="$(arg serial_no_t265)" />
+      <arg name="tf_prefix" value="t265" />
+      <arg name="initial_reset" value="$(arg initial_reset)"/>
     </include>
   </group>
 
   <group ns="d435">
     <include file="$(find realsense2_camera)/launch/rs_camera.launch">
-      <param name="serial_no" type="str" value="$(arg serial_no_d435)" />
-      <param name="tf_prefix" type="str" value="d435" />
-      <param name="base_frame_id" type="str" value="d435_base" />
-      <param name="odom_frame_id" type="str" value="d435_odom" />
-      <arg name="initial_reset"         value="$(arg initial_reset)"/>
+      <arg name="serial_no" value="$(arg serial_no_d435)" />
+      <arg name="tf_prefix" value="d435" />
+      <arg name="filters" value="disparity,decimation"/>
+      <arg name="enable_pointcloud" value="true"/>
+      <arg name="initial_reset" value="$(arg initial_reset)"/>
     </include>
   </group>
 
+  <!-- Image Processing -->
   <node pkg="image_proc" ns="/d435/camera/color/" type="image_proc" name="image_proc" args="image:=/d435/camera/color/image_raw"/>
+
+  <!-- base pose publisher -->
+  <node pkg="lunabot_localization" type="base_pose_manager" name="base_pose_manager"/>
 
   <!-- Apriltag detection -->
   <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" name="apriltag" output="screen">
