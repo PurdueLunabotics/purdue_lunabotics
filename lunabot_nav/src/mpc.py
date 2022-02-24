@@ -168,8 +168,7 @@ class MPC:
         means = np.zeros((self.horizon_t, 2))  # v, omega
         std_devs = np.ones((self.horizon_t, 2))  # v, omega
         counter = 0
-        rollout_costs = {}
-        rollout_actions = {}
+        rollout_states = [] #rollout, cost, action
         while counter < self.g:
             # Generating random velocities
             random_velocities = np.random.normal(
@@ -179,30 +178,16 @@ class MPC:
             # Generating new states and costs
             for i in range(len(random_velocities)):
                 rollout = self.__calculate_model(random_velocities[i])
-                rollout_costs[rollout] = self.__calculate_cost(rollout)
-                rollout_actions[rollout] = random_velocities[i]
-            rollout_costs = dict(
-                sorted(rollout_costs.items(), key=lambda item: item[1])
-            )  # Sorting the costs
+                rollout_states.append(rollout, self.__calculate_cost(rollout), random_velocities[i])
+            rollout_costs = sorted(rollout_costs, key=lambda item: item[1]) # Sorting the costs
 
             counter += self.k
             # Finding good states
-            new_states = {}
-            new_actions = {}
-            temp_counter = 0
-            for key, value in rollout_costs:
-                if temp_counter == counter:
-                    break
-                temp_counter += 1
-                new_states[key] = value
-                new_actions[key] = rollout_actions[key]
-            rollout_costs = new_states
-            rollout_actions = new_actions
+            states = states[:counter]
 
             # Calculating new means
-            means = np.mean(new_actions.keys())
-            std_devs = np.std(new_actions.keys())
+            means = np.mean(states[:,2])
+            std_devs = np.std(states[:,2])
 
         # Returning velocities
-        best_state = list(rollout_costs.keys())[0]
-        return [rollout_actions[best_state][0], rollout_actions[best_state][1]]
+        return [states[0][2][0], states[0][2][1]]
