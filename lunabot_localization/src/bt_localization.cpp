@@ -50,8 +50,17 @@ BTLocalization::BTLocalization(uint16_t UUID1_, uint16_t UUID2_, uint16_t UUID3_
 float BTLocalization::rssiConv(float s)
 {
     //Convert rssi to linear, positive = stronger format
-    //Dummy for now
-    return s;
+    //According to this: https://www.metageek.com/training/resources/understanding-rssi/
+    //And this: https://community.intel.com/t5/Intel-Makers/Reading-Bluetooth-RSSI-in-LE-not-BR-EDR-Values/td-p/569620
+    //RSSI ranges from ~-100 to ~-30 for BLE
+    //In this basic format, -30 is the best possible signal, while -100 is the worst plausible signal
+    //The unit is generally assumed to be dB
+    //So for the "base" unit, we will add 30
+    s += 30.0;
+    //Then divide it by 10 to get the power
+    double p = s / 10;
+    //Raise to the power of 10 to get a "real power value" on a on a linear scale
+    return (float) std::pow(10, p);
 }
 
 float BTLocalization::fastInvSqrt(float x) 
