@@ -412,6 +412,8 @@ class RRTStarPlanner:
         if self.goalfound:
             goalind = None
             mincost = float("inf")
+            print(self.solution_set)
+            print(self.node_list)
             for idx in self.solution_set:
                 cost = self.node_list[idx].cost + np.linalg.norm(
                     self.node_list[idx].state - self.goal
