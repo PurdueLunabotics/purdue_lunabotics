@@ -47,8 +47,8 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/lunabot_planning_node.cpp)
 
-add_executable(laser_to_point_cloud src/slam/laser_to_point_cloud.cpp)
-target_link_libraries(laser_to_point_cloud ${catkin_LIBRARIES})
+#add_executable(laser_to_point_cloud src/slam/laser_to_point_cloud.cpp)
+#target_link_libraries(laser_to_point_cloud ${catkin_LIBRARIES})
 
 #############
 ## Testing ##

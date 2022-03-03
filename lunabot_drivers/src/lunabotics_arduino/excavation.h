@@ -14,8 +14,8 @@ namespace excavation {
 		const uint8_t MAX_SPEED = 1;
 
 		// excavation motor indices
-		const int drive_pin_ = 18; 
-		const int direction_pin_ = 19;
+		const int drive_pin_ = 2; 
+		const int direction_pin_ = 3;
 }
 
 #endif

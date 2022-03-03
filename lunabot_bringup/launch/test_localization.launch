@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+  <include file="$(find lunabot_bringup)/launch/view_tf.launch" />
+  <node pkg="rosbag" type="play" name="player" output="screen" args="--clock $(find lunabot_bringup)/bags/localization_testing.bag" />
+</launch>
