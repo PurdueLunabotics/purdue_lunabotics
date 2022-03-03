@@ -1,4 +1,4 @@
-#include <lunabot_bt/scan.h>
+#include <lunabot_bt/scan_node.h>
 
 BeaconScannerNode::BeaconScannerNode(ros::NodeHandle* nh) : _nh(nh) {
 	signal(SIGINT, catch_function);

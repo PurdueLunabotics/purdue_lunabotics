@@ -44,8 +44,8 @@ enum beac_id {
 class BeaconScannerNode {
 	private:
 		ros::NodeHandle* _nh;
-    ros::Publisher scans_publisher_;
-    std::string _addr1, _addr2, _addr3;
+    	ros::Publisher scans_publisher_;
+    	std::string _addr1, _addr2, _addr3;
 		void process_scan(int beac_id, int8_t rssi, lunabot_msgs::BeaconScan* scan);
 	public:
 		BeaconScannerNode(ros::NodeHandle* nh);

@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/lunabot_bt/include/**",
+                "~/catkin_ws/devel/lib",
+                "~/catkin_ws/devel/include",
+                "~/catkin_ws/src/purdue_lunabotics/**",
+                "/opt/ros/noetic/include",
+                "/opt/ros/noetic/include/ros",
+                "/usr/include/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}

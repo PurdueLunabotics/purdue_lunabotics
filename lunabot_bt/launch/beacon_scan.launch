@@ -1,4 +1,5 @@
 <launch>
     <rosparam file="$(find lunabot_bt)/config/beacons.yml" />
     <node name="scanner" pkg="lunabot_bt" type="scan_node" output="screen" />
+
 </launch>

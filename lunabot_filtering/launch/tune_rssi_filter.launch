@@ -1,0 +1,8 @@
+<launch>
+    <node name="filter" pkg="lunabot_filtering" type="rssi_filter_node" output="screen" />
+    <include file="$(find lunabot_bringup)/launch/play_bag.launch">
+        <arg name="bag_name" value="bt_test"/>
+    </include>
+    <node pkg="rosbag" type="record" name="recorder" output="screen" args="-a -O $(find lunabot_bringup)/bags/filtered_bt_test.bag" />
+    <node name="plotter" pkg="plotjuggler" type="plotjuggler" output="screen" />
+</launch>
