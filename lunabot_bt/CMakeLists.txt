@@ -35,10 +35,10 @@ target_link_libraries(${PROJECT_NAME}_scan_node
   ${BLEPP_LIBRARIES}
 )
 
-add_executable(${PROJECT_NAME}_bt_test src/bt_test.cpp)
-set_target_properties(${PROJECT_NAME}_bt_test PROPERTIES OUTPUT_NAME bt_test PREFIX "")
-add_dependencies(${PROJECT_NAME}_bt_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME}_bt_test
+add_executable(${PROJECT_NAME}_scan_test src/scan_test.cpp)
+set_target_properties(${PROJECT_NAME}_scan_test PROPERTIES OUTPUT_NAME scan_test PREFIX "")
+add_dependencies(${PROJECT_NAME}_scan_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME}_scan_test
   ${catkin_LIBRARIES}
   ${BLEPP_LIBRARIES}
 )

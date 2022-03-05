@@ -72,30 +72,26 @@ void BeaconScannerNode::scan() {
           lunabot_msgs::BeaconScan scan;
           scan.id = 0; // invalid scan
           if(ad.address == _addr1) {
-            cout << "scan1" << "\n";
             process_scan(BEAC_ID1, ad.rssi, &scan);
           }
           else if(ad.address == _addr2) {
-            cout << "scan2" << "\n";
             process_scan(BEAC_ID2, ad.rssi, &scan);
           }
           else if(ad.address == _addr3) {
-            cout << "scan3" << "\n";
             process_scan(BEAC_ID3, ad.rssi, &scan);
           }
           if(scan.id != 0) {
-            cout << "setting" << "\n";
             beacon_scans.scans[scan.id - 1] = scan;
             is_set |= 1 << (scan.id - 1);
           }
       }
 
-      if(is_set & mask == mask) {
+      if((is_set & mask) == mask) {
         cout << "publishing" << "\n";
         
 		    beacon_scans.stamp = ros::Time::now();
         scans_publisher_.publish(beacon_scans);
-        //is_set = 0b000;
+        is_set = 0b000;
       }
     }
 	}
