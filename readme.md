@@ -49,5 +49,6 @@ source ~/catkin_ws/devel/setup.bash # or .zsh if you use a zsh terminal
 
 5. Check out specific package readmes in:
 
+- `lunabot_bringup`
 - `lunabot_localization`
 - `lunabot_nav`

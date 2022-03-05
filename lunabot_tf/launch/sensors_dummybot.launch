@@ -4,5 +4,5 @@
 
 	<node pkg="tf" type="static_transform_publisher" name="d435_broadcaster" args="0.000 0.229 0.482 0 0 0 1 base_link d435_link 100" />
 
-<node pkg="tf" type="static_transform_publisher" name="laser_broadcaster" args="0.414 -0.124 0.2515 0.1530459 0.1530459 0.6903455 0.6903455 base_link laser 100" />
+	<node pkg="tf" type="static_transform_publisher" name="laser_broadcaster" args="0.414 -0.124 0.2515 0.1530459 0.1530459 0.6903455 0.6903455 base_link laser 100" />
 </launch>

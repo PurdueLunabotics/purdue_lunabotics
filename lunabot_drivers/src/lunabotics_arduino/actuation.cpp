@@ -29,7 +29,7 @@ namespace actuation {
 	}
 
 	// Negative value - move DOWN, 0 - STOP, positive value - move UP, range - [-1,1]
-	void run_actuation(const lunabotics_robot::Actuation& actuation, ros::NodeHandle nh) {
+	void run_actuation(const lunabot_msgs::Actuation& actuation, ros::NodeHandle nh) {
 		int lead_screw_speed = map(actuation.lead_screw_actuation, -MAX_SPEED, MAX_SPEED, -255, 255); // Range from [-255,255]
 		int angle_speed = map(actuation.angle_actuation, -MAX_SPEED, MAX_SPEED, -255, 255); // Range from [-255,255]
 

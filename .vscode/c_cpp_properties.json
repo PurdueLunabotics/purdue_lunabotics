@@ -10,7 +10,8 @@
                 "~/catkin_ws/src/purdue_lunabotics/**",
                 "/opt/ros/noetic/include",
                 "/opt/ros/noetic/include/ros",
-                "/usr/include/**"
+                "/usr/include/**",
+                "~/Arduino/libraries/ros_lib"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
