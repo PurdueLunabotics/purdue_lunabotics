@@ -1,7 +1,7 @@
 #ifndef MPC_H
 #define MPC_H
 
-#include <ros.h>
+#include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <nav_msgs/Odometry.h>
@@ -15,7 +15,6 @@
 
 class MPC {
 private:
-    ros::NodeHandle nh;
     ros::Publisher velocity_pub;
     ros::Subscriber grid_sub;
     ros::Subscriber path_sub;
@@ -46,11 +45,11 @@ private:
     Eigen::MatrixXd std_dev(std::vector<std::pair<Eigen::MatrixXd, double>>);
 
 public:
-    MPC(int rollout_count, int top_rollouts, int iterations, double w_linear, double w_angular, double w_goal, double w_line, double w_occupied, int horizon_length, double delta_time);
-    void update_grid(nav_msgs::OccupancyGrid grid);
-    void update_path(nav_msgs::Path path);
-    void update_goal(geometry_msgs::PoseStamped pose);
-    void update_robot_pos(nav_msgs::Odometry odometry);
+    MPC(ros::NodeHandle* nh, int rollout_count, int top_rollouts, int iterations, double w_linear, double w_angular, double w_goal, double w_line, double w_occupied, int horizon_length, double delta_time);
+    void update_grid(const nav_msgs::OccupancyGrid& grid);
+    void update_path(const nav_msgs::Path& path);
+    void update_goal(const geometry_msgs::PoseStamped& pose);
+    void update_robot_pos(const nav_msgs::Odometry& odometry);
     void calculate_velocity();
 };
 

@@ -48,6 +48,9 @@
   <depend>octomap_server</depend>
   <depend>octomap_mapping</depend>
   <depend>octomap</depend>
+  <depend>roscpp</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
   <!-- Use doc_depend for packages you need only for building documentation: -->

@@ -1,13 +1,13 @@
-#include "mpc.h"
+#include <lunabot_nav/mpc.h>
 
-MPC::MPC(int rollout_count, int top_rollouts, int iterations, double w_linear, double w_angular, double w_goal, double w_line, double w_occupied, int horizon_length, double delta_time) {
-    this->velocity_pub = this->nh.advertise<geometry_msgs::TwistStamped>("lunabot_nav/cmd_vel", 10);
+MPC::MPC(ros::NodeHandle* nh, int rollout_count, int top_rollouts, int iterations, double w_linear, double w_angular, double w_goal, double w_line, double w_occupied, int horizon_length, double delta_time) {
+    this->velocity_pub = nh->advertise<geometry_msgs::TwistStamped>("lunabot_nav/cmd_vel", 10);
 
     //TODO find names of topics
-    this->grid_sub = this->nh.subscribe("grid", 10, &MPC::update_grid, this);
-    this->path_sub = this->nh.subscribe("path", 10, &MPC::update_path, this);
-    this->goal_sub = this->nh.subscribe("goal", 10, &MPC::update_goal, this);
-    this->robot_pos_sub = this->nh.subscribe("robot_pos", 10, &MPC::update_robot_pos, this);
+    this->grid_sub = nh->subscribe("/projected_map", 10, &MPC::update_grid, this);
+    this->path_sub = nh->subscribe("/lunabot_nav/path_generator", 10, &MPC::update_path, this);
+    this->goal_sub = nh->subscribe("/goal", 10, &MPC::update_goal, this);
+    this->robot_pos_sub = nh->subscribe("/odom", 10, &MPC::update_robot_pos, this);
 
     this->rollout_count = rollout_count;
     this->top_rollouts = top_rollouts;
@@ -23,6 +23,7 @@ MPC::MPC(int rollout_count, int top_rollouts, int iterations, double w_linear, d
 
 bool MPC::check_collision(Eigen::RowVectorXd pos) {
     //TODO finish or use Raghava's Code
+    return false;
 }
 
 double MPC::find_closest_distance(Eigen::RowVectorXd pos) { 
@@ -65,11 +66,11 @@ double MPC::find_closest_distance(Eigen::RowVectorXd pos) {
     return min_dist;
 }
 
-void MPC::update_grid(nav_msgs::OccupancyGrid grid) {
+void MPC::update_grid(const nav_msgs::OccupancyGrid& grid) {
     //TODO format based on what collision needs
 }
 
-void MPC::update_path(nav_msgs::Path path) {
+void MPC::update_path(const nav_msgs::Path& path) {
     this->path.clear();
     for(int i = 0; i < path.poses.size(); ++i) {
         geometry_msgs::Point position = path.poses[i].pose.position;
@@ -77,18 +78,22 @@ void MPC::update_path(nav_msgs::Path path) {
     }
 }
 
-void MPC::update_goal(geometry_msgs::PoseStamped goal) {
+void MPC::update_goal(const geometry_msgs::PoseStamped& goal) {
+    // ROS_INFO("GOAL");
     geometry_msgs::Point position = goal.pose.position;
     this->goal = {position.x, position.y};
 }
 
-void MPC::update_robot_pos(nav_msgs::Odometry odometry) {
+void MPC::update_robot_pos(const nav_msgs::Odometry& odometry) {
+    // ROS_INFO("ROBOT_POS");
     geometry_msgs::Point position = odometry.pose.pose.position;
-    this->robot_pos = {position.x, position.y};
+    this->robot_pos = {position.x, position.y, odometry.twist.twist.angular.z};
 }
 
 void MPC::publish_velocity(double linear, double angular) {
     geometry_msgs::TwistStamped twist;
+    twist.header.frame_id = "base_link";
+    twist.header.stamp = ros::Time::now();
     twist.twist.linear.x = linear;
     twist.twist.angular.z = angular;
     //TODO Stamping stuff idk how it works
@@ -151,13 +156,13 @@ double MPC::calculate_cost(Eigen::MatrixXd rollout) {
         cost += this->w_angular * (position(0) - robot_pos[0]) * (position(0) - robot_pos[0]);
         cost += this->w_goal * ((position(0) - goal[0]) * (position(0) - goal[0]) + (position(1) - goal[1]) * (position(1) - goal[1]));
         cost += this->w_line * find_closest_distance(position);
-        cost += this->w_occupied * check_collision(position);
+        //cost += this->w_occupied * check_collision(position);
     }
     return cost;
 }
 
 Eigen::MatrixXd MPC::calculate_model(Eigen::MatrixXd actions) {
-    Eigen::VectorXd current_pos(3); //3 x 1 matrix
+    Eigen::VectorXd current_pos(3); //3 x 1 mat
     current_pos << this->robot_pos[0], this->robot_pos[1], this->robot_pos[2];
     Eigen::MatrixXd A(3, 3);
     A << 
@@ -186,6 +191,10 @@ bool comparator(std::pair<Eigen::MatrixXd, double> a, std::pair<Eigen::MatrixXd,
 }
 
 void MPC::calculate_velocity() {
+    if(this->robot_pos.empty() || this->path.empty() || this->goal.empty()) {
+        ROS_INFO("Waiting for Data");
+        return;
+    }
     int horizon_length = this-> horizon_length;
     Eigen::MatrixXd means = Eigen::MatrixXd::Zero(horizon_length, 2); //v, omega
     Eigen::MatrixXd std_devs = Eigen::MatrixXd::Ones(horizon_length, 2); //v, omega
@@ -212,5 +221,20 @@ void MPC::calculate_velocity() {
             means = mean(top_rollouts);
             std_devs = std_dev(top_rollouts);
         }
+    }
+}
+
+int main(int argc, char** argv) {
+    ros::init(argc, argv, "mpc_node");
+    ros::NodeHandle nh;
+    double frequency = 20;
+
+    MPC mpc(&nh, 1000, 10, 100, 0.1, 0.1, 0.1, 0.1, 0.9, 5, 1.0/frequency);
+
+    ros::Rate rate(frequency);
+    while(ros::ok()) {
+        ros::spinOnce();
+        mpc.calculate_velocity();
+        rate.sleep();
     }
 }
