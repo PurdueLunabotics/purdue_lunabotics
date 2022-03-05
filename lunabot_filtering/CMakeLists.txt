@@ -19,10 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
 ###################################
 
 catkin_package(
-  INCLUDE_DIRS include
-#  LIBRARIES lunabot_filtering
   CATKIN_DEPENDS lunabot_msgs nav_msgs roscpp std_msgs
-#  DEPENDS system_lib
 )
 
 ###########
@@ -32,7 +29,6 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -66,7 +62,6 @@ set_target_properties(${PROJECT_NAME}_rssi_filter_node PROPERTIES OUTPUT_NAME rs
 add_dependencies(${PROJECT_NAME}_rssi_filter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}_rssi_filter_node
   ${catkin_LIBRARIES}
-  ${BLEPP_LIBRARIES}
 )
 
 #############
