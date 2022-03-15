@@ -5,41 +5,60 @@
 
 <gazebo>
   <plugin filename="libgazebo_ros_control.so" name="control"/>
+  <plugin name="skid_steer_drive_controller" filename="libskid_steer_drive.so">
+    <updateRate>100.0</updateRate>
+    <robotNamespace>/</robotNamespace>
+    <leftFrontJoint>left_back_rev</leftFrontJoint>
+    <rightFrontJoint>right_back_rev</rightFrontJoint>
+    <leftRearJoint>left_front_rev</leftRearJoint>
+    <rightRearJoint>right_front_rev</rightRearJoint>
+    <wheelDiameter>0.4</wheelDiameter>
+    <robotBaseFrame>base_link</robotBaseFrame>
+    <torque>35</torque>
+    <topicName>cmd_vel</topicName>
+    <broadcastTF>true</broadcastTF>
+  </plugin>
 </gazebo>
+
 <gazebo reference="base_link">
   <material>${body_color}</material>
-  <mu1>0.2</mu1>
-  <mu2>0.2</mu2>
-  <selfCollide>true</selfCollide>
   <gravity>true</gravity>
 </gazebo>
 
-<gazebo reference="wheel_right_front_1">
+<gazebo reference="right_front">
   <material>${body_color}</material>
-  <mu1>0.2</mu1>
-  <mu2>0.2</mu2>
-  <selfCollide>true</selfCollide>
+  <mu1 value="1.0"/>
+  <mu2 value="1.0"/>
+  <kp  value="10000000.0" />
+  <kd  value="1.0" />
+  <fdir1 value="1 0 0"/>
 </gazebo>
 
-<gazebo reference="wheel_1_left_front_1">
+<gazebo reference="left_front">
   <material>${body_color}</material>
-  <mu1>0.2</mu1>
-  <mu2>0.2</mu2>
-  <selfCollide>true</selfCollide>
+  <mu1 value="1.0"/>
+  <mu2 value="1.0"/>
+  <kp  value="10000000.0" />
+  <kd  value="1.0" />
+  <fdir1 value="1 0 0"/>
 </gazebo>
 
-<gazebo reference="wheel_left_back_1">
+<gazebo reference="left_back">
   <material>${body_color}</material>
-  <mu1>0.2</mu1>
-  <mu2>0.2</mu2>
-  <selfCollide>true</selfCollide>
+  <mu1 value="1.0"/>
+  <mu2 value="1.0"/>
+  <kp  value="10000000.0" />
+  <kd  value="1.0" />
+  <fdir1 value="1 0 0"/>
 </gazebo>
 
-<gazebo reference="wheel_right_back_1">
+<gazebo reference="right_back">
   <material>${body_color}</material>
-  <mu1>0.2</mu1>
-  <mu2>0.2</mu2>
-  <selfCollide>true</selfCollide>
+  <mu1 value="1.0"/>
+  <mu2 value="1.0"/>
+  <kp  value="10000000.0" />
+  <kd  value="1.0" />
+  <fdir1 value="1 0 0"/>
 </gazebo>
 
 </robot>

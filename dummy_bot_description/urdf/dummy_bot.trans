@@ -1,45 +1,45 @@
 <?xml version="1.0" ?>
 <robot name="dummy_bot" xmlns:xacro="http://www.ros.org/wiki/xacro" >
 
-<transmission name="Rev1_tran">
+<transmission name="right_front_rev_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Rev1">
+  <joint name="right_front_rev">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Rev1_actr">
+  <actuator name="right_front_rev_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Rev2_tran">
+<transmission name="left_front_rev_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Rev2">
+  <joint name="left_front_rev">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Rev2_actr">
+  <actuator name="left_front_rev_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Rev3_tran">
+<transmission name="left_back_rev_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Rev3">
+  <joint name="left_back_rev">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Rev3_actr">
+  <actuator name="left_back_rev_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
 </transmission>
 
-<transmission name="Rev4_tran">
+<transmission name="right_back_rev_tran">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="Rev4">
+  <joint name="right_back_rev">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
   </joint>
-  <actuator name="Rev4_actr">
+  <actuator name="right_back_rev_actr">
     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     <mechanicalReduction>1</mechanicalReduction>
   </actuator>
