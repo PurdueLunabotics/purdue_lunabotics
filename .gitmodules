@@ -1,0 +1,3 @@
+[submodule "lunabot_gazebo"]
+	path = lunabot_gazebo
+	url = https://github.com/PurdueLunabotics/lunabot_gazebo
