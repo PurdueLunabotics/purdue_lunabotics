@@ -7,7 +7,7 @@
 	<!-- Gazebo specific options -->
 	<arg name="gazebo_gui" default="true"/>
 	<arg name="verbose" default="false"/>
-	<arg name="debug" default="true"/>
+	<arg name="debug" default="false"/>
 	<arg name="paused" default="false"/>
 
 	<!-- push robot_description to factory and spawn robot in gazebo -->
