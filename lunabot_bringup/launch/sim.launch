@@ -1,25 +1,28 @@
 <?xml version="1.0"?>
 <launch>
   	<include file="$(find dummy_bot_description)/launch/display.launch" />
-  	<arg name="world_name" default="$(find lunabot_gazebo)/worlds/arena.world"/>
-  	<arg name="initial_pose" default="-x 1.0 -y 0 -z 0 -R 0 -P 0 -Y 3.14"/>
+  	<arg name="world_name" default="$(find mining_arena_gazebo)/worlds/arena.world"/>
+  	<arg name="initial_pose" default="-x 1.0 -y 0 -z 0"/>
+  	<arg name="model" default="$(find dummy_bot_description)/urdf/dummy_bot.xacro"/>
 
 	<!-- Gazebo specific options -->
 	<arg name="gazebo_gui" default="true"/>
 	<arg name="verbose" default="false"/>
 	<arg name="debug" default="false"/>
 	<arg name="paused" default="false"/>
+	<arg name="manager" default="standalone_nodelet"/>
 
-	<!-- push robot_description to factory and spawn robot in gazebo -->
-	<node name="spawn_gazebo_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model robot $(arg initial_pose)"
-		respawn="false" output="screen" />
+  	<param command="$(find xacro)/xacro $(arg model)" name="robot_description"/>
+	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
 
-	<!-- startup simulated world -->
-	<include file="$(find gazebo_ros)/launch/empty_world.launch" >
+	<include file="$(find mining_arena_gazebo)/launch/gazebo.launch">
 		<arg name="world_name" value="$(arg world_name)"/>
 		<arg name="paused" value="$(arg paused)"/>
-		<arg name="gui" value="$(arg gazebo_gui)"/>
+		<arg name="gazebo_gui" value="$(arg gazebo_gui)"/>
 		<arg name="verbose" value="$(arg verbose)"/>
 		<arg name="debug" value="$(arg debug)"/>
+		<arg name="initial_pose" value="$(arg initial_pose)"/>
 	</include>
+
 </launch>

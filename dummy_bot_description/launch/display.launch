@@ -1,7 +1,0 @@
-<launch>
-  <arg default="$(find dummy_bot_description)/urdf/dummy_bot.xacro" name="model"/>
-  <arg default="true" name="gui"/>
-  <arg default="$(find dummy_bot_description)/launch/urdf.rviz" name="rvizconfig"/>
-  <param command="$(find xacro)/xacro $(arg model)" name="robot_description"/>
-  <node args="-d $(arg rvizconfig)" name="rviz" pkg="rviz" required="true" type="rviz"/>
-</launch>
