@@ -3,9 +3,9 @@
 Global path planner using RRTstar algorithm
 author: Raghava Uppuluri, code adapted from Ahmed Qureshi and AtsushiSakai(@Atsushi_twi)
 """
+import logging
 logging.getLogger("matplotlib").setLevel(logging.WARNING)
 import copy
-import logging
 import math
 import random
 import time
