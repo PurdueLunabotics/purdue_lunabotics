@@ -36,9 +36,8 @@ G1 = [
 class RRTStarTest(unittest.TestCase):
     def setUp(self):
 
-        viz = os.environ.get("VISUALIZE") == 1
         self.planner = RRTStarPlanner(
-            visualize=viz, max_iter=50, goal_sample_rate=10, DISCRETIZATION_STEP=0.1
+            max_iter=50, goal_sample_rate=10, DISCRETIZATION_STEP=0.1
         )
         resolution = 0.1
         self.planner.set_grid_data(np.array(G1).flatten(), resolution, 5, 5)
@@ -67,6 +66,12 @@ class RRTStarTest(unittest.TestCase):
         end = Node(np.array([0.4, 0.4]))
         success, _ = self.planner.steer_to(end, start)
         self.assertFalse(success, "diagonal false")
+        logger.debug("diagonal false")
+
+        start = Node(np.array([0.2, 0.2]))
+        end = Node(np.array([0.4, 0.4]))
+        success, _ = self.planner.steer_to(end, start)
+        self.assertFalse(success, "another diagonal false")
         logger.debug("diagonal false")
 
         start = Node(np.array([0, 0]))

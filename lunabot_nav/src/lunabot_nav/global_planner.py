@@ -4,20 +4,21 @@ Global path planner using RRTstar algorithm
 author: Raghava Uppuluri, code adapted from Ahmed Qureshi and AtsushiSakai(@Atsushi_twi)
 """
 import logging
-logging.getLogger("matplotlib").setLevel(logging.WARNING)
 import copy
 import math
 import random
 import time
 
-import matplotlib.pyplot as plt
 import numpy as np
+
+import os
+if os.environ.get("MPL_VISUALIZE") == '1':
+    from lunabot_nav.utils import visualize
 
 DOF = 2
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
 
 class Node:
     """Node class"""
@@ -36,7 +37,6 @@ class Node:
 class RRTStarPlanner:
     def __init__(
         self,
-        visualize,
         goal_sample_rate=10,
         max_iter=100,
         GAMMA=10,
@@ -58,7 +58,7 @@ class RRTStarPlanner:
         self.goal = None
         self.start = None
         self.node_list = []
-        self.visualize_path = visualize
+        self.visualize = os.environ.get('MPL_VISUALIZE') == '1'
 
         self.min_dist_to_goal = 0.1
         self.GAMMA = GAMMA
@@ -101,10 +101,10 @@ class RRTStarPlanner:
         self.start = Node(start)
         self.goal = Node(goal)
         if self.grid is None:
-            print("Occupancy grid not defined yet...")
+            logger.info("Occupancy grid not defined yet...")
             return
 
-        print("planning")
+        logger.info("planning")
         plan_start = time.perf_counter()
         self.node_list = [self.start]
 
@@ -142,14 +142,14 @@ class RRTStarPlanner:
                 if self.is_near_goal(new_node):
                     self.solution_set.add(newNodeIndex)
                     self.goalfound = True
-                if self.visualize_path:
-                    self.visualize(rnd.state)
+                if self.visualize:
+                    visualize(self,rnd.state)
 
         path = self.get_path_to_goal()
         if path is not None:
             plan_time = time.perf_counter() - plan_start
-            print("plan time: {}".format(plan_time))
-        print("path not found")
+            logger.info("plan time: %.3f",plan_time)
+        logger.info("path not found")
         self.planner_cleanup()
         return path
 
@@ -336,7 +336,7 @@ class RRTStarPlanner:
 
         return minind
 
-    def __cspace_to_grid(self, state):
+    def cspace_to_grid(self, state):
         """Converts an np.array to a discretized index in the occ grid
 
         Args:
@@ -370,7 +370,7 @@ class RRTStarPlanner:
         Returns:
             bool: Returns True if in Collision and False otherwise
         """
-        uv_ind = self.__cspace_to_grid(node.state)
+        uv_ind = self.cspace_to_grid(node.state)
         flat_ind = self.__to_flat(uv_ind)
         logger.debug("flat_ind: %s", flat_ind)
         if flat_ind < 0 or flat_ind >= len(self.grid):
@@ -397,51 +397,3 @@ class RRTStarPlanner:
             return self.gen_final_course(goalind)
         else:
             return None
-
-    def visualize(self, rnd):
-        """Visualizes obstacles, self.node_list, self.goal, self.start at step in self.plan
-
-        Args:
-            rnd (np.array): randomly sampled state at step in self.plan
-        """
-
-        plt.clf()
-        grid = self.grid.copy().reshape(self.grid_height, self.grid_width)
-        plt.grid(True)
-        obs = np.nonzero(grid > 0.5)
-        plt.scatter(obs[0], obs[1], marker="o")
-
-        for node in self.node_list:
-            if node.parent is not None:
-                if node.state is not None:
-                    edge = np.array(
-                        [
-                            [node.state[0], node.state[1]],
-                            [
-                                self.node_list[node.parent].state[0],
-                                self.node_list[node.parent].state[1],
-                            ],
-                        ]
-                    )
-                    edge = self.__cspace_to_grid(edge)
-                    plt.plot(edge[:, 0], edge[:, 1], "-g")
-
-        if self.goalfound:
-            path = self.get_path_to_goal()
-            if path is not None:
-                path = np.array(path)
-                path = self.__cspace_to_grid(path)
-                plt.plot(path[:, 0], path[:, 1], "-r")
-
-        if rnd is not None:
-            rnd = self.__cspace_to_grid(rnd)
-            plt.plot(rnd[0], rnd[1], "^k")
-
-        start = self.__cspace_to_grid(self.start.state)
-        goal = self.__cspace_to_grid(self.goal.state)
-
-        plt.plot(start[0], start[1], "xb")
-        plt.plot(goal[0], goal[1], "xb")
-        plt.axis("equal")
-        plt.axis([0, self.grid_height, 0, self.grid_width])
-        plt.pause(0.01)
