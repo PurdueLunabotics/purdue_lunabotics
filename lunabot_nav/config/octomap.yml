@@ -1,0 +1,11 @@
+resolution: 0.05
+filter_speckles: true
+pointcloud_min_z: 0.0
+pointcloud_max_z: 0.8
+occupancy_min_z: 0.1
+occupancy_max_z: 0.5
+frame_id: "map"
+base_frame_id: "base_link"
+sensor_model:
+  max_range: 3.0
+  hit: 0.9
