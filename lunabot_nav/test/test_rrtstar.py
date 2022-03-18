@@ -41,7 +41,7 @@ class RRTStarTest(unittest.TestCase):
             visualize=viz, max_iter=50, goal_sample_rate=10, DISCRETIZATION_STEP=0.1
         )
         resolution = 0.1
-        self.planner.set_grid_data(np.array(G1), resolution, 5, 5)
+        self.planner.set_grid_data(np.array(G1).flatten(), resolution, 5, 5)
 
     # Testing steering and collision testing
     def test_steer_to(self):
@@ -96,14 +96,15 @@ class RRTStarTest(unittest.TestCase):
 
     def test_rrtstar_harder(self):
         self.planner.GAMMA = 20
-        grid = np.zeros((200, 200))
+        dims = [200,200]
+        grid = np.zeros(dims)
         resolution = 0.1
         lower, upper = [50, 50], [70, 70]
         grid[lower[0] : upper[0] + 1, lower[1] : upper[1] + 1] = 1
 
         lower, upper = [20, 10], [50, 70]
         grid[lower[0] : upper[0] + 1, lower[1] : upper[1] + 1] = 1
-        self.planner.set_grid_data(grid, resolution, 200, 200)
+        self.planner.set_grid_data(grid.flatten(), resolution, *dims)
         start = np.array([1, 1])
         end = np.array([10, 10])
 

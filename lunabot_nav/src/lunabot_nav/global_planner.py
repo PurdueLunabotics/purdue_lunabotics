@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-ROS Node Class for global path planning using RRTstar algorithm 
+Global path planner using RRTstar algorithm 
 author: Raghava Uppuluri, code adapted from Ahmed Qureshi and AtsushiSakai(@Atsushi_twi)
 """
 import copy
@@ -38,15 +38,19 @@ class RRTStarPlanner:
     def __init__(
         self,
         visualize,
-        goal_sample_rate=5,
-        max_iter=1000,
-        GAMMA=2,
-        DISCRETIZATION_STEP=0.01,
+        goal_sample_rate=10,
+        max_iter=100,
+        GAMMA=10,
+        DISCRETIZATION_STEP=0.1,
     ):
-        """Args:
-        disc_step (float, optional): [description]. Defaults to 0.05.
-        goal_sample_rate (int, optional): . Defaults to 5.
-        max_iter (int, optional): Max iterations. Defaults to 100.
+        """Implements RRT*, a sampling-based planner 
+
+        Args:
+            visualize (bool): If True, visualize planning using matplotlib 
+            goal_sample_rate (int, optional): How often the sampler will sample the goal state. Defaults to 10.
+            max_iter (int, optional): Max iterations of the planning loop to run. Defaults to 100.
+            GAMMA (int, optional): Hyperparameter that determines nearest nodes to randomly sample node that will be rewired. Defaults to 10.
+            DISCRETIZATION_STEP (float, optional): step size when determining if two points have a collision-free straight-line path between them. Defaults to 0.01.
         """
         self.grid = None
         self.resolution = None
@@ -65,31 +69,24 @@ class RRTStarPlanner:
         self.max_iter = max_iter
         self.goalfound = False
         self.solution_set = set()
-        self.is_planning = False
         self.plan_start = 0
 
-    def planner_cleanup(self):
-        self.goalfound = False
-        self.solution_set = set()
-        self.is_planning = False
-        self.plan_start = 0
 
     def set_grid_data(self, grid, resolution, height, width):
         """Sets the map grid and internal parameters related to the grid
 
         Args:
-            grid (list height * width): Occupancy Grid
+            grid (1D np.array height * width): Occupancy Grid
             resolution (float): resolution m/cell
-            origin (np.array): [x,y] offset from map frame
-            height (_type_): _description_
-            width (_type_): _description_
+            height (int): the number of rows of the grid in cells (rows or x-axis) 
+            width (int): the width of the grid in cells (cols or y-axis) 
         """
         assert grid is not None
         assert resolution is not None
         assert height is not None
         assert width is not None
 
-        self.grid = grid.flatten(order="C")
+        self.grid = grid
         self.resolution = resolution
         self.grid_height = height
         self.grid_width = width
@@ -110,7 +107,6 @@ class RRTStarPlanner:
             return
 
         print("planning")
-        self.is_planning = True
         plan_start = time.perf_counter()
         self.node_list = [self.start]
 
@@ -158,6 +154,13 @@ class RRTStarPlanner:
         print("path not found")
         self.planner_cleanup()
         return path
+
+    def planner_cleanup(self):
+        """Resets the solution_set, plan_start, goalfound class variables, called after every call to self.plan 
+        """
+        self.goalfound = False
+        self.solution_set = set()
+        self.plan_start = 0
 
     def choose_parent(self, newNode, nearinds):
         """
@@ -263,6 +266,14 @@ class RRTStarPlanner:
         return False
 
     def gen_final_course(self, goalind):
+        """Generates list of c-space states through looping by parent
+
+        Args:
+            goalind (int): index of the self.goal node in self.node_list 
+
+        Returns:
+            list(np.array): list of c-space states of dim DOF of the robot planning c-space 
+        """
         path = [self.goal.state]
         while self.node_list[goalind].parent is not None:
             node = self.node_list[goalind]
@@ -272,7 +283,14 @@ class RRTStarPlanner:
         return path
 
     def find_near_nodes(self, newNode):
-        # Use this value of gamma
+        """Returns indicies of nodes within a certain radius from the newNode calculated by GAMMA
+
+        Args:
+            newNode (Node): sampled node to check for near nodes 
+
+        Returns:
+            list(int): list of indicies of near nodes 
+        """
         i = len(self.node_list)
         upper_bound = self.GAMMA * (np.log(i) / i) ** (1.0 / DOF)
         near_nodes = []
@@ -322,15 +340,39 @@ class RRTStarPlanner:
         return minind
 
     def __cspace_to_grid(self, state):
+        """Converts an np.array to a discretized index in the occ grid
+
+        Args:
+            state (_type_): np.array of size DOF 
+
+        Returns:
+            np.array 2x1: index of state in uv format of the occ grid 
+        """
         pos = state.copy()
         pos = pos / self.resolution
         uv_pos = np.round(pos).astype("uint32")
         return uv_pos
 
     def __to_flat(self, uv_ind):
+        """Flattens uv index to row-major index
+
+        Args:
+            uv_ind (list-like type): index in row,col  
+
+        Returns:
+            int: row-major index of uv 
+        """
         return self.grid_width * uv_ind[0] + uv_ind[1]
 
     def __InCollision(self, node):
+        """Checks if node corresponds to an occupied state in the occupancy grid
+
+        Args:
+            node (Node): node to check in collision 
+
+        Returns:
+            bool: Returns True if in Collision and False otherwise
+        """
         uv_ind = self.__cspace_to_grid(node.state)
         flat_ind = self.__to_flat(uv_ind)
         logger.debug("flat_ind: %s", flat_ind)
@@ -360,6 +402,11 @@ class RRTStarPlanner:
             return None
 
     def visualize(self, rnd):
+        """ Visualizes obstacles, self.node_list, self.goal, self.start at step in self.plan
+
+        Args:
+            rnd (np.array): randomly sampled state at step in self.plan 
+        """
 
         plt.clf()
         grid = self.grid.copy().reshape(self.grid_height, self.grid_width)
