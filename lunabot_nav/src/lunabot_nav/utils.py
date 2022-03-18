@@ -49,4 +49,3 @@ def point_from_xyz(x, y, z):
     pt.y = y
     pt.z = z
     return pt
-

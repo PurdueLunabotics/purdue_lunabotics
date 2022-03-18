@@ -8,7 +8,8 @@ import math
 import random
 import time
 import logging
-logging.getLogger('matplotlib').setLevel(logging.WARNING)
+
+logging.getLogger("matplotlib").setLevel(logging.WARNING)
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,6 +18,7 @@ DOF = 2
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
 
 class Node:
     """Node class"""
@@ -33,23 +35,30 @@ class Node:
 
 
 class RRTStarPlanner:
-    def __init__(self, visualize, goal_sample_rate=5, max_iter=1000,GAMMA=2,DISCRETIZATION_STEP=0.01):
+    def __init__(
+        self,
+        visualize,
+        goal_sample_rate=5,
+        max_iter=1000,
+        GAMMA=2,
+        DISCRETIZATION_STEP=0.01,
+    ):
         """Args:
         disc_step (float, optional): [description]. Defaults to 0.05.
         goal_sample_rate (int, optional): . Defaults to 5.
         max_iter (int, optional): Max iterations. Defaults to 100.
         """
-        self.grid = None 
+        self.grid = None
         self.resolution = None
         self.grid_height = None
         self.grid_width = None
-        self.goal = None 
-        self.start = None 
+        self.goal = None
+        self.start = None
         self.node_list = []
         self.visualize_path = visualize
 
         self.min_dist_to_goal = 0.1
-        self.GAMMA = GAMMA 
+        self.GAMMA = GAMMA
         self.DISCRETIZATION_STEP = DISCRETIZATION_STEP
 
         self.goal_sample_rate = goal_sample_rate
@@ -66,12 +75,12 @@ class RRTStarPlanner:
         self.plan_start = 0
 
     def set_grid_data(self, grid, resolution, height, width):
-        """ Sets the map grid and internal parameters related to the grid
+        """Sets the map grid and internal parameters related to the grid
 
         Args:
             grid (list height * width): Occupancy Grid
-            resolution (float): resolution m/cell 
-            origin (np.array): [x,y] offset from map frame 
+            resolution (float): resolution m/cell
+            origin (np.array): [x,y] offset from map frame
             height (_type_): _description_
             width (_type_): _description_
         """
@@ -80,13 +89,13 @@ class RRTStarPlanner:
         assert height is not None
         assert width is not None
 
-        self.grid = grid.flatten(order='C')
-        self.resolution = resolution 
+        self.grid = grid.flatten(order="C")
+        self.resolution = resolution
         self.grid_height = height
-        self.grid_width = width 
+        self.grid_width = width
 
     def plan(self, start, goal):
-        """ Plan path
+        """Plan path
 
         Args:
             start (np.array): start configuration of size DOF in GRID frame
@@ -114,12 +123,8 @@ class RRTStarPlanner:
                 new_node.parent = nind
                 new_node.cost = rnd_cost + self.node_list[nind].cost
 
-                near_inds = self.find_near_nodes(
-                    new_node
-                )
-                new_parent = self.choose_parent(
-                    new_node, near_inds
-                )
+                near_inds = self.find_near_nodes(new_node)
+                new_parent = self.choose_parent(new_node, near_inds)
 
                 # insert newNode into the tree
                 if new_parent is not None:
@@ -189,7 +194,7 @@ class RRTStarPlanner:
         returns: (success, cost) tuple
             - success is True if the route is collision free; False otherwise.
             - cost is the distance from source to dest, if the route is collision free; or None otherwise.
-            7,1 1,1 6,0  
+            7,1 1,1 6,0
         """
 
         newNode = copy.deepcopy(source)
@@ -200,9 +205,9 @@ class RRTStarPlanner:
             incrementTotal = distTotal / self.DISCRETIZATION_STEP
             dists = dists / incrementTotal
             numSegments = int(math.floor(incrementTotal)) + 1
-            logger.debug("state_check: %s",newNode.state)
-            logger.debug("dists: %s",dists)
-            logger.debug("numSegments: %d",numSegments)
+            logger.debug("state_check: %s", newNode.state)
+            logger.debug("dists: %s", dists)
+            logger.debug("numSegments: %d", numSegments)
             stateCurr = Node(newNode.state)
 
             for i in range(0, numSegments):
@@ -211,7 +216,7 @@ class RRTStarPlanner:
                     return (False, None)
                 logger.debug("SAFE")
                 stateCurr.state = stateCurr.state + dists
-                logger.debug("state_check: %s",stateCurr.state)
+                logger.debug("state_check: %s", stateCurr.state)
 
             if self.__InCollision(dest):
                 return (False, None)
@@ -320,17 +325,17 @@ class RRTStarPlanner:
         pos = state.copy()
         pos = pos / self.resolution
         uv_pos = np.round(pos).astype("uint32")
-        return uv_pos 
-    
-    def __to_flat(self,uv_ind):
+        return uv_pos
+
+    def __to_flat(self, uv_ind):
         return self.grid_width * uv_ind[0] + uv_ind[1]
 
     def __InCollision(self, node):
         uv_ind = self.__cspace_to_grid(node.state)
         flat_ind = self.__to_flat(uv_ind)
-        logger.debug("flat_ind: %s",flat_ind)
+        logger.debug("flat_ind: %s", flat_ind)
         if flat_ind < 0 or flat_ind >= len(self.grid):
-            return True # outside of c_space, so it is invalid 
+            return True  # outside of c_space, so it is invalid
         return self.grid[flat_ind] > 0.5
 
     def get_path_to_goal(self):
@@ -354,38 +359,45 @@ class RRTStarPlanner:
         else:
             return None
 
-    def visualize(self,rnd):
+    def visualize(self, rnd):
 
         plt.clf()
-        grid = self.grid.copy().reshape(self.grid_height,self.grid_width)
+        grid = self.grid.copy().reshape(self.grid_height, self.grid_width)
         plt.grid(True)
         obs = np.nonzero(grid > 0.5)
-        plt.scatter(obs[0],obs[1], marker="o")
+        plt.scatter(obs[0], obs[1], marker="o")
 
         for node in self.node_list:
             if node.parent is not None:
                 if node.state is not None:
-                    edge = np.array([[node.state[0], node.state[1]],
-                    [self.node_list[node.parent].state[0], self.node_list[node.parent].state[1]]])
+                    edge = np.array(
+                        [
+                            [node.state[0], node.state[1]],
+                            [
+                                self.node_list[node.parent].state[0],
+                                self.node_list[node.parent].state[1],
+                            ],
+                        ]
+                    )
                     edge = self.__cspace_to_grid(edge)
-                    plt.plot(edge[:,0],edge[:,1], "-g")
+                    plt.plot(edge[:, 0], edge[:, 1], "-g")
 
         if self.goalfound:
             path = self.get_path_to_goal()
             if path is not None:
                 path = np.array(path)
-                path = self.__cspace_to_grid(path) 
-                plt.plot(path[:,0], path[:,1], "-r")
+                path = self.__cspace_to_grid(path)
+                plt.plot(path[:, 0], path[:, 1], "-r")
 
         if rnd is not None:
-            rnd = self.__cspace_to_grid(rnd) 
+            rnd = self.__cspace_to_grid(rnd)
             plt.plot(rnd[0], rnd[1], "^k")
-        
+
         start = self.__cspace_to_grid(self.start.state)
         goal = self.__cspace_to_grid(self.goal.state)
 
         plt.plot(start[0], start[1], "xb")
         plt.plot(goal[0], goal[1], "xb")
         plt.axis("equal")
-        plt.axis([0, self.grid_height, 0, self.grid_width]) 
+        plt.axis([0, self.grid_height, 0, self.grid_width])
         plt.pause(0.01)
