@@ -27,17 +27,8 @@ jobs:
         workspace: '$GITHUB_WORKSPACE'
 
     - run: |
-        source /opt/ros/$ROS_DISTRO/setup.bash
-        sudo rosdep init
-        rosdep update
         mkdir -p ~/catkin_ws/src
         ln -s $GITHUB_WORKSPACE ~/catkin_ws/src/purdue_lunabotics
         cd ~/catkin_ws
-        rosdep install --from-paths src --ignore-src -r -s  # do a dry-run first
-        rosdep install --from-paths src --ignore-src -r -y
-    - run: |
-        source /opt/ros/$ROS_DISTRO/setup.bash
-        cd ~/catkin_ws
         catkin build 
         catkin test 
-    - run: catkin test 
