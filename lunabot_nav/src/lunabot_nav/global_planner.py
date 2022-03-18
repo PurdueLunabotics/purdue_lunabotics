@@ -42,10 +42,10 @@ class RRTStarPlanner:
         GAMMA=10,
         DISCRETIZATION_STEP=0.1,
     ):
-        """Implements RRT*, a sampling-based planner 
+        """Implements RRT*, a sampling-based planner
 
         Args:
-            visualize (bool): If True, visualize planning using matplotlib 
+            visualize (bool): If True, visualize planning using matplotlib
             goal_sample_rate (int, optional): How often the sampler will sample the goal state. Defaults to 10.
             max_iter (int, optional): Max iterations of the planning loop to run. Defaults to 100.
             GAMMA (int, optional): Hyperparameter that determines nearest nodes to randomly sample node that will be rewired. Defaults to 10.
@@ -70,15 +70,14 @@ class RRTStarPlanner:
         self.solution_set = set()
         self.plan_start = 0
 
-
     def set_grid_data(self, grid, resolution, height, width):
         """Sets the map grid and internal parameters related to the grid
 
         Args:
             grid (1D np.array height * width): Occupancy Grid
             resolution (float): resolution m/cell
-            height (int): the number of rows of the grid in cells (rows or x-axis) 
-            width (int): the width of the grid in cells (cols or y-axis) 
+            height (int): the number of rows of the grid in cells (rows or x-axis)
+            width (int): the width of the grid in cells (cols or y-axis)
         """
         assert grid is not None
         assert resolution is not None
@@ -155,8 +154,7 @@ class RRTStarPlanner:
         return path
 
     def planner_cleanup(self):
-        """Resets the solution_set, plan_start, goalfound class variables, called after every call to self.plan 
-        """
+        """Resets the solution_set, plan_start, goalfound class variables, called after every call to self.plan"""
         self.goalfound = False
         self.solution_set = set()
         self.plan_start = 0
@@ -268,10 +266,10 @@ class RRTStarPlanner:
         """Generates list of c-space states through looping by parent
 
         Args:
-            goalind (int): index of the self.goal node in self.node_list 
+            goalind (int): index of the self.goal node in self.node_list
 
         Returns:
-            list(np.array): list of c-space states of dim DOF of the robot planning c-space 
+            list(np.array): list of c-space states of dim DOF of the robot planning c-space
         """
         path = [self.goal.state]
         while self.node_list[goalind].parent is not None:
@@ -285,10 +283,10 @@ class RRTStarPlanner:
         """Returns indicies of nodes within a certain radius from the newNode calculated by GAMMA
 
         Args:
-            newNode (Node): sampled node to check for near nodes 
+            newNode (Node): sampled node to check for near nodes
 
         Returns:
-            list(int): list of indicies of near nodes 
+            list(int): list of indicies of near nodes
         """
         i = len(self.node_list)
         upper_bound = self.GAMMA * (np.log(i) / i) ** (1.0 / DOF)
@@ -342,10 +340,10 @@ class RRTStarPlanner:
         """Converts an np.array to a discretized index in the occ grid
 
         Args:
-            state (_type_): np.array of size DOF 
+            state (_type_): np.array of size DOF
 
         Returns:
-            np.array 2x1: index of state in uv format of the occ grid 
+            np.array 2x1: index of state in uv format of the occ grid
         """
         pos = state.copy()
         pos = pos / self.resolution
@@ -356,10 +354,10 @@ class RRTStarPlanner:
         """Flattens uv index to row-major index
 
         Args:
-            uv_ind (list-like type): index in row,col  
+            uv_ind (list-like type): index in row,col
 
         Returns:
-            int: row-major index of uv 
+            int: row-major index of uv
         """
         return self.grid_width * uv_ind[0] + uv_ind[1]
 
@@ -367,7 +365,7 @@ class RRTStarPlanner:
         """Checks if node corresponds to an occupied state in the occupancy grid
 
         Args:
-            node (Node): node to check in collision 
+            node (Node): node to check in collision
 
         Returns:
             bool: Returns True if in Collision and False otherwise
@@ -401,10 +399,10 @@ class RRTStarPlanner:
             return None
 
     def visualize(self, rnd):
-        """ Visualizes obstacles, self.node_list, self.goal, self.start at step in self.plan
+        """Visualizes obstacles, self.node_list, self.goal, self.start at step in self.plan
 
         Args:
-            rnd (np.array): randomly sampled state at step in self.plan 
+            rnd (np.array): randomly sampled state at step in self.plan
         """
 
         plt.clf()

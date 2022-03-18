@@ -96,7 +96,7 @@ class RRTStarTest(unittest.TestCase):
 
     def test_rrtstar_harder(self):
         self.planner.GAMMA = 20
-        dims = [200,200]
+        dims = [200, 200]
         grid = np.zeros(dims)
         resolution = 0.1
         lower, upper = [50, 50], [70, 70]
