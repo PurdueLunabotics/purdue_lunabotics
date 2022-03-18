@@ -204,3 +204,8 @@ target_link_libraries(${PROJECT_NAME}_scan_to_pc_node
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+if(CATKIN_ENABLE_TESTING)
+  find_package(roslaunch REQUIRED)
+  roslaunch_add_file_check(launch USE_TEST_DEPENDENCIES)
+endif()

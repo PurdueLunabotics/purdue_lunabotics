@@ -52,6 +52,11 @@
   <depend>rosbag</depend>
   <depend>rviz</depend>
   <depend>lunabot_nav</depend>
+  <depend>lunabot_control</depend>
+  <depend>gazebo_ros</depend>
+  <depend>dummy_bot_description</depend>
+  <depend>lunabot_tf</depend>
+  <depend>lunabot_localization</depend>
   <buildtool_depend>catkin</buildtool_depend>
 
 

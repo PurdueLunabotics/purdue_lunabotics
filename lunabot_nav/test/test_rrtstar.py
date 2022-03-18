@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import unittest
 from lunabot_nav.global_planner import RRTStarPlanner,Node
 import logging
@@ -30,9 +31,12 @@ G1 =[[0, 0, 0, 0, 0],
 
 class RRTStarTest(unittest.TestCase):
     def setUp(self):
-        self.planner = RRTStarPlanner(visualize=False,max_iter=50,goal_sample_rate=10,DISCRETIZATION_STEP=0.1)
+
+        viz = os.environ.get('VISUALIZE') == 1
+        self.planner = RRTStarPlanner(visualize=viz,max_iter=50,goal_sample_rate=10,DISCRETIZATION_STEP=0.1)
         resolution = 0.1
         self.planner.set_grid_data(np.array(G1),resolution,5,5)
+
     # Testing steering and collision testing
     def test_steer_to(self):
         start = Node(np.array([0,0]))
