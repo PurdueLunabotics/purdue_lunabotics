@@ -23,6 +23,7 @@ jobs:
     - uses: betwo/github-setup-catkin@master
       with:
         ros-version: 'noetic'
+        build-tool: 'catkin_tools'
         workspace: '$GITHUB_WORKSPACE'
     - run: catkin build
     - run: catkin test 
