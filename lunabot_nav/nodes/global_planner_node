@@ -52,5 +52,4 @@ class GlobalPlannerNode:
     
 def main():
     rospy.init_node("global_planner_node")
-    planner_node = GlobalPlannerNode()
     rospy.spin()
