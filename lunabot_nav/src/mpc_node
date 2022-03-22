@@ -34,9 +34,12 @@ def main():
     while(not rospy.is_shutdown()):
         vel = mpc.calculate_velocity()
         if vel is not None:
+
+            print(vel)
             vel_msg = TwistStamped()
             vel_msg.twist.linear.x = vel[0]
             vel_msg.twist.angular.z = vel[1]
+
             vel_msg.header.stamp = rospy.Time.now()
             vel_msg.header.frame_id = "base_link"
             cm_vel_pub.publish(vel_msg)

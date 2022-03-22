@@ -1,0 +1,6 @@
+[submodule "lunabot_sim/realsense_ros_gazebo"]
+	path = lunabot_sim/realsense_ros_gazebo
+	url = https://github.com/PurdueLunabotics/realsense_ros_gazebo 
+[submodule "lunabot_sim/mining_arena_gazebo"]
+	path = lunabot_sim/mining_arena_gazebo
+	url = https://github.com/PurdueLunabotics/mining_arena_gazebo

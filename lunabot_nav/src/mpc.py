@@ -1,6 +1,5 @@
 import numpy as np
 from conversions import pose_to_array
-import heapq
 from global_path_planner import rotate
 
 class MPC:
@@ -19,8 +18,25 @@ class MPC:
         robot_w,
         robot_h,
     ):
-        self.g = g
-        self.k = k
+        """_summary_
+
+        Args:
+            g (_type_): _description_
+            k (_type_): _description_
+            w_linear (_type_): _description_
+            w_angular (_type_): _description_
+            w_goal (_type_): _description_
+            w_line (_type_): _description_
+            w_occupied (_type_): _description_
+            horizon_t (_type_): _description_
+            dt (_type_): _description_
+            footprint (_type_): _description_
+            robot_w (_type_): _description_
+            robot_h (_type_): _description_
+        """
+        self.rollout_count = g
+        self.top_rollouts = k
+        self.T = 1000
         self.w_linear = w_linear
         self.w_angular = w_angular
         self.w_goal = w_goal
@@ -45,8 +61,6 @@ class MPC:
     def __check_collision(self, robot_pos):  # TODO check collision
         """
         Checks whether a given configuration is valid. (collides with obstacles)
-
-        You will need to modify this for question 2 (if self.geom == 'circle') and question 3 (if self.geom == 'rectangle')
         """
         pos = robot_pos[0:2] - self.origin[0:2]
         translated_robot = self.footprint + pos  # maps to origin in 2d
@@ -73,12 +87,12 @@ class MPC:
 
     def __find_closest_distance(self, robot_pos):
         path = self.path
-        if path == None:
+        if path is None:
             return -1.0
-        p1 = [path.poses[0].pose.position.x, path.poses[0].pose.position.y]
+        p1 = [path[0,0], path[0,1]]
         dist = -1.0
-        for i in range(1, len(path.poses)):
-            p2 = [path.poses[i].pose.position.x, path.poses[i].pose.position.y]
+        for i in range(1, len(path)):
+            p2 = [path[i,0], path[i,1]]
             # Building parametric between points (0 < t < 1)
             y_vel = p2[1] - p1[1]
             x_vel = p2[0] - p1[0]
@@ -168,26 +182,30 @@ class MPC:
         means = np.zeros((self.horizon_t, 2))  # v, omega
         std_devs = np.ones((self.horizon_t, 2))  # v, omega
         counter = 0
-        rollout_states = [] #rollout, cost, action
-        while counter < self.g:
+        while counter < self.T:
+            rollout_count = self.rollout_count
+            costs = np.zeros(rollout_count) # cost
+            actions = np.zeros((rollout_count,self.horizon_t,2)) #rollout, cost, action
             # Generating random velocities
             random_velocities = np.random.normal(
-                means, std_devs, size=(self.g - counter,self.horizon_t,2)
+                means, std_devs, size=(rollout_count,self.horizon_t,2)
             )
-
             # Generating new states and costs
             for i in range(len(random_velocities)):
                 rollout = self.__calculate_model(random_velocities[i])
-                rollout_states.append(rollout, self.__calculate_cost(rollout), random_velocities[i])
-            rollout_costs = sorted(rollout_costs, key=lambda item: item[1]) # Sorting the costs
+                costs[i] = self.__calculate_cost(rollout)
+                actions[i] = random_velocities[i]
 
-            counter += self.k
+            counter += 100
             # Finding good states
-            states = states[:counter]
+            actions = actions[costs.argsort()]
+            good_actions = actions[np.arange(self.top_rollouts)]
+            print(good_actions.shape)
 
             # Calculating new means
-            means = np.mean(states[:,2])
-            std_devs = np.std(states[:,2])
-
+            means = np.mean(good_actions,axis=0)
+            print(means.shape)
+            std_devs = np.std(good_actions,axis=0)
         # Returning velocities
-        return [states[0][2][0], states[0][2][1]]
+        print(good_actions[0,0,0])
+        return [good_actions[0,0,0], good_actions[0,0,1]]
