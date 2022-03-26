@@ -8,7 +8,7 @@ namespace DummyNodes
 
 BT::NodeStatus CheckAprilTag()
 {
-    std::cout << id << ": April Tag checked" << std::endl;
+    std::cout << ": April Tag checked" << std::endl;
     //ROS_DEBUG("April Tag checked");
     return BT::NodeStatus::SUCCESS;
 };
