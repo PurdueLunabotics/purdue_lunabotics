@@ -8,6 +8,7 @@ import copy
 import math
 import random
 import time
+import heapq
 
 import numpy as np
 
@@ -32,25 +33,11 @@ class Node:
         self.cost = 0.0
         self.parent = None
         self.children = set()
+    def __lt__(self, other):
+        return self.cost < other.cost
 
-
-class RRTStarPlanner:
-    def __init__(
-        self,
-        goal_sample_rate=10,
-        max_iter=100,
-        GAMMA=10,
-        DISCRETIZATION_STEP=0.1,
-    ):
-        """Implements RRT*, a sampling-based planner
-
-        Args:
-            visualize (bool): If True, visualize planning using matplotlib
-            goal_sample_rate (int, optional): How often the sampler will sample the goal state. Defaults to 10.
-            max_iter (int, optional): Max iterations of the planning loop to run. Defaults to 100.
-            GAMMA (int, optional): Hyperparameter that determines nearest nodes to randomly sample node that will be rewired. Defaults to 10.
-            DISCRETIZATION_STEP (float, optional): step size when determining if two points have a collision-free straight-line path between them. Defaults to 0.01.
-        """
+class Planner:
+    def __init__(self):
         self.grid = None
         self.resolution = None
         self.grid_height = None
@@ -59,16 +46,6 @@ class RRTStarPlanner:
         self.start = None
         self.node_list = []
         self.visualize = os.environ.get('MPL_VISUALIZE') == '1'
-
-        self.min_dist_to_goal = 0.1
-        self.GAMMA = GAMMA
-        self.DISCRETIZATION_STEP = DISCRETIZATION_STEP
-
-        self.goal_sample_rate = goal_sample_rate
-        self.max_iter = max_iter
-        self.goalfound = False
-        self.solution_set = set()
-        self.plan_start = 0
 
     def set_grid_data(self, grid, resolution, height, width):
         """Sets the map grid and internal parameters related to the grid
@@ -88,6 +65,107 @@ class RRTStarPlanner:
         self.resolution = resolution
         self.grid_height = height
         self.grid_width = width
+
+    def plan(self, start, goal):
+        raise NotImplementedError
+
+    def get_path_to_goal(self):
+        raise NotImplementedError
+
+    def cspace_to_grid(self, state):
+        """Converts an np.array to a discretized index in the occ grid
+
+        Args:
+            state (_type_): np.array of size DOF
+
+        Returns:
+            np.array 2x1: index of state in uv format of the occ grid
+        """
+        pos = state.copy()
+        pos = pos / self.resolution
+        uv_pos = np.round(pos).astype("uint32")
+        return uv_pos
+
+    def __to_flat(self, uv_ind):
+        """Flattens uv index to row-major index
+
+        Args:
+            uv_ind (list-like type): index in row,col
+
+        Returns:
+            int: row-major index of uv
+        """
+        return self.grid_width * uv_ind[0] + uv_ind[1]
+
+    def in_collision(self, node):
+        """Checks if node corresponds to an occupied state in the occupancy grid
+
+        Args:
+            node (Node): node to check in collision
+
+        Returns:
+            bool: Returns True if in Collision and False otherwise
+        """
+        uv_ind = self.cspace_to_grid(node.state)
+        flat_ind = self.__to_flat(uv_ind)
+        logger.debug("flat_ind: %s", flat_ind)
+        if flat_ind < 0 or flat_ind >= len(self.grid):
+            return True  # outside of c_space, so it is invalid
+        return self.grid[flat_ind] > 0.5
+
+    def is_near_goal(self, node):
+        """_summary_
+        Checks whether node is within self.min_dist_to_goal of goal
+
+        Args:
+            node (Node): location to check
+
+        Returns:
+            bool: true or false
+        """
+        d = np.linalg.norm(node.state - self.goal.state)
+        if d < self.min_dist_to_goal:
+            return True
+        return False
+
+'''
+class AStar(Planner):
+    def __init__(self):
+        pass
+
+    def plan(self,start, goal):
+        open_set = [start] 
+        g_score 
+        heapq.heappush()
+'''
+
+class RRTStarPlanner(Planner):
+    def __init__(
+        self,
+        goal_sample_rate=10,
+        max_iter=100,
+        GAMMA=10,
+        DISCRETIZATION_STEP=0.1,
+    ):
+        """Implements RRT*, a sampling-based planner
+
+        Args:
+            goal_sample_rate (int, optional): How often the sampler will sample the goal state. Defaults to 10.
+            max_iter (int, optional): Max iterations of the planning loop to run. Defaults to 100.
+            GAMMA (int, optional): Hyperparameter that determines nearest nodes to randomly sample node that will be rewired. Defaults to 10.
+            DISCRETIZATION_STEP (float, optional): step size when determining if two points have a collision-free straight-line path between them. Defaults to 0.01.
+        """
+        super().__init__()
+
+        self.min_dist_to_goal = 0.1
+        self.GAMMA = GAMMA
+        self.DISCRETIZATION_STEP = DISCRETIZATION_STEP
+
+        self.goal_sample_rate = goal_sample_rate
+        self.max_iter = max_iter
+        self.goalfound = False
+        self.solution_set = set()
+
 
     def plan(self, start, goal):
         """Plan path
@@ -150,14 +228,13 @@ class RRTStarPlanner:
             plan_time = time.perf_counter() - plan_start
             logger.info("plan time: %.3f",plan_time)
         logger.info("path not found")
-        self.planner_cleanup()
+        self.cleanup()
         return path
 
-    def planner_cleanup(self):
-        """Resets the solution_set, plan_start, goalfound class variables, called after every call to self.plan"""
+    def cleanup(self):
+        """Resets the solution_set, goalfound class variables, called after every call to self.plan"""
         self.goalfound = False
         self.solution_set = set()
-        self.plan_start = 0
 
     def choose_parent(self, newNode, nearinds):
         """
@@ -211,14 +288,14 @@ class RRTStarPlanner:
             stateCurr = Node(newNode.state)
 
             for i in range(0, numSegments):
-                if self.__InCollision(stateCurr):
+                if self.in_collision(stateCurr):
                     logger.debug("COLLISION")
                     return (False, None)
                 logger.debug("SAFE")
                 stateCurr.state = stateCurr.state + dists
                 logger.debug("state_check: %s", stateCurr.state)
 
-            if self.__InCollision(dest):
+            if self.in_collision(dest):
                 return (False, None)
             return (True, distTotal)
         else:
@@ -247,20 +324,6 @@ class RRTStarPlanner:
             rnd = self.goal
         return rnd
 
-    def is_near_goal(self, node):
-        """_summary_
-        Checks whether node is within self.min_dist_to_goal of goal
-
-        Args:
-            node (Node): location to check
-
-        Returns:
-            bool: true or false
-        """
-        d = np.linalg.norm(node.state - self.goal.state)
-        if d < self.min_dist_to_goal:
-            return True
-        return False
 
     def gen_final_course(self, goalind):
         """Generates list of c-space states through looping by parent
@@ -335,47 +398,6 @@ class RRTStarPlanner:
         minind = dlist.index(min(dlist))
 
         return minind
-
-    def cspace_to_grid(self, state):
-        """Converts an np.array to a discretized index in the occ grid
-
-        Args:
-            state (_type_): np.array of size DOF
-
-        Returns:
-            np.array 2x1: index of state in uv format of the occ grid
-        """
-        pos = state.copy()
-        pos = pos / self.resolution
-        uv_pos = np.round(pos).astype("uint32")
-        return uv_pos
-
-    def __to_flat(self, uv_ind):
-        """Flattens uv index to row-major index
-
-        Args:
-            uv_ind (list-like type): index in row,col
-
-        Returns:
-            int: row-major index of uv
-        """
-        return self.grid_width * uv_ind[0] + uv_ind[1]
-
-    def __InCollision(self, node):
-        """Checks if node corresponds to an occupied state in the occupancy grid
-
-        Args:
-            node (Node): node to check in collision
-
-        Returns:
-            bool: Returns True if in Collision and False otherwise
-        """
-        uv_ind = self.cspace_to_grid(node.state)
-        flat_ind = self.__to_flat(uv_ind)
-        logger.debug("flat_ind: %s", flat_ind)
-        if flat_ind < 0 or flat_ind >= len(self.grid):
-            return True  # outside of c_space, so it is invalid
-        return self.grid[flat_ind] > 0.5
 
     def get_path_to_goal(self):
         """
