@@ -71,23 +71,32 @@ void MPC::update_grid(const nav_msgs::OccupancyGrid& grid) {
 }
 
 void MPC::update_path(const nav_msgs::Path& path) {
+    ROS_INFO("PATH");
     this->path.clear();
     for(int i = 0; i < path.poses.size(); ++i) {
         geometry_msgs::Point position = path.poses[i].pose.position;
-        this->path.push_back({position.x, position.y});
+        std::vector<double> pos;
+        pos.push_back(position.x);
+        pos.push_back(position.y);
+        this->path.push_back(pos);
     }
 }
 
 void MPC::update_goal(const geometry_msgs::PoseStamped& goal) {
-    // ROS_INFO("GOAL");
+    ROS_INFO("GOAL");
     geometry_msgs::Point position = goal.pose.position;
-    this->goal = {position.x, position.y};
+    this->goal.clear();
+    this->goal.push_back(position.x);
+    this->goal.push_back(position.y);
 }
 
 void MPC::update_robot_pos(const nav_msgs::Odometry& odometry) {
-    // ROS_INFO("ROBOT_POS");
+    ROS_INFO("ROBOT_POS");
     geometry_msgs::Point position = odometry.pose.pose.position;
-    this->robot_pos = {position.x, position.y, odometry.twist.twist.angular.z};
+    this->robot_pos.clear();
+    this->robot_pos.push_back(position.x);
+    this->robot_pos.push_back(position.y);
+    this->robot_pos.push_back(position.z); //TODO make angle
 }
 
 void MPC::publish_velocity(double linear, double angular) {
@@ -195,13 +204,14 @@ void MPC::calculate_velocity() {
         ROS_INFO("Waiting for Data");
         return;
     }
+    ROS_INFO("HERE");
     int horizon_length = this-> horizon_length;
     Eigen::MatrixXd means = Eigen::MatrixXd::Zero(horizon_length, 2); //v, omega
     Eigen::MatrixXd std_devs = Eigen::MatrixXd::Ones(horizon_length, 2); //v, omega
     int iterations = this->iterations;
     int rollout_count = this->rollout_count;
     int top_rollouts = this->top_rollouts;
-
+    std::cout << "2";
     for(int i = 0; i < iterations; ++i) {
         std::vector<Eigen::MatrixXd> random_actions = normal_distribute(means, std_devs, rollout_count);
         std::vector<std::pair<Eigen::MatrixXd, double>> rollouts(rollout_count); //x, y, theta, v, omega for each horizon step paired with cost
