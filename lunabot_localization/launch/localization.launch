@@ -32,7 +32,7 @@
   <node pkg="image_proc" ns="/d435/camera/color/" type="image_proc" name="image_proc" args="image:=/d435/camera/color/image_raw"/>
 
   <!-- base pose publisher -->
-  <node pkg="lunabot_localization" type="base_pose_manager" name="base_pose_manager"/>
+  <node pkg="lunabot_localization" type="base_pose_manager_node" name="base_pose_manager"/>
 
   <!-- Apriltag detection -->
   <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" name="apriltag" output="screen">

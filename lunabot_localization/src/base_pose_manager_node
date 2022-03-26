@@ -48,8 +48,8 @@ class BasePoseManager:
 
     base_to_t265 = self._map_to_t265_start
 
-    base_to_t265_start = base_to_t265 @ np.linalg.inv(t265_start_to_t265) 
-    map_to_base_link = np.linalg.inv(base_to_t265_start) @ np.linalg.inv(self._map_to_t265_start)
+    base_to_t265_start = np.matmul(base_to_t265, np.linalg.inv(t265_start_to_t265))
+    map_to_base_link = np.matmul(np.linalg.inv(base_to_t265_start),np.linalg.inv(self._map_to_t265_start))
 
     base_link_pose = np_to_pose(map_to_base_link)
     map_to_base_link = np_to_tf(map_to_base_link)
@@ -83,7 +83,7 @@ class BasePoseManager:
     self._t265_odom = odom
 
 if __name__ == '__main__':
-    rospy.init_node('base_pose_manager')
+    rospy.init_node('base_pose_manager_node')
 
     manager = BasePoseManager()
     manager.init_base_tf()

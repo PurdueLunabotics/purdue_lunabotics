@@ -2,6 +2,7 @@ import numpy as np
 from conversions import pose_to_array
 from global_path_planner import rotate
 
+
 class MPC:
     def __init__(
         self,
@@ -89,10 +90,10 @@ class MPC:
         path = self.path
         if path is None:
             return -1.0
-        p1 = [path[0,0], path[0,1]]
+        p1 = [path[0, 0], path[0, 1]]
         dist = -1.0
         for i in range(1, len(path)):
-            p2 = [path[i,0], path[i,1]]
+            p2 = [path[i, 0], path[i, 1]]
             # Building parametric between points (0 < t < 1)
             y_vel = p2[1] - p1[1]
             x_vel = p2[0] - p1[0]
@@ -184,11 +185,13 @@ class MPC:
         counter = 0
         while counter < self.T:
             rollout_count = self.rollout_count
-            costs = np.zeros(rollout_count) # cost
-            actions = np.zeros((rollout_count,self.horizon_t,2)) #rollout, cost, action
+            costs = np.zeros(rollout_count)  # cost
+            actions = np.zeros(
+                (rollout_count, self.horizon_t, 2)
+            )  # rollout, cost, action
             # Generating random velocities
             random_velocities = np.random.normal(
-                means, std_devs, size=(rollout_count,self.horizon_t,2)
+                means, std_devs, size=(rollout_count, self.horizon_t, 2)
             )
             # Generating new states and costs
             for i in range(len(random_velocities)):
@@ -203,9 +206,9 @@ class MPC:
             print(good_actions.shape)
 
             # Calculating new means
-            means = np.mean(good_actions,axis=0)
+            means = np.mean(good_actions, axis=0)
             print(means.shape)
-            std_devs = np.std(good_actions,axis=0)
+            std_devs = np.std(good_actions, axis=0)
         # Returning velocities
-        print(good_actions[0,0,0])
-        return [good_actions[0,0,0], good_actions[0,0,1]]
+        print(good_actions[0, 0, 0])
+        return [good_actions[0, 0, 0], good_actions[0, 0, 1]]

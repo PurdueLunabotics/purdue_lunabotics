@@ -1,4 +1,4 @@
-"""Functions to convert between ros msg and numpy data representations 
+"""Functions to convert between ros msg and numpy data representations
 """
 
 import numpy as np

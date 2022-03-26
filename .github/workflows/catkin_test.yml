@@ -1,0 +1,34 @@
+name: Catkin ROS Tests 
+
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  push:
+    branches:
+      - master 
+  pull_request:
+    branches:
+      - master 
+
+jobs:
+  catkin-tests:
+    name: Setup catkin and Run Tests 
+    runs-on: [ubuntu-20.04] 
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive 
+        token: ${{ secrets.PAT_TOKEN }}
+    - uses: betwo/github-setup-catkin@master
+      with:
+        ros-version: 'noetic'
+        build-tool: 'catkin_tools'
+        workspace: '$GITHUB_WORKSPACE'
+
+    - run: |
+        mkdir -p ~/catkin_ws/src
+        ln -s $GITHUB_WORKSPACE ~/catkin_ws/src/purdue_lunabotics
+        cd ~/catkin_ws
+        catkin build 
+        catkin test 
