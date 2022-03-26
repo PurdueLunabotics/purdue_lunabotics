@@ -53,7 +53,9 @@
   <depend>rviz</depend>
   <depend>lunabot_nav</depend>
   <depend>lunabot_control</depend>
-  <depend>gazebo_ros</depend>
+  <depend>mining_arena_gazebo</depend>
+  <depend>robot_state_publisher</depend>
+  <depend>joint_state_publisher</depend>
   <depend>dummy_bot_description</depend>
   <depend>lunabot_tf</depend>
   <depend>lunabot_localization</depend>

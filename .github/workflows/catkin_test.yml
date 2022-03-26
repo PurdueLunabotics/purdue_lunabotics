@@ -18,7 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        submodules: 'true'
+        submodules: recursive 
         token: ${{ secrets.PAT_TOKEN }}
     - uses: betwo/github-setup-catkin@master
       with:

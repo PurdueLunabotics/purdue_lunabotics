@@ -1,5 +1,23 @@
 # lunabot_bringup
 
+All the launch files related to running different parts of the software stack
+### Gazebo simulator
+
+#### Run it!
+1. Double check you have the `realsense_ros_gazebo` and `mining_arena_gazebo` packages in [lunabot_sim](https://github.com/PurdueLunabotics/purdue_lunabotics/tree/simulator/lunabot_sim). If not, [run this](https://gist.github.com/raghavauppuluri13/e72f650116efa7a935161f4772083d10)
+
+2. Run the [setup instructions](https://github.com/PurdueLunabotics/mining_arena_gazebo/tree/33f5949c90bd798f3925302800600661709a8f50#setup) for the [mining_arena_gazebo](https://github.com/PurdueLunabotics/mining_arena_gazebo) package to ensure gazebo can find all the gazebo model files
+3. Run the simulator with `roslaunch lunabot_bringup sim.launch`
+
+> Run with `debug:=true` (TODO: should run gdb, but it keeps exiting) and `verbose:=true` if you want gazebo's debug info
+
+#### Usage
+
+1. Get odometry information from the `odom` topic
+2. Publish velocity control commands with `cmd_vel` topic (**NOTE: invert the `linear` and `angular` fields when you send it, its a weird bug that needs to be fixed TODO**)
+3. Get 3D pointcloud and camera data from `d435_cam_forward/depth/*` and `d435_cam_backward/depth/*` topics
+
+
 ### Run rosbags
 
 1. Download `localization_testing.bag` (link in Discord)
