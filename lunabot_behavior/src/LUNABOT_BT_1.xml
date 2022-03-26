@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="BehaviorTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="BehaviorTree">
+        <ReactiveSequence name="Keep looking for apriltags until found, then start behavior">
+            <Action ID="DetectApriltag"/>
+            <Sequence name="If apriltags found, start competition behaviors">
+                <Action ID="Navigate" Input="" Returns="SUCCESS/FAIL/ELSE" Where="Excavation"/>
+                <Action ID="Excavate" Returns="SUCCESS/FAIL/ELSE"/>
+                <Action ID="Navigate" Input="sieve_position" Returns="SUCCESS/FAIL/ELSE" Where="Bin"/>
+                <Action ID="RunDeposition" Returns="SUCCESS/FAIL/ELSE"/>
+            </Sequence>
+        </ReactiveSequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Action ID="DetectApriltag"/>
+        <Action ID="Excavate">
+            <output_port default="SUCCESS/FAIL/ELSE" name="Returns"/>
+        </Action>
+        <Action ID="Navigate">
+            <input_port name="Input"/>
+            <output_port default="SUCCESS/FAIL/ELSE" name="Returns"/>
+            <input_port name="Where"/>
+        </Action>
+        <Action ID="RunDeposition">
+            <output_port default="SUCCESS/FAIL/ELSE" name="Returns"/>
+        </Action>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>
+
