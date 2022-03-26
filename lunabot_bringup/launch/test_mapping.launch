@@ -2,5 +2,5 @@
 <launch>
   <include file="$(find lunabot_nav)/launch/octomap.launch" />
   <include file="$(find lunabot_bringup)/launch/view_tf.launch" />
-  <node pkg="rosbag" type="play" name="player" output="screen" args="--clock $(find lunabot_bringup)/bags/localization_testing.bag" />
+  <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -l --rate 2 $(find lunabot_bringup)/bags/2-5-mapping.bag" />
 </launch>

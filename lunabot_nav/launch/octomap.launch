@@ -1,18 +1,10 @@
 <launch>
+    <group ns="octomap_server">
+        <rosparam file="$(find lunabot_nav)/config/octomap.yml" command="load" />
+    </group>
 
-    <!-- Builds map --> 
+    <!-- Builds map from d435 camera --> 
     <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
-        <param name="resolution" value="0.05" />
-
-        <!-- Map frame id --> 
-        <param name="frame_id" type="string" value="map" />
-
-        <!-- Robot base_link frame id --> 
-        <param name="base_frame_id" type="string" value="base_link" />
-
-        <!-- maximum range to integrate (speedup!) -->
-        <param name="sensor_model/max_range" value="5.0" />
-
         <!-- data source to integrate (PointCloud2) -->
         <remap from="cloud_in" to="/d435/camera/depth/color/points" />
     </node>

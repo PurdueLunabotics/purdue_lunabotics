@@ -1,0 +1,4 @@
+<launch>
+    <test type="test_global_planner_node" pkg="lunabot_nav" test-name="test_global_planner_node"/>
+    <node type="global_planner_node" pkg="lunabot_nav" name="global_planner"/>
+</launch>

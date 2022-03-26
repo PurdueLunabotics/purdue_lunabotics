@@ -1,6 +1,6 @@
 Panels:
   - Class: rviz/Displays
-    Help Height: 78
+    Help Height: 76
     Name: Displays
     Property Tree Widget:
       Expanded:
@@ -8,8 +8,10 @@ Panels:
         - /Status1
         - /RobotModel1
         - /TF1
+        - /TF1/Frames1
+        - /Image1
       Splitter Ratio: 0.5
-    Tree Height: 1221
+    Tree Height: 381
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -28,7 +30,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: Image
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -96,10 +98,46 @@ Visualization Manager:
       Value: true
       Visual Enabled: true
     - Class: rviz/TF
-      Enabled: false
+      Enabled: true
       Frame Timeout: 15
       Frames:
+        1:
+          Value: true
         All Enabled: true
+        base_link:
+          Value: true
+        odom:
+          Value: true
+        t265_accel_frame:
+          Value: true
+        t265_accel_optical_frame:
+          Value: true
+        t265_gyro_frame:
+          Value: true
+        t265_gyro_optical_frame:
+          Value: true
+        t265_link:
+          Value: true
+        t265_odom_frame:
+          Value: true
+        t265_pose_frame:
+          Value: true
+        tag_0:
+          Value: true
+        tag_1:
+          Value: true
+        tag_2:
+          Value: true
+        unzano:
+          Value: true
+        wheel_1_left_front_1:
+          Value: true
+        wheel_left_back_1:
+          Value: true
+        wheel_right_back_1:
+          Value: true
+        wheel_right_front_1:
+          Value: true
       Marker Alpha: 1
       Marker Scale: 0.5
       Name: TF
@@ -107,9 +145,43 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        {}
+        base_link:
+          t265_link:
+            t265_accel_frame:
+              t265_accel_optical_frame:
+                {}
+            t265_gyro_frame:
+              t265_gyro_optical_frame:
+                {}
+          unzano:
+            tag_0:
+              {}
+            tag_1:
+              {}
+            tag_2:
+              {}
+          wheel_1_left_front_1:
+            {}
+          wheel_left_back_1:
+            {}
+          wheel_right_back_1:
+            {}
+          wheel_right_front_1:
+            {}
       Update Interval: 0
-      Value: false
+      Value: true
+    - Class: rviz/Image
+      Enabled: true
+      Image Topic: /unzano/tag_detections_image
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: Image
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -138,7 +210,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 3.576737880706787
+      Distance: 9.129603385925293
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -154,9 +226,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.46039697527885437
+      Pitch: 1.1697967052459717
       Target Frame: <Fixed Frame>
-      Yaw: 0.593582272529602
+      Yaw: 2.9835922718048096
     Saved: ~
 Window Geometry:
   Displays:
@@ -164,7 +236,9 @@ Window Geometry:
   Height: 1518
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd0000000400000000000001560000054efc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003b0000054e000000c700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f0000054efc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073010000003b0000054e000000a000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000035100000044fc0100000002fb0000000800540069006d00650100000000000003510000024400fffffffb0000000800540069006d00650100000000000004500000000000000000000000e00000054e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Image:
+    collapsed: false
+  QMainWindow State: 000000ff00000000fd0000000400000000000002ee0000054efc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003b00000204000000c700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000a0049006d0061006700650100000245000003440000001600ffffff000000010000010f0000054efc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073010000003b0000054e000000a000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000009fc00000044fc0100000002fb0000000800540069006d00650100000000000009fc0000024400fffffffb0000000800540069006d00650100000000000004500000000000000000000005f30000054e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -173,6 +247,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 849
-  X: 854
+  Width: 2556
+  X: 0
   Y: 26

@@ -1,0 +1,95 @@
+#!/usr/bin/env python3
+"""Publishes pose of base_link of robot from t265 tracking camera
+"""
+
+import numpy as np
+
+import rospy
+from nav_msgs.msg import Odometry
+from geometry_msgs.msg import TransformStamped
+import tf2_ros
+
+from scripts.conversions import np_to_pose, np_to_tf, pose_to_np_matrix
+
+
+def get_param(name, default):
+    val = rospy.get_param(name, default)
+    rospy.loginfo("  %s: %s", name, str(val))
+    return val
+
+
+class BasePoseManager:
+  def __init__(self):
+    self._base_odom_pub = rospy.Publisher(get_param("~base_odom_topic", '/odom'), Odometry, queue_size=1)
+    self._t265_odom_sub = rospy.Subscriber(get_param('~t265_odom_topic', '/t265/camera/odom/sample'), 
+                                            Odometry, callback=self.t265_odom_callback, queue_size=1)
+    self._tf_buffer = tf2_ros.Buffer() 
+    self._tf_listener = tf2_ros.TransformListener(self._tf_buffer) 
+    self._tf_broadcaster = tf2_ros.TransformBroadcaster()
+    self.odom_rate_hz = rospy.Rate(get_param('~odom_calc_hz', 10))
+    self._t265_odom = None
+    self._map_to_t265_start = None
+
+  @property
+  def t265_started(self):
+    return self._t265_odom is not None
+
+  def init_base_tf(self):
+    while self._map_to_t265_start is None:
+      try:
+        tf = self._tf_buffer.lookup_transform('t265_pose_frame', 'map', rospy.Time(0))
+      except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+        continue
+      self._map_to_t265_start = pose_to_np_matrix(tf.transform.translation, tf.transform.rotation)  
+
+  def pub_odom(self):
+    t265_start_to_t265 = pose_to_np_matrix(self._t265_odom.pose.pose.position,
+                                          self._t265_odom.pose.pose.orientation) 
+
+    base_to_t265 = self._map_to_t265_start
+
+    base_to_t265_start = np.matmul(base_to_t265, np.linalg.inv(t265_start_to_t265))
+    map_to_base_link = np.matmul(np.linalg.inv(base_to_t265_start),np.linalg.inv(self._map_to_t265_start))
+
+    base_link_pose = np_to_pose(map_to_base_link)
+    map_to_base_link = np_to_tf(map_to_base_link)
+
+    base_tf_msg = TransformStamped()
+    base_tf_msg.header.frame_id = "map"
+    base_tf_msg.header.stamp = rospy.Time.now()
+    base_tf_msg.child_frame_id = "base_link"
+    base_tf_msg.transform = map_to_base_link 
+    base_tf_msg.transform.translation.x *= -1
+    base_tf_msg.transform.translation.y *= -1
+    base_tf_msg.transform.translation.z = 0
+
+    odom_msg = Odometry()
+
+    odom_msg.header.frame_id = "map"
+    odom_msg.header.stamp = rospy.Time.now() 
+    odom_msg.child_frame_id = "base_link"
+    odom_msg.pose.pose = base_link_pose
+    odom_msg.pose.pose.position.x *= -1
+    odom_msg.pose.pose.position.y *= -1
+    #odom_msg.pose.pose.position.z = 0
+    odom_msg.pose.covariance = self._t265_odom.pose.covariance
+    odom_msg.twist = self._t265_odom.twist
+    #odom_msg.twist.linear.z = 0 
+
+    self._base_odom_pub.publish(odom_msg)
+    self._tf_broadcaster.sendTransform(base_tf_msg)
+
+  def t265_odom_callback(self, odom):
+    self._t265_odom = odom
+
+if __name__ == '__main__':
+    rospy.init_node('base_pose_manager_node')
+
+    manager = BasePoseManager()
+    manager.init_base_tf()
+    while not rospy.is_shutdown():
+        if manager.t265_started:
+            manager.pub_odom()
+        manager.odom_rate_hz.sleep()
+
+    rospy.spin()
