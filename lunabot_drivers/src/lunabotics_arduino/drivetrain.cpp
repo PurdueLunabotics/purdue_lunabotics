@@ -9,7 +9,9 @@ namespace drivetrain {
 
 		for(int i = 0; i < MOTOR_CNT; i++) {
 			pinMode(direction_pins_[i], OUTPUT);
+			encoders_[i] = new Encoder(encoder_ids_[2 * i], encoder_ids_[2 * i + 1]);
 		}
+
 	}
 
 	void _move_motor(motor_dir_t motor, int vel) {
@@ -29,29 +31,48 @@ namespace drivetrain {
 		/*
 			Tank drive steering
 		*/
-		int8_t left_wheel = drive_msg.left; // left wheel vel 
-		int8_t right_wheel = drive_msg.right; // right wheel vel 
 
-		// calculate left and right chassis velocities
-		int vel_l = map(left_wheel, -128, 127, -255, 255); // Range from [-255,255]
-		int vel_r = map(right_wheel, -128, 127, -255, 255); // Range from [-255,255]
-		vel_l = constrain(vel_l, -255, 255);
-		vel_r = constrain(vel_r, -255, 255);
+		const float robot_width = 0; //TODO find
 
-		nh.logerror("left_vel:");	
-		nh.logerror(String(vel_l).c_str());
-		nh.logerror("right_vel:");	
-		nh.logerror(String(vel_r).c_str());
+		float linear_vel = drive_msg.linear; // left wheel vel 
+		float angular_vel = drive_msg.angular; // right wheel vel 
 
-		// Order: FRONT_LEFT 0, FRONT_RIGHT 1, BACK_LEFT 2, BACK_RIGHT 3
-		// move each motor to the specified velocity
-		for (int motor = FRONT_LEFT; motor <= BACK_RIGHT; motor++) {
-			if(motor % 2 == 0) { // moves left motors
-				_move_motor((motor_dir_t) motor, vel_l);
+		float left_vel = (2 * linear_vel - robot_width * angular_vel) / 2.0
+		float right_vel = (2 * linear_vel + robot_width * angular_vel) / 2.0 //TODO find units
+
+		for(int i = 0; i < MOTOR_CNT; ++i) {
+			float curr_pos = encoders_[i].read();
+			float curr_velocity = (curr_pos - prev_positions_[i]) / delta_time;
+			float goal_vel;
+			if (i % 2 == 0) {
+				goal_vel = left_vel;
+			} else {
+				goal_vel = right_vel;
 			}
-			else {
-				_move_motor((motor_dir_t) motor, vel_r); // moves right motors
+			float calculated_vel = goal_vel * pidf_values_[3]; //F
+			float error = goal_vel - curr_velocity;
+			calculated_vel += pidf_values_[0] * error; //P
+			i_accumulations_[i] += error * delta_time;
+			calculated_vel += pidf_values_[1] * i_accumulations_[i]; //I
+			d_error = (error - prev_error_[i]) / delta_time;
+			calculated_vel += pidf_values_[2] * d_error; //D
+
+			if(calculated_vel < -1) { //Clamping speed
+				calculated_vel = -1;
+			} else if(calculated_vel > 1) {
+				calculated_vel = 1;
 			}
+
+			calculated_vel *= 255 // mapping to arduino
+
+			//Update motor
+			_move_motor((motor_dir_t) motor, (int)(calculated_vel));
+
+			//Updating previous values
+
+			prev_positions_[i] = curr_pos;
+			prev_velocities_[i] = curr_velocity;
+			prev_error_[i] = error;
 		}
 	}
 }
