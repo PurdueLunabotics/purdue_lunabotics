@@ -10,11 +10,15 @@
 	<arg name="verbose" default="false"/>
 	<arg name="debug" default="false"/>
 	<arg name="paused" default="false"/>
-	<arg name="manager" default="standalone_nodelet"/>
+	<arg name="point_cloud_topic" default="/point_cloud"/>
 
   	<param command="$(find xacro)/xacro $(arg model)" name="robot_description"/>
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+    <node name="points_concat" pkg="lunabot_proc" type="points_concat" output="screen">
+        <rosparam file="$(find lunabot_bringup)/config/sensors.yml" command="load" />
+	</node>
 
 	<include file="$(find mining_arena_gazebo)/launch/gazebo.launch">
 		<arg name="world_name" value="$(arg world_name)"/>
@@ -23,6 +27,16 @@
 		<arg name="verbose" value="$(arg verbose)"/>
 		<arg name="debug" value="$(arg debug)"/>
 		<arg name="initial_pose" value="$(arg initial_pose)"/>
+	</include>
+
+	<include file="$(find lunabot_nav)/launch/octomap.launch" >
+		<arg name="point_cloud_topic" value="$(arg point_cloud_topic)"/>
+	</include>
+	
+	<include file="$(find lunabot_nav)/launch/mapping.launch" />
+
+	<include file="$(find lunabot_perception)/launch/cameras.launch">
+		<arg name="sim" value="true"/>
 	</include>
 
 </launch>

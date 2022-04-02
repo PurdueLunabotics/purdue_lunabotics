@@ -1,55 +1,62 @@
 #!/usr/bin/env python3
+from re import S
 import numpy as np
 import rospy
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import OccupancyGrid, Odometry, Path
 
 from lunabot_nav.global_planner import RRTStarPlanner
-from lunabot_nav.utils import pose_to_array 
+from lunabot_nav.utils import pose_to_array, state_to_pose_msg
+
 
 class GlobalPlannerNode:
     def __init__(self):
         self.costmap = None
         self.costmap_info = None
-        self.curr_pos = None  
+        self.curr_pos = None
         self.goal = None
+        self.origin = None
         self.planner = RRTStarPlanner(max_iter=30, disc_step=0.05, goal_sample_rate=10)
 
-        rospy.Subscriber("/costmap", OccupancyGrid, self.__occ_grid_cb)
+        rospy.Subscriber(
+            "maps/costmap_node/global_costmap/costmap", OccupancyGrid, self.__occ_grid_cb
+        )
         rospy.Subscriber("/odom", Odometry, self.__odom_cb)
-        rospy.Subscriber("/goal", PoseStamped, self.__goal_cb)
+        rospy.Subscriber("/move_base_simple/goal", PoseStamped, self.__goal_cb)
 
         self.path_publisher = rospy.Publisher(
-            "lunabot_nav/global_path", Path, queue_size=10
+            "nav/global_path", Path, queue_size=10
         )
 
     def __occ_grid_cb(self, grid_msg):
         grid = np.array(grid_msg.data)
         resolution = grid_msg.info.resolution  # m/cell
-        origin, _ = np.array(
+        self.origin, _ = np.array(
             pose_to_array(grid_msg.info.origin)
         )  # (pose, ori = usually zero, so same frame as 'map')
         width = grid_msg.info.width  # m/cell
         height = grid_msg.info.height  # m/cell
-        self.planner.set_grid_data(grid,resolution,origin,height,width)
+        self.planner.set_grid_data(grid, resolution, height, width)
 
     def __odom_cb(self, odom_msg):
         pos, _ = pose_to_array(odom_msg.pose.pose)
         self.curr = np.array([pos[0], pos[1]])
 
     def __goal_cb(self, goal_msg):
-        pos,_ = pose_to_array(goal_msg.pose)
-        self.goal = np.array([pos[0], pos[1]]) - self.origin
-        self.plan()
+        pos, _ = pose_to_array(goal_msg.pose)
+        self.goal = np.array([pos[0], pos[1]]) - self.origin[0:2]
+        poses = self.planner.plan(self.curr, self.goal)
+        poses = poses + self.origin[0:2]
+        self.publish_path(poses)
 
     def publish_path(self, poses):
         path = Path()
         path.header.stamp = rospy.Time.now()
         path.header.frame_id = "map"
-        path.poses = poses
+        path.poses = [state_to_pose_msg(pose) for pose in poses]
         self.path_publisher.publish(path)
 
-    
+
 def main():
     rospy.init_node("global_planner_node")
     rospy.spin()

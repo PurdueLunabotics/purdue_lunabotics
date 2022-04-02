@@ -1,4 +1,5 @@
 <launch>
+	<arg name="point_cloud_topic" default="/point_cloud"/>
     <group ns="octomap_server">
         <rosparam file="$(find lunabot_nav)/config/octomap.yml" command="load" />
     </group>
@@ -6,7 +7,7 @@
     <!-- Builds map from d435 camera --> 
     <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
         <!-- data source to integrate (PointCloud2) -->
-        <remap from="cloud_in" to="/d435/camera/depth/color/points" />
+        <remap from="cloud_in" to="point_cloud" />
     </node>
     
 </launch>

@@ -5,7 +5,7 @@
 	    <param name="port" type="string" value="/dev/ttyACM0"/>
 	</node>
   <include file="$(find lunabot_localization)/launch/localization.launch" />
-  <include file="$(find lunabot_tf)/launch/sensors_dummybot.launch" />
+  <include file="$(find lunabot_localization)/launch/sensors_dummybot.launch" />
   <include file="$(find lunabot_nav)/launch/octomap.launch" />
   <include file="$(find lunabot_nav)/launch/lidar.launch" />
 </launch>

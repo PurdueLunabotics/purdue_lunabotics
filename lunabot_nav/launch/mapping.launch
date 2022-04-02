@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <launch>
     <param name="use_sim_time" value="true"/>
-    <group ns="costmap_node">
-        <rosparam file="$(find lunabot_nav)/config/local_costmap.yml" command="load" ns="local_costmap" />
+    <group ns="maps">
+        <node name="costmap_node" pkg="lunabot_nav" type="costmap_node" output="screen">
+            <rosparam file="$(find lunabot_nav)/config/global_costmap.yml" command="load" ns="global_costmap" />
+        </node>
     </group>
-    <node name="costmap_node" pkg="lunabot_nav" type="costmap_node" output="screen"/>
 </launch>

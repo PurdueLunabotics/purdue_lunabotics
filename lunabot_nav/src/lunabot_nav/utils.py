@@ -56,21 +56,22 @@ def visualize(planner,rnd):
     plt.pause(0.01)
 
 
-def state_to_pose_msg(state, frame_id="map"):
+def state_to_pose_msg(pos, rot=0.0, frame_id="map"):
     """Generates a PoseStamped ROS msg from a numpy array of the robot c-space
 
     Args:
-        state (numpy.array): [x (m), y (m), theta (deg)]
+        state (numpy.array): [x (m), y (m)] 
+        pos (float): theta (deg)
 
     Returns:
         PoseStamped: Pose of robot with time stamp and relative to 'map' tf frame
     """
-    rot = quaternion_from_euler(0, 0, state[-1])
+    rot = quaternion_from_euler(0, 0, rot)
     pose = PoseStamped()
     pose.header.stamp = rospy.Time.now()
     pose.header.frame_id = frame_id
-    pose.pose.position.x = state[0]
-    pose.pose.position.y = state[1]
+    pose.pose.position.x = pos[0]
+    pose.pose.position.y = pos[1]
     pose.pose.position.z = 0
     pose.pose.orientation.x = rot[1]
     pose.pose.orientation.y = rot[2]
