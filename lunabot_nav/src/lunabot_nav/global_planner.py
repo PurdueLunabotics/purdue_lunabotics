@@ -3,6 +3,7 @@
 Global path planner using RRTstar algorithm
 author: Raghava Uppuluri, code adapted from Ahmed Qureshi and AtsushiSakai(@Atsushi_twi)
 """
+from collections import defaultdict
 import logging
 import copy
 import math
@@ -35,6 +36,8 @@ class Node:
         self.children = set()
     def __lt__(self, other):
         return self.cost < other.cost
+    def dist(self,other):
+        return np.sqrt(np.sum((other.state - self.state) ** 2))
 
 class Planner:
     def __init__(self):
@@ -128,16 +131,27 @@ class Planner:
             return True
         return False
 
-'''
-class AStar(Planner):
-    def __init__(self):
-        pass
+# class AStarNode(Node):
+#     def __init__(self,state):
+#         super().__init__(state)
 
-    def plan(self,start, goal):
-        open_set = [start] 
-        g_score 
-        heapq.heappush()
-'''
+# class AStar(Planner):
+#     def __init__(self):
+#         super().__init__()
+#         self.came_from = {}
+#         self.g_score = defaultdict(np.inf)
+#         self.f_score = defaultdict(np.inf)
+
+#     def h(self, node):
+#         collision_penalty = np.inf if self.in_collision(node) else 0
+#         return self.goal.dist(node) + collision_penalty 
+
+#     def plan(self, start, goal):
+#         self.start = Node(start)
+#         self.goal = Node(goal)
+#         open_set = [Node(start)] 
+
+#         heapq.heappush()
 
 class RRTStarPlanner(Planner):
     def __init__(
@@ -340,7 +354,7 @@ class RRTStarPlanner(Planner):
             path.append(node.state)
             goalind = node.parent
         path.append(self.start.state)
-        return path
+        return np.array(path)
 
     def find_near_nodes(self, newNode):
         """Returns indicies of nodes within a certain radius from the newNode calculated by GAMMA

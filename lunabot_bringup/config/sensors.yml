@@ -1,0 +1,5 @@
+input_topics:
+  - /d435_backward/depth/color/points
+  - /d435_forward/depth/color/points
+output_frame_id: "d435_backward_link"
+output_topic: "/point_cloud"
