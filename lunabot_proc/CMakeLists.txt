@@ -231,7 +231,7 @@ target_link_libraries(${PROJECT_NAME}_concat
   ${YAML_CPP_LIBRARIES}
 )
 
-if(CATKIN_ENABLE_TESTING)
-  find_package(roslaunch REQUIRED)
-  roslaunch_add_file_check(launch USE_TEST_DEPENDENCIES)
-endif()
+#if(CATKIN_ENABLE_TESTING)
+#  find_package(roslaunch REQUIRED)
+#  roslaunch_add_file_check(launch USE_TEST_DEPENDENCIES)
+#endif()
