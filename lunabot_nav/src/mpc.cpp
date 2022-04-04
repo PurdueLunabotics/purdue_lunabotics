@@ -5,9 +5,9 @@ MPC::MPC(ros::NodeHandle* nh, int rollout_count, int top_rollouts, int iteration
 
     //TODO find names of topics
     this->grid_sub = nh->subscribe("/projected_map", 10, &MPC::update_grid, this);
-    this->path_sub = nh->subscribe("/lunabot_nav/path_generator", 10, &MPC::update_path, this);
+    this->path_sub = nh->subscribe("/lunabot_nav/path_generator", 10, &MPC::update_path, this); //Convert to Map
     this->goal_sub = nh->subscribe("/goal", 10, &MPC::update_goal, this);
-    this->robot_pos_sub = nh->subscribe("/odom", 10, &MPC::update_robot_pos, this);
+    this->robot_pos_sub = nh->subscribe("/odom", 10, &MPC::update_robot_pos, this); //Convert to Map
 
     this->rollout_count = rollout_count;
     this->top_rollouts = top_rollouts;
@@ -91,7 +91,7 @@ void MPC::update_goal(const geometry_msgs::PoseStamped& goal) {
 }
 
 void MPC::update_robot_pos(const nav_msgs::Odometry& odometry) {
-    ROS_INFO("ROBOT_POS");
+    // ROS_INFO("ROBOT_POS");
     geometry_msgs::Point position = odometry.pose.pose.position;
     this->robot_pos.clear();
     this->robot_pos.push_back(position.x);
@@ -100,6 +100,7 @@ void MPC::update_robot_pos(const nav_msgs::Odometry& odometry) {
 }
 
 void MPC::publish_velocity(double linear, double angular) {
+    ROS_INFO("PUBLISHING");
     geometry_msgs::TwistStamped twist;
     twist.header.frame_id = "base_link";
     twist.header.stamp = ros::Time::now();
@@ -193,6 +194,8 @@ Eigen::MatrixXd MPC::calculate_model(Eigen::MatrixXd actions) {
         current_pos = A * current_pos + B * actions.row(i).transpose();
     }
 
+    return model;
+
 }
 
 bool comparator(std::pair<Eigen::MatrixXd, double> a, std::pair<Eigen::MatrixXd, double> b) {
@@ -221,12 +224,12 @@ void MPC::calculate_velocity() {
             rollouts[j] = std::make_pair(state, calculate_cost(state));
         }
 
+
         //Getting best options
         std::sort(rollouts.begin(), rollouts.end(), comparator);
         std::vector<std::pair<Eigen::MatrixXd, double>> top_rollouts(rollouts.begin(), rollouts.begin() + 1);
-
         if(i == iterations - 1) {
-            publish_velocity(top_rollouts[0].first(0, 3), top_rollouts[0].first(0, 4));
+            publish_velocity(top_rollouts[0].first.coeff(0, 3), top_rollouts[0].first.coeff(0, 4));
         } else {
             means = mean(top_rollouts);
             std_devs = std_dev(top_rollouts);
