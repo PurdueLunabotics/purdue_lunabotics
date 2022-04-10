@@ -1,0 +1,8 @@
+depth_topics:
+  - /d435_backward/depth/color/points
+  - /d435_forward/depth/color/points
+depth_frame_id: "d435_backward_link"
+pc_topic: "/point_cloud"
+odom_topic: "/odom"
+nav_goal_topic: "/goal"
+cmd_vel_topic: "/cmd_vel"

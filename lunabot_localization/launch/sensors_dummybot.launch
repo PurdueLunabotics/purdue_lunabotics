@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-	<node pkg="tf" type="static_transform_publisher" name="t265_broadcaster" args="-0.025 0.229 0.457 0 0 1 0 map t265_pose_frame 100" />
+	<node pkg="tf" type="static_transform_publisher" name="t265_broadcaster" args="-0.025 0.229 0.457 0 0 1 0 odom t265_pose_frame 100" />
 
 	<node pkg="tf" type="static_transform_publisher" name="d435_broadcaster" args="0.000 0.229 0.482 0 0 0 1 base_link d435_link 100" />
 	<node pkg="tf" type="static_transform_publisher" name="laser_broadcaster" args="0.414 -0.124 0.2515 0.1530459 0.1530459 0.6903455 0.6903455 base_link laser 100" />

@@ -3,7 +3,7 @@ import logging
 import unittest
 
 import numpy as np
-from lunabot_nav.global_planner import Node, RRTStarPlanner
+from lunabot_nav.global_planner import Map, Node, RRTStarPlanner
 
 # create logger
 logger = logging.getLogger(__name__)
@@ -36,10 +36,11 @@ class RRTStarTest(unittest.TestCase):
     def setUp(self):
 
         self.planner = RRTStarPlanner(
-            max_iter=50, goal_sample_rate=10, DISCRETIZATION_STEP=0.1
+            max_iter=100, goal_sample_rate=10, disc_step=0.1
         )
-        resolution = 0.1
-        self.planner.set_grid_data(np.array(G1).flatten(), resolution, 5, 5)
+        self.resolution = 0.1
+        self.planner.grid = Map()
+        self.planner.grid.from_data(np.array(G1).flatten(), self.resolution, 5, 5)
 
     # Testing steering and collision testing
     def test_steer_to(self):
@@ -108,10 +109,28 @@ class RRTStarTest(unittest.TestCase):
 
         lower, upper = [20, 10], [50, 70]
         grid[lower[0] : upper[0] + 1, lower[1] : upper[1] + 1] = 1
-        self.planner.set_grid_data(grid.flatten(), resolution, *dims)
+        self.planner.grid.from_data(grid.flatten(), resolution, *dims)
         start = np.array([1, 1])
         end = np.array([10, 10])
 
         plan = self.planner.plan(start, end)
         logger.debug("path: %s", plan)
+        self.assertIsNotNone(plan, "large obstacle")
+
+    def test_rrtstar_harder_offset(self):
+        self.planner.GAMMA = 20
+        dims = [200, 200]
+        grid = np.zeros(dims)
+        lower, upper = [50, 50], [70, 70]
+        grid[lower[0] : upper[0] + 1, lower[1] : upper[1] + 1] = 1
+
+        lower, upper = [20, 10], [50, 70]
+        grid[lower[0] : upper[0] + 1, lower[1] : upper[1] + 1] = 1
+        self.planner.grid.from_data(grid.flatten(), self.resolution, *dims, origin=np.array([-0.25,-0.25]))
+        self.planner.goal_sample_rate = 0.4
+        start = np.array([1, 1])
+        end = np.array([10, 10])
+
+        plan = self.planner.plan(start, end)
+        logger.info("path: %s", self.planner.goalfound)
         self.assertIsNotNone(plan, "large obstacle")

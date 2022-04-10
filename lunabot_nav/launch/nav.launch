@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+    <group ns="maps">
+        <node name="costmap_node" pkg="lunabot_nav" type="costmap_node">
+            <rosparam file="$(find lunabot_config)/config/global_costmap.yml" command="load" ns="global_costmap" />
+        </node>
+    </group>
+
+    <group ns="nav">
+        <rosparam file="$(find lunabot_config)/config/nav.yml" command="load" />
+
+        <node name="mpc_node" pkg="lunabot_nav" type="mpc_node" output="screen">
+            <rosparam file="$(find lunabot_config)/config/mpc.yml" command="load"/>
+        </node>
+        <node name="global_planner_node" pkg="lunabot_nav" type="global_planner_node" output="screen">
+            <rosparam file="$(find lunabot_config)/config/rrtstar.yml" command="load"/>
+        </node>
+    </group>
+
+</launch>

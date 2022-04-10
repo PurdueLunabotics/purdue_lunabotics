@@ -24,8 +24,7 @@
     <group ns="camera/color" >
         <node pkg="image_proc" type="image_proc" name="image_proc" args="image:=camera/color/image_raw"/>
         <include file="$(find lunabot_perception)/launch/apriltag.launch">
-        <arg name="camera_prefix" value="d435/camera" />
-        <arg name="camera_frame" value="d435_base" />
+          <arg name="camera_frame" value="d435_base" />
         </include>
     </group>
   </group>

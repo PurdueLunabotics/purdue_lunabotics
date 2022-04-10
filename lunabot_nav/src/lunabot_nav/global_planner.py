@@ -3,24 +3,116 @@
 Global path planner using RRTstar algorithm
 author: Raghava Uppuluri, code adapted from Ahmed Qureshi and AtsushiSakai(@Atsushi_twi)
 """
-from collections import defaultdict
 import logging
 import copy
 import math
 import random
 import time
-import heapq
 
 import numpy as np
 
 import os
+
+from lunabot_nav.utils import grid_to_file, grid_to_file_rc, pose_to_array
 if os.environ.get("MPL_VISUALIZE") == '1':
     from lunabot_nav.utils import visualize
+
 
 DOF = 2
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+class Map:
+    """Map class"""
+
+    def __init__(self,occ_threshold=0.5):
+        self.resolution = None
+        self.origin = None
+        self.width = None
+        self.height = None
+        self.grid = None
+        self.occ_threshold = occ_threshold 
+
+    def from_msg(self, grid_msg):
+        self.resolution = grid_msg.info.resolution  # m/cell
+        self.origin, _ = np.array(
+            pose_to_array(grid_msg.info.origin)
+        )  # (pose, ori = usually zero, so same frame as 'map')
+        self.origin = self.origin[:2] # only x,y
+        self.width = grid_msg.info.width  # m/cell
+        self.height = grid_msg.info.height  # m/cell
+        self.grid = np.array(grid_msg.data).reshape((self.width,self.height),order='F')
+        #grid_to_file_rc(self.grid)
+        #grid_to_file(grid_msg.data,self.width)
+
+    def from_data(self, grid, resolution, height, width, origin=np.zeros(2),occ_threshold=0.5):
+        """Sets the map grid and internal parameters related to the grid
+
+        Args:
+            grid (1D np.array height * width): Occupancy Grid
+            resolution (float): resolution m/cell
+            height (int): the number of rows of the grid in cells (rows or x-axis)
+            width (int): the width of the grid in cells (cols or y-axis)
+            origin (np.array): the (x,y) offset of the grid in  in the robot cspace 
+        """
+        assert grid is not None
+        assert resolution is not None
+        assert height is not None
+        assert width is not None
+
+        self.resolution = resolution
+        self.width = width
+        self.height = height
+        self.grid = grid.reshape(width,height)
+        self.origin = origin
+        self.occ_threshold = occ_threshold 
+
+    def cspace_to_grid(self, state):
+        """Converts an np.array in c-space to a discretized index in the occ grid
+
+        Args:
+            state (_type_): np.array of size DOF
+
+        Returns:
+            np.array 2x1: index of state in uv format of the occ grid
+        """
+        assert self.initialized, "Not initalized with set_data or set_msg"
+        pos = state.copy() - self.origin
+        pos = pos / self.resolution
+        uv_pos = np.round(pos).astype("uint32")
+        return uv_pos 
+
+    @property
+    def cspace_spec(self):
+    
+        assert self.initialized, "Not initalized with set_data or set_msg"
+        x_spec = np.array([0,self.width * self.resolution]) + self.origin[0]
+        y_spec = np.array([0,self.height * self.resolution]) + self.origin[1]
+        return x_spec,y_spec
+
+    @property
+    def initialized(self):
+        return self.resolution is not None and self.origin is not None and self.width is not None and self.height is not None and self.grid is not None and self.grid is not None and self.occ_threshold is not None
+
+    def in_collision(self, node):
+        """Checks if node corresponds to an occupied state in the occupancy grid
+
+        Args:
+            node (Node): node to check in collision
+
+        Returns:
+            bool: Returns True if in Collision and False otherwise
+        """
+        assert self.initialized, "Not initalized with set_data or set_msg"
+
+        w,h = self.cspace_to_grid(node.state)
+        if w < 0 or w >= self.width: 
+            return True
+        if h < 0 or h >= self.height: 
+            return True
+        logger.debug("uv_ind: (%d,%d)",w,h)
+        return self.grid[w,h] > self.occ_threshold
 
 class Node:
     """Node class"""
@@ -42,79 +134,17 @@ class Node:
 class Planner:
     def __init__(self):
         self.grid = None
-        self.resolution = None
-        self.grid_height = None
-        self.grid_width = None
         self.goal = None
         self.start = None
         self.node_list = []
         self.visualize = os.environ.get('MPL_VISUALIZE') == '1'
-
-    def set_grid_data(self, grid, resolution, height, width):
-        """Sets the map grid and internal parameters related to the grid
-
-        Args:
-            grid (1D np.array height * width): Occupancy Grid
-            resolution (float): resolution m/cell
-            height (int): the number of rows of the grid in cells (rows or x-axis)
-            width (int): the width of the grid in cells (cols or y-axis)
-        """
-        assert grid is not None
-        assert resolution is not None
-        assert height is not None
-        assert width is not None
-
-        self.grid = grid
-        self.resolution = resolution
-        self.grid_height = height
-        self.grid_width = width
+        self.min_dist_to_goal = 0.1
 
     def plan(self, start, goal):
         raise NotImplementedError
 
     def get_path_to_goal(self):
         raise NotImplementedError
-
-    def cspace_to_grid(self, state):
-        """Converts an np.array to a discretized index in the occ grid
-
-        Args:
-            state (_type_): np.array of size DOF
-
-        Returns:
-            np.array 2x1: index of state in uv format of the occ grid
-        """
-        pos = state.copy()
-        pos = pos / self.resolution
-        uv_pos = np.round(pos).astype("uint32")
-        return uv_pos
-
-    def __to_flat(self, uv_ind):
-        """Flattens uv index to row-major index
-
-        Args:
-            uv_ind (list-like type): index in row,col
-
-        Returns:
-            int: row-major index of uv
-        """
-        return self.grid_width * uv_ind[0] + uv_ind[1]
-
-    def in_collision(self, node):
-        """Checks if node corresponds to an occupied state in the occupancy grid
-
-        Args:
-            node (Node): node to check in collision
-
-        Returns:
-            bool: Returns True if in Collision and False otherwise
-        """
-        uv_ind = self.cspace_to_grid(node.state)
-        flat_ind = self.__to_flat(uv_ind)
-        logger.debug("flat_ind: %s", flat_ind)
-        if flat_ind < 0 or flat_ind >= len(self.grid):
-            return True  # outside of c_space, so it is invalid
-        return self.grid[flat_ind] > 0.5
 
     def is_near_goal(self, node):
         """_summary_
@@ -159,7 +189,7 @@ class RRTStarPlanner(Planner):
         goal_sample_rate=10,
         max_iter=100,
         GAMMA=10,
-        DISCRETIZATION_STEP=0.1,
+        disc_step=0.05,
     ):
         """Implements RRT*, a sampling-based planner
 
@@ -167,19 +197,17 @@ class RRTStarPlanner(Planner):
             goal_sample_rate (int, optional): How often the sampler will sample the goal state. Defaults to 10.
             max_iter (int, optional): Max iterations of the planning loop to run. Defaults to 100.
             GAMMA (int, optional): Hyperparameter that determines nearest nodes to randomly sample node that will be rewired. Defaults to 10.
-            DISCRETIZATION_STEP (float, optional): step size when determining if two points have a collision-free straight-line path between them. Defaults to 0.01.
+            discretization_step (float, optional): step size when determining if two points have a collision-free straight-line path between them. Defaults to 0.05.
         """
         super().__init__()
 
-        self.min_dist_to_goal = 0.1
         self.GAMMA = GAMMA
-        self.DISCRETIZATION_STEP = DISCRETIZATION_STEP
+        self.disc_step = disc_step
 
         self.goal_sample_rate = goal_sample_rate
         self.max_iter = max_iter
         self.goalfound = False
         self.solution_set = set()
-
 
     def plan(self, start, goal):
         """Plan path
@@ -192,14 +220,13 @@ class RRTStarPlanner(Planner):
         assert goal is not None
         self.start = Node(start)
         self.goal = Node(goal)
-        if self.grid is None:
+        if not self.grid.initialized:
             logger.info("Occupancy grid not defined yet...")
             return
 
         logger.info("planning")
         plan_start = time.perf_counter()
         self.node_list = [self.start]
-
         for i in range(self.max_iter):
             rnd = self.generate_sample()
             nind = self.nearest_list_index(self.node_list, rnd)
@@ -234,6 +261,7 @@ class RRTStarPlanner(Planner):
                 if self.is_near_goal(new_node):
                     self.solution_set.add(newNodeIndex)
                     self.goalfound = True
+                logger.info("goalfound: %s",self.goalfound)
                 if self.visualize:
                     visualize(self,rnd.state)
 
@@ -293,7 +321,7 @@ class RRTStarPlanner(Planner):
         distTotal = np.linalg.norm(dists)
 
         if distTotal > 0:
-            incrementTotal = distTotal / self.DISCRETIZATION_STEP
+            incrementTotal = distTotal / self.disc_step
             dists = dists / incrementTotal
             numSegments = int(math.floor(incrementTotal)) + 1
             logger.debug("state_check: %s", newNode.state)
@@ -302,14 +330,14 @@ class RRTStarPlanner(Planner):
             stateCurr = Node(newNode.state)
 
             for i in range(0, numSegments):
-                if self.in_collision(stateCurr):
+                if self.grid.in_collision(stateCurr):
                     logger.debug("COLLISION")
                     return (False, None)
                 logger.debug("SAFE")
                 stateCurr.state = stateCurr.state + dists
                 logger.debug("state_check: %s", stateCurr.state)
 
-            if self.in_collision(dest):
+            if self.grid.in_collision(dest):
                 return (False, None)
             return (True, distTotal)
         else:
@@ -324,14 +352,10 @@ class RRTStarPlanner(Planner):
             Node(state=np.array(dof)): random sample
         """
         if random.randint(0, 100) > self.goal_sample_rate:
-            x_max = self.grid_width * self.resolution
-            # x_min = max(self.curr[0] - self.sample_window_w, 0)
-            y_max = self.grid_height * self.resolution
-            # y_min = max(self.curr[1] - self.sample_window_h, 0)
-
+            x_spec, y_spec = self.grid.cspace_spec
             sample = [
-                np.random.uniform(0, x_max),
-                np.random.uniform(0, y_max),
+                np.random.uniform(*x_spec),
+                np.random.uniform(*y_spec),
             ]
             rnd = Node(np.array(sample))
         else:

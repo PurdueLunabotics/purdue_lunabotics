@@ -1,24 +1,26 @@
 <?xml version="1.0"?>
 <launch>
-  	<include file="$(find dummy_bot_description)/launch/display.launch" />
   	<arg name="world_name" default="$(find mining_arena_gazebo)/worlds/arena.world"/>
   	<arg name="initial_pose" default="-x 1.0 -y 0 -z 0"/>
   	<arg name="model" default="$(find dummy_bot_description)/urdf/dummy_bot.xacro"/>
 
 	<!-- Gazebo specific options -->
 	<arg name="gazebo_gui" default="true"/>
+	<arg name="rviz" default="true"/>
 	<arg name="verbose" default="false"/>
 	<arg name="debug" default="false"/>
 	<arg name="paused" default="false"/>
 	<arg name="point_cloud_topic" default="/point_cloud"/>
 
+
+	<rosparam file="$(find lunabot_config)/config/sim.yml" command="load" />
+
+	<!--Rviz -->
+  	<include file="$(find dummy_bot_description)/launch/display.launch" if="$(arg rviz)"/>
+
   	<param command="$(find xacro)/xacro $(arg model)" name="robot_description"/>
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
-
-    <node name="points_concat" pkg="lunabot_proc" type="points_concat" output="screen">
-        <rosparam file="$(find lunabot_bringup)/config/sensors.yml" command="load" />
-	</node>
 
 	<include file="$(find mining_arena_gazebo)/launch/gazebo.launch">
 		<arg name="world_name" value="$(arg world_name)"/>
@@ -27,10 +29,7 @@
 		<arg name="verbose" value="$(arg verbose)"/>
 		<arg name="debug" value="$(arg debug)"/>
 		<arg name="initial_pose" value="$(arg initial_pose)"/>
-	</include>
-
-	<include file="$(find lunabot_nav)/launch/octomap.launch" >
-		<arg name="point_cloud_topic" value="$(arg point_cloud_topic)"/>
+		<arg name="extra_gazebo_args" value="--lockstep"/>	
 	</include>
 	
 	<include file="$(find lunabot_nav)/launch/mapping.launch" />

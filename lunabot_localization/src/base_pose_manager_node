@@ -37,7 +37,7 @@ class BasePoseManager:
   def init_base_tf(self):
     while self._map_to_t265_start is None:
       try:
-        tf = self._tf_buffer.lookup_transform('t265_pose_frame', 'map', rospy.Time(0))
+        tf = self._tf_buffer.lookup_transform('t265_pose_frame', 'odom', rospy.Time(0))
       except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
         continue
       self._map_to_t265_start = pose_to_np_matrix(tf.transform.translation, tf.transform.rotation)  
@@ -55,7 +55,7 @@ class BasePoseManager:
     map_to_base_link = np_to_tf(map_to_base_link)
 
     base_tf_msg = TransformStamped()
-    base_tf_msg.header.frame_id = "map"
+    base_tf_msg.header.frame_id = "odom"
     base_tf_msg.header.stamp = rospy.Time.now()
     base_tf_msg.child_frame_id = "base_link"
     base_tf_msg.transform = map_to_base_link 
@@ -65,7 +65,7 @@ class BasePoseManager:
 
     odom_msg = Odometry()
 
-    odom_msg.header.frame_id = "map"
+    odom_msg.header.frame_id = "odom"
     odom_msg.header.stamp = rospy.Time.now() 
     odom_msg.child_frame_id = "base_link"
     odom_msg.pose.pose = base_link_pose

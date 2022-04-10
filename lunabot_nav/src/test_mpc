@@ -13,8 +13,6 @@ if __name__ == '__main__':
 
     master = rosgraph.Master('/rostopic')
 
-    
-
     while True:
         pubs, subs = rostopic.get_topic_list(master=master)
         for topic in subs:
@@ -31,7 +29,6 @@ if __name__ == '__main__':
     pose.pose.position.y = 0
     pose.header.frame_id = 'map'
     pose.header.stamp = rospy.Time.now()
-    print('here')
     goal_pub.publish(pose)
 
     points = [
