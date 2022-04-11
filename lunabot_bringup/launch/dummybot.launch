@@ -6,6 +6,6 @@
 	</node>
   <include file="$(find lunabot_localization)/launch/localization.launch" />
   <include file="$(find lunabot_localization)/launch/sensors_dummybot.launch" />
-  <include file="$(find lunabot_nav)/launch/octomap.launch" />
+  <include file="$(find lunabot_nav)/launch/mapping.launch" />
   <include file="$(find lunabot_nav)/launch/lidar.launch" />
 </launch>
