@@ -11,7 +11,7 @@ MPC::MPC(ros::NodeHandle* nh) {
 
     // Nav params
     ros::param::get("map_topic", map_topic);
-    ros::param::get("path_topic", path_topic);
+    ros::param::get("global_path_topic", path_topic);
 
     // MPC params
     ros::param::get("~rollout_count", this->rollout_count_);
@@ -137,8 +137,10 @@ void MPC::publish_velocity_(double linear, double angular) {
     geometry_msgs::Twist twist;
     //twist.header.frame_id = "base_link";
     //twist.header.stamp = ros::Time::now();
-    twist.linear.x = clamp_(angular,ang_lim_[0],ang_lim_[1]);
-    twist.angular.z = clamp_(linear,lin_lim_[0],lin_lim_[1]);
+    //twist.linear.x = clamp_(angular,ang_lim_[0],ang_lim_[1]);
+    twist.linear.x = angular;
+    //twist.angular.z = clamp_(linear,lin_lim_[0],lin_lim_[1]);
+    twist.angular.z = linear;
     //TODO Stamping stuff idk how it works
     this->velocity_pub_.publish(twist);
 }

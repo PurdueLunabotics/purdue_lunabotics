@@ -13,7 +13,7 @@ import numpy as np
 
 import os
 
-from lunabot_nav.utils import grid_to_file, grid_to_file_rc, pose_to_array
+from lunabot_nav.utils import pose_to_array
 if os.environ.get("MPL_VISUALIZE") == '1':
     from lunabot_nav.utils import visualize
 
@@ -43,8 +43,6 @@ class Map:
         self.width = grid_msg.info.width  # m/cell
         self.height = grid_msg.info.height  # m/cell
         self.grid = np.array(grid_msg.data).reshape((self.width,self.height),order='F')
-        #grid_to_file_rc(self.grid)
-        #grid_to_file(grid_msg.data,self.width)
 
     def from_data(self, grid, resolution, height, width, origin=np.zeros(2),occ_threshold=0.5):
         """Sets the map grid and internal parameters related to the grid

@@ -5,7 +5,6 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 import logging
 logging.getLogger("matplotlib").setLevel(logging.WARNING)
-import matplotlib.pyplot as plt
 
 def grid_to_file(grid, cols, file='map_grid.txt'):
     s = ''
@@ -31,6 +30,7 @@ def grid_to_file_rc(grid, file='map_grid_rc.txt'):
 
 
 def visualize(planner,rnd):
+    import matplotlib.pyplot as plt
     """Visualizes obstacles, self.node_list, self.goal, self.start at step in self.plan
 
     Args:
