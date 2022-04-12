@@ -1,31 +1,58 @@
 #include "actuation.h"
 
+Stepper stepper(STEPS, 0, 1, 2, 3); //TODO find ids
 namespace actuation { 
-	void init() {
+	void init() {		
+
 		// set all pwm and direction pins to output
 		for(int i = 0; i < MOTOR_CNT; i++) {
 			pinMode(drive_pins_[i], OUTPUT);
 		}
 
-		for(int i = 0; i < MOTOR_CNT; i++) { pinMode(direction_pins_[i], OUTPUT);
+		for(int i = 0; i < MOTOR_CNT; i++) { 
+			pinMode(direction_pins_[i], OUTPUT);
 		}
 	}
 
 	void _move_angle(int speed) {
 		// (HIGH (CW and moves DOWN), LOW (CCW and moves UP))
 		int direction = (speed > 0) ? LOW : HIGH;
+		digitalWrite(direction_pins_[0], direction);
 		digitalWrite(direction_pins_[1], direction);
-		digitalWrite(direction_pins_[2], direction);
 
+		analogWrite(drive_pins_[0], abs(speed));
 		analogWrite(drive_pins_[1], abs(speed));
-		analogWrite(drive_pins_[2], abs(speed));
+	}
+
+	void resetPID() {
+		integral_accumulation = 0;
+		prev_error = 0;
+		prev_position = 0;
+		prev_lin_speed = 0;
 	}
 
 	void _move_lead_screw(int speed) {
-		int direction = (speed > 0) ? LOW : HIGH;
-		digitalWrite(direction_pins_[0], direction);
+		int curr_pos = (long)analogRead(0) * STEPS / 1024.0; //Unsure if this works
+		float curr_speed = (curr_pos - prev_position) / dt;
+		float error = speed - curr_speed;
+		float target = speed * F;
+		target += error * P;
+		integral_accumulation += error * dt;
+		target += integral_accumulation * I;
+		differential = (error - prev_error) / dt;
+		target += differential * D;
 
-		analogWrite(drive_pins_[0], abs(speed));
+		if(target > MAX_LIN_VEL) {
+			target = MAX_LIN_VEL;
+		} else if (target < -MAX_LIN_VEL) {
+			target = -MAX_LIN_VEL;
+		}
+
+		stepper.setSpeed(target);
+
+		prev_position = curr_pos;
+		prev_lin_speed = curr_speed;
+		prev_error = error;
 	}
 
 	// Negative value - move DOWN, 0 - STOP, positive value - move UP, range - [-1,1]

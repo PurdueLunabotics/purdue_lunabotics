@@ -12,6 +12,7 @@ namespace drivetrain {
 	const uint8_t MOTOR_CNT = 4;
 	const uint8_t MAX_SPEED = 1;
 	typedef enum { FRONT_LEFT, FRONT_RIGHT, BACK_LEFT, BACK_RIGHT } motor_dir_t;
+	const int MAX_ACC = 1;
 
 	// chassis motor indices
 	// corresponding entries are for the same motors

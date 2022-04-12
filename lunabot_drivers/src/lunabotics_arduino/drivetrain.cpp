@@ -57,6 +57,12 @@ namespace drivetrain {
 			d_error = (error - prev_error_[i]) / delta_time;
 			calculated_vel += pidf_values_[2] * d_error; //D
 
+			if(calculated_vel - curr_velocity > MAX_ACC) { //Capping acceleration
+				calculated_vel = curr_velocity + MAX_ACC;
+			} else if(calculated_vel - curr_velocity < -MAX_ACC) {
+				calculated_vel = curr_velocity - MAX_ACC;
+			}
+
 			if(calculated_vel < -1) { //Clamping speed
 				calculated_vel = -1;
 			} else if(calculated_vel > 1) {

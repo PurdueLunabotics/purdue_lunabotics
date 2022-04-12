@@ -1,2 +1,2 @@
-int8 left
-int8 right
+float64 linear
+float64 angular
