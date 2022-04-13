@@ -1,13 +1,13 @@
 rollout_count: 500
-top_rollouts: 10
+top_rollouts: 50
 iterations: 100
-w_linear: 0.1
-w_angular: 0.1
-w_goal: 0.1
-w_line: 0.2
-w_occupied: 10
+w_linear: 0.0
+w_angular: 0.0
+w_goal: 0.2
+w_line: 0.0
+w_occupied: 0.0
 horizon_len: 15
 frequency: 20
 velocity_limits:
-  linear: [-0.2,0.2]
-  angular: [-0.2,0.2]
+  linear: [-0.4,0.4]
+  angular: [-0.1,0.1]

@@ -182,6 +182,7 @@ Eigen::MatrixXd MPC::std_dev_(std::vector<std::pair<Eigen::MatrixXd, double>> ro
             std_dev(j, 1) += (rollouts[i].first(j, 1) - temp_mean(j, 1)) * (rollouts[i].first(j, 1) - temp_mean(j, 1));
         }
     }
+    ROS_ASSERT(rollouts.size() > 1);
     std_dev /= rollouts.size() - 1;
     for(int i = 0; i < std_dev.rows(); ++i) {
         for(int j = 0; j < std_dev.cols(); ++j) {
@@ -261,7 +262,7 @@ void MPC::calculate_velocity() {
 
         //Getting best options
         std::sort(rollouts.begin(), rollouts.end(), comparator);
-        std::vector<std::pair<Eigen::MatrixXd, double>> top_rollouts(rollouts.begin(), rollouts.begin() + 1);
+        std::vector<std::pair<Eigen::MatrixXd, double>> top_rollouts(rollouts.begin(), rollouts.begin() + this->top_rollouts_);
         if(i == iterations - 1) {
             publish_velocity_(top_rollouts[0].first.coeff(0, 3), top_rollouts[0].first.coeff(0, 4));
         } else {

@@ -14,6 +14,7 @@
 #include <Eigen/Dense>
 #include <random>
 #include <vector>
+#include <assert.h>
 
 #include <lunabot_nav/map.h>
 
