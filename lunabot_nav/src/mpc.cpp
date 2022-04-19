@@ -62,6 +62,10 @@ double MPC::find_closest_distance_(Eigen::RowVectorXd pos) {
         //Building Parametric Lines
         double x_vel = new_point[0] - point[0];
         double y_vel = new_point[1] - point[1];
+
+        if(x_vel == 0 && y_vel == 0) {
+            return 0;
+        }
         
         double t = (x_vel * (pos(0) - point[0]) + y_vel * (pos(1) - point[1])) / (x_vel * x_vel + y_vel * y_vel); //Finding time where line is closest to point
 
@@ -133,7 +137,7 @@ double MPC::clamp_(double val, double low, double high) {
 }
 
 void MPC::publish_velocity_(double linear, double angular) {
-    ROS_INFO("PUBLISHING");
+    // ROS_INFO("PUBLISHING");
     geometry_msgs::Twist twist;
     //twist.header.frame_id = "base_link";
     //twist.header.stamp = ros::Time::now();
@@ -152,8 +156,9 @@ std::vector<Eigen::MatrixXd> MPC::normal_distribute_(Eigen::MatrixXd means, Eige
 
         for(int j = 0; j < means.rows(); ++j) {
             for(int k = 0; k < means.cols(); ++k) {
-                std::default_random_engine generator;
-                std::normal_distribution<double> distribution(means(j,k), std_devs(j, k));
+                std::random_device rd;
+                std::default_random_engine generator(rd()); 
+                std::normal_distribution<double> distribution(means(j, k), std_devs(j, k));
                 random_vel(j, k) = distribution(generator);
             }
         }
@@ -215,11 +220,15 @@ Eigen::MatrixXd MPC::calculate_model_(Eigen::MatrixXd actions) {
     1, 0, 0,
     0, 1, 0,
     0, 0, 1;
-    Eigen::MatrixXd model(this->horizon_length_, 3); //x, y, theta
+    Eigen::MatrixXd model(this->horizon_length_, 5); //x, y, theta, v, omega
+    // std::cout << "Horzion Length" << this->horizon_length_ << ": \n";
+    // std::cout << model << "\n";
     for(int i = 0; i < this->horizon_length_; ++i) {
         model(i, 0) = current_pos(0);
         model(i, 1) = current_pos(1);
         model(i, 2) = current_pos(2);
+        model(i, 3) = actions(i, 0);
+        model(i, 4) = actions(i, 1);
 
         Eigen::MatrixXd B(3, 2);
         B << 
@@ -242,28 +251,32 @@ void MPC::calculate_velocity() {
     if(this->robot_pos_.empty() || this->path_.empty() || this->goal_.empty()) {
         return;
     }
-    ROS_INFO("HERE");
+    // ROS_INFO("HERE");
     int horizon_length = this-> horizon_length_;
     Eigen::MatrixXd means = Eigen::MatrixXd::Zero(horizon_length, 2); //v, omega
     Eigen::MatrixXd std_devs = Eigen::MatrixXd::Ones(horizon_length, 2); //v, omega
     int iterations = this->iterations_;
     int rollout_count = this->rollout_count_;
     int top_rollouts = this->top_rollouts_;
-    std::cout << "2";
     for(int i = 0; i < iterations; ++i) {
         std::vector<Eigen::MatrixXd> random_actions = normal_distribute_(means, std_devs, rollout_count_);
         std::vector<std::pair<Eigen::MatrixXd, double>> rollouts(rollout_count_); //x, y, theta, v, omega for each horizon step paired with cost
-
+        std::cout << "Means: " << means << "\n";
+        std::cout << "Std Devs: " << std_devs << "\n";
         for(int j = 0; j < rollout_count_; ++j) {
+            // std::cout << "Random Action:\n";
+            // std::cout << random_actions[j] << "\n";
             Eigen::MatrixXd state = calculate_model_(random_actions[j]);
             rollouts[j] = std::make_pair(state, calculate_cost_(state));
+            // std::cout << "Cost: " << rollouts[j].second << "\n";
+            // std::cout << state << "\n";
         }
-
 
         //Getting best options
         std::sort(rollouts.begin(), rollouts.end(), comparator);
         std::vector<std::pair<Eigen::MatrixXd, double>> top_rollouts(rollouts.begin(), rollouts.begin() + this->top_rollouts_);
         if(i == iterations - 1) {
+            std::cout << top_rollouts[0].second << "\n";
             publish_velocity_(top_rollouts[0].first.coeff(0, 3), top_rollouts[0].first.coeff(0, 4));
         } else {
             means = mean_(top_rollouts);
