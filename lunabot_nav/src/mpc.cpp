@@ -108,8 +108,8 @@ void MPC::update_path(const nav_msgs::Path& path) {
 }
 
 void MPC::update_goal(const geometry_msgs::PoseStamped& goal) {
-    ROS_INFO("GOAL");
     geometry_msgs::Point position = goal.pose.position;
+    std::cout << "Goal: " << position.x << " " << position.y << "\n";
     this->goal_.clear();
     this->goal_.push_back(position.x);
     this->goal_.push_back(position.y);
@@ -169,26 +169,26 @@ std::vector<Eigen::MatrixXd> MPC::normal_distribute_(Eigen::MatrixXd means, Eige
 
 Eigen::MatrixXd MPC::mean_(std::vector<std::pair<Eigen::MatrixXd, double>> rollouts) {
     Eigen::MatrixXd mean = Eigen::MatrixXd::Zero(this->horizon_length_, 2);
-    for(int i = 0; i < rollouts.size(); ++i) {
+    for(int i = 0; i < this->top_rollouts_; ++i) {
         for(int j = 0; j < rollouts[i].first.rows(); ++j) {
-            mean(j, 0) += rollouts[i].first(j, 0);
-            mean(j, 1) += rollouts[i].first(j, 1);
+            mean(j, 0) += rollouts[i].first(j, 3);
+            mean(j, 1) += rollouts[i].first(j, 4);
         }
     }
-    return mean / rollouts.size();
+    return mean / this->top_rollouts_;
 }
 
 Eigen::MatrixXd MPC::std_dev_(std::vector<std::pair<Eigen::MatrixXd, double>> rollouts) {
     Eigen::MatrixXd temp_mean = mean_(rollouts);
     Eigen::MatrixXd std_dev = Eigen::MatrixXd::Zero(this->horizon_length_, 2);
-    for(int i = 0; i < rollouts.size(); ++i) {
+    for(int i = 0; i < this->top_rollouts_; ++i) {
         for(int j = 0; j < rollouts[i].first.rows(); ++j) {
-            std_dev(j, 0) += (rollouts[i].first(j, 0) - temp_mean(j, 0)) * (rollouts[i].first(j, 0) - temp_mean(j, 0));
-            std_dev(j, 1) += (rollouts[i].first(j, 1) - temp_mean(j, 1)) * (rollouts[i].first(j, 1) - temp_mean(j, 1));
+            std_dev(j, 0) += (rollouts[i].first(j, 3) - temp_mean(j, 0)) * (rollouts[i].first(j, 3) - temp_mean(j, 0));
+            std_dev(j, 1) += (rollouts[i].first(j, 4) - temp_mean(j, 1)) * (rollouts[i].first(j, 4) - temp_mean(j, 1));
         }
     }
-    ROS_ASSERT(rollouts.size() > 1);
-    std_dev /= rollouts.size() - 1;
+    ROS_ASSERT(this->top_rollouts_ > 1);
+    std_dev /= this->top_rollouts_ - 1;
     for(int i = 0; i < std_dev.rows(); ++i) {
         for(int j = 0; j < std_dev.cols(); ++j) {
             std_dev(i, j) = std::sqrt(std_dev(i, j));
@@ -204,7 +204,7 @@ double MPC::calculate_cost_(Eigen::MatrixXd rollout) {
     for(int i = 0; i < rollout.rows(); ++i) {
         Eigen::RowVectorXd position = rollout.row(i);
         cost += this->w_linear_ * ((position(0) - robot_pos[0]) * (position(0) - robot_pos[0]) + (position(1) - robot_pos[1]) * (position(1) - robot_pos[1]));
-        cost += this->w_angular_ * (position(0) - robot_pos[0]) * (position(0) - robot_pos[0]);
+        cost += this->w_angular_ * (position(2) - robot_pos[2]) * (position(2) - robot_pos[2]);
         cost += this->w_goal_ * ((position(0) - goal[0]) * (position(0) - goal[0]) + (position(1) - goal[1]) * (position(1) - goal[1]));
         cost += this->w_line_ * find_closest_distance_(position);
         cost += this->w_occupied_ * check_collision_(position);
@@ -252,6 +252,7 @@ void MPC::calculate_velocity() {
         return;
     }
     // ROS_INFO("HERE");
+    std::cout << "vel" << "\n";
     int horizon_length = this-> horizon_length_;
     Eigen::MatrixXd means = Eigen::MatrixXd::Zero(horizon_length, 2); //v, omega
     Eigen::MatrixXd std_devs = Eigen::MatrixXd::Ones(horizon_length, 2); //v, omega
@@ -261,8 +262,8 @@ void MPC::calculate_velocity() {
     for(int i = 0; i < iterations; ++i) {
         std::vector<Eigen::MatrixXd> random_actions = normal_distribute_(means, std_devs, rollout_count_);
         std::vector<std::pair<Eigen::MatrixXd, double>> rollouts(rollout_count_); //x, y, theta, v, omega for each horizon step paired with cost
-        std::cout << "Means: " << means << "\n";
-        std::cout << "Std Devs: " << std_devs << "\n";
+        // std::cout << "Means: " << means << "\n";
+        // std::cout << "Std Devs: " << std_devs << "\n";
         for(int j = 0; j < rollout_count_; ++j) {
             // std::cout << "Random Action:\n";
             // std::cout << random_actions[j] << "\n";
@@ -274,13 +275,16 @@ void MPC::calculate_velocity() {
 
         //Getting best options
         std::sort(rollouts.begin(), rollouts.end(), comparator);
-        std::vector<std::pair<Eigen::MatrixXd, double>> top_rollouts(rollouts.begin(), rollouts.begin() + this->top_rollouts_);
+        std::cout << "Weights:\n";
+        for(int j = 0; j < 10; ++j) {
+            std::cout << rollouts[j].second << "\n";
+        } 
+        std::cout << "\n";
         if(i == iterations - 1) {
-            std::cout << top_rollouts[0].second << "\n";
-            publish_velocity_(top_rollouts[0].first.coeff(0, 3), top_rollouts[0].first.coeff(0, 4));
+            publish_velocity_(rollouts[0].first.coeff(0, 3), rollouts[0].first.coeff(0, 4));
         } else {
-            means = mean_(top_rollouts);
-            std_devs = std_dev_(top_rollouts);
+            means = mean_(rollouts);
+            std_devs = std_dev_(rollouts);
         }
     }
 }
