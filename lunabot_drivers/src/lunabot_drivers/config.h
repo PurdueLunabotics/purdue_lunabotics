@@ -32,30 +32,31 @@ struct MotorConfig
 
 static const struct ExcavationConfig
 {
-    MotorConfig exc = {.DIR_P = 10, .PWM_P = 10};
+    MotorConfig exc = {.DIR_P = 26, .PWM_P = 24};
 } excavation_cfg;
 
 
 static const struct DrivetrainConfig
 {
-    MotorConfig left_front = {.DIR_P = 10, .PWM_P = 10};
-    MotorConfig right_front = {.DIR_P = 10, .PWM_P = 10};
-    MotorConfig left_back = {.DIR_P = 10, .PWM_P = 10};
-    MotorConfig right_back = {.DIR_P = 10, .PWM_P = 10};
+    MotorConfig left_front = {.DIR_P = 14, .PWM_P = 13};
+    MotorConfig right_front = {.DIR_P = 16, .PWM_P = 15};
+    MotorConfig left_back = {.DIR_P = 20, .PWM_P = 19};
+    MotorConfig right_back = {.DIR_P = 23, .PWM_P = 22};
 } drivetrain_cfg;
 
 static const struct DepositionConfig
 {
-    MotorConfig dep_motor = { .DIR_P = 10, .PWM_P = 10};
+    MotorConfig dep_motor = { .DIR_P = 5, .PWM_P = 4};
 } deposition_cfg;
 
-const struct ActuationConfig
+static const struct ActuationConfig
 {
-    MotorConfig left_lin_act = {.DIR_P = 10, .PWM_P = 10};
-    MotorConfig right_lin_act = {.DIR_P = 10, .PWM_P = 10};
+    MotorConfig left_lin_act = {.DIR_P = 29, .PWM_P = 28};
+    MotorConfig right_lin_act = {.DIR_P = 27, .PWM_P = 25};
     StepperConfig lead_screw = {
-        .PWM1_P = 10, .PWM2_P = 10, 
-        .DIR1_P = 10, .DIR2_P = 10, .steps = 200, .speed = 50, .step_size = 10
+        .PWM1_P = 2, .PWM2_P = 0, 
+        .DIR1_P = 3, .DIR2_P = 1, 
+        .steps = 200, .speed = 50, .step_size = 10
     };
 } actuation_cfg;
 

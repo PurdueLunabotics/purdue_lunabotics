@@ -24,20 +24,27 @@ namespace actuation
 
 		nh.logerror("  lead screw:");
 		nh.logerror(String(lead_screw_en).c_str());
+		nh.logerror(String(actuation_cfg.lead_screw.DIR_P).c_str());
 
 		if(angle_en) {
+			nh.logerror(String(actuation_cfg.left_lin_act.DIR_P).c_str());
+			nh.logerror(String(actuation_cfg.right_lin_act.DIR_P).c_str());
+			nh.logerror(String(actuation_cfg.left_lin_act.PWM_P).c_str());
+			nh.logerror(String(actuation_cfg.right_lin_act.PWM_P).c_str());
 			write_motor(actuation_cfg.left_lin_act,
 						actuation_cfg.left_lin_act.MAX_PWM,angle_dir);
 			write_motor(actuation_cfg.right_lin_act,
 						actuation_cfg.right_lin_act.MAX_PWM,angle_dir);
 		}
 		else {
+			nh.logerror("STOP");
 			stop_motor(actuation_cfg.left_lin_act);
 			stop_motor(actuation_cfg.right_lin_act);
 		}
 
 		if(lead_screw_en) {
-
+			nh.logerror(String(actuation_cfg.lead_screw.DIR1_P).c_str());
+			nh.logerror(String(actuation_cfg.lead_screw.DIR2_P).c_str());
 			step(actuation_cfg.lead_screw, &lead_screw_stepper, lead_screw_dir);
 		}
 	}
