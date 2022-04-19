@@ -2,7 +2,7 @@
 import rospy
 import numpy as np
 
-from std_msgs.msg import Float64 
+from std_msgs.msg import Int8
 from sensor_msgs.msg import Joy 
 from lunabot_msgs.msg import Actuation
 from lunabot_msgs.msg import Drivetrain 
@@ -19,10 +19,10 @@ class ManualController:
         self._joy_sub = rospy.Subscriber('joy', Joy, self.joy_cb);
         self.actions = {'drivetrain': self.run_drivetrain, 'actuation': self.run_actuation, 'excavation': self.run_excavation, 'deposition': self.run_deposition}
 
-        self._drivetrain_pub = rospy.Publisher('cmd_vel', Drivetrain, queue_size=1000);
-        self._excavation_pub = rospy.Publisher('excavation', Float64, queue_size=1000);
-        self._deposition_pub = rospy.Publisher('deposition', Float64, queue_size=1000);
-        self._actuation_pub = rospy.Publisher('actuation', Actuation, queue_size=1000);
+        self._drivetrain_pub = rospy.Publisher('cmd_vel', Drivetrain, queue_size=100);
+        self._excavation_pub = rospy.Publisher('excavation', Int8, queue_size=100);
+        self._deposition_pub = rospy.Publisher('deposition', Int8, queue_size=100);
+        self._actuation_pub = rospy.Publisher('actuation', Actuation, queue_size=100);
 
     def joy_cb(self, joy):
         if joy.buttons[0]: # 'A' button -- switches the active subsystem
@@ -48,17 +48,17 @@ class ManualController:
 
     def run_actuation(self, joy):
         actuation_msg = Actuation()
-        actuation_msg.lead_screw_actuation = joy.axes[1]
-        actuation_msg.angle_actuation = joy.axes[4]
+        actuation_msg.lead_screw = joy.axes[1]
+        actuation_msg.angle = joy.axes[4]
         self._actuation_pub.publish(actuation_msg)
         
     def run_excavation(self, joy):
-        excavation_msg = Float64()
+        excavation_msg = Int8()
         excavation_msg.data = joy.axes[1]
         self._excavation_pub.publish(excavation_msg)
         
     def run_deposition(self, joy):
-        deposition_msg = Float64()
+        deposition_msg = Int8()
         deposition_msg.data = joy.axes[1]
         self._deposition_pub.publish(deposition_msg)
 
@@ -69,9 +69,9 @@ class ManualController:
         actuation_stop = Actuation()
         actuation_stop.lead_screw_actuation = 0
         actuation_stop.angle_actuation = 0
-        excavation_stop = Float64()
+        excavation_stop = Int8()
         excavation_stop.data = 0
-        deposition_stop = Float64()
+        deposition_stop = Int8()
         deposition_stop.data = 0
 
         self._drivetrain_pub.publish(cmd_vel_stop)
