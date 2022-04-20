@@ -38,5 +38,5 @@ void setup() {
 
 void loop() {
 	nh.spinOnce();
-	delay(3);
+	delay(100);
 }
