@@ -43,13 +43,23 @@ class ManualController:
     def run_drivetrain(self, joy):
         drive_msg = Drivetrain()
         drive_msg.left = self.constrain(joy.axes[1])
-        drive_msg.right = self.constrain(joy.axes[4])
+        drive_msg.right = self.constrain(joy.axes[3])
         self._drivetrain_pub.publish(drive_msg)
+        actuation_msg = Actuation()
+        actuation_msg.lead_screw = int(joy.axes[5] - joy.axes[6])
+        actuation_msg.angle = int(joy.buttons[4] - joy.buttons[5])
+        self._actuation_pub.publish(actuation_msg)
+        excavation_msg = Float64()
+        excavation_msg.data = joy.buttons[1]
+        self._excavation_pub.publish(excavation_msg)
+        deposition_msg = Int8()
+        deposition_msg.data = int(joy.buttons[2] - joy.buttons[3])
+        self._deposition_pub.publish(deposition_msg)
 
     def run_actuation(self, joy):
         actuation_msg = Actuation()
-        actuation_msg.lead_screw = int(joy.axes[1])
-        actuation_msg.angle = int(joy.axes[4])
+        actuation_msg.lead_screw = int(joy.axes[5] - joy.axes[6])
+        actuation_msg.angle = int(joy.axes[3])
         self._actuation_pub.publish(actuation_msg)
         
     def run_excavation(self, joy):
