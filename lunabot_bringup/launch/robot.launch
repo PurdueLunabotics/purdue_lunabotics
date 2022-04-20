@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <group>
-        <machine name="lunabot" env-loader="lunabot_env.sh" user="lunabotics" address="192.168.1.10" default="true" />
-        <node name="teensy_drive" ns="teensy_drive" pkg="rosserial_python" type="serial_node.py" output="screen">
+        <node name="teensy_main" ns="teensy_main" pkg="rosserial_python" type="serial_node.py" output="screen">
             <param name="port" type="string" value="/dev/ttyACM0"/>
         </node>
     </group>
