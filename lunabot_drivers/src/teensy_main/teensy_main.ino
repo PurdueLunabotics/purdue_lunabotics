@@ -6,6 +6,7 @@
 
 ros::NodeHandle nh;
 
+
 void actuation_cb(const lunabot_msgs::Actuation& actuation) {
 	actuation::run_actuation(actuation, nh);
 }
@@ -34,9 +35,11 @@ void setup() {
 	drivetrain::init();
 	actuation::init();
 	excavation::init();
+
 }
 
 void loop() {
 	nh.spinOnce();
-	delay(100);
+	actuation::stepper_step();
+	delay(10);
 }
