@@ -1,7 +1,12 @@
 #!/bin/bash
 
 TESTING=true
-IS_COMPUTER=true
+if [[ -z "$JETSON" ]]; then
+  IS_COMPUTER=false
+else
+  IS_COMPUTER=true
+fi
+IS_COMPUTER="${JETSON:-true}"
 COMPUTER_IP=192.168.1.11
 ROBOT_IP=192.168.1.10
 
