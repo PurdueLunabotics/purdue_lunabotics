@@ -252,7 +252,7 @@ void MPC::calculate_velocity() {
         return;
     }
     // ROS_INFO("HERE");
-    std::cout << "vel" << "\n";
+    // std::cout << "vel" << "\n";
     int horizon_length = this-> horizon_length_;
     Eigen::MatrixXd means = Eigen::MatrixXd::Zero(horizon_length, 2); //v, omega
     Eigen::MatrixXd std_devs = Eigen::MatrixXd::Ones(horizon_length, 2); //v, omega
@@ -275,11 +275,11 @@ void MPC::calculate_velocity() {
 
         //Getting best options
         std::sort(rollouts.begin(), rollouts.end(), comparator);
-        std::cout << "Weights:\n";
-        for(int j = 0; j < 10; ++j) {
-            std::cout << rollouts[j].second << "\n";
-        } 
-        std::cout << "\n";
+        // std::cout << "Weights:\n";
+        // for(int j = 0; j < 10; ++j) {
+        //     std::cout << rollouts[j].second << "\n";
+        // } 
+        // std::cout << "\n";
         if(i == iterations - 1) {
             publish_velocity_(rollouts[0].first.coeff(0, 3), rollouts[0].first.coeff(0, 4));
         } else {
