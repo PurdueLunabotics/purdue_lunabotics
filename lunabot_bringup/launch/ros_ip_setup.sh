@@ -7,7 +7,7 @@ else
   IS_COMPUTER=true
 fi
 IS_COMPUTER="${JETSON:-true}"
-COMPUTER_IP=192.168.1.12
+COMPUTER_IP=192.168.1.11
 ROBOT_IP=192.168.1.10
 
 # RUN `. ./ros_ip_setup.sh` in your terminal after setting the above variables, check by doing `export | grep ROS`
