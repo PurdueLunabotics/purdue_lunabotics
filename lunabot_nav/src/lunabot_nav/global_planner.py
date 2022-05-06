@@ -12,6 +12,7 @@ import time
 import numpy as np
 
 import os
+from lunabot_nav.smoothing import Bezier
 
 from lunabot_nav.utils import pose_to_array
 if os.environ.get("MPL_VISUALIZE") == '1':
@@ -145,8 +146,7 @@ class Planner:
         raise NotImplementedError
 
     def is_near_goal(self, node):
-        """_summary_
-        Checks whether node is within self.min_dist_to_goal of goal
+        """Checks whether node is within self.min_dist_to_goal of goal
 
         Args:
             node (Node): location to check
@@ -158,6 +158,7 @@ class Planner:
         if d < self.min_dist_to_goal:
             return True
         return False
+    
 
 # class AStarNode(Node):
 #     def __init__(self,state):
@@ -188,6 +189,7 @@ class RRTStarPlanner(Planner):
         max_iter=100,
         GAMMA=10,
         disc_step=0.05,
+        **kwargs
     ):
         """Implements RRT*, a sampling-based planner
 
@@ -197,7 +199,7 @@ class RRTStarPlanner(Planner):
             GAMMA (int, optional): Hyperparameter that determines nearest nodes to randomly sample node that will be rewired. Defaults to 10.
             discretization_step (float, optional): step size when determining if two points have a collision-free straight-line path between them. Defaults to 0.05.
         """
-        super().__init__()
+        super().__init__(**kwargs)
 
         self.GAMMA = GAMMA
         self.disc_step = disc_step

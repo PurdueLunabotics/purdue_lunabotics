@@ -42,7 +42,7 @@ class Map {
                 state[i] = round(state[i]);
             }
             std::vector<int> uv_ind(state.begin(), state.end());
-            int flat_ind = width_ * uv_ind[0] + uv_ind[1];
+            int flat_ind = height_ * uv_ind[1] + uv_ind[0];
             if(flat_ind < 0 || flat_ind >= grid_.size()) return true;
             return grid_[flat_ind] > occupied_val_;
         }
@@ -53,7 +53,6 @@ class Map {
             height_ = map.info.height;
             origin_.push_back(map.info.origin.position.x);
             origin_.push_back(map.info.origin.position.y);
-            origin_.push_back(map.info.origin.position.z);
             grid_ = map.data;
         }
 };
