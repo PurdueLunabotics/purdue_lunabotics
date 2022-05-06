@@ -23,12 +23,12 @@ class ManualController:
         self._actuation_pub = rospy.Publisher('actuation', Actuation, queue_size=100);
 
     def joy_cb(self, joy):
-        if joy.buttons[1]: # 'A' button -- switches the active subsystem
+        if joy.buttons[1]: # 'B' button -- switches the active subsystem
             self.stop()
             rospy.logerr("STOPPED")
-            return
-
-        self.actions[self.curr_subsystem](joy)
+        else:
+            self.main_cb(joy)
+        
 
     def constrain(self,joy_in):
         return np.int8(min(joy_in * 128,127))
