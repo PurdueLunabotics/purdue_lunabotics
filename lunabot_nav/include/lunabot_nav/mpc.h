@@ -58,7 +58,7 @@ private:
 
     int is_close_();
     void update_setpoint_();
-    double dist_();
+    double dist_to_setpoint_();
 
 public:
     MPC(ros::NodeHandle* nh);

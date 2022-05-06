@@ -97,7 +97,7 @@ double MPC::find_closest_distance_(Eigen::RowVectorXd pos)
 }
 
 int MPC::is_close_() {
-    return dist_() <= min_dist_thres_ * min_dist_thres_;
+    return dist_to_setpoint_() <= min_dist_thres_ * min_dist_thres_;
 }
 
 void MPC::update_setpoint_() {
@@ -242,7 +242,7 @@ Eigen::MatrixXd MPC::std_dev_(std::vector<std::pair<Eigen::MatrixXd, double>> ro
     return std_dev;
 }
 
-double MPC::dist_() {
+double MPC::dist_to_setpoint_() {
 return ((robot_pos_[0] - path_[path_ind_][0]) * (robot_pos_[0] - path_[path_ind_][0]) + (robot_pos_[1] - path_[path_ind_][1]) * (robot_pos_[1] - path_[path_ind_][1]));
 }
 
