@@ -48,20 +48,14 @@ source ~/catkin_ws/devel/setup.bash # or .zsh if you use a zsh terminal
 
 2. Connect computer to ethernet port on the router
 3. Turn on the jetson and wait atleast 1.5 min
-4. On the laptop, run `jetson` to run the ssh alias to the jetson. Then enter the password.
 
 #### 2. Run roslaunch commands
 
-1. In another terminal, set the ROS IP info on the laptop using the alias: `set_ip`
-2. Launch the computer launch file on the laptop
+1. Open a terminal, set the ROS IP info on the laptop and run the magic run command: 
 ```
-roslaunch lunabot_bringup computer.launch
+set_ip
+roslaunch lunabot_bringup robot.launch
 ```
-2. Launch the jetson launch file on the jetson
-```
-roslaunch lunabot_bringup dummybot.launch
-```
-> Can replace dummybot with `rollerbot` or for the config of the competition robot (compbot?)
 
 That's it! Things should be running now.
 
