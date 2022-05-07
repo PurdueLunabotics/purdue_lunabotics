@@ -10,7 +10,7 @@ namespace drivetrain {
 
 	// DRIVETRAIN FUNCTIONS
   	void init();
-	void run_drivetrain(const lunabot_msgs::Drivetrain& drive_msg, ros::NodeHandle& nh); 
+	void run_drivetrain(const lunabot_msgs::Drivetrain& drive_msg, ros::NodeHandle* nh); 
 }
 
 #endif

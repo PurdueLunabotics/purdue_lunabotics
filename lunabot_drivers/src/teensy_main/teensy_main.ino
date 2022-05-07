@@ -8,16 +8,16 @@ ros::NodeHandle nh;
 
 
 void actuation_cb(const lunabot_msgs::Actuation& actuation) {
-	actuation::run_actuation(actuation, nh);
+	actuation::run_actuation(actuation, &nh);
 }
 void excavation_cb(const std_msgs::Float64& speed) {
-	excavation::run_excavation(speed, nh);
+	excavation::run_excavation(speed, &nh);
 }
 void deposition_cb(const std_msgs::Int8& command) {
-	deposition::run_deposition(command, nh);
+	deposition::run_deposition(command, &nh);
 }
 void drivetrain_cb(const lunabot_msgs::Drivetrain& drive_msg) {
-	drivetrain::run_drivetrain(drive_msg, nh);
+	drivetrain::run_drivetrain(drive_msg, &nh);
 }
 
 ros::Subscriber<lunabot_msgs::Actuation> actuation_sub("/actuation", actuation_cb);

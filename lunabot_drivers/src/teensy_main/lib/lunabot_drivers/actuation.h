@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <Stepper.h>
 #include "actuator_config.h"
-
+#include "sensor_config.h"
 
 #ifndef ACTUATION_H
 #define ACTUATION_H
@@ -14,7 +14,7 @@ namespace actuation
 	// ACTUATION FUNCTIONS
 	void init();
 	void stepper_step();
-	void run_actuation(const lunabot_msgs::Actuation &actuation, ros::NodeHandle nh);
+	void run_actuation(const lunabot_msgs::Actuation &actuation, ros::NodeHandle *nh);
 }
 
 #endif
