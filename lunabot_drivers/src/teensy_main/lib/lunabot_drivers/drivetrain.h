@@ -1,6 +1,6 @@
 #include <ros.h>
 #include <lunabot_msgs/Drivetrain.h>
-#include "config.h"
+#include "actuator_config.h"
 
 #ifndef DRIVETRAIN_H
 #define DRIVETRAIN_H

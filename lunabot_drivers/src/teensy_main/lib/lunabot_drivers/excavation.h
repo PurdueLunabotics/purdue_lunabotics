@@ -1,6 +1,6 @@
 #include <ros.h>
 #include <std_msgs/Float64.h>
-#include "config.h"
+#include "actuator_config.h"
 
 #ifndef EXCAVATION_H
 #define EXCAVATION_H

@@ -25,10 +25,10 @@ namespace drivetrain {
 		MotorDir left_back_vel_dir = (vel_l > 0) ? CCW : CW; // wiring issue
 		MotorDir right_vel_dir = (vel_r > 0) ? CW : CCW; 
 
-		nh.logerror("left_vel:");	
-		nh.logerror(String(vel_l).c_str());
-		nh.logerror("right_vel:");	
-		nh.logerror(String(vel_r).c_str());
+		// nh.logerror("left_vel:");	
+		// nh.logerror(String(vel_l).c_str());
+		// nh.logerror("right_vel:");	
+		// nh.logerror(String(vel_r).c_str());
 
 		write_motor(drivetrain_cfg.left_front,abs(vel_l),left_front_vel_dir);
 		write_motor(drivetrain_cfg.left_back,abs(vel_l),left_back_vel_dir);

@@ -45,13 +45,13 @@ namespace actuation
 			stop_motor(actuation_cfg.right_lin_act);
 		}
 
-		nh.logerror("lead screw:");
+		// nh.logerror("lead screw:");
 		if(lead_screw_en) {
-			nh.logerror("ON");
+			// nh.logerror("ON");
 			stepper_on(actuation_cfg.lead_screw);
 		}
 		else {
-			nh.logerror("STOP");
+			// nh.logerror("STOP");
 			stepper_off(actuation_cfg.lead_screw);
 		}
 	}

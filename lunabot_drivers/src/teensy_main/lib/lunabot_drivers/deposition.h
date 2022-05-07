@@ -1,6 +1,6 @@
 #include <ros.h>
 #include <std_msgs/Int8.h>
-#include "config.h"
+#include "actuator_config.h"
 
 #ifndef DEPOSITION_H
 #define DEPOSITION_H

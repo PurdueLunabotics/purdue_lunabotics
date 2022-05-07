@@ -2,7 +2,7 @@
 #include <lunabot_msgs/Actuation.h>
 #include <Arduino.h>
 #include <Stepper.h>
-#include "config.h"
+#include "actuator_config.h"
 
 
 #ifndef ACTUATION_H

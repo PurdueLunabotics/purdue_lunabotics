@@ -1,4 +1,4 @@
-#include "config.h"
+#include "actuator_config.h"
 
 void init_motor(MotorConfig m)
 {

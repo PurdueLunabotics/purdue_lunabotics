@@ -1,10 +1,15 @@
 /*
 Using hall sensors to define joint limit logic for actuators
 
-Actuation:
-    Lead screw: (max,min)
-    Angle: (max,min)x2 (two for each linear actuator)
+* Assuming starting from the robot's stored config
 
-Deposition: (max,min)
+Actuation:
+    Lead screw: 2
+        State machine:  LOW -> HIGH -> LOW
+    Angle: (2 x 2) 
+        State machine:  
+
+Deposition: 2 
+    State machine: LOW -> HIGH -> LOW
 */
 

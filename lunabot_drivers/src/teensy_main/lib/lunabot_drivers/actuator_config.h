@@ -1,14 +1,15 @@
 #include <Arduino.h>
 #include <Stepper.h>
 
-#ifndef __CONFIG_H__
-#define __CONFIG_H__
+#ifndef __ACTUATOR_CONFIG_H__
+#define __ACTUATOR_CONFIG_H__
 
 #define DRIVE_MTR_CNT 4
 #define ACT_MTR_CNT 2
 #define DEP_MTR_CNT 1
 #define EXC_MTR_CNT 1
 
+// ACTUATORS
 
 enum StepperDir { RETRACT = -1, EXTEND = 1 };
 struct StepperConfig
@@ -69,5 +70,50 @@ void stepper_step(StepperConfig s, Stepper* stepper, StepperDir dir);
 void init_motor(MotorConfig m);
 void write_motor(MotorConfig m, uint8_t pwm, MotorDir dir);
 void stop_motor(MotorConfig m);
+
+// SENSORS
+
+/*
+Using hall sensors to define joint limit logic for actuators
+
+* Assuming starting from the robot's stored config
+
+Actuation:
+    Lead screw: 2
+        State machine:  LOW -> HIGH -> LOW
+    Angle: (2 x 2) 
+        State machine:  
+
+Deposition: 2 
+    State machine: LOW -> HIGH -> LOW
+*/
+
+struct HallConfig {
+
+}
+
+struct WeightConfig {
+
+}
+
+
+static const struct DepHallConfig {
+    enum FSM = { };
+    HallConfig 
+}
+
+static const struct DepWeightConfig {
+    enum FSM;
+}
+
+static const struct LinActHallConfig {
+    enum FSM;
+}
+
+static const struct LeadScrewHallConfig {
+    enum FSM;
+}
+
+void init_sensor();
 
 #endif
