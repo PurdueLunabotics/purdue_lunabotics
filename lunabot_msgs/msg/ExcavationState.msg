@@ -1,0 +1,2 @@
+uint8 load_cell_state
+uint16 current_draw
