@@ -88,6 +88,7 @@ struct ExcLoadCell
     float current_wt;
     uint8_t gain;
     ExcState state;
+    uint32_t update_period;
 
 } exc_load;
 

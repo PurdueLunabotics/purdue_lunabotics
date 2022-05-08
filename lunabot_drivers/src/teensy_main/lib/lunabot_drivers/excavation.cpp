@@ -1,13 +1,14 @@
 #include "excavation.h"
-#include "HX711.h"
 
 namespace excavation
 {
 	HX711 scale;
+	IntervalTimer scale_timer;
 
 	void exc_load_cell_cb()
 	{
-		if (exc_load.current_wt == 0)
+		exc_load.current_wt = scale.get_value();
+		if (exc_load.current_wt < 0.01)
 		{
 			exc_load.state = EMPTY;
 		}
@@ -18,12 +19,13 @@ namespace excavation
 		else
 		{
 			exc_load.state = FULL;
+			stop_motor(excavation_cfg.exc);
 		}
 	}
 
 	void init_load_cell() {
 		exc_load = { .calibration_factor = 10000,.max_wt=12.0, 
-				     .current_wt = 0.0, .gain=128, .state = EMPTY};
+				     .current_wt = 0.0, .gain=128, .state = EMPTY, .update_period = 1000000 };
 		scale.begin(EXC_LOAD_DATA_PIN,EXC_LOAD_CLK_PIN,exc_load.gain);
 		scale.tare();
 	}
@@ -34,6 +36,8 @@ namespace excavation
 		init_motor(excavation_cfg.exc);
 		stop_motor(excavation_cfg.exc);
 		init_load_cell();
+
+		scale_timer.begin(exc_load_cell_cb,exc_load.update_period);
 	}
 
 	void run_excavation(const std_msgs::Float64 &speed, ros::NodeHandle *nh)
@@ -49,7 +53,6 @@ namespace excavation
 
 		if (excavate_speed != 0)
 		{
-			// stop_motor(excavation_cfg.exc);
 			write_motor(excavation_cfg.exc, excavate_speed, excavate_dir);
 		}
 		else

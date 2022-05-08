@@ -36,6 +36,7 @@ void publish_lunabot_state() {
 	robot_state.lin_act_state = (uint8_t) lin_act_hall.lin_act_state;
 	robot_state.lead_screw_state = (uint8_t) lead_screw_hall.lead_screw_state;
 	robot_state.exc_state.load_cell_state = (uint8_t) exc_load.state;
+	robot_state.exc_state.load_cell_weight = exc_load.current_wt;
 	robot_state.exc_state.current_draw = 0; 
 	robot_state_pub.publish( &robot_state );
 }

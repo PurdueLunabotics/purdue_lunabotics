@@ -2,6 +2,8 @@
 #include <std_msgs/Float64.h>
 #include "actuator_config.h"
 #include "sensor_config.h"
+#include "HX711.h"
+#include <IntervalTimer.h>
 
 #ifndef EXCAVATION_H
 #define EXCAVATION_H
