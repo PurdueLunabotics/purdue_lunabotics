@@ -26,18 +26,15 @@ class ManualController:
         if joy.buttons[1]: # 'B' button -- switches the active subsystem
             self.stop()
             rospy.logerr("STOPPED")
+            return
         else:
             self.main_cb(joy)
-        
-
-    def constrain(self,joy_in):
-        return np.int8(min(joy_in * 128,127))
     
     def main_cb(self, joy):
         # Joysticks
         drive_msg = Drivetrain()
-        drive_msg.left = self.constrain(joy.axes[1] * 0.5)
-        drive_msg.right = self.constrain(joy.axes[4] * 0.5)
+        drive_msg.left = joy.axes[1]
+        drive_msg.right = joy.axes[4]
         self._drivetrain_pub.publish(drive_msg)
 
         actuation_msg = Actuation()

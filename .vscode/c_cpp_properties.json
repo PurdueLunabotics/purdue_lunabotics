@@ -20,7 +20,7 @@
                 "~/arduino-1.8.19/hardware/tools/avr/lib/gcc/avr/4.*.*/include/",
                 "~/arduino-1.8.19/hardware/tools/avr/lib/gcc/avr/4.*.*/include-fixed/",
                 "~/arduino-1.8.19/libraries/**",
-                "~/Arduino/libraries/lunabot_drivers/*"
+                "~/luna_ws/src/purdue_lunabotics/lunabot_drivers/src/teensy_main/lib/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
