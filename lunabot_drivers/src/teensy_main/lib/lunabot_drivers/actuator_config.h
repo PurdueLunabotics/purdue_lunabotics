@@ -46,10 +46,10 @@ static const struct ExcavationConfig
 
 static const struct DrivetrainConfig
 {
-    MotorConfig left_front = {.DIR_pin = 16, .PWM_pin = 15};
-    MotorConfig right_front = {.DIR_pin = 14, .PWM_pin = 13};
-    MotorConfig left_back = {.DIR_pin = 20, .PWM_pin = 19};
-    MotorConfig right_back = {.DIR_pin = 23, .PWM_pin = 22};
+    MotorConfig front_left = {.DIR_pin = 16, .PWM_pin = 15};
+    MotorConfig front_right = {.DIR_pin = 14, .PWM_pin = 13};
+    MotorConfig back_left = {.DIR_pin = 20, .PWM_pin = 19};
+    MotorConfig back_right = {.DIR_pin = 23, .PWM_pin = 22};
 } drivetrain_cfg;
 
 static const struct DepositionConfig

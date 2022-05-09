@@ -25,7 +25,7 @@ namespace excavation
 
 	void init_load_cell() {
 		exc_load = { .calibration_factor = 10000,.max_wt=12.0, 
-				     .current_wt = 0.0, .gain=128, .state = EMPTY, .update_period = 1000000 };
+				     .current_wt = 0.0, .gain=128, .state = EMPTY };
 		scale.begin(EXC_LOAD_DATA_PIN,EXC_LOAD_CLK_PIN,exc_load.gain);
 		scale.tare();
 	}
@@ -37,7 +37,7 @@ namespace excavation
 		stop_motor(excavation_cfg.exc);
 		init_load_cell();
 
-		scale_timer.begin(exc_load_cell_cb,exc_load.update_period);
+		scale_timer.begin(exc_load_cell_cb,EXC_UPDATE_PERIOD);
 	}
 
 	void run_excavation(const std_msgs::Float64 &speed, ros::NodeHandle *nh)

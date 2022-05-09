@@ -36,14 +36,11 @@ class ManualController:
             return
 
         self.actions[self.curr_subsystem](joy)
-
-    def constrain(self,joy_in):
-        return np.int8(min(joy_in * 128,127))
     
     def run_drivetrain(self, joy):
         drive_msg = Drivetrain()
-        drive_msg.left = self.constrain(joy.axes[1])
-        drive_msg.right = self.constrain(joy.axes[4])
+        drive_msg.left = joy.axes[1]
+        drive_msg.right = joy.axes[4]
         self._drivetrain_pub.publish(drive_msg)
 
     def run_actuation(self, joy):
