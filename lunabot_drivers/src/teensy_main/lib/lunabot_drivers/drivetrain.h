@@ -1,6 +1,7 @@
 #include <ros.h>
 #include <lunabot_msgs/Drivetrain.h>
 #include <Encoder.h>
+#include <IntervalTimer.h>
 #include "actuator_config.h"
 #include "sensor_config.h"
 
@@ -18,11 +19,12 @@
 namespace drivetrain {
 
 	struct WheelControl {
-		MotorConfig motor;
-		EncoderConfig enc; 
+		volatile MotorConfig motor;
 		volatile float prev_err;
 		volatile int prev_pos;
-		volatile float setp;
+		volatile float setp; // wheel vel [1,-1]
+		volatile MotorDir forward; // spins motor torwards excavation tool (front)
+		volatile MotorDir backward; // spins motor towards deposition (back)
 	} front_left, front_right, back_left, back_right;
 
 	// DRIVETRAIN FUNCTIONS

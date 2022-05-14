@@ -13,14 +13,14 @@
 #define LIN_ACT_HALL_PIN 33
 #define LEAD_SCREW_HALL_PIN 34
 
-#define DT_FRONT_LEFT_ENC_A_PIN 10
-#define DT_FRONT_LEFT_ENC_A_PIN 10
-#define DT_FRONT_RIGHT_ENC_A_PIN 11
-#define DT_FRONT_RIGHT_ENC_A_PIN 11
-#define DT_BACK_LEFT_ENC_A_PIN 12
-#define DT_BACK_LEFT_ENC_B_PIN 12
-#define DT_BACK_RIGHT_ENC_A_PIN 13
-#define DT_BACK_RIGHT_ENC_B_PIN 13
+#define DT_FT_LFT_ENC_A_PIN 10
+#define DT_FT_LFT_ENC_B_PIN 10
+#define DT_FT_RT_ENC_A_PIN 11
+#define DT_FT_RT_ENC_B_PIN 11
+#define DT_BK_LFT_ENC_A_PIN 12
+#define DT_BK_LFT_ENC_B_PIN 12
+#define DT_BK_RT_ENC_A_PIN 13
+#define DT_BK_RT_ENC_B_PIN 13
 
 /*
 Using hall sensors to define joint limit logic for actuators
@@ -95,18 +95,6 @@ struct ExcLoadCell
     ExcState state;
 
 } exc_load;
-
-struct EncoderConfig
-{
-    uint8_t A_pin;
-    uint8_t B_pin;
-};
-
-const EncoderConfig front_left_enc = { .A_pin = 10, .B_pin = 11 };
-const EncoderConfig front_right_enc = { .A_pin = 10, .B_pin = 11 };
-const EncoderConfig back_left_enc = { .A_pin = 10, .B_pin = 11 };
-const EncoderConfig back_right_enc = { .A_pin = 10, .B_pin = 11 };
-
 
 void init_hall(uint8_t pin, void (*cb)());
 
