@@ -256,7 +256,8 @@ double MPC::calculate_cost_(Eigen::MatrixXd rollout)
         Eigen::RowVectorXd position = rollout.row(i);
         cost += this->w_linear_ * ((position(0) - robot_pos[0]) * (position(0) - robot_pos[0]) + (position(1) - robot_pos[1]) * (position(1) - robot_pos[1]));
         cost += this->w_angular_ * (position(2) - robot_pos[2]) * (position(2) - robot_pos[2]);
-        cost += this->w_waypoint_ * ((position(0) - path_[path_ind_][0]) * (position(0) - path_[path_ind_][0]) + (position(1) - path_[path_ind_][1]) * (position(1) - path_[path_ind_][1]));
+        int path_cost_i = std::min(path_ind_ + i,(int) path_.size()-1); 
+        cost += this->w_waypoint_ * ((position(0) - path_[path_cost_i][0]) * (position(0) - path_[path_cost_i][0]) + (position(1) - path_[path_cost_i][1]) * (position(1) - path_[path_cost_i][1]));
         cost += this->w_occupied_ * check_collision_(position);
     }
 
