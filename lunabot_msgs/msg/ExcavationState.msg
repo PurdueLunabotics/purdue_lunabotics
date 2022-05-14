@@ -1,3 +1,3 @@
 uint8 load_cell_state
-float16 load_cell_weight
+float32 load_cell_weight
 uint16 current_draw
