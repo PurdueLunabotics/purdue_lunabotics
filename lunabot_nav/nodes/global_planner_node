@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import time
 import numpy as np
-from lunabot_nav.smoothing import spline 
+from lunabot_nav.smoothing import Bezier, lerp, spline,dubins
 import rospy
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import OccupancyGrid, Odometry, Path
@@ -58,15 +58,15 @@ class GlobalPlannerNode:
         self.curr_pos = np.array([pos[0], pos[1]])
 
     def __goal_cb(self, goal_msg):
-        pos, _ = pose_to_array(goal_msg.pose)
-        self.goal = np.array([pos[0], pos[1]])
+        pos, (r,p,y) = pose_to_array(goal_msg.pose)
+        self.goal = np.array([pos[0], pos[1], y])
         self.new_goal = True
         
     def plan(self):
         if self.curr_pos is not None and self.goal is not None and self.new_goal:
-            path = self.planner.plan(self.curr_pos, self.goal)
+            path = self.planner.plan(self.curr_pos, self.goal[:-1])
             if path is not None:
-                #path = self.bezier(path) 
+                path = self.smoothing(path) 
                 self.publish_path(path)
                 self.new_goal = False
 
@@ -83,15 +83,18 @@ class GlobalPlannerNode:
         path.poses = [state_to_pose_msg(pose) for pose in poses]
         self.path_publisher.publish(path)
 
-    def bezier(self,points):
-        """Smoothens path with a bezier curve 
+    def smoothing(self,points):
+        """Smoothens path 
         Returns:
-            np.array: Outputs numpy array of current path waypoints smoothened by a bezier curve
+            np.array: Outputs numpy array of current path waypoints
         """
-        runtime = time.process_time() 
-        curve = spline() 
-        runtime -= time.process_time() 
-        print(runtime)
+        try:
+            points = lerp(0.05,points) 
+            curve = Bezier.Curve(self.t_curve, points)
+            print(curve.shape)
+        except BaseException as e:
+            print(e)
+            curve = points
         return curve 
 
 
