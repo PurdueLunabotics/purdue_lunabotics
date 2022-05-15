@@ -1,36 +1,39 @@
+import logging
+
 import numpy as np
 import rospy
 from geometry_msgs.msg import Point32, PoseStamped
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
-import logging
 logging.getLogger("matplotlib").setLevel(logging.WARNING)
 
-def grid_to_file(grid, cols, file='map_grid.txt'):
-    s = ''
+
+def grid_to_file(grid, cols, file="map_grid.txt"):
+    s = ""
     for i in range(len(grid)):
         s += str(grid[i])
-        s += ' '
+        s += " "
         if i % cols == 0:
-            s += '\n'
+            s += "\n"
     with open(file, "w") as text_file:
         text_file.write(s)
 
-def grid_to_file_rc(grid, file='map_grid_rc.txt'):
-    s = ''
+
+def grid_to_file_rc(grid, file="map_grid_rc.txt"):
+    s = ""
     for i in range(len(grid)):
         for j in range(len(grid[0])):
             s += str(grid[i][j])
-            s += ' '
-        s += '\n'
+            s += " "
+        s += "\n"
 
     with open(file, "w") as text_file:
         text_file.write(s)
 
 
-
-def visualize(planner,rnd):
+def visualize(planner, rnd):
     import matplotlib.pyplot as plt
+
     """Visualizes obstacles, self.node_list, self.goal, self.start at step in self.plan
 
     Args:
@@ -74,10 +77,10 @@ def visualize(planner,rnd):
     plt.plot(goal[0], goal[1], "xb")
     plt.axis([0, planner.grid.height, 0, planner.grid.width])
 
-    plt.xlim(0,planner.grid.width)
-    plt.ylim(0,planner.grid.height)
-    plt.gca().set_aspect('equal', adjustable='box')
-    plt.grid(which='both')
+    plt.xlim(0, planner.grid.width)
+    plt.ylim(0, planner.grid.height)
+    plt.gca().set_aspect("equal", adjustable="box")
+    plt.grid(which="both")
     plt.pause(0.01)
 
 
@@ -85,7 +88,7 @@ def state_to_pose_msg(pos, rot=0.0, frame_id="map"):
     """Generates a PoseStamped ROS msg from a numpy array of the robot c-space
 
     Args:
-        state (numpy.array): [x (m), y (m)] 
+        state (numpy.array): [x (m), y (m)]
         pos (float): theta (deg)
 
     Returns:

@@ -2,3 +2,4 @@ map_topic: "/maps/costmap_node/global_costmap/costmap"
 global_path_topic: "global_path"
 occ_threshold: 80 # corresponds to possibly-in-collision
 bezier_step: 0.01
+lerp_step: 0.05
