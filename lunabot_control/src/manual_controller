@@ -2,7 +2,7 @@
 import rospy
 import numpy as np
 
-from std_msgs.msg import Float64 
+from std_msgs.msg import Int8,Float64
 from sensor_msgs.msg import Joy 
 from lunabot_msgs.msg import Actuation
 from lunabot_msgs.msg import Drivetrain 
@@ -17,49 +17,46 @@ class ManualController:
         self.curr_subsystem = 'drivetrain'
 
         self._joy_sub = rospy.Subscriber('joy', Joy, self.joy_cb);
-        self.actions = {'drivetrain': self.run_drivetrain, 'actuation': self.run_actuation, 'excavation': self.run_excavation, 'deposition': self.run_deposition}
-
-        self._drivetrain_pub = rospy.Publisher('cmd_vel', Drivetrain, queue_size=1000);
-        self._excavation_pub = rospy.Publisher('excavation', Float64, queue_size=1000);
-        self._deposition_pub = rospy.Publisher('deposition', Float64, queue_size=1000);
-        self._actuation_pub = rospy.Publisher('actuation', Actuation, queue_size=1000);
+        self._drivetrain_pub = rospy.Publisher('cmd_vel', Drivetrain, queue_size=100);
+        self._excavation_pub = rospy.Publisher('excavation', Float64, queue_size=100);
+        self._deposition_pub = rospy.Publisher('deposition', Int8, queue_size=100);
+        self._actuation_pub = rospy.Publisher('actuation', Actuation, queue_size=100);
 
     def joy_cb(self, joy):
-        if joy.buttons[0]: # 'A' button -- switches the active subsystem
-            new_index = 0 if self.curr_subsystem == 'deposition' else self.subsystems.index(self.curr_subsystem) + 1 	
-            self.curr_subsystem = self.subsystems[new_index]
-            rospy.loginfo("Switch to Subsystem: %s", self.curr_subsystem)
-
-        elif joy.buttons[1]:
+        if joy.buttons[1]: # 'B' button -- switches the active subsystem
             self.stop()
             rospy.logerr("STOPPED")
-            return
-
-        self.actions[self.curr_subsystem](joy)
+        else:
+            self.main_cb(joy)
+        
 
     def constrain(self,joy_in):
         return np.int8(min(joy_in * 128,127))
     
-    def run_drivetrain(self, joy):
+    def main_cb(self, joy):
+        # Joysticks
         drive_msg = Drivetrain()
-        drive_msg.right = self.constrain(-1*joy.axes[1])
-        drive_msg.left = self.constrain(-1*joy.axes[4])
+        drive_msg.left = self.constrain(joy.axes[1] * 0.5)
+        drive_msg.right = self.constrain(joy.axes[4] * 0.5)
         self._drivetrain_pub.publish(drive_msg)
 
-    def run_actuation(self, joy):
         actuation_msg = Actuation()
-        actuation_msg.lead_screw_actuation = joy.axes[1]
-        actuation_msg.angle_actuation = joy.axes[4]
+
+        # up/down arrows 
+        actuation_msg.lead_screw = int(joy.axes[7])
+
+        # left/right bumpers 
+        actuation_msg.angle = int(joy.buttons[4] - joy.buttons[5])
         self._actuation_pub.publish(actuation_msg)
-        
-    def run_excavation(self, joy):
+
+        # Triggers
         excavation_msg = Float64()
-        excavation_msg.data = joy.axes[1]
+        excavation_msg.data = joy.axes[2] - joy.axes[5]
         self._excavation_pub.publish(excavation_msg)
-        
-    def run_deposition(self, joy):
-        deposition_msg = Float64()
-        deposition_msg.data = joy.axes[1]
+
+        # left/right arrows 
+        deposition_msg = Int8()
+        deposition_msg.data = int(joy.axes[6])
         self._deposition_pub.publish(deposition_msg)
 
     def stop(self):
@@ -67,11 +64,11 @@ class ManualController:
         cmd_vel_stop.left = 0
         cmd_vel_stop.right = 0
         actuation_stop = Actuation()
-        actuation_stop.lead_screw_actuation = 0
-        actuation_stop.angle_actuation = 0
+        actuation_stop.lead_screw = 0
+        actuation_stop.angle = 0
         excavation_stop = Float64()
         excavation_stop.data = 0
-        deposition_stop = Float64()
+        deposition_stop = Int8()
         deposition_stop.data = 0
 
         self._drivetrain_pub.publish(cmd_vel_stop)

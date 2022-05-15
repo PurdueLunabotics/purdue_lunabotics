@@ -32,23 +32,37 @@ rosdep install --from-paths src --ignore-src --rosdistro=noetic -y
 
 4. Build + source (Do this every time you download new packages)
 
-**For MacOS only**
-
-The `rplidar_ros` package doesn't build as of now, so run this to ignore it during build: 
-```
-touch ~/catkin_ws/src/purdue_lunabotics/rplidar_ros/CATKIN_IGNORE
-```
-
-**All**
-
 ```
 catkin build
 source ~/catkin_ws/devel/setup.bash # or .zsh if you use a zsh terminal
 ```
 > Note: Build + source every time you add new packages. Source every time you open a fresh terminal, or add the line to your ~/.bashrc (or .zshrc) so it sources automatically
 
-5. Check out specific package readmes in:
+### Run the robot
 
-- `lunabot_bringup`
-- `lunabot_localization`
-- `lunabot_nav`
+#### 1. Setup Networking
+
+1. Connect router to power
+
+> Optionally to get wifi, connect "internet" port on router to an external ethernet port with wifi
+
+2. Connect computer to ethernet port on the router
+3. Turn on the jetson and wait atleast 1.5 min
+
+#### 2. Run roslaunch commands
+
+1. Open a terminal, set the ROS IP info on the laptop and run the magic run command: 
+```
+set_ip
+roslaunch lunabot_bringup robot.launch
+```
+
+That's it! Things should be running now.
+
+##### Manual Control Commands
+
+- two joysticks: tank drive controls for drivetrain
+- LT/RT: Excavation (forward/backward)
+- LB/RB: linear actuators (tool angle)
+- cross key left/right: deposition (up/down)
+- cross key up/down: tool extension (lead screw) 

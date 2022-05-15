@@ -1,2 +1,2 @@
-float64 lead_screw_actuation
-float64 angle_actuation
+int8 lead_screw
+int8 angle
