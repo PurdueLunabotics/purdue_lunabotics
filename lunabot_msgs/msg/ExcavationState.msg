@@ -1,3 +1,4 @@
-uint8 load_cell_state
-float16 load_cell_weight
+uint8 bin_state # [EMPTY, FILLING, FULL]
+uint8 exc_state # [NOMINAL ,OVERCURRENT]  
+float32 bin_weight 
 uint16 current_draw

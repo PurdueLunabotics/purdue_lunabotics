@@ -1,5 +1,5 @@
 #include <ros.h>
-#include <std_msgs/Float64.h>
+#include <std_msgs/Float32.h>
 #include "actuator_config.h"
 #include "sensor_config.h"
 #include "HX711.h"
