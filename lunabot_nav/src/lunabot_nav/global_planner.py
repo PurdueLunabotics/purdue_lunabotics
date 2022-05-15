@@ -200,7 +200,7 @@ class Planner:
 
 class RRTStarPlanner(Planner):
     def __init__(
-        self, goal_sample_rate=10, max_iter=100, GAMMA=10, disc_step=0.05, **kwargs
+        self, goal_sample_rate=15, max_iter=100, GAMMA=10, disc_step=0.05, **kwargs
     ):
         """Implements RRT*, a sampling-based planner
 
