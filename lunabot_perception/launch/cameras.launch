@@ -1,0 +1,45 @@
+<launch>
+  <arg name="serial_no_d435"    			default="939622074382"/> 		
+  <arg name="serial_no_t265"    			default="943222111167"/> 	
+  <arg name="initial_reset"                 default="false"/>
+  <arg name="sim"                           default="false"/>
+
+  <group ns="t265" unless="$(arg sim)">
+    <include file="$(find realsense2_camera)/launch/rs_t265.launch">
+      <arg name="serial_no" value="$(arg serial_no_t265)" />
+      <arg name="tf_prefix" value="t265" />
+      <arg name="initial_reset" value="$(arg initial_reset)"/>
+    </include>
+  </group>
+
+  <group ns="d435" unless="$(arg sim)">
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+      <arg name="serial_no" value="$(arg serial_no_d435)" />
+      <arg name="tf_prefix" value="d435" />
+      <arg name="filters" value="disparity,decimation"/>
+      <arg name="enable_pointcloud" value="true"/>
+      <arg name="initial_reset" value="$(arg initial_reset)"/>
+    </include>
+
+    <group ns="camera/color" >
+        <node pkg="image_proc" type="image_proc" name="image_proc" args="image:=camera/color/image_raw"/>
+        <include file="$(find lunabot_perception)/launch/apriltag.launch">
+          <arg name="camera_frame" value="d435_base" />
+        </include>
+    </group>
+  </group>
+
+  <group ns="d435_forward/color" if="$(arg sim)">
+    <node pkg="image_proc" type="image_proc" name="image_proc"/>
+    <include file="$(find lunabot_perception)/launch/apriltag.launch">
+      <arg name="camera_frame" value="d435_forward_link" />
+    </include>
+  </group>
+
+  <group ns="d435_backward/color" if="$(arg sim)">
+    <node pkg="image_proc" type="image_proc" name="image_proc"/>
+    <include file="$(find lunabot_perception)/launch/apriltag.launch">
+      <arg name="camera_frame" value="d435_backward_link" />
+    </include>
+  </group>
+</launch>

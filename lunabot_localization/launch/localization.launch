@@ -1,48 +1,8 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="serial_no_d435"    			default="939622074382"/> 		
-  <arg name="serial_no_t265"    			default="943222111167"/> 	
-  <arg name="initial_reset"             default="false"/>
 
-  <!--The Bluetooth node requires root access to the low-level sockets using setcap.
-      As a security feature, this removes the LD_LIBRARY_PATH that other nodes need for accessing the shared libraries 
-      See: https://discourse.ros.org/t/is-it-a-good-practice-to-force-rpath-to-be-embedded-in-the-installed-targets/1335
-      and https://answers.ros.org/question/366380/ubuntu1804ros2-dashing-failed-to-load-entry-point-issue/?answer=366439#post-id-366439
-      -->
-
-  <group ns="t265">
-    <include file="$(find realsense2_camera)/launch/rs_t265.launch">
-      <arg name="serial_no" value="$(arg serial_no_t265)" />
-      <arg name="tf_prefix" value="t265" />
-      <arg name="initial_reset" value="$(arg initial_reset)"/>
-    </include>
-  </group>
-
-  <group ns="d435">
-    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
-      <arg name="serial_no" value="$(arg serial_no_d435)" />
-      <arg name="tf_prefix" value="d435" />
-      <arg name="filters" value="disparity,decimation"/>
-      <arg name="enable_pointcloud" value="true"/>
-      <arg name="initial_reset" value="$(arg initial_reset)"/>
-    </include>
-  </group>
-
-  <!-- Image Processing -->
-  <node pkg="image_proc" ns="/d435/camera/color/" type="image_proc" name="image_proc" args="image:=/d435/camera/color/image_raw"/>
-
-  <!-- base pose publisher -->
   <node pkg="lunabot_localization" type="base_pose_manager_node" name="base_pose_manager"/>
 
-  <!-- Apriltag detection -->
-  <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" name="apriltag" output="screen">
-    <param name="camera_frame" type="str" value="d435_base" />
-    <param name="publish_tag_detections_image" type="bool" value="true" />
+  <include file="$(find lunabot_perception)/launch/cameras.launch" />
 
-    <remap from="image_rect" to="/d435/camera/color/image_rect_color" />
-    <remap from="camera_info" to="/d435/camera/color/camera_info" />
-
-    <rosparam command="load" file="$(find lunabot_localization)/config/apriltags/config/settings.yaml" />
-    <rosparam command="load" file="$(find lunabot_localization)/config/apriltags/config/tags.yaml" />
-  </node>
 </launch>
