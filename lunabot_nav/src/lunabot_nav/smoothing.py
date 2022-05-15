@@ -6,7 +6,6 @@ import math
 from enum import Enum
 
 import numpy as np
-from scipy.interpolate import splev, splprep
 
 __all__ = ["Bezier"]
 
@@ -19,15 +18,6 @@ def lerp(step, pts):
     path = np.array([get_traj(pts[i], pts[i + 1]) for i in range(len(pts) - 1)])
     path = path.reshape(-1, path.shape[-1])
     return path
-
-
-def spline(step, pts):
-    print(pts.T)
-    tck, u = splprep(pts.T, u=None, k=min(3, len(pts) - 1), s=1)
-    u_new = np.linspace(u.min(), u.max(), 1000)
-    pts = splev(u_new, tck, der=0)
-    return pts
-
 
 class Bezier:
     def TwoPoints(t, P1, P2):
