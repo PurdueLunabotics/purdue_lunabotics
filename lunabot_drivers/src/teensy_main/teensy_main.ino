@@ -32,15 +32,15 @@ ros::Subscriber<std_msgs::Int8> deposition_sub("/deposition", deposition_cb);
 ros::Subscriber<lunabot_msgs::Drivetrain> drivetrain_sub("/cmd_vel", drivetrain_cb);
 
 lunabot_msgs::LunabotState robot_state;
-ros::Publisher<lunabot_msgs::LunabotState> robot_state_pub("/robot_state");
+ros::Publisher robot_state_pub("/robot_state", &robot_state);
 
 void publish_lunabot_state()
 {
-	robot_state.dep_state = (uint8_t)dep_hall.dep_state;
-	robot_state.lin_act_state = (uint8_t)lin_act_hall.lin_act_state;
-	robot_state.lead_screw_state = (uint8_t)lead_screw_hall.lead_screw_state;
-	robot_state.exc_state.bin_state = (uint8_t)exc_feedback.bin_state;
-	robot_state.exc_state.exc_state = exc_feedback.exc_state;
+	robot_state.dep_state = (uint8_t) dep_hall.dep_state;
+	robot_state.lin_act_state = (uint8_t) lin_act_hall.lin_act_state;
+	robot_state.lead_screw_state = (uint8_t) lead_screw_hall.lead_screw_state;
+	robot_state.exc_state.bin_state = (uint8_t) exc_feedback.bin_state;
+	robot_state.exc_state.exc_state = (uint8_t) exc_feedback.exc_state;
 	robot_state.exc_state.current_draw = 0;
 	robot_state.exc_state.bin_weight = exc_feedback.current_wt;
 	robot_state_pub.publish(&robot_state);

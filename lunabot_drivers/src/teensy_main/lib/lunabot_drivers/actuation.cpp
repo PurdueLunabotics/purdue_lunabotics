@@ -14,7 +14,7 @@ namespace actuation
 	{
 		if (digitalRead(LIN_ACT_HALL_PIN) == LOW)
 		{
-			lin_act_hall.lin_act_state = static_cast<LinActState>((lin_act_hall.lin_act_state + 1) % LinActState::CNT);
+			lin_act_hall.lin_act_state = static_cast<LinActState>((static_cast<int>(lin_act_hall.lin_act_state) + 1) % LinActState::CNT);
 			stop_motor(actuation_cfg.left_lin_act);
 			stop_motor(actuation_cfg.right_lin_act);
 			lin_act_hall.lim = AT_LIMIT;
@@ -31,7 +31,7 @@ namespace actuation
 	{
 		if (digitalRead(LEAD_SCREW_HALL_PIN) == LOW)
 		{
-			lead_screw_hall.lead_screw_state = static_cast<LeadScrewState>((lead_screw_hall.lead_screw_state + 1) % LeadScrewState::CNT);
+			lead_screw_hall.lead_screw_state = static_cast<LeadScrewState>((static_cast<int>(lead_screw_hall.lead_screw_state) + 1) % LeadScrewState::CNT);
 			stepper_off(actuation_cfg.lead_screw);
 			lead_screw_hall.lim = AT_LIMIT;
 		}

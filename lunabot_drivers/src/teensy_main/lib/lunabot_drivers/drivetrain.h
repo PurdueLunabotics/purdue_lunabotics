@@ -12,7 +12,7 @@
 #define D_CTRL 0.02
 #define DT_MILLIS 600000U
 #define DT 0.6
-#define F 435U
+#define F_ 435U
 
 
 // enums for determining motor pin index

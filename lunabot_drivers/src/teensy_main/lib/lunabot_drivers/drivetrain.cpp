@@ -46,7 +46,7 @@ namespace drivetrain
 	{
 		int pos = enc->read();
 		float curr_vel = (pos - ctrl->prev_pos) / DT;
-		curr_vel /= F;
+		curr_vel /= F_;
 		float goal_vel = calc_pid(ctrl->setp, curr_vel, &(ctrl->prev_err));
 		if (goal_vel > 1)
 		{

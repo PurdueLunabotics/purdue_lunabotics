@@ -12,7 +12,7 @@ namespace excavation
 {
 	// EXCAVATION FUNCTIONS
 	void init();
-	void run_excavation(const std_msgs::Float64 &speed, ros::NodeHandle *nh);
+	void run_excavation(const std_msgs::Float32 &speed, ros::NodeHandle *nh);
 }
 
 #endif

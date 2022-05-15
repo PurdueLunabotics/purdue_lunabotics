@@ -7,7 +7,7 @@ namespace deposition
 	{
 
 		if(digitalRead(DEP_HALL_PIN) == LOW) {
-			dep_hall.dep_state = static_cast<DepState>((dep_hall.dep_state + 1) % DepState::CNT);
+			dep_hall.dep_state = static_cast<DepState>((static_cast<int>(dep_hall.dep_state) + 1) % DepState::CNT);
 			stop_motor(deposition_cfg.dep_motor);
 			dep_hall.lim = AT_LIMIT;
 		}

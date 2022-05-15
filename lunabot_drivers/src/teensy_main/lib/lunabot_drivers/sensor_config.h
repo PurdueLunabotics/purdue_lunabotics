@@ -40,27 +40,27 @@ Deposition:
     State machine: EMPTY -> FILLING -> FULL
 */
 
-enum DepState
+enum class DepState
 {
     STORED,
     FULL_EXT,
     CNT
 };
 
-enum BinState
+enum class BinState
 {
     EMPTY,
     FILLING,
     FULL,
 };
 
-enum ExcState
+enum class ExcState
 {
     NOMINAL,
     OVERCURRENT,
 };
 
-enum LinActState
+enum class LinActState
 {
     STORED,    // move lin act
     START_EXC, // start excavating slowly
@@ -69,7 +69,7 @@ enum LinActState
     CNT
 };
 
-enum LeadScrewState
+enum class LeadScrewState
 {
     STORED,
     FULL_EXT,
