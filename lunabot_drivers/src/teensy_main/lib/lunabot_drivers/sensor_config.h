@@ -8,23 +8,23 @@
 #define INT(a) static_cast<int>(a)
 
 #define EXC_UPDATE_PERIOD 10000000
-#define EXC_LOAD_DATA_PIN 10
-#define EXC_LOAD_CLK_PIN 12
+#define EXC_LOAD_DATA_PIN 33
+#define EXC_LOAD_CLK_PIN 30
 
-#define EXC_CURRENT_PIN 10
+#define EXC_CURRENT_PIN 38
 
-#define DEP_HALL_PIN 32
-#define LIN_ACT_HALL_PIN 33
-#define LEAD_SCREW_HALL_PIN 34
+#define DEP_HALL_PIN 35
+#define LIN_ACT_HALL_PIN 37
+#define LEAD_SCREW_HALL_PIN 36
 
-#define DT_FT_LFT_ENC_A_PIN 10
-#define DT_FT_LFT_ENC_B_PIN 10
-#define DT_FT_RT_ENC_A_PIN 11
-#define DT_FT_RT_ENC_B_PIN 11
-#define DT_BK_LFT_ENC_A_PIN 12
-#define DT_BK_LFT_ENC_B_PIN 12
-#define DT_BK_RT_ENC_A_PIN 13
-#define DT_BK_RT_ENC_B_PIN 13
+#define DT_FT_LFT_ENC_A_PIN 11
+#define DT_FT_LFT_ENC_B_PIN 12
+#define DT_FT_RT_ENC_A_PIN 9
+#define DT_FT_RT_ENC_B_PIN 10
+#define DT_BK_LFT_ENC_A_PIN 7
+#define DT_BK_LFT_ENC_B_PIN 8
+#define DT_BK_RT_ENC_A_PIN 31
+#define DT_BK_RT_ENC_B_PIN 32
 
 /*
 Using hall sensors to define joint limit logic for actuators

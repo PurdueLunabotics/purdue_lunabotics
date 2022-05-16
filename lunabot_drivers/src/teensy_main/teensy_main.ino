@@ -65,5 +65,5 @@ void loop()
 	nh.spinOnce();
 	publish_lunabot_state();
 	actuation::stepper_step();
-	delay(100);
+	delay(50);
 }

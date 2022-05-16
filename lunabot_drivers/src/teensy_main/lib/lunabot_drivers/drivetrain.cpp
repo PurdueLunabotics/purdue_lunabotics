@@ -17,13 +17,12 @@ namespace drivetrain
 
 	Encoder front_left_enc(DT_FT_LFT_ENC_A_PIN, DT_FT_LFT_ENC_B_PIN);
 	Encoder front_right_enc(DT_FT_RT_ENC_A_PIN, DT_FT_RT_ENC_B_PIN);
-	Encoder back_left_enc(DT_BK_LFT_ENC_A_PIN, DT_BK_LFT_ENC_B_PIN);
+	//Encoder back_left_enc(DT_BK_LFT_ENC_A_PIN, DT_BK_LFT_ENC_B_PIN); // doesn't work
 	Encoder back_right_enc(DT_BK_RT_ENC_A_PIN, DT_BK_RT_ENC_B_PIN);
 	IntervalTimer ctrl_tim;
 
 	void init()
 	{
-
 		// set all pwm and direction pins to output
 		init_motor(drivetrain_cfg.front_left);
 		init_motor(drivetrain_cfg.front_right);
