@@ -77,7 +77,7 @@ namespace drivetrain
 	{
 		motor_loop(&front_left_ctrl, &front_left_enc);
 		motor_loop(&front_right_ctrl, &front_right_enc);
-		motor_loop(&back_left_ctrl, &front_left_enc); // back left doesn't work
+		motor_loop(&back_left_ctrl, &front_left_enc); // back left encoder doesn't work
 		motor_loop(&back_right_ctrl, &back_right_enc);
 	}
 }
