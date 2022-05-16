@@ -11,6 +11,7 @@
 // enums for determining motor pin index
 namespace actuation
 {
+	extern HallSensor lin_act_hall, lead_screw_hall;
 	// ACTUATION FUNCTIONS
 	void init();
 	void stepper_step();

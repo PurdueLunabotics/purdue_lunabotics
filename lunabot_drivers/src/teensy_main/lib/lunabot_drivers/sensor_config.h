@@ -5,6 +5,8 @@
 #ifndef __SENSOR_CONFIG_H__
 #define __SENSOR_CONFIG_H__
 
+#define INT(a) static_cast<int>(a)
+
 #define EXC_UPDATE_PERIOD 10000000
 #define EXC_LOAD_DATA_PIN 10
 #define EXC_LOAD_CLK_PIN 12
@@ -84,15 +86,10 @@ enum Limit
 
 struct HallSensor
 {
-    union
-    {
-        DepState dep_state;
-        LinActState lin_act_state;
-        LeadScrewState lead_screw_state;
-    };
+    uint8_t state;
     Limit lim;
 
-} dep_hall, lin_act_hall, lead_screw_hall;
+}; 
 
 struct ExcFeedback
 {
@@ -100,17 +97,17 @@ struct ExcFeedback
     float max_wt;
     float current_wt;
     uint8_t gain;
-    BinState bin_state;
-    ExcState exc_state;
+    uint8_t bin_state;
+    uint8_t exc_state;
 
-} exc_feedback;
+};
 
 struct CurrentSensor
 {
     int current_value;
     int max_value;
 
-} exc_current;
+};
 
 void init_hall(uint8_t pin, void (*cb)());
 

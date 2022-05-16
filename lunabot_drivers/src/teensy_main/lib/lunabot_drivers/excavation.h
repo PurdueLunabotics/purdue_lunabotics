@@ -10,6 +10,8 @@
 
 namespace excavation
 {
+	extern ExcFeedback exc_feedback;
+	extern CurrentSensor exc_current;
 	// EXCAVATION FUNCTIONS
 	void init();
 	void run_excavation(const std_msgs::Float32 &speed, ros::NodeHandle *nh);

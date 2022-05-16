@@ -36,13 +36,13 @@ ros::Publisher robot_state_pub("/robot_state", &robot_state);
 
 void publish_lunabot_state()
 {
-	robot_state.dep_state = (uint8_t) dep_hall.dep_state;
-	robot_state.lin_act_state = (uint8_t) lin_act_hall.lin_act_state;
-	robot_state.lead_screw_state = (uint8_t) lead_screw_hall.lead_screw_state;
-	robot_state.exc_state.bin_state = (uint8_t) exc_feedback.bin_state;
-	robot_state.exc_state.exc_state = (uint8_t) exc_feedback.exc_state;
-	robot_state.exc_state.current_draw = 0;
-	robot_state.exc_state.bin_weight = exc_feedback.current_wt;
+	robot_state.dep_state = deposition::dep_hall.state;
+	robot_state.lin_act_state = actuation::lin_act_hall.state;
+	robot_state.lead_screw_state =  actuation::lead_screw_hall.state;
+	robot_state.exc_state.bin_state =  excavation::exc_feedback.bin_state;
+	robot_state.exc_state.exc_state =  excavation::exc_feedback.exc_state;
+	robot_state.exc_state.current_draw = excavation::exc_current.current_value;
+	robot_state.exc_state.bin_weight = excavation::exc_feedback.current_wt;
 	robot_state_pub.publish(&robot_state);
 }
 

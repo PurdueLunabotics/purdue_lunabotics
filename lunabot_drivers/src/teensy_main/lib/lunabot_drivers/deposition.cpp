@@ -2,12 +2,13 @@
 
 namespace deposition
 {
+	HallSensor dep_hall = { .state = INT(DepState::STORED), .lim = AT_LIMIT};
 
 	void dep_hall_cb()
 	{
 
 		if(digitalRead(DEP_HALL_PIN) == LOW) {
-			dep_hall.dep_state = static_cast<DepState>((static_cast<int>(dep_hall.dep_state) + 1) % DepState::CNT);
+			dep_hall.state = dep_hall.state % INT(DepState::CNT);
 			stop_motor(deposition_cfg.dep_motor);
 			dep_hall.lim = AT_LIMIT;
 		}
@@ -21,7 +22,6 @@ namespace deposition
 	{
 		// set all pwm and direction pins to output
 		init_motor(deposition_cfg.dep_motor);
-		dep_hall = { .dep_state = DepState::STORED, .lim = AT_LIMIT};
 		init_hall(DEP_HALL_PIN, dep_hall_cb);
 	}
 
@@ -32,10 +32,10 @@ namespace deposition
 		bool dep_en = speed.data != 0;
 
 		if (dep_hall.lim == AT_LIMIT) {
-			if(dep_hall.dep_state == DepState::STORED && dep_dir == CW) {
+			if(dep_hall.state == INT(DepState::STORED) && dep_dir == CW) {
 				return;
 			}
-			if(dep_hall.dep_state == DepState::FULL_EXT && dep_dir == CCW) {
+			if(dep_hall.state == INT(DepState::FULL_EXT) && dep_dir == CCW) {
 				return;
 			}
 		}
