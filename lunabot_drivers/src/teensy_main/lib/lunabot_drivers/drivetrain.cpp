@@ -4,16 +4,16 @@ namespace drivetrain
 {
 
 	WheelControl front_left_ctrl = {
-		.motor = drivetrain_cfg.front_left, .prev_err = 0, .prev_pos = 0, .curr_vel = 0, .setp = 0.5, .forward = CW, .backward = CCW};
+		.motor = drivetrain_cfg.front_left, .prev_err = 0, .prev_pos = 0, .curr_vel = 0, .setp = 0, .forward = CW, .backward = CCW};
 
 	WheelControl front_right_ctrl = {
-		.motor = drivetrain_cfg.front_right, .prev_err = 0, .prev_pos = 0, .curr_vel = 0, .setp = 0.5, .forward = CW, .backward = CCW };
+		.motor = drivetrain_cfg.front_right, .prev_err = 0, .prev_pos = 0, .curr_vel = 0, .setp = 0, .forward = CW, .backward = CCW };
 
 	WheelControl back_left_ctrl = {
-		.motor = drivetrain_cfg.back_left, .prev_err = 0, .prev_pos = 0, .curr_vel = 0, .setp = 0.5, .forward = CCW, .backward = CW};
+		.motor = drivetrain_cfg.back_left, .prev_err = 0, .prev_pos = 0, .curr_vel = 0, .setp = 0, .forward = CCW, .backward = CW};
 
 	WheelControl back_right_ctrl = {
-		.motor = drivetrain_cfg.back_right, .prev_err = 0, .prev_pos = 0, .curr_vel = 0, .setp = 0.5, .forward = CW, .backward = CCW};
+		.motor = drivetrain_cfg.back_right, .prev_err = 0, .prev_pos = 0, .curr_vel = 0, .setp = 0, .forward = CW, .backward = CCW};
 
 	Encoder front_left_enc(DT_FT_LFT_ENC_A_PIN, DT_FT_LFT_ENC_B_PIN);
 	Encoder front_right_enc(DT_FT_RT_ENC_A_PIN, DT_FT_RT_ENC_B_PIN);
