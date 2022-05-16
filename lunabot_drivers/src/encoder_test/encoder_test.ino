@@ -4,15 +4,15 @@
 //Max Speed of wheel = 0.54 m/s
 
 IntervalTimer ctrl_timer;
-Encoder enc(17, 18);
+Encoder enc(0, 1);
 
 volatile int prev_pos = 0;
 const float dt = 0.6;
 const float dt_ms = 600000;
-volatile float goal = 0.5;
+volatile float goal = 0.2;
 const float f = 435;
-const int dir_pin = 2;
-const int drive_pin = 1;
+const int dir_pin = 20;
+const int drive_pin = 19;
 volatile float prev_err = 0;
 void setup() {
     Serial.begin(9600);
@@ -71,7 +71,7 @@ void run_control_loop(){
 } // 1.67 Hz
 
 void loop() {
-  goal = 0;
+  //goal = 0;
   // analogWrite(drive_pin, 0);
 //  for(float i = 0; i <= 1; i += 0.1) {
 //    goal = i;
