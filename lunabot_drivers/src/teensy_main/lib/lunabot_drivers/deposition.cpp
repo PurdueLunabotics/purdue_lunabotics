@@ -37,14 +37,14 @@ namespace deposition
 		{
 			if(dep_hall.state == INT(DepState::STORED) && dep_dir == CW) {
 				stop_motor(deposition_cfg.dep_motor);
-				return;
 			}
-			if(dep_hall.state == INT(DepState::FULL_EXT) && dep_dir == CCW) {
+			else if(dep_hall.state == INT(DepState::FULL_EXT) && dep_dir == CCW) {
 				stop_motor(deposition_cfg.dep_motor);
-				return;
 			}
-			write_motor(deposition_cfg.dep_motor,
-						deposition_cfg.dep_motor.MAX_PWM, dep_dir);
+			else {
+				write_motor(deposition_cfg.dep_motor,
+							deposition_cfg.dep_motor.MAX_PWM, dep_dir);
+			}
 		}
 		else
 		{

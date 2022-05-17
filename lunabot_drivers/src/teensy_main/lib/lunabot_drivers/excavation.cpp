@@ -36,10 +36,8 @@ namespace excavation
 
 	void init_load_cell()
 	{
-
 		scale.begin(EXC_LOAD_DATA_PIN, EXC_LOAD_CLK_PIN, exc_feedback.gain);
 		scale.tare();
-
 	}
 
 	void init()
