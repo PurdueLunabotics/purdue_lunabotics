@@ -70,7 +70,7 @@ namespace actuation
 		lead_screw_dir = (actuation.lead_screw > 0) ? EXTEND : RETRACT;
 		lead_screw_en = actuation.lead_screw != 0;
 
-		MotorDir angle_dir = (actuation.angle > 0) ? CW : CCW;
+		MotorDir angle_dir = (actuation.angle > 0) ? CW : CCW; // CCW retracts, CW extends
 
 
 		if (actuation.angle != 0)
