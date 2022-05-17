@@ -12,26 +12,26 @@ namespace excavation
 	void exc_sensors_cb()
 	{
 		exc_feedback.current_wt = scale.get_value();
-		if (exc_feedback.current_wt < 0.01)
-		{
-			exc_feedback.bin_state = INT(BinState::EMPTY);
-		}
-		else if (exc_feedback.max_wt - exc_feedback.current_wt > 0)
-		{
-			exc_feedback.bin_state = INT(BinState::FILLING);
-		}
-		else
-		{
-			exc_feedback.bin_state = INT(BinState::FULL);
-			stop_motor(excavation_cfg.exc);
-		}
+		// if (exc_feedback.current_wt < 0.01)
+		// {
+		// 	exc_feedback.bin_state = INT(BinState::EMPTY);
+		// }
+		// else if (exc_feedback.max_wt - exc_feedback.current_wt > 0)
+		// {
+		// 	exc_feedback.bin_state = INT(BinState::FILLING);
+		// }
+		// else
+		// {
+		// 	exc_feedback.bin_state = INT(BinState::FULL);
+		// 	stop_motor(excavation_cfg.exc);
+		// }
 
 		exc_current.current_value = analogRead(EXC_CURRENT_PIN);
-		if (exc_current.current_value >= exc_current.max_value)
-		{
-			exc_feedback.exc_state = INT(ExcState::OVERCURRENT);
-			stop_motor(excavation_cfg.exc);
-		}
+		// if (exc_current.current_value >= exc_current.max_value)
+		// {
+		// 	exc_feedback.exc_state = INT(ExcState::OVERCURRENT);
+		// 	stop_motor(excavation_cfg.exc);
+		// }
 	}
 
 	void init_load_cell()
@@ -54,17 +54,24 @@ namespace excavation
 		pinMode(EXC_CURRENT_PIN, INPUT);
 	}
 
+	float mapf(double val, double in_min, double in_max, double out_min, double out_max)
+	{
+		return (val - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+	}
+
 	void run_excavation(const std_msgs::Float32 &speed, ros::NodeHandle *nh)
 	{
-		unsigned int excavate_speed = abs(map(speed.data, -1, 1, -255, 255)); // Range from [-255,255]
+		unsigned int excavate_speed = abs(round(mapf(speed.data, -2, 2, -255, 255))); // Range from [-255,255]
 		MotorDir excavate_dir = (speed.data > 0) ? CCW : CW;
-		// nh.logerror("Excavation:");
-		// nh.logerror(String(excavate_speed != 0).c_str());
+
 
 		if (exc_feedback.bin_state == INT(BinState::FULL) || exc_feedback.exc_state == INT(ExcState::OVERCURRENT))
 		{
 			return;
 		}
+
+		// nh->logerror("Excavation:");
+		// nh->logerror(String(excavate_speed).c_str());
 
 		if (excavate_speed != 0)
 		{

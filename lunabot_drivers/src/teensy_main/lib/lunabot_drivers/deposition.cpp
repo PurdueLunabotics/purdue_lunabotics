@@ -8,13 +8,12 @@ namespace deposition
 	{
 
 		if(digitalRead(DEP_HALL_PIN) == LOW) {
-			dep_hall.state = dep_hall.state % INT(DepState::CNT);
+			dep_hall.state = (dep_hall.state + 1) % INT(DepState::CNT);
 			stop_motor(deposition_cfg.dep_motor);
 			dep_hall.lim = AT_LIMIT;
 		}
 		else {
 			dep_hall.lim = FREE;
-
 		}
 	}
 
@@ -31,19 +30,19 @@ namespace deposition
 		MotorDir dep_dir = (speed.data > 0) ? CCW : CW; // CCW rotates deposition up, CW retracts deposition down
 		bool dep_en = speed.data != 0;
 
-		if (dep_hall.lim == AT_LIMIT) {
-			if(dep_hall.state == INT(DepState::STORED) && dep_dir == CW) {
-				return;
-			}
-			if(dep_hall.state == INT(DepState::FULL_EXT) && dep_dir == CCW) {
-				return;
-			}
-		}
 
 		// nh.logerror("Deposition:");
 		// nh.logerror(String(bin_move_speed).c_str());
 		if (dep_en)
 		{
+			if(dep_hall.state == INT(DepState::STORED) && dep_dir == CW) {
+				stop_motor(deposition_cfg.dep_motor);
+				return;
+			}
+			if(dep_hall.state == INT(DepState::FULL_EXT) && dep_dir == CCW) {
+				stop_motor(deposition_cfg.dep_motor);
+				return;
+			}
 			write_motor(deposition_cfg.dep_motor,
 						deposition_cfg.dep_motor.MAX_PWM, dep_dir);
 		}

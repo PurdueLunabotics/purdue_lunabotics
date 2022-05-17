@@ -11,7 +11,7 @@
 #define EXC_LOAD_DATA_PIN 33
 #define EXC_LOAD_CLK_PIN 30
 
-#define EXC_CURRENT_PIN 38
+#define EXC_CURRENT_PIN 40
 
 #define DEP_HALL_PIN 35
 #define LIN_ACT_HALL_PIN 37

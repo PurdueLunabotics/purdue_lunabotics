@@ -72,32 +72,25 @@ namespace actuation
 
 		MotorDir angle_dir = (actuation.angle > 0) ? CW : CCW;
 
-		if (lin_act_hall.lim == AT_LIMIT)
+
+		if (actuation.angle != 0)
 		{
+
 			if (lin_act_hall.state == INT(LinActState::STORED) && angle_dir == CCW)
 			{
+
+				stop_motor(actuation_cfg.left_lin_act);
+				stop_motor(actuation_cfg.right_lin_act);
 				return;
 			}
 			else if (lin_act_hall.state == INT(LinActState::FULL_EXT) && angle_dir == CW)
 			{
-				return;
-			}
-		}
 
-		if (lead_screw_hall.lim == AT_LIMIT)
-		{
-			if (lead_screw_hall.state == INT(LeadScrewState::STORED) && lead_screw_dir == RETRACT)
-			{
+				stop_motor(actuation_cfg.left_lin_act);
+				stop_motor(actuation_cfg.right_lin_act);
 				return;
 			}
-			else if (lead_screw_hall.state == INT(LeadScrewState::FULL_EXT) && lead_screw_dir == EXTEND)
-			{
-				return;
-			}
-		}
 
-		if (actuation.angle != 0)
-		{
 			write_motor(actuation_cfg.left_lin_act,
 						actuation_cfg.left_lin_act.MAX_PWM, angle_dir);
 			write_motor(actuation_cfg.right_lin_act,
@@ -112,6 +105,19 @@ namespace actuation
 		// nh.logerror("lead screw:");
 		if (lead_screw_en)
 		{
+
+			if (lead_screw_hall.state == INT(LeadScrewState::STORED) && lead_screw_dir == RETRACT)
+			{
+
+				stepper_off(actuation_cfg.lead_screw);
+				return;
+			}
+			else if (lead_screw_hall.state == INT(LeadScrewState::FULL_EXT) && lead_screw_dir == EXTEND)
+			{
+
+				stepper_off(actuation_cfg.lead_screw);
+				return;
+			}
 			// nh.logerror("ON");
 			stepper_on(actuation_cfg.lead_screw);
 		}
