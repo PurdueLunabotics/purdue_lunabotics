@@ -10,6 +10,7 @@
 namespace deposition
 {
 
+	extern HallSensor dep_hall;
 	// DEPOSITION FUNCTIONS
 	void init();
 	void run_deposition(const std_msgs::Int8 &command, ros::NodeHandle *nh);

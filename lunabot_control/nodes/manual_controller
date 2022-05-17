@@ -2,7 +2,7 @@
 import rospy
 import numpy as np
 
-from std_msgs.msg import Int8,Float64
+from std_msgs.msg import Int8,Float32
 from sensor_msgs.msg import Joy 
 from lunabot_msgs.msg import Actuation
 from lunabot_msgs.msg import Drivetrain 
@@ -18,7 +18,7 @@ class ManualController:
 
         self._joy_sub = rospy.Subscriber('joy', Joy, self.joy_cb);
         self._drivetrain_pub = rospy.Publisher('cmd_vel', Drivetrain, queue_size=100);
-        self._excavation_pub = rospy.Publisher('excavation', Float64, queue_size=100);
+        self._excavation_pub = rospy.Publisher('excavation', Float32, queue_size=100);
         self._deposition_pub = rospy.Publisher('deposition', Int8, queue_size=100);
         self._actuation_pub = rospy.Publisher('actuation', Actuation, queue_size=100);
 
@@ -47,7 +47,7 @@ class ManualController:
         self._actuation_pub.publish(actuation_msg)
 
         # Triggers
-        excavation_msg = Float64()
+        excavation_msg = Float32()
         excavation_msg.data = joy.axes[2] - joy.axes[5]
         self._excavation_pub.publish(excavation_msg)
 
@@ -63,7 +63,7 @@ class ManualController:
         actuation_stop = Actuation()
         actuation_stop.lead_screw = 0
         actuation_stop.angle = 0
-        excavation_stop = Float64()
+        excavation_stop = Float32()
         excavation_stop.data = 0
         deposition_stop = Int8()
         deposition_stop.data = 0

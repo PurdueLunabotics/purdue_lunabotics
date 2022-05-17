@@ -1,5 +1,5 @@
 #include <ros.h>
-#include <std_msgs/Float64.h>
+#include <std_msgs/Float32.h>
 #include "actuator_config.h"
 #include "sensor_config.h"
 #include "HX711.h"
@@ -10,9 +10,11 @@
 
 namespace excavation
 {
+	extern ExcFeedback exc_feedback;
+	extern CurrentSensor exc_current;
 	// EXCAVATION FUNCTIONS
 	void init();
-	void run_excavation(const std_msgs::Float64 &speed, ros::NodeHandle *nh);
+	void run_excavation(const std_msgs::Float32 &speed, ros::NodeHandle *nh);
 }
 
 #endif

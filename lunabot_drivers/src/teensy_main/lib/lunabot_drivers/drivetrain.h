@@ -1,6 +1,7 @@
 #include <ros.h>
 #include <lunabot_msgs/Drivetrain.h>
 #include <Encoder.h>
+#include <IntervalTimer.h>
 #include "actuator_config.h"
 #include "sensor_config.h"
 
@@ -11,23 +12,29 @@
 #define D_CTRL 0.02
 #define DT_MILLIS 600000U
 #define DT 0.6
-#define F 435U
-
+#define F_ 435U
 
 // enums for determining motor pin index
-namespace drivetrain {
+namespace drivetrain
+{
 
-	struct WheelControl {
+	struct WheelControl
+	{
 		MotorConfig motor;
-		EncoderConfig enc; 
-		volatile float prev_err;
-		volatile int prev_pos;
-		volatile float setp;
-	} front_left, front_right, back_left, back_right;
+		float prev_err;
+		int prev_pos;
+		float curr_vel;
+		float setp;		// wheel vel [1,-1]
+		MotorDir forward;	// spins motor torwards excavation tool (front)
+		MotorDir backward; // spins motor towards deposition (back)
+	}; 
+
+	extern WheelControl front_left_ctrl, front_right_ctrl, back_left_ctrl, back_right_ctrl;
 
 	// DRIVETRAIN FUNCTIONS
-  	void init();
-	void run_drivetrain(const lunabot_msgs::Drivetrain& drive_msg, ros::NodeHandle* nh); 
+	void init();
+	void run_drivetrain(const lunabot_msgs::Drivetrain &drive_msg, ros::NodeHandle *nh);
+	void ctrl_loop(void);
 }
 
 #endif
