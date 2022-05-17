@@ -3,19 +3,17 @@
 Global path planner using RRTstar algorithm
 author: Raghava Uppuluri, code adapted from Ahmed Qureshi and AtsushiSakai(@Atsushi_twi)
 """
-import logging
 import copy
+import logging
 import math
+import os
 import random
 import time
 
 import numpy as np
-
-import os
-from lunabot_nav.smoothing import Bezier
-
 from lunabot_nav.utils import pose_to_array
-if os.environ.get("MPL_VISUALIZE") == '1':
+
+if os.environ.get("MPL_VISUALIZE") == "1":
     from lunabot_nav.utils import visualize
 
 
@@ -24,28 +22,33 @@ DOF = 2
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+
 class Map:
     """Map class"""
 
-    def __init__(self,occ_threshold=0.5):
+    def __init__(self, occ_threshold=0.5):
         self.resolution = None
         self.origin = None
         self.width = None
         self.height = None
         self.grid = None
-        self.occ_threshold = occ_threshold 
+        self.occ_threshold = occ_threshold
 
     def from_msg(self, grid_msg):
         self.resolution = grid_msg.info.resolution  # m/cell
         self.origin, _ = np.array(
             pose_to_array(grid_msg.info.origin)
         )  # (pose, ori = usually zero, so same frame as 'map')
-        self.origin = self.origin[:2] # only x,y
+        self.origin = self.origin[:2]  # only x,y
         self.width = grid_msg.info.width  # m/cell
         self.height = grid_msg.info.height  # m/cell
-        self.grid = np.array(grid_msg.data).reshape((self.width,self.height),order='F')
+        self.grid = np.array(grid_msg.data).reshape(
+            (self.width, self.height), order="F"
+        )
 
-    def from_data(self, grid, resolution, height, width, origin=np.zeros(2),occ_threshold=0.5):
+    def from_data(
+        self, grid, resolution, height, width, origin=np.zeros(2), occ_threshold=0.5
+    ):
         """Sets the map grid and internal parameters related to the grid
 
         Args:
@@ -53,7 +56,7 @@ class Map:
             resolution (float): resolution m/cell
             height (int): the number of rows of the grid in cells (rows or x-axis)
             width (int): the width of the grid in cells (cols or y-axis)
-            origin (np.array): the (x,y) offset of the grid in  in the robot cspace 
+            origin (np.array): the (x,y) offset of the grid in  in the robot cspace
         """
         assert grid is not None
         assert resolution is not None
@@ -63,9 +66,9 @@ class Map:
         self.resolution = resolution
         self.width = width
         self.height = height
-        self.grid = grid.reshape(width,height)
+        self.grid = grid.reshape(width, height)
         self.origin = origin
-        self.occ_threshold = occ_threshold 
+        self.occ_threshold = occ_threshold
 
     def cspace_to_grid(self, state):
         """Converts an np.array in c-space to a discretized index in the occ grid
@@ -80,19 +83,27 @@ class Map:
         pos = state.copy() - self.origin
         pos = pos / self.resolution
         uv_pos = np.round(pos).astype("uint32")
-        return uv_pos 
+        return uv_pos
 
     @property
     def cspace_spec(self):
-    
+
         assert self.initialized, "Not initalized with set_data or set_msg"
-        x_spec = np.array([0,self.width * self.resolution]) + self.origin[0]
-        y_spec = np.array([0,self.height * self.resolution]) + self.origin[1]
-        return x_spec,y_spec
+        x_spec = np.array([0, self.width * self.resolution]) + self.origin[0]
+        y_spec = np.array([0, self.height * self.resolution]) + self.origin[1]
+        return x_spec, y_spec
 
     @property
     def initialized(self):
-        return self.resolution is not None and self.origin is not None and self.width is not None and self.height is not None and self.grid is not None and self.grid is not None and self.occ_threshold is not None
+        return (
+            self.resolution is not None
+            and self.origin is not None
+            and self.width is not None
+            and self.height is not None
+            and self.grid is not None
+            and self.grid is not None
+            and self.occ_threshold is not None
+        )
 
     def in_collision(self, node):
         """Checks if node corresponds to an occupied state in the occupancy grid
@@ -105,13 +116,14 @@ class Map:
         """
         assert self.initialized, "Not initalized with set_data or set_msg"
 
-        w,h = self.cspace_to_grid(node.state)
-        if w < 0 or w >= self.width: 
+        w, h = self.cspace_to_grid(node.state)
+        if w < 0 or w >= self.width:
             return True
-        if h < 0 or h >= self.height: 
+        if h < 0 or h >= self.height:
             return True
-        logger.debug("uv_ind: (%d,%d)",w,h)
-        return self.grid[w,h] > self.occ_threshold
+        logger.debug("uv_ind: (%d,%d)", w, h)
+        return self.grid[w, h] > self.occ_threshold
+
 
 class Node:
     """Node class"""
@@ -125,10 +137,13 @@ class Node:
         self.cost = 0.0
         self.parent = None
         self.children = set()
+
     def __lt__(self, other):
         return self.cost < other.cost
-    def dist(self,other):
+
+    def dist(self, other):
         return np.sqrt(np.sum((other.state - self.state) ** 2))
+
 
 class Planner:
     def __init__(self):
@@ -136,7 +151,7 @@ class Planner:
         self.goal = None
         self.start = None
         self.node_list = []
-        self.visualize = os.environ.get('MPL_VISUALIZE') == '1'
+        self.visualize = os.environ.get("MPL_VISUALIZE") == "1"
         self.min_dist_to_goal = 0.1
 
     def plan(self, start, goal):
@@ -158,7 +173,7 @@ class Planner:
         if d < self.min_dist_to_goal:
             return True
         return False
-    
+
 
 # class AStarNode(Node):
 #     def __init__(self,state):
@@ -173,23 +188,19 @@ class Planner:
 
 #     def h(self, node):
 #         collision_penalty = np.inf if self.in_collision(node) else 0
-#         return self.goal.dist(node) + collision_penalty 
+#         return self.goal.dist(node) + collision_penalty
 
 #     def plan(self, start, goal):
 #         self.start = Node(start)
 #         self.goal = Node(goal)
-#         open_set = [Node(start)] 
+#         open_set = [Node(start)]
 
 #         heapq.heappush()
 
+
 class RRTStarPlanner(Planner):
     def __init__(
-        self,
-        goal_sample_rate=10,
-        max_iter=100,
-        GAMMA=10,
-        disc_step=0.05,
-        **kwargs
+        self, goal_sample_rate=15, max_iter=100, GAMMA=10, disc_step=0.05, **kwargs
     ):
         """Implements RRT*, a sampling-based planner
 
@@ -261,14 +272,14 @@ class RRTStarPlanner(Planner):
                 if self.is_near_goal(new_node):
                     self.solution_set.add(newNodeIndex)
                     self.goalfound = True
-                logger.info("goalfound: %s",self.goalfound)
+                logger.info("goalfound: %s", self.goalfound)
                 if self.visualize:
-                    visualize(self,rnd.state)
+                    visualize(self, rnd.state)
 
         path = self.get_path_to_goal()
         if path is not None:
             plan_time = time.perf_counter() - plan_start
-            logger.info("plan time: %.3f",plan_time)
+            logger.info("plan time: %.3f", plan_time)
         logger.info("path not found")
         self.cleanup()
         return path
@@ -361,7 +372,6 @@ class RRTStarPlanner(Planner):
         else:
             rnd = self.goal
         return rnd
-
 
     def gen_final_course(self, goalind):
         """Generates list of c-space states through looping by parent

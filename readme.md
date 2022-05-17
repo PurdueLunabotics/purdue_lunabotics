@@ -61,8 +61,8 @@ That's it! Things should be running now.
 
 ##### Manual Control Commands
 
-two joysticks: tank drive controls for drivetrain
-LT/RT: Excavation (forward/backward)
-LB/RB: linear actuators (tool angle)
-cross key left/right: deposition (up/down)
-cross key up/down: tool extension (lead screw) 
+- two joysticks: tank drive controls for drivetrain
+- LT/RT: Excavation (forward/backward)
+- LB/RB: linear actuators (tool angle)
+- cross key left/right: deposition (up/down)
+- cross key up/down: tool extension (lead screw) 

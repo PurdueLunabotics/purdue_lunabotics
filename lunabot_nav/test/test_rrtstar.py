@@ -35,9 +35,7 @@ G1 = [
 class RRTStarTest(unittest.TestCase):
     def setUp(self):
 
-        self.planner = RRTStarPlanner(
-            max_iter=100, goal_sample_rate=10, disc_step=0.1
-        )
+        self.planner = RRTStarPlanner(max_iter=50, goal_sample_rate=15, disc_step=0.1)
         self.resolution = 0.1
         self.planner.grid = Map()
         self.planner.grid.from_data(np.array(G1).flatten(), self.resolution, 5, 5)
@@ -103,13 +101,12 @@ class RRTStarTest(unittest.TestCase):
         self.planner.GAMMA = 20
         dims = [200, 200]
         grid = np.zeros(dims)
-        resolution = 0.1
         lower, upper = [50, 50], [70, 70]
         grid[lower[0] : upper[0] + 1, lower[1] : upper[1] + 1] = 1
 
         lower, upper = [20, 10], [50, 70]
         grid[lower[0] : upper[0] + 1, lower[1] : upper[1] + 1] = 1
-        self.planner.grid.from_data(grid.flatten(), resolution, *dims)
+        self.planner.grid.from_data(grid.flatten(), self.resolution, *dims)
         start = np.array([1, 1])
         end = np.array([10, 10])
 
@@ -126,11 +123,10 @@ class RRTStarTest(unittest.TestCase):
 
         lower, upper = [20, 10], [50, 70]
         grid[lower[0] : upper[0] + 1, lower[1] : upper[1] + 1] = 1
-        self.planner.grid.from_data(grid.flatten(), self.resolution, *dims, origin=np.array([-0.25,-0.25]))
-        self.planner.goal_sample_rate = 0.4
+        self.planner.grid.from_data(grid.flatten(), self.resolution, *dims, origin=np.array([1.0,1.0]))
         start = np.array([1, 1])
         end = np.array([10, 10])
 
         plan = self.planner.plan(start, end)
         logger.info("path: %s", self.planner.goalfound)
-        self.assertIsNotNone(plan, "large obstacle")
+        self.assertIsNotNone(plan, "large obstacle offset")

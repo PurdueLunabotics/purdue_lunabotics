@@ -41,6 +41,5 @@
     <include file="$(find lunabot_perception)/launch/apriltag.launch">
       <arg name="camera_frame" value="d435_backward_link" />
     </include>
-
   </group>
 </launch>
