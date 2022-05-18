@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="serial_no_d435"    			default="939622074382"/> 		
+  <arg name="serial_no_d435_forward"    		default="939622074382"/> 		
+  <arg name="serial_no_d435_backward"        default="141222070808"/>                
   <arg name="serial_no_t265"    			default="943222111167"/> 	
-  <arg name="initial_reset"             default="false"/>
+  <arg name="initial_reset"           default="false"/>
 
   <!--The Bluetooth node requires root access to the low-level sockets using setcap.
       As a security feature, this removes the LD_LIBRARY_PATH that other nodes need for accessing the shared libraries 
@@ -14,6 +15,16 @@
     <include file="$(find realsense2_camera)/launch/rs_t265.launch">
       <arg name="serial_no" value="$(arg serial_no_t265)" />
       <arg name="tf_prefix" value="t265" />
+      <arg name="initial_reset" value="$(arg initial_reset)"/>
+    </include>
+  </group>
+
+  <group ns="d435">
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+      <arg name="serial_no" value="$(arg serial_no_d435)" />
+      <arg name="tf_prefix" value="d435" />
+      <arg name="filters" value="disparity,decimation"/>
+      <arg name="enable_pointcloud" value="true"/>
       <arg name="initial_reset" value="$(arg initial_reset)"/>
     </include>
   </group>
