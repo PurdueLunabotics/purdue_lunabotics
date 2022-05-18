@@ -7,7 +7,7 @@
 
 #define INT(a) static_cast<int>(a)
 
-#define EXC_UPDATE_PERIOD 10000000
+#define EXC_UPDATE_PERIOD 100000
 #define EXC_LOAD_DATA_PIN 33
 #define EXC_LOAD_CLK_PIN 30
 
