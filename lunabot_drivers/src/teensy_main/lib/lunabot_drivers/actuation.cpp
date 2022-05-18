@@ -75,7 +75,7 @@ namespace actuation
 
 		if (actuation.angle != 0)
 		{
-			if (lin_act_hall.state == INT(LinActState::STORED) && angle_dir == CCW)
+			if ((lin_act_hall.state == INT(LinActState::STORED) || lin_act_hall.state == INT(LinActState::INIT)) && angle_dir == CCW)
 			{
 
 				stop_motor(actuation_cfg.left_lin_act);

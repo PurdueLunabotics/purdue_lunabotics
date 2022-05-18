@@ -64,11 +64,12 @@ enum class ExcState
 
 enum class LinActState
 {
+    INIT = -1,
     STORED,    // move lin act
     START_EXC, // start excavating slowly
     FULL_EXT,  // excavate max speed
     STOP_EXC,  // stop lin act
-    CNT
+    CNT,
 };
 
 enum class LeadScrewState
@@ -86,7 +87,7 @@ enum Limit
 
 struct HallSensor
 {
-    uint8_t state;
+    int8_t state;
     Limit lim;
 
 }; 
