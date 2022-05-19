@@ -7,7 +7,7 @@
 
 #define INT(a) static_cast<int>(a)
 
-#define EXC_UPDATE_PERIOD 10000000
+#define EXC_UPDATE_PERIOD 100000
 #define EXC_LOAD_DATA_PIN 33
 #define EXC_LOAD_CLK_PIN 30
 
@@ -64,11 +64,12 @@ enum class ExcState
 
 enum class LinActState
 {
-    STORED,    // move lin act
+    STORED = -1,
+    DRIVING,    // move lin act
     START_EXC, // start excavating slowly
     FULL_EXT,  // excavate max speed
     STOP_EXC,  // stop lin act
-    CNT
+    CNT,
 };
 
 enum class LeadScrewState
@@ -78,17 +79,10 @@ enum class LeadScrewState
     CNT
 };
 
-enum Limit
-{
-    AT_LIMIT,
-    FREE
-};
-
 struct HallSensor
 {
-    uint8_t state;
-    Limit lim;
-
+    int8_t state;
+    int8_t init_state;
 }; 
 
 struct ExcFeedback
@@ -109,6 +103,6 @@ struct CurrentSensor
 
 };
 
-void init_hall(uint8_t pin, void (*cb)());
+void init_hall(uint8_t pin, void (*cb)(), HallSensor* sensor);
 
 #endif

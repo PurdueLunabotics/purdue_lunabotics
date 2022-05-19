@@ -7,11 +7,11 @@ namespace excavation
 
 
 	CurrentSensor exc_current = {.current_value = 0, .max_value = 511};
-	ExcFeedback exc_feedback = {.calibration_factor = 10000, .max_wt = 12.0, .current_wt = 0.0, .gain = 128,.bin_state = INT(BinState::EMPTY), .exc_state = INT(ExcState::NOMINAL) };
+	ExcFeedback exc_feedback = {.calibration_factor = 7050, .max_wt = 12.0, .current_wt = 0.0, .gain = 128,.bin_state = INT(BinState::EMPTY), .exc_state = INT(ExcState::NOMINAL) };
 
 	void exc_sensors_cb()
 	{
-		exc_feedback.current_wt = scale.get_value();
+		exc_feedback.current_wt = scale.get_units();
 		// if (exc_feedback.current_wt < 0.01)
 		// {
 		// 	exc_feedback.bin_state = INT(BinState::EMPTY);
@@ -37,6 +37,8 @@ namespace excavation
 	void init_load_cell()
 	{
 		scale.begin(EXC_LOAD_DATA_PIN, EXC_LOAD_CLK_PIN, exc_feedback.gain);
+
+  		scale.set_scale(exc_feedback.calibration_factor); //Adjust to this calibration factor
 		scale.tare();
 	}
 

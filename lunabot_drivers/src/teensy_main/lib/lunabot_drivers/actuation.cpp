@@ -10,8 +10,8 @@ namespace actuation
 							   actuation_cfg.lead_screw.DIR1_pin,
 							   actuation_cfg.lead_screw.DIR2_pin);
 
-	HallSensor lead_screw_hall = {.state = INT(LeadScrewState::STORED), .lim = AT_LIMIT};
-	HallSensor lin_act_hall = {.state = INT(LinActState::STORED), .lim = AT_LIMIT};
+	HallSensor lead_screw_hall = {.state = INT(LeadScrewState::STORED)};
+	HallSensor lin_act_hall = {.state = INT(LinActState::STORED)};
 
 	void lin_act_hall_cb()
 	{
@@ -20,11 +20,6 @@ namespace actuation
 			lin_act_hall.state = (lin_act_hall.state + 1) % INT(LinActState::CNT);
 			stop_motor(actuation_cfg.left_lin_act);
 			stop_motor(actuation_cfg.right_lin_act);
-			lin_act_hall.lim = AT_LIMIT;
-		}
-		else
-		{
-			lin_act_hall.lim = FREE;
 		}
 	}
 
@@ -36,11 +31,6 @@ namespace actuation
 		{
 			lead_screw_hall.state = (lead_screw_hall.state + 1) % INT(LeadScrewState::CNT);
 			stepper_off(actuation_cfg.lead_screw);
-			lead_screw_hall.lim = AT_LIMIT;
-		}
-		else
-		{
-			lead_screw_hall.lim = FREE;
 		}
 	}
 
@@ -52,8 +42,8 @@ namespace actuation
 		init_stepper(actuation_cfg.lead_screw, &lead_screw_stepper);
 		stepper_off(actuation_cfg.lead_screw);
 		lead_screw_en = 0;
-		init_hall(LEAD_SCREW_HALL_PIN, lead_screw_hall_cb);
-		init_hall(LIN_ACT_HALL_PIN, lin_act_hall_cb);
+		init_hall(LEAD_SCREW_HALL_PIN, lead_screw_hall_cb, &lead_screw_hall);
+		init_hall(LIN_ACT_HALL_PIN, lin_act_hall_cb, &lin_act_hall);
 	}
 
 	void stepper_step()
@@ -75,7 +65,7 @@ namespace actuation
 
 		if (actuation.angle != 0)
 		{
-			if (lin_act_hall.state == INT(LinActState::STORED) && angle_dir == CCW)
+			if ((lin_act_hall.state == INT(LinActState::STORED) || lin_act_hall.state == INT(LinActState::DRIVING)) && angle_dir == CCW)
 			{
 
 				stop_motor(actuation_cfg.left_lin_act);

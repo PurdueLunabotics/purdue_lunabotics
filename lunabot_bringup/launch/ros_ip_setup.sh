@@ -1,12 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 
-TESTING=true
-if [[ -z "$JETSON" ]]; then
-  IS_COMPUTER=false
-else
-  IS_COMPUTER=true
-fi
-IS_COMPUTER="${JETSON:-true}"
+TESTING="${TESTING:-false}"
+JETSON="${JETSON:-false}"
 COMPUTER_IP=192.168.1.11
 ROBOT_IP=192.168.1.10
 
@@ -16,7 +11,7 @@ if [ "$TESTING" = true ];
 then # we want ROS master on the computer during testing to use Rviz and diagnostic tools for testing
   export ROS_MASTER_URI="http://$COMPUTER_IP:11311"
 
-  if [ "$IS_COMPUTER" = true ];
+  if [ "$JETSON" = false ];
   then
     export ROS_IP="$COMPUTER_IP"
   else
@@ -25,7 +20,7 @@ then # we want ROS master on the computer during testing to use Rviz and diagnos
 else # we want ROS master on the robot during the actual competition to reduce bandwitdth usage
   export ROS_MASTER_URI="http://$ROBOT_IP:11311"
 
-  if [ "$IS_COMPUTER" = false ];
+  if [ "$JETSON" = true ];
   then
     export ROS_IP="$ROBOT_IP"
   else
