@@ -1,13 +1,39 @@
+import logging
+
 import numpy as np
 import rospy
 from geometry_msgs.msg import Point32, PoseStamped
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
-import logging
 logging.getLogger("matplotlib").setLevel(logging.WARNING)
-import matplotlib.pyplot as plt
 
-def visualize(planner,rnd):
+
+def grid_to_file(grid, cols, file="map_grid.txt"):
+    s = ""
+    for i in range(len(grid)):
+        s += str(grid[i])
+        s += " "
+        if i % cols == 0:
+            s += "\n"
+    with open(file, "w") as text_file:
+        text_file.write(s)
+
+
+def grid_to_file_rc(grid, file="map_grid_rc.txt"):
+    s = ""
+    for i in range(len(grid)):
+        for j in range(len(grid[0])):
+            s += str(grid[i][j])
+            s += " "
+        s += "\n"
+
+    with open(file, "w") as text_file:
+        text_file.write(s)
+
+
+def visualize(planner, rnd):
+    import matplotlib.pyplot as plt
+
     """Visualizes obstacles, self.node_list, self.goal, self.start at step in self.plan
 
     Args:
@@ -15,9 +41,7 @@ def visualize(planner,rnd):
     """
 
     plt.clf()
-    grid = planner.grid.copy().reshape(planner.grid_height, planner.grid_width)
-    plt.grid(True)
-    obs = np.nonzero(grid > 0.5)
+    obs = np.nonzero(planner.grid.grid >= planner.grid.occ_threshold)
     plt.scatter(obs[0], obs[1], marker="o")
 
     for node in planner.node_list:
@@ -32,45 +56,50 @@ def visualize(planner,rnd):
                         ],
                     ]
                 )
-                edge = planner.cspace_to_grid(edge)
+                edge = planner.grid.cspace_to_grid(edge)
                 plt.plot(edge[:, 0], edge[:, 1], "-g")
 
     if planner.goalfound:
         path = planner.get_path_to_goal()
         if path is not None:
             path = np.array(path)
-            path = planner.cspace_to_grid(path)
+            path = planner.grid.cspace_to_grid(path)
             plt.plot(path[:, 0], path[:, 1], "-r")
 
     if rnd is not None:
-        rnd = planner.cspace_to_grid(rnd)
+        rnd = planner.grid.cspace_to_grid(rnd)
         plt.plot(rnd[0], rnd[1], "^k")
 
-    start = planner.cspace_to_grid(planner.start.state)
-    goal = planner.cspace_to_grid(planner.goal.state)
+    start = planner.grid.cspace_to_grid(planner.start.state)
+    goal = planner.grid.cspace_to_grid(planner.goal.state)
 
     plt.plot(start[0], start[1], "xb")
     plt.plot(goal[0], goal[1], "xb")
-    plt.axis("equal")
-    plt.axis([0, planner.grid_height, 0, planner.grid_width])
+    plt.axis([0, planner.grid.height, 0, planner.grid.width])
+
+    plt.xlim(0, planner.grid.width)
+    plt.ylim(0, planner.grid.height)
+    plt.gca().set_aspect("equal", adjustable="box")
+    plt.grid(which="both")
     plt.pause(0.01)
 
 
-def state_to_pose_msg(state, frame_id="map"):
+def state_to_pose_msg(pos, rot=0.0, frame_id="map"):
     """Generates a PoseStamped ROS msg from a numpy array of the robot c-space
 
     Args:
-        state (numpy.array): [x (m), y (m), theta (deg)]
+        state (numpy.array): [x (m), y (m)]
+        pos (float): theta (deg)
 
     Returns:
         PoseStamped: Pose of robot with time stamp and relative to 'map' tf frame
     """
-    rot = quaternion_from_euler(0, 0, state[-1])
+    rot = quaternion_from_euler(0, 0, rot)
     pose = PoseStamped()
     pose.header.stamp = rospy.Time.now()
     pose.header.frame_id = frame_id
-    pose.pose.position.x = state[0]
-    pose.pose.position.y = state[1]
+    pose.pose.position.x = pos[0]
+    pose.pose.position.y = pos[1]
     pose.pose.position.z = 0
     pose.pose.orientation.x = rot[1]
     pose.pose.orientation.y = rot[2]

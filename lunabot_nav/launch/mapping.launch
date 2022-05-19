@@ -1,8 +1,24 @@
 <?xml version="1.0"?>
 <launch>
+	<arg name="point_cloud_topic" default="/point_cloud"/>
     <param name="use_sim_time" value="true"/>
-    <group ns="costmap_node">
-        <rosparam file="$(find lunabot_nav)/config/local_costmap.yml" command="load" ns="local_costmap" />
+
+    <group ns="maps">
+        <node name="costmap_node" pkg="lunabot_nav" type="costmap_node" output="screen">
+            <rosparam file="$(find lunabot_config)/config/global_costmap.yml" command="load" ns="global_costmap" />
+        </node>
     </group>
-    <node name="costmap_node" pkg="lunabot_nav" type="costmap_node" output="screen"/>
+
+    <!-- Builds map from d435 camera --> 
+    <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
+        <rosparam file="$(find lunabot_config)/config/octomap.yml" command="load" />
+        <!-- data source to integrate (PointCloud2) -->
+        <remap from="cloud_in" to="$(arg point_cloud_topic)" />
+    </node>
+
+    <node name="points_concat" pkg="lunabot_proc" type="points_concat" output="screen">
+        <remap to="/depth_topics" from="~input_topics" />
+        <remap to="/depth_frame_id" from="~output_frame_id" />
+        <remap to="/pc_topic" from="~output_topic" />
+	</node>
 </launch>

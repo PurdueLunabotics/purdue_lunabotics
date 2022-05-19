@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>lunabot_tf</name>
+  <name>lunabot_perception</name>
   <version>0.0.0</version>
-  <description>The lunabot_tf package</description>
+  <description>The lunabot_perception package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="raghava13@todo.todo">raghava13</maintainer>
+  <maintainer email="raghava@todo.todo">raghava</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/lunabot_tf</url> -->
+  <!-- <url type="website">http://wiki.ros.org/lunabot_perception</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -48,8 +48,14 @@
   <!--   <test_depend>gtest</test_depend> -->
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
-  <depend>tf</depend>
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>image_proc</build_depend>
+  <build_depend>realsense2_camera</build_depend>
+  <build_export_depend>image_proc</build_export_depend>
+  <build_export_depend>realsense2_camera</build_export_depend>
+  <exec_depend>image_proc</exec_depend>
+  <exec_depend>realsense2_camera</exec_depend>
+  <depend>apriltag_ros</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

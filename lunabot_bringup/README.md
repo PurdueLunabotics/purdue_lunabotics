@@ -1,9 +1,11 @@
 # lunabot_bringup
 
 All the launch files related to running different parts of the software stack
+
 ### Gazebo simulator
 
 #### Run it!
+
 1. Double check you have the `realsense_ros_gazebo` and `mining_arena_gazebo` packages in [lunabot_sim](https://github.com/PurdueLunabotics/purdue_lunabotics/tree/simulator/lunabot_sim). If not, [run this](https://gist.github.com/raghavauppuluri13/e72f650116efa7a935161f4772083d10)
 
 2. Run the [setup instructions](https://github.com/PurdueLunabotics/mining_arena_gazebo/tree/33f5949c90bd798f3925302800600661709a8f50#setup) for the [mining_arena_gazebo](https://github.com/PurdueLunabotics/mining_arena_gazebo) package to ensure gazebo can find all the gazebo model files
@@ -15,8 +17,7 @@ All the launch files related to running different parts of the software stack
 
 1. Get odometry information from the `odom` topic
 2. Publish velocity control commands with `cmd_vel` topic (**NOTE: invert the `linear` and `angular` fields when you send it, its a weird bug that needs to be fixed TODO**)
-3. Get 3D pointcloud and camera data from `d435_cam_forward/depth/*` and `d435_cam_backward/depth/*` topics
-
+3. Get 3D pointcloud and camera data from `d435_forward/depth/*` and `d435_backward/depth/*` topics
 
 ### Run rosbags
 
@@ -24,11 +25,13 @@ All the launch files related to running different parts of the software stack
 2. Make `lunabot_bringup/bags` folder and put the rosbag in there
 
 #### View Localization
+
 ```
 roslaunch lunabot_bringup test_localization.launch
 ```
 
 #### View Map Building
+
 ```
 roslaunch lunabot_bringup test_mapping.launch
 ```
@@ -49,13 +52,17 @@ roslaunch lunabot_bringup test_mapping.launch
 
 1. In another terminal, set the ROS IP info on the laptop using the alias: `set_ip`
 2. Launch the computer launch file on the laptop
+
 ```
 roslaunch lunabot_bringup computer.launch
 ```
+
 2. Launch the jetson launch file on the jetson
+
 ```
 roslaunch lunabot_bringup dummybot.launch
 ```
+
 > Can replace dummybot with `rollerbot` or for the config of the competition robot (compbot?)
 
 That's it! Things should be running now.

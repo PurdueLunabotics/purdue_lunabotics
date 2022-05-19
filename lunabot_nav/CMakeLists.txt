@@ -23,6 +23,9 @@ catkin_package(
 #  DEPENDS system_lib
 )
 
+add_compile_options(-pg)
+set(catkin_LIBRARIES ${catkin_LIBRARIES} -pg)
+
 include_directories(
  include
  ${catkin_INCLUDE_DIRS}
@@ -42,7 +45,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME}_mpc_node src/mpc.cpp )
+add_executable(${PROJECT_NAME}_mpc_node nodes/mpc_node.cpp src/mpc.cpp )
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -83,6 +86,6 @@ if(CATKIN_ENABLE_TESTING)
   find_package(roslaunch REQUIRED)
   roslaunch_add_file_check(launch USE_TEST_DEPENDENCIES)
   find_package(rostest REQUIRED)
-  add_rostest(test/test_global_planner.test)
+  #add_rostest(test/test_global_planner.test)
   catkin_add_nosetests(test)
 endif()

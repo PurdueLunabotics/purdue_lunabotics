@@ -52,7 +52,9 @@
 	<depend>realsense2_camera</depend>  
 	<depend>image_proc</depend>  
 	<depend>apriltag_ros</depend>  
+	<depend>lunabot_perception</depend>  
 	<depend>roscpp</depend>  
+	<depend>tf</depend>  
 	<depend>rospy</depend>  
 	<depend>std_msgs</depend>  
 	<depend>geometry_msgs</depend>  
