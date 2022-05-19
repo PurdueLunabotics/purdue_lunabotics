@@ -2,7 +2,7 @@
 
 namespace deposition
 {
-	HallSensor dep_hall = { .state = INT(DepState::STORED)};
+	HallSensor dep_hall = { .state = INT(DepState::STORED, .init_state=INT(DepState::STORED))};
 
 	void dep_hall_cb()
 	{

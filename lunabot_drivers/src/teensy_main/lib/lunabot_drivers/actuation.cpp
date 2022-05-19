@@ -10,8 +10,8 @@ namespace actuation
 							   actuation_cfg.lead_screw.DIR1_pin,
 							   actuation_cfg.lead_screw.DIR2_pin);
 
-	HallSensor lead_screw_hall = {.state = INT(LeadScrewState::STORED)};
-	HallSensor lin_act_hall = {.state = INT(LinActState::STORED)};
+	HallSensor lead_screw_hall = {.state = INT(LeadScrewState::STORED), .init_state = INT(LeadScrewState::STORED)};
+	HallSensor lin_act_hall = {.state = INT(LinActState::STORED, .init_state = INT(LeadScrewState::STORED))};
 
 	void lin_act_hall_cb()
 	{
