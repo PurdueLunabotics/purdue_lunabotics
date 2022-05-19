@@ -10,28 +10,33 @@ namespace actuation
 							   actuation_cfg.lead_screw.DIR1_pin,
 							   actuation_cfg.lead_screw.DIR2_pin);
 
-	HallSensor lead_screw_hall = {.state = INT(LeadScrewState::STORED), .init_state = INT(LeadScrewState::STORED)};
-	HallSensor lin_act_hall = {.state = INT(LinActState::STORED, .init_state = INT(LeadScrewState::STORED))};
+	HallSensor lead_screw_hall = {.state = INT(LeadScrewState::STORED), .init_state = INT(LeadScrewState::STORED), .last_debounce_time = 0};
+	HallSensor lin_act_hall = {.state = INT(LinActState::STORED), .init_state = INT(LinActState::STORED), .last_debounce_time = 0};
 
 	void lin_act_hall_cb()
 	{
-		if (digitalRead(LIN_ACT_HALL_PIN) == LOW)
+
+		if (millis() - lin_act_hall.last_debounce_time > DEBOUNCE_DELAY_MILLIS && digitalRead(LIN_ACT_HALL_PIN) == LOW)
 		{
 			lin_act_hall.state = (lin_act_hall.state + 1) % INT(LinActState::CNT);
 			stop_motor(actuation_cfg.left_lin_act);
 			stop_motor(actuation_cfg.right_lin_act);
 		}
+
+		lin_act_hall.last_debounce_time = millis();
 	}
 
 	// Lead Screw Actuation
 
 	void lead_screw_hall_cb()
 	{
-		if (digitalRead(LEAD_SCREW_HALL_PIN) == LOW)
+		if (millis() - lead_screw_hall.last_debounce_time > DEBOUNCE_DELAY_MILLIS)
 		{
 			lead_screw_hall.state = (lead_screw_hall.state + 1) % INT(LeadScrewState::CNT);
 			stepper_off(actuation_cfg.lead_screw);
 		}
+
+		lead_screw_hall.last_debounce_time = millis();
 	}
 
 	void init()

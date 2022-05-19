@@ -2,15 +2,17 @@
 
 namespace deposition
 {
-	HallSensor dep_hall = { .state = INT(DepState::STORED, .init_state=INT(DepState::STORED))};
+	HallSensor dep_hall = { .state = INT(DepState::STORED), .init_state=INT(DepState::STORED), .last_debounce_time = 0};
 
 	void dep_hall_cb()
 	{
 
-		if(digitalRead(DEP_HALL_PIN) == LOW) {
+		if (millis() - dep_hall.last_debounce_time > DEBOUNCE_DELAY_MILLIS) {
 			dep_hall.state = (dep_hall.state + 1) % INT(DepState::CNT);
 			stop_motor(deposition_cfg.dep_motor);
 		}
+
+		dep_hall.last_debounce_time = millis();
 	}
 
 	void init()

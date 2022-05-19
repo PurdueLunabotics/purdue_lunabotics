@@ -4,3 +4,6 @@
 [submodule "lunabot_sim/mining_arena_gazebo"]
 	path = lunabot_sim/mining_arena_gazebo
 	url = https://github.com/PurdueLunabotics/mining_arena_gazebo
+[submodule "timed_roslaunch"]
+	path = timed_roslaunch
+	url = https://github.com/MoriKen254/timed_roslaunch.git

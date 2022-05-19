@@ -1,0 +1,41 @@
+<launch>
+  <arg name="serial_no_d435_forward"    			default="939622074382"/> 		
+  <arg name="serial_no_d435_backward"        default="141222070808"/>                
+  <arg name="initial_reset"                 default="false"/>
+
+
+  <group ns="d435_forward">
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+      <arg name="serial_no" value="$(arg serial_no_d435_forward)" />
+      <arg name="tf_prefix" value="d435_forward" />
+      <arg name="filters" value="disparity,decimation"/>
+      <arg name="enable_pointcloud" value="true"/>
+      <arg name="initial_reset" value="$(arg initial_reset)"/>
+    </include>
+
+    <group ns="camera/color" >
+        <node pkg="image_proc" type="image_proc" name="image_proc" args="image:=camera/color/image_raw"/>
+        <include file="$(find lunabot_perception)/launch/apriltag.launch">
+          <arg name="camera_frame" value="d435_forward_base" />
+        </include>
+    </group>
+  </group>
+
+  <group ns="d435_backward">
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+      <arg name="serial_no" value="$(arg serial_no_d435_backward)" />
+      <arg name="tf_prefix" value="d435_backward" />
+      <arg name="filters" value="disparity,decimation"/>
+      <arg name="enable_pointcloud" value="true"/>
+      <arg name="initial_reset" value="$(arg initial_reset)"/>
+    </include>
+
+    <group ns="camera/color" >
+        <node pkg="image_proc" type="image_proc" name="image_proc" args="image:=camera/color/image_raw"/>
+        <include file="$(find lunabot_perception)/launch/apriltag.launch">
+          <arg name="camera_frame" value="d435_backward_base" />
+        </include>
+    </group>
+  </group>
+
+</launch>

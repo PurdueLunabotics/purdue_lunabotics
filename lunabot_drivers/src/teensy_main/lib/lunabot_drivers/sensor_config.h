@@ -7,6 +7,8 @@
 
 #define INT(a) static_cast<int>(a)
 
+#define DEBOUNCE_DELAY_MILLIS 2000 
+
 #define EXC_UPDATE_PERIOD 100000
 #define EXC_LOAD_DATA_PIN 33
 #define EXC_LOAD_CLK_PIN 30
@@ -83,6 +85,7 @@ struct HallSensor
 {
     int8_t state;
     int8_t init_state;
+    unsigned long last_debounce_time;
 }; 
 
 struct ExcFeedback

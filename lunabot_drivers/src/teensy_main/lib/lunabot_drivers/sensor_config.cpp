@@ -6,3 +6,4 @@ void init_hall(uint8_t pin, void (*cb)(), HallSensor* sensor)
     attachInterrupt(pin, cb, FALLING);
     sensor->state = sensor->init_state;
 }
+
