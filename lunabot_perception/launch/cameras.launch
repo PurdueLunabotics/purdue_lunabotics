@@ -16,7 +16,7 @@
 
   <group ns="d435_forward" unless="$(arg sim)">
     <include file="$(find realsense2_camera)/launch/rs_camera.launch">
-      <arg name="serial_no" value="$(arg serial_no_d435)" />
+      <arg name="serial_no" value="$(arg serial_no_d435_forward)" />
       <arg name="tf_prefix" value="d435_forward" />
       <arg name="filters" value="disparity,decimation"/>
       <arg name="enable_pointcloud" value="true"/>
@@ -33,7 +33,7 @@
 
   <group ns="d435_backward" unless="$(arg sim)">
     <include file="$(find realsense2_camera)/launch/rs_camera.launch">
-      <arg name="serial_no" value="$(arg serial_no_d435)" />
+      <arg name="serial_no" value="$(arg serial_no_d435_backward)" />
       <arg name="tf_prefix" value="d435_backward" />
       <arg name="filters" value="disparity,decimation"/>
       <arg name="enable_pointcloud" value="true"/>
