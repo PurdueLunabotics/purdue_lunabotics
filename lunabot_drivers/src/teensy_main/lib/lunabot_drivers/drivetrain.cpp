@@ -31,9 +31,9 @@ namespace drivetrain
 			Tank drive steering
 		*/
 		front_left_ctrl.setp = drive_msg.left; // wheel velocity [-1,1]
-		back_left_ctrl.setp = drive_msg.left;
+		//back_left_ctrl.setp = drive_msg.left;
 		front_right_ctrl.setp = drive_msg.right;
-		back_right_ctrl.setp = drive_msg.right;
+		//back_right_ctrl.setp = drive_msg.right;
 	}
 
 	float calc_pid(WheelControl *ctrl)

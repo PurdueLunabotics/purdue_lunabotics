@@ -2,10 +2,39 @@
 import rospy
 import numpy as np
 
-from std_msgs.msg import Int8,Float32
+from std_msgs.msg import Int8,Float32,UInt8
 from sensor_msgs.msg import Joy 
 from lunabot_msgs.msg import Actuation
 from lunabot_msgs.msg import Drivetrain 
+from enum import Enum
+
+class DepState(Enum):
+    STORED = 0,
+    FULL_EXT = 1,
+    CNT = 2,
+    STOPPED = 3
+
+class BinState(Enum):
+    EMPTY = 0,
+    FILLING = 1,
+    FULL = 2,
+
+class ExcState(Enum):
+    NOMINAL= 0,
+    OVERCURRENT = 1,
+
+class LinActState(Enum):
+    STORED = -1,
+    DRIVING = 0,
+    FULL_EXT = 1, 
+    CNT = 2,
+    STOPPED = 3
+
+class LeadScrewState(Enum):
+    STORED = 0,
+    FULL_EXT = 1,
+    CNT = 2,
+    STOPPED = 2,
 
 class ManualController:
     '''ManualController
@@ -16,11 +45,16 @@ class ManualController:
         self.subsystems = ['drivetrain', 'actuation', 'excavation', 'deposition']
         self.curr_subsystem = 'drivetrain'
 
+        dep_topic = rospy.get_param('deposition_setp_topic')
+        lin_act_topic = rospy.get_param('lin_act_setp_topic')
+        lead_screw_topic = rospy.get_param('lead_screw_setp_topic')
+
         self._joy_sub = rospy.Subscriber('joy', Joy, self.joy_cb);
         self._drivetrain_pub = rospy.Publisher('cmd_vel', Drivetrain, queue_size=100);
         self._excavation_pub = rospy.Publisher('excavation', Float32, queue_size=100);
-        self._deposition_pub = rospy.Publisher('deposition', Int8, queue_size=100);
-        self._actuation_pub = rospy.Publisher('actuation', Actuation, queue_size=100);
+        self._deposition_pub = rospy.Publisher(dep_topic, UInt8, queue_size=100);
+        self._lin_act_pub = rospy.Publisher(lin_act_topic, UInt8, queue_size=100);
+        self._lead_screw_pub = rospy.Publisher(lead_screw_topic, UInt8, queue_size=100);
 
     def joy_cb(self, joy):
         if joy.buttons[1]: # 'B' button -- switches the active subsystem
@@ -37,14 +71,29 @@ class ManualController:
         drive_msg.right = joy.axes[4]
         self._drivetrain_pub.publish(drive_msg)
 
-        actuation_msg = Actuation()
-
+        lead_screw_msg = UInt8()
         # up/down arrows 
-        actuation_msg.lead_screw = int(joy.axes[7])
+        ctrl = int(joy.axes[7])
+        if ctrl > 0:
+            ctrl = LeadScrewState.FULL_EXT 
+        elif ctrl < 0:
+            ctrl = LeadScrewState.STORED
+        else:
+            ctrl = LeadScrewState.STOPPED
+        lead_screw_msg.data = ctrl 
+        self._lead_screw_pub.publish(lin_act_msg)
 
         # left/right bumpers 
-        actuation_msg.angle = int(joy.buttons[4] - joy.buttons[5])
-        self._actuation_pub.publish(actuation_msg)
+        lin_act_msg = UInt8()
+        ctrl = int(joy.buttons[4] - joy.buttons[5])
+        if ctrl > 0:
+            ctrl = LinActState.DRIVING 
+        elif ctrl < 0:
+            ctrl = LinActState.FULL_EXT
+        else:
+            ctrl = LinActState.STOPPED
+        lin_act_msg.data = ctrl 
+        self._lin_act_pub.publish(lin_act_msg)
 
         # Triggers
         excavation_msg = Float32()
@@ -52,8 +101,17 @@ class ManualController:
         self._excavation_pub.publish(excavation_msg)
 
         # left/right arrows 
-        deposition_msg = Int8()
-        deposition_msg.data = int(joy.axes[6])
+        deposition_msg = UInt8()
+
+        ctrl = int(joy.axes[6])
+
+        if ctrl > 0:
+            ctrl = DepState.FULL_EXT 
+        elif ctrl < 0:
+            ctrl = DepState.STORED
+        else:
+            ctrl = DepState.STOPPED
+        deposition_msg.data = ctrl 
         self._deposition_pub.publish(deposition_msg)
 
     def stop(self):

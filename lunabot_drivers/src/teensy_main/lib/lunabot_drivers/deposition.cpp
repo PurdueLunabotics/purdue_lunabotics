@@ -3,6 +3,7 @@
 namespace deposition
 {
 	State dep_curr = {.state = INT(DepState::STORED)};
+	State dep_setp = {.state = INT(DepState::STORED)};
 
 	void dep_hall_cb()
 	{

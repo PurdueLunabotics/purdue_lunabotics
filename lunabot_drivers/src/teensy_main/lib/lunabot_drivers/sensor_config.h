@@ -103,6 +103,6 @@ struct CurrentSensor
     int max_value;
 }; // not used
 
-void init_hall(uint8_t pin, void (*cb)(), HallSensor* sensor);
+void init_hall(uint8_t pin, void (*cb)(), State* state);
 
 #endif
