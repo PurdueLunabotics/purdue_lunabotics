@@ -7,7 +7,7 @@ namespace excavation
 
 
 	CurrentSensor exc_current = {.current_value = 0, .max_value = 511};
-	ExcFeedback exc_feedback = {.calibration_factor = 7050, .max_wt = 12.0, .current_wt = 0.0, .gain = 128,.bin_state = INT(BinState::EMPTY), .exc_state = INT(ExcState::NOMINAL) };
+	ExcFeedback exc_feedback = {.calibration_factor = 7050, .max_wt = 12.0, .current_wt = 0.0, .gain = 128,.bin_state = INT(BinState::EMPTY), .exc_state = INT(ExcState::STOPPED) };
 
 	void exc_sensors_cb()
 	{
@@ -26,8 +26,6 @@ namespace excavation
 		// 	stop_motor(excavation_cfg.exc);
 		// }
 
-		exc_current.current_value = analogRead(EXC_CURRENT_PIN);
-		// if (exc_current.current_value >= exc_current.max_value)
 		// {
 		// 	exc_feedback.exc_state = INT(ExcState::OVERCURRENT);
 		// 	stop_motor(excavation_cfg.exc);
@@ -59,13 +57,17 @@ namespace excavation
 		return (val - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 	}
 
+	void set_state(uint8_t state) {
+		
+	}
+
 	void run_excavation(const std_msgs::Float32 &speed, ros::NodeHandle *nh)
 	{
 		unsigned int excavate_speed = abs(round(mapf(speed.data, -2, 2, -255, 255))); // Range from [-255,255]
 		MotorDir excavate_dir = (speed.data > 0) ? CCW : CW;
 
 
-		if (exc_feedback.bin_state == INT(BinState::FULL) || exc_feedback.exc_state == INT(ExcState::OVERCURRENT))
+		if (exc_feedback.bin_state == INT(BinState::FULL))
 		{
 			return;
 		}

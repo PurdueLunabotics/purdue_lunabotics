@@ -1,5 +1,7 @@
 #include <ros.h>
 #include <std_msgs/Int8.h>
+#include <std_msgs/UInt8.h>
+
 #include "actuator_config.h"
 #include "sensor_config.h"
 
@@ -10,10 +12,12 @@
 namespace deposition
 {
 
-	extern HallSensor dep_hall;
+	extern State dep_curr;
+	extern State dep_setp;
 	// DEPOSITION FUNCTIONS
 	void init();
 	void run_deposition(const std_msgs::Int8 &command, ros::NodeHandle *nh);
+	void move_to_setp();
 }
 
 #endif

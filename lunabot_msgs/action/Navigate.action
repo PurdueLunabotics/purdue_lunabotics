@@ -1,1 +1,7 @@
 # Pose goal | bool success | float progress
+
+geometry_msgs/Pose goal 
+---
+uint8 success
+---
+float32 progress

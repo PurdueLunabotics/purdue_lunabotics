@@ -1,8 +1,12 @@
+#ifndef __FSM__
+#define __FSM__
+
 enum class DepState
 {
     STORED,
     FULL_EXT,
-    CNT
+    CNT,
+    STOPPED
 };
 
 enum class BinState
@@ -20,17 +24,19 @@ enum class ExcState
 
 enum class LinActState
 {
-    INIT = -1,
-    STORED,    // move lin act
-    START_EXC, // start excavating slowly
-    FULL_EXT,  // excavate max speed
-    STOP_EXC,  // stop lin act
+    STORED = -1,
+    DRIVING,  // move lin act
+    FULL_EXT, 
     CNT,
+    STOPPED
 };
 
 enum class LeadScrewState
 {
     STORED,
     FULL_EXT,
-    CNT
+    CNT,
+    STOPPED
 };
+
+#endif

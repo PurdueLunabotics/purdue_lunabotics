@@ -1,0 +1,18 @@
+map_topic: "maps/costmap_node/global_costmap/costmap"
+odom_topic: "odom"
+goal_topic: "goal"
+path_topic: "global_path"
+pc_topic: "point_cloud"
+cmd_vel_topic: "cmd_vel"
+
+excavation_topic: "/excavation/ctrl"
+deposition_topic: "/deposition/ctrl"
+drivetrain_topic: "/drivetrain/ctrl"
+actuation_topic: "/actuation/ctrl"
+robot_state_topic: "/robot_state"
+
+lin_act_setp_topic: "/actuation/lin_act/set_state"
+lead_screw_setp_topic: "/actuation/lead_screw/set_state"
+deposition_setp_topic: "/deposition/set_state"
+
+occ_threshold: 128 # corresponds to possibly-in-collision

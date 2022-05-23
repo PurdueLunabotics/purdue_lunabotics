@@ -1,1 +1,6 @@
-# string behavior_name | bool success | float progress (i.e Localize, Rotate, 
+# string action { "EXCAVATE","DEPOSIT" } | bool success | float progress
+uint8 data 
+---
+uint8 success
+---
+float32 progress

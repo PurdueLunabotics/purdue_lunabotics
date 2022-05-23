@@ -10,14 +10,16 @@ namespace actuation
 							   actuation_cfg.lead_screw.DIR1_pin,
 							   actuation_cfg.lead_screw.DIR2_pin);
 
-	HallSensor lead_screw_hall = {.state = INT(LeadScrewState::STORED)};
-	HallSensor lin_act_hall = {.state = INT(LinActState::STORED)};
+	State lead_screw_curr = {.state = INT(LeadScrewState::STORED)};
+	State lin_act_curr = {.state = INT(LinActState::STORED)};
+	State lead_screw_setp = {.state = INT(LeadScrewState::STORED)};
+	State lin_act_setp = {.state = INT(LinActState::STORED)};
 
 	void lin_act_hall_cb()
 	{
 		if (digitalRead(LIN_ACT_HALL_PIN) == LOW)
 		{
-			lin_act_hall.state = (lin_act_hall.state + 1) % INT(LinActState::CNT);
+			lin_act_curr.state = (lin_act_curr.state + 1) % INT(LinActState::CNT);
 			stop_motor(actuation_cfg.left_lin_act);
 			stop_motor(actuation_cfg.right_lin_act);
 		}
@@ -29,7 +31,7 @@ namespace actuation
 	{
 		if (digitalRead(LEAD_SCREW_HALL_PIN) == LOW)
 		{
-			lead_screw_hall.state = (lead_screw_hall.state + 1) % INT(LeadScrewState::CNT);
+			lead_screw_curr.state = (lead_screw_curr.state + 1) % INT(LeadScrewState::CNT);
 			stepper_off(actuation_cfg.lead_screw);
 		}
 	}
@@ -42,8 +44,8 @@ namespace actuation
 		init_stepper(actuation_cfg.lead_screw, &lead_screw_stepper);
 		stepper_off(actuation_cfg.lead_screw);
 		lead_screw_en = 0;
-		init_hall(LEAD_SCREW_HALL_PIN, lead_screw_hall_cb, &lead_screw_hall);
-		init_hall(LIN_ACT_HALL_PIN, lin_act_hall_cb, &lin_act_hall);
+		init_hall(LEAD_SCREW_HALL_PIN, lead_screw_hall_cb, &lead_screw_curr);
+		init_hall(LIN_ACT_HALL_PIN, lin_act_hall_cb, &lin_act_curr);
 	}
 
 	void stepper_step()
@@ -51,6 +53,23 @@ namespace actuation
 		if (lead_screw_en)
 		{
 			stepper_step(actuation_cfg.lead_screw, &lead_screw_stepper, lead_screw_dir);
+		}
+	}
+
+	void move_to_setp(void)
+	{
+		if (lin_act_setp.state != lin_act_curr.state && lin_act_setp.state != INT(LinActState::STOPPED))
+		{
+			MotorDir dir = (lin_act_setp.state == INT(LinActState::STORED)) ? CCW : CW; // CCW rotates lin_act up when stored, CW retracts deposition down when extended
+			write_motor(actuation_cfg.left_lin_act,
+						actuation_cfg.left_lin_act.MAX_PWM, dir);
+			write_motor(actuation_cfg.right_lin_act,
+						actuation_cfg.right_lin_act.MAX_PWM, dir);
+		}
+		if (lead_screw_curr.state != lead_screw_setp.state && lead_screw_curr.state != INT(LeadScrewState::STOPPED))
+		{
+			lead_screw_dir = (lead_screw_curr.state == INT(LeadScrewState::STORED)) ? EXTEND : RETRACT;
+			stepper_on(actuation_cfg.lead_screw);
 		}
 	}
 
@@ -62,27 +81,12 @@ namespace actuation
 
 		MotorDir angle_dir = (actuation.angle > 0) ? CW : CCW; // CCW retracts, CW extends
 
-
 		if (actuation.angle != 0)
 		{
-			if ((lin_act_hall.state == INT(LinActState::STORED) || lin_act_hall.state == INT(LinActState::DRIVING)) && angle_dir == CCW)
-			{
-
-				stop_motor(actuation_cfg.left_lin_act);
-				stop_motor(actuation_cfg.right_lin_act);
-			}
-			else if (lin_act_hall.state == INT(LinActState::FULL_EXT) && angle_dir == CW)
-			{
-
-				stop_motor(actuation_cfg.left_lin_act);
-				stop_motor(actuation_cfg.right_lin_act);
-			}
-			else {
-				write_motor(actuation_cfg.left_lin_act,
-							actuation_cfg.left_lin_act.MAX_PWM, angle_dir);
-				write_motor(actuation_cfg.right_lin_act,
-							actuation_cfg.right_lin_act.MAX_PWM, angle_dir);
-			}
+			write_motor(actuation_cfg.left_lin_act,
+						actuation_cfg.left_lin_act.MAX_PWM, angle_dir);
+			write_motor(actuation_cfg.right_lin_act,
+						actuation_cfg.right_lin_act.MAX_PWM, angle_dir);
 		}
 		else
 		{
@@ -93,19 +97,7 @@ namespace actuation
 		// nh.logerror("lead screw:");
 		if (lead_screw_en)
 		{
-
-			if (lead_screw_hall.state == INT(LeadScrewState::STORED) && lead_screw_dir == RETRACT)
-			{
-				stepper_off(actuation_cfg.lead_screw);
-			}
-			else if (lead_screw_hall.state == INT(LeadScrewState::FULL_EXT) && lead_screw_dir == EXTEND)
-			{
-				stepper_off(actuation_cfg.lead_screw);
-			}
-			else {
-				// nh.logerror("ON");
-				stepper_on(actuation_cfg.lead_screw);
-			}
+			stepper_on(actuation_cfg.lead_screw);
 		}
 		else
 		{

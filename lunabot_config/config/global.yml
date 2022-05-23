@@ -4,4 +4,9 @@ goal_topic: "goal"
 path_topic: "global_path"
 pc_topic: "point_cloud"
 cmd_vel_topic: "cmd_vel"
+excavation_topic: "/excavation"
+deposition_topic: "/deposition"
+drivetrain_topic: "/drivetrain"
+actuation_topic: "/actuation"
+
 occ_threshold: 128 # corresponds to possibly-in-collision

@@ -10,6 +10,8 @@ project(lunabot_msgs)
 find_package(catkin REQUIRED COMPONENTS
  message_generation
  std_msgs
+ actionlib_msgs
+ geometry_msgs
 )
 
 
@@ -34,9 +36,18 @@ add_message_files(FILES
   LunabotState.msg
 )
 
+## Generate actions in the 'action' folder
+add_action_files(
+  DIRECTORY action
+  FILES
+  Behavior.action
+  Navigate.action
+  Rotate.action
+)
+
 ## Generate added messages and services with any dependencies listed here
 generate_messages(DEPENDENCIES
-  std_msgs
+  std_msgs actionlib_msgs geometry_msgs
 )
 
 ###################################
@@ -51,7 +62,7 @@ generate_messages(DEPENDENCIES
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES lunabot_msgs
-   CATKIN_DEPENDS message_runtime
+   CATKIN_DEPENDS message_runtime actionlib_msgs geometry_msgs
 #  DEPENDS system_lib
 )
 

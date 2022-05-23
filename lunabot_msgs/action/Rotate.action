@@ -1,0 +1,6 @@
+# [0 - CCW, 1 - CW]
+uint8 dir 
+---
+uint8 success
+---
+float32 angle # in radians

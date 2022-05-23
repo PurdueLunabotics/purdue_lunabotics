@@ -46,7 +46,8 @@ enum class DepState
 {
     STORED,
     FULL_EXT,
-    CNT
+    CNT,
+    STOPPED
 };
 
 enum class BinState
@@ -58,28 +59,28 @@ enum class BinState
 
 enum class ExcState
 {
-    NOMINAL,
-    OVERCURRENT,
+    EXCAVATE,
+    STOPPED
 };
 
 enum class LinActState
 {
     STORED = -1,
-    DRIVING,    // move lin act
-    START_EXC, // start excavating slowly
-    FULL_EXT,  // excavate max speed
-    STOP_EXC,  // stop lin act
+    DRIVING,  // move lin act
+    FULL_EXT, 
     CNT,
+    STOPPED
 };
 
 enum class LeadScrewState
 {
     STORED,
     FULL_EXT,
-    CNT
+    CNT,
+    STOPPED
 };
 
-struct HallSensor
+struct State 
 {
     int8_t state;
     int8_t init_state;
@@ -100,8 +101,7 @@ struct CurrentSensor
 {
     int current_value;
     int max_value;
-
-};
+}; // not used
 
 void init_hall(uint8_t pin, void (*cb)(), HallSensor* sensor);
 

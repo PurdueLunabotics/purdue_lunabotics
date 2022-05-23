@@ -1,0 +1,6 @@
+# diff drive
+
+diff_drive_node:
+  wheel_diam: 
+  wheel_separation: 
+  max_speed: 0.54
