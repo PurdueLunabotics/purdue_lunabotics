@@ -13,8 +13,7 @@ namespace actuation
 	void init()
 	{
 		// set all pwm and direction pins to output
-		init_motor(actuation_cfg.left_lin_act);
-		init_motor(actuation_cfg.right_lin_act);
+		init_motor(actuation_cfg.lin_act);
 		init_stepper(actuation_cfg.lead_screw,&lead_screw_stepper);
 		stepper_off(actuation_cfg.lead_screw);
 		lead_screw_en = 0;
@@ -35,14 +34,11 @@ namespace actuation
 		MotorDir angle_dir = (actuation.angle > 0) ? CW : CCW; 
 
 		if(actuation.angle != 0) {
-			write_motor(actuation_cfg.left_lin_act,
-						actuation_cfg.left_lin_act.MAX_PWM,angle_dir);
-			write_motor(actuation_cfg.right_lin_act,
-						actuation_cfg.right_lin_act.MAX_PWM,angle_dir);
+			write_motor(actuation_cfg.lin_act,
+						actuation_cfg.lin_act.MAX_PWM,angle_dir);
 		}
 		else {
-			stop_motor(actuation_cfg.left_lin_act);
-			stop_motor(actuation_cfg.right_lin_act);
+			stop_motor(actuation_cfg.lin_act);
 		}
 
 		nh.logerror("lead screw:");

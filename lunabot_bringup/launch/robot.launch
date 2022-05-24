@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <include file="$(find lunabot_control)/launch/manual_control.launch" />
-    <machine name="jetson" address="192.168.1.10" env-loader="~/lunabot_env.sh"/>
+    <machine name="jetson" address="192.168.0.101" env-loader="~/lunabot_env.sh"/>
     <node machine="jetson" name="teensy_main" ns="teensy_main" pkg="rosserial_python" type="serial_node.py" output="screen">
         <param name="port" type="string" value="/dev/ttyACM0"/>
     </node>

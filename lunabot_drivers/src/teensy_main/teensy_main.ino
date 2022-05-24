@@ -4,6 +4,8 @@
 #include <excavation.h>
 #include <deposition.h>
 
+#define STATUS_LED 41 
+
 ros::NodeHandle nh;
 
 
@@ -36,10 +38,12 @@ void setup() {
 	actuation::init();
 	excavation::init();
 
+	pinMode(STATUS_PIN, OUTPUT);
 }
 
 void loop() {
 	nh.spinOnce();
 	actuation::stepper_step();
+	digitalWrite(STATUS_PIN,HIGH);
 	delay(10);
 }
