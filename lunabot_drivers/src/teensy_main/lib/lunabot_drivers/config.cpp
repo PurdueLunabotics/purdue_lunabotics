@@ -1,5 +1,12 @@
 #include "config.h"
 
+void init_serial() {
+}
+
+void init_serial_motor() {
+
+}
+
 void init_motor(MotorConfig m)
 {
     pinMode(m.DIR_P, OUTPUT);
@@ -16,7 +23,11 @@ void init_stepper(StepperConfig cfg, Stepper* stepper)
 void write_motor(MotorConfig m, uint8_t pwm, MotorDir dir)
 {
     digitalWrite(m.DIR_P, dir);
-    analogWrite(m.PWM_P, pwm);
+    analogWrite(min(m.PWM_P), pwm);
+}
+
+void write_serial_motor(MotorConfig m, int8_t power) {
+    m.st->motor(m.motor, power);
 }
 
 void stepper_step(StepperConfig s, Stepper* stepper, StepperDir dir) {

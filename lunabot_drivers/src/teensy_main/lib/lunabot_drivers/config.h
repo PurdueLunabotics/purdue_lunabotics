@@ -1,14 +1,17 @@
 #include <Arduino.h>
 #include <Stepper.h>
+#include <Sabertooth.h>
 
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#define DRIVE_MTR_CNT 4
+#define DRIVE_MTR_CNT 2
 #define ACT_MTR_CNT 2
 #define DEP_MTR_CNT 1
 #define EXC_MTR_CNT 1
 
+ Sabertooth MC1(129);
+ Sabertooth MC2(128);
 
 enum StepperDir { RETRACT = -1, EXTEND = 1 };
 struct StepperConfig
@@ -23,33 +26,45 @@ struct StepperConfig
 };
 
 enum MotorDir { CW = HIGH, CCW = LOW };
-struct MotorConfig
+
+union MotorConfig 
 {
-    uint8_t DIR_P;
-    uint8_t PWM_P;
-    uint8_t MAX_PWM = 255;
+    struct {
+        uint8_t PWM_P;
+        uint8_t DIR_P;
+        uint8_t MAX_SPEED = 255;
+    };
+
+    struct {
+        Sabertooth* st;
+        int8_t MAX_SPEED = 127;
+        uint8_t motor;
+    };
+
+    int IS_SERIAL = 0;
 };
 
-static const struct ExcavationConfig
+static struct ExcavationConfig
 {
-    MotorConfig exc = {.DIR_P = 26, .PWM_P = 24};
+    MotorConfig exc = { .IS_SERIAL = 1, .st=&MC2, .motor = 2};
 } excavation_cfg;
 
 
-static const struct DrivetrainConfig
+static struct DrivetrainConfig
 {
-    MotorConfig left = {.DIR_P = 1, .PWM_P = 0, .MAX_PWM = 100};
-    MotorConfig right = {.DIR_P = 3, .PWM_P = 2. MAX_PWM = 100};
+    MotorConfig left = {.st=&MC1, .IS_SERIAL= 1, .MAX_SPEED = 50, .motor=1};
+    MotorConfig right = {.st=&MC1, .IS_SERIAL= 1, .MAX_SPEED = 50, .motor=2};
 } drivetrain_cfg;
 
 static const struct DepositionConfig
 {
-    MotorConfig dep_motor = { .DIR_P = 16, .PWM_P = 15};
+    MotorConfig dep_motor = { .DIR_P = 16, .PWM_P = 15 };
 } deposition_cfg;
 
-static const struct ActuationConfig
+static struct ActuationConfig
 {
-    MotorConfig lin_act = {.DIR_P = 5, .PWM_P = 4};
+    MotorConfig lin_act = { .IS_SERIAL=1,.st=&MC2,.motor=1};
+
     StepperConfig lead_screw = {
         .PWM1_P = 22, .PWM2_P = 19, 
         .DIR1_P = 23, .DIR2_P = 20, 
@@ -65,6 +80,7 @@ void stepper_step(StepperConfig s, Stepper* stepper, StepperDir dir);
 
 void init_motor(MotorConfig m);
 void write_motor(MotorConfig m, uint8_t pwm, MotorDir dir);
+void write_serial_motor(MotorConfig m, int8_t power);
 void stop_motor(MotorConfig m);
 
 #endif

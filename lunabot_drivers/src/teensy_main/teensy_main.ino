@@ -38,7 +38,7 @@ void setup() {
 	actuation::init();
 	excavation::init();
 
-	pinMode(STATUS_PIN, OUTPUT);
+	pinMode(STATUS_LED, OUTPUT);
 }
 
 void loop() {
