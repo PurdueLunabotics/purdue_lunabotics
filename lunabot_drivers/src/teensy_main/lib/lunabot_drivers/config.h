@@ -10,8 +10,12 @@
 #define DEP_MTR_CNT 1
 #define EXC_MTR_CNT 1
 
- Sabertooth MC1(129);
- Sabertooth MC2(128);
+#define MC_SERIAL_BAUD_RATE 9600
+typedef Serial2 MCSerial
+
+
+Sabertooth MC1(128, Serial2);
+Sabertooth MC2(129, Serial2);
 
 enum StepperDir { RETRACT = -1, EXTEND = 1 };
 struct StepperConfig
@@ -27,20 +31,21 @@ struct StepperConfig
 
 enum MotorDir { CW = HIGH, CCW = LOW };
 
-union MotorConfig 
+struct MotorConfig 
 {
-    struct {
-        uint8_t PWM_P;
-        uint8_t DIR_P;
-        uint8_t MAX_SPEED = 255;
-    };
+    union {
+        struct {
+            uint8_t PWM_P;
+            uint8_t DIR_P;
+            uint8_t MAX_SPEED = 255;
+        };
 
-    struct {
-        Sabertooth* st;
-        int8_t MAX_SPEED = 127;
-        uint8_t motor;
+        struct {
+            Sabertooth* st;
+            int8_t MAX_SPEED = 127;
+            uint8_t motor;
+        };
     };
-
     int IS_SERIAL = 0;
 };
 
@@ -63,8 +68,7 @@ static const struct DepositionConfig
 
 static struct ActuationConfig
 {
-    MotorConfig lin_act = { .IS_SERIAL=1,.st=&MC2,.motor=1};
-
+    MotorConfig lin_act = { .IS_SERIAL=1,.st=&MC2,.motor=1 };
     StepperConfig lead_screw = {
         .PWM1_P = 22, .PWM2_P = 19, 
         .DIR1_P = 23, .DIR2_P = 20, 

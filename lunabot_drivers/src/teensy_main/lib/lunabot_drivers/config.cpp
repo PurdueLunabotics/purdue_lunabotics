@@ -1,10 +1,7 @@
 #include "config.h"
 
 void init_serial() {
-}
-
-void init_serial_motor() {
-
+    MCSerial.begin(MC_SERIAL_BAUD_RATE);
 }
 
 void init_motor(MotorConfig m)

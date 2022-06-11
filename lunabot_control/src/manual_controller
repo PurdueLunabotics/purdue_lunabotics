@@ -25,7 +25,7 @@ class ManualController:
     def joy_cb(self, joy):
         if joy.buttons[1]: # 'B' button -- switches the active subsystem
             self.stop()
-            rospy.logerr("STOPPED")
+            #rospy.logerr("STOPPED")
         else:
             self.main_cb(joy)
         
