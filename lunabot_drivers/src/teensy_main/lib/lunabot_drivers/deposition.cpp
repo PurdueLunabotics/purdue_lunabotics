@@ -14,7 +14,7 @@ namespace deposition {
 		// nh.logerror(String(bin_move_speed).c_str());
 		if(dep_en) {
 			write_motor(deposition_cfg.dep_motor,
-						deposition_cfg.dep_motor.MAX_PWM,dep_dir);
+						deposition_cfg.dep_motor.MAX_SPEED,dep_dir);
 		}
 		else {
 			stop_motor(deposition_cfg.dep_motor);
