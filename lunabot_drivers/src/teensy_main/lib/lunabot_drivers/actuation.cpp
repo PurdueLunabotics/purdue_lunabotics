@@ -2,7 +2,6 @@
 
 namespace actuation
 {
-
 	static StepperDir lead_screw_dir;
 	static uint8_t lead_screw_en;
 
@@ -30,13 +29,11 @@ namespace actuation
 		lead_screw_dir = (actuation.lead_screw > 0) ? EXTEND : RETRACT; 
 		lead_screw_en = actuation.lead_screw != 0;
 
-		MotorDir angle_dir = (actuation.angle > 0) ? CW : CCW; 
-
 		if(actuation.angle != 0) {
-			write_serial_motor(actuation_cfg.lin_act, actuation_cfg.lin_act.MAX_PWM * actuation.angle);
+			write_serial_motor(actuation_cfg.lin_act,actuation.angle);
 		}
 		else {
-			write_serial_motor(actuation_cfg.lin_act, 0);
+			actuation_cfg.lin_act.st->stop();
 		}
 
 		//nh.logerror("lead screw:");

@@ -11,11 +11,9 @@
 #define EXC_MTR_CNT 1
 
 #define MC_SERIAL_BAUD_RATE 9600
-typedef Serial2 MCSerial
 
-
-Sabertooth MC1(128, Serial2);
-Sabertooth MC2(129, Serial2);
+extern Sabertooth MC1;
+extern Sabertooth MC2;
 
 enum StepperDir { RETRACT = -1, EXTEND = 1 };
 struct StepperConfig
@@ -31,44 +29,40 @@ struct StepperConfig
 
 enum MotorDir { CW = HIGH, CCW = LOW };
 
+struct SerialMotorConfig {
+
+    Sabertooth* st;
+    uint8_t motor;
+    uint8_t MAX_SPEED = 127;
+};
+
 struct MotorConfig 
 {
-    union {
-        struct {
-            uint8_t PWM_P;
-            uint8_t DIR_P;
-            uint8_t MAX_SPEED = 255;
-        };
-
-        struct {
-            Sabertooth* st;
-            int8_t MAX_SPEED = 127;
-            uint8_t motor;
-        };
-    };
-    int IS_SERIAL = 0;
+    uint8_t PWM_P;
+    uint8_t DIR_P;
+    uint8_t MAX_SPEED = 255;
 };
 
 static struct ExcavationConfig
 {
-    MotorConfig exc = { .IS_SERIAL = 1, .st=&MC2, .motor = 2};
+    SerialMotorConfig exc = {  .st=&MC2, .motor = 2 };
 } excavation_cfg;
 
 
 static struct DrivetrainConfig
 {
-    MotorConfig left = {.st=&MC1, .IS_SERIAL= 1, .MAX_SPEED = 50, .motor=1};
-    MotorConfig right = {.st=&MC1, .IS_SERIAL= 1, .MAX_SPEED = 50, .motor=2};
+    SerialMotorConfig left = {.st=&MC1, .motor=1, .MAX_SPEED = 50 };
+    SerialMotorConfig right = {.st=&MC1,  .motor=2, .MAX_SPEED = 50 };
 } drivetrain_cfg;
 
 static const struct DepositionConfig
 {
-    MotorConfig dep_motor = { .DIR_P = 16, .PWM_P = 15 };
+    MotorConfig dep_motor = {  .PWM_P = 13, .DIR_P = 14 };
 } deposition_cfg;
 
 static struct ActuationConfig
 {
-    MotorConfig lin_act = { .IS_SERIAL=1,.st=&MC2,.motor=1 };
+    SerialMotorConfig lin_act = { .st=&MC2, .motor=1 };
     StepperConfig lead_screw = {
         .PWM1_P = 22, .PWM2_P = 19, 
         .DIR1_P = 23, .DIR2_P = 20, 
@@ -84,7 +78,9 @@ void stepper_step(StepperConfig s, Stepper* stepper, StepperDir dir);
 
 void init_motor(MotorConfig m);
 void write_motor(MotorConfig m, uint8_t pwm, MotorDir dir);
-void write_serial_motor(MotorConfig m, int8_t power);
+void write_serial_motor(SerialMotorConfig m, int8_t power);
 void stop_motor(MotorConfig m);
+
+void init_serial();
 
 #endif

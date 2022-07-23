@@ -28,7 +28,7 @@ ros::Subscriber<std_msgs::Int8> deposition_sub("/deposition", deposition_cb);
 ros::Subscriber<lunabot_msgs::Drivetrain> drivetrain_sub("/cmd_vel", drivetrain_cb);
 
 void setup() {
-	Serial2.begin(9600);
+	init_serial();
 	nh.initNode();
 	nh.subscribe(drivetrain_sub);
 	nh.subscribe(deposition_sub);
@@ -39,12 +39,12 @@ void setup() {
 	actuation::init();
 	excavation::init();
 
-	pinMode(STATUS_LED, OUTPUT);
+	//pinMode(STATUS_LED, OUTPUT);
 }
 
 void loop() {
 	nh.spinOnce();
 	actuation::stepper_step();
-	digitalWrite(STATUS_PIN,HIGH);
+	//digitalWrite(STATUS_PIN,HIGH);
 	delay(10);
 }

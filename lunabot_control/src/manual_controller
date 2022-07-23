@@ -46,7 +46,7 @@ class ManualController:
         actuation_msg.lead_screw = int(joy.axes[7])
 
         # left/right bumpers 
-        actuation_msg.angle = 127 * int(joy.buttons[4] - joy.buttons[5])
+        actuation_msg.angle = int(joy.buttons[4] - joy.buttons[5]) * 127
         self._actuation_pub.publish(actuation_msg)
 
         # Triggers
