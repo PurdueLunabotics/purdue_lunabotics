@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-	<node pkg="tf" type="static_transform_publisher" name="d435_broadcaster" args="0.0 0.0 0.5 0 0 0 1 base_link d435 100" />
-	<node pkg="tf" type="static_transform_publisher" name="t265_broadcaster" args="0.36195 0.0 0.2032 0 0 0 1 base_link t265 100" />
+	<node pkg="tf" type="static_transform_publisher" name="front_broadcaster" args="0.46 0.28 0.2032 0 0 0 1 base_link front 100" />
+	<node pkg="tf" type="static_transform_publisher" name="d455_front_broadcaster" args="-0.35 0.0 0 0 0 0 1 front d455_front_link 100" />
+	<node pkg="tf" type="static_transform_publisher" name="d455_back_broadcaster" args="-0.44 0.0 0 0 0 0 1 d455_front_link d455_back_link 100" />
 </launch>

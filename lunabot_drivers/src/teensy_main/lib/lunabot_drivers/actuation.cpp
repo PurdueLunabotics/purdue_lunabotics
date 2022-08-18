@@ -2,7 +2,6 @@
 
 namespace actuation
 {
-
 	static StepperDir lead_screw_dir;
 	static uint8_t lead_screw_en;
 
@@ -13,8 +12,6 @@ namespace actuation
 	void init()
 	{
 		// set all pwm and direction pins to output
-		init_motor(actuation_cfg.left_lin_act);
-		init_motor(actuation_cfg.right_lin_act);
 		init_stepper(actuation_cfg.lead_screw,&lead_screw_stepper);
 		stepper_off(actuation_cfg.lead_screw);
 		lead_screw_en = 0;
@@ -32,26 +29,20 @@ namespace actuation
 		lead_screw_dir = (actuation.lead_screw > 0) ? EXTEND : RETRACT; 
 		lead_screw_en = actuation.lead_screw != 0;
 
-		MotorDir angle_dir = (actuation.angle > 0) ? CW : CCW; 
-
 		if(actuation.angle != 0) {
-			write_motor(actuation_cfg.left_lin_act,
-						actuation_cfg.left_lin_act.MAX_PWM,angle_dir);
-			write_motor(actuation_cfg.right_lin_act,
-						actuation_cfg.right_lin_act.MAX_PWM,angle_dir);
+			write_serial_motor(actuation_cfg.lin_act,actuation.angle);
 		}
 		else {
-			stop_motor(actuation_cfg.left_lin_act);
-			stop_motor(actuation_cfg.right_lin_act);
+			actuation_cfg.lin_act.st->stop();
 		}
 
-		nh.logerror("lead screw:");
+		//nh.logerror("lead screw:");
 		if(lead_screw_en) {
-			nh.logerror("ON");
+			//nh.logerror("ON");
 			stepper_on(actuation_cfg.lead_screw);
 		}
 		else {
-			nh.logerror("STOP");
+			//nh.logerror("STOP");
 			stepper_off(actuation_cfg.lead_screw);
 		}
 	}

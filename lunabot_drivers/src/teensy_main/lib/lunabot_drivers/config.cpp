@@ -1,5 +1,12 @@
 #include "config.h"
 
+Sabertooth MC1(128, Serial1);
+Sabertooth MC2(129, Serial1);
+
+void init_serial() {
+    Serial1.begin(MC_SERIAL_BAUD_RATE);
+}
+
 void init_motor(MotorConfig m)
 {
     pinMode(m.DIR_P, OUTPUT);
@@ -16,7 +23,11 @@ void init_stepper(StepperConfig cfg, Stepper* stepper)
 void write_motor(MotorConfig m, uint8_t pwm, MotorDir dir)
 {
     digitalWrite(m.DIR_P, dir);
-    analogWrite(m.PWM_P, pwm);
+    analogWrite(min(m.PWM_P,m.MAX_SPEED), pwm);
+}
+
+void write_serial_motor(SerialMotorConfig m, int8_t power) {
+    m.st->motor(m.motor, power);
 }
 
 void stepper_step(StepperConfig s, Stepper* stepper, StepperDir dir) {

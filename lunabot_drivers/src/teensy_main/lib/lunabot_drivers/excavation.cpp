@@ -2,23 +2,12 @@
 
 namespace excavation {
 	void init() {
-		// set all pwm and direction pins to output
-		init_motor(excavation_cfg.exc);
-		stop_motor(excavation_cfg.exc);
+		// stop 
+		excavation_cfg.exc.st->stop();
 	}
 
 	void run_excavation(const std_msgs::Float64& speed, ros::NodeHandle nh) {
-		unsigned int excavate_speed = abs(map(speed.data, -1, 1, -255, 255)); // Range from [-255,255]
-		MotorDir excavate_dir = (speed.data > 0) ? CCW : CW; 
-		nh.logerror("Excavation:");  
-		nh.logerror(String(excavate_speed != 0).c_str());
-
-		if(excavate_speed != 0) {
-			//stop_motor(excavation_cfg.exc);
-			write_motor(excavation_cfg.exc,excavate_speed, excavate_dir);
-		}
-		else {
-			stop_motor(excavation_cfg.exc);
-		}
+		int8_t excavate_speed = map(speed.data, -1, 1, -127, 127); // Range from [-255,255]
+		write_serial_motor(excavation_cfg.exc, excavate_speed);
 	}
 }
