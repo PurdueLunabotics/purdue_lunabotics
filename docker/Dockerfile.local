@@ -1,0 +1,18 @@
+ARG TAG=latest
+FROM purduelunabotics/2022-2023:${TAG}
+
+USER root
+
+# create user
+ARG BASE_USER=lunabotics
+ARG USER=user
+ARG PW=password
+ARG UID=1000
+ARG GID=1000
+
+RUN usermod -l $USER -u $UID -aG video,dialout -md /home/$USER $BASE_USER && \
+    ( groupmod -n $USER -g $GID $BASE_USER || groupmod -n $USER $BASE_USER ) && \
+    echo "$USER:$PW" | chpasswd
+
+USER $USER
+WORKDIR /home/$USER

@@ -31,15 +31,15 @@
 
   <group ns="d435_forward/color" if="$(arg sim)">
     <node pkg="image_proc" type="image_proc" name="image_proc"/>
-    <include file="$(find lunabot_perception)/launch/apriltag.launch">
+    <!-- <include file="$(find lunabot_perception)/launch/apriltag.launch">
       <arg name="camera_frame" value="d435_forward_link" />
-    </include>
+    </include> -->
   </group>
 
   <group ns="d435_backward/color" if="$(arg sim)">
     <node pkg="image_proc" type="image_proc" name="image_proc"/>
-    <include file="$(find lunabot_perception)/launch/apriltag.launch">
+    <!-- <include file="$(find lunabot_perception)/launch/apriltag.launch">
       <arg name="camera_frame" value="d435_backward_link" />
-    </include>
+    </include> -->
   </group>
 </launch>
