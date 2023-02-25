@@ -7,8 +7,9 @@ import rostest
 
 class GlobalPlannerTest(unittest.TestCase):
     def test_global_planner(self):
-        rospy.init_node('test_global_planner_node')
-        assert(True)
-    
-if __name__ == '__main__':
-    rostest.rosrun('lunabot_nav', 'test_global_planner', GlobalPlannerTest)
+        rospy.init_node("test_global_planner_node")
+        assert True
+
+
+if __name__ == "__main__":
+    rostest.rosrun("lunabot_nav", "test_global_planner", GlobalPlannerTest)

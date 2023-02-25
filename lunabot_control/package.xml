@@ -41,8 +41,13 @@
   <!-- Use buildtool_depend for build tool packages: -->
   <!--   <buildtool_depend>catkin</buildtool_depend> -->
   <!-- Use exec_depend for packages you need at runtime: -->
-  <exec_depend>rospy</exec_depend>
-  <exec_depend>joy</exec_depend>
+  <depend>rospy</depend>
+  <depend>roscpp</depend>
+  <depend>tf2_ros</depend>
+  <depend>geometry_msgs</depend>
+  <depend>costmap_2d</depend>
+  <depend>nav_msgs</depend>
+  <depend>joy</depend>
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
   <!-- Use doc_depend for packages you need only for building documentation: -->

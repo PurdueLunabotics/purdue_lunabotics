@@ -1,4 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-  <include file="$(find lunabot_localization)/launch/sensors_tf.launch" />
-</launch>

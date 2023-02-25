@@ -3,6 +3,7 @@ import logging
 import unittest
 
 import numpy as np
+
 from lunabot_nav.global_planner import Map, Node, RRTStarPlanner
 
 # create logger
@@ -123,7 +124,9 @@ class RRTStarTest(unittest.TestCase):
 
         lower, upper = [20, 10], [50, 70]
         grid[lower[0] : upper[0] + 1, lower[1] : upper[1] + 1] = 1
-        self.planner.grid.from_data(grid.flatten(), self.resolution, *dims, origin=np.array([1.0,1.0]))
+        self.planner.grid.from_data(
+            grid.flatten(), self.resolution, *dims, origin=np.array([1.0, 1.0])
+        )
         start = np.array([1, 1])
         end = np.array([10, 10])
 
