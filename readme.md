@@ -58,3 +58,6 @@ That's it! Things should be running now.
 - LB/RB: linear actuators (tool angle)
 - cross key left/right: deposition (up/down)
 - cross key up/down: tool extension (lead screw) 
+
+## Contributing guidelines
+See https://github.com/PurdueLunabotics/purdue_lunabotics/blob/master/contributing.md
