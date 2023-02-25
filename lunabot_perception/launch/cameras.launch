@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <launch>
   <arg name="serial_no_d455_front"    			default="053122251286"/> 		
   <arg name="serial_no_d455_back"    			  default="053122251335"/> 	

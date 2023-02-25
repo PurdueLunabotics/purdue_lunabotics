@@ -1,0 +1,11 @@
+Header header
+# Actuation
+int8 lead_screw
+int8 lin_act 
+# Drivetrain
+int8 left_drive
+int8 right_drive
+# Excavation
+int8 excavate
+# Deposition
+int8 deposit

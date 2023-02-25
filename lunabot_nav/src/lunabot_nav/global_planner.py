@@ -11,6 +11,7 @@ import random
 import time
 
 import numpy as np
+
 from lunabot_nav.utils import pose_to_array
 
 if os.environ.get("MPL_VISUALIZE") == "1":

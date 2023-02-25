@@ -54,9 +54,11 @@
   <depend>costmap_2d</depend>
   <depend>geometry_msgs</depend>
   <depend>rplidar_ros</depend>
-  <depend>lunabot_proc</depend>
   <depend>rviz</depend>
-  <depend>rosbag</depend>
+  <depend>lunabot_control</depend>
+  <exec_depend>lunabot_perception</exec_depend>
+  <exec_depend>lunabot_config</exec_depend>
+  <exec_depend>rosbag</exec_depend>
   <exec_depend>python-numpy</exec_depend>
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->

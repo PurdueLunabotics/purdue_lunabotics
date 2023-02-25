@@ -12,12 +12,15 @@ __all__ = ["Bezier"]
 
 def lerp(step, pts):
     def get_traj(start, goal):
-        interp = lambda start, end, t: (1 - t) * start + t * end
+        def interp(start, end, t):
+            return (1 - t) * start + t * end
+
         return np.array([interp(start, goal, t) for t in np.arange(0, 1, step)])
 
     path = np.array([get_traj(pts[i], pts[i + 1]) for i in range(len(pts) - 1)])
     path = path.reshape(-1, path.shape[-1])
     return path
+
 
 class Bezier:
     def TwoPoints(t, P1, P2):

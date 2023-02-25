@@ -58,8 +58,7 @@
   <depend>joint_state_publisher</depend>
   <depend>controller_manager</depend>
   <depend>gazebo_ros</depend>
-
-
+  <depend>gazebo_plugins</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

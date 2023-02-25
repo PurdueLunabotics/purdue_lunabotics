@@ -54,12 +54,10 @@
   <depend>lunabot_nav</depend>
   <depend>lunabot_control</depend>
   <depend>lunabot_perception</depend>
-  <depend>lunabot_proc</depend>
   <depend>mining_arena_gazebo</depend>
   <depend>robot_state_publisher</depend>
   <depend>joint_state_publisher</depend>
   <depend>dummy_bot_description</depend>
-  <depend>lunabot_localization</depend>
   <buildtool_depend>catkin</buildtool_depend>
 
 
