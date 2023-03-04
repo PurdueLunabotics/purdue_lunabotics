@@ -9,8 +9,12 @@
             <rosparam file="$(find lunabot_config)/config/mpc.yml" command="load"/>
         </node>
 
-        <node name="global_planner_node" pkg="lunabot_nav" type="global_planner_node.py" output="screen">
+        <!-- <node name="global_planner_node" pkg="lunabot_nav" type="global_planner_node.py" output="screen">
             <rosparam file="$(find lunabot_config)/config/rrtstar.yml" command="load"/>
+        </node> -->
+
+        <node name="global_planner_node" pkg="lunabot_nav" type="dstar_ros_script" output="screen">
+            <!-- <rosparam file="$(find lunabot_config)/config/rrtstar.yml" command="load"/> -->
         </node>
     </group>
 

@@ -155,7 +155,7 @@ class Planner:
         self.visualize = os.environ.get("MPL_VISUALIZE") == "1"
         self.min_dist_to_goal = 0.1
 
-    def plan(self, start, goal):
+    def plan(self, start, goal, map):
         raise NotImplementedError
 
     def get_path_to_goal(self):
@@ -221,7 +221,8 @@ class RRTStarPlanner(Planner):
         self.goalfound = False
         self.solution_set = set()
 
-    def plan(self, start, goal):
+
+    def plan(self, start, goal, map):
         """Plan path
 
         Args:
@@ -230,8 +231,10 @@ class RRTStarPlanner(Planner):
         """
         assert start is not None
         assert goal is not None
+        assert map is not None
         self.start = Node(start)
         self.goal = Node(goal)
+        self.grid = map
         if not self.grid.initialized:
             logger.info("Occupancy grid not defined yet...")
             return

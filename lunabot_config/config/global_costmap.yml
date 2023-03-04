@@ -7,6 +7,6 @@ robot_base_frame: "base_link"
 footprint: "[ [0.5,0.25],[0.5,-0.25],[-0.5,-0.25],[-0.5,0.25] ]"
 map_topic: "/projected_map"
 inflation: {
-  inflation_radius: 0.2,
+  inflation_radius: 0.4,
   cost_scaling_factor: 10,
 }
