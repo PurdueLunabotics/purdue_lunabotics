@@ -95,9 +95,10 @@ class Dstar():
         for node_tuple in nodelist:
             if node_tuple[1] == node:
                 newlist.remove(node_tuple)
-        
-        while (not self.node_queue.empty()):
-            self.node_queue.get()
+                break
+        # newlist.pop(idx)
+
+        self.node_queue = PriorityQueue()
 
         for node_tuple in newlist:
             self.node_queue.put(node_tuple)
@@ -227,10 +228,11 @@ class Dstar():
             node_values_list[node[0]][node[1]][1] = self.calculate_RHS(node) #Calculate RHS
 
         #Calculate if it's in the queue and removes
-        queue_contains = False 
+        queue_contains = False
         for node_tuple in self.node_queue.queue:
             if (node_tuple[1] == node):
                 queue_contains = True
+                break
 
         if (queue_contains):
             self.remove(node)

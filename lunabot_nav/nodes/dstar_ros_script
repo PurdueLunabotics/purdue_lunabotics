@@ -87,6 +87,7 @@ def main():
 
     path = []
     while not rospy.is_shutdown():
+        # print("Loop")
         if (dstar == None and len(map) > 0 and len(pose) > 0 and len(goal) > 0):
             dstar = dstar_ros.Dstar(goal, pose, map, radius, res, x_offset, y_offset)
             print("Initialize")
@@ -96,28 +97,30 @@ def main():
 
             dstar.update_position(pose)
 
-            if (update_map):
-                dstar.update_map(map, x_offset, y_offset)
-                update_map = False
-
             if (need_update_goal):
-                dstar = dstar_ros.Dstar(goal, pose, map, radius, res, x_offset, y_offset)
                 print("created new Dstar")
+                dstar = dstar_ros.Dstar(goal, pose, map, radius, res, x_offset, y_offset)
                 completedInitialRun = False
                 # dstar.update_goal(goal)
                 need_update_goal = False
+            
+            if (update_map):
+                dstar.update_map(map, x_offset, y_offset)
+                update_map = False
 
             if (not completedInitialRun):
                 dstar.find_path(True)
                 completedInitialRun = True
 
             if (dstar.needs_new_path):
+                print("Start create path")
                 path = np.array(dstar.createPathList())
+                print("End create path")
 
-                if (len(path) == 0):
-                    print("publish empty path")
-                else:
-                    print("published path")
+                # if (len(path) == 0):
+                #     print("publish empty path")
+                # else:
+                #     print("published path")
 
                 temp = map.copy()
                 ros_struct = Path()
@@ -127,20 +130,20 @@ def main():
 
                 count = 0
                 for index, point in enumerate(path):
-                    path_pose = PoseStamped()
+                    if (index % 5 ==0 or np.all(path[index] == path[-1])):
 
-                    path_pose.pose.position.x = point[0]
-                    path_pose.pose.position.y = point[1]
+                        path_pose = PoseStamped()
 
-                    rotation = quaternion_from_euler(0,0,0)
-                    path_pose.pose.orientation.x = rotation[0]
-                    path_pose.pose.orientation.y = rotation[1]
-                    path_pose.pose.orientation.z = rotation[2]
-                    path_pose.pose.orientation.w = rotation[3]
+                        path_pose.pose.position.x = point[0]
+                        path_pose.pose.position.y = point[1]
 
-                    if (count % 5 ==0 or np.all(path[index] == path[-1])):
+                        rotation = quaternion_from_euler(0,0,0)
+                        path_pose.pose.orientation.x = rotation[0]
+                        path_pose.pose.orientation.y = rotation[1]
+                        path_pose.pose.orientation.z = rotation[2]
+                        path_pose.pose.orientation.w = rotation[3]
+
                         ros_struct.poses.append(path_pose)
-                    count+=1
 
                 
                 # plt.imshow(temp, cmap='hot', interpolation='nearest')
