@@ -39,12 +39,14 @@ def grid_subscriber(data):
 def grid_update_subscriber(data):
     global update_map, map, res, x_offset, y_offset
 
+    temp_map = map.copy()
     index = 0
     for i in range (data.y, data.y+data.height):
         for j in range (data.x, data.x+data.width):
-            map[i][j] = data.data[index]
+            temp_map[i][j] = data.data[index]
             index+=1
 
+    map = temp_map.copy()
     update_map = True
 
 def position_subscriber(data):

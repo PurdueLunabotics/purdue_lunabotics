@@ -2,7 +2,6 @@ from queue import PriorityQueue
 from sys import maxsize
 import math
 import numpy as np
-# from Collison_avoid import expand_grid
 
 
 class Dstar():
@@ -109,7 +108,7 @@ class Dstar():
         if (init):
             h = (np.sqrt(((node[0]-self.current_node[0])**2 + (node[1]-self.current_node[1])**2 )))
         else:
-            h = 0.99 * (np.sqrt(((node[0]-self.current_node[0])**2 + (node[1]-self.current_node[1])**2 )))
+            h = 1 * (np.sqrt(((node[0]-self.current_node[0])**2 + (node[1]-self.current_node[1])**2 )))
         return h
 
     # Calculates the priority of a node based on its g and rhs values
@@ -254,9 +253,9 @@ class Dstar():
     '''
     def find_path(self, init: bool):
 
-        print("grid size", np.shape(self.current_map))
-
         node_values_list = self.node_values_list #copy values list to avoid async problems
+
+        print("Start findpath")
 
         while (self.topKey() < self.calculate_key(self.current_node,init) or node_values_list[self.current_node[0]][self.current_node[1]][0] != node_values_list[self.current_node[0]][self.current_node[1]][1]):
             #Loop until current node is locally consistent and priority is lowest in the queue
@@ -319,6 +318,8 @@ class Dstar():
                 print ("Error: No Path")
                 break
 
+        print ("end findpath")
+
     '''
     Create path: This creates a temporary node at the start, and picks the lowest g value (lowest distance to goal) as the next step on the path, adds it to the list, and
     repeats until the goal is reached. All of these points in order are the path.
@@ -329,8 +330,10 @@ class Dstar():
 
         # if start = goal or map/goal are obstacle
         if (self.current_node[0]==self.goal[0] and self.current_node[1] == self.goal[1] 
-            or self.current_map[self.current_node[0]][self.current_node[1]]>50 
-            or self.current_map[self.goal[0]][self.goal[1]]>50):
+            or self.current_map[self.current_node[0]][self.current_node[1]]>50 ):
+
+            #or self.current_map[self.goal[0]][self.goal[1]]>50
+
             print ("Error: No path")
             return []
 
@@ -414,6 +417,8 @@ class Dstar():
 
         #This function runs when map changes
 
+        print("Start updateReplan")
+
         self.km += (((self.prev_node[0]-self.current_node[0])**2 + (self.prev_node[1]-self.current_node[1])**2)**0.5) 
         #Add to the accumulation value the distance from the last point (of changed map) to the current point
         self.prev_node = self.current_node.copy() #update the prev_node
@@ -424,14 +429,17 @@ class Dstar():
 
                     self.update_node([i,j], False)
                     
-                    if (i > 0): #above
-                        self.update_node([i-1,j], False)
-                    if (i < len(self.node_values_list)-1): #below
-                        self.update_node([i+1,j], False)
-                    if (j > 0): #left
-                        self.update_node([i,j-1], False)
-                    if (j < len(self.node_values_list[0])-1): #right
-                        self.update_node([i,j+1], False)
+                    # if (i > 0): #above
+                    #     self.update_node([i-1,j], False)
+                    # if (i < len(self.node_values_list)-1): #below
+                    #     self.update_node([i+1,j], False)
+                    # if (j > 0): #left
+                    #     self.update_node([i,j-1], False)
+                    # if (j < len(self.node_values_list[0])-1): #right
+                    #     self.update_node([i,j+1], False)
+
+                    #8direction -- uncomment
+
                     # if (i > 0 and j > 0): #Topleft
                     #     self.update_node([i-1,j-1], False)
                     # if (i < (len(self.node_values_list)-1) and j > 0): #Bottomleft
@@ -440,6 +448,8 @@ class Dstar():
                     #     self.update_node([i+1,j+1], False)
                     # if (i > 0 and j < len(self.node_values_list[0])-1): #Topright
                     #     self.update_node([i-1,j+1], False)
+
+        print("end UpdateReplan")
 
         self.find_path(False) #recalculate g values
 
@@ -461,6 +471,8 @@ class Dstar():
 
         if (np.array_equal(prev_map, new_map)):
             return
+        
+        print ("start Updatemap")
 
         new_node_values = self.node_values_list
 
@@ -493,9 +505,10 @@ class Dstar():
 
         self.node_values_list = new_node_values
 
-        print("shape of new map", np.shape(new_map), "shape nodevalues", np.shape(new_node_values))
-
         self.current_map = new_map
+
+        print("end UpdateMap")
+
         self.update_replan(prev_map)
 
         #New path will be published
