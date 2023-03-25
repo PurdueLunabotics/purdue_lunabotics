@@ -24,6 +24,7 @@ import numpy as np
 import ros_numpy
 import rospy
 from apriltag_ros.msg import AprilTagDetectionArray
+from geometry_msgs.msg import Twist
 
 # John added
 from lunabot_msgs.msg import RobotEffort
@@ -47,25 +48,32 @@ class HomingController:
 
     def __init__(self):
         self._apriltag_sub = rospy.Subscriber(
-            "/d455_front/camera/color/tag_detections",
+            #"/d455_front/camera/color/tag_detections",
+            "/d435_backward/color/tag_detections",
             AprilTagDetectionArray,
             self.apritag_cb,
         )
 
-        self._effort_pub_ = rospy.Publisher("effort_homing", RobotEffort, queue_size=1)
+        # self._effort_pub_ = rospy.Publisher("effort_homing", RobotEffort, queue_size=1)
+        self._effort_pub = rospy.Publisher("cmd_vel", Twist, queue_size=1)
         # self._effort_pub_ = rospy.Publisher('linear', Float32, queue_size=1);
         # self._effort_pub_ = rospy.Publisher('Angle', Float32, queue_size=1)
 
-        self._effort_msg = RobotEffort()
+        # self._effort_msg = RobotEffort()
+        self._effort_msg = Twist()
         # self._effort_msg = Float32()
         self._prev_error = np.zeros(2)
         self._error_total = np.zeros(2)
 
     def apritag_cb(self, msg):
+        if (len(msg.detections) == 0):
+            self._effort_msg.linear.x = 0
+            self._effort_msg.angular.z = 0
 
-        T_camera_april_msg = msg.detections[
-            0
-        ].pose.pose.pose  # transformation from apriltag to camera frame (check header frame_id to be sure)
+            #print("No AprilTag Dected\n")
+            return
+            
+        T_camera_april_msg = msg.detections[0].pose.pose.pose  # transformation from apriltag to camera frame (check header frame_id to be sure)
         T_camera_april = ros_numpy.numpify(
             T_camera_april_msg
         )  # Converting the transformation matrix to a numpy array
@@ -73,9 +81,14 @@ class HomingController:
         # Assigning the unit vector values for the different vectors
         v_1A = np.array([0, 0, -1, 1])
         v_2C = np.array([1, 0, 0, 1])
+        # compare = np.array([0,0,0,0])
 
         # Computing the location of point V that is in frame A to transformed to its location in frame C
         v_1C = T_camera_april @ v_1A
+        # if (T_camera_april == compare):
+        #     self._effort_msg.left_drive = 0
+        #     self._effort_msg.right_drive = 0
+            
         v_1C[2] = 0
 
         # Finding the error angle between the two points, v_1C and v_2C, using dot product (in radians)
@@ -91,8 +104,8 @@ class HomingController:
         # write PD controller here with the output being lin, ang velocity
         # Define the K constants for P, I, and D
         KP = np.array([0.1, 0.1])
-        KI = np.array([0, 0])
-        KD = np.array([0.01, 0.01])
+        KI = np.array([0.0, 0.0])
+        KD = np.array([0.1, 0.1])
 
         # Define the errors
         error_lin = 0
@@ -112,15 +125,23 @@ class HomingController:
         twist = np.zeros(2)  # lin, ang velocity
         twist[0] = ctrl[0]
         twist[1] = ctrl[1]
+        
+        """For real robot
         ctrl = diff_drive_model(
             ctrl
         )  # computes wheel velocities from lin, ang vel (twist)
 
         self._effort_msg.left_drive = constrain(ctrl[0])
         self._effort_msg.right_drive = constrain(ctrl[1])
+        """
+
+        #For simulation (lin and ang vel swapped)
+        self._effort_msg.linear.x = ctrl[1]
+        self._effort_msg.angular.z = -ctrl[0]
+        # print("Hello")
 
     def loop(self):
-        self._effort_pub_.publish(self._effort_msg)  # Sends ctrl to robot
+        self._effort_pub.publish(self._effort_msg)  # Sends ctrl to robot
 
     def stop(self):
         # self._effort_msg.left_drive = 0
