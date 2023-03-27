@@ -53,11 +53,14 @@ That's it! Things should be running now.
 
 ##### Manual Control Commands
 
-- two joysticks: tank drive controls for drivetrain
-- LT/RT: Excavation (forward/backward)
-- LB/RB: linear actuators (tool angle)
+- left and right joysticks (up/down): tank drive controls for drivetrain (left stick controls left wheel, right stick controls right wheel)
+- right joystick (right/left): Excavation (forward/backward)
+  - latch (Y button): will latch current value of excavation and ignore joystick values, press Y again to unlatch, (i.e latching to 0 while driving and latch to max speed while mining)
+- LB/RB: linear actuators (up/down)
 - cross key left/right: deposition (up/down)
-- cross key up/down: tool extension (lead screw) 
+- cross key up/down: lead screw (up/down
+
+
 
 ## Contributing guidelines
 See https://github.com/PurdueLunabotics/purdue_lunabotics/blob/master/contributing.md

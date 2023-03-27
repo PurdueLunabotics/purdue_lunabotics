@@ -11,9 +11,9 @@ STMotorInterface act_left{&MC2, STMotor::M2};
 STMotorInterface lead_screw_motor{&MC1, STMotor::M1};
 
 void cb(int8_t lead_screw, int8_t lin_act) {
-    act_left.write(lin_act);
-    act_right.write(lin_act);
-    lead_screw_motor.write(lead_screw);
+  act_left.write(-lin_act);
+  act_right.write(lin_act);
+  lead_screw_motor.write(lead_screw);
 }
 
 } // namespace actuation
@@ -22,9 +22,9 @@ namespace drivetrain {
 STMotorInterface left_drive{&MC3, STMotor::M1};
 STMotorInterface right_drive{&MC3, STMotor::M2};
 void cb(int8_t left, int8_t right) {
-    // Tank drive steering
-    left_drive.write(left);
-    right_drive.write(right);
+  // Tank drive steering
+  left_drive.write(-left);
+  right_drive.write(-right);
 }
 } // namespace drivetrain
 

@@ -10,6 +10,4 @@
         <param name="port" type="string" value="/dev/ttyACM0"/>
         <param name="baud" type="string" value="9600"/>
     </node>
-    <node if="$(arg record)" pkg="rosbag" type="record" name="recorder" output="screen" args="-e '(.*)camera_info(.*)|(.*)image_rect(.*)|(.*)tag(.*)|(.*)gyro(.*)|(.*)sample(.*)|(.*)accel(.*)|(.*)tf(.*)|(.*)tf_static(.*)|(.*)cmd_vel(.*)'"/>
-    <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch" />
 </launch>
