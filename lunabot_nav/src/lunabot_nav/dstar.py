@@ -1,4 +1,4 @@
-from queue import PriorityQueue
+from queue import PriorityQueue, Queue
 from sys import maxsize
 
 import numpy as np
@@ -132,6 +132,37 @@ class Dstar:
                 )
             )
         return h
+
+    # Searches for the nearest non-occupied node closest to the given node. Used for finding a path if the robot is stuck on top of an obstacle.
+    def bfs_non_occupied(self, current_node: list):
+        nodequeue = Queue()
+        visited_nodes = set()
+
+        nodequeue.put(current_node)
+
+        while not nodequeue.empty():
+
+            node = nodequeue.get()
+
+            if tuple(node) in visited_nodes:
+                continue
+
+            if self.current_map[node[0]][node[1]] < 50:
+                return node
+
+            if node[0] > 0:  # above
+                nodequeue.put([node[0] - 1, node[1]])
+            if node[0] < len(self.node_values_list) - 1:  # below
+                nodequeue.put([node[0] + 1, node[1]])
+            if node[1] > 0:  # left
+                nodequeue.put([node[0], node[1] - 1])
+            if node[1] < len(self.node_values_list[0]) - 1:  # right
+                nodequeue.put([node[0], node[1] + 1])
+
+            visited_nodes.add(tuple(node))
+
+        print("Error in search for open node")
+        return [current_node]
 
     # Calculates the priority of a node based on its g and rhs values
     def calculate_key(self, node: list, init: bool):
@@ -288,6 +319,9 @@ class Dstar:
         node_values_list = (
             self.node_values_list
         )  # copy values list to avoid async problems
+
+        if self.current_map[self.current_node[0]][self.current_node[1]] > 50:
+            self.current_node = self.bfs_non_occupied(self.current_node)
 
         print("Start findpath")
 
