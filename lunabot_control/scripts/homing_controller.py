@@ -48,7 +48,7 @@ class HomingController:
 
     def __init__(self):
         self._apriltag_sub = rospy.Subscriber(
-            #"/d455_front/camera/color/tag_detections",
+            # "/d455_front/camera/color/tag_detections",
             "/d435_backward/color/tag_detections",
             AprilTagDetectionArray,
             self.apritag_cb,
@@ -66,21 +66,26 @@ class HomingController:
         self._error_total = np.zeros(2)
 
     def apritag_cb(self, msg):
-        if (len(msg.detections) == 0):
+        if len(msg.detections) == 0:
             self._effort_msg.linear.x = 0
             self._effort_msg.angular.z = 0
 
-            #print("No AprilTag Dected\n")
+            # print("No AprilTag Dected\n")
             return
-            
-        T_camera_april_msg = msg.detections[0].pose.pose.pose  # transformation from apriltag to camera frame (check header frame_id to be sure)
+
+        T_camera_april_msg = msg.detections[
+            0
+        ].pose.pose.pose  # transformation from apriltag to camera frame (check header frame_id to be sure)
         T_camera_april = ros_numpy.numpify(
             T_camera_april_msg
         )  # Converting the transformation matrix to a numpy array
 
         # Assigning the unit vector values for the different vectors
         v_1A = np.array([0, 0, -1, 1])
+        # V_1A refers to the april tag reference in the april tag frame
         v_2C = np.array([1, 0, 0, 1])
+        # V_2C refers to the unit vector for the camera frame of the robot
+
         # compare = np.array([0,0,0,0])
 
         # Computing the location of point V that is in frame A to transformed to its location in frame C
@@ -88,12 +93,25 @@ class HomingController:
         # if (T_camera_april == compare):
         #     self._effort_msg.left_drive = 0
         #     self._effort_msg.right_drive = 0
-            
+
         v_1C[2] = 0
 
         # Finding the error angle between the two points, v_1C and v_2C, using dot product (in radians)
-        cos_of_angle = v_2C.dot(v_1C) / (np.linalg.norm(v_2C) * np.linalg.norm(v_1C))
-        ang_error = np.arccos(cos_of_angle)
+        trig_result = v_2C.dot(v_1C) / (np.linalg.norm(v_2C) * np.linalg.norm(v_1C))
+        arc_cos = np.arccos(trig_result)
+        arc_sin = np.arcsin(trig_result)
+
+        if (arc_cos <= (np.pi) / 2 and 0 <= arc_sin <= (np.pi) / 2) or (
+            (np.pi) / 2 < arc_cos <= np.pi and 0 < arc_sin <= (np.pi) / 2
+        ):
+            ang_error = arc_cos
+        elif (arc_cos <= (np.pi) / 2 and 0 > arc_sin >= -(np.pi) / 2) or (
+            (np.pi) / 2 < arc_cos <= np.pi and 0 > arc_sin >= -(np.pi) / 2
+        ):
+            ang_error = -arc_cos
+
+        print(f"\nError Cosine: {trig_result}")
+        print(f"\nCalculated Error: {ang_error}")
 
         # determining the linear translational error (in x and y) of the robot considered
 
@@ -103,7 +121,9 @@ class HomingController:
 
         # write PD controller here with the output being lin, ang velocity
         # Define the K constants for P, I, and D
-        KP = np.array([0.1, 0.1])
+        # For sim tuning, lin and ang are flipped.
+        # For Testing angular tuning only change the first value
+        KP = np.array([10, 0.1])
         KI = np.array([0.0, 0.0])
         KD = np.array([0.1, 0.1])
 
@@ -125,7 +145,7 @@ class HomingController:
         twist = np.zeros(2)  # lin, ang velocity
         twist[0] = ctrl[0]
         twist[1] = ctrl[1]
-        
+
         """For real robot
         ctrl = diff_drive_model(
             ctrl
@@ -135,10 +155,9 @@ class HomingController:
         self._effort_msg.right_drive = constrain(ctrl[1])
         """
 
-        #For simulation (lin and ang vel swapped)
+        # For simulation (lin and ang vel swapped)
         self._effort_msg.linear.x = ctrl[1]
         self._effort_msg.angular.z = -ctrl[0]
-        # print("Hello")
 
     def loop(self):
         self._effort_pub.publish(self._effort_msg)  # Sends ctrl to robot
