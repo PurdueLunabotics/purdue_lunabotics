@@ -65,13 +65,23 @@ void STMotorInterface::write(int8_t power) {
 // ---- Sensors ----
 
 // Current Sensor
+//
+int CurrentSensor::initialized_ = 0;
 
 CurrentSensor::CurrentSensor(ADS1115_lite *adc, ADSChannel ch)
-    : adc_{adc}, ch_(ch), curr_{-1} {}
+    : adc_{adc}, ch_{ch}, curr_{-1} {}
 
-void CurrentSensor::init_ads1115(ADS1115_lite *adc) {
-    adc->setGain(ADS1115_REG_CONFIG_PGA_0_256V); //  +/-2.048V range = Gain 2
-    adc->setSampleRate(ADS1115_REG_CONFIG_DR_64SPS); // 64 SPS, or every 15.6ms
+void CurrentSensor::init_ads1115(ADS1115_lite *adc0, ADS1115_lite *adc1) {
+    adc0->setGain(ADS1115_REG_CONFIG_PGA_0_256V); //  +/-2.048V range = Gain 2
+    adc0->setSampleRate(ADS1115_REG_CONFIG_DR_128SPS); // 128 SPS, or every 7.8ms
+
+    adc1->setGain(ADS1115_REG_CONFIG_PGA_0_256V); //  +/-2.048V range = Gain 2
+    adc1->setSampleRate(ADS1115_REG_CONFIG_DR_128SPS); // 128 SPS, or every 7.8ms
+
+    if(!adc0->testConnection() || !adc1->testConnection()) {
+	return;
+    }
+    initialized_ = 1;
 }
 
 int16_t CurrentSensor::read() { return curr_; }
@@ -79,9 +89,11 @@ int16_t CurrentSensor::read() { return curr_; }
 void CurrentSensor::loop() {
     // The mux setting must be set every time each channel is read, there is NOT
     // a separate function call for each possible mux combination.
-    adc_->setMux(ch_);         // Set mux
-    adc_->triggerConversion(); // Start a conversion.  This immediatly returns
-    curr_ =
-        adc_->getConversion(); // This polls the ADS1115 and wait for
+    if(initialized_) {
+      adc_->setMux(ch_);         // Set mux
+      adc_->triggerConversion(); // Start a conversion.  This immediatly returns
+      while(!adc_->isConversionDone());
+      curr_ = adc_->getConversion(); // This polls the ADS1115 and wait for
                                // conversion to finish, THEN returns the value
+    }
 }
