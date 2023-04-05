@@ -52,8 +52,7 @@ void publish_state() {
 
 void setup() {
   STMotorInterface::init_serial(ST_SERIAL, ST_BAUD_RATE);
-  CurrentSensor::init_ads1115(&adc0);
-  CurrentSensor::init_ads1115(&adc1);
+  CurrentSensor::init_ads1115(&adc0,&adc1);
   nh.initNode();
   nh.subscribe(effort_sub);
   nh.advertise(lead_screw_curr_pub);
@@ -71,5 +70,5 @@ void loop() {
     deposition::loop_once();
     excavation::loop_once();
     publish_state();
-    delay(50);
+    delay(20);
 }
