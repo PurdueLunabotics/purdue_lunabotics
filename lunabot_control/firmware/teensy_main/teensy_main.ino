@@ -56,6 +56,12 @@ void setup() {
   CurrentSensor::init_ads1115(&adc1);
   nh.initNode();
   nh.subscribe(effort_sub);
+  nh.advertise(lead_screw_curr_pub);
+  nh.advertise(act_right_curr_pub);
+  nh.advertise(drive_left_curr_pub);
+  nh.advertise(drive_right_curr_pub);
+  nh.advertise(exc_curr_pub);
+  nh.advertise(dep_curr_pub);
 }
 
 void loop() {
