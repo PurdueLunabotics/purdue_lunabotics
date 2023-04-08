@@ -52,7 +52,20 @@ void publish_state() {
 
 void setup() {
   STMotorInterface::init_serial(ST_SERIAL, ST_BAUD_RATE);
-  CurrentSensor::init_ads1115(&adc0,&adc1);
+  CurrentSensor::init_ads1115(&adc0, &adc1);
+
+  // disable timeout
+  MC1.setTimeout(0);
+  MC2.setTimeout(0);
+  MC3.setTimeout(0);
+  MC4.setTimeout(0);
+
+  // set to fast ramp (1-10 - fast, 11-20 slow, 20-80 intermed)
+  MC1.setRamping(1);
+  MC2.setRamping(1);
+  MC3.setRamping(1);
+  MC4.setRamping(1);
+
   nh.initNode();
   nh.subscribe(effort_sub);
   nh.advertise(lead_screw_curr_pub);
@@ -64,11 +77,11 @@ void setup() {
 }
 
 void loop() {
-    nh.spinOnce();
-    actuation::loop_once();
-    drivetrain::loop_once();
-    deposition::loop_once();
-    excavation::loop_once();
-    publish_state();
-    delay(20);
+  nh.spinOnce();
+  actuation::loop_once();
+  drivetrain::loop_once();
+  deposition::loop_once();
+  excavation::loop_once();
+  publish_state();
+  delay(20);
 }
