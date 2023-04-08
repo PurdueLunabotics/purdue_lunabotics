@@ -37,6 +37,7 @@ void publish_state() {
   excavation::update(&(exc_curr_msg.data));
   deposition::update(&(dep_curr_msg.data));
 
+  lead_screw_curr_pub.publish(&lead_screw_curr_msg);
   act_right_curr_pub.publish(&act_right_curr_msg);
   drive_left_curr_pub.publish(&drive_left_curr_msg);
   drive_right_curr_pub.publish(&drive_right_curr_msg);
