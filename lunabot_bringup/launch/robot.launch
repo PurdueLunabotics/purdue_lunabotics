@@ -4,10 +4,16 @@
     <arg name="teensy" default="true" />
     <arg name="cameras" default="true" />
     <arg name="manual" default="true" />
+    <arg name="overhead" default="false" />
+
+    <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch" />
     <include if="$(arg manual)" file="$(find lunabot_control)/launch/manual_control.launch" />
     <machine name="jetson" address="192.168.0.101" env-loader="~/lunabot_env.sh" default="true"/>
     <node if="$(arg teensy)" machine="jetson" name="teensy_main" ns="teensy_main" pkg="rosserial_python" type="serial_node.py" output="screen">
         <param name="port" type="string" value="/dev/ttyACM0"/>
         <param name="baud" type="string" value="9600"/>
     </node>
+    <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch" >
+      <arg name="back" value="false"/>
+    </include>
 </launch>
