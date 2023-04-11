@@ -1,5 +1,6 @@
 # datasets
 data/
+*.lz4
 # vim
 
 # Swap

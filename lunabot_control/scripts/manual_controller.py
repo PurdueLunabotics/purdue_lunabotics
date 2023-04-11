@@ -34,37 +34,61 @@ class ManualController:
     def __init__(self):
         self._joy_sub = rospy.Subscriber("joy", Joy, self.joy_cb)
         self._effort_pub_ = rospy.Publisher("effort", RobotEffort, queue_size=1)
-        self._exc_latch_val = 0.0
-        self._exc_latch = True  # starts out latched
-
         self._effort_msg = RobotEffort()
+        self._driving_mode = True
+
+        debug_str = "DRIVE" if self._driving_mode else "EXCAVATE"
+        rospy.loginfo(f"MODE: {debug_str}")
+
+        self._exc_latch_val = 0
+        self._exc_latch = True
         self.stop()
 
     def joy_cb(self, joy):
+        if joy.buttons[2]:  # 'X' button, switch between excavation mode and drive mode
+            self._driving_mode = not self._driving_mode
+            debug_str = "DRIVE" if self._driving_mode else "EXCAVATE"
+            rospy.loginfo(f"MODE: {debug_str}")
         if joy.buttons[1]:  # 'B' button
             self.stop()
             rospy.loginfo("STOPPED")
         else:
             effort_msg = RobotEffort()
+
             # Joysticks
-            effort_msg.left_drive = constrain(joy.axes[1])
-            effort_msg.right_drive = constrain(joy.axes[4])
-            # up/down arrows
-            effort_msg.lead_screw = int(joy.axes[7]) * int(127 * 0.4)
+            effort_msg.left_drive = 0
+            effort_msg.right_drive = 0
+
+            effort_msg.lead_screw = 0
+            effort_msg.excavate = 0
+
+            if self._driving_mode:
+                # Joysticks
+                effort_msg.left_drive = constrain(joy.axes[1])
+                effort_msg.right_drive = constrain(joy.axes[4])
+            else:
+                if joy.buttons[3] == 1:  # Y button for latch
+                    self._exc_latch_val = constrain(joy.axes[1])
+                    self._exc_latch = not self._exc_latch
+                    debug_str = "LATCHED" if self._exc_latch else "NOT LATCHED"
+                    rospy.loginfo(f"EXC {debug_str}")
+
+                if self._exc_latch:
+                    effort_msg.excavate = self._exc_latch_val
+                else:
+                    effort_msg.excavate = constrain(joy.axes[1])  # left stick
+
+                effort_msg.lead_screw = constrain(joy.axes[4])  # right stick
+
+            if self._exc_latch:  # keeps exc latched even when switching to drive mode
+                effort_msg.excavate = self._exc_latch_val
+
             # right bumpers
             effort_msg.lin_act = int(joy.buttons[4] - joy.buttons[5]) * 127
+
             # right arrows
             effort_msg.deposit = int(joy.axes[6]) * 127
-            # latch excavation
-            if joy.buttons[3] == 1:  # Y button
-                self._exc_latch_val = constrain(joy.axes[3])
-                self._exc_latch = not self._exc_latch
-                debug_str = "LATCHED" if self._exc_latch else "NOT LATCHED"
-                rospy.loginfo(f"EXC {debug_str}")
-            if self._exc_latch:
-                effort_msg.excavate = self._exc_latch_val
-            else:
-                effort_msg.excavate = constrain(joy.axes[3])
+
             self._effort_msg = effort_msg
 
     def loop(self):
