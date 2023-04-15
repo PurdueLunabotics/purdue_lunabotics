@@ -20,6 +20,8 @@ Step 3: Run it!
 """
 
 
+import math
+
 import numpy as np
 import ros_numpy
 import rospy
@@ -27,7 +29,7 @@ from apriltag_ros.msg import AprilTagDetectionArray
 from geometry_msgs.msg import Twist
 
 # John added
-from lunabot_msgs.msg import RobotEffort
+# from lunabot_msgs.msg import RobotEffort
 
 
 # clips input is within limits bounds
@@ -98,15 +100,6 @@ class HomingController:
         v_1C[2] = 0
 
         # Finding the error angle between the two points, v_1C and v_2C, using dot product (in radians)
-        trig_result = v_2C[0:3].dot(v_1C[0:3]) / (
-            np.linalg.norm(v_2C[0:3]) * np.linalg.norm(v_1C[0:3])
-        )
-        arc_cos = np.arccos(trig_result)
-        arc_sin = np.arcsin(trig_result)
-
-        sin = np.sin(np.arcsin(trig_result))
-
-        vn = np.array([0, 1, 0])
 
         # v_1C = v_1C[0:2]
         # v_2C = v_2C[0:2]
@@ -137,27 +130,28 @@ class HomingController:
         #     (np.pi) / 2 < arc_cos <= np.pi and 0 > arc_sin >= -(np.pi) / 2
         # ):
         #     ang_error = -arc_cos
-
         # print(f"\nError Cosine: {trig_result}")
-        print(f"\nCalculated Error: {ang_error * 180 / np.pi}")
+        # print(f"\nCalculated Error: {ang_error * 180 / np.pi}")
 
         # determining the linear translational error (in x and y) of the robot considered
 
-        # distance = m.dist(F_2C, F_1C_final)
+        distance = math.dist([0, 0, 0, 1], v_1C)
+        # Replaced v_2c with 0,0,0,1 for the sim because the distance being calculated
+        # Was seemingly off from the apriltag (based on mapping out values, was 0,0,0)
 
-        # lin_error = np.array([distance * m.cos(ang_error)], [distance * m.sin(ang_error)])
+        # lin_error = np.array([distance * math.cos(ang_error), distance * math.sin(ang_error)])
 
         # write PD controller here with the output being lin, ang velocity
         # Define the K constants for P, I, and D
         # For sim tuning, lin and ang are flipped.
         # For Testing angular tuning only change the first value
-        KP = np.array([0.0, 0.5])
+        KP = np.array([1, 0.5])
         KI = np.array([0.0, 0.0])
-        KD = np.array([0.0, 0.0])
+        KD = np.array([0.2, 0.1])
 
         # Define the errors
-        error_lin = 0
-        curr_error = np.array([error_lin, ang_error])
+        # lin_error_dist = np.sqrt((lin_error[0])**2 + (lin_error[1])**2)
+        curr_error = np.array([distance, ang_error])
         self._error_total += curr_error
 
         # Computing PID errors
