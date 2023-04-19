@@ -1,0 +1,3 @@
+<launch>
+<node name="recorder" pkg="rosbag" type="record" args="-a -o $(find lunabot_bringup)/bags/rosbag -x '(.*)theora(.*)|(.*)raw|(.*)Depth(.*)|(.*)mono(.*)'" output="screen"/> 
+</launch>

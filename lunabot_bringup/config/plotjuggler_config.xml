@@ -1,0 +1,179 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<root>
+ <tabbed_widget parent="main_window" name="Main Window">
+  <Tab containers="1" tab_name="all">
+   <Container>
+    <DockSplitter orientation="-" sizes="1" count="1">
+     <DockArea name="...">
+      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
+       <range left="0.000000" bottom="7902.913108" right="19.763890" top="13464.006997"/>
+       <limitY/>
+       <curve name="/current/act_lead_screw/data" color="#1f77b4">
+        <transform alias="/current/act_lead_screw/data[Moving Average]" name="Moving Root Mean Squared">
+         <options value="10"/>
+        </transform>
+       </curve>
+       <curve name="/current/act_right/data" color="#d62728"/>
+       <curve name="/current/deposition/data" color="#1ac938">
+        <transform alias="/current/deposition/data[Moving Average]" name="Moving Average">
+         <options value="10" compensate_offset="false"/>
+        </transform>
+       </curve>
+       <curve name="/current/drive_left/data" color="#ff7f0e">
+        <transform alias="/current/drive_left/data[Moving Average]" name="Moving Average">
+         <options value="10" compensate_offset="false"/>
+        </transform>
+       </curve>
+       <curve name="/current/drive_right/data" color="#f14cc1">
+        <transform alias="/current/drive_right/data[Moving Average]" name="Moving Average">
+         <options value="10" compensate_offset="false"/>
+        </transform>
+       </curve>
+       <curve name="/current/excavation/data" color="#9467bd">
+        <transform alias="/current/excavation/data[Moving Average]" name="Moving Average">
+         <options value="10" compensate_offset="false"/>
+        </transform>
+       </curve>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab containers="1" tab_name="deposition">
+   <Container>
+    <DockSplitter orientation="-" sizes="1" count="1">
+     <DockArea name="...">
+      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
+       <range left="0.008548" bottom="13196.815000" right="19.692712" top="13208.785000"/>
+       <limitY/>
+       <curve name="/current/deposition/data" color="#d62728">
+        <transform alias="/current/deposition/data[Moving Average]" name="Moving Average">
+         <options value="10" compensate_offset="false"/>
+        </transform>
+       </curve>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab containers="1" tab_name="actuation">
+   <Container>
+    <DockSplitter orientation="-" sizes="1" count="1">
+     <DockArea name="...">
+      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
+       <range left="0.000000" bottom="7905.628106" right="19.761995" top="13352.692090"/>
+       <limitY/>
+       <curve name="/current/act_lead_screw/data" color="#f14cc1">
+        <transform alias="/current/act_lead_screw/data[Moving Root Mean Squared]" name="Moving Root Mean Squared">
+         <options value="10"/>
+        </transform>
+       </curve>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab containers="1" tab_name="excavation">
+   <Container>
+    <DockSplitter orientation="-" sizes="1" count="1">
+     <DockArea name="...">
+      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
+       <range left="0.006005" bottom="13298.982500" right="19.690902" top="13312.317500"/>
+       <limitY/>
+       <curve name="/current/excavation/data" color="#ff7f0e">
+        <transform alias="/current/excavation/data[Moving Average]" name="Moving Average">
+         <options value="10" compensate_offset="false"/>
+        </transform>
+       </curve>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab containers="1" tab_name="lin_act">
+   <Container>
+    <DockSplitter orientation="-" sizes="1" count="1">
+     <DockArea name="...">
+      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
+       <range left="0.000655" bottom="13154.727500" right="19.763890" top="13170.372500"/>
+       <limitY/>
+       <curve name="/current/act_right/data" color="#9467bd">
+        <transform alias="/current/act_right/data[Moving Average]" name="Moving Average">
+         <options value="10" compensate_offset="false"/>
+        </transform>
+       </curve>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab containers="1" tab_name="drive">
+   <Container>
+    <DockSplitter orientation="-" sizes="1" count="1">
+     <DockArea name="...">
+      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
+       <range left="0.002651" bottom="13228.587500" right="19.689124" top="13334.112500"/>
+       <limitY/>
+       <curve name="/current/drive_left/data" color="#ff7f0e">
+        <transform alias="/current/drive_left/data[Moving Average]" name="Moving Average">
+         <options value="10" compensate_offset="false"/>
+        </transform>
+       </curve>
+       <curve name="/current/drive_right/data" color="#f14cc1">
+        <transform alias="/current/drive_right/data[Moving Average]" name="Moving Average">
+         <options value="10" compensate_offset="false"/>
+        </transform>
+       </curve>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <currentTabIndex index="0"/>
+ </tabbed_widget>
+ <use_relative_time_offset enabled="1"/>
+ <!-- - - - - - - - - - - - - - - -->
+ <!-- - - - - - - - - - - - - - - -->
+ <Plugins>
+  <plugin ID="DataLoad CSV">
+   <default time_axis="" delimiter="0"/>
+  </plugin>
+  <plugin ID="DataLoad ROS bags">
+   <use_header_stamp value="false"/>
+   <discard_large_arrays value="true"/>
+   <max_array_size value="100"/>
+   <boolean_strings_to_number value="true"/>
+   <remove_suffix_from_strings value="true"/>
+  </plugin>
+  <plugin ID="DataLoad ULog"/>
+  <plugin ID="ROS Topic Subscriber">
+   <use_header_stamp value="false"/>
+   <discard_large_arrays value="true"/>
+   <max_array_size value="100"/>
+   <boolean_strings_to_number value="true"/>
+   <remove_suffix_from_strings value="true"/>
+  </plugin>
+  <plugin ID="UDP Server"/>
+  <plugin ID="WebSocket Server"/>
+  <plugin ID="Fast Fourier Transform"/>
+  <plugin ID="Quaternion to RPY"/>
+  <plugin ID="Reactive Script Editor">
+   <library code="--[[ Helper function to create a ScatterXY series from arrays.&#xa;&#xa; series_name: name of the created ScatterXY series&#xa; prefix:      prefix of the timeseries, before the index of the array&#xa; suffix_X:   suffix to complete the name of the series containing the X value.&#xa;             if [nil], the index of the array will be used.&#xa; suffix_Y:   suffix to complete the name of the series containing the Y value&#xa; timestamp:   usually the tracker_time variable&#xa;              &#xa; Example:&#xa; &#xa; Assuming we have multiple series in the form:&#xa; &#xa;   /trajectory/node.{N}/position/x&#xa;   /trajectory/node.{N}/position/y&#xa;   &#xa; where {N} is the index of the array (integer). We can create a reactive series from the array with:&#xa; &#xa;   CreateSeriesFromArray( &quot;my_trajectory&quot;, &quot;/trajectory/node&quot;,  &quot;position/x&quot;, &quot;position/y&quot;, tracker_time );&#xa;]]--&#xa;&#xa;function CreateSeriesFromArray( series_name, prefix, suffix_X, suffix_Y, timestamp )&#xa;  --- create a new series or overwite the previous one&#xa;  new_series = MutableScatterXY.new(series_name)&#xa;  &#xa;  --- Append points to new_series&#xa;  index = 0&#xa;  while(true) do&#xa;&#xa;    x = index;&#xa;    -- if not nil, get the X coordinate from a series&#xa;    if suffix_X ~= nil then &#xa;      series_x = TimeseriesView.find( string.format( &quot;%s.%d/%s&quot;, prefix, index, suffix_X) )&#xa;      if series_x == nil then break end&#xa;      x = series_x:atTime(timestamp)&#x9; &#xa;    end&#xa;    &#xa;    series_y = TimeseriesView.find( string.format( &quot;%s.%d/%s&quot;, prefix, index, suffix_Y) )&#xa;    if series_x == nil then break end &#xa;    y = series_y:atTime(timestamp)&#xa;    &#xa;    new_series:push_back(x,y)&#xa;    index = index+1&#xa;  end&#xa;end&#xa;"/>
+   <scripts/>
+  </plugin>
+  <plugin ID="CSV Exporter"/>
+  <plugin ID="ROS /rosout Visualization"/>
+  <plugin ID="ROS Topic Re-Publisher"/>
+ </Plugins>
+ <!-- - - - - - - - - - - - - - - -->
+ <previouslyLoaded_Datafiles>
+  <fileInfo filename="../bags/rosbag_2023-04-10-12-30-15.bag" prefix="">
+   <selected_datasources value="/current/act_lead_screw;/current/act_right;/current/deposition;/current/drive_left;/current/drive_right;/current/excavation"/>
+  </fileInfo>
+ </previouslyLoaded_Datafiles>
+ <!-- - - - - - - - - - - - - - - -->
+ <customMathEquations/>
+ <snippets/>
+ <!-- - - - - - - - - - - - - - - -->
+</root>
+

@@ -52,6 +52,7 @@
   <depend>rosbag</depend>
   <depend>rviz</depend>
   <depend>lunabot_nav</depend>
+  <depend>usb_cam</depend>
   <depend>lunabot_control</depend>
   <depend>lunabot_perception</depend>
   <depend>mining_arena_gazebo</depend>
