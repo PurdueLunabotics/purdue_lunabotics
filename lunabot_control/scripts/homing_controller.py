@@ -20,21 +20,32 @@ Step 3: Run it!
 """
 
 
-import math
-
 import numpy as np
 import ros_numpy
 import rospy
 from apriltag_ros.msg import AprilTagDetectionArray
-from geometry_msgs.msg import Twist
 
 # John added
-# from lunabot_msgs.msg import RobotEffort
+from lunabot_msgs.msg import RobotEffort
+
+# from geometry_msgs.msg import Twist
 
 
 # clips input is within limits bounds
+SCALE = 0.5
+setpoint = 0.8
+KP = np.array([4, 4])
+KI = np.array([0.0, 0.0])
+KD = np.array([0, 0.0])
+
+
 def constrain(unconstr_input):
-    return np.int8(min(unconstr_input * 128, 127))
+    global SCALE
+
+    unconstr_input = np.clip(unconstr_input, -SCALE, SCALE)
+    print(unconstr_input)
+
+    return np.int8(min(unconstr_input * 127, 127))
 
 
 def diff_drive_model(twist):
@@ -50,27 +61,30 @@ class HomingController:
 
     def __init__(self):
         self._apriltag_sub = rospy.Subscriber(
-            # "/d455_front/camera/color/tag_detections",
-            "/d435_backward/color/tag_detections",
+            "/d455_front/camera/color/tag_detections",
+            # "/d435_backward/color/tag_detections",
             AprilTagDetectionArray,
             self.apritag_cb,
         )
 
-        # self._effort_pub_ = rospy.Publisher("effort_homing", RobotEffort, queue_size=1)
-        self._effort_pub = rospy.Publisher("cmd_vel", Twist, queue_size=1)
+        self._effort_pub = rospy.Publisher("effort", RobotEffort, queue_size=1)
+        # self._effort_pub = rospy.Publisher("cmd_vel", Twist, queue_size=1)
         # self._effort_pub_ = rospy.Publisher('linear', Float32, queue_size=1);
         # self._effort_pub_ = rospy.Publisher('Angle', Float32, queue_size=1)
 
-        # self._effort_msg = RobotEffort()
-        self._effort_msg = Twist()
+        self._effort_msg = RobotEffort()
+        # self._effort_msg = Twist()
         # self._effort_msg = Float32()
         self._prev_error = np.zeros(2)
         self._error_total = np.zeros(2)
 
     def apritag_cb(self, msg):
         if len(msg.detections) == 0:
-            self._effort_msg.linear.x = 0
-            self._effort_msg.angular.z = 0
+            # self._effort_msg.linear.x = 0
+            # self._effort_msg.angular.z = 0
+
+            self._effort_msg.left_drive = 0
+            self._effort_msg.right_drive = 0
 
             # print("No AprilTag Dected\n")
             return
@@ -83,6 +97,8 @@ class HomingController:
             T_camera_april_msg
         )  # Converting the transformation matrix to a numpy array
 
+        print(T_camera_april)
+
         # Assigning the unit vector values for the different vectors
         v_1A = np.array([0, 0, -1, 1])
         # V_1A refers to the april tag reference in the april tag frame
@@ -93,11 +109,17 @@ class HomingController:
 
         # Computing the location of point V that is in frame A to transformed to its location in frame C
         v_1C = T_camera_april @ v_1A
+
+        p_A_zero = np.array([0, 0, 0, 1])
+
+        v_C_april = T_camera_april @ p_A_zero
         # if (T_camera_april == compare):
         #     self._effort_msg.left_drive = 0
         #     self._effort_msg.right_drive = 0
 
         v_1C[2] = 0
+        v_C_april[2] = 0
+        v_C_april[3] = 0
 
         # Finding the error angle between the two points, v_1C and v_2C, using dot product (in radians)
 
@@ -108,7 +130,7 @@ class HomingController:
             v_1C[0] * v_2C[1] - v_2C[0] * v_1C[1], v_1C[0] * v_1C[1] + v_2C[0] * v_2C[1]
         )
 
-        ang_error += np.pi / 2 + 0.3
+        ang_error += 3 * np.pi / 2 + 0.3
         if ang_error > np.pi:
             ang_error -= 2 * np.pi
         # print(ang_error * 180 / np.pi)
@@ -135,7 +157,12 @@ class HomingController:
 
         # determining the linear translational error (in x and y) of the robot considered
 
-        distance = math.dist([0, 0, 0, 1], v_1C)
+        v_C_april = np.array(
+            [T_camera_april_msg.position.x, T_camera_april_msg.position.z, 0, 0]
+        )
+
+        print(v_C_april)
+        distance = np.linalg.norm(v_C_april)
         # Replaced v_2c with 0,0,0,1 for the sim because the distance being calculated
         # Was seemingly off from the apriltag (based on mapping out values, was 0,0,0)
 
@@ -145,13 +172,12 @@ class HomingController:
         # Define the K constants for P, I, and D
         # For sim tuning, lin and ang are flipped.
         # For Testing angular tuning only change the first value
-        KP = np.array([1, 0.5])
-        KI = np.array([0.0, 0.0])
-        KD = np.array([0.2, 0.1])
 
         # Define the errors
         # lin_error_dist = np.sqrt((lin_error[0])**2 + (lin_error[1])**2)
-        curr_error = np.array([distance, ang_error])
+        curr_error = np.array([distance - setpoint, ang_error])
+
+        print("curr_error: ", curr_error)
         self._error_total += curr_error
 
         # Computing PID errors
@@ -165,34 +191,35 @@ class HomingController:
         # Converting errors into the lin_vel, ang_vel
 
         twist = np.zeros(2)  # lin, ang velocity
-        twist[0] = ctrl[0]
+        twist[0] = -ctrl[0]
         twist[1] = ctrl[1]
 
-        """For real robot
+        print("twist", twist)
+
+        """For real robot"""
         ctrl = diff_drive_model(
-            ctrl
+            twist
         )  # computes wheel velocities from lin, ang vel (twist)
 
         self._effort_msg.left_drive = constrain(ctrl[0])
         self._effort_msg.right_drive = constrain(ctrl[1])
-        """
 
-        # For simulation (lin and ang vel swapped)
+        print("left: ", constrain(ctrl[0]))
+        print("right: ", constrain(ctrl[1]))
+
+        """ For simulation (lin and ang vel swapped)
         self._effort_msg.linear.x = -ctrl[1]
         self._effort_msg.angular.z = -ctrl[0]
-
-        print("effort:", self._effort_msg)
+        """
 
     def loop(self):
         self._effort_pub.publish(self._effort_msg)  # Sends ctrl to robot
-        # pass
+        pass
 
     def stop(self):
-        # self._effort_msg.left_drive = 0
-        # self._effort_msg.right_drive = 0
-
-        self._exc_latch_val = 0
-        self._exc_latch = False
+        self._effort_msg.left_drive = 0
+        self._effort_msg.right_drive = 0
+        self._effort_pub.publish(self._effort_msg)  # Sends ctrl to robot
 
 
 if __name__ == "__main__":
@@ -202,13 +229,11 @@ if __name__ == "__main__":
     r = rospy.Rate(20)
 
     def shutdown_hook():
-        print("stopping manual control")
         ctrl.stop()
+        print("stopping homing control")
 
     rospy.on_shutdown(shutdown_hook)
 
     while not rospy.is_shutdown():
         ctrl.loop()
         r.sleep()
-
-    rospy.spin()
