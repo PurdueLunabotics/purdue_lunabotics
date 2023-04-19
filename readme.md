@@ -51,10 +51,22 @@ roslaunch lunabot_bringup robot.launch
 
 That's it! Things should be running now.
 
-##### Manual Control Commands
+### Manual Control Commands
 
-- two joysticks: tank drive controls for drivetrain
-- LT/RT: Excavation (forward/backward)
-- LB/RB: linear actuators (tool angle)
+##### General commands 
 - cross key left/right: deposition (up/down)
-- cross key up/down: tool extension (lead screw) 
+- cross key up/down: lead screw (up/down
+- B button: stop everything and latch excavation to zero
+- X button: switch mode
+- Y button: latch/unlatch excavation (only done in excavation mode
+
+##### Drive mode
+- left and right joysticks (up/down): tank drive controls for drivetrain (left stick controls left wheel, right stick controls right wheel)
+
+##### Excavation mode
+- left joystick (up/down): Excavation (forward/backward)
+  - latch (Y button): will latch current value of excavation and ignore joystick values, press Y again to unlatch
+- right joystick (up/down): Actuation (up/down)
+
+## Contributing guidelines
+See https://github.com/PurdueLunabotics/purdue_lunabotics/blob/master/contributing.md

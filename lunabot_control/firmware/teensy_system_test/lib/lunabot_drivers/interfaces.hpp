@@ -1,4 +1,3 @@
-#include <ADS1115_lite.h>
 #include <Arduino.h>
 #include <Sabertooth.h>
 #include <Stepper.h>
@@ -50,29 +49,6 @@ class STMotorInterface {
     static int initialized_serial_;
     Sabertooth *st_;
     STMotor motor_;
-};
-
-// Sensors
-
-enum ADSChannel {
-    A0_ch = ADS1115_REG_CONFIG_MUX_SINGLE_0,
-    A1_ch = ADS1115_REG_CONFIG_MUX_SINGLE_1,
-    A2_ch = ADS1115_REG_CONFIG_MUX_SINGLE_2,
-    A3_ch = ADS1115_REG_CONFIG_MUX_SINGLE_3
-};
-
-class CurrentSensor {
-  public:
-    CurrentSensor(ADS1115_lite *adc, ADSChannel ch);
-    static void init_ads1115(ADS1115_lite *adc0, ADS1115_lite *adc1);
-    int16_t read();
-    void loop();
-
-  private:
-    static int initialized_;
-    ADS1115_lite *adc_;
-    ADSChannel ch_;
-    int16_t curr_;
 };
 
 #endif
