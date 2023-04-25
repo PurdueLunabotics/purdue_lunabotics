@@ -24,8 +24,6 @@ import numpy as np
 import ros_numpy
 import rospy
 from apriltag_ros.msg import AprilTagDetectionArray
-
-# John added
 from lunabot_msgs.msg import RobotEffort
 
 # from geometry_msgs.msg import Twist
@@ -33,16 +31,21 @@ from lunabot_msgs.msg import RobotEffort
 
 # clips input is within limits bounds
 SCALE = 0.5
-setpoint = 0.8
+MIN_VEL = 0.2
+linear_setpoint = 0.8
+angular_setpoint = 0
 KP = np.array([4, 4])
 KI = np.array([0.0, 0.0])
 KD = np.array([0, 0.0])
 
 
 def constrain(unconstr_input):
-    global SCALE
+    global SCALE, MIN_VEL
 
     unconstr_input = np.clip(unconstr_input, -SCALE, SCALE)
+    
+    if unconstr_input != 0 and np.abs(unconstr_input) < SCALE:
+        unconstr_input = np.sign(unconstr_input) * MIN_VEL
     print(unconstr_input)
 
     return np.int8(min(unconstr_input * 127, 127))
@@ -126,34 +129,13 @@ class HomingController:
         # v_1C = v_1C[0:2]
         # v_2C = v_2C[0:2]
 
-        ang_error = np.arctan2(
+        angle = np.arctan2(
             v_1C[0] * v_2C[1] - v_2C[0] * v_1C[1], v_1C[0] * v_1C[1] + v_2C[0] * v_2C[1]
         )
 
-        ang_error += 3 * np.pi / 2 + 0.3
-        if ang_error > np.pi:
-            ang_error -= 2 * np.pi
-        # print(ang_error * 180 / np.pi)
-
-        # if(trig_result > 0 and sin > 0):
-        #     ang_error = arc_cos
-        # elif(trig_result > 0 and sin < 0):
-        #     ang_error = -arc_cos
-        # elif(sin > 0 and trig_result < 0):
-        #     ang_error = arc_cos
-        # else:
-        #     ang_error = -arc_cos
-
-        # if (arc_cos <= (np.pi) / 2 and 0 <= arc_sin <= (np.pi) / 2) or (
-        #     (np.pi) / 2 < arc_cos <= np.pi and 0 < arc_sin <= (np.pi) / 2
-        # ):
-        #     ang_error = arc_cos
-        # elif (arc_cos <= (np.pi) / 2 and 0 > arc_sin >= -(np.pi) / 2) or (
-        #     (np.pi) / 2 < arc_cos <= np.pi and 0 > arc_sin >= -(np.pi) / 2
-        # ):
-        #     ang_error = -arc_cos
-        # print(f"\nError Cosine: {trig_result}")
-        # print(f"\nCalculated Error: {ang_error * 180 / np.pi}")
+        angle += 3 * np.pi / 2 + 0.3
+        if angle > np.pi:
+            angle -= 2 * np.pi
 
         # determining the linear translational error (in x and y) of the robot considered
 
@@ -166,8 +148,6 @@ class HomingController:
         # Replaced v_2c with 0,0,0,1 for the sim because the distance being calculated
         # Was seemingly off from the apriltag (based on mapping out values, was 0,0,0)
 
-        # lin_error = np.array([distance * math.cos(ang_error), distance * math.sin(ang_error)])
-
         # write PD controller here with the output being lin, ang velocity
         # Define the K constants for P, I, and D
         # For sim tuning, lin and ang are flipped.
@@ -175,7 +155,7 @@ class HomingController:
 
         # Define the errors
         # lin_error_dist = np.sqrt((lin_error[0])**2 + (lin_error[1])**2)
-        curr_error = np.array([distance - setpoint, ang_error])
+        curr_error = np.array([distance - linear_setpoint, angle - angular_setpoint])
 
         print("curr_error: ", curr_error)
         self._error_total += curr_error
@@ -191,6 +171,16 @@ class HomingController:
         # Converting errors into the lin_vel, ang_vel
 
         twist = np.zeros(2)  # lin, ang velocity
+        
+        # Setting thresholds to stop movement
+        linear_threshold = 0.05
+        angular_threshold = 3 * np.pi / 180
+        
+        if np.abs(curr_error[0]) < linear_threshold:
+            ctrl[0] = 0
+        if np.abs(curr_error[1]) < angular_threshold:
+            ctrl[1] = 0
+        
         twist[0] = -ctrl[0]
         twist[1] = ctrl[1]
 
