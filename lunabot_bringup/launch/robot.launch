@@ -5,6 +5,7 @@
     <arg name="cameras" default="true" />
     <arg name="manual" default="true" />
     <arg name="overhead" default="false" />
+    <arg name="slam" default="false" />
 
     <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch" />
     <include if="$(arg manual)" file="$(find lunabot_control)/launch/manual_control.launch" />
@@ -15,5 +16,15 @@
     </node>
     <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch" >
       <arg name="back" value="false"/>
+    </include>
+
+    <include if="$(arg slam)" file="$(find rtabmap_ros)/launch/rtabmap.launch" >
+      <arg name="rtabmap_args" value="--delete_db_on_start"/>
+      <arg name="depth_topic" value="/d455_front/camera/aligned_depth_to_color/image_raw"/>
+      <arg name="rgb_topic" value="/d455_front/camera/color/image_rect_color"/>
+      <arg name="camera_info_topic" value="/d455_front/camera/color/camera_info"/>
+      <arg name="approx_sync" value="false"/>
+      <arg name="rtabmapviz" value="false" />
+      <arg name="frame_id" value="d455_front_link" />
     </include>
 </launch>
