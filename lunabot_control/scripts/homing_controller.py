@@ -44,7 +44,7 @@ def constrain(unconstr_input):
 
     unconstr_input = np.clip(unconstr_input, -SCALE, SCALE)
     
-    if unconstr_input != 0 and np.abs(unconstr_input) < SCALE:
+    if unconstr_input != 0 and np.abs(unconstr_input) < MIN_VEL:
         unconstr_input = np.sign(unconstr_input) * MIN_VEL
     print(unconstr_input)
 
