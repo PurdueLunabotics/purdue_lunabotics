@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+message RobotState {
+    int32 lead_screw_curr = 1;
+    int32 act_right_curr = 2;
+    int32 dep_curr = 3;
+    int32 exc_curr = 4;
+    int32 drive_left_curr = 5;
+    int32 drive_right_curr = 6;
+}
+
+message RobotEffort {
+    int32 lead_screw = 1;
+    int32 lin_act = 2;
+    int32 left_drive = 3;
+    int32 right_drive = 4;
+    int32 excavate = 5;
+    int32 deposit = 6;
+}

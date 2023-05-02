@@ -66,7 +66,6 @@ class CurrentSensor {
     CurrentSensor(ADS1115_lite *adc, ADSChannel ch);
     static void init_ads1115(ADS1115_lite *adc0, ADS1115_lite *adc1);
     int16_t read();
-    void loop();
 
   private:
     static int initialized_;

@@ -24,21 +24,15 @@ CurrentSensor act_right_curr{&adc1, ADSChannel::A1_ch};  // U6 curr_sense_board
 CurrentSensor act_left_curr{&adc0, ADSChannel::A3_ch};   // U4 curr_sense_board
 CurrentSensor lead_screw_curr{&adc1, ADSChannel::A2_ch}; // U7 curr_sense_board
 
-void update(int16_t *act_right, int16_t *lead_screw) {
+void update(int32_t *act_right, int32_t *lead_screw) {
     *act_right = act_right_curr.read();
     *lead_screw = lead_screw_curr.read();
 }
 
-void loop_once() {
-    act_right_curr.loop();
-    // act_left_curr.loop();
-    lead_screw_curr.loop();
-}
-
 void cb(int8_t lead_screw, int8_t lin_act) {
-  act_left.write(-lin_act);
-  act_right.write(lin_act);
-  lead_screw_motor.write(lead_screw);
+    act_left.write(-lin_act);
+    act_right.write(lin_act);
+    lead_screw_motor.write(lead_screw);
 }
 
 } // namespace actuation
@@ -50,20 +44,15 @@ STMotorInterface right_drive{&MC3, STMotor::M2};
 CurrentSensor left_drive_curr{&adc0, ADSChannel::A2_ch};  // U3 curr_sense_board
 CurrentSensor right_drive_curr{&adc0, ADSChannel::A0_ch}; // U1 curr_sense_board
 
-void update(int16_t *left, int16_t *right) {
+void update(int32_t *left, int32_t *right) {
     *left = left_drive_curr.read();
     *right = right_drive_curr.read();
 }
 
-void loop_once() {
-    left_drive_curr.loop();
-    right_drive_curr.loop();
-}
-
 void cb(int8_t left, int8_t right) {
-  // Tank drive steering
-  left_drive.write(-left);
-  right_drive.write(-right);
+    // Tank drive steering
+    left_drive.write(-left);
+    right_drive.write(-right);
 }
 
 } // namespace drivetrain
@@ -73,9 +62,7 @@ STMotorInterface exc_motor{&MC4, STMotor::M1};
 
 CurrentSensor exc_curr{&adc1, ADSChannel::A0_ch}; // U5 curr_sense_board
 
-void update(int16_t *exc) { *exc = exc_curr.read(); }
-
-void loop_once() { exc_curr.loop(); }
+void update(int32_t *exc) { *exc = exc_curr.read(); }
 
 void cb(int8_t speed) { exc_motor.write(speed); }
 } // namespace excavation
@@ -85,9 +72,8 @@ STMotorInterface dep_motor{&MC1, STMotor::M2};
 
 CurrentSensor dep_curr{&adc0, ADSChannel::A1_ch}; // U2 curr_sense_board
 
-void update(int16_t *dep) { *dep = dep_curr.read(); }
+void update(int32_t *dep) { *dep = dep_curr.read(); }
 
-void loop_once() { dep_curr.loop(); }
 void cb(int8_t speed) { dep_motor.write(speed); }
 
 } // namespace deposition

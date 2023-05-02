@@ -9,7 +9,7 @@
 #include <conio.h>
 #endif
 
-#include "hid.h"
+#include <lunabot_embedded/hid.h>
 
 static char get_keystroke(void);
 
