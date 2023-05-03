@@ -34,9 +34,15 @@ void send() {
     excavation::update(&(state.exc_curr));
     deposition::update(&(state.dep_curr));
 
+    state.drive_left_ang = 7;
+    state.drive_right_ang = 8;
+    state.dep_ang = 9;
+    state.lead_screw_ang = 10;
+    state.act_ang = 11;
+
     pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
-    message_length = stream.bytes_written;
     pb_encode(&stream, RobotState_fields, &state);
+    message_length = stream.bytes_written;
 
     buffer[62] = highByte(message_length);
     buffer[63] = lowByte(message_length);
@@ -65,7 +71,7 @@ void loop() {
     int n;
     n = RawHID.recv(buffer, 0); // 0 timeout = do not wait
     if (n > 0) {
-        // recv();
+        recv();
     }
 
     if (msUntilNextSend > TX_PERIOD) {

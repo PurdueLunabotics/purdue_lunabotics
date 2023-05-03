@@ -25,11 +25,24 @@ void recv() {
 
     /* Now we are ready to decode the message. */
     status = pb_decode(&stream, RobotState_fields, &state);
+    std::cout << state.act_right_curr << std::endl;
+    std::cout << state.drive_right_curr << std::endl;
+    std::cout << state.drive_left_curr << std::endl;
+    std::cout << state.lead_screw_curr << std::endl;
+    std::cout << state.dep_curr << std::endl;
+    std::cout << state.exc_curr << std::endl;
+
+    std::cout << state.act_ang << std::endl;
+    std::cout << state.drive_right_ang << std::endl;
+    std::cout << state.drive_left_ang << std::endl;
+    std::cout << state.lead_screw_ang << std::endl;
+    std::cout << state.dep_ang << std::endl;
 }
 
 int main(int argc, char **argv) {
 
     ros::init(argc, argv, "driver_node");
+    ros::NodeHandle nh;
 
     int i, r, num;
 
@@ -44,11 +57,12 @@ int main(int argc, char **argv) {
 
     while (ros::ok()) {
         // check if any Raw HID packet has arrived
-        num = rawhid_recv(0, buf, 64, 220);
+        num = rawhid_recv(0, buf, BUF_SIZE, 0);
         if (num < 0) {
             printf("\nerror reading, device went offline\n");
             break;
         }
+
         if (num > 0) {
             printf("\nrecv %d bytes:\n", num);
             recv();

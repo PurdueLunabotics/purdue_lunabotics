@@ -17,6 +17,11 @@ typedef struct _RobotState {
     int32_t exc_curr;
     int32_t drive_left_curr;
     int32_t drive_right_curr;
+    int32_t drive_left_ang;
+    int32_t drive_right_ang;
+    int32_t dep_ang;
+    int32_t lead_screw_ang;
+    int32_t act_ang;
 } RobotState;
 
 typedef struct _RobotEffort {
@@ -34,11 +39,11 @@ extern "C" {
 
 /* Initializer values for message structs */
 #define RobotState_init_default                                                \
-    { 0, 0, 0, 0, 0, 0 }
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 #define RobotEffort_init_default                                               \
     { 0, 0, 0, 0, 0, 0 }
 #define RobotState_init_zero                                                   \
-    { 0, 0, 0, 0, 0, 0 }
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 #define RobotEffort_init_zero                                                  \
     { 0, 0, 0, 0, 0, 0 }
 
@@ -49,6 +54,11 @@ extern "C" {
 #define RobotState_exc_curr_tag 4
 #define RobotState_drive_left_curr_tag 5
 #define RobotState_drive_right_curr_tag 6
+#define RobotState_drive_left_ang_tag 7
+#define RobotState_drive_right_ang_tag 8
+#define RobotState_dep_ang_tag 9
+#define RobotState_lead_screw_ang_tag 10
+#define RobotState_act_ang_tag 11
 #define RobotEffort_lead_screw_tag 1
 #define RobotEffort_lin_act_tag 2
 #define RobotEffort_left_drive_tag 3
@@ -58,22 +68,27 @@ extern "C" {
 
 /* Struct field encoding specification for nanopb */
 #define RobotState_FIELDLIST(X, a)                                             \
-    X(a, STATIC, SINGULAR, INT32, lead_screw_curr, 1)                          \
-    X(a, STATIC, SINGULAR, INT32, act_right_curr, 2)                           \
-    X(a, STATIC, SINGULAR, INT32, dep_curr, 3)                                 \
-    X(a, STATIC, SINGULAR, INT32, exc_curr, 4)                                 \
-    X(a, STATIC, SINGULAR, INT32, drive_left_curr, 5)                          \
-    X(a, STATIC, SINGULAR, INT32, drive_right_curr, 6)
+    X(a, STATIC, SINGULAR, SINT32, lead_screw_curr, 1)                         \
+    X(a, STATIC, SINGULAR, SINT32, act_right_curr, 2)                          \
+    X(a, STATIC, SINGULAR, SINT32, dep_curr, 3)                                \
+    X(a, STATIC, SINGULAR, SINT32, exc_curr, 4)                                \
+    X(a, STATIC, SINGULAR, SINT32, drive_left_curr, 5)                         \
+    X(a, STATIC, SINGULAR, SINT32, drive_right_curr, 6)                        \
+    X(a, STATIC, SINGULAR, SINT32, drive_left_ang, 7)                          \
+    X(a, STATIC, SINGULAR, SINT32, drive_right_ang, 8)                         \
+    X(a, STATIC, SINGULAR, SINT32, dep_ang, 9)                                 \
+    X(a, STATIC, SINGULAR, SINT32, lead_screw_ang, 10)                         \
+    X(a, STATIC, SINGULAR, SINT32, act_ang, 11)
 #define RobotState_CALLBACK NULL
 #define RobotState_DEFAULT NULL
 
 #define RobotEffort_FIELDLIST(X, a)                                            \
-    X(a, STATIC, SINGULAR, INT32, lead_screw, 1)                               \
-    X(a, STATIC, SINGULAR, INT32, lin_act, 2)                                  \
-    X(a, STATIC, SINGULAR, INT32, left_drive, 3)                               \
-    X(a, STATIC, SINGULAR, INT32, right_drive, 4)                              \
-    X(a, STATIC, SINGULAR, INT32, excavate, 5)                                 \
-    X(a, STATIC, SINGULAR, INT32, deposit, 6)
+    X(a, STATIC, SINGULAR, SINT32, lead_screw, 1)                              \
+    X(a, STATIC, SINGULAR, SINT32, lin_act, 2)                                 \
+    X(a, STATIC, SINGULAR, SINT32, left_drive, 3)                              \
+    X(a, STATIC, SINGULAR, SINT32, right_drive, 4)                             \
+    X(a, STATIC, SINGULAR, SINT32, excavate, 5)                                \
+    X(a, STATIC, SINGULAR, SINT32, deposit, 6)
 #define RobotEffort_CALLBACK NULL
 #define RobotEffort_DEFAULT NULL
 
@@ -85,7 +100,7 @@ extern const pb_msgdesc_t RobotEffort_msg;
 #define RobotEffort_fields &RobotEffort_msg
 
 /* Maximum encoded size of messages (where known) */
-#define RobotEffort_size 66
+#define RobotEffort_size 36
 #define RobotState_size 66
 
 #ifdef __cplusplus

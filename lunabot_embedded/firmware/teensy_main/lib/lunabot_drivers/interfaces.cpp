@@ -69,7 +69,7 @@ void STMotorInterface::write(int8_t power) {
 int CurrentSensor::initialized_ = 0;
 
 CurrentSensor::CurrentSensor(ADS1115_lite *adc, ADSChannel ch)
-    : adc_{adc}, ch_{ch}, curr_{-1} {}
+    : adc_{adc}, ch_{ch}, curr_{-100} {}
 
 void CurrentSensor::init_ads1115(ADS1115_lite *adc0, ADS1115_lite *adc1) {
     adc0->setGain(ADS1115_REG_CONFIG_PGA_4_096V); //  +/-4.096V range = Gain 2

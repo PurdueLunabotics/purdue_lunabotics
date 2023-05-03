@@ -35,7 +35,7 @@ void setup() {
     pinMode(SEL2_PIN,
             OUTPUT); // pinMode() will initialize the CLK pin as output
 
-    selectEnc(0);
+    selectEnc(4);
 
     digitalWriteFast(
         SCK_PIN,
