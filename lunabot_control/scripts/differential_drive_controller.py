@@ -2,7 +2,7 @@
 import numpy as np
 import rospy
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Int32
+from std_msgs.msg import Float32
 
 from lunabot_msgs.msg import RobotEffort
 
@@ -14,8 +14,8 @@ class DifferentialDriveController:
 
         self._vel_sub = rospy.Subscriber("cmd_vel", Twist, self._vel_cb)
         self._effort_pub = rospy.Publisher("effort", RobotEffort, queue_size=1)
-        rospy.Subscriber("left_wheel_enc", Int32, self._left_enc_cb)
-        rospy.Subscriber("right_wheel_enc", Int32, self._right_enc_cb)
+        rospy.Subscriber("left_wheel_enc", Float32, self._left_enc_cb)
+        rospy.Subscriber("right_wheel_enc", Float32, self._right_enc_cb)
 
         # Variables for PIDF Velocity Control
 
@@ -102,3 +102,10 @@ class DifferentialDriveController:
     def constrain(self, val):
         max_speed_percentage = 1  # Maximum speed we're allowing drive motors to spin
         return np.int8(val * 127 * max_speed_percentage)
+
+
+if __name__ == "__main__":
+    rospy.init_node("differential_drive_controller")
+
+    controller = DifferentialDriveController()
+    rospy.spin()
