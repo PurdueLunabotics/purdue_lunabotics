@@ -100,6 +100,7 @@ class DifferentialDriveController:
         return left, right
 
     def constrain(self, val):
+        val = np.clip(-1, val, 1)  # Clipping speed to not go over 100%
         max_speed_percentage = 1  # Maximum speed we're allowing drive motors to spin
         return np.int8(val * 127 * max_speed_percentage)
 
