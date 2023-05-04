@@ -90,11 +90,9 @@ int16_t CurrentSensor::read() {
     // The mux setting must be set every time each channel is read, there is NOT
     // a separate function call for each possible mux combination.
     if (initialized_) {
-        adc_->setMux(ch_);         // Set mux
-        adc_->triggerConversion(); // Start a conversion.  This immediatly
-                                   // returns
-        while (!adc_->isConversionDone())
-            ;
+        adc_->setMux(ch_);             // Set mux
+        adc_->triggerConversion();     // Start a conversion.  This immediatly
+                                       // returns
         curr_ = adc_->getConversion(); // This polls the ADS1115 and wait for
                                        // conversion to finish, THEN returns the
                                        // value
@@ -109,7 +107,8 @@ int16_t CurrentSensor::read() {
 SPISettings spi_settings(CLOCK_SPEED, MSBFIRST, SPI_MODE1);
 
 volatile uint8_t EncoderBus::curr_id_ = 0;
-volatile uint8_t EncoderBus::enc_buffer_[EncoderBus::BUS_SIZE][3] = {0};
+volatile uint8_t EncoderBus::spi_buffer_[EncoderBus::BUFFER_SIZE] = {0};
+volatile uint16_t EncoderBus::enc_buffer_[EncoderBus::BUS_SIZE] = {0};
 
 void EncoderBus::init() {
     SPI.begin();
@@ -142,8 +141,8 @@ void EncoderBus::transfer() {
     SPI.begin();
     SPI.beginTransaction(spi_settings); // We use transactional API
 
-    for (int i = 0; i < 2; i++) {
-        enc_buffer_[curr_id_][i] =
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+        spi_buffer_[i] =
             SPI.transfer(0xAA); // Transfer anything and read data back
     }
 
@@ -157,15 +156,18 @@ void EncoderBus::transfer() {
     delayMicroseconds(
         27); // Running above 500kHz perform Delay First Clock function
 
+    enc_buffer_[curr_id_] =
+        static_cast<uint16_t>(spi_buffer_[0] << 8) |
+        static_cast<uint16_t>(spi_buffer_[1]); // here transfer8 was made
+
     curr_id_ = (curr_id_ + 1) % BUS_SIZE;
     select_enc_(curr_id_);
 }
 
 float EncoderBus::read_enc(uint8_t id) {
+    uint16_t data;
     noInterrupts();
-    uint32_t data =
-        static_cast<uint32_t>(enc_buffer_[id][0] << 8) |
-        static_cast<uint32_t>(enc_buffer_[id][1]); // here transfer8 was made
+    data = enc_buffer_[id];
     interrupts();
 
     // Shift one bit right - (MSB of position was placed on at MSB of
@@ -175,7 +177,5 @@ float EncoderBus::read_enc(uint8_t id) {
     // encoderPosition is placed in front (starting from MSB of uint32_t) so
     // shift it for 11 bits to align position data right
 
-    float abs_pos =
-        static_cast<float>(data) / static_cast<float>(1 << 16) * 360.0F;
-    return abs_pos;
+    return static_cast<float>(data) / static_cast<float>(1 << 16) * 360.0F;
 }

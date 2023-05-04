@@ -83,13 +83,15 @@ class EncoderBus {
     static void transfer();
 
   private:
+    static constexpr int BUFFER_SIZE = 2;
     static constexpr int BUS_SIZE = 5;
     static constexpr int sel0_p_ = 8;
     static constexpr int sel1_p_ = 9;
     static constexpr int sel2_p_ = 10;
     static constexpr int clk_p_ = 13;
     volatile static uint8_t curr_id_;
-    volatile static uint8_t enc_buffer_[BUS_SIZE][3];
+    volatile static uint8_t spi_buffer_[BUFFER_SIZE];
+    volatile static uint16_t enc_buffer_[BUS_SIZE];
 
     static void select_enc_(uint8_t id);
 };

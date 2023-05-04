@@ -39,8 +39,9 @@ void send() {
                       state.act_ang, state.lead_screw_ang);
     drivetrain::update(state.drive_left_curr, state.drive_right_curr,
                        state.drive_left_ang, state.drive_right_ang);
-    excavation::update(state.exc_curr);
     deposition::update(state.dep_curr, state.dep_ang);
+
+    excavation::update(state.exc_curr);
 
     pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
     pb_encode(&stream, RobotState_fields, &state);

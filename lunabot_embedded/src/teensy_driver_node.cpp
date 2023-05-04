@@ -18,8 +18,8 @@ extern "C" {
 
 #define BUF_SIZE 64
 
-uint8_t rx_buf[BUF_SIZE];
 uint8_t tx_buf[BUF_SIZE];
+uint8_t rx_buf[BUF_SIZE];
 
 RobotState state = RobotState_init_zero;
 size_t state_size;
@@ -75,15 +75,15 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "teensy_driver_node");
     ros::NodeHandle nh;
 
-    ros::Subscriber effort_sub = nh.subscribe("/effort", 10, &effort_cb);
+    ros::Subscriber effort_sub = nh.subscribe("/effort", 1, &effort_cb);
     ros::Publisher state_pub =
-        nh.advertise<lunabot_msgs::RobotState>("/state", 10);
+        nh.advertise<lunabot_msgs::RobotState>("/state", 1);
 
     ros::Rate rate(100);
 
     while (ros::ok()) {
         // check if any Raw HID packet has arrived
-        ros::spinOnce();
+        // ros::spinOnce();
         num = rawhid_recv(0, rx_buf, BUF_SIZE, 0);
         if (num < 0) {
             printf("\nerror reading, device went offline\n");

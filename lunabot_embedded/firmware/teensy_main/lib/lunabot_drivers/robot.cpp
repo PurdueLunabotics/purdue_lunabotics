@@ -32,8 +32,8 @@ constexpr uint8_t ACT_ENC_MUX = 1;
 
 void update(int32_t &act_right_curr, int32_t &lead_screw_curr, float &act_angle,
             float &lead_screw_angle) {
-    act_right_curr = act_right_curr_sense.read();
-    lead_screw_curr = lead_screw_curr_sense.read();
+    // act_right_curr = act_right_curr_sense.read();
+    // lead_screw_curr = lead_screw_curr_sense.read();
 
     lead_screw_angle = EncoderBus::read_enc(LEAD_SCREW_ENC_MUX);
     act_angle = EncoderBus::read_enc(ACT_ENC_MUX);
@@ -59,8 +59,8 @@ constexpr uint8_t DRIVE_LEFT_MUX = 3;
 
 void update(int32_t &left_curr, int32_t &right_curr, float &left_angle,
             float &right_angle) {
-    left_curr = left_curr_sense.read();
-    right_curr = right_curr_sense.read();
+    // left_curr = left_curr_sense.read();
+    // right_curr = right_curr_sense.read();
 
     left_angle = EncoderBus::read_enc(DRIVE_LEFT_MUX);
     right_angle = EncoderBus::read_enc(DRIVE_RIGHT_MUX);
@@ -90,7 +90,7 @@ CurrentSensor dep_curr_sense{&adc0, ADSChannel::A1_ch}; // U2 curr_sense_board
 constexpr uint8_t DEP_MUX = 4;
 
 void update(int32_t &dep_curr, float &dep_angle) {
-    dep_curr = dep_curr_sense.read();
+    // dep_curr = dep_curr_sense.read();
     dep_angle = EncoderBus::read_enc(DEP_MUX);
 }
 

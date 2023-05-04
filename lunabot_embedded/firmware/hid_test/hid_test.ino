@@ -38,8 +38,8 @@ void loop() {
         }
     }
     // every 2 seconds, send a packet to the computer
-    if (msUntilNextSend > 2000) {
-        msUntilNextSend = msUntilNextSend - 2000;
+    if (msUntilNextSend > 10) {
+        msUntilNextSend = msUntilNextSend - 10;
         // first 2 bytes are a signature
         buffer[0] = 0xAB;
         buffer[1] = 0xCD;
@@ -57,7 +57,7 @@ void loop() {
         buffer[62] = highByte(packetCount);
         buffer[63] = lowByte(packetCount);
         // actually send the packet
-        n = RawHID.send(buffer, 100);
+        n = RawHID.send(buffer, 0);
         if (n > 0) {
             Serial.print(F("Transmit packet "));
             Serial.println(packetCount);
