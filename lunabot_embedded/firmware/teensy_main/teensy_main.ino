@@ -8,10 +8,10 @@
 #define TX_PERIOD 10             // ms
 #define ENC_TRANSFER_PERIOD 1000 // microsec
 
-size_t message_length;
 
 RobotState state = RobotState_init_zero;
 RobotEffort effort = RobotEffort_init_zero;
+size_t effort_msg_size;
 
 uint8_t buffer[64];
 
@@ -45,10 +45,6 @@ void send() {
 
     pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
     pb_encode(&stream, RobotState_fields, &state);
-    message_length = stream.bytes_written;
-
-    buffer[62] = flags;
-    buffer[63] = lowByte(message_length);
 }
 IntervalTimer enc_timer;
 

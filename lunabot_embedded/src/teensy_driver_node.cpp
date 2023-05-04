@@ -18,20 +18,17 @@ extern "C" {
 
 #define BUF_SIZE 64
 
-uint8_t tx_buf[BUF_SIZE];
-uint8_t rx_buf[BUF_SIZE];
+uint8_t buf[BUF_SIZE];
 
 RobotState state = RobotState_init_zero;
-size_t state_size;
 RobotEffort effort = RobotEffort_init_zero;
-size_t effort_size;
 
 pb_ostream_t sizestream = {0};
 
 void recv(ros::Publisher &pub) {
     int status;
     /* Create a stream that reads from the buffer. */
-    pb_istream_t stream = pb_istream_from_buffer(rx_buf, sizeof(rx_buf));
+    pb_istream_t stream = pb_istream_from_buffer(buf, sizeof(buf));
     /* Now we are ready to decode the message. */
     pb_decode(&stream, RobotState_fields, &state);
     lunabot_msgs::RobotState state_msg;
@@ -56,10 +53,13 @@ void effort_cb(const lunabot_msgs::RobotEffort &msg) {
     effort.right_drive = msg.right_drive;
     effort.excavate = msg.excavate;
     effort.deposit = msg.deposit;
+}
 
-    pb_ostream_t stream = pb_ostream_from_buffer(tx_buf, sizeof(tx_buf));
-    pb_encode(&stream, RobotEffort_fields, &effort);
-    rawhid_send(0, tx_buf, 64, 0);
+void publish(const ros::TimerEvent&) {
+        memset(buf, 0, sizeof(buf));
+        pb_ostream_t stream = pb_ostream_from_buffer(buf, sizeof(buf));
+        pb_encode(&stream, RobotEffort_fields, &effort);
+    	rawhid_send(0, buf, 64, 0);
 }
 
 int main(int argc, char **argv) {
@@ -75,16 +75,18 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "teensy_driver_node");
     ros::NodeHandle nh;
 
-    ros::Subscriber effort_sub = nh.subscribe("/effort", 1, &effort_cb);
+    ros::Subscriber effort_sub = nh.subscribe("/effort", 10, &effort_cb);
     ros::Publisher state_pub =
-        nh.advertise<lunabot_msgs::RobotState>("/state", 1);
+        nh.advertise<lunabot_msgs::RobotState>("/state", 10);
 
     ros::Rate rate(100);
 
+    ros::Timer timer = nh.createTimer(ros::Duration(0.1), publish);
+
     while (ros::ok()) {
         // check if any Raw HID packet has arrived
-        // ros::spinOnce();
-        num = rawhid_recv(0, rx_buf, BUF_SIZE, 0);
+        ros::spinOnce();
+        num = rawhid_recv(0, buf, BUF_SIZE, 0);
         if (num < 0) {
             printf("\nerror reading, device went offline\n");
             break;
@@ -93,6 +95,7 @@ int main(int argc, char **argv) {
         if (num > 0) {
             recv(state_pub);
         }
+
         rate.sleep();
     }
     rawhid_close(0);
