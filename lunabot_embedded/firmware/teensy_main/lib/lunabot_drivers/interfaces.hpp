@@ -91,7 +91,7 @@ class EncoderBus {
     static constexpr int clk_p_ = 13;
     volatile static uint8_t curr_id_;
     volatile static uint8_t spi_buffer_[BUFFER_SIZE];
-    volatile static uint16_t enc_buffer_[BUS_SIZE];
+    volatile static uint32_t enc_buffer_[BUS_SIZE];
 
     static void select_enc_(uint8_t id);
 };

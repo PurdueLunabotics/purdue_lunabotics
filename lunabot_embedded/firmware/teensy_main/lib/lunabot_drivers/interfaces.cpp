@@ -102,13 +102,13 @@ int16_t CurrentSensor::read() {
 
 // Encoders
 
-#define CLOCK_SPEED 2'000'000u // 1MHz SSI Clock
+#define CLOCK_SPEED 1'000'000u // 1MHz SSI Clock
 
 SPISettings spi_settings(CLOCK_SPEED, MSBFIRST, SPI_MODE1);
 
 volatile uint8_t EncoderBus::curr_id_ = 0;
 volatile uint8_t EncoderBus::spi_buffer_[EncoderBus::BUFFER_SIZE] = {0};
-volatile uint16_t EncoderBus::enc_buffer_[EncoderBus::BUS_SIZE] = {0};
+volatile uint32_t EncoderBus::enc_buffer_[EncoderBus::BUS_SIZE] = {0};
 
 void EncoderBus::init() {
     SPI.begin();
@@ -157,15 +157,15 @@ void EncoderBus::transfer() {
         27); // Running above 500kHz perform Delay First Clock function
 
     enc_buffer_[curr_id_] =
-        static_cast<uint16_t>(spi_buffer_[0] << 8) |
-        static_cast<uint16_t>(spi_buffer_[1]); // here transfer8 was made
+        static_cast<uint32_t>(spi_buffer_[0] << 8) |
+        static_cast<uint32_t>(spi_buffer_[1]); // here transfer8 was made
 
     curr_id_ = (curr_id_ + 1) % BUS_SIZE;
     select_enc_(curr_id_);
 }
 
 float EncoderBus::read_enc(uint8_t id) {
-    uint16_t data;
+    uint32_t data;
     noInterrupts();
     data = enc_buffer_[id];
     interrupts();
