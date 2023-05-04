@@ -9,6 +9,7 @@ project(lunabot_embedded)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  lunabot_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -103,7 +104,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   #  INCLUDE_DIRS include
 #  LIBRARIES lunabot_embedded
-  CATKIN_DEPENDS roscpp
+  CATKIN_DEPENDS roscpp lunabot_msgs
 #  DEPENDS system_lib
 )
 
@@ -125,7 +126,7 @@ add_executable(${PROJECT_NAME}_teensy_driver_node src/teensy_driver_node.cpp
   src/pb_decode.c 
   src/RobotMsgs.pb.c 
 )
-set_target_properties(${PROJECT_NAME}_teensy_driver_node PROPERTIES OUTPUT_NAME driver_node PREFIX "")
+set_target_properties(${PROJECT_NAME}_teensy_driver_node PROPERTIES OUTPUT_NAME teensy_driver_node PREFIX "")
 add_dependencies(${PROJECT_NAME}_teensy_driver_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}_teensy_driver_node
   usb

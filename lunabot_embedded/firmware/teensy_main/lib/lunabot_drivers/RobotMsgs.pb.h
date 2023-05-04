@@ -17,11 +17,11 @@ typedef struct _RobotState {
     int32_t exc_curr;
     int32_t drive_left_curr;
     int32_t drive_right_curr;
-    int32_t drive_left_ang;
-    int32_t drive_right_ang;
-    int32_t dep_ang;
-    int32_t lead_screw_ang;
-    int32_t act_ang;
+    float drive_left_ang;
+    float drive_right_ang;
+    float dep_ang;
+    float lead_screw_ang;
+    float act_ang;
 } RobotState;
 
 typedef struct _RobotEffort {
@@ -74,11 +74,11 @@ extern "C" {
     X(a, STATIC, SINGULAR, SINT32, exc_curr, 4)                                \
     X(a, STATIC, SINGULAR, SINT32, drive_left_curr, 5)                         \
     X(a, STATIC, SINGULAR, SINT32, drive_right_curr, 6)                        \
-    X(a, STATIC, SINGULAR, SINT32, drive_left_ang, 7)                          \
-    X(a, STATIC, SINGULAR, SINT32, drive_right_ang, 8)                         \
-    X(a, STATIC, SINGULAR, SINT32, dep_ang, 9)                                 \
-    X(a, STATIC, SINGULAR, SINT32, lead_screw_ang, 10)                         \
-    X(a, STATIC, SINGULAR, SINT32, act_ang, 11)
+    X(a, STATIC, SINGULAR, FLOAT, drive_left_ang, 7)                           \
+    X(a, STATIC, SINGULAR, FLOAT, drive_right_ang, 8)                          \
+    X(a, STATIC, SINGULAR, FLOAT, dep_ang, 9)                                  \
+    X(a, STATIC, SINGULAR, FLOAT, lead_screw_ang, 10)                          \
+    X(a, STATIC, SINGULAR, FLOAT, act_ang, 11)
 #define RobotState_CALLBACK NULL
 #define RobotState_DEFAULT NULL
 
@@ -101,7 +101,7 @@ extern const pb_msgdesc_t RobotEffort_msg;
 
 /* Maximum encoded size of messages (where known) */
 #define RobotEffort_size 36
-#define RobotState_size 66
+#define RobotState_size 61
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -1,5 +1,6 @@
 #include <ADS1115_lite.h>
 #include <Arduino.h>
+#include <SPI.h>
 #include <Sabertooth.h>
 #include <Stepper.h>
 
@@ -72,6 +73,25 @@ class CurrentSensor {
     ADS1115_lite *adc_;
     ADSChannel ch_;
     int16_t curr_;
+};
+
+class EncoderBus {
+  public:
+    EncoderBus(){};
+    static void init();
+    static float read_enc(uint8_t id);
+    static void transfer();
+
+  private:
+    static constexpr int BUS_SIZE = 5;
+    static constexpr int sel0_p_ = 8;
+    static constexpr int sel1_p_ = 9;
+    static constexpr int sel2_p_ = 10;
+    static constexpr int clk_p_ = 13;
+    volatile static uint8_t curr_id_;
+    volatile static uint8_t enc_buffer_[BUS_SIZE][3];
+
+    static void select_enc_(uint8_t id);
 };
 
 #endif

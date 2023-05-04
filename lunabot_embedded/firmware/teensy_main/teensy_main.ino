@@ -5,7 +5,8 @@
 #include <robot.hpp>
 #include <stdio.h>
 
-#define TX_PERIOD 10 // ms
+#define TX_PERIOD 10             // ms
+#define ENC_TRANSFER_PERIOD 1000 // microsec
 
 size_t message_length;
 
@@ -14,13 +15,18 @@ RobotEffort effort = RobotEffort_init_zero;
 
 uint8_t buffer[64];
 
+/*
+if set:
+bit0: cannot recv
+*/
+uint8_t flags = 0;
+
 void recv() {
-    int status;
     /* Create a stream that reads from the buffer. */
     pb_istream_t stream = pb_istream_from_buffer(buffer, sizeof(buffer));
 
     /* Now we are ready to decode the message. */
-    status = pb_decode(&stream, RobotEffort_fields, &effort);
+    pb_decode(&stream, RobotEffort_fields, &effort);
 
     actuation::cb(effort.lead_screw, effort.lin_act);
     drivetrain::cb(effort.left_drive, effort.right_drive);
@@ -29,28 +35,28 @@ void recv() {
 }
 
 void send() {
-    actuation::update(&(state.act_right_curr), &(state.lead_screw_curr));
-    drivetrain::update(&(state.drive_left_curr), &(state.drive_right_curr));
-    excavation::update(&(state.exc_curr));
-    deposition::update(&(state.dep_curr));
-
-    state.drive_left_ang = 7;
-    state.drive_right_ang = 8;
-    state.dep_ang = 9;
-    state.lead_screw_ang = 10;
-    state.act_ang = 11;
+    actuation::update(state.act_right_curr, state.lead_screw_curr,
+                      state.act_ang, state.lead_screw_ang);
+    drivetrain::update(state.drive_left_curr, state.drive_right_curr,
+                       state.drive_left_ang, state.drive_right_ang);
+    excavation::update(state.exc_curr);
+    deposition::update(state.dep_curr, state.dep_ang);
 
     pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
     pb_encode(&stream, RobotState_fields, &state);
     message_length = stream.bytes_written;
 
-    buffer[62] = highByte(message_length);
+    buffer[62] = flags;
     buffer[63] = lowByte(message_length);
 }
+IntervalTimer enc_timer;
 
 void setup() {
     STMotorInterface::init_serial(ST_SERIAL, ST_BAUD_RATE);
     CurrentSensor::init_ads1115(&adc0, &adc1);
+    EncoderBus::init();
+
+    enc_timer.begin(EncoderBus::transfer, ENC_TRANSFER_PERIOD);
 
     // disable timeout
     MC1.setTimeout(0);
@@ -65,7 +71,7 @@ void setup() {
     MC4.setRamping(1);
 }
 
-elapsedMillis msUntilNextSend;
+elapsedMillis ms_until_send;
 
 void loop() {
     int n;
@@ -74,8 +80,8 @@ void loop() {
         recv();
     }
 
-    if (msUntilNextSend > TX_PERIOD) {
-        msUntilNextSend -= TX_PERIOD;
+    if (ms_until_send > TX_PERIOD) {
+        ms_until_send -= TX_PERIOD;
         send();
         n = RawHID.send(buffer, 0);
     }

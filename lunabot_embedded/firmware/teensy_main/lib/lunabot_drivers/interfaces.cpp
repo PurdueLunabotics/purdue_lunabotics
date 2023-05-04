@@ -101,3 +101,81 @@ int16_t CurrentSensor::read() {
     }
     return curr_;
 }
+
+// Encoders
+
+#define CLOCK_SPEED 2'000'000u // 1MHz SSI Clock
+
+SPISettings spi_settings(CLOCK_SPEED, MSBFIRST, SPI_MODE1);
+
+volatile uint8_t EncoderBus::curr_id_ = 0;
+volatile uint8_t EncoderBus::enc_buffer_[EncoderBus::BUS_SIZE][3] = {0};
+
+void EncoderBus::init() {
+    SPI.begin();
+    pinMode(clk_p_, OUTPUT);
+    pinMode(sel0_p_, OUTPUT);
+    pinMode(sel1_p_, OUTPUT);
+    pinMode(sel2_p_, OUTPUT);
+    select_enc_(curr_id_);
+    digitalWriteFast(clk_p_,
+                     HIGH); // Set CLK line HIGH (to meet the requirements
+                            // of SSI interface)
+}
+
+void EncoderBus::select_enc_(uint8_t id) {
+    uint8_t sel0 = id & 1;
+    uint8_t sel1 = id >> 1 & 1;
+    uint8_t sel2 = id >> 2 & 1;
+    digitalWrite(sel0_p_, sel0);
+    digitalWrite(sel1_p_, sel1);
+    digitalWrite(sel2_p_, sel2);
+}
+
+void EncoderBus::transfer() {
+    digitalWriteFast(clk_p_,
+                     LOW); // Set CLK line LOW (to inform encoder -> latch data)
+
+    // Before in setup() the pinMode() change the CLK pin function to
+    // output, now we have to enable usage of this pin by SPI port with
+    // calling SPI.begin():
+    SPI.begin();
+    SPI.beginTransaction(spi_settings); // We use transactional API
+
+    for (int i = 0; i < 2; i++) {
+        enc_buffer_[curr_id_][i] =
+            SPI.transfer(0xAA); // Transfer anything and read data back
+    }
+
+    SPI.endTransaction(); // We use transactional API
+
+    pinMode(clk_p_,
+            OUTPUT); // A while before we set CLK pin to be used by SPI
+                     // port, now we have to change it manually...
+    digitalWrite(clk_p_, HIGH); // ... back to idle HIGH
+
+    delayMicroseconds(
+        27); // Running above 500kHz perform Delay First Clock function
+
+    curr_id_ = (curr_id_ + 1) % BUS_SIZE;
+    select_enc_(curr_id_);
+}
+
+float EncoderBus::read_enc(uint8_t id) {
+    noInterrupts();
+    uint32_t data =
+        static_cast<uint32_t>(enc_buffer_[id][0] << 8) |
+        static_cast<uint32_t>(enc_buffer_[id][1]); // here transfer8 was made
+    interrupts();
+
+    // Shift one bit right - (MSB of position was placed on at MSB of
+    // uint32_t, so make it right and shift to make MSB position at 30'th
+    // bit): data = data >> 1;
+
+    // encoderPosition is placed in front (starting from MSB of uint32_t) so
+    // shift it for 11 bits to align position data right
+
+    float abs_pos =
+        static_cast<float>(data) / static_cast<float>(1 << 16) * 360.0F;
+    return abs_pos;
+}

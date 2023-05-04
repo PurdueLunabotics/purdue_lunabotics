@@ -5,6 +5,10 @@
 
 #include <sys/ioctl.h>
 #include <termios.h>
+
+#include <lunabot_msgs/RobotEffort.h>
+#include <lunabot_msgs/RobotState.h>
+
 extern "C" {
 #include "RobotMsgs.pb.h"
 #include "hid.h"
@@ -14,38 +18,53 @@ extern "C" {
 
 #define BUF_SIZE 64
 
-uint8_t buf[BUF_SIZE];
-RobotState state = RobotState_init_zero;
-RobotEffort effort = RobotEffort_init_zero;
+uint8_t rx_buf[BUF_SIZE];
+uint8_t tx_buf[BUF_SIZE];
 
-void recv() {
+RobotState state = RobotState_init_zero;
+size_t state_size;
+RobotEffort effort = RobotEffort_init_zero;
+size_t effort_size;
+
+pb_ostream_t sizestream = {0};
+
+void recv(ros::Publisher &pub) {
     int status;
     /* Create a stream that reads from the buffer. */
-    pb_istream_t stream = pb_istream_from_buffer(buf, BUF_SIZE);
-
+    pb_istream_t stream = pb_istream_from_buffer(rx_buf, sizeof(rx_buf));
     /* Now we are ready to decode the message. */
-    status = pb_decode(&stream, RobotState_fields, &state);
-    std::cout << state.act_right_curr << std::endl;
-    std::cout << state.drive_right_curr << std::endl;
-    std::cout << state.drive_left_curr << std::endl;
-    std::cout << state.lead_screw_curr << std::endl;
-    std::cout << state.dep_curr << std::endl;
-    std::cout << state.exc_curr << std::endl;
+    pb_decode(&stream, RobotState_fields, &state);
+    lunabot_msgs::RobotState state_msg;
+    state_msg.act_right_curr = state.act_right_curr;
+    state_msg.drive_right_curr = state.drive_right_curr;
+    state_msg.drive_left_curr = state.drive_left_curr;
+    state_msg.lead_screw_curr = state.lead_screw_curr;
+    state_msg.dep_curr = state.dep_curr;
+    state_msg.exc_curr = state.exc_curr;
+    state_msg.act_ang = state.act_ang;
+    state_msg.drive_right_ang = state.drive_right_ang;
+    state_msg.drive_left_ang = state.drive_left_ang;
+    state_msg.lead_screw_ang = state.lead_screw_ang;
+    state_msg.dep_ang = state.dep_ang;
+    pub.publish(state_msg);
+}
 
-    std::cout << state.act_ang << std::endl;
-    std::cout << state.drive_right_ang << std::endl;
-    std::cout << state.drive_left_ang << std::endl;
-    std::cout << state.lead_screw_ang << std::endl;
-    std::cout << state.dep_ang << std::endl;
+void effort_cb(const lunabot_msgs::RobotEffort &msg) {
+    effort.lead_screw = msg.lead_screw;
+    effort.lin_act = msg.lin_act;
+    effort.left_drive = msg.left_drive;
+    effort.right_drive = msg.right_drive;
+    effort.excavate = msg.excavate;
+    effort.deposit = msg.deposit;
+
+    pb_ostream_t stream = pb_ostream_from_buffer(tx_buf, sizeof(tx_buf));
+    pb_encode(&stream, RobotEffort_fields, &effort);
+    rawhid_send(0, tx_buf, 64, 0);
 }
 
 int main(int argc, char **argv) {
 
-    ros::init(argc, argv, "driver_node");
-    ros::NodeHandle nh;
-
     int i, r, num;
-
     r = rawhid_open(1, 0x16C0, 0x0486, 0xFFAB, 0x0200);
     if (r <= 0) {
         printf("no rawhid device found\n");
@@ -53,25 +72,26 @@ int main(int argc, char **argv) {
     }
     printf("found rawhid device\n");
 
+    ros::init(argc, argv, "teensy_driver_node");
+    ros::NodeHandle nh;
+
+    ros::Subscriber effort_sub = nh.subscribe("/effort", 10, &effort_cb);
+    ros::Publisher state_pub =
+        nh.advertise<lunabot_msgs::RobotState>("/state", 10);
+
     ros::Rate rate(100);
 
     while (ros::ok()) {
         // check if any Raw HID packet has arrived
-        num = rawhid_recv(0, buf, BUF_SIZE, 0);
+        ros::spinOnce();
+        num = rawhid_recv(0, rx_buf, BUF_SIZE, 0);
         if (num < 0) {
             printf("\nerror reading, device went offline\n");
             break;
         }
 
         if (num > 0) {
-            printf("\nrecv %d bytes:\n", num);
-            recv();
-            for (i = 0; i < num; i++) {
-                printf("%02X ", buf[i] & 255);
-                if (i % 16 == 15 && i < num - 1)
-                    printf("\n");
-            }
-            printf("\n");
+            recv(state_pub);
         }
         rate.sleep();
     }

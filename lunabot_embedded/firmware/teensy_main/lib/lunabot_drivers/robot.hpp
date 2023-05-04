@@ -19,22 +19,23 @@ extern Sabertooth MC4; // high-current
 
 namespace actuation {
 void cb(int8_t lead_screw, int8_t lin_act);
-void update(int32_t *, int32_t *);
+void update(int32_t &, int32_t &, float &, float &);
+
 } // namespace actuation
 
 namespace drivetrain {
 void cb(int8_t left, int8_t right);
-void update(int32_t *, int32_t *);
+void update(int32_t &, int32_t &, float &, float &);
 } // namespace drivetrain
 
 namespace deposition {
 void cb(int8_t dep);
-void update(int32_t *);
+void update(int32_t &, float &);
 } // namespace deposition
 
 namespace excavation {
 void cb(int8_t exc);
-void update(int32_t *);
+void update(int32_t &);
 } // namespace excavation
 
 #endif
