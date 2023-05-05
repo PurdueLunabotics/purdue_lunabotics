@@ -4,18 +4,21 @@ import rospy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float32
 
-from lunabot_msgs.msg import RobotEffort
+from lunabot_msgs.msg import RobotEffort, RobotState
 
 
 class DifferentialDriveController:
+    width = 20  # Robot width, TODO find
+    max_speed_percentage = 1  # Maximum speed we're allowing drive motors to spin
+
     def __init__(self):
 
         # ROS Publishers and subsribers to get / send data
 
         self._vel_sub = rospy.Subscriber("cmd_vel", Twist, self._vel_cb)
         self._effort_pub = rospy.Publisher("effort", RobotEffort, queue_size=1)
-        rospy.Subscriber("left_wheel_enc", Float32, self._left_enc_cb)
-        rospy.Subscriber("right_wheel_enc", Float32, self._right_enc_cb)
+        rospy.Subscriber("state", Float32, self._left_enc_cb)
+        rospy.Subscriber("right_wheel_enc", RobotState, self._robot_state_cb)
 
         # Variables for PIDF Velocity Control
 
@@ -27,13 +30,12 @@ class DifferentialDriveController:
         self.right_reading = 0
 
     def _vel_cb(self, vel_msg):
-        w = 20  # Robot width, TODO find
         lin = vel_msg.linear.x
         ang = vel_msg.angular.z
         effort_msg = RobotEffort()
 
-        left = lin - ang * w / 2
-        right = lin + ang * w / 2
+        left = lin - ang * self.width / 2
+        right = lin + ang * self.width / 2
 
         # left, right = self._vel_pidf(left, right) #Using encoder velocity pid
 
@@ -42,13 +44,12 @@ class DifferentialDriveController:
 
         self._effort_pub.publish(effort_msg)
 
-    def _left_enc_cb(self, enc):
-        self.left_prev_reading = self.left_reading
-        self.left_reading = enc.data
-
-    def _right_enc_cb(self, enc):
+    def _robot_state_cb(self, msg):
         self.right_prev_reading = self.right_reading
-        self.right_reading = enc.data
+        self.right_reading = msg.drive_right_ang
+
+        self.left_prev_reading = self.left_reading
+        self.left_reading = msg.drive_keft_ang
 
     def _vel_pidf(self, left_vel, right_vel):
         max_speed = 1  # TODO find max speed of motors in meters / second
@@ -101,8 +102,7 @@ class DifferentialDriveController:
 
     def constrain(self, val):
         val = np.clip(-1, val, 1)  # Clipping speed to not go over 100%
-        max_speed_percentage = 1  # Maximum speed we're allowing drive motors to spin
-        return np.int8(val * 127 * max_speed_percentage)
+        return np.int8(val * 127 * self.max_speed_percentage)
 
 
 if __name__ == "__main__":
