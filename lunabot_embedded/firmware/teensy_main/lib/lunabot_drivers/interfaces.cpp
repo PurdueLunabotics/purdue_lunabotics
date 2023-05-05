@@ -65,39 +65,64 @@ void STMotorInterface::write(int8_t power) {
 // ---- Sensors ----
 
 // Current Sensor
-//
-int CurrentSensor::initialized_ = 0;
 
-CurrentSensor::CurrentSensor(ADS1115_lite *adc, ADSChannel ch)
-    : adc_{adc}, ch_{ch}, curr_{-100} {}
+const int CurrentSensorBus::ADS_CHANNELS[CurrentSensorBus::CH_SIZE] = {
+  ADS1115_REG_CONFIG_MUX_SINGLE_0,
+  ADS1115_REG_CONFIG_MUX_SINGLE_1,
+  ADS1115_REG_CONFIG_MUX_SINGLE_2,
+  ADS1115_REG_CONFIG_MUX_SINGLE_3
+};
 
-void CurrentSensor::init_ads1115(ADS1115_lite *adc0, ADS1115_lite *adc1) {
-    adc0->setGain(ADS1115_REG_CONFIG_PGA_4_096V); //  +/-4.096V range = Gain 2
-    adc0->setSampleRate(
+ADS1115_lite CurrentSensorBus::adc0_(ADS1115_ADDRESS_ADDR_SCL);
+ADS1115_lite CurrentSensorBus::adc1_(ADS1115_ADDRESS_ADDR_SDA);
+
+int CurrentSensorBus::initialized_ = 0;
+int16_t CurrentSensorBus::curr_buffer_[CurrentSensorBus::BUSES][CurrentSensorBus::BUS_SIZE] = {-1};
+uint8_t CurrentSensorBus::adc0_ch_ = 0;
+uint8_t CurrentSensorBus::adc1_ch_ = 0;
+
+void CurrentSensorBus::init_ads1115() {
+    adc0_.setGain(ADS1115_REG_CONFIG_PGA_4_096V); //  +/-4.096V range = Gain 2
+    adc0_.setSampleRate(
         ADS1115_REG_CONFIG_DR_128SPS); // 128 SPS, or every 7.8ms
 
-    adc1->setGain(ADS1115_REG_CONFIG_PGA_4_096V); //  +/-4.096V range = Gain 2
-    adc1->setSampleRate(
+    adc1_.setGain(ADS1115_REG_CONFIG_PGA_4_096V); //  +/-4.096V range = Gain 2
+    adc1_.setSampleRate(
         ADS1115_REG_CONFIG_DR_128SPS); // 128 SPS, or every 7.8ms
 
-    if (!adc0->testConnection() || !adc1->testConnection()) {
+    if (!adc0_.testConnection() || !adc1_.testConnection()) {
         return;
     }
+
+    adc0_.triggerConversion();
+    adc1_.triggerConversion();
     initialized_ = 1;
 }
 
-int16_t CurrentSensor::read() {
-    // The mux setting must be set every time each channel is read, there is NOT
-    // a separate function call for each possible mux combination.
+void CurrentSensorBus::transfer() {
     if (initialized_) {
-        adc_->setMux(ch_);             // Set mux
-        adc_->triggerConversion();     // Start a conversion.  This immediatly
-                                       // returns
-        curr_ = adc_->getConversion(); // This polls the ADS1115 and wait for
-                                       // conversion to finish, THEN returns the
-                                       // value
+	if(adc0_.isConversionDone()) {
+		curr_buffer_[0][adc0_ch_] = adc0_.getConversion(); // This polls the ADS1115 and wait for
+					       // conversion to finish, THEN returns the
+					       // value
+		adc0_ch_ = (adc0_ch_ + 1) % CH_SIZE;
+		adc0_.setMux(ADS_CHANNELS[adc0_ch_]);             // Set mux
+        	adc0_.triggerConversion();     // Start a conversion.  This immediatly
+	}
+
+	if(adc1_.isConversionDone()) {
+		curr_buffer_[1][adc1_ch_] = adc1_.getConversion(); // This polls the ADS1115 and wait for
+					       // conversion to finish, THEN returns the
+					       // value
+		adc1_ch_ = (adc1_ch_ + 1) % CH_SIZE;
+		adc1_.setMux(ADS_CHANNELS[adc0_ch_]);             // Set mux
+        	adc1_.triggerConversion();     // Start a conversion.  This immediatly
+	}
     }
-    return curr_;
+}
+
+int16_t CurrentSensorBus::read(uint8_t bus, uint8_t mux) {
+     return curr_buffer_[bus][mux];
 }
 
 // Encoders

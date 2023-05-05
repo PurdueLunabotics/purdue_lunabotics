@@ -11,8 +11,6 @@ Sabertooth MC4(131, ST_SERIAL); // high-current
 
 // ADCs
 
-ADS1115_lite adc0(ADS1115_ADDRESS_ADDR_SCL);
-ADS1115_lite adc1(ADS1115_ADDRESS_ADDR_SDA);
 
 namespace actuation {
 
@@ -20,21 +18,24 @@ STMotorInterface act_right{&MC2, STMotor::M1};
 STMotorInterface act_left{&MC2, STMotor::M2};
 STMotorInterface lead_screw_motor{&MC1, STMotor::M1};
 
-CurrentSensor act_right_curr_sense{&adc1,
-                                   ADSChannel::A1_ch}; // U6 curr_sense_board
-CurrentSensor act_left_curr_sense{&adc0,
-                                  ADSChannel::A3_ch}; // U4 curr_sense_board
-CurrentSensor lead_screw_curr_sense{&adc1,
-                                    ADSChannel::A2_ch}; // U7 curr_sense_board
+constexpr uint8_t LEAD_SCREW_CURR_ADC = 1;
+constexpr uint8_t LEAD_SCREW_CURR_MUX = 1; // U6 curr_sense_board
+
+constexpr uint8_t ACT_LEFT_CURR_ADC = 0;
+constexpr uint8_t ACT_LEFT_CURR_MUX = 3; // U4 curr_sense_board
+
+constexpr uint8_t ACT_RIGHT_CURR_ADC = 1;
+constexpr uint8_t ACT_RIGHT_CURR_MUX = 2; // U7 curr_sense_board
 
 constexpr uint8_t LEAD_SCREW_ENC_MUX = 4;
 constexpr uint8_t ACT_ENC_MUX = 2;
 
 void update(int32_t &act_right_curr, int32_t &lead_screw_curr, float &act_angle,
             float &lead_screw_angle) {
-    // act_right_curr = act_right_curr_sense.read();
-    // lead_screw_curr = lead_screw_curr_sense.read();
-
+    act_right_curr = CurrentSensorBus::read(ACT_RIGHT_CURR_ADC,
+		    ACT_RIGHT_CURR_MUX); 
+    lead_screw_curr = CurrentSensorBus::read(LEAD_SCREW_CURR_ADC,
+		    LEAD_SCREW_CURR_MUX); 
     lead_screw_angle = EncoderBus::read_enc(LEAD_SCREW_ENC_MUX);
     act_angle = EncoderBus::read_enc(ACT_ENC_MUX);
 }
@@ -51,16 +52,22 @@ namespace drivetrain {
 STMotorInterface left_drive{&MC3, STMotor::M1};
 STMotorInterface right_drive{&MC3, STMotor::M2};
 
-CurrentSensor left_curr_sense{&adc0, ADSChannel::A2_ch};  // U3 curr_sense_board
-CurrentSensor right_curr_sense{&adc0, ADSChannel::A0_ch}; // U1 curr_sense_board
+constexpr uint8_t LEFT_CURR_ADC = 0;
+constexpr uint8_t LEFT_CURR_MUX = 2;// U3 curr_sense_board
+
+constexpr uint8_t RIGHT_CURR_ADC = 0;
+constexpr uint8_t RIGHT_CURR_MUX = 0; // U1 curr_sense_board
 
 constexpr uint8_t DRIVE_RIGHT_MUX = 0;
 constexpr uint8_t DRIVE_LEFT_MUX = 3;
 
 void update(int32_t &left_curr, int32_t &right_curr, float &left_angle,
             float &right_angle) {
-    // left_curr = left_curr_sense.read();
-    // right_curr = right_curr_sense.read();
+    left_curr = CurrentSensorBus::read(LEFT_CURR_ADC,
+		    LEFT_CURR_MUX); 
+
+    right_curr = CurrentSensorBus::read(RIGHT_CURR_ADC,
+		    RIGHT_CURR_MUX); 
 
     left_angle = EncoderBus::read_enc(DRIVE_LEFT_MUX);
     right_angle = EncoderBus::read_enc(DRIVE_RIGHT_MUX);
@@ -76,22 +83,29 @@ void cb(int8_t left, int8_t right) {
 
 namespace excavation {
 STMotorInterface exc_motor{&MC4, STMotor::M1};
-CurrentSensor exc_curr_sense{&adc1, ADSChannel::A0_ch}; // U5 curr_sense_board
 
-void update(int32_t &exc_curr) { exc_curr = exc_curr_sense.read(); }
+constexpr uint8_t EXC_CURR_ADC = 1; 
+constexpr uint8_t EXC_CURR_MUX = 0; // U5 curr_sense_board
+
+void update(int32_t &exc_curr) { 
+    exc_curr = CurrentSensorBus::read(EXC_CURR_ADC,
+		    EXC_CURR_MUX); 
+}
 
 void cb(int8_t speed) { exc_motor.write(speed); }
 } // namespace excavation
 
 namespace deposition {
 STMotorInterface dep_motor{&MC1, STMotor::M2};
-CurrentSensor dep_curr_sense{&adc0, ADSChannel::A1_ch}; // U2 curr_sense_board
+constexpr uint8_t DEP_CURR_ADC = 0;
+constexpr uint8_t DEP_CURR_MUX = 1; // U2 curr_sense_board
 
-constexpr uint8_t DEP_MUX = 1;
+constexpr uint8_t DEP_ENC_MUX = 1;
 
 void update(int32_t &dep_curr, float &dep_angle) {
-    // dep_curr = dep_curr_sense.read();
-    dep_angle = EncoderBus::read_enc(DEP_MUX);
+    dep_curr = CurrentSensorBus::read(DEP_CURR_ADC,
+		    DEP_CURR_MUX); 
+    dep_angle = EncoderBus::read_enc(DEP_ENC_MUX);
 }
 
 void cb(int8_t speed) { dep_motor.write(speed); }

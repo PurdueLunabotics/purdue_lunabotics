@@ -7,6 +7,7 @@
 
 #define TX_PERIOD 10             // ms
 #define ENC_TRANSFER_PERIOD 1000 // microsec
+#define CURR_UPDATE_PERIOD 8 // ms
 
 
 RobotState state = RobotState_init_zero;
@@ -50,7 +51,7 @@ IntervalTimer enc_timer;
 
 void setup() {
     STMotorInterface::init_serial(ST_SERIAL, ST_BAUD_RATE);
-    CurrentSensor::init_ads1115(&adc0, &adc1);
+    CurrentSensorBus::init_ads1115();
     EncoderBus::init();
 
     enc_timer.begin(EncoderBus::transfer, ENC_TRANSFER_PERIOD);
@@ -69,6 +70,7 @@ void setup() {
 }
 
 elapsedMillis ms_until_send;
+elapsedMillis ms_curr_update;
 
 void loop() {
     int n;
@@ -82,4 +84,10 @@ void loop() {
         send();
         n = RawHID.send(buffer, 0);
     }
+
+    if (ms_curr_update > CURR_UPDATE_PERIOD) {
+        ms_curr_update -= CURR_UPDATE_PERIOD;	
+	CurrentSensorBus::transfer();
+    }
+  
 }
