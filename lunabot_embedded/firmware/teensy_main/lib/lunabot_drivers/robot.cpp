@@ -27,7 +27,7 @@ CurrentSensor act_left_curr_sense{&adc0,
 CurrentSensor lead_screw_curr_sense{&adc1,
                                     ADSChannel::A2_ch}; // U7 curr_sense_board
 
-constexpr uint8_t LEAD_SCREW_ENC_MUX = 0;
+constexpr uint8_t LEAD_SCREW_ENC_MUX = 4;
 constexpr uint8_t ACT_ENC_MUX = 2;
 
 void update(int32_t &act_right_curr, int32_t &lead_screw_curr, float &act_angle,
@@ -54,8 +54,8 @@ STMotorInterface right_drive{&MC3, STMotor::M2};
 CurrentSensor left_curr_sense{&adc0, ADSChannel::A2_ch};  // U3 curr_sense_board
 CurrentSensor right_curr_sense{&adc0, ADSChannel::A0_ch}; // U1 curr_sense_board
 
-constexpr uint8_t DRIVE_RIGHT_MUX = 4;
-constexpr uint8_t DRIVE_LEFT_MUX = 1;
+constexpr uint8_t DRIVE_RIGHT_MUX = 0;
+constexpr uint8_t DRIVE_LEFT_MUX = 3;
 
 void update(int32_t &left_curr, int32_t &right_curr, float &left_angle,
             float &right_angle) {
@@ -87,7 +87,7 @@ namespace deposition {
 STMotorInterface dep_motor{&MC1, STMotor::M2};
 CurrentSensor dep_curr_sense{&adc0, ADSChannel::A1_ch}; // U2 curr_sense_board
 
-constexpr uint8_t DEP_MUX = 3;
+constexpr uint8_t DEP_MUX = 1;
 
 void update(int32_t &dep_curr, float &dep_angle) {
     // dep_curr = dep_curr_sense.read();
