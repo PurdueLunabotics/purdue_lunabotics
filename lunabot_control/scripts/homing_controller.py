@@ -20,20 +20,34 @@ Step 3: Run it!
 """
 
 
+from enum import Enum
+
 import numpy as np
 import ros_numpy
 import rospy
 from apriltag_ros.msg import AprilTagDetectionArray
+from std_msgs.msg import Bool, Float32
+
 from lunabot_msgs.msg import RobotEffort
 
 # from geometry_msgs.msg import Twist
 
 
+class State(Enum):
+    WAIT = 0
+    ALIGN = 1
+    DRIVE = 2
+    DEPOSIT = 3
+    RESET = 4
+
+
 # clips input is within limits bounds
 SCALE = 0.5
 MIN_VEL = 0.2
+DEPOSIT_SPEED = 0.2  # TODO find
 linear_setpoint = 0.8
 angular_setpoint = 0
+deposit_setpoint = 0
 KP = np.array([4, 4])
 KI = np.array([0.0, 0.0])
 KD = np.array([0, 0.0])
@@ -43,7 +57,7 @@ def constrain(unconstr_input):
     global SCALE, MIN_VEL
 
     unconstr_input = np.clip(unconstr_input, -SCALE, SCALE)
-    
+
     if unconstr_input != 0 and np.abs(unconstr_input) < MIN_VEL:
         unconstr_input = np.sign(unconstr_input) * MIN_VEL
     print(unconstr_input)
@@ -81,7 +95,34 @@ class HomingController:
         self._prev_error = np.zeros(2)
         self._error_total = np.zeros(2)
 
+        # TODO: Not accounting for encoder resetting value after rotation, assuming that is fixed through another process
+
+        rospy.Subscriber("left_wheel_enc", Float32, self._left_enc_cb)
+        rospy.Subscriber("right_wheel_enc", Float32, self._right_enc_cb)
+        rospy.Subscriber("deposit_enc", Float32, self._deposit_cb)
+        rospy.Subsriber("start_homing", Bool, self._start_cb)
+        self.left_enc_value = 0
+        self.right_enc_value = 0
+        self.deposit_enc_value = 0
+        self.state = State.WAIT
+
+    def _start_cb(self, msg):
+        if msg.data and self.state == State.WAIT:
+            self.state = State.ALIGN
+
+    def _left_enc_cb(self, msg):
+        self.left_enc_value = msg.data
+
+    def _right_enc_cb(self, msg):
+        self.right_enc_value = msg.data
+
+    def _deposit_cb(self, msg):
+        self._deposit_enc_value = msg.data
+
     def apritag_cb(self, msg):
+        if self.state != State.ALIGN:
+            pass
+
         if len(msg.detections) == 0:
             # self._effort_msg.linear.x = 0
             # self._effort_msg.angular.z = 0
@@ -171,16 +212,21 @@ class HomingController:
         # Converting errors into the lin_vel, ang_vel
 
         twist = np.zeros(2)  # lin, ang velocity
-        
+
         # Setting thresholds to stop movement
         linear_threshold = 0.05
         angular_threshold = 3 * np.pi / 180
-        
+
         if np.abs(curr_error[0]) < linear_threshold:
             ctrl[0] = 0
         if np.abs(curr_error[1]) < angular_threshold:
             ctrl[1] = 0
-        
+
+        if ctrl[0] == 0 and ctrl[1] == 0:
+            self.state = State.DRIVE
+            self.left_starting_enc = self.left_enc_value
+            self.right_starting_enc = self.right_enc_value
+
         twist[0] = -ctrl[0]
         twist[1] = ctrl[1]
 
@@ -193,6 +239,7 @@ class HomingController:
 
         self._effort_msg.left_drive = constrain(ctrl[0])
         self._effort_msg.right_drive = constrain(ctrl[1])
+        self._effort_msg.deposit = 0
 
         print("left: ", constrain(ctrl[0]))
         print("right: ", constrain(ctrl[1]))
@@ -203,12 +250,50 @@ class HomingController:
         """
 
     def loop(self):
-        self._effort_pub.publish(self._effort_msg)  # Sends ctrl to robot
-        pass
+        if self.state == State.ALIGN:
+            self._effort_pub.publish(self._effort_msg)  # Sends ctrl to robot
+
+        elif self.state == State.DRIVE:
+            dist = (
+                (self.left_enc_value - self.left_starting_enc)
+                + (self.right_enc_value - self.right_starting_enc)
+            ) / 2
+            if dist >= linear_setpoint:  # 0.01 for thresholding
+                self.state = State.DEPOSIT
+                self.deposit_starting_enc = self.deposit_enc_value
+
+            self._effort_msg.left_drive = constrain(MIN_VEL)
+            self._effort_msg.right_drive = constrain(MIN_VEL)
+            self._effort_msg.deposit = 0
+            self._effort_pub.publish(self._effort_msg)
+
+        elif self.state == State.DEPOSIT:
+            dist = self.deposit_enc_value - self.deposit_starting_enc
+            if dist >= deposit_setpoint:
+                self.state = State.ALIGN
+            self._effort_msg.left_drive = 0
+            self._effort_msg.right_drive = 0
+            self._effort_msg.deposit = DEPOSIT_SPEED
+            self._effort_pub.publish(self._effort_msg)
+
+        elif self.state == State.RESET:
+            dist = self.deposit_enc_value - self.deposit_starting_enc
+            if dist <= 0:
+                self.state = State.WAIT
+                self._effort_msg.left_drive = 0
+                self._effort_msg.right_drive = 0
+                self._effort_msg.deposit = 0
+                self._effort_pub.publish(self._effort_msg)
+            else:
+                self._effort_msg.left_drive = 0
+                self._effort_msg.right_drive = 0
+                self._effort_msg.deposit = -DEPOSIT_SPEED
+                self._effort_pub.publish(self._effort_msg)
 
     def stop(self):
         self._effort_msg.left_drive = 0
         self._effort_msg.right_drive = 0
+        self._effort_msg.deposit = 0
         self._effort_pub.publish(self._effort_msg)  # Sends ctrl to robot
 
 
