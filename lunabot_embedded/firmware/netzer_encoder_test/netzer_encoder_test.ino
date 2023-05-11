@@ -24,19 +24,15 @@ void selectEnc(uint8_t id);
 void setup() {
     SerialUSB.begin(9600);
     SPI.begin(); // SPI.begin() will initialize the SPI port, as well as CLK pin
-
     pinMode(SCK_PIN, OUTPUT); // pinMode() will initialize the CLK pin as output
                               // (SPI port can't use it now!)
-
     pinMode(SEL0_PIN,
             OUTPUT); // pinMode() will initialize the CLK pin as output
     pinMode(SEL1_PIN,
             OUTPUT); // pinMode() will initialize the CLK pin as output
     pinMode(SEL2_PIN,
             OUTPUT); // pinMode() will initialize the CLK pin as output
-
-    selectEnc(1);
-
+    selectEnc(0);
     digitalWriteFast(
         SCK_PIN,
         HIGH); // Set CLK line HIGH (to meet the requirements of SSI interface)
