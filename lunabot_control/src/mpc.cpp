@@ -26,10 +26,12 @@ MPC::MPC(ros::NodeHandle *nh) {
     ros::param::get("~velocity_limits/linear", lin_lim_);
     ros::param::get("~velocity_limits/angular", ang_lim_);
 
+    // MPC Variables
     this->delta_time_ = 1 / frequency;
     this->path_ind_ = 0;
     this->enabled_ = false;
 
+    // Ros publishers and subscribers
     this->velocity_pub_ =
         nh->advertise<geometry_msgs::Twist>(cmd_vel_topic, 10);
     this->grid_sub_ = nh->subscribe(map_topic, 10, &MPC::update_grid, this);
@@ -100,8 +102,6 @@ int MPC::is_close_() {
 
 void MPC::update_setpoint_() {
     if (is_close_()) {
-        // ROS_INFO("HERE!");
-        // std::cout << "Updating setpoint: " << this->path_ind_ << "\n";
         if (this->path_ind_ == this->path_.size() - 1) {
             publish_velocity_(0, 0);
             this->path_ind_ = 0;
@@ -137,7 +137,6 @@ static double get_yaw_(geometry_msgs::Quaternion q) {
 }
 
 void MPC::update_robot_pos(const nav_msgs::Odometry &odometry) {
-    // ROS_INFO("ROBOT_POS");
     geometry_msgs::Pose pose = odometry.pose.pose;
     this->robot_pos_.clear();
     this->robot_pos_.push_back(pose.position.x);
@@ -156,15 +155,10 @@ double MPC::clamp_(double val, double low, double high) {
 }
 
 void MPC::publish_velocity_(double linear, double angular) {
-    // ROS_INFO("PUBLISHING");
     geometry_msgs::Twist twist;
-    // twist.header.frame_id = "base_link";
-    // twist.header.stamp = ros::Time::now();
-    // twist.linear.x = clamp_(angular,ang_lim_[0],ang_lim_[1]);
-    twist.linear.x = angular;
-    // twist.angular.z = clamp_(linear,lin_lim_[0],lin_lim_[1]);
-    twist.angular.z = linear;
-    // TODO Stamping stuff idk how it works
+    // NOTE: Swap linear and angular velocity in simulation
+    twist.linear.x = linear;
+    twist.angular.z = angular;
     this->velocity_pub_.publish(twist);
 }
 
@@ -213,7 +207,7 @@ MPC::std_dev_(std::vector<std::pair<Eigen::MatrixXd, double>> rollouts) {
                              (rollouts[i].first(j, 4) - temp_mean(j, 1));
         }
     }
-    // ROS_ASSERT(this->top_rollouts_ > 1);
+
     std_dev /= this->top_rollouts_ - 1;
     for (int i = 0; i < std_dev.rows(); ++i) {
         for (int j = 0; j < std_dev.cols(); ++j) {
@@ -249,8 +243,6 @@ double MPC::calculate_cost_(Eigen::MatrixXd rollout) {
         cost += this->w_occupied_ * check_collision_(position);
     }
 
-    // std::cout << "COST: " << "\n";
-    // std::cout << cost << "\n";
     return cost;
 }
 
@@ -259,8 +251,7 @@ Eigen::MatrixXd MPC::calculate_model_(Eigen::MatrixXd actions) {
     current_pos << this->robot_pos_[0], this->robot_pos_[1],
         this->robot_pos_[2];
     Eigen::MatrixXd model(this->horizon_length_, 5); // x, y, theta, v, omega
-    // std::cout << "Horzion Length" << this->horizon_length_ << ": \n";
-    // std::cout << model << "\n";
+
     for (int i = 0; i < this->horizon_length_; ++i) {
         model(i, 0) = current_pos(0);
         model(i, 1) = current_pos(1);
@@ -286,7 +277,6 @@ void MPC::calculate_velocity() {
     if (this->robot_pos_.empty() || this->path_.empty() || !this->enabled_) {
         return;
     }
-    // std::cout << "vel" << "\n";
     int horizon_length = this->horizon_length_;
     Eigen::MatrixXd means =
         Eigen::MatrixXd::Zero(horizon_length, 2); // v, omega
@@ -301,24 +291,15 @@ void MPC::calculate_velocity() {
         std::vector<std::pair<Eigen::MatrixXd, double>> rollouts(
             rollout_count_); // x, y, theta, v, omega for each horizon step
                              // paired with cost
-        // std::cout << "Means: " << means << "\n";
-        // std::cout << "Std Devs: " << std_devs << "\n";
+
         for (int j = 0; j < rollout_count_; ++j) {
-            // std::cout << "Random Action:\n";
-            // std::cout << random_actions[j] << "\n";
+
             Eigen::MatrixXd state = calculate_model_(random_actions[j]);
             rollouts[j] = std::make_pair(state, calculate_cost_(state));
-            // std::cout << "Cost: " << rollouts[j].second << "\n";
-            // std::cout << state << "\n";
         }
 
         // Getting best options
         std::sort(rollouts.begin(), rollouts.end(), comparator);
-        // std::cout << "Weights:\n";
-        for (int j = 0; j < 10; ++j) {
-            // std::cout << rollouts[j].second << "\n";
-        }
-        // std::cout << "\n";
         if (i == iterations - 1) {
             publish_velocity_(rollouts[0].first.coeff(0, 3),
                               rollouts[0].first.coeff(0, 4));
