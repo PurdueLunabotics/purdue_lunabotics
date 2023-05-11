@@ -61,6 +61,7 @@
   <depend>joint_state_publisher</depend>
   <depend>rtabmap_ros</depend>
   <depend>dummy_bot_description</depend>
+  <depend>image_proc</depend>
   <buildtool_depend>catkin</buildtool_depend>
 
 
