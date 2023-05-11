@@ -2,23 +2,21 @@
 import numpy as np
 import rospy
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Float32
 
 from lunabot_msgs.msg import RobotEffort, RobotState
 
 
 class DifferentialDriveController:
-    width = 20  # Robot width, TODO find
+    width = 0.5588  # Robot width, TODO find
     max_speed_percentage = 1  # Maximum speed we're allowing drive motors to spin
 
     def __init__(self):
 
         # ROS Publishers and subsribers to get / send data
 
-        self._vel_sub = rospy.Subscriber("cmd_vel", Twist, self._vel_cb)
-        self._effort_pub = rospy.Publisher("effort", RobotEffort, queue_size=1)
-        rospy.Subscriber("state", Float32, self._left_enc_cb)
-        rospy.Subscriber("right_wheel_enc", RobotState, self._robot_state_cb)
+        self._vel_sub = rospy.Subscriber("/cmd_vel", Twist, self._vel_cb)
+        self._effort_pub = rospy.Publisher("/effort", RobotEffort, queue_size=1)
+        self._state_sub = rospy.Subscriber("state", RobotState, self._robot_state_cb)
 
         # Variables for PIDF Velocity Control
 
@@ -41,7 +39,6 @@ class DifferentialDriveController:
 
         effort_msg.left_drive = self.constrain(left)
         effort_msg.right_drive = self.constrain(right)
-
         self._effort_pub.publish(effort_msg)
 
     def _robot_state_cb(self, msg):
@@ -49,7 +46,7 @@ class DifferentialDriveController:
         self.right_reading = msg.drive_right_ang
 
         self.left_prev_reading = self.left_reading
-        self.left_reading = msg.drive_keft_ang
+        self.left_reading = msg.drive_left_ang
 
     def _vel_pidf(self, left_vel, right_vel):
         max_speed = 1  # TODO find max speed of motors in meters / second

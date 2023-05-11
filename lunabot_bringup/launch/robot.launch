@@ -3,11 +3,13 @@
     <arg name="record" default="false" />
     <arg name="teensy" default="true" />
     <arg name="cameras" default="true" />
-    <arg name="manual" default="true" />
+    <arg name="autonomy" default="false" />
     <arg name="overhead" default="false" />
 
     <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch" />
-    <include if="$(arg manual)" file="$(find lunabot_control)/launch/manual_control.launch" />
+    <include file="$(find lunabot_control)/launch/control.launch">
+      <arg name="autonomy" value="$(arg autonomy)"/>
+    </include>
     <machine name="jetson" address="192.168.0.101" env-loader="~/lunabot_env.sh" default="true"/>
     <node if="$(arg teensy)" machine="jetson" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node" output="screen"/>
 </launch>
