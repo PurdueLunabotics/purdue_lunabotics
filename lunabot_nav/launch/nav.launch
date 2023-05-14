@@ -1,10 +1,16 @@
 <?xml version="1.0"?>
 <launch>
+    <group ns="maps">
+        <node name="costmap_node" pkg="lunabot_nav" type="costmap_node" output="screen">
+            <rosparam file="$(find lunabot_config)/config/global_costmap.yml" command="load" ns="global_costmap" />
+        </node>
+    </group>
 
     <group ns="nav">
         <rosparam file="$(find lunabot_config)/config/nav.yml" command="load" />
-        
+
         <env name="GMON_OUT_PREFIX" value="mpc_node" />
+
         <node name="mpc_node" pkg="lunabot_control" type="mpc_node" output="screen">
             <rosparam file="$(find lunabot_config)/config/mpc.yml" command="load"/>
         </node>

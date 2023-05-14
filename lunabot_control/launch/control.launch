@@ -13,6 +13,7 @@
 
   <group if="$(arg autonomy)">
     <node pkg="lunabot_control" type="differential_drive_controller.py" name="diff_drive_controller" output="screen"/>
+    <node pkg="lunabot_control" type="mpc_node" name="mpc_node" output="screen"/>
   </group>
 
 </launch>
