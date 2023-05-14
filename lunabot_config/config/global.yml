@@ -1,5 +1,5 @@
 map_topic: "maps/costmap_node/global_costmap/costmap"
-odom_topic: "odom"
+odom_topic: "/rtabmap/odom"
 goal_topic: "goal"
 path_topic: "global_path"
 pc_topic: "point_cloud"

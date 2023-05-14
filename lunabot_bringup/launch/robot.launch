@@ -5,25 +5,37 @@
     <arg name="cameras" default="true" />
     <arg name="autonomy" default="false" />
     <arg name="overhead" default="false" />
-    <arg name="slam" default="false" />
+    <arg name="slam" default="true" />
+
+    <rosparam file="$(find lunabot_config)/config/global.yml" command="load" />
 
     <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch" />
     <include file="$(find lunabot_control)/launch/control.launch">
       <arg name="autonomy" value="$(arg autonomy)"/>
     </include>
+
+
     <machine name="jetson" address="192.168.0.101" env-loader="~/lunabot_env.sh" default="true"/>
     <node if="$(arg teensy)" machine="jetson" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node" output="screen"/>
+
     <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch" >
       <arg name="back" value="false"/>
     </include>
 
-    <include if="$(arg slam)" file="$(find rtabmap_ros)/launch/rtabmap.launch" >
-      <arg name="rtabmap_args" value="--delete_db_on_start"/>
-      <arg name="depth_topic" value="/d455_front/camera/aligned_depth_to_color/image_raw"/>
-      <arg name="rgb_topic" value="/d455_front/camera/color/image_rect_color"/>
-      <arg name="camera_info_topic" value="/d455_front/camera/color/camera_info"/>
-      <arg name="approx_sync" value="false"/>
-      <arg name="rtabmapviz" value="false" />
-      <arg name="frame_id" value="d455_front_link" />
-    </include>
+    <group if="$(arg autonomy)">
+      <include file="$(find lunabot_description)/launch/display.launch"/>
+
+
+      <include if="$(arg slam)" file="$(find rtabmap_ros)/launch/rtabmap.launch" >
+        <arg name="rtabmap_args" value="--delete_db_on_start"/>
+        <arg name="depth_topic" value="/d455_front/camera/aligned_depth_to_color/image_raw"/>
+        <arg name="rgb_topic" value="/d455_front/camera/color/image_rect_color"/>
+        <arg name="camera_info_topic" value="/d455_front/camera/color/camera_info"/>
+        <arg name="approx_sync" value="false"/>
+        <arg name="rtabmapviz" value="false" />
+        <arg name="frame_id" value="base_link" />
+      </include>
+
+      <include file="$(find lunabot_nav)/launch/nav.launch"/>
+    </group>
 </launch>

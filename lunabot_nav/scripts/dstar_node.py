@@ -89,7 +89,7 @@ def main():
         grid_update_subscriber,
     )
 
-    rospy.Subscriber("/odom", Odometry, position_subscriber)
+    rospy.Subscriber("/rtabmap/odom", Odometry, position_subscriber)
 
     rospy.Subscriber("/goal", PoseStamped, goal_subscriber)
 
