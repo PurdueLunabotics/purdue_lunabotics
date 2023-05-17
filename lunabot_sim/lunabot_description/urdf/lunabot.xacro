@@ -164,12 +164,12 @@
   <axis xyz="0.0 1.0 0.0"/>
 </joint>
 
-<link name="d455_front_color_optical_frame"/>
+<link name="d455_back_link"/>
 
 <joint name="depth_cam_jnt" type="fixed">
-    <origin rpy="${-PI/2} 0 ${PI/2}" xyz="-0.457877 0.188509 0.255037"/>
+    <origin rpy="-2.0000019999706227e-06 0.0019999983333319994 3.139592651256459" xyz="-0.457877 0.129509 0.255037"/>
   <parent link="base_link"/>
-  <child link="d455_front_color_optical_frame"/>
+  <child link="d455_back_link"/>
   <axis xyz="0.0 1.0 0.0"/>
 </joint>
 
