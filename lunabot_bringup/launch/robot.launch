@@ -3,19 +3,8 @@
     <arg name="record" default="false" />
     <arg name="teensy" default="true" />
     <arg name="cameras" default="true" />
-    <arg name="autonomy" default="false" />
-    <arg name="overhead" default="false" />
     <arg name="slam" default="true" />
 
-    <rosparam file="$(find lunabot_config)/config/global.yml" command="load" />
-
-    <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch" />
-    <include file="$(find lunabot_control)/launch/control.launch">
-      <arg name="autonomy" value="$(arg autonomy)"/>
-    </include>
-
-
-    <machine name="jetson" address="192.168.0.101" env-loader="~/lunabot_env.sh" default="true"/>
     <node if="$(arg teensy)" machine="jetson" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node" output="screen"/>
 
     <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch" >
@@ -24,7 +13,6 @@
 
     <group if="$(arg autonomy)">
       <include file="$(find lunabot_description)/launch/display.launch"/>
-
 
       <include if="$(arg slam)" file="$(find rtabmap_ros)/launch/rtabmap.launch" >
         <arg name="rtabmap_args" value="--delete_db_on_start"/>
@@ -37,5 +25,8 @@
       </include>
 
       <include file="$(find lunabot_nav)/launch/nav.launch"/>
+
+      <node pkg="lunabot_control" type="differential_drive_controller.py" name="diff_drive_controller" output="screen"/>
+      <node pkg="lunabot_control" type="mpc_node" name="mpc_node" output="screen"/>
     </group>
 </launch>

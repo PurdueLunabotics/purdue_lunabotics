@@ -1,5 +1,11 @@
 <?xml version="1.0"?>
 <launch>
-  <include file="$(find lunabot_bringup)/launch/view_tf.launch" />
-  <include file="$(find lunabot_control)/launch/manual_control.launch" />
+    <arg name="autonomy" default="false" />
+    <arg name="overhead" default="false" />
+
+    <rosparam file="$(find lunabot_config)/config/global.yml" command="load" />
+
+    <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch" />
+    <include unless="$(arg autonomy)" file="$(find lunabot_control)/launch/manual_control.launch"/>
+
 </launch>
