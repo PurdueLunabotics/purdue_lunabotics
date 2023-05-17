@@ -6,8 +6,8 @@ w_angular: 0.0
 w_waypoint: 10.0
 w_occupied: 10.0
 horizon_length: 10
-frequency: 4
+frequency: 30
 min_distance_threshold: 0.5
 velocity_limits:
-  linear: [-0.2, 0.2]
-  angular: [-0.03, 0.03]
+  linear: [-0.3, 0.3]
+  angular: [-0.1, 0.1]
