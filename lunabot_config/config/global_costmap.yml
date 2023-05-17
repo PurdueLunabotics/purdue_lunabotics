@@ -5,7 +5,7 @@ publish_frequency: 20.0
 global_frame: "odom"
 robot_base_frame: "base_link"
 footprint: "[ [0.54615446154,0.295590],[0.546154,-0.295590],[-0.546154,-0.295590],[-0.546154,0.295590] ]"
-map_topic: "/rtabmap/grid_map"
+map_topic: "/rtabmap/octomap_grid"
 inflation: {
   inflation_radius: 0.4,
   cost_scaling_factor: 10,

@@ -3,12 +3,13 @@ import numpy as np
 import rospy
 from geometry_msgs.msg import Twist
 
-from lunabot_msgs.msg import RobotEffort, RobotState
+from lunabot_msgs.msg import RobotEffort, RobotState 
+
 
 
 class DifferentialDriveController:
     width = 0.5588  # Robot width, TODO find
-    max_speed_percentage = 1  # Maximum speed we're allowing drive motors to spin
+    max_speed_percentage = 0.6  # Maximum speed we're allowing drive motors to spin
 
     def __init__(self):
 
@@ -101,9 +102,14 @@ class DifferentialDriveController:
         val = np.clip(-1, val, 1)  # Clipping speed to not go over 100%
         return np.int8(val * 127 * self.max_speed_percentage)
 
+    def shutdown_hook(self):
+        effort_msg = RobotEffort()
+        self._effort_pub.publish(effort_msg)
+        print("stopping diff_drive control")
+
 
 if __name__ == "__main__":
     rospy.init_node("differential_drive_controller")
-
     controller = DifferentialDriveController()
+    rospy.on_shutdown(controller.shutdown_hook)
     rospy.spin()
