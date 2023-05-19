@@ -27,16 +27,16 @@ class LeakyBucket:
 
 
 class ExcavationController:
-    max_exc_percent = 0.1
-    max_lead_screw_percent = 0.1
+    max_exc_percent = 0.3
+    max_lead_screw_percent = 0.5
 
     FORWARD_EXCAVATE = -1
     DOWN_LEAD_SCREW = -1
 
-    valid_exc_range = (12600, 17400)
+    valid_exc_range = (11000, 17400)
     # valid_exc_range = (5000,17400)
-    valid_lead_screw_range = (10000, 15000)
-    # valid_lead_screw_range =  (8000, 21130)
+    # valid_lead_screw_range = (9000, 17000)
+    valid_lead_screw_range = (6000, 22000)
 
     def __init__(self):
         self.exc_curr = None
@@ -48,7 +48,7 @@ class ExcavationController:
         self.exc_leaky_bucket = LeakyBucket(self.is_exc_stuck, dec=20)
         self.lead_screw_leaky_bucket = LeakyBucket(self.is_lead_screw_invalid, dec=0)
 
-        self._effort_pub = rospy.Publisher("/effort_auton", RobotEffort, queue_size=1)
+        self._effort_pub = rospy.Publisher("/effort", RobotEffort, queue_size=1)
         self._state_sub = rospy.Subscriber("/state", RobotState, self._robot_state_cb)
 
         rospy.on_shutdown(self.shutdown_hook)
@@ -80,12 +80,13 @@ class ExcavationController:
         exc_overflow = self.exc_leaky_bucket.is_overflow()
         lead_screw_overflow = self.lead_screw_leaky_bucket.is_overflow()
         if exc_overflow:
-            print(self.exc_leaky_bucket.count_)
+            print("EXC OVERFLOW")
             self.lead_screw_voltage = -self.DOWN_LEAD_SCREW
         else:
             self.lead_screw_voltage = self.DOWN_LEAD_SCREW
 
         if lead_screw_overflow:
+            print("LEAD_SCREW_OVERFLOW")
             self.lead_screw_voltage = 0
 
         effort_msg = RobotEffort()
