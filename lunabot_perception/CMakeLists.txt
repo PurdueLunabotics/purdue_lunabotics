@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   image_proc
   realsense2_camera
   message_filters
+  tf2
   pcl_conversions
   pcl_ros
   roscpp
@@ -45,6 +46,15 @@ add_executable(${PROJECT_NAME}_concat src/points_concat.cpp)
 set_target_properties(${PROJECT_NAME}_concat PROPERTIES OUTPUT_NAME points_concat PREFIX "")
 add_dependencies(${PROJECT_NAME}_concat ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}_concat
+  ${catkin_LIBRARIES}
+  ${YAML_CPP_LIBRARIES}
+)
+
+add_executable(${PROJECT_NAME}_imu src/imu.cpp)
+set_target_properties(${PROJECT_NAME}_imu PROPERTIES OUTPUT_NAME imu_node PREFIX "")
+add_dependencies(${PROJECT_NAME}_imu ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME}_imu
+realsense2
   ${catkin_LIBRARIES}
   ${YAML_CPP_LIBRARIES}
 )

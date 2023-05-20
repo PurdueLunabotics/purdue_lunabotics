@@ -40,6 +40,7 @@ class ManualController:
         debug_str = "DRIVE" if self._driving_mode else "EXCAVATE"
         rospy.loginfo(f"MODE: {debug_str}")
 
+        self._autonomy = False
         self._exc_latch_val = 0
         self._exc_latch = True
         self.stop()
@@ -48,6 +49,11 @@ class ManualController:
         if joy.buttons[2]:  # 'X' button, switch between excavation mode and drive mode
             self._driving_mode = not self._driving_mode
             debug_str = "DRIVE" if self._driving_mode else "EXCAVATE"
+            rospy.loginfo(f"MODE: {debug_str}")
+
+        if joy.buttons[0]:  # 'A' button
+            self._autonomy = not self._autonomy
+            debug_str = "AUTONOMY" if self._autonomy else "MANUAL"
             rospy.loginfo(f"MODE: {debug_str}")
         if joy.buttons[1]:  # 'B' button
             self.stop()
@@ -92,7 +98,8 @@ class ManualController:
             self._effort_msg = effort_msg
 
     def loop(self):
-        self._effort_pub_.publish(self._effort_msg)
+        if not self._autonomy:
+            self._effort_pub_.publish(self._effort_msg)
 
     def stop(self):
         self._effort_msg.left_drive = 0

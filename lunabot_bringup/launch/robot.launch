@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <arg name="autonomy" default="false" />
-    <arg name="record" default="false" />
+    <arg name="record" default="true" />
     <arg name="teensy" default="true" />
     <arg name="cameras" default="true" />
     <arg name="slam" default="true" />
@@ -19,11 +19,11 @@
         <arg name="rgb_topic" value="/d455_back/camera/color/image_rect_color"/>
         <arg name="camera_info_topic" value="/d455_back/camera/color/camera_info"/>
         <arg name="rtabmapviz" value="false" />
+	<arg name="imu_topic" value="/imu" />
         <arg name="frame_id" value="base_link" />
       </include>
 
       <include file="$(find lunabot_nav)/launch/nav.launch"/>
 
-      <node pkg="lunabot_control" type="differential_drive_controller.py" name="diff_drive_controller" output="screen"/>
     </group>
 </launch>
