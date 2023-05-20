@@ -27,7 +27,7 @@ class LeakyBucket:
 
 
 class ExcavationController:
-    max_exc_percent = 0.3
+    max_exc_percent = 1
     max_lead_screw_percent = 1
 
     FORWARD_EXCAVATE = -1
@@ -71,6 +71,8 @@ class ExcavationController:
                         self.lead_screw_voltage = self.UP_LEAD_SCREW
                     else:
                         self.lead_screw_voltage = self.DOWN_LEAD_SCREW
+                else:
+                    self.exc_voltage = 0
 
                 if lead_screw_overflow:
                     if self.lead_screw_max_extend():
