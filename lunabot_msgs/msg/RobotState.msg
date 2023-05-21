@@ -9,3 +9,4 @@ float32 drive_right_ang
 float32 dep_ang
 float32 lead_screw_ang
 float32 act_ang
+float32 weight

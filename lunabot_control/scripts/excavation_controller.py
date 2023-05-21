@@ -29,6 +29,7 @@ class LeakyBucket:
 class ExcavationController:
     max_exc_percent = 1
     max_lead_screw_percent = 1
+    max_dep_percent = 1
 
     FORWARD_EXCAVATE = -1
     DOWN_LEAD_SCREW = -0.3
@@ -51,6 +52,9 @@ class ExcavationController:
         self.lead_screw_leaky_bucket = LeakyBucket(
             self.is_lead_screw_invalid, dec=1000, inc=100
         )
+
+        self.mid_step_dump_threshold = 1
+        self.weight = None
 
         self._effort_pub = rospy.Publisher("/effort", RobotEffort, queue_size=1)
         self._state_sub = rospy.Subscriber("/state", RobotState, self._robot_state_cb)
@@ -87,12 +91,21 @@ class ExcavationController:
                         break
                 else:
                     print("LEAD SCREW OVERFLOW RELEASED")
+
+                if self.weight > self.mid_step_dump_threshold:
+                    if self.mid_step_dump_extend():
+                        print("MID_STEP_DUMPING, MOVING_UP")
+                        self.dep_voltage = 1
+                    elif self.mid_step_dump_retract():
+                        print("MID_STEP_RETRACTING, MOVING_DOWN")
+                        self.dep_voltage = 1
                 self.publish_effort()
             self.rate.sleep()
 
     def _robot_state_cb(self, msg):
         self.exc_curr = msg.exc_curr
         self.lead_screw_curr = msg.lead_screw_curr
+        self.weight = msg.weight
 
     def is_exc_stuck(self):
         return (
@@ -116,6 +129,9 @@ class ExcavationController:
         )
         effort_msg.excavate = self.constrain(
             self.exc_voltage, max_percent=self.max_exc_percent
+        )
+        effort_msg.deposit = self.constrain(
+            self.dep_voltage, max_percent=self.max_dep_percent
         )
         self._effort_pub.publish(effort_msg)
 
