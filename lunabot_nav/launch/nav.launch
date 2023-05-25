@@ -6,6 +6,8 @@
         </node>
     </group>
 
+    <node pkg="lunabot_control" type="differential_drive_controller.py" name="diff_drive_controller" output="screen"/>
+
     <group ns="nav">
         <rosparam file="$(find lunabot_config)/config/nav.yml" command="load" />
 
