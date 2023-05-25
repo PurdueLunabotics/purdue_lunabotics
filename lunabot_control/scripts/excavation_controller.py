@@ -27,37 +27,68 @@ class LeakyBucket:
 
 
 class ExcavationController:
-    max_exc_percent = 0.3
-    max_lead_screw_percent = 0.5
+    max_exc_percent = 1
+    max_lead_screw_percent = 1
 
     FORWARD_EXCAVATE = -1
-    DOWN_LEAD_SCREW = -1
+    # DOWN_LEAD_SCREW = -0.3
+    DOWN_LEAD_SCREW = -0.2
+    UP_LEAD_SCREW = 0.7
 
-    valid_exc_range = (11000, 17400)
-    # valid_exc_range = (5000,17400)
+    # valid_exc_range = (11000, 17400)
+    valid_exc_range = (5000, 17400)
     # valid_lead_screw_range = (9000, 17000)
-    valid_lead_screw_range = (6000, 22000)
+    valid_lead_screw_range = (6000, 20000)
 
     def __init__(self):
         self.exc_curr = None
         self.lead_screw_curr = None
+        self.retract = False
 
         self.exc_voltage = self.FORWARD_EXCAVATE
         self.lead_screw_voltage = self.DOWN_LEAD_SCREW
 
         self.exc_leaky_bucket = LeakyBucket(self.is_exc_stuck, dec=20)
-        self.lead_screw_leaky_bucket = LeakyBucket(self.is_lead_screw_invalid, dec=0)
+        self.lead_screw_leaky_bucket = LeakyBucket(
+            self.is_lead_screw_invalid, dec=1000, inc=100
+        )
 
         self._effort_pub = rospy.Publisher("/effort", RobotEffort, queue_size=1)
         self._state_sub = rospy.Subscriber("/state", RobotState, self._robot_state_cb)
 
         rospy.on_shutdown(self.shutdown_hook)
-
         self.rate = rospy.Rate(50)
 
         while not rospy.is_shutdown():
             if self.exc_curr is not None and self.lead_screw_curr is not None:
-                self.loop()
+                exc_overflow = self.exc_leaky_bucket.is_overflow()
+                lead_screw_overflow = self.lead_screw_leaky_bucket.is_overflow()
+                print("max extend", self.lead_screw_max_extend())
+                print("max retract", self.lead_screw_max_retract())
+
+                if not self.retract:
+                    if exc_overflow:
+                        print("EXC OVERFLOW, MOVING UP")
+                        self.lead_screw_voltage = self.UP_LEAD_SCREW
+                    else:
+                        self.lead_screw_voltage = self.DOWN_LEAD_SCREW
+                else:
+                    self.exc_voltage = 0
+
+                if lead_screw_overflow:
+                    if self.lead_screw_max_extend():
+                        print("LEAD_SCREW_OVERFLOW, RETRACTING")
+                        print("max_retract", self.lead_screw_max_retract())
+                        self.retract = True
+                        self.lead_screw_voltage = self.UP_LEAD_SCREW
+                    elif self.lead_screw_max_retract():
+                        print("LEAD_SCREW_OVERFLOW, STOPPING")
+                        self.stop()
+                        self.retract = False
+                        break
+                else:
+                    print("LEAD SCREW OVERFLOW RELEASED")
+                self.publish_effort()
             self.rate.sleep()
 
     def _robot_state_cb(self, msg):
@@ -70,25 +101,16 @@ class ExcavationController:
             or self.exc_curr > self.valid_exc_range[1]
         )
 
+    def lead_screw_max_retract(self):
+        return self.lead_screw_curr < self.valid_lead_screw_range[0]
+
+    def lead_screw_max_extend(self):
+        return self.lead_screw_curr > self.valid_lead_screw_range[1]
+
     def is_lead_screw_invalid(self):
-        return (
-            self.lead_screw_curr < self.valid_lead_screw_range[0]
-            or self.lead_screw_curr > self.valid_lead_screw_range[1]
-        )
+        return self.lead_screw_max_retract() or self.lead_screw_max_extend()
 
-    def loop(self):
-        exc_overflow = self.exc_leaky_bucket.is_overflow()
-        lead_screw_overflow = self.lead_screw_leaky_bucket.is_overflow()
-        if exc_overflow:
-            print("EXC OVERFLOW")
-            self.lead_screw_voltage = -self.DOWN_LEAD_SCREW
-        else:
-            self.lead_screw_voltage = self.DOWN_LEAD_SCREW
-
-        if lead_screw_overflow:
-            print("LEAD_SCREW_OVERFLOW")
-            self.lead_screw_voltage = 0
-
+    def publish_effort(self):
         effort_msg = RobotEffort()
         effort_msg.lead_screw = self.constrain(
             self.lead_screw_voltage, max_percent=self.max_lead_screw_percent
