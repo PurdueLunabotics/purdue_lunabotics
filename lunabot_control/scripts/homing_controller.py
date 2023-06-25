@@ -64,11 +64,11 @@ class HomingController:
 
     DRIVE_CTRL = 0.5
     DRIVE_CURR_RANGE = (5000, 18000)
-    EXC_ANGLE_RANGE = (5000, 18000)  # TODO: find
+    DEP_CURR_RANGE = (12900, 13400)  # TODO: find
 
-    CLEAR_ACT_TIME_FROM_EXTEND = 1  # TODO: find
-    CLEAR_ACT_TIME_FROM_RETRACT = 1  # TODO: find
-    EXTEND_ACT_TIME_FROM_RETRACT = 1  # TODO: find
+    TIME_FROM_RETRACT_TO_EXTEND = 25.0
+    TIME_TO_CLEAR_BUCKETS = 7
+    DEP_CURR_STARTING = 2
 
     def __init__(self):
         self._apriltag_sub = rospy.Subscriber(
@@ -77,11 +77,15 @@ class HomingController:
             self.apritag_cb,
         )
 
+        self._drive_left_curr = None
+        self._drive_right_curr = None
+        self._dep_curr = None
+
         self._state_sub = rospy.Subscriber("/state", RobotState, self._robot_state_cb)
         self._effort_pub = rospy.Publisher("/effort", RobotEffort, queue_size=1)
 
         self._effort_msg = RobotEffort()
-        self._state = State.HOMING
+        self._state = State.OPEN_EXC
 
         self._curr_time_act = None
 
@@ -91,6 +95,24 @@ class HomingController:
         self._prev_error = np.zeros(2)
         self._curr_error = np.zeros(2)
         self._error_total = np.zeros(2)
+
+        r = rospy.Rate(20)
+
+        rospy.on_shutdown(self.shutdown_hook)
+
+        while not rospy.is_shutdown():
+            if self._drive_left_curr is not None and \
+            self._drive_right_curr is not None and \
+            self._dep_curr is not None:
+                if self._state == State.DONE:
+                    break
+                else:
+                    self.loop()
+            r.sleep()
+
+    def shutdown_hook(self):
+        self.stop()
+        print("stopping homing control")
 
     def apritag_cb(self, msg):
         if len(msg.detections) != 0:
@@ -106,7 +128,7 @@ class HomingController:
     def _robot_state_cb(self, msg):
         self._drive_left_curr = msg.drive_left_curr
         self._drive_right_curr = msg.drive_right_curr
-        self._dep_ang = msg.dep_ang
+        self._dep_curr = msg.dep_curr
 
     def homing(self):
         if self.T_camera_april_msg is None:
@@ -243,16 +265,14 @@ class HomingController:
             diff = 0
 
             if self._curr_time_act is None:
-                self._curr_time_act = rospy.Time.now()
+                self._curr_time_act = rospy.Time.now().to_sec()
             else:
-                diff = rospy.Time.now() - self._curr_time_act
+                diff = rospy.Time.now().to_sec() - self._curr_time_act
 
-            print(diff)
+            if diff > self.TIME_TO_CLEAR_BUCKETS:
+                self._effort_msg.excavate = self.constrain(-1, 1)
 
-            if diff > self.CLEAR_ACT_TIME_FROM_RETRACT:
-                self._effort_msg.excavate = self.constrain(1, 1)
-
-            if diff > self.EXTEND_ACT_TIME_FROM_RETRACT:
+            if diff > self.TIME_FROM_RETRACT_TO_EXTEND:
                 self._effort_msg.lin_act = 0
                 self._effort_msg.excavate = 0
                 self._curr_time_act = None
@@ -261,33 +281,41 @@ class HomingController:
                 self._effort_msg.lin_act = self.constrain(0.5, 1)
 
         elif self._state == State.DEPOSIT:
-            if self._dep_angle < self.DEP_ANGLE_RANGE[1]:
+            diff = 0
+            if self._curr_time_act is None:
+                self._curr_time_act = rospy.Time.now().to_sec()
+            else:
+                diff = rospy.Time.now().to_sec() - self._curr_time_act
+            if in_range(self._dep_curr, self.DEP_CURR_RANGE) or diff < self.DEP_CURR_STARTING:
                 self._effort_msg.deposit = self.constrain(1, 1)
             else:
+                self._curr_time_act = None
+                self._effort_msg.deposit = 0 
                 self._state = State.RETRACT
         elif self._state == State.RETRACT:
-            if self._dep_angle > self.DEP_ANGLE_RANGE[0]:
+            diff = 0
+            if self._curr_time_act is None:
+                self._curr_time_act = rospy.Time.now().to_sec()
+            else:
+                diff = rospy.Time.now().to_sec() - self._curr_time_act
+            if in_range(self._dep_curr, self.DEP_CURR_RANGE) or diff < self.DEP_CURR_STARTING:
                 self._effort_msg.deposit = self.constrain(-1, 1)
             else:
+                self._effort_msg.deposit = 0 
+                self._curr_time_act = None
                 self._state = State.CLOSE_EXC
         elif self._state == State.CLOSE_EXC:
             diff = 0
 
             if self._curr_time_act is None:
-                self._curr_time_act = rospy.Time.now()
+                self._curr_time_act = rospy.Time.now().to_sec()
             else:
-                diff = rospy.Time.now() - self._curr_time_act
-
-            print(diff)
-
-            if diff > self.CLEAR_ACT_TIME_FROM_RETRACT:
-                self._effort_msg.excavate = self.constrain(1, 1)
-
-            if diff > self.EXTEND_ACT_TIME_FROM_RETRACT:
+                diff = rospy.Time.now().to_sec() - self._curr_time_act
+            if diff > self.TIME_FROM_RETRACT_TO_EXTEND:
                 self._effort_msg.lin_act = 0
                 self._effort_msg.excavate = 0
                 self._curr_time_act = None
-                self._state = State.RESET
+                self._state = State.DONE
             else:
                 self._effort_msg.lin_act = self.constrain(-0.5, 1)
         elif self._state == State.RESET:
@@ -327,18 +355,3 @@ if __name__ == "__main__":
     rospy.init_node("homing_controller_node")
 
     ctrl = HomingController()
-    ctrl._state = State.OPEN_EXC
-    r = rospy.Rate(20)
-
-    def shutdown_hook():
-        ctrl.stop()
-        print("stopping homing control")
-
-    rospy.on_shutdown(shutdown_hook)
-
-    while not rospy.is_shutdown():
-        if ctrl._state == State.DONE:
-            break
-        else:
-            ctrl.loop()
-        r.sleep()

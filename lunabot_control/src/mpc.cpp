@@ -1,42 +1,43 @@
 #include <lunabot_control/mpc.h>
 
 MPC::MPC(ros::NodeHandle *nh) {
-  double frequency;
-  std::string map_topic, path_topic, odom_topic, cmd_vel_topic;
-  // Global params
-  ros::param::get("/odom_topic", odom_topic);
-  ros::param::get("/cmd_vel_topic", cmd_vel_topic);
+    double frequency;
+    std::string map_topic, path_topic, odom_topic, cmd_vel_topic;
+// Global params
+    ros::param::get("/odom_topic", odom_topic);
+    ros::param::get("/cmd_vel_topic", cmd_vel_topic);
 
-  // Nav params
-  ros::param::get("map_topic", map_topic);
-  ros::param::get("global_path_topic", path_topic);
+    // Nav params
+    ros::param::get("map_topic", map_topic);
+    ros::param::get("global_path_topic", path_topic);
 
-  // MPC params
-  ros::param::get("~rollout_count", this->rollout_count_);
-  ros::param::get("~top_rollouts", this->top_rollouts_);
-  ros::param::get("~iterations", this->iterations_);
-  ros::param::get("~w_linear", this->w_linear_);
-  ros::param::get("~w_angular", this->w_angular_);
-  ros::param::get("~w_waypoint", this->w_waypoint_);
-  ros::param::get("~w_occupied", this->w_occupied_);
-  ros::param::get("~horizon_length", this->horizon_length_);
-  ros::param::get("~frequency", frequency);
-  ros::param::get("~min_distance_threshold", this->min_dist_thres_);
-  ros::param::get("~velocity_limits/linear", lin_lim_);
-  ros::param::get("~velocity_limits/angular", ang_lim_);
+    // MPC params
+    ros::param::get("~rollout_count", this->rollout_count_);
+    ros::param::get("~top_rollouts", this->top_rollouts_);
+    ros::param::get("~iterations", this->iterations_);
+    ros::param::get("~w_linear", this->w_linear_);
+    ros::param::get("~w_angular", this->w_angular_);
+    ros::param::get("~w_waypoint", this->w_waypoint_);
+    ros::param::get("~w_occupied", this->w_occupied_);
+    ros::param::get("~horizon_length", this->horizon_length_);
+    ros::param::get("~frequency", frequency);
+    ros::param::get("~min_distance_threshold", this->min_dist_thres_);
+    ros::param::get("~velocity_limits/linear", lin_lim_);
+    ros::param::get("~velocity_limits/angular", ang_lim_);
 
-  // MPC Variables
-  this->delta_time_ = 1 / frequency;
-  this->path_ind_ = 0;
-  this->enabled_ = false;
+    // MPC Variables
+    this->delta_time_ = 1 / frequency;
+    this->path_ind_ = 0;
+    this->enabled_ = false;
 
-  // Ros publishers and subscribers
-  this->velocity_pub_ = nh->advertise<geometry_msgs::Twist>(cmd_vel_topic, 10);
-  this->grid_sub_ = nh->subscribe(map_topic, 10, &MPC::update_grid, this);
-  this->path_sub_ = nh->subscribe(path_topic, 10, &MPC::update_path,
-                                  this); // Convert to Map
-  this->robot_pos_sub_ = nh->subscribe(odom_topic, 10, &MPC::update_robot_pos,
-                                       this); // Convert to Map
+    // Ros publishers and subscribers
+    this->velocity_pub_ =
+        nh->advertise<geometry_msgs::Twist>(cmd_vel_topic, 10);
+    this->grid_sub_ = nh->subscribe(map_topic, 10, &MPC::update_grid, this);
+    this->path_sub_ = nh->subscribe(path_topic, 10, &MPC::update_path,
+                                    this); // Convert to Map
+    this->robot_pos_sub_ = nh->subscribe(odom_topic, 10, &MPC::update_robot_pos,
+                                         this); // Convert to Map
 }
 
 bool MPC::check_collision_(Eigen::RowVectorXd pos) {
@@ -221,48 +222,49 @@ double MPC::dist_to_setpoint_() {
 }
 
 double MPC::calculate_cost_(Eigen::MatrixXd rollout) {
-  SWRI_PROFILE("calculate-cost");
-  double cost = 0;
-  std::vector<double> robot_pos = this->robot_pos_;
-  std::vector<double> goal = this->goal_;
-  for (int i = 0; i < rollout.rows(); ++i) {
-    Eigen::RowVectorXd position = rollout.row(i);
-    cost += this->w_linear_ *
-            ((position(0) - robot_pos[0]) * (position(0) - robot_pos[0]) +
-             (position(1) - robot_pos[1]) * (position(1) - robot_pos[1]));
-    cost += this->w_angular_ * (position(2) - robot_pos[2]) *
-            (position(2) - robot_pos[2]);
-    int path_cost_i = std::min(path_ind_ + i, (int)path_.size() - 1);
-    cost += this->w_waypoint_ * ((position(0) - path_[path_cost_i][0]) *
-                                     (position(0) - path_[path_cost_i][0]) +
-                                 (position(1) - path_[path_cost_i][1]) *
-                                     (position(1) - path_[path_cost_i][1]));
-    cost += this->w_occupied_ * check_collision_(position);
-  }
+    SWRI_PROFILE("calculate-cost");
+    double cost = 0;
+    std::vector<double> robot_pos = this->robot_pos_;
+    std::vector<double> goal = this->goal_;
+    for (int i = 0; i < rollout.rows(); ++i) {
+        Eigen::RowVectorXd position = rollout.row(i);
+        cost += this->w_linear_ *
+                ((position(0) - robot_pos[0]) * (position(0) - robot_pos[0]) +
+                 (position(1) - robot_pos[1]) * (position(1) - robot_pos[1]));
+        cost += this->w_angular_ * (position(2) - robot_pos[2]) *
+                (position(2) - robot_pos[2]);
+        int path_cost_i = std::min(path_ind_ + i, (int)path_.size() - 1);
+        cost += this->w_waypoint_ * ((position(0) - path_[path_cost_i][0]) *
+                                         (position(0) - path_[path_cost_i][0]) +
+                                     (position(1) - path_[path_cost_i][1]) *
+                                         (position(1) - path_[path_cost_i][1]));
+        cost += this->w_occupied_ * check_collision_(position);
+    }
 
-  return cost;
+    return cost;
 }
 
 Eigen::MatrixXd MPC::calculate_model_(Eigen::MatrixXd actions) {
-  SWRI_PROFILE("calculate-model");
-  Eigen::VectorXd current_pos(3); // 3 x 1 mat
-  current_pos << this->robot_pos_[0], this->robot_pos_[1], this->robot_pos_[2];
-  Eigen::MatrixXd model(this->horizon_length_, 5); // x, y, theta, v, omega
+    SWRI_PROFILE("calculate-model");
+    Eigen::VectorXd current_pos(3); // 3 x 1 mat
+    current_pos << this->robot_pos_[0], this->robot_pos_[1],
+        this->robot_pos_[2];
+    Eigen::MatrixXd model(this->horizon_length_, 5); // x, y, theta, v, omega
 
-  for (int i = 0; i < this->horizon_length_; ++i) {
-    model(i, 0) = current_pos(0);
-    model(i, 1) = current_pos(1);
-    model(i, 2) = current_pos(2);
-    model(i, 3) = actions(i, 0);
-    model(i, 4) = actions(i, 1);
-    current_pos(0) +=
-        std::cos(current_pos(2)) * this->delta_time_ * actions(i, 0);
-    current_pos(1) +=
-        std::sin(current_pos(2)) * this->delta_time_ * actions(i, 0);
-    current_pos(2) += this->delta_time_ * actions(i, 1);
-  }
+    for (int i = 0; i < this->horizon_length_; ++i) {
+        model(i, 0) = current_pos(0);
+        model(i, 1) = current_pos(1);
+        model(i, 2) = current_pos(2);
+        model(i, 3) = actions(i, 0);
+        model(i, 4) = actions(i, 1);
+        current_pos(0) +=
+            std::cos(current_pos(2)) * this->delta_time_ * actions(i, 0);
+        current_pos(1) +=
+            std::sin(current_pos(2)) * this->delta_time_ * actions(i, 0);
+        current_pos(2) += this->delta_time_ * actions(i, 1);
+    }
 
-  return model;
+    return model;
 }
 
 bool comparator(std::pair<Eigen::MatrixXd, double> a,
@@ -271,7 +273,6 @@ bool comparator(std::pair<Eigen::MatrixXd, double> a,
 }
 
 void MPC::calculate_velocity() {
-
   SWRI_PROFILE("calculate-velocity");
   if (this->robot_pos_.empty() || this->path_.empty() || !this->enabled_) {
     return;

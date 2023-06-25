@@ -5,16 +5,14 @@ from geometry_msgs.msg import Twist
 
 from lunabot_msgs.msg import RobotEffort, RobotState
 
-
 def ang_delta(deg, prev_deg):
     raw = deg - prev_deg
-    if raw == 0:
+    if(raw == 0):
         return 0
-    turn = min(raw % 360.0, -raw % 360.0)
+    turn = min(raw % 360., -raw % 360.)
 
-    dir_ = abs(raw) / raw if turn == raw else -abs(raw) / raw
+    dir_ = abs(raw) / raw  if turn == raw else -abs(raw) / raw
     return turn * dir_
-
 
 class DifferentialDriveController:
     width = 0.5588  # Robot width, TODO find
@@ -33,6 +31,7 @@ class DifferentialDriveController:
         self.ang = 0
 
         # Variables for PIDF Velocity Control
+
 
         self.prev_left_vel_reading = 0
         self.prev_right_vel_reading = 0
@@ -75,16 +74,14 @@ class DifferentialDriveController:
 
         meters_per_tick = 0.1397  # TODO find
         encoder_dt = 0.01  # Amount of time between readings
-        loop_dt = 1 / self.HZ  # Amount of time between calls of this function
+        loop_dt = 1/self.HZ  # Amount of time between calls of this function
 
         # Measured Velocity in m / s
         left_vel_reading = (
-            ang_delta(self.left_reading, self.prev_left_reading)
-            / encoder_dt
-            * meters_per_tick
+            ang_delta(self.left_reading , self.prev_left_reading) / encoder_dt * meters_per_tick
         ) * 3
         right_vel_reading = (
-            ang_delta(self.right_reading, self.prev_right_reading)
+            ang_delta(self.right_reading , self.prev_right_reading)
             / encoder_dt
             * meters_per_tick
         )
