@@ -1,10 +1,10 @@
 rollout_count: 50
 top_rollouts: 15
 iterations: 10
-w_linear: 0.0
-w_angular: 0.0
-w_waypoint: 10.0
-w_occupied: 10.0
+w_linear: 1.0
+w_angular: 5.0
+w_waypoint: 20.0
+w_occupied: 100.0
 horizon_length: 10
 frequency: 30
 min_distance_threshold: 0.5
