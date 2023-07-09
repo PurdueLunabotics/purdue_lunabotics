@@ -73,6 +73,7 @@ class ManualController:
                 effort_msg.left_drive = constrain(joy.axes[1])
                 effort_msg.right_drive = constrain(joy.axes[4])
             else:
+                # latching allows to run two systems simultaneously
                 if joy.buttons[3] == 1:  # Y button for latch
                     self._exc_latch_val = constrain(joy.axes[1])
                     self._exc_latch = not self._exc_latch
