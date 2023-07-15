@@ -59,6 +59,7 @@
   <depend>mining_arena_gazebo</depend>
   <depend>robot_state_publisher</depend>
   <depend>joint_state_publisher</depend>
+  <depend>lunabot_description</depend>
   <depend>rtabmap_ros</depend>
   <depend>dummy_bot_description</depend>
   <depend>image_proc</depend>

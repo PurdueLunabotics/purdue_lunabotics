@@ -21,6 +21,8 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(PkgConfig REQUIRED)
+find_package(realsense2 CONFIG REQUIRED)
+
 pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
 
 find_path(YAML_CPP_INCLUDE_DIR NAMES yaml_cpp.h PATHS ${YAML_CPP_INCLUDE_DIRS})
@@ -28,7 +30,21 @@ find_library(YAML_CPP_LIBRARY NAMES YAML_CPP PATHS ${YAML_CPP_LIBRARY_DIRS})
 
 link_directories(${YAML_CPP_LIBRARY_DIRS})
 
-catkin_package()
+catkin_package(
+# INCLUDE_DIRS include
+#  LIBRARIES lunabot_perception
+ CATKIN_DEPENDS 
+   image_proc 
+   realsense2_camera 
+   message_filters 
+   tf2
+   pcl_conversions
+   pcl_ros
+   roscpp
+   sensor_msgs
+   laser_geometry 
+   tf
+)
 
 include_directories(
 # include
@@ -50,11 +66,13 @@ target_link_libraries(${PROJECT_NAME}_concat
   ${YAML_CPP_LIBRARIES}
 )
 
-add_executable(${PROJECT_NAME}_imu src/imu.cpp)
+add_executable(${PROJECT_NAME}_imu src/imu_node.cpp)
 set_target_properties(${PROJECT_NAME}_imu PROPERTIES OUTPUT_NAME imu_node PREFIX "")
 add_dependencies(${PROJECT_NAME}_imu ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}_imu
-realsense2
+  realsense2::usb 
+  realsense2::realsense2
+
   ${catkin_LIBRARIES}
   ${YAML_CPP_LIBRARIES}
 )
