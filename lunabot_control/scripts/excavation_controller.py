@@ -31,12 +31,11 @@ class ExcavationController:
     max_lead_screw_percent = 1
 
     FORWARD_EXCAVATE = -1
-    # DOWN_LEAD_SCREW = -0.3
     DOWN_LEAD_SCREW = -0.2
     UP_LEAD_SCREW = 0.7
 
     # valid_exc_range = (11000, 17400)
-    valid_exc_range = (5000, 17400)
+    valid_exc_range = (6000, 17400)
     # valid_lead_screw_range = (9000, 17000)
     valid_lead_screw_range = (6000, 20000)
 

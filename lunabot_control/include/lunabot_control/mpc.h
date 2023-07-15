@@ -8,6 +8,7 @@
 #include <geometry_msgs/TwistStamped.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <nav_msgs/Odometry.h>
+#include <swri_profiler/profiler.h>
 #include <nav_msgs/Path.h>
 #include <ros/ros.h>
 #include <swri_profiler/profiler.h>

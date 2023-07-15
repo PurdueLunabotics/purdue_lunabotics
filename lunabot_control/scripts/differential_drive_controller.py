@@ -11,7 +11,6 @@ def ang_delta(deg, prev_deg):
     if raw == 0:
         return 0
     turn = min(raw % 360.0, -raw % 360.0)
-
     dir_ = abs(raw) / raw if turn == raw else -abs(raw) / raw
     return turn * dir_
 
