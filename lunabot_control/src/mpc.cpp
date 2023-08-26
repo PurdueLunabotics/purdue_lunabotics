@@ -206,6 +206,7 @@ MPC::std_dev_(std::vector<std::pair<Eigen::MatrixXd, double>> rollouts) {
                              (rollouts[i].first(j, 4) - temp_mean(j, 1));
         }
     }
+    ROS_ASSERT(this->top_rollouts_ > 1);
 
     std_dev /= this->top_rollouts_ - 1;
     for (int i = 0; i < std_dev.rows(); ++i) {

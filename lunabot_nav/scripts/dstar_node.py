@@ -10,45 +10,41 @@ from tf.transformations import quaternion_from_euler
 from lunabot_nav.dstar import Dstar
 
 pose = []
-
-map = []
-
+grid = []
 goal = []
-
-update_map = False
-
+update_grid = False
 need_update_goal = False
-
 res = 0
-
 x_offset = 0
-
 y_offset = 0
 
 
 def grid_subscriber(data):
-    global update_map, map, res, x_offset, y_offset
+    global update_grid, grid, res, x_offset, y_offset
     width = data.info.width
     height = data.info.height
-    map = np.reshape(data.data, (height, width))
+    grid = np.reshape(data.data, (height, width))
     res = data.info.resolution
     x_offset = data.info.origin.position.x
     y_offset = data.info.origin.position.y
-    update_map = True
+    update_grid = True
 
 
 def grid_update_subscriber(data):
-    global update_map, map, res, x_offset, y_offset
+    global update_grid, grid, res, x_offset, y_offset
 
-    temp_map = map.copy()
+    # grid = np.array(data.data).reshape(
+    #    (data.height, data.width), order="F"
+    # )
+    temp_map = grid.copy()
     index = 0
     for i in range(data.y, data.y + data.height):
         for j in range(data.x, data.x + data.width):
             temp_map[i][j] = data.data[index]
             index += 1
 
-    map = temp_map.copy()
-    update_map = True
+    grid = temp_map.copy()
+    update_grid = True
 
 
 def position_subscriber(data):
@@ -67,9 +63,12 @@ def goal_subscriber(data):
 
 
 def main():
-    global map, update_map, pose, goal, res, need_update_goal
+    global grid, update_grid, pose, goal, res, need_update_goal
 
     rospy.init_node("dstar_ros_script")
+
+    odom_topic = rospy.get_param("/odom_topic")
+    goal_topic = rospy.get_param("/nav_goal_topic")
 
     radius = 8  # robot rad (grid units)
 
@@ -89,9 +88,9 @@ def main():
         grid_update_subscriber,
     )
 
-    rospy.Subscriber("/rtabmap/odom", Odometry, position_subscriber)
+    rospy.Subscriber(odom_topic, Odometry, position_subscriber)
 
-    rospy.Subscriber("/goal", PoseStamped, goal_subscriber)
+    rospy.Subscriber(goal_topic, PoseStamped, goal_subscriber)
 
     rate = rospy.Rate(frequency)
 
@@ -100,8 +99,8 @@ def main():
     path = []
     while not rospy.is_shutdown():
         # print("Loop")
-        if (dstar is None) and len(map) > 0 and len(pose) > 0 and len(goal) > 0:
-            dstar = Dstar(goal, pose, map, radius, res, x_offset, y_offset)
+        if (dstar is None) and len(grid) > 0 and len(pose) > 0 and len(goal) > 0:
+            dstar = Dstar(goal, pose, grid, radius, res, x_offset, y_offset)
             print("Initialize")
 
         if dstar is not None:
@@ -111,14 +110,14 @@ def main():
 
             if need_update_goal:
                 print("created new Dstar")
-                dstar = Dstar(goal, pose, map, radius, res, x_offset, y_offset)
+                dstar = Dstar(goal, pose, grid, radius, res, x_offset, y_offset)
                 completedInitialRun = False
                 # dstar.update_goal(goal)
                 need_update_goal = False
 
-            if update_map:
-                dstar.update_map(map, x_offset, y_offset)
-                update_map = False
+            if update_grid:
+                dstar.update_map(grid, x_offset, y_offset)
+                update_grid = False
 
             if not completedInitialRun:
                 dstar.find_path(True)
