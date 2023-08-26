@@ -44,15 +44,7 @@
   <!--   <buildtool_depend>catkin</buildtool_depend> -->
   <!-- Use exec_depend for packages you need at runtime: -->
   <!--   <exec_depend>message_runtime</exec_depend> -->
-  <depend>depth_image_proc</depend>
-  <depend>octomap_server</depend>
-  <depend>octomap_mapping</depend>
-  <depend>octomap</depend>
   <depend>nav_msgs</depend>
-  <depend>roscpp</depend>
-  <depend>tf2_ros</depend>
-  <depend>costmap_2d</depend>
-  <depend>geometry_msgs</depend>
   <depend>rplidar_ros</depend>
   <depend>rviz</depend>
   <depend>lunabot_control</depend>

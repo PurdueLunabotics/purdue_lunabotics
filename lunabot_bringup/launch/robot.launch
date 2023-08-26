@@ -1,4 +1,39 @@
 <?xml version="1.0"?>
 <launch>
-    <node name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node" output="screen"/>
+    <arg name="autonomy" default="false" />
+    <arg name="record" default="true" />
+    <arg name="teensy" default="true" />
+    <arg name="cameras" default="true" />
+    <arg name="slam" default="true" />
+
+    <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node" output="screen"/>
+
+    <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch"/>
+    <include if="$(arg record)" file="$(find lunabot_bringup)/launch/record.launch"/>
+
+    <group if="$(arg autonomy)">
+
+      <include if="$(arg slam)" file="$(find rtabmap_ros)/launch/rtabmap.launch" >
+        <arg name="rtabmap_args" value="--delete_db_on_start"/>
+        <arg name="depth_topic" value="/d455_back/camera/aligned_depth_to_color/image_raw"/>
+        <arg name="rgb_topic" value="/d455_back/camera/color/image_rect_color"/>
+        <arg name="camera_info_topic" value="/d455_back/camera/color/camera_info"/>
+        <arg name="rtabmapviz" value="false" />
+        <arg name="imu_topic" value="/imu" />
+        <arg name="frame_id" value="base_link" />
+      </include>
+
+      <!--<node pkg="lunabot_control" type="differential_drive_controller.py" name="diff_drive_controller" output="screen"/>-->
+
+      <group ns="nav">
+          <node pkg="lunabot_control" type="mpc_node" name="mpc_node" output="screen">
+              <rosparam file="$(find lunabot_config)/config/mpc.yml" command="load"/>
+          </node>
+
+          <node name="global_planner_node" pkg="lunabot_nav" type="dstar_node.py" output="screen" respawn="true">
+              <!-- <rosparam file="$(find lunabot_config)/config/rrtstar.yml" command="load"/> -->
+          </node>
+      </group>
+
+    </group>
 </launch>

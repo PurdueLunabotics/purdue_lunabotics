@@ -18,6 +18,9 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   laser_geometry 
   tf
+  tf2_ros
+  geometry_msgs
+  costmap_2d
 )
 
 find_package(PkgConfig REQUIRED)
@@ -44,6 +47,9 @@ catkin_package(
    sensor_msgs
    laser_geometry 
    tf
+  tf2_ros
+  geometry_msgs
+  costmap_2d
 )
 
 include_directories(
@@ -64,6 +70,13 @@ add_dependencies(${PROJECT_NAME}_concat ${${PROJECT_NAME}_EXPORTED_TARGETS} ${ca
 target_link_libraries(${PROJECT_NAME}_concat
   ${catkin_LIBRARIES}
   ${YAML_CPP_LIBRARIES}
+)
+
+add_executable(${PROJECT_NAME}_costmap_node src/costmap_node.cpp)
+set_target_properties(${PROJECT_NAME}_costmap_node PROPERTIES OUTPUT_NAME costmap_node PREFIX "")
+add_dependencies(${PROJECT_NAME}_costmap_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME}_costmap_node
+ ${catkin_LIBRARIES}
 )
 
 add_executable(${PROJECT_NAME}_imu src/imu_node.cpp)

@@ -5,7 +5,7 @@
 #include <Stepper.h>
 
 #ifndef __INTERFACES_H__
-#define __INTERFACES_H__ 
+#define __INTERFACES_H__
 enum StepperDir { RETRACT = -1, EXTEND = 1 };
 enum MotorDir { CW = HIGH, CCW = LOW };
 enum STMotor { M1 = 1, M2 = 2 };
@@ -24,7 +24,7 @@ class StepperInterface {
     uint8_t PWM2_P_;
     uint8_t DIR1_P_;
     uint8_t DIR2_P_;
-    int en_;
+    int enabled_;
     int steps_;     // steps per revolution
     int speed_;     // steps per minute
     int step_size_; // step cnt per step
@@ -53,7 +53,6 @@ class STMotorInterface {
 };
 
 // Sensors
-
 
 class CurrentSensorBus {
   public:
