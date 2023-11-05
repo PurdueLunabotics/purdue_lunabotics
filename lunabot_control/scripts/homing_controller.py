@@ -1,24 +1,5 @@
 #!/usr/bin/env python3
 
-"""
-Design Homing Controller Using ROS:
-
-Step 1: Get angular error from Apriltag (most of the work!)
-1. Understand how coordinate frames work:
-    https://w3.cs.jmu.edu/molloykp/teaching/cs354/cs354_2020Fall/resources/frames.pdf
-    https://manipulation.mit.edu/pick.html#monogram
-2. Understand how a transformation data format is represented in ROS for an apriltag
-    http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/Pose.html
-    https://github.com/AprilRobotics/apriltag_ros/blob/master/apriltag_ros/msg/AprilTagDetection.msg
-    https://github.com/AprilRobotics/apriltag_ros/blob/master/apriltag_ros/msg/AprilTagDetectionArray.msg
-3. Extract *relative* z angle between apriltag and camera frame such that at zero radians, the apriltag and camera face are parallel
-
-Step 2: Write PD Controllor using angular error in apriltag_cb fn
-
-Step 3: Run it!
-
-"""
-
 from enum import Enum
 
 import numpy as np
@@ -222,9 +203,8 @@ class HomingController:
         twist[0] = -ctrl[0]
         twist[1] = ctrl[1]
 
-        print("twist", twist)
+        # print("twist", twist)
 
-        """For real robot"""
         ctrl = self.diff_drive_model(
             twist
         )  # computes wheel velocities from lin, ang vel (twist)
@@ -232,13 +212,8 @@ class HomingController:
         self._effort_msg.left_drive = self.constrain(ctrl[0])
         self._effort_msg.right_drive = self.constrain(ctrl[1])
 
-        print("left: ", self.constrain(ctrl[0]))
-        print("right: ", self.constrain(ctrl[1]))
-
-        """ For simulation (lin and ang vel swapped)
-        self._effort_msg.linear.x = -ctrl[1]
-        self._effort_msg.angular.z = -ctrl[0]
-        """
+        # print("left: ", self.constrain(ctrl[0]))
+        # print("right: ", self.constrain(ctrl[1]))
 
     def loop(self):
         self._effort_msg == RobotEffort()
