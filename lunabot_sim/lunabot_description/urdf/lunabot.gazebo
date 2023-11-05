@@ -4,7 +4,7 @@
 <xacro:property name="body_color" value="Gazebo/Silver" />
 
 <gazebo>
-  <plugin name="skid_steer_drive_controller" filename="libgazebo_ros_skid_steer_drive.so">
+  <plugin name="skid_steer_drive_controller" filename="libluna_gazebo_ros_skid_steer_drive.so">
     <updateRate>100.0</updateRate>
     <robotNamespace>/</robotNamespace>
     <leftFrontJoint>left_front_rev</leftFrontJoint>
