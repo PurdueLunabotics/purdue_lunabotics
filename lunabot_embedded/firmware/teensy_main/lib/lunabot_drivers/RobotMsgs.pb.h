@@ -22,6 +22,10 @@ typedef struct _RobotState {
     float dep_ang;
     float lead_screw_ang;
     float act_ang;
+    float dep_weight;
+    float uwb_dist_0;
+    float uwb_dist_1;
+    float uwb_dist_2;
 } RobotState;
 
 typedef struct _RobotEffort {
@@ -39,11 +43,11 @@ extern "C" {
 
 /* Initializer values for message structs */
 #define RobotState_init_default                                                \
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 #define RobotEffort_init_default                                               \
     { 0, 0, 0, 0, 0, 0 }
 #define RobotState_init_zero                                                   \
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 #define RobotEffort_init_zero                                                  \
     { 0, 0, 0, 0, 0, 0 }
 
@@ -59,6 +63,10 @@ extern "C" {
 #define RobotState_dep_ang_tag 9
 #define RobotState_lead_screw_ang_tag 10
 #define RobotState_act_ang_tag 11
+#define RobotState_dep_weight_tag 12
+#define RobotState_uwb_dist_0_tag 13
+#define RobotState_uwb_dist_1_tag 14
+#define RobotState_uwb_dist_2_tag 15
 #define RobotEffort_lead_screw_tag 1
 #define RobotEffort_lin_act_tag 2
 #define RobotEffort_left_drive_tag 3
@@ -78,7 +86,11 @@ extern "C" {
     X(a, STATIC, SINGULAR, FLOAT, drive_right_ang, 8)                          \
     X(a, STATIC, SINGULAR, FLOAT, dep_ang, 9)                                  \
     X(a, STATIC, SINGULAR, FLOAT, lead_screw_ang, 10)                          \
-    X(a, STATIC, SINGULAR, FLOAT, act_ang, 11)
+    X(a, STATIC, SINGULAR, FLOAT, act_ang, 11)                                 \
+    X(a, STATIC, SINGULAR, FLOAT, dep_weight, 12)                              \
+    X(a, STATIC, SINGULAR, FLOAT, uwb_dist_0, 13)                              \
+    X(a, STATIC, SINGULAR, FLOAT, uwb_dist_1, 14)                              \
+    X(a, STATIC, SINGULAR, FLOAT, uwb_dist_2, 15)
 #define RobotState_CALLBACK NULL
 #define RobotState_DEFAULT NULL
 
@@ -101,7 +113,7 @@ extern const pb_msgdesc_t RobotEffort_msg;
 
 /* Maximum encoded size of messages (where known) */
 #define RobotEffort_size 36
-#define RobotState_size 61
+#define RobotState_size 81
 
 #ifdef __cplusplus
 } /* extern "C" */

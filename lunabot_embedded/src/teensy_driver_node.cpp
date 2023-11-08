@@ -43,6 +43,9 @@ void recv(ros::Publisher &pub) {
     state_msg.drive_left_ang = state.drive_left_ang;
     state_msg.lead_screw_ang = state.lead_screw_ang;
     state_msg.dep_ang = state.dep_ang;
+    state_msg.uwb_dists.push_back(state.uwb_dist_0);
+    state_msg.uwb_dists.push_back(state.uwb_dist_1);
+    state_msg.uwb_dists.push_back(state.uwb_dist_2);
     pub.publish(state_msg);
 }
 
@@ -55,11 +58,11 @@ void effort_cb(const lunabot_msgs::RobotEffort &msg) {
     effort.deposit = msg.deposit;
 }
 
-void publish(const ros::TimerEvent&) {
-        memset(buf, 0, sizeof(buf));
-        pb_ostream_t stream = pb_ostream_from_buffer(buf, sizeof(buf));
-        pb_encode(&stream, RobotEffort_fields, &effort);
-    	rawhid_send(0, buf, 64, 0);
+void publish(const ros::TimerEvent &) {
+    memset(buf, 0, sizeof(buf));
+    pb_ostream_t stream = pb_ostream_from_buffer(buf, sizeof(buf));
+    pb_encode(&stream, RobotEffort_fields, &effort);
+    rawhid_send(0, buf, 64, 0);
 }
 
 int main(int argc, char **argv) {

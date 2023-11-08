@@ -28,6 +28,10 @@ void cb(int8_t left, int8_t right);
 void update(int32_t &, int32_t &, float &, float &);
 } // namespace drivetrain
 
+namespace uwb {
+void update(float &d0, float &d1, float &d2);
+} // namespace uwb
+
 namespace deposition {
 void cb(int8_t dep);
 void update(int32_t &, float &);
