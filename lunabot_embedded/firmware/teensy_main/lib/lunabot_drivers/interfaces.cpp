@@ -212,32 +212,32 @@ float UWBBus::read_uwb(uint8_t id) {
 }
 
 void UWBBus::init() {
-  Serial2.begin(115200);
+  UWBSerial.begin(115200);
 
   // serial 2 setup as tag on bot (does dist calc)
   for (int b = 0; b < 2; b++) { // Repeat twice to stabilize the connection
     delay(50);
-    Serial2.write("AT+anchor_tag=0\r\n"); // Set up the Tag
+    UWBSerial.write("AT+anchor_tag=0\r\n"); // Set up the Tag
     delay(50);
-    Serial2.write("AT+interval=50\r\n"); // Set the calculation precision,
+    UWBSerial.write("AT+interval=50\r\n"); // Set the calculation precision,
                                          // the larger the response is, the
                                          // slower it will be
     delay(50); // 设置计算精度，越大响应越慢
-    Serial2.write("AT+switchdis=1\r\n"); // Began to distance 开始测距
+    UWBSerial.write("AT+switchdis=1\r\n"); // Began to distance 开始测距
     delay(50);
     if (b == 0) {
-      Serial2.write("AT+RST\r\n"); // RESET 复位
+      UWBSerial.write("AT+RST\r\n"); // RESET 复位
     }
   }
-  if (Serial2.available()) {
+  if (UWBSerial.available()) {
     delay(3);
   }
 }
 
 void UWBBus::transfer() {
-  if (Serial2.available()) {
+  if (UWBSerial.available()) {
     // Read the original input
-    String originalInput = Serial2.readStringUntil('\n');
+    String originalInput = UWBSerial.readStringUntil('\n');
     originalInput.trim();
 
     // Check if the message starts with "anX:" where X is a digit

@@ -5,8 +5,12 @@
 #include <Stepper.h>
 #include <Wire.h>
 
+
 #ifndef __INTERFACES_H__
 #define __INTERFACES_H__
+
+#define UWBSerial Serial8
+
 enum StepperDir { RETRACT = -1, EXTEND = 1 };
 enum MotorDir { CW = HIGH, CCW = LOW };
 enum STMotor { M1 = 1, M2 = 2 };
