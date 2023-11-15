@@ -206,7 +206,7 @@ volatile float UWBBus::uwb_buffer_[BUS_SIZE] = {0};
 
 float UWBBus::read_uwb(uint8_t id) {
   noInterrupts();
-  uint8_t data = uwb_buffer_[id];
+  float data = uwb_buffer_[id];
   interrupts();
   return data;
 }
@@ -219,7 +219,7 @@ void UWBBus::init() {
     delay(50);
     UWBSerial.write("AT+anchor_tag=0\r\n"); // Set up the Tag
     delay(50);
-    UWBSerial.write("AT+interval=50\r\n"); // Set the calculation precision,
+    UWBSerial.write("AT+interval=5\r\n"); // Set the calculation precision,
                                          // the larger the response is, the
                                          // slower it will be
     delay(50); // 设置计算精度，越大响应越慢

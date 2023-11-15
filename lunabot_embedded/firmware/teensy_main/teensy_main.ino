@@ -56,6 +56,7 @@ void setup() {
   STMotorInterface::init_serial(ST_SERIAL, ST_BAUD_RATE);
   CurrentSensorBus::init_ads1115();
   EncoderBus::init();
+  UWBBus::init();
 
   enc_timer.begin(EncoderBus::transfer, ENC_TRANSFER_PERIOD);
   uwb_timer.begin(UWBBus::transfer, UWB_TRANSFER_PERIOD);
