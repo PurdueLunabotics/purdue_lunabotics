@@ -6,29 +6,29 @@ StepperInterface::StepperInterface(uint8_t PWM1_P, uint8_t PWM2_P,
                                    uint8_t DIR1_P, uint8_t DIR2_P, int steps,
                                    int speed, int step_size)
     : s_(steps, DIR1_P, DIR2_P), PWM1_P_{PWM1_P}, PWM2_P_{PWM2_P},
-      DIR1_P_{DIR1_P}, DIR2_P_{DIR2_P}, en_{0}, steps_{steps}, speed_{speed},
-      step_size_{step_size} {
-  pinMode(PWM1_P_, OUTPUT);
-  pinMode(PWM2_P_, OUTPUT);
-  s_.setSpeed(speed_);
+      DIR1_P_{DIR1_P}, DIR2_P_{DIR2_P}, enabled_{0}, steps_{steps},
+      speed_{speed}, step_size_{step_size} {
+    pinMode(PWM1_P_, OUTPUT);
+    pinMode(PWM2_P_, OUTPUT);
+    s_.setSpeed(speed_);
 }
 
 void StepperInterface::step(StepperDir dir) {
-  if (en_) {
-    s_.step(step_size_ * dir);
-  }
+    if (enabled_) {
+        s_.step(step_size_ * dir);
+    }
 }
 
 void StepperInterface::on() {
-  digitalWrite(PWM1_P_, HIGH);
-  digitalWrite(PWM2_P_, HIGH);
-  en_ = 1;
+    digitalWrite(PWM1_P_, HIGH);
+    digitalWrite(PWM2_P_, HIGH);
+    enabled_ = 1;
 }
 
 void StepperInterface::off() {
-  digitalWrite(PWM1_P_, LOW);
-  digitalWrite(PWM2_P_, LOW);
-  en_ = 0;
+    digitalWrite(PWM1_P_, LOW);
+    digitalWrite(PWM2_P_, LOW);
+    enabled_ = 0;
 }
 
 // PWM Motor Control Interfacing
@@ -96,36 +96,37 @@ void CurrentSensorBus::init_ads1115() {
 }
 
 void CurrentSensorBus::transfer() {
-  if (initialized_) {
-    if (adc0_.isConversionDone()) {
-      curr_buffer_[0][adc0_ch_] =
-          adc0_.getConversion(); // This polls the ADS1115 and wait for
-                                 // conversion to finish, THEN returns the
-                                 // value
-      adc0_ch_ = (adc0_ch_ + 1) % CH_SIZE;
-      adc0_.setMux(ADS_CHANNELS[adc0_ch_]); // Set mux
-      adc0_.triggerConversion(); // Start a conversion.  This immediatly
-    }
+    if (initialized_) {
+        if (adc0_.isConversionDone()) {
+            curr_buffer_[0][adc0_ch_] =
+                adc0_.getConversion(); // This polls the ADS1115 and wait for
+                                       // conversion to finish, THEN returns the
+                                       // value
+            adc0_ch_ = (adc0_ch_ + 1) % CH_SIZE;
+            adc0_.setMux(ADS_CHANNELS[adc0_ch_]); // Set mux
+            adc0_.triggerConversion(); // Start a conversion.  This immediatly
+        }
 
-    if (adc1_.isConversionDone()) {
-      curr_buffer_[1][adc1_ch_] =
-          adc1_.getConversion(); // This polls the ADS1115 and wait for
-                                 // conversion to finish, THEN returns the
-                                 // value
-      adc1_ch_ = (adc1_ch_ + 1) % CH_SIZE;
-      adc1_.setMux(ADS_CHANNELS[adc0_ch_]); // Set mux
-      adc1_.triggerConversion(); // Start a conversion.  This immediatly
+        if (adc1_.isConversionDone()) {
+            curr_buffer_[1][adc1_ch_] =
+                adc1_.getConversion(); // This polls the ADS1115 and wait for
+                                       // conversion to finish, THEN returns the
+                                       // value
+            adc1_ch_ = (adc1_ch_ + 1) % CH_SIZE;
+            adc1_.setMux(ADS_CHANNELS[adc0_ch_]); // Set mux
+            adc1_.triggerConversion(); // Start a conversion.  This immediatly
+        }
     }
   }
 }
 
 int16_t CurrentSensorBus::read(uint8_t bus, uint8_t mux) {
-  return curr_buffer_[bus][mux];
+    return curr_buffer_[bus][mux];
 }
 
 // Encoders
 
-#define CLOCK_SPEED 1'000'000u // 1MHz SSI Clock
+#define CLOCK_SPEED 100'000u // 100kHz SSI Clock
 
 SPISettings spi_settings(CLOCK_SPEED, MSBFIRST, SPI_MODE1);
 

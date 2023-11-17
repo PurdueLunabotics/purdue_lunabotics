@@ -1,0 +1,176 @@
+<?xml version="1.0" ?>
+<robot name="lunabot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:property name="PI" value="3.1415926535897931"/>
+
+<xacro:property name="chassisHeight" value="0.2"/>
+<xacro:property name="chassisLength" value="1.0"/>
+<xacro:property name="chassisWidth" value="0.5"/>
+<xacro:property name="chassisMass" value="50"/>
+
+<xacro:property name="wheelWidth" value="0.05"/>
+<xacro:property name="wheelRadius" value="0.2"/>
+<xacro:property name="wheelMass" value="5"/>
+
+<xacro:macro name="box_inertia" params="m x y z">
+  <inertia  ixx="${m*(y*y+z*z)/12}" ixy = "0" ixz = "0"
+    iyy="${m*(x*x+z*z)/12}" iyz = "0"
+    izz="${m*(x*x+z*z)/12}"
+  />
+</xacro:macro>
+
+<xacro:macro name="cylinder_inertia" params="m r h">
+  <inertia  ixx="${m*(3*r*r+h*h)/12}" ixy = "0" ixz = "0"
+    iyy="${m*(3*r*r+h*h)/12}" iyz = "0"
+    izz="${m*r*r/2}"
+  />
+</xacro:macro>
+
+<xacro:include filename="$(find lunabot_description)/urdf/materials.xacro" />
+
+<link name="base_link"/>
+<link name="chassis">
+  <visual>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://lunabot_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://lunabot_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="right_front">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-4.3576253716537394e-14 -0.022224999999999995 -2.736260904245835e-07"/>
+    <mass value="${wheelMass}"/>
+    <xacro:cylinder_inertia m="${wheelMass}" r="${wheelRadius}" h="${wheelWidth}"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.254 0.254 -0.101276"/>
+    <geometry>
+      <mesh filename="package://lunabot_description/meshes/right_front.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.254 0.254 -0.101276"/>
+    <geometry>
+      <mesh filename="package://lunabot_description/meshes/right_front.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="left_front">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-4.3576253716537394e-14 0.02222499999999994 -2.736260904245835e-07"/>
+    <mass value="${wheelMass}"/>
+    <xacro:cylinder_inertia m="${wheelMass}" r="${wheelRadius}" h="${wheelWidth}"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.254 -0.254 -0.101276"/>
+    <geometry>
+      <mesh filename="package://lunabot_description/meshes/left_front.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.254 -0.254 -0.101276"/>
+    <geometry>
+      <mesh filename="package://lunabot_description/meshes/left_front.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="left_back">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-4.346523141407488e-14 0.02222499999999994 -2.7362609036907237e-07"/>
+    <mass value="${wheelMass}"/>
+    <xacro:cylinder_inertia m="${wheelMass}" r="${wheelRadius}" h="${wheelWidth}"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="0.254 -0.254 -0.101276"/>
+    <geometry>
+      <mesh filename="package://lunabot_description/meshes/left_back.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="0.254 -0.254 -0.101276"/>
+    <geometry>
+      <mesh filename="package://lunabot_description/meshes/left_back.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="right_back">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-4.3520742565306136e-14 -0.022224999999999995 -2.736260904245835e-07"/>
+    <mass value="${wheelMass}"/>
+    <xacro:cylinder_inertia m="${wheelMass}" r="${wheelRadius}" h="${wheelWidth}"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="0.254 0.254 -0.101276"/>
+    <geometry>
+      <mesh filename="package://lunabot_description/meshes/right_back.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="0.254 0.254 -0.101276"/>
+    <geometry>
+      <mesh filename="package://lunabot_description/meshes/right_back.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<joint name="base_link" type="fixed">
+  <origin rpy="0 0 0" xyz="0 0 -0.25"/>
+  <parent link="base_link"/>
+  <child link="chassis"/>
+  <axis xyz="0.0 1.0 0.0"/>
+</joint>
+
+<joint name="right_front_rev" type="continuous">
+  <origin rpy="0 0 0" xyz="0.254 -0.254 0.101276"/>
+  <parent link="chassis"/>
+  <child link="right_front"/>
+  <axis xyz="0.0 1.0 0.0"/>
+</joint>
+
+<joint name="left_front_rev" type="continuous">
+  <origin rpy="0 0 0" xyz="0.254 0.254 0.101276"/>
+  <parent link="chassis"/>
+  <child link="left_front"/>
+  <axis xyz="0.0 -1.0 0.0"/>
+</joint>
+
+<joint name="left_back_rev" type="continuous">
+  <origin rpy="0 0 0" xyz="-0.254 0.254 0.101276"/>
+  <parent link="chassis"/>
+  <child link="left_back"/>
+  <axis xyz="0.0 -1.0 0.0"/>
+</joint>
+
+<joint name="right_back_rev" type="continuous">
+  <origin rpy="0 0 0" xyz="-0.254 -0.254 0.101276"/>
+  <parent link="chassis"/>
+  <child link="right_back"/>
+  <axis xyz="0.0 1.0 0.0"/>
+</joint>
+
+<link name="d455_back_link"/>
+
+<joint name="depth_cam_jnt" type="fixed">
+    <origin rpy="-2.0000019999706227e-06 0.0019999983333319994 3.139592651256459" xyz="-0.457877 0.129509 0.255037"/>
+  <parent link="base_link"/>
+  <child link="d455_back_link"/>
+  <axis xyz="0.0 1.0 0.0"/>
+</joint>
+
+</robot>

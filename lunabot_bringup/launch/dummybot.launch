@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-	<node name="teensy_drive" ns="teensy_drive" pkg="rosserial_python" type="serial_node.py" output="screen">
-	    <param name="port" type="string" value="/dev/ttyACM0"/>
-	</node>
-  <include file="$(find lunabot_nav)/launch/mapping.launch" />
-  <include file="$(find lunabot_nav)/launch/lidar.launch" />
-</launch>

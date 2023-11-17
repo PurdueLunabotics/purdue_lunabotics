@@ -1,0 +1,13 @@
+<launch>
+  <!-- Group without delay -->
+  <group>
+    <!-- Run lunabot_bringup -->
+    <include file="$(find lunabot_bringup)/launch/overhead.launch"/>
+
+    <!-- Run lunabot_perception -->
+    <include file="$(find lunabot_perception)/launch/cameras.launch"/>
+  </group>
+
+  <!-- Rosbag record with delay -->
+  <node name="rosbag_record" pkg="rosbag" type="record" args="-o lunabag /imu /d455_back/camera/color/image_rect_color /d455_back/camera/aligned_depth_to_color/image_raw /d455_back/camera/aligned_depth_to_color/camera_info /d455_back/camera/color/camera_info /usb_cam/tag_detections /state --split --duration 60" launch-prefix="bash -c 'sleep 5; $0 $@'"/>
+</launch>

@@ -1,0 +1,9 @@
+odom_topic: "/rtabmap/odom"
+cmd_vel_topic: "/cmd_vel"
+nav:
+    map_topic: "/maps/costmap_node/global_costmap/costmap"
+    global_path_topic: "/nav/global_path"
+    goal_topic: "/goal"
+    occ_threshold: 80 # corresponds to possibly-in-collision
+    bezier_step: 0.01
+    lerp_step: 0.05

@@ -16,23 +16,23 @@ enum MotorDir { CW = HIGH, CCW = LOW };
 enum STMotor { M1 = 1, M2 = 2 };
 
 class StepperInterface {
-public:
-  StepperInterface(uint8_t PWM1_P, uint8_t PWM2_P, uint8_t DIR1_P,
-                   uint8_t DIR2_P, int steps, int speed, int step_size);
-  void on();
-  void off();
-  void step(StepperDir dir);
+  public:
+    StepperInterface(uint8_t PWM1_P, uint8_t PWM2_P, uint8_t DIR1_P,
+                     uint8_t DIR2_P, int steps, int speed, int step_size);
+    void on();
+    void off();
+    void step(StepperDir dir);
 
-private:
-  Stepper s_;
-  uint8_t PWM1_P_;
-  uint8_t PWM2_P_;
-  uint8_t DIR1_P_;
-  uint8_t DIR2_P_;
-  int en_;
-  int steps_;     // steps per revolution
-  int speed_;     // steps per minute
-  int step_size_; // step cnt per step
+  private:
+    Stepper s_;
+    uint8_t PWM1_P_;
+    uint8_t PWM2_P_;
+    uint8_t DIR1_P_;
+    uint8_t DIR2_P_;
+    int enabled_;
+    int steps_;     // steps per revolution
+    int speed_;     // steps per minute
+    int step_size_; // step cnt per step
 };
 
 class MotorInterface {

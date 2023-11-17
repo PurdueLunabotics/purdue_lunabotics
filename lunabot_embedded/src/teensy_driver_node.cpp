@@ -6,6 +6,7 @@
 #include <sys/ioctl.h>
 #include <termios.h>
 
+#include <lunabot_embedded/utils.h>
 #include <lunabot_msgs/RobotEffort.h>
 #include <lunabot_msgs/RobotState.h>
 
@@ -16,12 +17,18 @@ extern "C" {
 #include "pb_encode.h"
 }
 
+using namespace std;
+
 #define BUF_SIZE 64
+#define DEP_GEAR_RATIO (1. / 7.125)
+#define MAX_DIFF 15
 
 uint8_t buf[BUF_SIZE];
 
+RobotState prev_state = RobotState_init_zero;
 RobotState state = RobotState_init_zero;
 RobotEffort effort = RobotEffort_init_zero;
+float last_drive_left = 0;
 
 pb_ostream_t sizestream = {0};
 
@@ -32,28 +39,44 @@ void recv(ros::Publisher &pub) {
     /* Now we are ready to decode the message. */
     pb_decode(&stream, RobotState_fields, &state);
     lunabot_msgs::RobotState state_msg;
-    state_msg.act_right_curr = state.act_right_curr;
-    state_msg.drive_right_curr = state.drive_right_curr;
-    state_msg.drive_left_curr = state.drive_left_curr;
-    state_msg.lead_screw_curr = state.lead_screw_curr;
-    state_msg.dep_curr = state.dep_curr;
-    state_msg.exc_curr = state.exc_curr;
+    state_msg.act_right_curr = adc_to_current_ACS711_15A(state.act_right_curr);
+    state_msg.drive_right_curr =
+        adc_to_current_ACS711_15A(state.drive_right_curr);
+    state_msg.drive_left_curr =
+        adc_to_current_ACS711_15A(state.drive_left_curr);
+    state_msg.lead_screw_curr =
+        adc_to_current_ACS711_15A(state.lead_screw_curr);
+    state_msg.dep_curr = adc_to_current_ACS711_15A(state.dep_curr);
+    state_msg.exc_curr = adc_to_current_ACS711_31A(state.exc_curr);
     state_msg.act_ang = state.act_ang;
-    state_msg.drive_right_ang = state.drive_right_ang;
-    state_msg.drive_left_ang = state.drive_left_ang;
+    float drive_left_ang_diff =
+        ang_delta(state.drive_left_ang, last_drive_left);
+
+    if (abs(drive_left_ang_diff) >= MAX_DIFF) {
+        state_msg.drive_left_ang = to_rad(last_drive_left);
+    } else {
+        state_msg.drive_left_ang = to_rad(state.drive_left_ang);
+        last_drive_left = state.drive_left_ang;
+    }
+
+    state_msg.drive_right_ang = to_rad(state.drive_right_ang);
     state_msg.lead_screw_ang = state.lead_screw_ang;
+    // state_msg.dep_ang =
+    // dep_gear.get_rad_from_raw(state.dep_ang, prev_state.dep_ang);
     state_msg.dep_ang = state.dep_ang;
     state_msg.uwb_dists.push_back(state.uwb_dist_0);
     state_msg.uwb_dists.push_back(state.uwb_dist_1);
     state_msg.uwb_dists.push_back(state.uwb_dist_2);
+
+    prev_state = state;
     pub.publish(state_msg);
 }
 
 void effort_cb(const lunabot_msgs::RobotEffort &msg) {
     effort.lead_screw = msg.lead_screw;
     effort.lin_act = msg.lin_act;
-    effort.left_drive = msg.left_drive;
-    effort.right_drive = msg.right_drive;
+    effort.left_drive = -msg.left_drive;
+    effort.right_drive = -msg.right_drive;
     effort.excavate = msg.excavate;
     effort.deposit = msg.deposit;
 }
