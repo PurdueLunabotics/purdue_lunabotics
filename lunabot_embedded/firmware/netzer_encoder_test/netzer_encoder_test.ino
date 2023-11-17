@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-#define CLOCK_SPEED 1'000'000u // 2.5 MHz SSI Clock
+#define CLOCK_SPEED 1'000'000u // 1 MHz SSI Clock
 #define SCK_PIN 13             // SSI CLK line
 
 #define SEL0_PIN 8  // SEL0 line
@@ -22,94 +22,93 @@ void calculateAndPrintPosition(uint32_t &encoderData);
 void selectEnc(uint8_t id);
 
 void setup() {
-    SerialUSB.begin(9600);
-    SPI.begin(); // SPI.begin() will initialize the SPI port, as well as CLK pin
-    pinMode(SCK_PIN, OUTPUT); // pinMode() will initialize the CLK pin as output
-                              // (SPI port can't use it now!)
-    pinMode(SEL0_PIN,
-            OUTPUT); // pinMode() will initialize the CLK pin as output
-    pinMode(SEL1_PIN,
-            OUTPUT); // pinMode() will initialize the CLK pin as output
-    pinMode(SEL2_PIN,
-            OUTPUT); // pinMode() will initialize the CLK pin as output
-    selectEnc(0);
-    digitalWriteFast(
-        SCK_PIN,
-        HIGH); // Set CLK line HIGH (to meet the requirements of SSI interface)
+  SerialUSB.begin(9600);
+  SPI.begin(); // SPI.begin() will initialize the SPI port, as well as CLK pin
+  pinMode(SCK_PIN, OUTPUT); // pinMode() will initialize the CLK pin as output
+                            // (SPI port can't use it now!)
+  pinMode(SEL0_PIN,
+          OUTPUT); // pinMode() will initialize the CLK pin as output
+  pinMode(SEL1_PIN,
+          OUTPUT); // pinMode() will initialize the CLK pin as output
+  pinMode(SEL2_PIN,
+          OUTPUT); // pinMode() will initialize the CLK pin as output
+  selectEnc(0);
+  digitalWriteFast(
+      SCK_PIN,
+      HIGH); // Set CLK line HIGH (to meet the requirements of SSI interface)
 
-    while (!SerialUSB) {
-    }
-    SerialUSB.println("Started!");
+  while (!SerialUSB) {
+  }
+  SerialUSB.println("Started!");
 }
 
 void loop() {
-    makeTransfer();
-    uint32_t encoderData = decodeEncoderFrame();
-    calculateAndPrintPosition(encoderData);
+  makeTransfer();
+  uint32_t encoderData = decodeEncoderFrame();
+  calculateAndPrintPosition(encoderData);
 
-    delay(50);
+  delay(50);
 }
 
 void selectEnc(uint8_t id) {
-    uint8_t sel0 = id & 1;
-    uint8_t sel1 = id >> 1 & 1;
-    uint8_t sel2 = id >> 2 & 1;
-    digitalWrite(SEL0_PIN, sel0);
-    digitalWrite(SEL1_PIN, sel1);
-    digitalWrite(SEL2_PIN, sel2);
+  uint8_t sel0 = id & 1;
+  uint8_t sel1 = id >> 1 & 1;
+  uint8_t sel2 = id >> 2 & 1;
+  digitalWrite(SEL0_PIN, sel0);
+  digitalWrite(SEL1_PIN, sel1);
+  digitalWrite(SEL2_PIN, sel2);
 }
 
 void makeTransfer() {
-    digitalWriteFast(SCK_PIN,
-                     LOW); // Set CLK line LOW (to inform encoder -> latch data)
+  digitalWriteFast(SCK_PIN,
+                   LOW); // Set CLK line LOW (to inform encoder -> latch data)
 
-    // Before in setup() the pinMode() change the CLK pin function to output,
-    // now we have to enable usage of this pin by SPI port with calling
-    // SPI.begin():
-    SPI.begin();
+  // Before in setup() the pinMode() change the CLK pin function to output,
+  // now we have to enable usage of this pin by SPI port with calling
+  // SPI.begin():
+  SPI.begin();
 
-    // Or use this one below - a bit faster but SPI port and SCK pin dependent
-    // option. I belive there is a more elegant and more scalable solution,
-    // maybe even supported by hardware for this purpose? - if anyone can point
-    // me it out I would be grateful:
+  // Or use this one below - a bit faster but SPI port and SCK pin dependent
+  // option. I belive there is a more elegant and more scalable solution,
+  // maybe even supported by hardware for this purpose? - if anyone can point
+  // me it out I would be grateful:
 
-    SPI.beginTransaction(settingsA); // We use transactional API
+  SPI.beginTransaction(settingsA); // We use transactional API
 
-    for (int i = 0; i < 2; i++) {
-        encoderBuf[i] =
-            SPI.transfer(0xAA); // Transfer anything and read data back
-    }
+  for (int i = 0; i < 2; i++) {
+    encoderBuf[i] = SPI.transfer(0xAA); // Transfer anything and read data back
+  }
 
-    SPI.endTransaction(); // We use transactional API
+  SPI.endTransaction(); // We use transactional API
 
-    pinMode(SCK_PIN, OUTPUT); // A while before we set CLK pin to be used by SPI
-                              // port, now we have to change it manually...
-    digitalWrite(SCK_PIN, HIGH); // ... back to idle HIGH
+  pinMode(SCK_PIN, OUTPUT); // A while before we set CLK pin to be used by SPI
+                            // port, now we have to change it manually...
+  digitalWrite(SCK_PIN, HIGH); // ... back to idle HIGH
 
-    delayMicroseconds(
-        27); // Running above 500kHz perform Delay First Clock function
+  delayMicroseconds(
+      27); // Running above 500kHz perform Delay First Clock function
 }
 
 uint32_t decodeEncoderFrame() {
-    uint32_t data =
-        static_cast<uint32_t>(encoderBuf[0] << 8) |
-        static_cast<uint32_t>(encoderBuf[1]); // here transfer8 was made
+  uint32_t data =
+      static_cast<uint32_t>(encoderBuf[0] << 8) |
+      static_cast<uint32_t>(encoderBuf[1]); // here transfer8 was made
 
-    // Shift one bit right - (MSB of position was placed on at MSB of uint32_t,
-    // so make it right and shift to make MSB position at 30'th bit):
-    // data = data >> 1;
+  // Shift one bit right - (MSB of position was placed on at MSB of uint32_t,
+  // so make it right and shift to make MSB position at 30'th bit):
+  // data = data >> 1;
 
-    return data;
+  return data;
 }
 
 void calculateAndPrintPosition(uint32_t &encoderData) {
-    // encoderPosition is placed in front (starting from MSB of uint32_t) so
-    // shift it for 11 bits to align position data right
-    uint32_t encoderPosition = encoderData;
+  // encoderPosition is placed in front (starting from MSB of uint32_t) so
+  // shift it for 11 bits to align position data right
+  uint32_t encoderPosition = encoderData;
 
-    float angularAbsolutePosition = static_cast<float>(encoderPosition) /
-                                    static_cast<float>(1 << 16) * 360.0F;
+  float angularAbsolutePosition = static_cast<float>(encoderPosition) /
+                                  static_cast<float>(1 << 16) * 360.0F;
 
-    SerialUSB.println("Encoder Positon = " + String(encoderPosition) +
-                      " Angle = " + String(angularAbsolutePosition, 4));
+  SerialUSB.println("Encoder Positon = " + String(encoderPosition) +
+                    " Angle = " + String(angularAbsolutePosition, 4));
 }

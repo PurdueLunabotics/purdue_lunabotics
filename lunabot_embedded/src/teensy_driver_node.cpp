@@ -64,6 +64,9 @@ void recv(ros::Publisher &pub) {
     // state_msg.dep_ang =
     // dep_gear.get_rad_from_raw(state.dep_ang, prev_state.dep_ang);
     state_msg.dep_ang = state.dep_ang;
+    state_msg.uwb_dists.push_back(state.uwb_dist_0);
+    state_msg.uwb_dists.push_back(state.uwb_dist_1);
+    state_msg.uwb_dists.push_back(state.uwb_dist_2);
 
     prev_state = state;
     pub.publish(state_msg);
