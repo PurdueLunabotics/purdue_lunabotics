@@ -15,24 +15,29 @@ def ang_delta(deg, prev_deg):
     return turn * dir_
 
 class DifferentialDriveController:
-    width = 0.5588  # Robot width, TODO find
-    max_speed_percentage = 0.25  # Maximum speed we're allowing drive motors to spin
-    HZ = 20
-
     def __init__(self):
-
         # ROS Publishers and subsribers to get / send data
 
         self._vel_sub = rospy.Subscriber("/cmd_vel", Twist, self._vel_cb)
         self._effort_pub = rospy.Publisher("/effort", RobotEffort, queue_size=1)
         self._state_sub = rospy.Subscriber("state", RobotState, self._robot_state_cb)
 
+        self.width = rospy.get_param("~width", 0.5588)
+        self.max_speed_percentage = rospy.get_param("~max_speed_percentage", 0.25)
+        self.hz = rospy.get_param("~hz", 20)
+        self.max_speed = rospy.get_param("~max_speed", 0.62)
+        self.p = rospy.get_param("~p", 0.00001)  # P gain for PD controller
+        self.d = rospy.get_param("~d", 0.000004)  # D gain for PD controller
+
         self.lin = 0
         self.ang = 0
 
+        self.meters_per_tick = 0.1397  # TODO find
+        self.encoder_dt = 0.01  # Amount of time between readings
+
         # Variables for PIDF Velocity Control
 
-
+        self.loop_dt = 1 / self.hz  # Amount of time between calls of this function
         self.prev_left_vel_reading = 0
         self.prev_right_vel_reading = 0
         self.prev_left_reading = 0
@@ -40,7 +45,7 @@ class DifferentialDriveController:
         self.prev_right_reading = 0
         self.right_reading = 0
 
-        rate = rospy.Rate(self.HZ)
+        rate = rospy.Rate(self.hz)
         rospy.on_shutdown(self.shutdown_hook)
 
         while not rospy.is_shutdown():
@@ -64,26 +69,20 @@ class DifferentialDriveController:
         left = self.lin - self.ang * self.width / 2
         right = self.lin + self.ang * self.width / 2
 
-        max_speed = 0.62  # TODO find max speed of motors in meters / second
-        p = 0.00001  # P gain for PD controller
-        d = 0.000004  # D gain for PD controller
-
         # Feed forward
-        left_percent_estimate = np.clip(left / max_speed, -1, 1)
-        right_percent_estimate = np.clip(right / max_speed, -1, 1)
-
-        meters_per_tick = 0.1397  # TODO find
-        encoder_dt = 0.01  # Amount of time between readings
-        loop_dt = 1/self.HZ  # Amount of time between calls of this function
+        left_percent_estimate = np.clip(left / self.max_speed, -1, 1)
+        right_percent_estimate = np.clip(right / self.max_speed, -1, 1)
 
         # Measured Velocity in m / s
         left_vel_reading = (
-            ang_delta(self.left_reading , self.prev_left_reading) / encoder_dt * meters_per_tick
-        ) * 3
+            ang_delta(self.left_reading, self.prev_left_reading)
+            / self.encoder_dt
+            * self.meters_per_tick
+        )
         right_vel_reading = (
-            ang_delta(self.right_reading , self.prev_right_reading)
-            / encoder_dt
-            * meters_per_tick
+            ang_delta(self.right_reading, self.prev_right_reading)
+            / self.encoder_dt
+            * self.meters_per_tick
         )
 
         # Calculating error
@@ -97,13 +96,13 @@ class DifferentialDriveController:
         # Calculating motor velocities
         left = (
             left_percent_estimate
-            + left_error * p
-            + (left_error - left_prev_error) / loop_dt * d
+            + left_error * self.p
+            + (left_error - left_prev_error) / self.loop_dt * self.d
         )
         right = (
             right_percent_estimate
-            + right_error * p
-            + (right_error - right_prev_error) / loop_dt * d
+            + right_error * self.p
+            + (right_error - right_prev_error) / self.loop_dt * self.d
         )
 
         # Updating previous readings

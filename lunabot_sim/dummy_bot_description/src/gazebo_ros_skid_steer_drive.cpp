@@ -47,7 +47,7 @@
 #include <algorithm>
 #include <assert.h>
 
-#include <gazebo_plugins/gazebo_ros_skid_steer_drive.h>
+#include <dummy_bot_description/gazebo_ros_skid_steer_drive.h>
 
 #ifdef ENABLE_PROFILER
 #include <ignition/common/Profiler.hh>

@@ -27,17 +27,12 @@ class LeakyBucket:
 
 
 class ExcavationController:
-    max_exc_percent = 1
-    max_lead_screw_percent = 1
-
     FORWARD_EXCAVATE = -1
     DOWN_LEAD_SCREW = -0.2
     UP_LEAD_SCREW = 0.7
 
-    # valid_exc_range = (11000, 17400)
-    valid_exc_range = (6000, 17400)
-    # valid_lead_screw_range = (9000, 17000)
-    valid_lead_screw_range = (6000, 20000)
+    valid_exc_current_range = (6000, 17400)
+    valid_lead_screw_current_range = (6000, 20000)
 
     def __init__(self):
         self.exc_curr = None
@@ -55,8 +50,12 @@ class ExcavationController:
         self._effort_pub = rospy.Publisher("/effort", RobotEffort, queue_size=1)
         self._state_sub = rospy.Subscriber("/state", RobotState, self._robot_state_cb)
 
+        self.max_exc_percent = rospy.get_param("~max_exc_percent", 1)
+        self.max_lead_screw_percent = rospy.get_param("~max_lead_screw_percent", 1)
+        self.hz = rospy.get_param("~hz", 50)
+
         rospy.on_shutdown(self.shutdown_hook)
-        self.rate = rospy.Rate(50)
+        self.rate = rospy.Rate(self.hz)
 
         while not rospy.is_shutdown():
             if self.exc_curr is not None and self.lead_screw_curr is not None:
@@ -96,15 +95,15 @@ class ExcavationController:
 
     def is_exc_stuck(self):
         return (
-            self.exc_curr < self.valid_exc_range[0]
-            or self.exc_curr > self.valid_exc_range[1]
+            self.exc_curr < self.valid_exc_current_range[0]
+            or self.exc_curr > self.valid_exc_current_range[1]
         )
 
     def lead_screw_max_retract(self):
-        return self.lead_screw_curr < self.valid_lead_screw_range[0]
+        return self.lead_screw_curr < self.valid_lead_screw_current_range[0]
 
     def lead_screw_max_extend(self):
-        return self.lead_screw_curr > self.valid_lead_screw_range[1]
+        return self.lead_screw_curr > self.valid_lead_screw_current_range[1]
 
     def is_lead_screw_invalid(self):
         return self.lead_screw_max_retract() or self.lead_screw_max_extend()
