@@ -6,6 +6,7 @@
 #include <sys/ioctl.h>
 #include <termios.h>
 
+#include <lunabot_embedded/utils.h>
 #include <lunabot_msgs/RobotEffort.h>
 #include <lunabot_msgs/RobotState.h>
 
@@ -19,53 +20,11 @@ extern "C" {
 using namespace std;
 
 #define BUF_SIZE 64
-
 #define DEP_GEAR_RATIO (1. / 7.125)
-
 #define MAX_DIFF 15
-
-float to_rad(float deg) { return deg * M_PI / 180.0; }
-float u_mod(float n, float base) {
-    float m = fmod(n, base);
-    return (m >= 0) ? m : m + base;
-}
-float ang_delta(float deg, float prev_deg) {
-    float raw = deg - prev_deg;
-    if (raw == 0) {
-        return 0;
-    }
-    float turn = min(u_mod(raw, 360.), u_mod(-raw, 360.));
-
-    int dir = turn == raw ? abs(raw) / raw : -abs(raw) / raw;
-
-    return turn * dir;
-}
-
-struct GearAngle {
-  public:
-    GearAngle(float gear_ratio) : gear_ratio_(gear_ratio) { cycle_ = 0; }
-    float get_rad_from_raw(float deg, float prev_deg) {
-        float raw = deg - prev_deg;
-        float turn = min(u_mod(raw, 360.), u_mod(-raw, 360.));
-        int dir = turn == raw ? abs(raw) / raw : -abs(raw) / raw;
-        if (abs(raw) != abs(turn)) { // overflow occured!
-            if (raw > 0) {
-                cycle_++;
-            } else {
-                cycle_--;
-            }
-        }
-        return (2 * M_PI * cycle_ + to_rad(deg)) * gear_ratio_;
-    }
-
-  private:
-    int cycle_;
-    float gear_ratio_;
-};
 
 uint8_t buf[BUF_SIZE];
 
-GearAngle dep_gear(DEP_GEAR_RATIO);
 RobotState prev_state = RobotState_init_zero;
 RobotState state = RobotState_init_zero;
 RobotEffort effort = RobotEffort_init_zero;
@@ -80,12 +39,15 @@ void recv(ros::Publisher &pub) {
     /* Now we are ready to decode the message. */
     pb_decode(&stream, RobotState_fields, &state);
     lunabot_msgs::RobotState state_msg;
-    state_msg.act_right_curr = state.act_right_curr;
-    state_msg.drive_right_curr = state.drive_right_curr;
-    state_msg.drive_left_curr = state.drive_left_curr;
-    state_msg.lead_screw_curr = state.lead_screw_curr;
-    state_msg.dep_curr = state.dep_curr;
-    state_msg.exc_curr = state.exc_curr;
+    state_msg.act_right_curr = adc_to_current_ACS711_15A(state.act_right_curr);
+    state_msg.drive_right_curr =
+        adc_to_current_ACS711_15A(state.drive_right_curr);
+    state_msg.drive_left_curr =
+        adc_to_current_ACS711_15A(state.drive_left_curr);
+    state_msg.lead_screw_curr =
+        adc_to_current_ACS711_15A(state.lead_screw_curr);
+    state_msg.dep_curr = adc_to_current_ACS711_15A(state.dep_curr);
+    state_msg.exc_curr = adc_to_current_ACS711_31A(state.exc_curr);
     state_msg.act_ang = state.act_ang;
     float drive_left_ang_diff =
         ang_delta(state.drive_left_ang, last_drive_left);
@@ -99,9 +61,9 @@ void recv(ros::Publisher &pub) {
 
     state_msg.drive_right_ang = to_rad(state.drive_right_ang);
     state_msg.lead_screw_ang = state.lead_screw_ang;
-    state_msg.dep_ang =
-        dep_gear.get_rad_from_raw(state.dep_ang, prev_state.dep_ang);
-    // state_msg.dep_ang = state.dep_ang;
+    // state_msg.dep_ang =
+    // dep_gear.get_rad_from_raw(state.dep_ang, prev_state.dep_ang);
+    state_msg.dep_ang = state.dep_ang;
 
     prev_state = state;
     pub.publish(state_msg);
