@@ -29,6 +29,7 @@ RobotState prev_state = RobotState_init_zero;
 RobotState state = RobotState_init_zero;
 RobotEffort effort = RobotEffort_init_zero;
 float last_drive_left = 0;
+float last_drive_right = 0;
 
 pb_ostream_t sizestream = {0};
 
@@ -59,11 +60,20 @@ void recv(ros::Publisher &pub) {
         last_drive_left = state.drive_left_ang;
     }
 
-    state_msg.drive_right_ang = to_rad(state.drive_right_ang);
+    float drive_right_ang_diff =
+        ang_delta(state.drive_right_ang, last_drive_right);
+
+    if (abs(drive_right_ang_diff) >= MAX_DIFF) {
+        state_msg.drive_right_ang = to_rad(last_drive_right);
+    } else {
+        state_msg.drive_right_ang = to_rad(state.drive_right_ang);
+        last_drive_right = state.drive_right_ang;
+    }
+
     state_msg.lead_screw_ang = state.lead_screw_ang;
     // state_msg.dep_ang =
     // dep_gear.get_rad_from_raw(state.dep_ang, prev_state.dep_ang);
-    state_msg.dep_ang = state.dep_ang;
+    state_msg.dep_ang = to_rad(state.dep_ang);
     state_msg.uwb_dists.push_back(state.uwb_dist_0);
     state_msg.uwb_dists.push_back(state.uwb_dist_1);
     state_msg.uwb_dists.push_back(state.uwb_dist_2);
