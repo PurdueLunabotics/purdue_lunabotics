@@ -24,12 +24,17 @@ float deg_angle_delta(float deg, float prev_deg) {
   return turn * dir;
 }
 
-void angle_noise_rej_filter(float &curr_angle_deg, float &prev_angle_deg, float max_delta) {
-  float delta = deg_angle_delta(curr_angle_deg, prev_angle_deg);
+// alpha = 0, no filter, alpha = 1, full
+void leaky_integrator(float &value, float prev_filter_value, float alpha) {
+  value = alpha * prev_filter_value + (1 - alpha) * value;
+}
+
+void angle_noise_rej_filter(float *curr_angle_deg, float *prev_angle_deg, float max_delta) {
+  float delta = deg_angle_delta(*curr_angle_deg, *prev_angle_deg);
   if (abs(delta) >= max_delta) {
-    curr_angle_deg = prev_angle_deg;
+    *curr_angle_deg = *prev_angle_deg;
   } else {
-    prev_angle_deg = curr_angle_deg;
+    *prev_angle_deg = *curr_angle_deg;
   }
 }
 
