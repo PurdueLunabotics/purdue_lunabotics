@@ -9,6 +9,28 @@ using namespace std;
 
 #define DEG2RAD(x) ((x)*M_PI / 180.0)
 
+struct RingBuffer {
+
+  RingBuffer(int size) {
+    this->size = size;
+    data = new float[size];
+  }
+
+  void push(float value) {
+    sum -= data[head];
+    sum += value;
+    data[head] = value;
+    head = (head + 1) % size;
+  }
+
+  float mean() { return sum / size; }
+
+  int size;
+  float *data;
+  int head;
+  float sum;
+};
+
 float u_mod(float n, float base) {
   float m = fmod(n, base);
   return (m >= 0) ? m : m + base;
@@ -25,8 +47,8 @@ float deg_angle_delta(float deg, float prev_deg) {
 }
 
 // alpha = 0, no filter, alpha = 1, full
-void leaky_integrator(float &value, float prev_filter_value, float alpha) {
-  value = alpha * prev_filter_value + (1 - alpha) * value;
+float leaky_integrator(float value, float prev_filter_value, float alpha) {
+  return alpha * prev_filter_value + (1 - alpha) * value;
 }
 
 void angle_noise_rej_filter(float *curr_angle_deg, float *prev_angle_deg, float max_delta) {
