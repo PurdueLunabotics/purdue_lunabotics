@@ -5,7 +5,6 @@
 #include <Stepper.h>
 #include <Wire.h>
 
-
 #ifndef __INTERFACES_H__
 #define __INTERFACES_H__
 
@@ -15,29 +14,29 @@ enum StepperDir { RETRACT = -1, EXTEND = 1 };
 enum MotorDir { CW = HIGH, CCW = LOW };
 enum STMotor { M1 = 1, M2 = 2 };
 
-class StepperInterface {
-  public:
-    StepperInterface(uint8_t PWM1_P, uint8_t PWM2_P, uint8_t DIR1_P,
-                     uint8_t DIR2_P, int steps, int speed, int step_size);
-    void on();
-    void off();
-    void step(StepperDir dir);
+class Stepper2Phase_MotorCtrl {
+public:
+  Stepper2Phase_MotorCtrl(uint8_t PWM1_P, uint8_t PWM2_P, uint8_t DIR1_P, uint8_t DIR2_P, int steps,
+                          int speed, int step_size);
+  void on();
+  void off();
+  void step(StepperDir dir);
 
-  private:
-    Stepper s_;
-    uint8_t PWM1_P_;
-    uint8_t PWM2_P_;
-    uint8_t DIR1_P_;
-    uint8_t DIR2_P_;
-    int enabled_;
-    int steps_;     // steps per revolution
-    int speed_;     // steps per minute
-    int step_size_; // step cnt per step
+private:
+  Stepper s_;
+  uint8_t PWM1_P_;
+  uint8_t PWM2_P_;
+  uint8_t DIR1_P_;
+  uint8_t DIR2_P_;
+  int enabled_;
+  int steps_;     // steps per revolution
+  int speed_;     // steps per minute
+  int step_size_; // step cnt per step
 };
 
-class MotorInterface {
+class PWM_MotorCtrl {
 public:
-  MotorInterface(uint8_t PWM_P, uint8_t DIR_P);
+  PWM_MotorCtrl(uint8_t PWM_P, uint8_t DIR_P);
   void write(uint8_t pwm, MotorDir dir);
 
 private:
@@ -45,9 +44,9 @@ private:
   uint8_t DIR_P_;
 };
 
-class STMotorInterface {
+class Sabertooth_MotorCtrl {
 public:
-  STMotorInterface(Sabertooth *st, STMotor motor);
+  Sabertooth_MotorCtrl(Sabertooth *st, STMotor motor);
   void write(int8_t pwm);
   static void init_serial(HardwareSerial s, int baud_rate);
 
@@ -59,9 +58,9 @@ private:
 
 // Sensors
 
-class CurrentSensorBus {
+class ACS711_Current_Bus {
 public:
-  CurrentSensorBus(){};
+  ACS711_Current_Bus(){};
   static void init_ads1115();
   static int16_t read(uint8_t bus, uint8_t mux);
   static void transfer();
@@ -79,21 +78,21 @@ private:
   static int16_t curr_buffer_[BUSES][BUS_SIZE];
 };
 
-class UWBBus {
+class M5Stack_UWB_Trncvr {
 public:
-  UWBBus(){};
+  M5Stack_UWB_Trncvr(){};
   static void init();
   static float read_uwb(uint8_t id);
   static void transfer();
 
 private:
-  static constexpr int BUS_SIZE = 3;
-  volatile static float uwb_buffer_[BUS_SIZE];
+  static constexpr int NUM_UWB_TAGS = 3;
+  volatile static float recv_buffer_[NUM_UWB_TAGS];
 };
 
-class EncoderBus {
+class VLH35_Angle_Bus {
 public:
-  EncoderBus(){};
+  VLH35_Angle_Bus(){};
   static void init();
   static float read_enc(uint8_t id);
   static void transfer();
