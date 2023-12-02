@@ -65,8 +65,8 @@ void recv(ros::Publisher &pub) {
 void effort_cb(const lunabot_msgs::RobotEffort &msg) {
   effort.lead_screw = msg.lead_screw;
   effort.lin_act = msg.lin_act;
-  effort.left_drive = -msg.left_drive;
-  effort.right_drive = -msg.right_drive;
+  effort.left_drive = msg.left_drive;
+  effort.right_drive = msg.right_drive;
   effort.excavate = msg.excavate;
   effort.deposit = msg.deposit;
 }

@@ -113,7 +113,6 @@ void ACS711_Current_Bus::transfer() {
     }
   }
 }
-}
 
 int16_t ACS711_Current_Bus::read(uint8_t bus, uint8_t mux) { return curr_buffer_[bus][mux]; }
 

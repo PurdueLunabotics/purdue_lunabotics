@@ -12,9 +12,9 @@ Sabertooth MC4(131, ST_SERIAL); // high-current
 // ADCs
 namespace actuation {
 
-Sabertooth_MotorCtrl act_right{&MC2, STMotor::M1};
-Sabertooth_MotorCtrl act_left{&MC2, STMotor::M2};
-Sabertooth_MotorCtrl lead_screw_motor{&MC1, STMotor::M1};
+Sabertooth_MotorCtrl act_right_mtr{&MC2, STMotor::M1};
+Sabertooth_MotorCtrl act_left_mtr{&MC2, STMotor::M2};
+Sabertooth_MotorCtrl lead_screw_mtr{&MC1, STMotor::M1};
 
 constexpr uint8_t ACT_RIGHT_CURR_ADC = 1;
 constexpr uint8_t ACT_RIGHT_CURR_MUX = 1; // U6 curr_sense_board
@@ -36,17 +36,17 @@ void update(int32_t &act_right_curr, int32_t &lead_screw_curr, float &act_angle,
   act_angle = VLH35_Angle_Bus::read_enc(ACT_ENC_MUX);
 }
 
-void cb(int8_t lead_screw, int8_t lin_act) {
-  act_left.write(-lin_act);
-  act_right.write(lin_act);
-  lead_screw_motor.write(lead_screw);
+void cb(int8_t lead_screw_volt, int8_t lin_act_volt) {
+  act_left_mtr.write(-lin_act_volt);
+  act_right_mtr.write(lin_act_volt);
+  lead_screw_mtr.write(lead_screw_volt);
 }
 
 } // namespace actuation
 
 namespace drivetrain {
-Sabertooth_MotorCtrl left_drive{&MC3, STMotor::M1};
-Sabertooth_MotorCtrl right_drive{&MC3, STMotor::M2};
+Sabertooth_MotorCtrl left_drive_mtr{&MC3, STMotor::M1};
+Sabertooth_MotorCtrl right_drive_mtr{&MC3, STMotor::M2};
 
 constexpr uint8_t LEFT_CURR_ADC = 0;
 constexpr uint8_t LEFT_CURR_MUX = 2; // U3 curr_sense_board
@@ -66,10 +66,10 @@ void update(int32_t &left_curr, int32_t &right_curr, float &left_angle, float &r
   right_angle = VLH35_Angle_Bus::read_enc(DRIVE_RIGHT_MUX);
 }
 
-void cb(int8_t left, int8_t right) {
+void cb(int8_t left_drive_volt, int8_t right_drive_volt) {
   // Tank drive steering
-  left_drive.write(-left);
-  right_drive.write(-right);
+  left_drive_mtr.write(left_drive_volt);
+  right_drive_mtr.write(right_drive_volt);
 }
 
 } // namespace drivetrain
@@ -83,18 +83,18 @@ void update(float &d0, float &d1, float &d2) {
 } // namespace uwb
 
 namespace excavation {
-Sabertooth_MotorCtrl exc_motor{&MC4, STMotor::M1};
+Sabertooth_MotorCtrl exc_mtr{&MC4, STMotor::M1};
 
 constexpr uint8_t EXC_CURR_ADC = 1;
 constexpr uint8_t EXC_CURR_MUX = 0; // U5 curr_sense_board
 
 void update(int32_t &exc_curr) { exc_curr = ACS711_Current_Bus::read(EXC_CURR_ADC, EXC_CURR_MUX); }
 
-void cb(int8_t speed) { exc_motor.write(speed); }
+void cb(int8_t speed) { exc_mtr.write(speed); }
 } // namespace excavation
 
 namespace deposition {
-Sabertooth_MotorCtrl dep_motor{&MC1, STMotor::M2};
+Sabertooth_MotorCtrl dep_mtr{&MC1, STMotor::M2};
 constexpr uint8_t DEP_CURR_ADC = 0;
 constexpr uint8_t DEP_CURR_MUX = 1; // U2 curr_sense_board
 
@@ -105,6 +105,6 @@ void update(int32_t &dep_curr, float &dep_angle) {
   dep_angle = VLH35_Angle_Bus::read_enc(DEP_ENC_MUX);
 }
 
-void cb(int8_t speed) { dep_motor.write(speed); }
+void cb(int8_t volt) { dep_mtr.write(volt); }
 
 } // namespace deposition
