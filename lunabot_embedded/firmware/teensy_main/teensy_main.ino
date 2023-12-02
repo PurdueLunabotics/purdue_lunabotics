@@ -3,7 +3,6 @@
 #include <pb_decode.h>
 #include <pb_encode.h>
 #include <robot.hpp>
-#include <stdio.h>
 
 #define TX_PERIOD 10               // ms
 #define ENC_TRANSFER_PERIOD 1000   // microsec
@@ -15,11 +14,6 @@ RobotEffort effort = RobotEffort_init_zero;
 size_t effort_msg_size;
 
 uint8_t buffer[64];
-
-/*
-if set:
-bit0: cannot recv
-*/
 uint8_t flags = 0;
 
 void recv() {
@@ -38,8 +32,8 @@ void recv() {
 void send() {
   actuation::update(state.act_right_curr, state.lead_screw_curr, state.act_ang,
                     state.lead_screw_ang);
-  drivetrain::update(state.drive_left_curr, state.drive_right_curr,
-                     state.drive_left_ang, state.drive_right_ang);
+  drivetrain::update(state.drive_left_curr, state.drive_right_curr, state.drive_left_ang,
+                     state.drive_right_ang);
   deposition::update(state.dep_curr, state.dep_ang);
 
   excavation::update(state.exc_curr);
@@ -53,13 +47,13 @@ IntervalTimer enc_timer;
 IntervalTimer uwb_timer;
 
 void setup() {
-  STMotorInterface::init_serial(ST_SERIAL, ST_BAUD_RATE);
-  CurrentSensorBus::init_ads1115();
-  EncoderBus::init();
-  UWBBus::init();
+  Sabertooth_MotorCtrl::init_serial(ST_SERIAL, ST_BAUD_RATE);
+  ACS711_Current_Bus::init_ads1115();
+  VLH35_Angle_Bus::init();
+  M5Stack_UWB_Trncvr::init();
 
-  enc_timer.begin(EncoderBus::transfer, ENC_TRANSFER_PERIOD);
-  uwb_timer.begin(UWBBus::transfer, UWB_TRANSFER_PERIOD);
+  enc_timer.begin(VLH35_Angle_Bus::transfer, ENC_TRANSFER_PERIOD);
+  uwb_timer.begin(M5Stack_UWB_Trncvr::transfer, UWB_TRANSFER_PERIOD);
 
   // disable timeout
   MC1.setTimeout(0);
@@ -92,6 +86,6 @@ void loop() {
 
   if (ms_curr_update > CURR_UPDATE_PERIOD) {
     ms_curr_update -= CURR_UPDATE_PERIOD;
-    CurrentSensorBus::transfer();
+    ACS711_Current_Bus::transfer();
   }
 }

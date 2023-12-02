@@ -6,11 +6,11 @@
 #include <tf2_ros/buffer.h>
 
 int main(int argc, char **argv) {
-    ros::init(argc, argv, "costmap_node");
-    tf2_ros::Buffer tf_buff(ros::Duration(5));
-    tf2_ros::TransformListener tf(tf_buff);
+  ros::init(argc, argv, "costmap_node");
+  tf2_ros::Buffer tf_buff(ros::Duration(5));
+  tf2_ros::TransformListener tf(tf_buff);
 
-    costmap_2d::Costmap2DROS costmap("global_costmap", tf_buff);
-    ros::spin();
-    return 0;
+  costmap_2d::Costmap2DROS costmap("global_costmap", tf_buff);
+  ros::spin();
+  return 0;
 }
