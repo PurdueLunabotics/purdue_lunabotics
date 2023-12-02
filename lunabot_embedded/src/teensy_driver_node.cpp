@@ -23,7 +23,7 @@ using namespace std;
 #define BUF_SIZE 64
 #define MAX_ANGLE_DELTA_DEG 15
 
-#define LEAKY_INTEGRATOR_ALPHA 0
+#define LEAKY_INTEGRATOR_ALPHA 0.6
 
 uint8_t buf[BUF_SIZE];
 
@@ -34,8 +34,8 @@ lunabot_msgs::RobotState prev_state_msg;
 float prev_raw_drive_ang_left = 0;
 float prev_raw_drive_ang_right = 0;
 
-RingBuffer left_buffer(5);
-RingBuffer right_buffer(5);
+RingBuffer<20> left_buffer;
+RingBuffer<10> right_buffer;
 
 float prev_drive_left_vel = 0;
 float prev_drive_right_vel = 0;
@@ -67,8 +67,8 @@ void recv(ros::Publisher &pub) {
   prev_time = ros::Time::now().toSec();
 
   float left_vel, right_vel;
-  left_vel = deg_angle_delta(state.drive_left_ang, prev_state.drive_left_ang);
-  right_vel = deg_angle_delta(state.drive_right_ang, prev_state.drive_right_ang);
+  left_vel = deg_angle_delta(state.drive_left_ang, prev_state.drive_left_ang) / dt;
+  right_vel = deg_angle_delta(state.drive_right_ang, prev_state.drive_right_ang) / dt;
 
   left_buffer.push(left_vel);
   right_buffer.push(right_vel);

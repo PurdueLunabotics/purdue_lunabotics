@@ -4,29 +4,25 @@
 #include <stdlib.h>
 #include <sys/ioctl.h>
 #include <termios.h>
+#include <array>
 
 using namespace std;
 
 #define DEG2RAD(x) ((x)*M_PI / 180.0)
 
+template <size_t N>
 struct RingBuffer {
-
-  RingBuffer(int size) {
-    this->size = size;
-    data = new float[size];
-  }
 
   void push(float value) {
     sum -= data[head];
     sum += value;
     data[head] = value;
-    head = (head + 1) % size;
+    head = (head + 1) % data.size();
   }
 
-  float mean() { return sum / size; }
+  float mean() { return sum / data.size(); }
 
-  int size;
-  float *data;
+  std::array<float,N> data;
   int head;
   float sum;
 };
@@ -42,7 +38,7 @@ float deg_angle_delta(float deg, float prev_deg) {
     return 0;
   }
   float turn = min(u_mod(raw, 360.), u_mod(-raw, 360.));
-  int dir = turn == raw ? abs(raw) / raw : -abs(raw) / raw;
+  int dir = abs(raw) / raw;
   return turn * dir;
 }
 
