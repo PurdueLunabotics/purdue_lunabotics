@@ -23,18 +23,20 @@ using namespace std;
 #define BUF_SIZE 64
 #define MAX_ANGLE_DELTA_DEG 15
 
-#define LEAKY_INTEGRATOR_ALPHA 0.1
+#define LEAKY_INTEGRATOR_ALPHA 0.9
 
 uint8_t buf[BUF_SIZE];
 
+RobotState prev_state = RobotState_init_zero;
 RobotState state = RobotState_init_zero;
 RobotEffort effort = RobotEffort_init_zero;
 lunabot_msgs::RobotState prev_state_msg;
-float last_raw_drive_ang_left = 0;
-float last_raw_drive_ang_right = 0;
+float prev_raw_drive_ang_left = 0;
+float prev_raw_drive_ang_right = 0;
 
-float last_drive_ang_left = 0;
-float last_drive_ang_right = 0;
+float prev_drive_left_vel = 0;
+float prev_drive_right_vel = 0;
+
 double prev_time = 0;
 
 pb_ostream_t sizestream = {0};
@@ -54,18 +56,23 @@ void recv(ros::Publisher &pub) {
   state_msg.exc_curr = adc_to_current_ACS711_31A(state.exc_curr);
   state_msg.act_ang = state.act_ang;
 
-  angle_noise_rej_filter(&state.drive_left_ang, &last_raw_drive_ang_left, MAX_ANGLE_DELTA_DEG);
-  angle_noise_rej_filter(&state.drive_right_ang, &last_raw_drive_ang_right, MAX_ANGLE_DELTA_DEG);
+  angle_noise_rej_filter(&state.drive_left_ang, &prev_raw_drive_ang_left, MAX_ANGLE_DELTA_DEG);
+  angle_noise_rej_filter(&state.drive_right_ang, &prev_raw_drive_ang_right, MAX_ANGLE_DELTA_DEG);
 
   double dt;
   dt = ros::Time::now().toSec() - prev_time;
+  prev_time = ros::Time::now().toSec();
 
   float left_vel, right_vel;
-  left_vel = deg_angle_delta(state.drive_left_ang, prev_state_msg.drive_left_ang) / dt;
-  right_vel = deg_angle_delta(state.drive_left_ang, prev_state_msg.drive_left_ang) / dt;
+  left_vel = deg_angle_delta(state.drive_left_ang, prev_state.drive_left_ang) ;
+  right_vel = deg_angle_delta(state.drive_right_ang, prev_state.drive_right_ang);
 
-  leaky_integrator(left_vel, prev_state_msg.drive_left_vel, LEAKY_INTEGRATOR_ALPHA);
-  leaky_integrator(right_vel, prev_state_msg.drive_left_vel, LEAKY_INTEGRATOR_ALPHA);
+  leaky_integrator(left_vel, prev_drive_left_vel, LEAKY_INTEGRATOR_ALPHA);
+  leaky_integrator(right_vel, prev_drive_right_vel, LEAKY_INTEGRATOR_ALPHA);
+
+  prev_state = state;
+  prev_drive_left_vel = left_vel;
+  prev_drive_right_vel = right_vel;
 
   state_msg.drive_left_ang = DEG2RAD(state.drive_left_ang);
   state_msg.drive_right_ang = DEG2RAD(state.drive_right_ang);
@@ -76,8 +83,6 @@ void recv(ros::Publisher &pub) {
   state_msg.uwb_dists.push_back(state.uwb_dist_0);
   state_msg.uwb_dists.push_back(state.uwb_dist_1);
   state_msg.uwb_dists.push_back(state.uwb_dist_2);
-
-  prev_state_msg = state_msg;
 
   pub.publish(state_msg);
 }
