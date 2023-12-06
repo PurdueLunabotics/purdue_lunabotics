@@ -32,6 +32,7 @@ float u_mod(float n, float base) {
   return (m >= 0) ? m : m + base;
 }
 
+// TODO: Fix cyclic spikes in delta
 float deg_angle_delta(float deg, float prev_deg) {
   float raw = deg - prev_deg;
   if (raw == 0) {

@@ -23,6 +23,9 @@ using namespace std;
 #define BUF_SIZE 64
 #define MAX_ANGLE_DELTA_DEG 15
 
+// Left encoder reports half the speed due to hardware error
+#define LEFT_ENCODER_MULTIPLIER 2
+
 #define LEAKY_INTEGRATOR_ALPHA 0.6
 
 uint8_t buf[BUF_SIZE];
@@ -67,7 +70,7 @@ void recv(ros::Publisher &pub) {
   prev_time = ros::Time::now().toSec();
 
   float left_vel, right_vel;
-  left_vel = deg_angle_delta(state.drive_left_ang, prev_state.drive_left_ang) / dt;
+  left_vel = LEFT_ENCODER_MULTIPLIER * deg_angle_delta(state.drive_left_ang, prev_state.drive_left_ang) / dt;
   right_vel = deg_angle_delta(state.drive_right_ang, prev_state.drive_right_ang) / dt;
 
   left_buffer.push(left_vel);
