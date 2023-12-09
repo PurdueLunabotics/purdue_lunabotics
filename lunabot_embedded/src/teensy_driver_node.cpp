@@ -34,8 +34,10 @@ RobotState prev_state = RobotState_init_zero;
 RobotState state = RobotState_init_zero;
 RobotEffort effort = RobotEffort_init_zero;
 lunabot_msgs::RobotState prev_state_msg;
-float prev_raw_drive_ang_left = 0;
-float prev_raw_drive_ang_right = 0;
+
+
+float prev_valid_drive_ang_left = 0;
+float prev_valid_drive_ang_right = 0;
 
 RingBuffer<20> left_buffer;
 RingBuffer<10> right_buffer;
@@ -62,8 +64,8 @@ void recv(ros::Publisher &pub) {
   state_msg.exc_curr = adc_to_current_ACS711_31A(state.exc_curr);
   state_msg.act_ang = state.act_ang;
 
-  angle_noise_rej_filter(&state.drive_left_ang, &prev_raw_drive_ang_left, MAX_ANGLE_DELTA_DEG);
-  angle_noise_rej_filter(&state.drive_right_ang, &prev_raw_drive_ang_right, MAX_ANGLE_DELTA_DEG);
+  angle_noise_rej_filter(&state.drive_left_ang, &prev_valid_drive_ang_left, MAX_ANGLE_DELTA_DEG);
+  angle_noise_rej_filter(&state.drive_right_ang, &prev_valid_drive_ang_right, MAX_ANGLE_DELTA_DEG);
 
   double dt;
   dt = ros::Time::now().toSec() - prev_time;

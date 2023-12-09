@@ -15,7 +15,7 @@ class DifferentialDriveController:
         self._state_sub = rospy.Subscriber("state", RobotState, self._robot_state_cb)
 
         self.width = rospy.get_param("~width", 0.5588)
-        self.max_speed_percentage = rospy.get_param("~max_speed_percentage", 1)
+        self.max_speed_percentage = rospy.get_param("~max_speed_percentage", 0.5)
         self.hz = rospy.get_param("~hz", 20)
         self._max_speed = rospy.get_param("~max_speed", 4.3)
         self.p = rospy.get_param("~p", 2)  # P gain for PID controller
@@ -94,12 +94,12 @@ class DifferentialDriveController:
         self._left_prev_error = left_error
         self._right_prev_error = right_error
 
+        # print("left", left_set)
+        # print("right", right_set)
         effort_msg.left_drive = self.constrain(left)
         effort_msg.right_drive = self.constrain(right)
-        print("left", left_error)
-        print("right", right_error)
-        print("left i_sum", self.left_error_sum)
-        print("right i_sum", self.right_error_sum)
+        # print("left i_sum", self.left_error_sum)
+        # print("right i_sum", self.right_error_sum)
         self._effort_pub.publish(effort_msg)
 
     def constrain(self, val):

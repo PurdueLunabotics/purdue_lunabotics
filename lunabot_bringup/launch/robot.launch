@@ -5,11 +5,15 @@
     <arg name="teensy" default="true" />
     <arg name="cameras" default="true" />
     <arg name="slam" default="true" />
+    <arg name="exp_name" default="exp" />
 
     <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node" output="screen"/>
 
     <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch"/>
-    <include if="$(arg record)" file="$(find lunabot_bringup)/launch/record.launch"/>
+    <include if="$(arg record)" file="$(find lunabot_bringup)/launch/record.launch">
+
+        <arg name="exp_name" value="$(arg exp_name)"/>
+    </include>
 
     <group if="$(arg autonomy)">
 
@@ -34,6 +38,12 @@
               <!-- <rosparam file="$(find lunabot_config)/config/rrtstar.yml" command="load"/> -->
           </node>
       </group>
+  <!-- mapping -->
+  <group ns="maps">
+      <node name="costmap_node" pkg="lunabot_perception" type="costmap_node" output="screen">
+          <rosparam file="$(find lunabot_config)/config/global_costmap.yml" command="load" ns="global_costmap" />
+      </node>
+  </group>
 
     </group>
 </launch>
