@@ -152,6 +152,12 @@ void MPC::publish_velocity_(double linear, double angular) {
   this->velocity_pub_.publish(twist);
 }
 
+// See Boundary and Constraint Handling
+// https://cma-es.github.io/cmaes_sourcecode_page.html#practical
+double MPC::smooth_clamp_(double x, double a, double b) {
+  return a + (b - a) * (1 - cos(M_PI * x / 10)) / 2;
+}
+
 std::vector<Eigen::MatrixXd> MPC::normal_distribute_(Eigen::MatrixXd means,
                                                      Eigen::MatrixXd std_devs, int count) {
   std::vector<Eigen::MatrixXd> random_vels(count);
@@ -163,7 +169,13 @@ std::vector<Eigen::MatrixXd> MPC::normal_distribute_(Eigen::MatrixXd means,
         std::random_device rd;
         std::default_random_engine generator(rd());
         std::normal_distribution<double> distribution(means(j, k), std_devs(j, k));
-        random_vel(j, k) = distribution(generator);
+        double rand_vel = 0;
+        if (k == 0) {
+          rand_vel = smooth_clamp_(distribution(generator), lin_lim_[0], lin_lim_[1]);
+        } else {
+          rand_vel = smooth_clamp_(distribution(generator), ang_lim_[0], ang_lim_[1]);
+        }
+        random_vel(j, k) = rand_val;
       }
     }
     random_vels[i] = random_vel;

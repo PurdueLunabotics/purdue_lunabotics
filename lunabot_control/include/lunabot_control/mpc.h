@@ -8,7 +8,6 @@
 #include <geometry_msgs/TwistStamped.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <nav_msgs/Odometry.h>
-#include <swri_profiler/profiler.h>
 #include <nav_msgs/Path.h>
 #include <ros/ros.h>
 #include <swri_profiler/profiler.h>
@@ -16,6 +15,7 @@
 #include <Eigen/Dense>
 #include <assert.h>
 #include <bits/stdc++.h>
+#include <cmath>
 #include <random>
 #include <vector>
 
@@ -47,12 +47,12 @@ private:
   double delta_time_;
   Map map_;
 
+  double smooth_clamp_(double x, double a, double b);
   bool check_collision_(Eigen::RowVectorXd pos);
   double find_closest_distance_(Eigen::RowVectorXd pos);
   double calculate_cost_(Eigen::MatrixXd rollout);
   Eigen::MatrixXd calculate_model_(Eigen::MatrixXd actions);
-  std::vector<Eigen::MatrixXd> normal_distribute_(Eigen::MatrixXd means,
-                                                  Eigen::MatrixXd std_devs,
+  std::vector<Eigen::MatrixXd> normal_distribute_(Eigen::MatrixXd means, Eigen::MatrixXd std_devs,
                                                   int count);
   void publish_velocity_(double linear, double angular);
   Eigen::MatrixXd mean_(std::vector<std::pair<Eigen::MatrixXd, double>>);
