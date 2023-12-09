@@ -7,6 +7,7 @@ project(lunabot_perception)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+
 find_package(catkin REQUIRED COMPONENTS
   image_proc
   realsense2_camera
@@ -22,6 +23,8 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   costmap_2d
 )
+
+catkin_python_setup()
 
 find_package(PkgConfig REQUIRED)
 find_package(realsense2 CONFIG REQUIRED)
