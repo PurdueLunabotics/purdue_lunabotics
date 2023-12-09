@@ -146,7 +146,8 @@ double MPC::clamp_(double val, double low, double high) {
 
 void MPC::publish_velocity_(double linear, double angular) {
   geometry_msgs::Twist twist;
-  // NOTE: Swap linear and angular velocity in simulation
+  linear = clamp_(linear, lin_lim_[0], lin_lim_[1]);
+  angular = clamp_(angular, ang_lim_[0], ang_lim_[1]);
   twist.linear.x = linear;
   twist.angular.z = angular;
   this->velocity_pub_.publish(twist);
@@ -155,7 +156,7 @@ void MPC::publish_velocity_(double linear, double angular) {
 // See Boundary and Constraint Handling
 // https://cma-es.github.io/cmaes_sourcecode_page.html#practical
 double MPC::smooth_clamp_(double x, double a, double b) {
-  return a + (b - a) * (1 - cos(M_PI * x / 10)) / 2;
+  return a + (b - a) * (1 + sin(M_PI * x / 2)) / 2;
 }
 
 std::vector<Eigen::MatrixXd> MPC::normal_distribute_(Eigen::MatrixXd means,
@@ -169,13 +170,15 @@ std::vector<Eigen::MatrixXd> MPC::normal_distribute_(Eigen::MatrixXd means,
         std::random_device rd;
         std::default_random_engine generator(rd());
         std::normal_distribution<double> distribution(means(j, k), std_devs(j, k));
-        double rand_vel = 0;
+        double rand_vel = distribution(generator);
+        /*
         if (k == 0) {
-          rand_vel = smooth_clamp_(distribution(generator), lin_lim_[0], lin_lim_[1]);
+          rand_vel = smooth_clamp_(rand_vel, lin_lim_[0], lin_lim_[1]);
         } else {
-          rand_vel = smooth_clamp_(distribution(generator), ang_lim_[0], ang_lim_[1]);
+          rand_vel = smooth_clamp_(rand_vel, ang_lim_[0], ang_lim_[1]);
         }
-        random_vel(j, k) = rand_val;
+        */
+        random_vel(j, k) = rand_vel;
       }
     }
     random_vels[i] = random_vel;

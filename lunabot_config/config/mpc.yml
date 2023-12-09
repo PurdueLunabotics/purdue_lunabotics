@@ -10,4 +10,4 @@ frequency: 30
 min_distance_threshold: 0.5
 velocity_limits:
   linear: [-0.3, 0.3]
-  angular: [-0.1, 0.1]
+  angular: [-1.5, 1.5]

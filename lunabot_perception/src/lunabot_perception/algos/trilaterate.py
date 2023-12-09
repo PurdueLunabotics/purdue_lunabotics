@@ -99,9 +99,9 @@ if __name__ == "__main__":
         d1, d2, d3 = dist_from_pos(x, a1, a2, a3)
 
         # Add noise to signals
-        d1 += np.random.uniform(-0.1, 0.1)
-        d2 += np.random.uniform(-0.1, 0.1)
-        d3 += np.random.uniform(-0.1, 0.1)
+        d1 += np.random.uniform(-0.01, 0.01)
+        d2 += np.random.uniform(-0.01, 0.01)
+        d3 += np.random.uniform(-0.01, 0.01)
 
         D = np.array([d1, d2, d3])
         pos = tril.trilaterate(D)
