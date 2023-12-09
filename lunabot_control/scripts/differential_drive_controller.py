@@ -5,6 +5,7 @@ from geometry_msgs.msg import Twist
 
 from lunabot_msgs.msg import RobotEffort, RobotState
 
+
 class DifferentialDriveController:
     def __init__(self):
         # ROS Publishers and subsribers to get / send data
@@ -17,8 +18,10 @@ class DifferentialDriveController:
         self.max_speed_percentage = rospy.get_param("~max_speed_percentage", 1)
         self.hz = rospy.get_param("~hz", 20)
         self._max_speed = rospy.get_param("~max_speed", 4.3)
-        self.p = rospy.get_param("~p", 1.75)  # P gain for PD controller
-        self.d = rospy.get_param("~d", 0.01)  # D gain for PD controller
+        self.p = rospy.get_param("~p", 2)  # P gain for PID controller
+        self.i = rospy.get_param("~i", 0.1)  # I gain for PID controller
+        self.d = rospy.get_param("~d", 0.02)  # D gain for PID controller
+        self.i_sat = rospy.get_param("~i_saturate", 10)  # P gain for PD controller
 
         self.lin = 0
         self.ang = 0
@@ -28,6 +31,9 @@ class DifferentialDriveController:
         self._meters_per_rad = 0.1397
         self._left_prev_error = 0
         self._right_prev_error = 0
+
+        self.left_error_sum = 0
+        self.right_error_sum = 0
 
         # Variables for PIDF Velocity Control
 
@@ -57,24 +63,30 @@ class DifferentialDriveController:
         right_set = self.lin + self.ang * self.width / 2
 
         # Measured Velocity in m / s
-        left_measured = (self._left_vel * self._meters_per_rad)
-        right_measured = (
-            self._right_vel * self._meters_per_rad
-        )
+        left_measured = self._left_vel * self._meters_per_rad
+        right_measured = self._right_vel * self._meters_per_rad
 
         # Calculating error
         left_error = left_set - left_measured
         right_error = right_set - right_measured
 
+        self.left_error_sum += left_error
+        self.right_error_sum += right_error
+
+        self.left_error_sum = np.clip(self.left_error_sum, -self.i_sat, self.i_sat)
+        self.right_error_sum = np.clip(self.right_error_sum, -self.i_sat, self.i_sat)
+
         # Calculating motor velocities
         left = (
-           left_percent_estimate
+            left_percent_estimate
             + left_error * self.p
+            + self.left_error_sum * self.i
             + (left_error - self._left_prev_error) / self.loop_dt * self.d
         )
         right = (
-           right_percent_estimate
+            right_percent_estimate
             + right_error * self.p
+            + self.right_error_sum * self.i
             + (right_error - self._right_prev_error) / self.loop_dt * self.d
         )
 
@@ -86,6 +98,8 @@ class DifferentialDriveController:
         effort_msg.right_drive = self.constrain(right)
         print("left", left_error)
         print("right", right_error)
+        print("left i_sum", self.left_error_sum)
+        print("right i_sum", self.right_error_sum)
         self._effort_pub.publish(effort_msg)
 
     def constrain(self, val):

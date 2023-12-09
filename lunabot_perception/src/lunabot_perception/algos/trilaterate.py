@@ -53,7 +53,7 @@ class Trilaterate:
         pos = sci.minimize(
             S,
             [-5, -5, 0.5],
-            args=(D[0], D[1], D[2], pts_cfg[0], pts_cfg[1], pts_cfg[2]),
+            args=(D[0], D[1], D[2], self.pts_cfg[0], self.pts_cfg[1], self.pts_cfg[2]),
             method="Powell",
         )
         return pos.x
@@ -89,13 +89,7 @@ if __name__ == "__main__":
     running_error = np.zeros((trials))
 
     for i in range(0, trials):
-        x = np.array(
-            [
-                np.random.uniform(-5, -3),
-                np.random.uniform(-5, -3),
-                0.6,
-            ]
-        )
+        x = np.array([np.random.uniform(-5, -3), np.random.uniform(-5, -3), 0.6])
         d1, d2, d3 = dist_from_pos(x, a1, a2, a3)
 
         # Add noise to signals
@@ -113,4 +107,4 @@ if __name__ == "__main__":
         running_error[i] = error
 
     print("Average error:", np.mean(running_error))
-    print("mean squared error", np.mean(running_error**2))
+    print("mean squared error", np.mean(running_error ** 2))
