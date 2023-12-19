@@ -1,7 +1,15 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="world_name" default="$(find mining_arena_gazebo)/worlds/arena.world"/>
-  <arg name="initial_pose" default="-x 1.0 -y 0 -z 0"/>
+
+  <!-- Set the arena to either KSC or UCF arena based on the boolean argument. -->
+  <arg name="KSC_arena" default="true"/>
+
+  <!-- Values for arena world (Nasa is KSC, UCF is not.) The above boolean argument changes what arg is passed to the launch file below (therefore, there are two duplicate launch files)
+  $(find mining_arena_gazebo)/worlds/arena_nasa.world
+  $(find mining_arena_gazebo)/worlds/arena_ucf.world -->
+
+
+  <arg name="initial_pose" default="-x 1.0 -y -1.3 -z 0"/>
   <arg name="model" default="$(find dummy_bot_description)/urdf/dummy_bot.xacro"/>
 
   <!-- Gazebo specific options -->
@@ -23,8 +31,19 @@
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
 
-  <include file="$(find mining_arena_gazebo)/launch/gazebo.launch">
-    <arg name="world_name" value="$(arg world_name)"/>
+  <!-- KSC Arena -->
+  <include file="$(find mining_arena_gazebo)/launch/gazebo.launch" if="$(arg KSC_arena)">
+    <arg name="world_name" value="$(find mining_arena_gazebo)/worlds/arena_nasa.world"/>
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="gazebo_gui" value="$(arg gazebo_gui)"/>
+    <arg name="verbose" value="$(arg verbose)"/>
+    <arg name="debug" value="$(arg debug)"/>
+    <arg name="initial_pose" value="$(arg initial_pose)"/>
+  </include>
+
+  <!-- UCF Arena -->
+  <include file="$(find mining_arena_gazebo)/launch/gazebo.launch" unless="$(arg KSC_arena)">
+    <arg name="world_name" value="$(find mining_arena_gazebo)/worlds/arena_ucf.world"/>
     <arg name="paused" value="$(arg paused)"/>
     <arg name="gazebo_gui" value="$(arg gazebo_gui)"/>
     <arg name="verbose" value="$(arg verbose)"/>
