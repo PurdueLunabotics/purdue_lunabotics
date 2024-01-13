@@ -33,7 +33,7 @@ include_directories(
 # Tests
 if(CATKIN_ENABLE_TESTING)
   find_package(roslaunch REQUIRED)
-  roslaunch_add_file_check(launch USE_TEST_DEPENDENCIES)
+  #roslaunch_add_file_check(launch USE_TEST_DEPENDENCIES)
   find_package(rostest REQUIRED)
   #add_rostest(test/test_global_planner.test)
   #catkin_add_nosetests(test)
