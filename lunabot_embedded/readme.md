@@ -8,7 +8,7 @@
 
 ## Teensy Firmware
 
-Code in `firmware/teensy_main/`
+code in `firmware/teensy_main/`
 
 ### Prerequisites
 - [Install arduino-cli compilation toolchain](https://arduino.github.io/arduino-cli/0.35/installation/#use-the-install-script)
@@ -24,7 +24,6 @@ roscd lunabot_embedded/firmware
 
 2. Add aliases to simplify compilation (in `.bashrc` or `.zshrc`):
 ```
-roscd lunabot_embedded/firmware/teensy_main
 alias teensy_compile="arduino-cli compile --build-path build --libraries lib --fqbn teensy:avr:teensy41:usb=rawhid teensy_main"
 alias teensy_upload="teensy_loader_cli --mcu=TEENSY41 -wv build/teensy_main.ino.hex"
 ```
