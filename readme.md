@@ -2,6 +2,9 @@
 
 This is the official git repo of the Purdue Lunabotics software team.
 
+## Supported Platforms
+- Ubuntu 20.04
+
 ## Quick Start
 
 1. [Install ROS](https://wiki.purduearc.com/wiki/tutorials/setup-ros)
@@ -29,3 +32,9 @@ catkin build
 source ~/catkin_ws/devel/setup.bash # or .zsh if you use a zsh terminal
 ```
 > Note: Build + source every time you add new packages. Source every time you open a fresh terminal, or add the line to your ~/.bashrc (or .zshrc) so it sources automatically
+
+
+## Important docs to read
+- [contributing guidelines](https://github.com/PurdueLunabotics/purdue_lunabotics/blob/master/contributing.md)
+- [running_the_robot](https://github.com/PurdueLunabotics/purdue_lunabotics/blob/master/running_the_robot.md)
+- [firmware setup](https://github.com/PurdueLunabotics/purdue_lunabotics/blob/master/lunabot_embedded/readme.md)
