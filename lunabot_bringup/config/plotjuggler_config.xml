@@ -1,129 +1,49 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <root>
- <tabbed_widget parent="main_window" name="Main Window">
-  <Tab containers="1" tab_name="all">
+ <tabbed_widget name="Main Window" parent="main_window">
+  <Tab containers="1" tab_name="curr,effort">
    <Container>
-    <DockSplitter orientation="-" sizes="1" count="1">
+    <DockSplitter sizes="0.5;0.5" count="2" orientation="-">
      <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" bottom="7902.913108" right="19.763890" top="13464.006997"/>
+      <plot style="Lines" flip_y="false" flip_x="false" mode="TimeSeries">
+       <range right="25.814898" top="13258.800000" left="0.136639" bottom="13057.200000"/>
        <limitY/>
-       <curve name="/current/act_lead_screw/data" color="#1f77b4">
-        <transform alias="/current/act_lead_screw/data[Moving Average]" name="Moving Root Mean Squared">
-         <options value="10"/>
-        </transform>
-       </curve>
-       <curve name="/current/act_right/data" color="#d62728"/>
-       <curve name="/current/deposition/data" color="#1ac938">
-        <transform alias="/current/deposition/data[Moving Average]" name="Moving Average">
-         <options value="10" compensate_offset="false"/>
-        </transform>
-       </curve>
-       <curve name="/current/drive_left/data" color="#ff7f0e">
-        <transform alias="/current/drive_left/data[Moving Average]" name="Moving Average">
-         <options value="10" compensate_offset="false"/>
-        </transform>
-       </curve>
-       <curve name="/current/drive_right/data" color="#f14cc1">
-        <transform alias="/current/drive_right/data[Moving Average]" name="Moving Average">
-         <options value="10" compensate_offset="false"/>
-        </transform>
-       </curve>
-       <curve name="/current/excavation/data" color="#9467bd">
-        <transform alias="/current/excavation/data[Moving Average]" name="Moving Average">
-         <options value="10" compensate_offset="false"/>
-        </transform>
-       </curve>
+       <curve name="/state/act_right_curr" color="#ff7f0e"/>
+       <curve name="/state/drive_left_curr" color="#f14cc1"/>
+       <curve name="/state/drive_right_curr" color="#9467bd"/>
+       <curve name="/state/exc_curr" color="#17becf"/>
+       <curve name="/state/lead_screw_curr" color="#bcbd22"/>
+       <curve name="/state/dep_curr" color="#1f77b4"/>
+      </plot>
+     </DockArea>
+     <DockArea name="...">
+      <plot style="Lines" flip_y="false" flip_x="false" mode="TimeSeries">
+       <range right="25.828174" top="0.100000" left="0.000000" bottom="-0.100000"/>
+       <limitY/>
+       <curve name="/effort/deposit" color="#d62728"/>
+       <curve name="/effort/excavate" color="#1ac938"/>
+       <curve name="/effort/lead_screw" color="#ff7f0e"/>
+       <curve name="/effort/left_drive" color="#f14cc1"/>
+       <curve name="/effort/right_drive" color="#9467bd"/>
+       <curve name="/effort/lin_act" color="#17becf"/>
       </plot>
      </DockArea>
     </DockSplitter>
    </Container>
   </Tab>
-  <Tab containers="1" tab_name="deposition">
+  <Tab containers="1" tab_name="encoder">
    <Container>
-    <DockSplitter orientation="-" sizes="1" count="1">
+    <DockSplitter sizes="1" count="1" orientation="-">
      <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="0.008548" bottom="13196.815000" right="19.692712" top="13208.785000"/>
+      <plot style="Lines" flip_y="false" flip_x="false" mode="TimeSeries">
+       <range right="25.828174" top="0.100000" left="0.000000" bottom="-0.100000"/>
        <limitY/>
-       <curve name="/current/deposition/data" color="#d62728">
-        <transform alias="/current/deposition/data[Moving Average]" name="Moving Average">
-         <options value="10" compensate_offset="false"/>
-        </transform>
-       </curve>
-      </plot>
-     </DockArea>
-    </DockSplitter>
-   </Container>
-  </Tab>
-  <Tab containers="1" tab_name="actuation">
-   <Container>
-    <DockSplitter orientation="-" sizes="1" count="1">
-     <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" bottom="7905.628106" right="19.761995" top="13352.692090"/>
-       <limitY/>
-       <curve name="/current/act_lead_screw/data" color="#f14cc1">
-        <transform alias="/current/act_lead_screw/data[Moving Root Mean Squared]" name="Moving Root Mean Squared">
-         <options value="10"/>
-        </transform>
-       </curve>
-      </plot>
-     </DockArea>
-    </DockSplitter>
-   </Container>
-  </Tab>
-  <Tab containers="1" tab_name="excavation">
-   <Container>
-    <DockSplitter orientation="-" sizes="1" count="1">
-     <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="0.006005" bottom="13298.982500" right="19.690902" top="13312.317500"/>
-       <limitY/>
-       <curve name="/current/excavation/data" color="#ff7f0e">
-        <transform alias="/current/excavation/data[Moving Average]" name="Moving Average">
-         <options value="10" compensate_offset="false"/>
-        </transform>
-       </curve>
-      </plot>
-     </DockArea>
-    </DockSplitter>
-   </Container>
-  </Tab>
-  <Tab containers="1" tab_name="lin_act">
-   <Container>
-    <DockSplitter orientation="-" sizes="1" count="1">
-     <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="0.000655" bottom="13154.727500" right="19.763890" top="13170.372500"/>
-       <limitY/>
-       <curve name="/current/act_right/data" color="#9467bd">
-        <transform alias="/current/act_right/data[Moving Average]" name="Moving Average">
-         <options value="10" compensate_offset="false"/>
-        </transform>
-       </curve>
-      </plot>
-     </DockArea>
-    </DockSplitter>
-   </Container>
-  </Tab>
-  <Tab containers="1" tab_name="drive">
-   <Container>
-    <DockSplitter orientation="-" sizes="1" count="1">
-     <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="0.002651" bottom="13228.587500" right="19.689124" top="13334.112500"/>
-       <limitY/>
-       <curve name="/current/drive_left/data" color="#ff7f0e">
-        <transform alias="/current/drive_left/data[Moving Average]" name="Moving Average">
-         <options value="10" compensate_offset="false"/>
-        </transform>
-       </curve>
-       <curve name="/current/drive_right/data" color="#f14cc1">
-        <transform alias="/current/drive_right/data[Moving Average]" name="Moving Average">
-         <options value="10" compensate_offset="false"/>
-        </transform>
-       </curve>
+       <curve name="/effort/deposit" color="#1f77b4"/>
+       <curve name="/effort/excavate" color="#d62728"/>
+       <curve name="/effort/lead_screw" color="#1ac938"/>
+       <curve name="/effort/left_drive" color="#ff7f0e"/>
+       <curve name="/effort/lin_act" color="#f14cc1"/>
+       <curve name="/effort/right_drive" color="#9467bd"/>
       </plot>
      </DockArea>
     </DockSplitter>
@@ -167,8 +87,8 @@
  </Plugins>
  <!-- - - - - - - - - - - - - - - -->
  <previouslyLoaded_Datafiles>
-  <fileInfo filename="../bags/rosbag_2023-04-10-12-30-15.bag" prefix="">
-   <selected_datasources value="/current/act_lead_screw;/current/act_right;/current/deposition;/current/drive_left;/current/drive_right;/current/excavation"/>
+  <fileInfo filename="../../../../../comp_runs/comp_run_1_6.bag" prefix="">
+   <selected_datasources value="/effort;/state"/>
   </fileInfo>
  </previouslyLoaded_Datafiles>
  <!-- - - - - - - - - - - - - - - -->

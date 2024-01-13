@@ -56,7 +56,17 @@
   <exec_depend>image_proc</exec_depend>
   <exec_depend>realsense2_camera</exec_depend>
   <depend>apriltag_ros</depend>
-
+  <depend>message_filters</depend>
+  <depend>tf2</depend>
+  <depend>pcl_conversions</depend>
+  <depend>pcl_ros</depend>
+  <depend>roscpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>laser_geometry</depend>
+  <depend>tf</depend>
+  <depend>tf2_ros</depend>
+  <depend>geometry_msgs</depend>
+  <depend>costmap_2d</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

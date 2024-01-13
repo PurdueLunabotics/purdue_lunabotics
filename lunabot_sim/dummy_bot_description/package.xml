@@ -58,7 +58,12 @@
   <depend>joint_state_publisher</depend>
   <depend>controller_manager</depend>
   <depend>gazebo_ros</depend>
-  <depend>gazebo_plugins</depend>
+  <depend>gazebo_dev</depend>
+  <depend>roscpp</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>tf</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
