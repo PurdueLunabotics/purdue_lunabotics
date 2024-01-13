@@ -35,7 +35,6 @@ RobotState state = RobotState_init_zero;
 RobotEffort effort = RobotEffort_init_zero;
 lunabot_msgs::RobotState prev_state_msg;
 
-
 float prev_valid_drive_ang_left = 0;
 float prev_valid_drive_ang_right = 0;
 
@@ -64,6 +63,9 @@ void recv(ros::Publisher &pub) {
   state_msg.exc_curr = adc_to_current_ACS711_31A(state.exc_curr);
   state_msg.act_ang = state.act_ang;
 
+  // TODO: add timestamp to each value using StampedValue, allowing for more accurate derivative
+  // calculations:
+  // https://github.com/PurdueLunabotics/purdue_lunabotics/pull/43#discussion_r1421183087
   angle_noise_rej_filter(&state.drive_left_ang, &prev_valid_drive_ang_left, MAX_ANGLE_DELTA_DEG);
   angle_noise_rej_filter(&state.drive_right_ang, &prev_valid_drive_ang_right, MAX_ANGLE_DELTA_DEG);
 
@@ -72,7 +74,8 @@ void recv(ros::Publisher &pub) {
   prev_time = ros::Time::now().toSec();
 
   float left_vel, right_vel;
-  left_vel = LEFT_ENCODER_MULTIPLIER * deg_angle_delta(state.drive_left_ang, prev_state.drive_left_ang) / dt;
+  left_vel = LEFT_ENCODER_MULTIPLIER *
+             deg_angle_delta(state.drive_left_ang, prev_state.drive_left_ang) / dt;
   right_vel = deg_angle_delta(state.drive_right_ang, prev_state.drive_right_ang) / dt;
 
   left_buffer.push(left_vel);
@@ -117,6 +120,7 @@ void publish(const ros::TimerEvent &) {
 int main(int argc, char **argv) {
 
   int i, r, num;
+
   r = rawhid_open(1, 0x16C0, 0x0486, 0xFFAB, 0x0200);
   if (r <= 0) {
     printf("no rawhid device found\n");

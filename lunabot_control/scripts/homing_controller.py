@@ -9,22 +9,20 @@ from apriltag_ros.msg import AprilTagDetectionArray
 
 from lunabot_msgs.msg import RobotEffort, RobotState
 
-# from geometry_msgs.msg import Twist
-
 
 def in_range(val, limits):
     return val > limits[0] and val < limits[1]
 
 
-class State(Enum):
-    DEPOSIT = 0
-    DRIVE = 1
-    HOMING = 2
-    RESET = 3
-    DONE = 4
-    RETRACT = 5
-    OPEN_EXC = 6
-    CLOSE_EXC = 7
+class DepositState(Enum):
+    HOMING = 0  # align with sieve using apriltags
+    DRIVE = 1  # once aligned, drive backwards to sieve until current limit is reached
+    OPEN_EXC = 2  # open excavation tool to make space for depositing
+    DEPOSIT = 3  # extend deposition system and deposit
+    RETRACT = 4  # after depositing, retract deposition system to closed configuration
+    CLOSE_EXC = 5  # close excavation
+    RESET = 6  # drive forward until apriltags are visible
+    DONE = 7  # done terminal state
 
 
 class HomingController:
@@ -66,7 +64,7 @@ class HomingController:
         self._effort_pub = rospy.Publisher("/effort", RobotEffort, queue_size=1)
 
         self._effort_msg = RobotEffort()
-        self._state = State.OPEN_EXC
+        self._state = DepositState.OPEN_EXC
 
         self._curr_time_act = None
 
@@ -82,10 +80,12 @@ class HomingController:
         rospy.on_shutdown(self.shutdown_hook)
 
         while not rospy.is_shutdown():
-            if self._drive_left_curr is not None and \
-            self._drive_right_curr is not None and \
-            self._dep_curr is not None:
-                if self._state == State.DONE:
+            if (
+                self._drive_left_curr is not None
+                and self._drive_right_curr is not None
+                and self._dep_curr is not None
+            ):
+                if self._state == DepositState.DONE:
                     break
                 else:
                     self.loop()
@@ -218,15 +218,20 @@ class HomingController:
         # print("right: ", self.constrain(ctrl[1]))
 
     def loop(self):
+        """
+
+        DepositStates:
+
+        """
         self._effort_msg == RobotEffort()
-        if self._state == State.HOMING:
+        if self._state == DepositState.HOMING:
             self.homing()
             if (
                 np.abs(self._curr_error[0]) < self.linear_threshold
                 and np.abs(self._curr_error[1]) < self.angular_threshold
             ):
-                self._state = State.DRIVE
-        elif self._state == State.DRIVE:
+                self._state = DepositState.DRIVE
+        elif self._state == DepositState.DRIVE:
             if in_range(self._drive_right_curr, self.DRIVE_CURR_RANGE) and in_range(
                 self._drive_left_curr, self.DRIVE_CURR_RANGE
             ):
@@ -235,8 +240,8 @@ class HomingController:
             else:
                 self._effort_msg.left_drive = 0
                 self._effort_msg.right_drive = 0
-                self._state = State.OPEN_EXC
-        elif self._state == State.OPEN_EXC:
+                self._state = DepositState.OPEN_EXC
+        elif self._state == DepositState.OPEN_EXC:
             diff = 0
 
             if self._curr_time_act is None:
@@ -251,35 +256,41 @@ class HomingController:
                 self._effort_msg.lin_act = 0
                 self._effort_msg.excavate = 0
                 self._curr_time_act = None
-                self._state = State.DEPOSIT
+                self._state = DepositState.DEPOSIT
             else:
                 self._effort_msg.lin_act = self.constrain(0.5, 1)
 
-        elif self._state == State.DEPOSIT:
+        elif self._state == DepositState.DEPOSIT:
             diff = 0
             if self._curr_time_act is None:
                 self._curr_time_act = rospy.Time.now().to_sec()
             else:
                 diff = rospy.Time.now().to_sec() - self._curr_time_act
-            if in_range(self._dep_curr, self.DEP_CURR_RANGE) or diff < self.DEP_CURR_STARTING:
+            if (
+                in_range(self._dep_curr, self.DEP_CURR_RANGE)
+                or diff < self.DEP_CURR_STARTING
+            ):
                 self._effort_msg.deposit = self.constrain(1, 1)
             else:
                 self._curr_time_act = None
-                self._effort_msg.deposit = 0 
-                self._state = State.RETRACT
-        elif self._state == State.RETRACT:
+                self._effort_msg.deposit = 0
+                self._state = DepositState.RETRACT
+        elif self._state == DepositState.RETRACT:
             diff = 0
             if self._curr_time_act is None:
                 self._curr_time_act = rospy.Time.now().to_sec()
             else:
                 diff = rospy.Time.now().to_sec() - self._curr_time_act
-            if in_range(self._dep_curr, self.DEP_CURR_RANGE) or diff < self.DEP_CURR_STARTING:
+            if (
+                in_range(self._dep_curr, self.DEP_CURR_RANGE)
+                or diff < self.DEP_CURR_STARTING
+            ):
                 self._effort_msg.deposit = self.constrain(-1, 1)
             else:
-                self._effort_msg.deposit = 0 
+                self._effort_msg.deposit = 0
                 self._curr_time_act = None
-                self._state = State.CLOSE_EXC
-        elif self._state == State.CLOSE_EXC:
+                self._state = DepositState.CLOSE_EXC
+        elif self._state == DepositState.CLOSE_EXC:
             diff = 0
 
             if self._curr_time_act is None:
@@ -290,17 +301,17 @@ class HomingController:
                 self._effort_msg.lin_act = 0
                 self._effort_msg.excavate = 0
                 self._curr_time_act = None
-                self._state = State.DONE
+                self._state = DepositState.DONE
             else:
                 self._effort_msg.lin_act = self.constrain(-0.5, 1)
-        elif self._state == State.RESET:
+        elif self._state == DepositState.RESET:
             if self.T_camera_april_msg is None:
                 self._effort_msg.left_drive = self.constrain(self.DRIVE_CTRL)
                 self._effort_msg.right_drive = self.constrain(self.DRIVE_CTRL)
             else:
                 self._effort_msg.left_drive = 0
                 self._effort_msg.right_drive = 0
-                self._state = State.DONE
+                self._state = DepositState.DONE
         self._effort_pub.publish(self._effort_msg)  # Sends ctrl to robot
 
     def stop(self):
