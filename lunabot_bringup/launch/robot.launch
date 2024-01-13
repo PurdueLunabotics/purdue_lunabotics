@@ -11,7 +11,6 @@
 
     <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch"/>
     <include if="$(arg record)" file="$(find lunabot_bringup)/launch/record.launch">
-
         <arg name="exp_name" value="$(arg exp_name)"/>
     </include>
 
@@ -38,12 +37,12 @@
               <!-- <rosparam file="$(find lunabot_config)/config/rrtstar.yml" command="load"/> -->
           </node>
       </group>
-  <!-- mapping -->
-  <group ns="maps">
-      <node name="costmap_node" pkg="lunabot_perception" type="costmap_node" output="screen">
-          <rosparam file="$(find lunabot_config)/config/global_costmap.yml" command="load" ns="global_costmap" />
-      </node>
-  </group>
+
+      <group ns="maps">
+          <node name="costmap_node" pkg="lunabot_perception" type="costmap_node" output="screen">
+              <rosparam file="$(find lunabot_config)/config/global_costmap.yml" command="load" ns="global_costmap" />
+          </node>
+      </group>
 
     </group>
 </launch>
