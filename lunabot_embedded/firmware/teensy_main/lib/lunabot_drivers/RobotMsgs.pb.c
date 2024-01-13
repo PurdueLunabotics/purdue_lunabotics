@@ -6,6 +6,6 @@
 #error Regenerate this file with the current version of nanopb generator.
 #endif
 
-PB_BIND(RobotState, RobotState, AUTO)
+PB_BIND(RobotSensors, RobotSensors, AUTO)
 
 PB_BIND(RobotEffort, RobotEffort, AUTO)

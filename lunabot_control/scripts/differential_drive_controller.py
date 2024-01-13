@@ -3,7 +3,7 @@ import numpy as np
 import rospy
 from geometry_msgs.msg import Twist
 
-from lunabot_msgs.msg import RobotEffort, RobotState
+from lunabot_msgs.msg import RobotEffort, RobotSensors
 
 
 class DifferentialDriveController:
@@ -12,7 +12,7 @@ class DifferentialDriveController:
 
         self._vel_sub = rospy.Subscriber("/cmd_vel", Twist, self._vel_cb)
         self._effort_pub = rospy.Publisher("/effort", RobotEffort, queue_size=1)
-        self._state_sub = rospy.Subscriber("state", RobotState, self._robot_state_cb)
+        self._state_sub = rospy.Subscriber("state", RobotSensors, self._robot_state_cb)
 
         self.width = rospy.get_param("~width", 0.5588)
         self.max_speed_percentage = rospy.get_param("~max_speed_percentage", 0.5)

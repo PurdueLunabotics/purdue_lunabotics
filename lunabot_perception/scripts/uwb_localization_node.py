@@ -3,9 +3,9 @@
 import numpy as np
 import rospy
 from geometry_msgs.msg import PoseStamped
-from lunabot_perception.algos.trilaterate import Trilaterate
 
-from lunabot_msgs.msg import RobotState
+from lunabot_msgs.msg import RobotSensors
+from lunabot_perception.algos.trilaterate import Trilaterate
 
 
 class UWBLocalizationNode:
@@ -22,7 +22,7 @@ class UWBLocalizationNode:
         rospy.init_node("uwb_localization_node", anonymous=False)
         # Start listener
         self.state_sub = rospy.Subscriber(
-            "state", RobotState, self.uwb_signal_sub, queue_size=10
+            "state", RobotSensors, self.uwb_signal_sub, queue_size=10
         )
         self.pos_pub = rospy.Publisher(self.uwb_pub_name, PoseStamped, queue_size=10)
 

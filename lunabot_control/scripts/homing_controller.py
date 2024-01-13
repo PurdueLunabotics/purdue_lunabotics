@@ -7,7 +7,7 @@ import ros_numpy
 import rospy
 from apriltag_ros.msg import AprilTagDetectionArray
 
-from lunabot_msgs.msg import RobotEffort, RobotState
+from lunabot_msgs.msg import RobotEffort, RobotSensors
 
 
 def in_range(val, limits):
@@ -60,7 +60,7 @@ class HomingController:
         self._drive_right_curr = None
         self._dep_curr = None
 
-        self._state_sub = rospy.Subscriber("/state", RobotState, self._robot_state_cb)
+        self._state_sub = rospy.Subscriber("/state", RobotSensors, self._robot_state_cb)
         self._effort_pub = rospy.Publisher("/effort", RobotEffort, queue_size=1)
 
         self._effort_msg = RobotEffort()

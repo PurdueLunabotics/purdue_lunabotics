@@ -27,7 +27,7 @@ from lunabot_msgs.msg import RobotEffort
 
 
 def constrain(joy_in):
-    return np.int8(joy_in * 127)
+    return np.int8(np.clip(joy_in, -1, 1) * 127)
 
 
 class ManualController:

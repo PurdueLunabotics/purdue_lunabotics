@@ -9,7 +9,7 @@
 
 #include <lunabot_embedded/sensor_proc.h>
 #include <lunabot_msgs/RobotEffort.h>
-#include <lunabot_msgs/RobotState.h>
+#include <lunabot_msgs/RobotSensors.h>
 
 extern "C" {
 #include "RobotMsgs.pb.h"
@@ -30,10 +30,10 @@ using namespace std;
 
 uint8_t buf[BUF_SIZE];
 
-RobotState prev_state = RobotState_init_zero;
-RobotState state = RobotState_init_zero;
+RobotSensors prev_state = RobotSensors_init_zero;
+RobotSensors state = RobotSensors_init_zero;
 RobotEffort effort = RobotEffort_init_zero;
-lunabot_msgs::RobotState prev_state_msg;
+lunabot_msgs::RobotSensors prev_state_msg;
 
 float prev_valid_drive_ang_left = 0;
 float prev_valid_drive_ang_right = 0;
@@ -53,8 +53,8 @@ void recv(ros::Publisher &pub) {
   /* Create a stream that reads from the buffer. */
   pb_istream_t stream = pb_istream_from_buffer(buf, sizeof(buf));
   /* Now we are ready to decode the message. */
-  pb_decode(&stream, RobotState_fields, &state);
-  lunabot_msgs::RobotState state_msg;
+  pb_decode(&stream, RobotSensors_fields, &state);
+  lunabot_msgs::RobotSensors state_msg;
   state_msg.act_right_curr = adc_to_current_ACS711_15A(state.act_right_curr);
   state_msg.drive_right_curr = adc_to_current_ACS711_15A(state.drive_right_curr);
   state_msg.drive_left_curr = adc_to_current_ACS711_15A(state.drive_left_curr);
@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
   ros::NodeHandle nh;
 
   ros::Subscriber effort_sub = nh.subscribe("/effort", 10, &effort_cb);
-  ros::Publisher state_pub = nh.advertise<lunabot_msgs::RobotState>("/state", 10);
+  ros::Publisher state_pub = nh.advertise<lunabot_msgs::RobotSensors>("/state", 10);
 
   ros::Rate rate(100);
 

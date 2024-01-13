@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-message RobotState {
+message RobotSensors {
   sint32 lead_screw_curr = 1;
   sint32 act_right_curr = 2;
   sint32 dep_curr = 3;

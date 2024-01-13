@@ -4,7 +4,7 @@
 
 - code in `src` folder
 - see `RobotEffort.msg`
-- see `RobotState.msg`
+- see `RobotSensors.msg`
 
 ## Teensy Firmware
 
