@@ -85,6 +85,11 @@ TLDR:
   - CMakelists.txt
 ```
 
+### Code Review Standards
+
+To ensure feedback from code reviews are actionable and clear, 
+we follow these standards: https://conventionalcomments.org/
+
 ### Everything Else 
 
 - General
