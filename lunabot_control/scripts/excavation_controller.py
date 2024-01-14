@@ -48,7 +48,9 @@ class ExcavationController:
         )
 
         self._effort_pub = rospy.Publisher("/effort", RobotEffort, queue_size=1)
-        self._state_sub = rospy.Subscriber("/state", RobotSensors, self._robot_state_cb)
+        self._state_sub = rospy.Subscriber(
+            "/sensors", RobotSensors, self._robot_state_cb
+        )
 
         self.max_exc_percent = rospy.get_param("~max_exc_percent", 1)
         self.max_lead_screw_percent = rospy.get_param("~max_lead_screw_percent", 1)

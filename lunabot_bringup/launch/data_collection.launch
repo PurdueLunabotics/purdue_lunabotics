@@ -12,5 +12,5 @@
   </group>
 
   <!-- Rosbag record with delay -->
-  <node name="rosbag_record" pkg="rosbag" type="record" args="-o $(find lunabot_bringup)/bags/$(arg exp_name) /imu /d455_back/camera/color/image_rect_color /d455_back/camera/color/tag_detections /effort /d455_back/camera/aligned_depth_to_color/image_raw /d455_back/camera/aligned_depth_to_color/camera_info /d455_back/camera/color/camera_info /usb_cam/tag_detections /state --split --duration 60" launch-prefix="bash -c 'sleep 5; $0 $@'"/>
+  <node name="rosbag_record" pkg="rosbag" type="record" args="-o $(find lunabot_bringup)/bags/$(arg exp_name) /imu /d455_back/camera/color/image_rect_color /d455_back/camera/color/tag_detections /effort /d455_back/camera/aligned_depth_to_color/image_raw /d455_back/camera/aligned_depth_to_color/camera_info /d455_back/camera/color/camera_info /usb_cam/tag_detections /sensors --split --duration 60" launch-prefix="bash -c 'sleep 5; $0 $@'"/>
 </launch>

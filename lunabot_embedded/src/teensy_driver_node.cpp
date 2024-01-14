@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
   ros::NodeHandle nh;
 
   ros::Subscriber effort_sub = nh.subscribe("/effort", 10, &effort_cb);
-  ros::Publisher state_pub = nh.advertise<lunabot_msgs::RobotSensors>("/state", 10);
+  ros::Publisher state_pub = nh.advertise<lunabot_msgs::RobotSensors>("/sensors", 10);
 
   ros::Rate rate(100);
 
