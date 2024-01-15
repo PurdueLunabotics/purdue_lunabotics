@@ -7,7 +7,15 @@ This is the official git repo of the Purdue Lunabotics software team.
 
 ## Quick Start
 
-1. [Install ROS](https://wiki.purduearc.com/wiki/tutorials/setup-ros)
+1. [Install ROS](http://wiki.ros.org/ROS/Installation/TwoLineInstall/)
+
+```
+# installs ROS
+wget -c https://raw.githubusercontent.com/qboticslabs/ros_install_noetic/master/ros_install_noetic.sh && chmod +x ./ros_install_noetic.sh && ./ros_install_noetic.sh
+
+# installs catkin tools
+sudo apt install python3-catkin-tools
+```
 
 This tutorial assumes you have your `catkin_ws` initialized in your home directory: `~/catkin_ws`
 
