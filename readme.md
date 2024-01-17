@@ -4,16 +4,26 @@ This is the official git repo of the Purdue Lunabotics software team.
 
 ## Supported Platforms
 - Ubuntu 20.04
+- if on windows:
+  - Use WSL2 (caveat: gui will appear more laggy) 
+  - dual boot linux (caveat: can be hard to set up, not recommended for beginners)
+- mac or windows (not tested):
+  - [try robostack to install ROS](https://robostack.github.io/GettingStarted.html)
+     - Once you complete this, move to step 2
 
-## Quick Start
+## Getting started
 
-1. [Install ROS](http://wiki.ros.org/ROS/Installation/TwoLineInstall/)
+1. Install ROS (Linux only)
 
+[ROS install:](http://wiki.ros.org/ROS/Installation/TwoLineInstall/)
 ```
-# installs ROS
 wget -c https://raw.githubusercontent.com/qboticslabs/ros_install_noetic/master/ros_install_noetic.sh && chmod +x ./ros_install_noetic.sh && ./ros_install_noetic.sh
+```
 
-# installs catkin tools
+Install catkin tools + setup catkin workspace:
+```
+mkdir ~/catkin_ws/src
+>>>>>>> Stashed changes
 sudo apt install python3-catkin-tools
 ```
 
@@ -40,6 +50,18 @@ catkin build
 source ~/catkin_ws/devel/setup.bash # or .zsh if you use a zsh terminal
 ```
 > Note: Build + source every time you add new packages. Source every time you open a fresh terminal, or add the line to your ~/.bashrc (or .zshrc) so it sources automatically
+
+## Testing your setup
+
+1. Run the sim
+
+```
+roslaunch lunabot_bringup sim.launch
+```
+
+> you should see two new windows pop up: once called gazebo and one called rviz
+
+2. Set goal waypoint and watch the robot navigate
 
 
 ## Important docs to read
