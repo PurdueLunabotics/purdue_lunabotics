@@ -5,13 +5,16 @@ import rospy
 from geometry_msgs.msg import PoseStamped
 from map_msgs.msg import OccupancyGridUpdate
 from nav_msgs.msg import OccupancyGrid, Odometry, Path
-from tf.transformations import quaternion_from_euler
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 from lunabot_nav.dstar import Dstar
+from lunabot_nav.smoothing import Bezier, lerp
 
 pose = []
 grid = []
 goal = []
+rot_z = 0
+goal_z_rot = 0
 update_grid = False
 need_update_goal = False
 res = 0
@@ -48,17 +51,33 @@ def grid_update_subscriber(data):
 
 
 def position_subscriber(data):
-    global pose
+    global pose, rot_z
     position = data.pose.pose.position
-
+    rpy = euler_from_quaternion(
+        [
+            data.pose.pose.orientation.w,
+            data.pose.pose.orientation.x,
+            data.pose.pose.orientation.y,
+            data.pose.pose.orientation.z,
+        ]
+    )
+    rot_z = rpy[2]
     coords = [position.x, position.y]
     pose = coords
 
 
 def goal_subscriber(data):
-    global goal, need_update_goal
+    global goal, need_update_goal, goal_z_rot
     print("New Goal")
     goal = [data.pose.position.x, data.pose.position.y]
+    goal_quat = [
+        data.pose.orientation.w,
+        data.pose.orientation.x,
+        data.pose.orientation.y,
+        data.pose.orientation.z,
+    ]
+    goal_euler = euler_from_quaternion(goal_quat)
+    goal_z_rot = goal_euler[2]
     need_update_goal = True
 
 
@@ -67,38 +86,38 @@ def main():
 
     rospy.init_node("dstar_ros_script")
 
+    # global params
     odom_topic = rospy.get_param("/odom_topic")
     goal_topic = rospy.get_param("/nav_goal_topic")
 
-    radius = 8  # robot rad (grid units)
+    # /nav params
+    enable_smoothing = rospy.get_param("enable_smoothing")
+    num_lerp_pts = rospy.get_param("num_lerp_pts")
+    num_bezier_pts = rospy.get_param("num_bezier_pts")
 
-    frequency = 10  # hz
+    # dstar params
+    radius = rospy.get_param("~robot_grid_radius")  # robot radius in grid units
+    frequency = rospy.get_param("~hz")
+    num_downsample = rospy.get_param("~num_downsample")
 
     dstar = None
-
     path_publisher = rospy.Publisher("/nav/global_path", Path, queue_size=10)
-
     rospy.Subscriber(
         "/maps/costmap_node/global_costmap/costmap", OccupancyGrid, grid_subscriber
     )
-
     rospy.Subscriber(
         "/maps/costmap_node/global_costmap/costmap_updates",
         OccupancyGridUpdate,
         grid_update_subscriber,
     )
-
     rospy.Subscriber(odom_topic, Odometry, position_subscriber)
-
     rospy.Subscriber(goal_topic, PoseStamped, goal_subscriber)
-
     rate = rospy.Rate(frequency)
-
     completedInitialRun = False
 
     path = []
     while not rospy.is_shutdown():
-        # print("Loop")
+        print("Loop")
         if (dstar is None) and len(grid) > 0 and len(pose) > 0 and len(goal) > 0:
             dstar = Dstar(goal, pose, grid, radius, res, x_offset, y_offset)
             print("Initialize")
@@ -126,12 +145,21 @@ def main():
             if dstar.needs_new_path:
                 print("Start create path")
                 path = np.array(dstar.createPathList())
-                print("End create path")
 
-                # if (len(path) == 0):
-                #     print("publish empty path")
-                # else:
-                #     print("published path")
+                if len(path) != 0 and enable_smoothing:
+                    points = lerp(num_lerp_pts, path)
+                    t_curve = np.linspace(0, 1, num_bezier_pts)
+                    path = Bezier.Curve(t_curve, points)
+                    print("End create path")
+                vectors = np.diff(path, axis=0)
+                angles = np.zeros(vectors.shape[0])
+
+                for i in range(vectors.shape[0]):
+                    # Compute the angles between consecutive vectors
+                    v = vectors[i]
+                    v_u = v / np.linalg.norm(v)
+                    angles[i] = np.arctan(v_u[1] / v_u[0])
+                angles[-1] = goal_z_rot
 
                 ros_struct = Path()
                 ros_struct.poses = []
@@ -139,25 +167,28 @@ def main():
                 ros_struct.header.frame_id = "odom"
 
                 for index, point in enumerate(path):
-                    if index % 5 == 0 or np.all(path[index] == path[-1]):
-
+                    if index % num_downsample == 0 or np.all(path[index] == path[-1]):
                         path_pose = PoseStamped()
-
                         path_pose.pose.position.x = point[0]
                         path_pose.pose.position.y = point[1]
 
-                        rotation = quaternion_from_euler(0, 0, 0)
+                        if index == 0:
+                            global rot_z
+                            z_rot = rot_z
+                        else:
+                            z_rot = angles[index - 1]
+
+                        rotation = quaternion_from_euler(0, 0, z_rot)
                         path_pose.pose.orientation.x = rotation[0]
                         path_pose.pose.orientation.y = rotation[1]
                         path_pose.pose.orientation.z = rotation[2]
                         path_pose.pose.orientation.w = rotation[3]
 
-                        ros_struct.poses.append(path_pose)
+                    ros_struct.poses.append(path_pose)
 
                 # plt.imshow(temp, cmap='hot', interpolation='nearest')
                 # plt.show()
                 path_publisher.publish(ros_struct)
-
         rate.sleep()
 
 

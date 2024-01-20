@@ -11,5 +11,10 @@ nav:
     map_topic: "/maps/costmap_node/global_costmap/costmap"
     global_path_topic: "/nav/global_path"
     occ_threshold: 80 # corresponds to possibly-in-collision
-    bezier_step: 0.01
-    lerp_step: 0.05
+    enable_smoothing: False 
+    num_lerp_pts: 5
+    num_bezier_pts: 5
+    dstar_node:
+      hz: 10
+      robot_grid_radius: 8 # grid units
+      num_downsample: 10

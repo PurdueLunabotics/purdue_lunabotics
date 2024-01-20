@@ -68,7 +68,6 @@ def dist_from_pos(x, a1, a2, a3):
 
 
 if __name__ == "__main__":
-
     error_accumulator = 0
 
     # Beacon positions
@@ -93,9 +92,9 @@ if __name__ == "__main__":
         d1, d2, d3 = dist_from_pos(x, a1, a2, a3)
 
         # Add noise to signals
-        d1 += np.random.uniform(-0.01, 0.01)
-        d2 += np.random.uniform(-0.01, 0.01)
-        d3 += np.random.uniform(-0.01, 0.01)
+        d1 += np.random.uniform(-0.05, 0.05)
+        d2 += np.random.uniform(-0.05, 0.05)
+        d3 += np.random.uniform(-0.05, 0.05)
 
         D = np.array([d1, d2, d3])
         pos = tril.trilaterate(D)
@@ -107,4 +106,4 @@ if __name__ == "__main__":
         running_error[i] = error
 
     print("Average error:", np.mean(running_error))
-    print("mean squared error", np.mean(running_error ** 2))
+    print("mean squared error", np.mean(running_error**2))

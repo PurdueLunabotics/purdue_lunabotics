@@ -63,7 +63,7 @@
           <rosparam file="$(find lunabot_config)/config/mpc.yml" command="load"/>
       </node>
 
-      <node name="global_planner_node" pkg="lunabot_nav" type="dstar_node.py" output="screen" respawn="true">
+      <node name="dstar_node" pkg="lunabot_nav" type="dstar_node.py" output="screen" respawn="true">
           <!-- <rosparam file="$(find lunabot_config)/config/rrtstar.yml" command="load"/> -->
       </node>
   </group>

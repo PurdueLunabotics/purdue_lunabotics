@@ -3,11 +3,14 @@ top_rollouts: 15
 iterations: 10
 w_linear: 1.0
 w_angular: 5.0
-w_waypoint: 20.0
+w_waypoint_pos: 50.0
+w_waypoint_rot: 0.0
 w_occupied: 100.0
+w_accel: 0.0
 horizon_length: 10
 frequency: 30
-min_distance_threshold: 0.5
+min_distance_threshold: 0.2
+min_angle_threshold: 0.2
 velocity_limits:
-  linear: [-0.3, 0.3]
-  angular: [-1.5, 1.5]
+  linear: [-0.2, 0.2]
+  angular: [-0.4, 0.4]
