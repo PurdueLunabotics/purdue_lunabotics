@@ -93,22 +93,18 @@ private:
 class VLH35_Angle_Bus {
 public:
   VLH35_Angle_Bus(){};
-  static void init();
   static float read_enc(uint8_t id);
-  static void transfer();
 
 private:
-  static constexpr int BUFFER_SIZE = 2;
-  static constexpr int BUS_SIZE = 5;
-  static constexpr int sel0_p_ = 8;
-  static constexpr int sel1_p_ = 9;
-  static constexpr int sel2_p_ = 10;
-  static constexpr int clk_p_ = 13;
-  volatile static uint8_t curr_id_;
-  volatile static uint8_t spi_buffer_[BUFFER_SIZE];
-  volatile static uint32_t enc_buffer_[BUS_SIZE];
-
-  static void select_enc_(uint8_t id);
+  static constexpr int NUM_ENCODERS = 3;
+  static constexpr int PIN_LIST[NUM_ENCODERS*2] = {10, 12, 25, 23, 19, 17};
+   
+  static Encoder encs[NUM_ENCODERS] = {
+      Encoder(PIN_LIST[0], PIN_LIST[1]),
+      Encoder(PIN_LIST[2], PIN_LIST[3]),
+      Encoder(PIN_LIST[4], PIN_LIST[5])
+  }
 };
+
 
 #endif

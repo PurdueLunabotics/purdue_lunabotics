@@ -118,79 +118,8 @@ int16_t ACS711_Current_Bus::read(uint8_t bus, uint8_t mux) { return curr_buffer_
 
 // VLH35_Angles
 
-#define CLOCK_SPEED 100'000u // 100kHz SSI Clock
-
-SPISettings spi_settings(CLOCK_SPEED, MSBFIRST, SPI_MODE1);
-
-volatile uint8_t VLH35_Angle_Bus::curr_id_ = 0;
-volatile uint8_t VLH35_Angle_Bus::spi_buffer_[VLH35_Angle_Bus::BUFFER_SIZE] = {0};
-volatile uint32_t VLH35_Angle_Bus::enc_buffer_[VLH35_Angle_Bus::BUS_SIZE] = {0};
-
-void VLH35_Angle_Bus::init() {
-  SPI.begin();
-  pinMode(clk_p_, OUTPUT);
-  pinMode(sel0_p_, OUTPUT);
-  pinMode(sel1_p_, OUTPUT);
-  pinMode(sel2_p_, OUTPUT);
-  select_enc_(curr_id_);
-  digitalWriteFast(clk_p_,
-                   HIGH); // Set CLK line HIGH (to meet the requirements
-                          // of SSI interface)
-}
-
-void VLH35_Angle_Bus::select_enc_(uint8_t id) {
-  uint8_t sel0 = id & 1;
-  uint8_t sel1 = id >> 1 & 1;
-  uint8_t sel2 = id >> 2 & 1;
-  digitalWrite(sel0_p_, sel0);
-  digitalWrite(sel1_p_, sel1);
-  digitalWrite(sel2_p_, sel2);
-}
-
-void VLH35_Angle_Bus::transfer() {
-  digitalWriteFast(clk_p_,
-                   LOW); // Set CLK line LOW (to inform encoder -> latch data)
-
-  // Before in setup() the pinMode() change the CLK pin function to
-  // output, now we have to enable usage of this pin by SPI port with
-  // calling SPI.begin():
-  SPI.begin();
-  SPI.beginTransaction(spi_settings); // We use transactional API
-
-  for (int i = 0; i < BUFFER_SIZE; i++) {
-    spi_buffer_[i] = SPI.transfer(0xAA); // Transfer anything and read data back
-  }
-
-  SPI.endTransaction(); // We use transactional API
-
-  pinMode(clk_p_,
-          OUTPUT);            // A while before we set CLK pin to be used by SPI
-                              // port, now we have to change it manually...
-  digitalWrite(clk_p_, HIGH); // ... back to idle HIGH
-
-  delayMicroseconds(27); // Running above 500kHz perform Delay First Clock function
-
-  enc_buffer_[curr_id_] = static_cast<uint32_t>(spi_buffer_[0] << 8) |
-                          static_cast<uint32_t>(spi_buffer_[1]); // here transfer8 was made
-
-  curr_id_ = (curr_id_ + 1) % BUS_SIZE;
-  select_enc_(curr_id_);
-}
-
 float VLH35_Angle_Bus::read_enc(uint8_t id) {
-  uint32_t data;
-  noInterrupts();
-  data = enc_buffer_[id];
-  interrupts();
-
-  // Shift one bit right - (MSB of position was placed on at MSB of
-  // uint32_t, so make it right and shift to make MSB position at 30'th
-  // bit): data = data >> 1;
-
-  // encoderPosition is placed in front (starting from MSB of uint32_t) so
-  // shift it for 11 bits to align position data right
-
-  return static_cast<float>(data) / static_cast<float>(1 << 16) * 360.0F;
+  return encs[id].read()/pulses_per_tick;
 }
 
 volatile float M5Stack_UWB_Trncvr::recv_buffer_[NUM_UWB_TAGS] = {0};
