@@ -196,7 +196,7 @@ Encoder AMT13_Angle_Bus::encs[NUM_ENCODERS] = {
       Encoder(PIN_LIST[0], PIN_LIST[1]),
       Encoder(PIN_LIST[2], PIN_LIST[3]),
       Encoder(PIN_LIST[4], PIN_LIST[5])
-  }
+};
 
 float AMT13_Angle_Bus::read_enc(uint8_t id) {
   return encs[id].read()/pulses_per_tick;
