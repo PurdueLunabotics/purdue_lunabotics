@@ -68,7 +68,7 @@ def position_subscriber(data):
 
 def goal_subscriber(data):
     global goal, need_update_goal, goal_z_rot
-    print("New Goal")
+    rospy.loginfo("New Goal")
     goal = [data.pose.position.x, data.pose.position.y]
     goal_quat = [
         data.pose.orientation.w,
@@ -117,18 +117,17 @@ def main():
 
     path = []
     while not rospy.is_shutdown():
-        print("Loop")
         if (dstar is None) and len(grid) > 0 and len(pose) > 0 and len(goal) > 0:
             dstar = Dstar(goal, pose, grid, radius, res, x_offset, y_offset)
-            print("Initialize")
+            rospy.loginfo("Initialize")
 
         if dstar is not None:
-            # print("Iterate")
+            # rospy.loginfo("Iterate")
 
             dstar.update_position(pose)
 
             if need_update_goal:
-                print("created new Dstar")
+                rospy.loginfo("created new Dstar")
                 dstar = Dstar(goal, pose, grid, radius, res, x_offset, y_offset)
                 completedInitialRun = False
                 # dstar.update_goal(goal)
@@ -143,14 +142,16 @@ def main():
                 completedInitialRun = True
 
             if dstar.needs_new_path:
-                print("Start create path")
-                path = np.array(dstar.createPathList())
+                rospy.loginfo("Start create path")
+                path = dstar.createPathList()
+                path.reverse()
+                path = np.array(path)
 
                 if len(path) != 0 and enable_smoothing:
                     points = lerp(num_lerp_pts, path)
                     t_curve = np.linspace(0, 1, num_bezier_pts)
                     path = Bezier.Curve(t_curve, points)
-                    print("End create path")
+                    rospy.loginfo("End create path")
                 vectors = np.diff(path, axis=0)
                 angles = np.zeros(vectors.shape[0])
 

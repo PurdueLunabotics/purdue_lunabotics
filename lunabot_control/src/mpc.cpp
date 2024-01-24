@@ -206,8 +206,8 @@ double MPC::calculate_cost_(Eigen::MatrixXd rollout) {
             (position(2) - path_[path_cost_i][2]);
     cost += this->w_occupied_ * check_collision_(position);
     if (i > 0) {
-      cost += this->w_accel_ * rollout(i, 3) - rollout(i - 1, 3); // min accel
-      cost += this->w_accel_ * rollout(i, 4) - rollout(i - 1, 4); // min accel
+      cost += this->w_accel_ * (rollout(i, 3) - rollout(i - 1, 3)); // min accel
+      cost += this->w_accel_ * (rollout(i, 4) - rollout(i - 1, 4)); // min accel
     }
   }
 

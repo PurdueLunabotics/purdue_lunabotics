@@ -6,15 +6,31 @@ pc_topic: "/point_cloud"
 odom_topic: "/odom"
 nav_goal_topic: "/goal"
 cmd_vel_topic: "/cmd_vel"
-
 nav:
     map_topic: "/maps/costmap_node/global_costmap/costmap"
     global_path_topic: "/nav/global_path"
     occ_threshold: 80 # corresponds to possibly-in-collision
-    enable_smoothing: False 
+    enable_smoothing: False
     num_lerp_pts: 5
-    num_bezier_pts: 5
+    num_bezier_pts: 10
     dstar_node:
-      hz: 10
+      hz: 0.2
       robot_grid_radius: 8 # grid units
-      num_downsample: 10
+      num_downsample: 5
+    mpc_node:
+      rollout_count: 50
+      top_rollouts: 5
+      iterations: 10
+      w_linear: 2.0
+      w_angular: 2.0
+      w_waypoint_pos: 20.0
+      w_waypoint_rot: 10.0
+      w_occupied: 100.0
+      w_accel: 1.0
+      horizon_length: 10
+      frequency: 30
+      min_distance_threshold: 0.3
+      min_angle_threshold: 0.3
+      velocity_limits:
+        linear: [-0.3, 0.3]
+        angular: [-0.5, 0.5]

@@ -2,6 +2,7 @@
 <robot name="dummy_bot" xmlns:xacro="http://www.ros.org/wiki/xacro" >
 
 <xacro:property name="body_color" value="Gazebo/Silver" />
+<xacro:property name="mu" value="0.5" />
 
 <gazebo>
   <plugin name="skid_steer_drive_controller" filename="libluna_gazebo_ros_skid_steer_drive.so">
@@ -26,8 +27,8 @@
 
 <gazebo reference="right_front">
   <material>${body_color}</material>
-  <mu1 value="1.0"/>
-  <mu2 value="1.0"/>
+  <mu1 value="${mu}"/>
+  <mu2 value="${mu}"/>
   <kp  value="10000000.0" />
   <kd  value="1.0" />
   <fdir1 value="1 0 0"/>
@@ -35,8 +36,8 @@
 
 <gazebo reference="left_front">
   <material>${body_color}</material>
-  <mu1 value="1.0"/>
-  <mu2 value="1.0"/>
+  <mu1 value="${mu}"/>
+  <mu2 value="${mu}"/>
   <kp  value="10000000.0" />
   <kd  value="1.0" />
   <fdir1 value="1 0 0"/>
@@ -44,8 +45,8 @@
 
 <gazebo reference="left_back">
   <material>${body_color}</material>
-  <mu1 value="1.0"/>
-  <mu2 value="1.0"/>
+  <mu1 value="${mu}"/>
+  <mu2 value="${mu}"/>
   <kp  value="10000000.0" />
   <kd  value="1.0" />
   <fdir1 value="1 0 0"/>
@@ -53,8 +54,8 @@
 
 <gazebo reference="right_back">
   <material>${body_color}</material>
-  <mu1 value="1.0"/>
-  <mu2 value="1.0"/>
+  <mu1 value="${mu}"/>
+  <mu2 value="${mu}"/>
   <kp  value="10000000.0" />
   <kd  value="1.0" />
   <fdir1 value="1 0 0"/>
