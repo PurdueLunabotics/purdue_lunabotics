@@ -4,6 +4,7 @@
 #include <Sabertooth.h>
 #include <Stepper.h>
 #include <Wire.h>
+#imclude <Encoder.h>
 
 #ifndef __INTERFACES_H__
 #define __INTERFACES_H__
