@@ -2,12 +2,6 @@ import rospy
 from lunabot_msgs.msg import RobotEffort, RobotSensors
 from geometry_msgs.msg import Twist
 
-def robot_state_cb(self, msg):
-	global drive_left_curr, drive_right_curr, dep_curr
-	drive_left_curr = msg.drive_left_curr
-	drive_right_curr = msg.drive_right_curr
-	dep_curr = msg.dep_curr
-
 def main():
 	rospy.init_node("escape_behavior_node")
 
