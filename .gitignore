@@ -1,3 +1,4 @@
+teensy_loader_cli
 # datasets
 data/
 *.lz4
