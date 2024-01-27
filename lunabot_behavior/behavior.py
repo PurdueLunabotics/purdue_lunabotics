@@ -1,15 +1,16 @@
 import rospy
 import smach
 
+import ascent
+
 class ascent(smach.State):
     def __init__(self):
         smach.State.__init__(self, 
-                outcomese=['init mapping', 'traversal to mining', 'traversal to berm', 'fail'])
+                outcomes=['init mapping', 'traversal to mining', 'traversal to berm', 'fail'])
                 
     
     def execute (self, behavior):
-        # extend linear actuators
-        if True:
+        if ascent.main():
             return 'pass'
         else:
             return 'fail'
@@ -22,7 +23,7 @@ class init_mapping(smach.State):
     def execute (self, behavior):
         # sping 360 & find april tag & set target
 
-        # generatte trajectory
+        # generate trajectory
 
         if True:
             return 'pass'
