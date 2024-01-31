@@ -36,7 +36,7 @@ def stuck():
 	r = rospy.Rate(20)
 
 	while not rospy.is_shutdown():
-		if stuck_time - rosy.get_time() >= stuck_min_time:
+		if stuck_time - rospy.get_time() >= stuck_min_time:
 			stuck.data = True
 			s.publish(stuck)
 		else:
