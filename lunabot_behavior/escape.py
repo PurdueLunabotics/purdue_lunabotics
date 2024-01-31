@@ -25,6 +25,8 @@ def main():
 	line(vel_msg, 0)
 	vel_pub.publish(vel_msg)
 
+	return True
+
 def line(vel, power):
 	vel.linear.x = power
 	vel.angular.z = 0

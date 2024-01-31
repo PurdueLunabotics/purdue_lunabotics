@@ -2,6 +2,8 @@ import rospy
 import smach
 
 import ascent
+import escape
+import init_mapping
 
 class ascent(smach.State):
     def __init__(self):
@@ -25,14 +27,14 @@ class init_mapping(smach.State):
 
         # generate trajectory
 
-        if True:
+        if init_mapping.main():
             return 'pass'
         else:
             return 'fail'
 
 class traversal_to_mining(smach.State):
     def __init__(self):
-        smach.State.__inti__(self,
+        smach.State.__init__(self,
                 outcomes=['pass', 'fail'])
         
     def execute (self, behavior):
@@ -47,7 +49,7 @@ class traversal_to_mining(smach.State):
         
 class traversal_to_berm(smach.State):
     def __init__(self):
-        smach.State.__inti__(self,
+        smach.State.__init__(self,
                 outcomes=['target reached', 'detect robot stuck'])
         
     def execute (self, behavior):
@@ -122,9 +124,10 @@ class escape(smach.Sate):
                 outcomes=['back to traversal to mining', 'back to traversal to berm', 'detect robot stuck':'ESCAPE'])
     
     def execute (self, behavior):
-        # drive stright at 100% speed
+        # ~~drive stright at 100% speed
+        # Rock forward and backward
 
-        if True:
+        if escape.main():
             return 'pass'
         else:
             return 'fail'
