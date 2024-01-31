@@ -33,6 +33,8 @@ def stuck():
 
 	stuck_min_time = 3.0 #seconds
 
+	r = rospy.Rate(20)
+
 	while not rospy.is_shutdown():
 		if stuck_time - rosy.get_time() >= stuck_min_time:
 			stuck.data = True
@@ -51,7 +53,7 @@ def stuck():
 				continue
 
 		stuck_time_lock = False
-					
+		rate.sleep()
 
 
 
