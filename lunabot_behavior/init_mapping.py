@@ -2,6 +2,7 @@ import rospy
 from geometry_msgs.msg import Twist
 
 from apriltag_ros.msg import AprilTagDetectionArray
+from std_msgs.msg import Bool
 
 def main():
     global foundTag
@@ -21,6 +22,8 @@ def main():
             apritag_cb,
     )
 
+    rospy.Subscriber("/stuck", Bool, stuck_cb)
+
     start = rospy.get_time()
     
     while True:
@@ -33,6 +36,8 @@ def main():
             return True
         if rospy.get_time() - start >= 45: #no tags for too long
             break
+        if is_stuck:
+            break
 
         #keep turning and searching for april_tags
         vel_pub.angular.z = 0.2
@@ -42,6 +47,7 @@ def main():
     vel_pub.linear.x = 0
 	vel_pub.angular.z = 0
     vel_pub.publish(vel_msg)
+
 	return False
 
 def apritag_cb(self, msg):
@@ -49,3 +55,8 @@ def apritag_cb(self, msg):
         foundTag = True
     else:
         foundTag = False
+
+def stuck_cb(self, msg):
+    global is_stuck
+
+    is_stuck = msg.data
