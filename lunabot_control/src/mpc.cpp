@@ -271,6 +271,7 @@ bool comparator(std::pair<Eigen::MatrixXd, double> a, std::pair<Eigen::MatrixXd,
 void MPC::calculate_velocity() {
   SWRI_PROFILE("calculate-velocity");
   if (this->robot_pos_.empty() || this->path_.empty() || !this->enabled_) {
+    MPC::publish_velocity_(0, 0);
     return;
   }
   int horizon_length = this->horizon_length_;
