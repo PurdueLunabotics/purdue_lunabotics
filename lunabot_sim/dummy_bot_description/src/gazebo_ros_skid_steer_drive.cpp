@@ -451,11 +451,13 @@ void GazeboRosSkidSteerDrive::getWheelVelocities() {
   double vr = x_;
   double va = rot_;
 
-  wheel_speed_[LEFT_FRONT] = -(vr - va * wheel_separation_ / 2.0);
-  wheel_speed_[LEFT_REAR] = -(vr - va * wheel_separation_ / 2.0);
+  double angularWeight = 1.0;
 
-  wheel_speed_[RIGHT_FRONT] = vr + va * wheel_separation_ / 2.0;
-  wheel_speed_[RIGHT_REAR] = vr + va * wheel_separation_ / 2.0;
+  wheel_speed_[LEFT_FRONT] = -(vr - angularWeight * va * wheel_separation_ / 2.0);
+  wheel_speed_[LEFT_REAR] = -(vr - angularWeight * va * wheel_separation_ / 2.0);
+
+  wheel_speed_[RIGHT_FRONT] = vr + angularWeight * va * wheel_separation_ / 2.0;
+  wheel_speed_[RIGHT_REAR] = vr + angularWeight * va * wheel_separation_ / 2.0;
 }
 
 void GazeboRosSkidSteerDrive::cmdVelCallback(const geometry_msgs::Twist::ConstPtr &cmd_msg) {
