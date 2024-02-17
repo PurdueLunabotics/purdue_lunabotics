@@ -10,6 +10,18 @@
 
 #define UWBSerial Serial8
 
+class KillSwitchRelay {
+  static constexpr int kill_pin = 99;
+  static constexpr float kill_cur = 10.0;
+
+  static bool dead = false;
+
+  void setup();
+  void reset();
+  void kill();
+  void logic(RobotSensors state);
+}
+
 enum StepperDir { RETRACT = -1, EXTEND = 1 };
 enum MotorDir { CW = HIGH, CCW = LOW };
 enum STMotor { M1 = 1, M2 = 2 };

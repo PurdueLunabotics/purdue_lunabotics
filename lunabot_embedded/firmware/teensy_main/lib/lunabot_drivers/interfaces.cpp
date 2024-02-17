@@ -252,3 +252,46 @@ void M5Stack_UWB_Trncvr::transfer() {
     }
   }
 }
+
+void KillSwitchRelay::setup() { 
+  pinMode(kill_pin, OUTPUT); 
+  reset();
+}
+
+void KillSwitchRelay::reset() { 
+  digitalWrite(kill_pin, HIGH); 
+  dead = false;
+}
+
+void KillSwitchRelay::kill() { 
+  digitalWrite(kill_pin, LOW);
+  dead = true;
+}
+
+void KillSwitchRelay::logic(RobotSensors state) {
+    //check for high current
+
+  if (state.exc_curr >= kill_cur) {
+    kill()
+  }
+  if (state.dep_curr >= kill_cur) {
+    kill()
+  }
+  if (state.drive_left_curr >= kill_cur) {
+    kill()
+  }
+  if (state.drive_right_curr >= kill_cur) {
+    kill()
+  }
+  if (state.act_right_curr >= kill_cur) {
+    kill()
+  }
+  if (state.lead_screw_curr_curr >= kill_cur) {
+    kill()
+  }
+
+  if (dead) {
+    reset();
+  }
+
+}

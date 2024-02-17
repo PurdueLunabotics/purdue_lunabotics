@@ -7,6 +7,7 @@
 #define TX_PERIOD 10               // ms
 #define ENC_TRANSFER_PERIOD 1000   // microsec
 #define UWB_TRANSFER_PERIOD 10'000 // microsec
+#define KILL_TRASNFER_PERIOD 1000  // microsec
 #define CURR_UPDATE_PERIOD 8       // ms
 
 RobotSensors state = RobotSensors_init_zero;
@@ -43,8 +44,11 @@ void send() {
   pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
   pb_encode(&stream, RobotSensors_fields, &state);
 }
+
 IntervalTimer enc_timer;
 IntervalTimer uwb_timer;
+IntervalTimer kill_timer;
+
 
 void setup() {
   Sabertooth_MotorCtrl::init_serial(ST_SERIAL, ST_BAUD_RATE);
@@ -54,6 +58,7 @@ void setup() {
 
   enc_timer.begin(VLH35_Angle_Bus::transfer, ENC_TRANSFER_PERIOD);
   uwb_timer.begin(M5Stack_UWB_Trncvr::transfer, UWB_TRANSFER_PERIOD);
+  kill_timer.begin(KillSwitchRelay::logic, KILL_TRASNFER_PERIOD)
 
   // disable timeout
   MC1.setTimeout(0);
