@@ -33,8 +33,10 @@ private:
   int iterations_;
   double w_linear_;
   double w_angular_;
-  double w_waypoint_;
+  double w_waypoint_pos_;
+  double w_waypoint_rot_;
   double w_occupied_;
+  double w_accel_;
   double min_dist_thres_;
   int path_ind_;
   bool enabled_;
@@ -49,15 +51,14 @@ private:
 
   double smooth_clamp_(double x, double a, double b);
   bool check_collision_(Eigen::RowVectorXd pos);
-  double find_closest_distance_(Eigen::RowVectorXd pos);
+  static double get_yaw_(geometry_msgs::Quaternion q);
   double calculate_cost_(Eigen::MatrixXd rollout);
-  Eigen::MatrixXd calculate_model_(Eigen::MatrixXd actions);
-  std::vector<Eigen::MatrixXd> normal_distribute_(Eigen::MatrixXd means, Eigen::MatrixXd std_devs,
-                                                  int count);
+  Eigen::MatrixXd calculate_model_(Eigen::MatrixXd actions, Eigen::MatrixXd actions_raw);
+  std::pair<std::vector<Eigen::MatrixXd>, std::vector<Eigen::MatrixXd>>
+  normal_distribute_(Eigen::MatrixXd means, Eigen::MatrixXd std_devs, int count);
   void publish_velocity_(double linear, double angular);
   Eigen::MatrixXd mean_(std::vector<std::pair<Eigen::MatrixXd, double>>);
   Eigen::MatrixXd std_dev_(std::vector<std::pair<Eigen::MatrixXd, double>>);
-  double clamp_(double val, double low, double high);
 
   int is_close_();
   void update_setpoint_();

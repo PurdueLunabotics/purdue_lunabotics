@@ -5,7 +5,6 @@ import numpy as np
 
 
 class Dstar:
-
     """
     Initializes the Dstar algorithm by creating a priority queue, initializing accumulation (km),
     creating a list of node values (g and rhs), all initialized to infinity, setting the rhs of the goal node to 0, and inserting
@@ -112,8 +111,8 @@ class Dstar:
         for node_tuple in newlist:
             self.node_queue.put(node_tuple)
 
-    # Defines the hueristic used for calculating the priority of a node (the first run uses AStar, subsequent uses a focused value)
-    def hueristic(self, node: list, init: bool):
+    # Defines the heuristic used for calculating the priority of a node (the first run uses AStar, subsequent uses a focused value)
+    def heuristic(self, node: list, init: bool):
         # TODO use np.sqrt()
         if init:
             h = np.sqrt(
@@ -170,7 +169,7 @@ class Dstar:
         rhs_value = self.node_values_list[node[0]][node[1]][1]
         min_val = min(g_value, rhs_value)
 
-        h = self.hueristic(node, init)
+        h = self.heuristic(node, init)
 
         key1 = min_val + h + self.km
         key2 = min_val
@@ -439,56 +438,56 @@ class Dstar:
             gvals = []  # find smallest g value (closest to self.goal)
             if path_node[0] > 0:  # above
                 if self.current_map[path_node[0] - 1][path_node[1]] < 50:
-                    hueristic = np.sqrt(
+                    heuristic = np.sqrt(
                         (self.goal[0] - (path_node[0] - 1)) ** 2
                         + (self.goal[1] - path_node[1]) ** 2
                     )
                     gvals.append(
                         (
                             node_values_list[path_node[0] - 1][path_node[1]][0] + 1,
-                            hueristic,
+                            heuristic,
                             [path_node[0] - 1, path_node[1]],
                         )
                     )
 
             if path_node[0] < len(node_values_list) - 1:  # below
                 if self.current_map[path_node[0] + 1][path_node[1]] < 50:
-                    hueristic = np.sqrt(
+                    heuristic = np.sqrt(
                         (self.goal[0] - (path_node[0] + 1)) ** 2
                         + (self.goal[1] - path_node[1]) ** 2
                     )
                     gvals.append(
                         (
                             node_values_list[path_node[0] + 1][path_node[1]][0] + 1,
-                            hueristic,
+                            heuristic,
                             [path_node[0] + 1, path_node[1]],
                         )
                     )
 
             if path_node[1] > 0:  # left
                 if self.current_map[path_node[0]][path_node[1] - 1] < 50:
-                    hueristic = np.sqrt(
+                    heuristic = np.sqrt(
                         (self.goal[0] - (path_node[0])) ** 2
                         + (self.goal[1] - (path_node[1] - 1)) ** 2
                     )
                     gvals.append(
                         (
                             node_values_list[path_node[0]][path_node[1] - 1][0] + 1,
-                            hueristic,
+                            heuristic,
                             [path_node[0], path_node[1] - 1],
                         )
                     )
 
             if path_node[1] < len(node_values_list[0]) - 1:  # right
                 if self.current_map[path_node[0]][path_node[1] + 1] < 50:
-                    hueristic = np.sqrt(
+                    heuristic = np.sqrt(
                         (self.goal[0] - (path_node[0])) ** 2
                         + (self.goal[1] - (path_node[1] + 1)) ** 2
                     )
                     gvals.append(
                         (
                             node_values_list[path_node[0]][path_node[1] + 1][0] + 1,
-                            hueristic,
+                            heuristic,
                             [path_node[0], path_node[1] + 1],
                         )
                     )
@@ -526,7 +525,7 @@ class Dstar:
         self.needs_new_path = False
 
         for i in range(len(path_list)):
-            path_list[i] = self.convertToReal(path_list[i])
+            path_list[i] = tuple(self.convertToReal(path_list[i]))
 
         return path_list
 
