@@ -23,7 +23,6 @@ wget -c https://raw.githubusercontent.com/qboticslabs/ros_install_noetic/master/
 Install catkin tools + setup catkin workspace:
 ```
 mkdir ~/catkin_ws/src
->>>>>>> Stashed changes
 sudo apt install python3-catkin-tools
 ```
 
