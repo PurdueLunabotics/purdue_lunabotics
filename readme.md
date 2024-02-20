@@ -1,12 +1,5 @@
 # purdue_lunabotics
 
-**MASTER IS VERY OUTDATED!**
-Refer to `develop` branch and the following PRs:
-- [Main PR for 2022-2023](https://github.com/PurdueLunabotics/purdue_lunabotics/pull/42)
-  - still a few cleanups and bug fixes needed to be done here, but firmware is tested and works
-- [Autonomy PR](https://github.com/PurdueLunabotics/purdue_lunabotics/pull/43)
-  - includes [D*](https://github.com/PurdueLunabotics/purdue_lunabotics/pull/34), [homing autonomy controller](https://github.com/PurdueLunabotics/purdue_lunabotics/pull/31), [excavation autonomy controller](https://github.com/PurdueLunabotics/purdue_lunabotics/pull/43/commits/8c7b8b3a5a831ccc6ece8877faf549ecc4fec0e1), [pidf diff drive controller](https://github.com/PurdueLunabotics/purdue_lunabotics/pull/39), [last minute comp changes](https://github.com/PurdueLunabotics/purdue_lunabotics/tree/user/raghavauppuluri13/jetson-last-minute-fixes)
-
 This is the official git repo of the Purdue Lunabotics software team.
 
 ## Supported Platforms Out of the Box
