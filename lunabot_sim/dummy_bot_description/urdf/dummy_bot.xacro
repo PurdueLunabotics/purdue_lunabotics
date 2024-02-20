@@ -3,8 +3,8 @@
 
 <xacro:property name="PI" value="3.1415926535897931"/>
 
-<xacro:property name="chassisHeight" value="0.2"/>
-<xacro:property name="chassisLength" value="1.0"/>
+<xacro:property name="chassisHeight" value="0.1"/>
+<xacro:property name="chassisLength" value="0.8"/>
 <xacro:property name="chassisWidth" value="0.5"/>
 <xacro:property name="chassisMass" value="50"/>
 
@@ -33,7 +33,7 @@
   <inertial>
     <origin rpy="0 0 0" xyz="0 0.0 0.08835894305363262"/>
     <mass value="${chassisMass}"/>
-    <xacro:box_inertia m="${chassisMass}" x="1" y="0.5" z="0.15"/>
+    <xacro:box_inertia m="${chassisMass}" x="${chassisLength}" y="${chassisWidth}" z="${chassisHeight}"/>
   </inertial>
   <visual>
     <origin rpy="0 0 0" xyz="0 0 0"/>

@@ -9,11 +9,36 @@ Refer to `develop` branch and the following PRs:
 
 This is the official git repo of the Purdue Lunabotics software team.
 
-TODO: Use releases feature to simplify versioning
+## Supported Platforms Out of the Box
+- Fully-supported
+  - Ubuntu 20.04
+- Partly-supported
+  - Windows:
+    - Use WSL2 (caveat: gui will appear more laggy) 
+    - Dual boot linux (caveat: can be hard to set up, not recommended for beginners)
+- Not supported
+  - MacOS (both Intel and M1)
 
-## Quick Start
+## Other installation methods 
+- Docker (native support coming soon), adds support for MacOS and Windows
+    - [Get docker](https://docs.docker.com/get-docker/)
+    - [Use this ROS noetic Docker image (choose arm if you're on M1 Mac)](https://hub.docker.com/layers/library/ros/noetic/images/sha256-41a0aad743d47e08bec68cf48005706c27a3d7aad10632d204cada99ef3642b2?context=explore)
+    - [Useful docker-ros tutorial for learning how docker can be used with ROS](https://roboticseabass.com/2021/04/21/docker-and-ros/) 
 
-1. [Install ROS](https://wiki.purduearc.com/wiki/tutorials/setup-ros)
+## Getting started
+
+1. Install ROS (Linux only)
+
+[ROS install:](http://wiki.ros.org/ROS/Installation/TwoLineInstall/)
+```
+wget -c https://raw.githubusercontent.com/qboticslabs/ros_install_noetic/master/ros_install_noetic.sh && chmod +x ./ros_install_noetic.sh && ./ros_install_noetic.sh
+```
+
+Install catkin tools + setup catkin workspace:
+```
+mkdir ~/catkin_ws/src
+sudo apt install python3-catkin-tools
+```
 
 This tutorial assumes you have your `catkin_ws` initialized in your home directory: `~/catkin_ws`
 
@@ -21,12 +46,16 @@ This tutorial assumes you have your `catkin_ws` initialized in your home directo
 
 ```
 cd ~/catkin_ws/src
-git clone https://github.com/PurdueLunabotics/purdue_lunabotics.git
+git clone --recurse-submodules https://github.com/PurdueLunabotics/purdue_lunabotics.git 
 ```
+
+> Note: if you forgot to add recurse, run: `git submodule update --init --recursive --remote`
+
 3. Install dependencies at the root of your catkin workspace
 ```
 cd ~/catkin_ws
 rosdep install --from-paths src --ignore-src --rosdistro=noetic -y
+sudo ./src/purdue_lunabotics/install-non-ros-deps.sh
 ```
 
 4. Build + source (Do this every time you download new packages)
@@ -37,34 +66,23 @@ source ~/catkin_ws/devel/setup.bash # or .zsh if you use a zsh terminal
 ```
 > Note: Build + source every time you add new packages. Source every time you open a fresh terminal, or add the line to your ~/.bashrc (or .zshrc) so it sources automatically
 
-### Run the robot
+## Testing your setup
 
-#### 1. Setup Networking
+1. Run the sim
 
-1. Connect router to power
-
-> Optionally to get wifi, connect "internet" port on router to an external ethernet port with wifi
-
-2. Connect computer to ethernet port on the router
-3. Turn on the jetson and wait atleast 1.5 min
-
-#### 2. Run roslaunch commands
-
-1. Open a terminal, set the ROS IP info on the laptop and run the magic run command: 
 ```
-set_ip
-roslaunch lunabot_bringup robot.launch
+roslaunch lunabot_bringup sim.launch
 ```
+> you should see two new windows pop up: once called gazebo and one called rviz
 
-That's it! Things should be running now.
+> NOTE: to remove the TF_REPEATED lines run:`{ roslaunch lunabot_bringup sim.launch verbose:=true 2>&1 | grep -Ev 'TF_REPEATED_DATA|buffer_core|at line|^$'; } 2>&1`
 
-##### Manual Control Commands
+2. Set goal waypoint in rviz and watch the robot navigate
+![mpc_fix_gazebo_skid_steer](https://github.com/PurdueLunabotics/purdue_lunabotics/assets/41026849/a5cdaf41-f482-4b47-bd7b-bc8b7cb88880)
 
-- two joysticks: tank drive controls for drivetrain
-- LT/RT: Excavation (forward/backward)
-- LB/RB: linear actuators (tool angle)
-- cross key left/right: deposition (up/down)
-- cross key up/down: tool extension (lead screw) 
 
-## Contributing guidelines
-See https://github.com/PurdueLunabotics/purdue_lunabotics/blob/master/contributing.md
+## Important docs to read
+- [contributing guidelines](https://github.com/PurdueLunabotics/purdue_lunabotics/blob/master/contributing.md)
+- [running_the_robot](https://github.com/PurdueLunabotics/purdue_lunabotics/blob/master/running_the_robot.md)
+- [firmware setup](https://github.com/PurdueLunabotics/purdue_lunabotics/blob/master/lunabot_embedded/readme.md)
+- [simulated arena docs](https://github.com/PurdueLunabotics/mining_arena_gazebo/blob/master/README.md)

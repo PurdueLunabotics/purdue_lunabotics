@@ -65,6 +65,11 @@ Similar to python except [Google C++ Style Guide](https://google.github.io/style
 TLDR:
 - to simplify all the fluff style standards, use [clang-format](https://leimao.github.io/blog/Clang-Format-Quick-Tutorial/) autoformatter
 
+## Code Review Standards
+
+To ensure feedback from code reviews are actionable and clear, 
+we follow these standards: https://conventionalcomments.org/
+
 ## ROS Naming Conventions
 
 ### Package Layout

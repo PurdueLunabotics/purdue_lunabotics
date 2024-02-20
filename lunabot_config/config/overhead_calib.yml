@@ -1,0 +1,27 @@
+image_width: 640
+image_height: 480
+camera_name: overhead 
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [240.73152,  -0.64709, 322.24795,
+           0.     , 241.24997, 250.94698,
+           0.     ,   0.     ,   1.     ]
+distortion_model: equidistant
+distortion_coefficients:
+  rows: 1
+  cols: 4
+  data: [-0.052297, 0.012172, -0.014468, 0.006503]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1., 0., 0.,
+         0., 1., 0.,
+         0., 0., 1.]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [240.73152,  -0.64709, 322.24795,   0.     ,
+           0.     , 241.24997, 250.94698,   0.     ,
+           0.     ,   0.     ,   1.     ,   0.     ]
+

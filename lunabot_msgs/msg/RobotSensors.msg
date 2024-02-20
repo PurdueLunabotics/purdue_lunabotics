@@ -1,0 +1,14 @@
+float32 lead_screw_curr
+float32 act_right_curr
+float32 dep_curr
+float32 exc_curr
+float32 drive_left_curr
+float32 drive_right_curr
+float32 drive_left_ang
+float32 drive_right_ang
+float32 drive_left_vel
+float32 drive_right_vel
+float32 dep_ang
+float32 lead_screw_ang
+float32 act_ang
+float32[] uwb_dists

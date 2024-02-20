@@ -48,17 +48,25 @@
   <!--   <test_depend>gtest</test_depend> -->
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
+  <buildtool_depend>catkin</buildtool_depend>
   <depend>rosserial_python</depend>
   <depend>rosbag</depend>
   <depend>rviz</depend>
   <depend>lunabot_nav</depend>
+  <depend>usb_cam</depend>
   <depend>lunabot_control</depend>
   <depend>lunabot_perception</depend>
+  <depend>lunabot_embedded</depend>
   <depend>mining_arena_gazebo</depend>
   <depend>robot_state_publisher</depend>
   <depend>joint_state_publisher</depend>
+  <depend>lunabot_description</depend>
+  <depend>rtabmap_ros</depend>
   <depend>dummy_bot_description</depend>
-  <buildtool_depend>catkin</buildtool_depend>
+  <depend>image_proc</depend>
+  <depend>octomap_server</depend>
+  <depend>octomap_mapping</depend>
+  <depend>octomap</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

@@ -6,6 +6,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
   geometry_msgs
   costmap_2d
+  swri_profiler
 )
 
 find_package(Eigen3 REQUIRED)
@@ -16,7 +17,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES lunabot_control
-   CATKIN_DEPENDS roscpp tf2_ros geometry_msgs costmap_2d nav_msgs
+   CATKIN_DEPENDS roscpp tf2_ros geometry_msgs costmap_2d nav_msgs swri_profiler
    DEPENDS EIGEN3 
 #  DEPENDS system_lib
 )
@@ -37,6 +38,7 @@ target_link_libraries(${PROJECT_NAME}_mpc_node
   ${catkin_LIBRARIES}
   ${Eigen3_LIBRARIES}
 )
+
 
 ## Add gtest based cpp test target and link libraries
 # catkin_add_gtest(${PROJECT_NAME}-test test/test_lunabot_control.cpp)
