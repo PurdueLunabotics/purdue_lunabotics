@@ -71,6 +71,7 @@ roslaunch lunabot_bringup sim.launch
 > NOTE: to remove the TF_REPEATED lines run:`{ roslaunch lunabot_bringup sim.launch verbose:=true 2>&1 | grep -Ev 'TF_REPEATED_DATA|buffer_core|at line|^$'; } 2>&1`
 
 2. Set goal waypoint in rviz and watch the robot navigate
+![mpc_fix_gazebo_skid_steer](https://github.com/PurdueLunabotics/purdue_lunabotics/assets/41026849/a5cdaf41-f482-4b47-bd7b-bc8b7cb88880)
 
 
 ## Important docs to read
