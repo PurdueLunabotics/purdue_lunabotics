@@ -10,7 +10,6 @@ project(lunabot_msgs)
 find_package(catkin REQUIRED COMPONENTS
  message_generation
  std_msgs
- behavior
 )
 
 
