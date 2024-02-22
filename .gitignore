@@ -175,4 +175,4 @@ cython_debug/
 #.idea/
 
 .vs/
-purdue_lunabotics/.vs/
+purdue_lunabotics/.vs
