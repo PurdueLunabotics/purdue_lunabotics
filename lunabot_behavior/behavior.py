@@ -47,10 +47,18 @@ def main():
     rospy.Subscriber("/effort", RobotEffort, eff_cb)
 
     #create interrupt logic here!
-    # - rospy.is_shutdown():
+    # rospy.is_shutdown():
     # stuck
     # map change
     # overcurrent
+
+    # notes on interrupts: if no functions use rospy.sleep, then they can all 
+    # just check for the kill signal at the end of every loop they go through. 
+    # that can cause them to return false or the error in an enum (need to decide)
+    # and that can be handled by the main process before continuing. 
+    # How to pick up where we were before? Current state enum flag?
+    # also how to cleanly handle the functions returning different values?
+    # and picking back up from somewhere new specificed by the enum flag?
 
     #startup stuff here
     ascent.main()
