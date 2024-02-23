@@ -1,6 +1,9 @@
 import rospy
+from geometry_msgs.msg import Twist
 
 def main(vel_pub, foundTag):
+    vel_pub = Twist()
+
     while True:
         if foundTag:
             vel_pub.linear.x = 0
