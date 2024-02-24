@@ -61,9 +61,11 @@ class Behavior:
         traversal_message.data = False
         self.traversal_publisher.publish(traversal_message)
 
+        rospy.loginfo("State: Ascent")
         ascent_module = ascent.Ascent(self.effort_publisher)
         ascent_module.raiseLinearActuators()
 
+        rospy.loginfo("State: Find AprilTag")
         find_apriltag_module = find_apriltag.FindAprilTag(self.velocity_publisher)
         find_apriltag_module.find_apriltag()
 
@@ -71,13 +73,15 @@ class Behavior:
 
         # Set goal to mining zone
 
-        while(True):
+        while(not rospy.is_shutdown()):
             # Enable traversal (to mining zone)
+            rospy.loginfo("State: Traversal")
             traversal_message.data = True
             self.traversal_publisher.publish(traversal_message)
 
             # Detect when reached mining zone
 
+            rospy.loginfo("State: Plunging")
             traversal_message.data = False
             self.traversal_publisher.publish(traversal_message)
 
@@ -85,16 +89,19 @@ class Behavior:
 
             # trench / mine
 
+            rospy.loginfo("State: Ascent")
             ascent_module.raiseLinearActuators()
 
             # Set goal to berm
 
             # Enable traversal (to berm)
+            rospy.loginfo("State: Traversal")
             traversal_message.data = True
             self.traversal_publisher.publish(traversal_message)
 
             # Detect when reached berm
 
+            rospy.loginfo("State: Alignment")
             traversal_message.data = False
             self.traversal_publisher.publish(traversal_message)
 
@@ -102,6 +109,7 @@ class Behavior:
             
             # Deposit
 
+            rospy.loginfo("State: Ascent")
             ascent_module.raiseLinearActuators() # TODO why do we do this?
 
             # Set goal to mining zone

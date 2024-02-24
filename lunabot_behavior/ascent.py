@@ -35,7 +35,7 @@ class Ascent:
 			self.effort_publisher.publish(effort_message)
 
 			#TODO check for new sensor message / values
-			if (self.robot_sensors.act_right_currrent - 0) < EPSILON:
+			if (self.robot_sensors.act_right_curr - 0) < EPSILON:
 				# If the current is within EPSILON of 0, then end
 				break
 

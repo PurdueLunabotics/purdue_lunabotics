@@ -27,7 +27,7 @@ class FindAprilTag:
         #TODO change to parameter
         # Real /d455_front/camera/color/tag_detections
         # Sim /d435_backward/color/tag_detections
-        rospy.Subscriber("/d455_front/camera/color/tag_detections", AprilTagDetectionArray, self.apriltag_callback)
+        rospy.Subscriber("/d435_backward/color/tag_detections", AprilTagDetectionArray, self.apriltag_callback)
 
         self.rate = rospy.Rate(10)  # 10hz
 
