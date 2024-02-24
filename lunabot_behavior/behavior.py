@@ -3,6 +3,9 @@ import rospy
 import ascent
 import escape
 import init_mapping
+from geometry_msgs.msg import Twist
+from apriltag_ros.msg import AprilTagDetectionArray
+from lunabot_msgs.msg import RobotEffort, RobotSensors
 
 class State:
     drive_left_curr = 0
@@ -23,7 +26,7 @@ def robot_state_cb(self, msg):
 def eff_cb(self, msg):
 	global robot_effort
 	robot_effort.cmd_left = msg.drive_left
-	robot_effor.cmd_right = msg.drive_right
+	robot_effort.cmd_right = msg.drive_right
 
 def apritag_cb(self, msg):
     global foundTag
@@ -37,7 +40,7 @@ robot_state = State()
 robot_effort = Effort()
 
 def main():
-    rospy.init_node('behavior_machine')
+    rospy.init_node('behavior_node')
 
     effort_pub = rospy.Publisher("/effort", RobotEffort, queue_size=1)
     vel_pub = rospy.Publisher("/cmd_vel", Twist, queue_size=1)
