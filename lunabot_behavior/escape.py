@@ -1,13 +1,9 @@
 import rospy
-from lunabot_msgs.msg import RobotEffort, RobotSensors
+
 from geometry_msgs.msg import Twist
 
 def main():
-	rospy.init_node("escape_behavior_node")
-
 	vel_msg = Twist()
-
-	vel_pub = rospy.Publisher("/cmd_vel", Twist, queue_size=1)
 
 	escape_speed = 5
 

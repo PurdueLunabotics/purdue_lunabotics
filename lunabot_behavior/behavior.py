@@ -1,175 +1,89 @@
 import rospy
-import smach
 
 import ascent
 import escape
 import init_mapping
+from geometry_msgs.msg import Twist
+from apriltag_ros.msg import AprilTagDetectionArray
+from lunabot_msgs.msg import RobotEffort, RobotSensors
 
-class ascent(smach.State):
-    def __init__(self):
-        smach.State.__init__(self, 
-                outcomes=['init mapping', 'traversal to mining', 'traversal to berm', 'fail'])
-                
-    
-    def execute (self, behavior):
-        if ascent.main():
-            return 'pass'
-        else:
-            return 'fail'
-        
-class init_mapping(smach.State):
-    def __init__(self):
-        smach.State.__init__(self,
-                outcomes=['pass', 'fail'])
-    
-    def execute (self, behavior):
-        # sping 360 & find april tag & set target
+class State:
+    drive_left_curr = 0
+    drive_right_curr = 0
+    drive_left_vel = 0
+    drive_right_vel = 0
 
-        # generate trajectory
+class Effort:
+    cmd_left = 0
+    cmd_right = 0
 
-        if init_mapping.main():
-            return 'pass'
-        else:
-            return 'fail'
+def robot_state_cb(self, msg):
+    global robot_state
+    robot_state.drive_left_curr = msg.drive_left_curr
+    robot_state.drive_right_curr = msg.drive_right_curr
+    robot_state.dep_curr = msg.dep_curr
 
-class traversal_to_mining(smach.State):
-    def __init__(self):
-        smach.State.__init__(self,
-                outcomes=['pass', 'fail'])
-        
-    def execute (self, behavior):
-        # generate trajectory
+def eff_cb(self, msg):
+	global robot_effort
+	robot_effort.cmd_left = msg.drive_left
+	robot_effort.cmd_right = msg.drive_right
 
-        # move along trajectory + recieve sensor input(imu, uwb, images) + update map
+def apritag_cb(self, msg):
+    global foundTag
+    if len(msg.detections) != 0:
+        foundTag = True
+    else:
+        foundTag = False
 
-        if True:
-            return 'pass'
-        else:
-            return 'fail'
-        
-class traversal_to_berm(smach.State):
-    def __init__(self):
-        smach.State.__init__(self,
-                outcomes=['target reached', 'detect robot stuck'])
-        
-    def execute (self, behavior):
-        # generate trajectory
-
-        # move along trajectory + recieve sensor input(imu, uwb, images) + update map
-
-        if True:
-            return 'pass'
-        else:
-            return 'fail'
-        
-class plunging(smach.Sate):
-    def __init__(self):
-        smach.State.__init__(self,
-                outcomes=['pass', 'fail'])
-    
-    def execute (self, behavior):
-        # Set excavation to full speed + lower 90% of distance
-
-        # reduce speed to 25%
-
-        if True:
-            return 'pass'
-        else:
-            return 'fail'
-
-class trenching(smach.Sate):
-    def __init__(self):
-        smach.State.__init__(self,
-                outcomes=['load cell full', 'Obstacle reached', 'fail'])
-    
-    def execute (self, behavior):
-        # drive forward + adjust speed
-
-        if True:
-            return 'pass'
-        else:
-            return 'fail'
-        
-class deposit(smach.Sate):
-    def __init__(self):
-        smach.State.__init__(self,
-                outcomes=['load cell empty', 'fail':'FUCKED'])
-    
-    def execute (self, behavior):
-        # spin auger
-
-        # stop spinning auger
-
-        if True:
-            return 'pass'
-        else:
-            return 'fail'
-        
-class post_deposit(smach.Sate):
-    def __init__(self):
-        smach.State.__init__(self,
-                outcomes=['pass', 'fail'])
-    
-    def execute (self, behavior):
-        # shift future deposition location
-
-        if True:
-            return 'pass'
-        else:
-            return 'fail'
-        
-class escape(smach.Sate):
-    def __init__(self):
-        smach.State.__init__(self,
-                outcomes=['back to traversal to mining', 'back to traversal to berm', 'detect robot stuck':'ESCAPE'])
-    
-    def execute (self, behavior):
-        # ~~drive stright at 100% speed
-        # Rock forward and backward
-
-        if escape.main():
-            return 'pass'
-        else:
-            return 'fail'
-
+foundTag = False
+robot_state = State()
+robot_effort = Effort()
 
 def main():
-    rospy.init_node('smach_example_state_machine')
+    rospy.init_node('behavior_node')
 
-    sm = smach.StateMachine(outcomes = ['PASS', 'FAIL'])
+    effort_pub = rospy.Publisher("/effort", RobotEffort, queue_size=1)
+    vel_pub = rospy.Publisher("/cmd_vel", Twist, queue_size=1)
+    
+    rospy.Subscriber("/d455_front/camera/color/tag_detections", AprilTagDetectionArray, apritag_cb)
+    rospy.Subscriber("/sensors", RobotSensors, robot_state_cb)
+    rospy.Subscriber("/effort", RobotEffort, eff_cb)
 
-    with sm:
-        smach.StateMachine.add('ASCENT', ascent(), 
-                               transitions={'init mapping':'INIT_MAPPING',
-                                            'traversal to mining':'TRAVERSAL_TO_MINING',
-                                            'traversal to berm':'TRAVERSAL_TO_BERM',
-                                             'fail':'FUCKED'})
-        smach.StateMachine.add('INIT_MAPPING', init_mapping(), 
-                               transitions={'pass':'TRAVERSAL_TO_MINING', 
-                                             'fail':'FUCKED'})
-        smach.StateMachine.add('TRAVERSAL_TO_MINING', traversal_to_mining(),
-                               transitions={'pass':'PLUGING',
-                                             'fail':'ESCAPE'})
-        smach.StateMachine.add('PLUGING', plunging(), 
-                               transitions={'pass':'TRENCHING', 
-                                             'fail':'FUCKED'})
-        smach.StateMachine.add('TRENCHING', trenching(), 
-                               transitions={'load cell full':'ASCENT',
-                                            'Obstacle reached':'ASCENT', 
-                                             'fail':'FUCKED'})
-        smach.StateMachine.add('TRAVERSAL_TO_BERM', traversal_to_berm(), 
-                               transitions={'target reached':'DEPOSIT', 
-                                            'detect robot stuck':'ESCAPE'})
-        smach.StateMachine.add('DEPOSIT', deposit(), 
-                               transitions={'load cell empty':'POST_DEPOSIT', 
-                                            'fail':'FUCKED'})
-        smach.StateMachine.add('POST_DEPOSIT', post_deposit(), 
-                               transitions={'pass':'ASCENT', 
-                                            'fail':'FUCKED'})
-        smach.StateMachine.add('ESCAPE', escape(), 
-                               transitions={'back to traversal to mining':'TRAVERSAL_TO_MINING',
-                                            'back to traversal to berm':'TRAVERSAL_TO_BERM', 
-                                            'detect robot stuck':'ESCAPE'})
-        
-        
-        
+    #create interrupt logic here!
+    # rospy.is_shutdown():
+    # stuck
+    # map change
+    # overcurrent
+
+    # notes on interrupts: if no functions use rospy.sleep, then they can all 
+    # just check for the kill signal at the end of every loop they go through. 
+    # that can cause them to return false or the error in an enum (need to decide)
+    # and that can be handled by the main process before continuing. 
+    # How to pick up where we were before? Current state enum flag?
+    # also how to cleanly handle the functions returning different values?
+    # and picking back up from somewhere new specificed by the enum flag?
+
+    #startup stuff here
+    ascent.main()
+    init_mapping.main()
+
+    while(True):
+        #traverse to mining zone
+
+        #plunge
+
+        #trench
+
+        ascent.main()
+
+        #berm plan
+
+        #go to berm
+
+        #deposit
+
+        #post_deposit
+
+        ascent.main() #why?
+
+        #plan to mining zone

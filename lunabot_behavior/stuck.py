@@ -46,7 +46,7 @@ def stuck():
 		#check if trying to go somewhere
 		if cmd_left >= 0.05 or cmd_right >= 0.05:
 			# check if not going anywhere
-			if left_vel <= 0.05 and right_vel <= 0.05
+			if left_vel <= 0.05 and right_vel <= 0.05:
 				if not stuck_time_lock:
 					stuck_time_lock = True
 					stuck_time = rospy.get_time()
