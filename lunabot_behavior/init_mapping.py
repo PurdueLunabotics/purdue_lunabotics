@@ -7,7 +7,7 @@ def main(vel_pub, foundTag):
     while True:
         if foundTag:
             vel_pub.linear.x = 0
-	        vel_pub.angular.z = 0
+            vel_pub.angular.z = 0
             vel_pub.publish(vel_msg)
             return True
         if rospy.get_time() - start >= 45: #no tags for too long
@@ -19,7 +19,7 @@ def main(vel_pub, foundTag):
         rate.sleep()
         
     vel_pub.linear.x = 0
-	vel_pub.angular.z = 0
+    vel_pub.angular.z = 0
     vel_pub.publish(vel_msg)
 
-	return False
+    return False

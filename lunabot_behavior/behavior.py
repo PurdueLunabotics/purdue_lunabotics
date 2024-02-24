@@ -43,7 +43,7 @@ def main():
     vel_pub = rospy.Publisher("/cmd_vel", Twist, queue_size=1)
     
     rospy.Subscriber("/d455_front/camera/color/tag_detections", AprilTagDetectionArray, apritag_cb)
-	rospy.Subscriber("/sensors", RobotSensors, robot_state_cb)
+    rospy.Subscriber("/sensors", RobotSensors, robot_state_cb)
     rospy.Subscriber("/effort", RobotEffort, eff_cb)
 
     #create interrupt logic here!
