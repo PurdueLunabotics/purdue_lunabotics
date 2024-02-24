@@ -6,6 +6,10 @@ from lunabot_msgs.msg import RobotEffort, RobotErrors, RobotSensors
 
 import time
 
+'''
+A node that detects if the robot is stuck (trying to move, and not moving), and publishes to the error topic.
+TODO add this to roslaunch so it always runs
+'''
 class Stuck:
     MIN_STUCK_TIME = 3.0 # seconds
 
