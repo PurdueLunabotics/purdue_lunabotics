@@ -199,7 +199,7 @@ Encoder AMT13_Angle_Bus::encs[NUM_ENCODERS] = {
 };
 
 float AMT13_Angle_Bus::read_enc(uint8_t id) {
-  return encs[id].read()/pulses_per_tick;
+  return encs[id].read()/pulses_per_rev * deg_per_rev;
 }
 
 volatile float M5Stack_UWB_Trncvr::recv_buffer_[NUM_UWB_TAGS] = {0};

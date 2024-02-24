@@ -120,7 +120,8 @@ public:
 private:
   static constexpr int NUM_ENCODERS = 3;
   static constexpr int PIN_LIST[NUM_ENCODERS*2] = {10, 12, 25, 23, 19, 17};
-  static constexpr float pulses_per_tick = 400; //4 times the value set on the encoders
+  static constexpr float pulses_per_rev = 400; //4 times the value set on the encoders
+  static constexpr float deg_per_rev = 360
    
   static Encoder encs[NUM_ENCODERS];
 };
