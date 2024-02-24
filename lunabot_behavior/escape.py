@@ -2,27 +2,44 @@ import rospy
 
 from geometry_msgs.msg import Twist
 
-def main():
-	vel_msg = Twist()
 
-	escape_speed = 5
+"""
+A class that controls the behavior for if the robot becomes 'stuck'
+Rocks back and fowards in order to become unstuck- (TODO - this might displace us too much)
+"""
+class Escape:
+	NUM_ITERATIONS = 6  # how many times to rock back and forth
+	ESCAPE_SPEED = 1    # m/s
 
-	#rock backwards and forwards
-	for i in range(6):
-		rospy.sleep((i+1)/2)
-		line(vel_msg, -escape_speed)
-		vel_pub.publish(vel_msg)
+	def __init__(self, velocity_publisher: rospy.Publisher = None):
+		if velocity_publisher is None:
+			self.velocity_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
+			rospy.init_node('escape_node')
+		else:
+			self.velocity_publisher = velocity_publisher
 
-		rospy.sleep((i+1)/2)
-		line(vel_msg, escape_speed)
-		vel_pub.publish(vel_msg)
+	def drive_in_line(self, speed: float):
+		velocity_message = Twist()
+		velocity_message.linear.x = speed
 
-	rospy.sleep(2)
-	line(vel_msg, 0)
-	vel_pub.publish(vel_msg)
+		self.velocity_publisher.publish(velocity_message)
+		
+	def unstickRobot(self):
+		# rock backwards and forwards
+		for i in range(self.NUM_ITERATIONS):
 
-	return True
+			rospy.sleep((i+1)/2)
+			self.drive_in_line(-self.ESCAPE_SPEED)
 
-def line(vel, power):
-	vel.linear.x = power
-	vel.angular.z = 0
+			rospy.sleep((i+1)/2)
+			self.drive_in_line(self.ESCAPE_SPEED)
+
+		rospy.sleep(2)
+
+		# stop
+		velocity_message = Twist()
+		velocity_message.linear.x = 0
+		velocity_message.angular.z = 0
+		self.velocity_publisher.publish(velocity_message)
+
+		return True
