@@ -25,7 +25,7 @@ def stuck():
 
     stuck.stuck = False
 
-    s = rospy.Publisher("/Errors", RobotErrors, queue_size=1)
+    s = rospy.Publisher("/errors", RobotErrors, queue_size=1)
     rospy.Subscriber("/effort", RobotEffort, eff_cb)
     rospy.Subscriber("/sensors", RobotSensors, robot_state_cb)
 
