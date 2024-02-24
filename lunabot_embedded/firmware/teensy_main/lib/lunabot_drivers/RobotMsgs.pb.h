@@ -82,22 +82,19 @@ extern "C" {
   X(a, STATIC, SINGULAR, FLOAT, drive_left_ang, 7)                                                 \
   X(a, STATIC, SINGULAR, FLOAT, drive_right_ang, 8)                                                \
   X(a, STATIC, SINGULAR, FLOAT, dep_ang, 9)                                                        \
-  X(a, STATIC, SINGULAR, FLOAT, lead_screw_ang, 10)                                                \
-  X(a, STATIC, SINGULAR, FLOAT, act_ang, 11)                                                       \
-  X(a, STATIC, SINGULAR, FLOAT, dep_weight, 12)                                                    \
-  X(a, STATIC, SINGULAR, FLOAT, uwb_dist_0, 13)                                                    \
-  X(a, STATIC, SINGULAR, FLOAT, uwb_dist_1, 14)                                                    \
-  X(a, STATIC, SINGULAR, FLOAT, uwb_dist_2, 15)
+  X(a, STATIC, SINGULAR, FLOAT, dep_weight, 10)                                                    \
+  X(a, STATIC, SINGULAR, FLOAT, uwb_dist_0, 11)                                                    \
+  X(a, STATIC, SINGULAR, FLOAT, uwb_dist_1, 12)                                                    \
+  X(a, STATIC, SINGULAR, FLOAT, uwb_dist_2, 13)
 #define RobotSensors_CALLBACK NULL
 #define RobotSensors_DEFAULT NULL
 
 #define RobotEffort_FIELDLIST(X, a)                                                                \
-  X(a, STATIC, SINGULAR, SINT32, lead_screw, 1)                                                    \
-  X(a, STATIC, SINGULAR, SINT32, lin_act, 2)                                                       \
-  X(a, STATIC, SINGULAR, SINT32, left_drive, 3)                                                    \
-  X(a, STATIC, SINGULAR, SINT32, right_drive, 4)                                                   \
-  X(a, STATIC, SINGULAR, SINT32, excavate, 5)                                                      \
-  X(a, STATIC, SINGULAR, SINT32, deposit, 6)
+  X(a, STATIC, SINGULAR, SINT32, lin_act, 1)                                                       \
+  X(a, STATIC, SINGULAR, SINT32, left_drive, 2)                                                    \
+  X(a, STATIC, SINGULAR, SINT32, right_drive, 3)                                                   \
+  X(a, STATIC, SINGULAR, SINT32, excavate, 4)                                                      \
+  X(a, STATIC, SINGULAR, SINT32, deposit, 5)
 #define RobotEffort_CALLBACK NULL
 #define RobotEffort_DEFAULT NULL
 
