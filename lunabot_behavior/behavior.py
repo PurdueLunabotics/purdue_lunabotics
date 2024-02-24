@@ -2,7 +2,8 @@ import rospy
 
 from geometry_msgs.msg import Twist
 from apriltag_ros.msg import AprilTagDetectionArray
-from lunabot_msgs.msg import RobotEffort, RobotSensors, RobotErrors
+from lunabot_msgs.msg import RobotEffort, RobotSensors, RobotErrors, Behavior
+from std_msgs.msg import Bool
 
 import ascent
 import escape
@@ -28,6 +29,7 @@ class Behavior:
 
         self.effort_publisher = rospy.Publisher("/effort", RobotEffort, queue_size=1, latch=True)
         self.velocity_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
+        self.traversal_publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue_size=1, latch=True)
 
         # TODO change to parameters
         rospy.Subscriber("/sensors", RobotSensors, self.robot_state_callback)
@@ -53,6 +55,12 @@ class Behavior:
         # and picking back up from somewhere new specificed by the enum flag?
 
         # Startup:
+
+        # disable traversal
+        traversal_message = Bool()
+        traversal_message.data = False
+        self.traversal_publisher.publish(traversal_message)
+
         ascent_module = ascent.Ascent(self.effort_publisher)
         ascent_module.raiseLinearActuators()
 
@@ -65,8 +73,13 @@ class Behavior:
 
         while(True):
             # Enable traversal (to mining zone)
+            traversal_message.data = True
+            self.traversal_publisher.publish(traversal_message)
 
             # Detect when reached mining zone
+
+            traversal_message.data = False
+            self.traversal_publisher.publish(traversal_message)
 
             # plunge
 
@@ -77,8 +90,13 @@ class Behavior:
             # Set goal to berm
 
             # Enable traversal (to berm)
+            traversal_message.data = True
+            self.traversal_publisher.publish(traversal_message)
 
             # Detect when reached berm
+
+            traversal_message.data = False
+            self.traversal_publisher.publish(traversal_message)
 
             # Alignment
             
