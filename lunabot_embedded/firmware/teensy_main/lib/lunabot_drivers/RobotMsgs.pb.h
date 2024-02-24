@@ -23,6 +23,8 @@ typedef struct _RobotSensors {
   float uwb_dist_0;
   float uwb_dist_1;
   float uwb_dist_2;
+  float load_cell_1;
+  float load_cell_2;
 } RobotSensors;
 
 typedef struct _RobotEffort {

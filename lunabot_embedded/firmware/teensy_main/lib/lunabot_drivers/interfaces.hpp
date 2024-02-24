@@ -4,6 +4,7 @@
 #include <Sabertooth.h>
 #include <Stepper.h>
 #include <Wire.h>
+#include <HX711.h>
 
 #ifndef __INTERFACES_H__
 #define __INTERFACES_H__
@@ -109,6 +110,17 @@ private:
   volatile static uint32_t enc_buffer_[BUS_SIZE];
 
   static void select_enc_(uint8_t id);
+};
+
+class HX711_Load_Cell {
+public:
+  HX711_Load_Cell(){};
+  static void init();
+  static float read_weight(uint8_t id);
+
+private: 
+  static constexpr int PIN_LIST[4] = {19, 18, 21, 20}; //data, clock, data, clock
+  static HX711 scales[2];
 };
 
 #endif

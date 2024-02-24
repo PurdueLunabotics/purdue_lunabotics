@@ -40,6 +40,8 @@ void send() {
 
   uwb::update(state.uwb_dist_0, state.uwb_dist_1, state.uwb_dist_2);
 
+  load_cell::update(state.load_cell_1, state.load_cell_2)
+
   pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
   pb_encode(&stream, RobotSensors_fields, &state);
 }
@@ -51,6 +53,7 @@ void setup() {
   ACS711_Current_Bus::init_ads1115();
   VLH35_Angle_Bus::init();
   M5Stack_UWB_Trncvr::init();
+  HX711_Load_Cell::init();
 
   enc_timer.begin(VLH35_Angle_Bus::transfer, ENC_TRANSFER_PERIOD);
   uwb_timer.begin(M5Stack_UWB_Trncvr::transfer, UWB_TRANSFER_PERIOD);
