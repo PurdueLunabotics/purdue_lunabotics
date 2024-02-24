@@ -31,6 +31,7 @@ add_message_files(FILES
   RobotEffort.msg
   RobotSensors.msg
   RobotErrors.msg
+  behavior.msg
 )
 
 ## Generate added messages and services with any dependencies listed here
