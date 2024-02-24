@@ -5,7 +5,7 @@ import escape
 import find_apriltag
 from geometry_msgs.msg import Twist
 from apriltag_ros.msg import AprilTagDetectionArray
-from lunabot_msgs.msg import RobotEffort, RobotSensors
+from lunabot_msgs.msg import RobotEffort, RobotSensors, RobotErrors
 
 class Behavior:
 
@@ -15,10 +15,13 @@ class Behavior:
     def effort_callback(self, msg: RobotEffort):
         self.robot_effort = msg
 
+    def errors_callback(self, msg: RobotErrors):
+        self.robot_errors = msg
 
     def __init__(self):
         self.robot_state: RobotSensors = RobotSensors()
         self.robot_effort: RobotEffort = RobotEffort()
+        self.robot_errors: RobotErrors = RobotErrors()
 
         self.found_apriltag = False
 
@@ -28,6 +31,7 @@ class Behavior:
         # TODO change to parameters
         rospy.Subscriber("/sensors", RobotSensors, self.robot_state_callback)
         rospy.Subscriber("/effort", RobotEffort, self.effort_callback)
+        rospy.Subscriber("/errors", RobotErrors, self.errors_callback)
 
         rospy.init_node('behavior_node')
 
