@@ -23,6 +23,8 @@ class Ascent:
 
 		rospy.Subscriber("/sensors", RobotSensors, self.sensors_callback)
 
+		self.rate = rospy.Rate(10)  # 10hz
+
 	def raiseLinearActuators(self):
 		time.sleep(0.1)
 
@@ -36,6 +38,8 @@ class Ascent:
 			if (self.robot_sensors.act_right_currrent - 0) < EPSILON:
 				# If the current is within EPSILON of 0, then end
 				break
+
+			self.rate.sleep()
 
 		effort_message.lin_act = 0
 		self.effort_publisher.publish(effort_message)
