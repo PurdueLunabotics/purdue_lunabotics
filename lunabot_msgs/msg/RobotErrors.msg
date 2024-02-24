@@ -1,0 +1,2 @@
+bool stuck
+bool overcurrent
