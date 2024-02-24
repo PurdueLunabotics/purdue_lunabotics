@@ -2,7 +2,7 @@ import rospy
 
 import ascent
 import escape
-import init_mapping
+import find_apriltag
 from geometry_msgs.msg import Twist
 from apriltag_ros.msg import AprilTagDetectionArray
 from lunabot_msgs.msg import RobotEffort, RobotSensors
@@ -15,11 +15,6 @@ class Behavior:
     def effort_callback(self, msg: RobotEffort):
         self.robot_effort = msg
 
-    def apritag_callback(self, msg: AprilTagDetectionArray):
-        if len(msg.detections) != 0:
-            self.found_apriltag = True
-        else:
-            self.found_apriltag = False
 
     def __init__(self):
         self.robot_state: RobotSensors = RobotSensors()
@@ -31,7 +26,6 @@ class Behavior:
         self.velocity_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
 
         # TODO change to parameters
-        rospy.Subscriber("/d455_front/camera/color/tag_detections", AprilTagDetectionArray, self.apritag_callback)
         rospy.Subscriber("/sensors", RobotSensors, self.robot_state_callback)
         rospy.Subscriber("/effort", RobotEffort, self.effort_callback)
 
@@ -55,7 +49,7 @@ class Behavior:
 
         #startup stuff here
         ascent.main()
-        init_mapping.main()
+        find_apriltag.main()
 
         while(True):
             #traverse to mining zone
