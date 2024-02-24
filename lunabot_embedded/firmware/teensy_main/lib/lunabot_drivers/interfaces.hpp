@@ -11,7 +11,7 @@
 #define UWBSerial Serial8
 
 class KillSwitchRelay {
-  static constexpr int kill_pin = 99;
+  static constexpr int kill_pin = 11;
   static constexpr float kill_cur = 10.0;
 
   static bool dead = false;
