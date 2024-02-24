@@ -6,7 +6,6 @@ import time
 
 EPSILON = 0.01 #TODO adjust as needed
 
-
 '''
 This is a transition state used to raise the linear actuators to the maximum height.
 '''

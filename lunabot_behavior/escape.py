@@ -9,7 +9,7 @@ Rocks back and fowards in order to become unstuck- (TODO - this might displace u
 """
 class Escape:
 	NUM_ITERATIONS = 6  # how many times to rock back and forth
-	ESCAPE_SPEED = 5    # m/s
+	ESCAPE_SPEED = 1    # m/s
 
 	def __init__(self, velocity_publisher: rospy.Publisher = None):
 		if velocity_publisher is None:
