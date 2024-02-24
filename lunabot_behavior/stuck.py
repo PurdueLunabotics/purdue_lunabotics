@@ -4,58 +4,65 @@ from std_msgs.msg import Bool
 
 from lunabot_msgs.msg import RobotEffort, RobotErrors, RobotSensors
 
+import time
 
-def robot_state_cb(self, msg):
-    global left_curr, right_curr, left_vel, right_vel
-    left_curr = msg.drive_left_curr
-    right_curr = msg.drive_right_curr
-    left_vel = msg.drive_left_vel
-    right_vel = msg.drive_right_vel
+class Stuck:
+    MIN_STUCK_TIME = 3.0 # seconds
 
-
-def eff_cb(self, msg):
-    global cmd_left, cmd_right
-    cmd_left = msg.drive_left
-    cmd_right = msg.drive_right
+    def robot_sensors_callback(self, msg):
+        self.robot_sensors = msg
 
 
-def stuck():
-    rospy.init_node("stuck_node")
-    stuck = RobotErrors
+    def effort_callback(self, msg):
+        self.robot_effort = msg
 
-    stuck.stuck = False
 
-    s = rospy.Publisher("/errors", RobotErrors, queue_size=1)
-    rospy.Subscriber("/effort", RobotEffort, eff_cb)
-    rospy.Subscriber("/sensors", RobotSensors, robot_state_cb)
+    def __init__(self):
+        self.robot_sensors = RobotSensors()
+        self.robot_effort = RobotEffort()
 
-    s.publish(stuck)
+    def stuck(self):
+        time.sleep(0.1)
 
-    stuck_time_lock = False
-    stuck_time = rospy.get_time()
+        rospy.init_node("stuck_node")
 
-    stuck_min_time = 3.0  # seconds
+        effort_publisher = rospy.Publisher("/errors", RobotErrors, queue_size=1)
+        rospy.Subscriber("/effort", RobotEffort, self.effort_callback)
+        rospy.Subscriber("/sensors", RobotSensors, self.robot_sensors_callback)
 
-    r = rospy.Rate(20)
-
-    while not rospy.is_shutdown():
-        if stuck_time - rospy.get_time() >= stuck_min_time:
-            stuck.stuck = True
-        else:
-            stuck.stuck = False
-
-        s.publish(stuck)
-
-        # check if trying to go somewhere
-        if cmd_left >= 0.05 or cmd_right >= 0.05:
-            # check if not going anywhere
-            if left_vel <= 0.05 and right_vel <= 0.05:
-                if not stuck_time_lock:
-                    stuck_time_lock = True
-                    stuck_time = rospy.get_time()
-                continue
+        stuck_msg = RobotErrors()
+        stuck_msg.stuck = False
+        effort_publisher.publish(stuck_msg)
 
         stuck_time_lock = False
-        rate.sleep()
+        stuck_time = rospy.get_time()
 
-    stuck.stuck = False
+        rate = rospy.Rate(20)
+
+        while not rospy.is_shutdown():
+            if stuck_time - rospy.get_time() >= self.MIN_STUCK_TIME:
+                stuck_msg.stuck = True
+            else:
+                stuck_msg.stuck = False
+
+            effort_publisher.publish(stuck_msg)
+
+            # check if trying to go somewhere
+            if self.robot_effort.left_drive >= 0.05 or self.robot_effort.right_drive >= 0.05:
+                # check if not going anywhere
+                if self.robot_sensors.drive_left_vel <= 0.05 and self.robot_sensors.drive_right_vel <= 0.05:
+                    if not stuck_time_lock:
+                        stuck_time_lock = True
+                        stuck_time = rospy.get_time()
+                    continue
+
+            stuck_time_lock = False
+            rate.sleep()
+
+        stuck_msg.stuck = False
+        effort_publisher.publish(stuck_msg)
+
+if __name__ == "__main__":
+    stuck = Stuck()
+    stuck.stuck()
+    rospy.spin()
