@@ -23,8 +23,8 @@ typedef struct _RobotSensors {
   float uwb_dist_0;
   float uwb_dist_1;
   float uwb_dist_2;
+  float load_cell_0;
   float load_cell_1;
-  float load_cell_2;
 } RobotSensors;
 
 typedef struct _RobotEffort {
@@ -41,11 +41,11 @@ extern "C" {
 
 /* Initializer values for message structs */
 #define RobotSensors_init_default                                                                  \
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 #define RobotEffort_init_default                                                                   \
   { 0, 0, 0, 0, 0 }
 #define RobotSensors_init_zero                                                                     \
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 #define RobotEffort_init_zero                                                                      \
   { 0, 0, 0, 0, 0 }
 
@@ -62,6 +62,8 @@ extern "C" {
 #define RobotSensors_uwb_dist_0_tag 10
 #define RobotSensors_uwb_dist_1_tag 11
 #define RobotSensors_uwb_dist_2_tag 12
+#define RobotSensors_load_cell_0_tag 13
+#define RobotSensors_load_cell_1_tag 14
 #define RobotEffort_lin_act_tag 1
 #define RobotEffort_left_drive_tag 2
 #define RobotEffort_right_drive_tag 3
@@ -81,7 +83,9 @@ extern "C" {
   X(a, STATIC, SINGULAR, FLOAT, dep_ang, 9)                                                        \
   X(a, STATIC, SINGULAR, FLOAT, uwb_dist_0, 10)                                                    \
   X(a, STATIC, SINGULAR, FLOAT, uwb_dist_1, 11)                                                    \
-  X(a, STATIC, SINGULAR, FLOAT, uwb_dist_2, 12)
+  X(a, STATIC, SINGULAR, FLOAT, uwb_dist_2, 12)                                                    \
+  X(a, STATIC, SINGULAR, FLOAT, load_cell_0, 13)                                                   \
+  X(a, STATIC, SINGULAR, FLOAT, load_cell_1, 14)                                                   \
 #define RobotSensors_CALLBACK NULL
 #define RobotSensors_DEFAULT NULL
 
