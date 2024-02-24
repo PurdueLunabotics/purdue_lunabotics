@@ -2,6 +2,8 @@ import rospy
 from geometry_msgs.msg import Twist
 from apriltag_ros.msg import AprilTagDetectionArray
 
+import time
+
 '''
 Called init_mapping in the concept of operations, this is the first behavior state- spinning until an apriltag is found
 and then reporting back on the estimated locations of the mining zone and berm zone
@@ -22,11 +24,16 @@ class FindAprilTag:
 
         self.found_apriltag = False
         
+        #TODO change to parameter
+        # Real /d455_front/camera/color/tag_detections
+        # Sim /d435_backward/color/tag_detections
         rospy.Subscriber("/d455_front/camera/color/tag_detections", AprilTagDetectionArray, self.apriltag_callback)
 
         self.rate = rospy.Rate(10)  # 10hz
 
     def find_apriltag(self):
+        time.sleep(0.1)
+
         start = rospy.get_time()
 
         velocity_message = Twist()
@@ -55,8 +62,9 @@ class FindAprilTag:
         self.velocity_publisher.publish(velocity_message)
 
         return False
+
     
 if __name__ == '__main__':
     find_apriltag = FindAprilTag()
     find_apriltag.find_apriltag()
-    rospy.spin()
+
