@@ -1,11 +1,12 @@
 import rospy
 
-import ascent
-import escape
-import find_apriltag
 from geometry_msgs.msg import Twist
 from apriltag_ros.msg import AprilTagDetectionArray
 from lunabot_msgs.msg import RobotEffort, RobotSensors, RobotErrors
+
+import ascent
+import escape
+import find_apriltag
 
 class Behavior:
 
@@ -35,7 +36,7 @@ class Behavior:
 
         rospy.init_node('behavior_node')
 
-    def behavior_loop():
+    def behavior_loop(self):
 
         #create interrupt logic here!
         # rospy.is_shutdown():
@@ -51,31 +52,43 @@ class Behavior:
         # also how to cleanly handle the functions returning different values?
         # and picking back up from somewhere new specificed by the enum flag?
 
-        #startup stuff here
-        ascent.main()
-        find_apriltag.main()
+        # Startup:
+        ascent_module = ascent.Ascent(self.effort_publisher)
+        ascent_module.raiseLinearActuators()
+
+        find_apriltag_module = find_apriltag.FindAprilTag(self.velocity_publisher)
+        find_apriltag_module.find_apriltag()
+
+        # Determine positions of mining and berm zones from apriltag
+
+        # Set goal to mining zone
 
         while(True):
-            #traverse to mining zone
+            # Enable traversal (to mining zone)
 
-            #plunge
+            # Detect when reached mining zone
 
-            #trench
+            # plunge
 
-            ascent.main()
+            # trench / mine
 
-            #berm plan
+            ascent_module.raiseLinearActuators()
 
-            #go to berm
+            # Set goal to berm
 
-            #deposit
+            # Enable traversal (to berm)
 
-            #post_deposit
+            # Detect when reached berm
 
-            ascent.main() #why?
+            # Alignment
+            
+            # Deposit
 
-            #plan to mining zone
+            ascent_module.raiseLinearActuators() # TODO why do we do this?
+
+            # Set goal to mining zone
 
 if __name__ == "__main__":
     behavior = Behavior()
     behavior.behavior_loop()
+    rospy.spin()
