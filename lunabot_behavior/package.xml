@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>lunabot_msgs</name>
+  <name>lunabot_behavior</name>
   <version>0.0.0</version>
-  <description>The lunabot_msgs package</description>
+  <description>The lunabot_behavior package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="raghava13@todo.todo">raghava13</maintainer>
+  <maintainer email="lunabotics@todo.todo">Purdue Lunabotics</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/lunabot_msgs</url> -->
+  <!-- <url type="website">http://wiki.ros.org/lunabot_behavior</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -37,10 +37,7 @@
   <!--   <build_depend>roscpp</build_depend> -->
   <!--   <exec_depend>roscpp</exec_depend> -->
   <!-- Use build_depend for packages you need at compile time: -->
-	<build_depend>message_generation</build_depend>
-	<!-- <run_depend>message_runtime</run_depend> -->
-	<depend>std_msgs</depend>
-	<exec_depend>message_runtime</exec_depend>
+  <!--   <build_depend>message_generation</build_depend> -->
   <!-- Use build_export_depend for packages you need in order to build against this package: -->
   <!--   <build_export_depend>message_generation</build_export_depend> -->
   <!-- Use buildtool_depend for build tool packages: -->
@@ -52,6 +49,7 @@
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
+  <depend>ros-noetic-smach-ros</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

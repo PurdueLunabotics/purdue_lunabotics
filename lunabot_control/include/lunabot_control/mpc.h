@@ -9,6 +9,7 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/Path.h>
+#include <std_msgs/Bool.h>
 #include <ros/ros.h>
 #include <swri_profiler/profiler.h>
 
