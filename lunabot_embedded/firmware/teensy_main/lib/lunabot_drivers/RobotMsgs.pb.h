@@ -20,8 +20,6 @@ typedef struct _RobotSensors {
   float drive_left_ang;
   float drive_right_ang;
   float dep_ang;
-  float lead_screw_ang;
-  float act_ang;
   float dep_weight;
   float uwb_dist_0;
   float uwb_dist_1;
@@ -29,7 +27,6 @@ typedef struct _RobotSensors {
 } RobotSensors;
 
 typedef struct _RobotEffort {
-  int32_t lead_screw;
   int32_t lin_act;
   int32_t left_drive;
   int32_t right_drive;
