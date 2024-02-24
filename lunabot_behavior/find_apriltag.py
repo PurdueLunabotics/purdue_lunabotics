@@ -14,7 +14,12 @@ class FindAprilTag:
         if len(msg.detections) > 0:
             self.found_apriltag = True
 
+
     def __init__(self, velocity_publisher: rospy.Publisher = None):
+        """
+        If passed a publisher, then it is assumed a node is already running, and the publisher is shared.
+        Else, initialize this node to run on its own.
+        """
 
         if velocity_publisher is None:
             self.velocity_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
@@ -32,6 +37,10 @@ class FindAprilTag:
         self.rate = rospy.Rate(10)  # 10hz
 
     def find_apriltag(self):
+        """
+        Spin in a circle (in the starting zone) until an apriltag is found. Then stop and return.
+        """
+        
         time.sleep(0.1)
 
         start = rospy.get_time()

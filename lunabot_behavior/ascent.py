@@ -6,12 +6,20 @@ import time
 
 EPSILON = 0.01 #TODO adjust as needed
 
+
+'''
+This is a transition state used to raise the linear actuators to the maximum height.
+'''
 class Ascent:
 
 	def sensors_callback(self, msg: RobotSensors):
 		self.robot_sensors = msg
 	
 	def __init__(self, effort_publisher: rospy.Publisher = None):
+		"""
+		If passed a publisher, then it is assumed a node is already running, and the publisher is shared.
+		Else, initialize this node to run on its own.
+		"""
 
 		if effort_publisher is None:
 			self.effort_publisher = rospy.Publisher("/effort", RobotEffort, queue_size=1, latch=True)
@@ -26,6 +34,10 @@ class Ascent:
 		self.rate = rospy.Rate(10)  # 10hz
 
 	def raiseLinearActuators(self):
+		"""
+		Raise linear actuators to the max. height by turning them on until the current received is 0.
+		"""
+
 		time.sleep(0.1)
 
 		effort_message = RobotEffort()

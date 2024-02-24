@@ -9,6 +9,12 @@ import ascent
 import escape
 import find_apriltag
 
+'''
+A class that controls the main behavior of the robot, aiming for a cycle of autonomous mining and berm depositing
+Consists of a variety of states, most of which are imported python modules. Publishes robot effort and cmd_vel,
+along with the various submodules (which share publishers when possible). For autonomous driving, the class
+publishes a boolean state that enables or disables MPC.
+'''
 class Behavior:
 
     def robot_state_callback(self, msg: RobotSensors):
@@ -25,26 +31,22 @@ class Behavior:
         self.robot_effort: RobotEffort = RobotEffort()
         self.robot_errors: RobotErrors = RobotErrors()
 
-        self.found_apriltag = False
-
         self.effort_publisher = rospy.Publisher("/effort", RobotEffort, queue_size=1, latch=True)
         self.velocity_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
         self.traversal_publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue_size=1, latch=True)
 
-        # TODO change to parameters
+        # TODO change to parameters, determine which are needed
         rospy.Subscriber("/sensors", RobotSensors, self.robot_state_callback)
         rospy.Subscriber("/effort", RobotEffort, self.effort_callback)
         rospy.Subscriber("/errors", RobotErrors, self.errors_callback)
 
         rospy.init_node('behavior_node')
 
+    """
+    The main method of the class: enables autonomous behavior. Starts up with a few states,
+    then goes in a loop of mining/deposition.
+    """
     def behavior_loop(self):
-
-        #create interrupt logic here!
-        # rospy.is_shutdown():
-        # stuck
-        # map change
-        # overcurrent
 
         # notes on interrupts: if no functions use rospy.sleep, then they can all 
         # just check for the kill signal at the end of every loop they go through. 
@@ -56,7 +58,7 @@ class Behavior:
 
         # Startup:
 
-        # disable traversal
+        # disable traversal to begin
         traversal_message = Bool()
         traversal_message.data = False
         self.traversal_publisher.publish(traversal_message)
