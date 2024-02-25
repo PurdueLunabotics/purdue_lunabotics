@@ -11,13 +11,14 @@ import escape
 import find_apriltag
 import interrupts
 
-class states(Enum):
+class States(Enum):
     ASCENT = auto()
     FIND_TAG = auto()
     TRAVERSAL_MINE = auto()
     PLUNGE = auto()
     TRENCH = auto()
     TRAVERSAL_BERM = auto()
+    ALIGN = auto()
     DEPOSIT = auto()
 
 '''
@@ -45,6 +46,9 @@ class Behavior:
         self.effort_publisher = rospy.Publisher("/effort", RobotEffort, queue_size=1, latch=True)
         self.velocity_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
         self.traversal_publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue_size=1, latch=True)
+
+        self.current_state = States()
+        self.current_state = States.ASCENT
 
         # TODO change to parameters, determine which are needed
         rospy.Subscriber("/sensors", RobotSensors, self.robot_state_callback)
@@ -75,56 +79,68 @@ class Behavior:
         self.traversal_publisher.publish(traversal_message)
 
         rospy.loginfo("State: Ascent")
+        self.current_state = States.ASCENT
         ascent_module = ascent.Ascent(self.effort_publisher)
         ascent_module.raiseLinearActuators()
 
         rospy.loginfo("State: Find AprilTag")
+        self.current_state = States.FIND_TAG
         find_apriltag_module = find_apriltag.FindAprilTag(self.velocity_publisher)
         find_apriltag_module.find_apriltag()
-
+        self.current_state = States.TRAVERSAL_MINE
         # Determine positions of mining and berm zones from apriltag
 
         # Set goal to mining zone
 
         while(not rospy.is_shutdown()):
-            # Enable traversal (to mining zone)
-            rospy.loginfo("State: Traversal")
-            traversal_message.data = True
-            self.traversal_publisher.publish(traversal_message)
+            #off to the mines
+            if (self.current_state == States.TRAVERSAL_MINE):
+                # Enable traversal (to mining zone)
+                rospy.loginfo("State: Traversal")
+                traversal_message.data = True
+                self.traversal_publisher.publish(traversal_message)
+                # Detect when reached mining zone
+                self.current_state = States.PLUNGE
+                
+            if (self.current_state == States.PLUNGING):
+                rospy.loginfo("State: Plunging")
+                traversal_message.data = False
+                self.traversal_publisher.publish(traversal_message)
+                self.current_state = States.TRENCH
 
-            # Detect when reached mining zone
+            if (self.current_state == States.TRENCH)
+                # trench / mine
+                self.current_state = States.ASCENT
 
-            rospy.loginfo("State: Plunging")
-            traversal_message.data = False
-            self.traversal_publisher.publish(traversal_message)
+            if (self.current_state == States.ASCENT):
+                rospy.loginfo("State: Ascent")
+                ascent_module.raiseLinearActuators()
+                # Set goal to berm
+                self.current_state = States.TRAVERSAL_BERM
 
-            # plunge
-
-            # trench / mine
-
-            rospy.loginfo("State: Ascent")
-            ascent_module.raiseLinearActuators()
-
-            # Set goal to berm
-
-            # Enable traversal (to berm)
-            rospy.loginfo("State: Traversal")
-            traversal_message.data = True
-            self.traversal_publisher.publish(traversal_message)
-
-            # Detect when reached berm
-
-            rospy.loginfo("State: Alignment")
-            traversal_message.data = False
-            self.traversal_publisher.publish(traversal_message)
-
-            # Alignment
+            if (self.current_state == States.TRAVERSAL_BERM):
+                # Enable traversal (to berm)
+                rospy.loginfo("State: Traversal")
+                traversal_message.data = True
+                self.traversal_publisher.publish(traversal_message)
+                # Detect when reached berm
+                self.current_state = States.ALIGN
             
-            # Deposit
+            if (self.current_state = States.ALIGN):
+                rospy.loginfo("State: Alignment")
+                traversal_message.data = False
+                self.traversal_publisher.publish(traversal_message)
+                self.current_state = States.DEPOSIT
+                # Alignment
+            
+            if (self.current_state == States.DEPOSIT)
+                # Deposit
+                self.current_state = States.ASCENT
 
-            rospy.loginfo("State: Ascent")
-            ascent_module.raiseLinearActuators() # TODO why do we do this?
-
+            if (self.current_state == States.ASCENT)
+                rospy.loginfo("State: Ascent")
+                ascent_module.raiseLinearActuators() # TODO why do we do this?
+                self.current_state = States.TRAVERSAL_MINE
             # Set goal to mining zone
 
 if __name__ == "__main__":
