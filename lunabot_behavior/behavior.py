@@ -11,6 +11,7 @@ import escape
 import find_apriltag
 import interrupts
 
+#TODO: differentiate between different ascent states?
 class States(Enum):
     ASCENT = auto()
     FIND_TAG = auto()
@@ -83,6 +84,7 @@ class Behavior:
         ascent_module = ascent.Ascent(self.effort_publisher)
         ascent_module.raiseLinearActuators()
 
+        #TODO: What do we do if there's a failure here? More loops?
         rospy.loginfo("State: Find AprilTag")
         self.current_state = States.FIND_TAG
         find_apriltag_module = find_apriltag.FindAprilTag(self.velocity_publisher)
@@ -92,56 +94,75 @@ class Behavior:
 
         # Set goal to mining zone
 
+        #This loop always running until we end the program
         while(not rospy.is_shutdown()):
-            #off to the mines
-            if (self.current_state == States.TRAVERSAL_MINE):
-                # Enable traversal (to mining zone)
-                rospy.loginfo("State: Traversal")
-                traversal_message.data = True
-                self.traversal_publisher.publish(traversal_message)
-                # Detect when reached mining zone
-                self.current_state = States.PLUNGE
+            #This loop is running while things are fine. Break out if interrupts
+            while (interrupts.main() == interrupts.Errors.FINE)
+                #off to the mines
+                if (self.current_state == States.TRAVERSAL_MINE):
+                    # Enable traversal (to mining zone)
+                    rospy.loginfo("State: Traversal")
+                    traversal_message.data = True
+                    self.traversal_publisher.publish(traversal_message)
+                    # Detect when reached mining zone
+                    self.current_state = States.PLUNGE
                 
-            if (self.current_state == States.PLUNGING):
-                rospy.loginfo("State: Plunging")
-                traversal_message.data = False
-                self.traversal_publisher.publish(traversal_message)
-                self.current_state = States.TRENCH
+                if (self.current_state == States.PLUNGING):
+                    rospy.loginfo("State: Plunging")
+                    traversal_message.data = False
+                    self.traversal_publisher.publish(traversal_message)
+                    self.current_state = States.TRENCH
 
-            if (self.current_state == States.TRENCH)
-                # trench / mine
-                self.current_state = States.ASCENT
+                if (self.current_state == States.TRENCH)
+                    # trench / mine
+                    self.current_state = States.ASCENT
 
-            if (self.current_state == States.ASCENT):
-                rospy.loginfo("State: Ascent")
-                ascent_module.raiseLinearActuators()
-                # Set goal to berm
-                self.current_state = States.TRAVERSAL_BERM
+                if (self.current_state == States.ASCENT):
+                    rospy.loginfo("State: Ascent")
+                    if not ascent_module.raiseLinearActuators():
+                        break
+                    # Set goal to berm
+                    self.current_state = States.TRAVERSAL_BERM
 
-            if (self.current_state == States.TRAVERSAL_BERM):
-                # Enable traversal (to berm)
-                rospy.loginfo("State: Traversal")
-                traversal_message.data = True
-                self.traversal_publisher.publish(traversal_message)
-                # Detect when reached berm
-                self.current_state = States.ALIGN
+                if (self.current_state == States.TRAVERSAL_BERM):
+                    # Enable traversal (to berm)
+                    rospy.loginfo("State: Traversal")
+                    traversal_message.data = True
+                    self.traversal_publisher.publish(traversal_message)
+                    # Detect when reached berm
+                    self.current_state = States.ALIGN
             
-            if (self.current_state = States.ALIGN):
-                rospy.loginfo("State: Alignment")
-                traversal_message.data = False
-                self.traversal_publisher.publish(traversal_message)
-                self.current_state = States.DEPOSIT
-                # Alignment
+                if (self.current_state = States.ALIGN):
+                    rospy.loginfo("State: Alignment")
+                    traversal_message.data = False
+                    self.traversal_publisher.publish(traversal_message)
+                    self.current_state = States.DEPOSIT
+                    # Alignment
             
-            if (self.current_state == States.DEPOSIT)
-                # Deposit
-                self.current_state = States.ASCENT
+                if (self.current_state == States.DEPOSIT)
+                    # Deposit
+                    self.current_state = States.ASCENT
 
-            if (self.current_state == States.ASCENT)
-                rospy.loginfo("State: Ascent")
-                ascent_module.raiseLinearActuators() # TODO why do we do this?
-                self.current_state = States.TRAVERSAL_MINE
-            # Set goal to mining zone
+                if (self.current_state == States.ASCENT)
+                    rospy.loginfo("State: Ascent")
+                    if not ascent_module.raiseLinearActuators(): # TODO why do we do this?
+                        break
+                    self.current_state = States.TRAVERSAL_MINE
+                # Set goal to mining zone
+            
+            #only get here if we have an interrupt of some kind
+            problem = interrupts.main()
+            if problem == interrupts.Errors.ROS_ENDED:
+                #simply exit this loop and the whole program
+                break
+            else if problem == interrupts.Errors.OVERCURRENT:
+                #TODO: what goes here?
+                pass
+            else if problem == interrupts.Errors.STUCK:
+                #if the robot is stuck, unstick it
+                escape_module = escape.Escape(self.velocity_publisher)
+                escape_module.unstickRobot()
+            
 
 if __name__ == "__main__":
     behavior = Behavior()
