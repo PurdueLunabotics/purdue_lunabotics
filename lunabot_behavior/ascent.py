@@ -58,4 +58,4 @@ class Ascent:
 		effort_message.lin_act = 0
 		self.effort_publisher.publish(effort_message)
 		
-		return
+		return interrupts.Errors.FINE
