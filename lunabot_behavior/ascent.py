@@ -3,6 +3,7 @@ import rospy
 from lunabot_msgs.msg import RobotEffort, RobotSensors
 
 import time
+import interrupts
 
 EPSILON = 0.01 #TODO adjust as needed
 
@@ -50,6 +51,8 @@ class Ascent:
 				# If the current is within EPSILON of 0, then end
 				break
 
+			if (interrupts.main() != interrupts.Errors.FINE):
+				return interrupts.main()
 			self.rate.sleep()
 
 		effort_message.lin_act = 0
