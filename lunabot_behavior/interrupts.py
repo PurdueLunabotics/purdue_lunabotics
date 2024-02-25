@@ -1,29 +1,31 @@
-from enum import Enum, auto
-
+import rospy
+from enum import Enum
 from lunabot_msgs.msg import RobotErrors
 
 
 class Errors(Enum):
-    OVERCURRENT = auto()
+    FINE = auto()
     MAP_CHANGE = auto()
+    OVERCURRENT = auto()
     ROS_ENDED = auto()
     STUCK = auto()
-    FINE = auto()
 
 
 class Interrupts:
-    def __init__(self, robot_errors: RobotErrors = None):
-        self.robot_errors: RobotErrors = RobotErrors()
+    def errors_callback(self, msg: RobotErrors):
+        self.robot_errors = msg
 
-    def main():
-        if robot_errors.stuck:
+    def __init__(self, robot_errors: RobotErrors = None):
+        self.robot_sensors = RobotErrors()
+
+	    rospy.Subscriber("/errors", RobotErrors, self.errors_callback)
+
+    def main(self):
+        if self.robot_errors.stuck:
             return Errors.STUCK
-        if robot_errors.overcurrent:
+        if self.robot_errors.overcurrent:
             return Errors.OVERCURRENT
         if rospy.is_shutdown():
             return Errors.ROS_ENDED
 
         return Errors.FINE
-
-    def errors_callback(self, msg: RobotErrors):
-        self.robot_errors = msg
