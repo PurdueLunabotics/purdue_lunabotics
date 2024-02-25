@@ -252,3 +252,16 @@ void M5Stack_UWB_Trncvr::transfer() {
     }
   }
 }
+
+void HX711_Load_Cell::init() {
+  scales[0].begin(PIN_LIST[0], PIN_LIST[1]);
+  scales[1].begin(PIN_LIST[2], PIN_LIST[3]);
+
+  scales[0].set_offset(131992);
+  scales[0].set_scale(-110.096122);
+
+  scales[1].set_offset(131992);
+  scales[1].set_scale(-110.096122);
+}
+
+float HX711_Load_Cell::read_weight(uint8_t id) { return scale[id].get_units(); }
