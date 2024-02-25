@@ -2,7 +2,7 @@ import rospy
 from enum import Enum, auto
 from lunabot_msgs.msg import RobotErrors
 
-
+#TODO: add catastrophic failure state? (manual control)
 class Errors(Enum):
     FINE = auto()
     MAP_CHANGE = auto()

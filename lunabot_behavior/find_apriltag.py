@@ -66,7 +66,8 @@ class FindAprilTag:
             self.velocity_publisher.publish(velocity_message)
 
             if interrupts.main() != interrupts.Errors.FINE:
-                return interrupts.main()
+                #TODO: tell this false apart from too searching-too-long False
+                return False
 
             self.rate.sleep()
             
