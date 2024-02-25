@@ -1,5 +1,5 @@
 import rospy
-from enum import Enum, auto()
+from enum import Enum, auto
 
 from geometry_msgs.msg import Twist
 from apriltag_ros.msg import AprilTagDetectionArray
@@ -97,7 +97,7 @@ class Behavior:
         #This loop always running until we end the program
         while(not rospy.is_shutdown()):
             #This loop is running while things are fine. Break out if interrupts
-            while (interrupts.main() == interrupts.Errors.FINE)
+            while (interrupts.main() == interrupts.Errors.FINE):
                 #off to the mines
                 if (self.current_state == States.TRAVERSAL_MINE):
                     # Enable traversal (to mining zone)
@@ -113,7 +113,7 @@ class Behavior:
                     self.traversal_publisher.publish(traversal_message)
                     self.current_state = States.TRENCH
 
-                if (self.current_state == States.TRENCH)
+                if (self.current_state == States.TRENCH):
                     # trench / mine
                     self.current_state = States.ASCENT
 
@@ -132,18 +132,18 @@ class Behavior:
                     # Detect when reached berm
                     self.current_state = States.ALIGN
             
-                if (self.current_state = States.ALIGN):
+                if (self.current_state == States.ALIGN):
                     rospy.loginfo("State: Alignment")
                     traversal_message.data = False
                     self.traversal_publisher.publish(traversal_message)
                     self.current_state = States.DEPOSIT
                     # Alignment
             
-                if (self.current_state == States.DEPOSIT)
+                if (self.current_state == States.DEPOSIT):
                     # Deposit
                     self.current_state = States.ASCENT
 
-                if (self.current_state == States.ASCENT)
+                if (self.current_state == States.ASCENT):
                     rospy.loginfo("State: Ascent")
                     if not ascent_module.raiseLinearActuators(): # TODO why do we do this?
                         break
@@ -155,10 +155,10 @@ class Behavior:
             if problem == interrupts.Errors.ROS_ENDED:
                 #simply exit this loop and the whole program
                 break
-            else if problem == interrupts.Errors.OVERCURRENT:
+            elif problem == interrupts.Errors.OVERCURRENT:
                 #TODO: what goes here?
                 pass
-            else if problem == interrupts.Errors.STUCK:
+            elif problem == interrupts.Errors.STUCK:
                 #if the robot is stuck, unstick it
                 escape_module = escape.Escape(self.velocity_publisher)
                 escape_module.unstickRobot()
