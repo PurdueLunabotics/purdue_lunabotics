@@ -1,6 +1,7 @@
 import rospy
 from geometry_msgs.msg import Twist
 from apriltag_ros.msg import AprilTagDetectionArray
+import interrupts
 
 import time
 
@@ -63,6 +64,9 @@ class FindAprilTag:
             velocity_message.linear.x = 0
             velocity_message.angular.z = 0.261799 # Around 15 degrees
             self.velocity_publisher.publish(velocity_message)
+
+            if interrupts.main() != interrupts.Errors.FINE:
+                return interrupts.main()
 
             self.rate.sleep()
             

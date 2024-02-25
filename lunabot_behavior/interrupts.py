@@ -1,5 +1,5 @@
 import rospy
-from enum import Enum
+from enum import Enum, auto
 from lunabot_msgs.msg import RobotErrors
 
 
