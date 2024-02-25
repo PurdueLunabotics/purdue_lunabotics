@@ -1,4 +1,5 @@
 import rospy
+from enum import Enum, auto()
 
 from geometry_msgs.msg import Twist
 from apriltag_ros.msg import AprilTagDetectionArray
@@ -8,6 +9,16 @@ from std_msgs.msg import Bool
 import ascent
 import escape
 import find_apriltag
+import interrupts
+
+class states(Enum):
+    ASCENT = auto()
+    FIND_TAG = auto()
+    TRAVERSAL_MINE = auto()
+    PLUNGE = auto()
+    TRENCH = auto()
+    TRAVERSAL_BERM = auto()
+    DEPOSIT = auto()
 
 '''
 A class that controls the main behavior of the robot, aiming for a cycle of autonomous mining and berm depositing
