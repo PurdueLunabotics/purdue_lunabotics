@@ -52,10 +52,10 @@ class Ascent:
 				break
 
 			if (interrupts.main() != interrupts.Errors.FINE):
-				return interrupts.main()
+				return False
 			self.rate.sleep()
 
 		effort_message.lin_act = 0
 		self.effort_publisher.publish(effort_message)
 		
-		return interrupts.Errors.FINE
+		return True
