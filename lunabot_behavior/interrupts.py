@@ -5,7 +5,6 @@ from lunabot_msgs.msg import RobotErrors
 #TODO: add catastrophic failure state? (manual control)
 class Errors(Enum):
     FINE = auto()
-    MAP_CHANGE = auto()
     OVERCURRENT = auto()
     ROS_ENDED = auto()
     STUCK = auto()
@@ -18,7 +17,7 @@ class Interrupts:
     def __init__(self, robot_errors: RobotErrors = None):
         self.robot_sensors = RobotErrors()
 
-	    rospy.Subscriber("/errors", RobotErrors, self.errors_callback)
+        rospy.Subscriber("/errors", RobotErrors, self.errors_callback)
 
     def main(self):
         if self.robot_errors.stuck:
