@@ -53,6 +53,7 @@ class Ascent:
 
 			if (interrupts.main() != interrupts.Errors.FINE):
 				return False
+
 			self.rate.sleep()
 
 		effort_message.lin_act = 0

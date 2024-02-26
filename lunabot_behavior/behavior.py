@@ -2,7 +2,7 @@ import rospy
 from enum import Enum, auto
 
 from geometry_msgs.msg import Twist
-from apriltag_ros.msg import AprilTagDetectionArray
+from apriltag_ros.msg import AprilTagDetectionArray, AprilTagDetection
 from lunabot_msgs.msg import RobotEffort, RobotSensors, RobotErrors, Behavior
 from std_msgs.msg import Bool
 
@@ -13,14 +13,16 @@ import interrupts
 
 #TODO: differentiate between different ascent states?
 class States(Enum):
-    ASCENT = auto()
+    ASCENT_INIT = auto()
     FIND_TAG = auto()
     TRAVERSAL_MINE = auto()
     PLUNGE = auto()
     TRENCH = auto()
+    ASCENT_MINING = auto()
     TRAVERSAL_BERM = auto()
     ALIGN = auto()
     DEPOSIT = auto()
+    ASCENT_DEP = auto() #TODO remove this maybe
 
 '''
 A class that controls the main behavior of the robot, aiming for a cycle of autonomous mining and berm depositing
@@ -49,7 +51,9 @@ class Behavior:
         self.traversal_publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue_size=1, latch=True)
 
         self.current_state = States()
-        self.current_state = States.ASCENT
+        self.current_state = States.ASCENT_INIT
+
+        self.start_apriltag: AprilTagDetection = AprilTagDetection()
 
         # TODO change to parameters, determine which are needed
         rospy.Subscriber("/sensors", RobotSensors, self.robot_state_callback)
@@ -79,78 +83,116 @@ class Behavior:
         traversal_message.data = False
         self.traversal_publisher.publish(traversal_message)
 
+        # Raise linear actuators
         rospy.loginfo("State: Ascent")
-        self.current_state = States.ASCENT
+        self.current_state = States.ASCENT_INIT
         ascent_module = ascent.Ascent(self.effort_publisher)
-        ascent_module.raiseLinearActuators()
 
-        #TODO: What do we do if there's a failure here? More loops?
+        ascent_status = ascent_module.raiseLinearActuators()
+        if ascent_status == False: # Robot error
+            pass # TODO implement the error functions here
+
+        
+        # Spin until we find the start apriltag
         rospy.loginfo("State: Find AprilTag")
         self.current_state = States.FIND_TAG
-        find_apriltag_module = find_apriltag.FindAprilTag(self.velocity_publisher)
-        find_apriltag_module.find_apriltag()
-        self.current_state = States.TRAVERSAL_MINE
-        # Determine positions of mining and berm zones from apriltag
 
-        # Set goal to mining zone
+        find_apriltag_module = find_apriltag.FindAprilTag(self.velocity_publisher)
+        apriltag_status = find_apriltag_module.find_apriltag()
+
+        if apriltag_status == "Error": # Robot error
+            pass # TODO implement the error functions here
+        elif apriltag_status == None: # Could not find apriltag
+            pass #TODO pick what to do here
+        else:
+            self.start_apriltag = apriltag_status
+
+        self.current_state = States.TRAVERSAL_MINE
+
+
+        # TODO Determine positions of mining and berm zones from apriltag
+
+        # TODO Set goal to mining zone
 
         #This loop always running until we end the program
         while(not rospy.is_shutdown()):
+
             #This loop is running while things are fine. Break out if interrupts
             while (interrupts.main() == interrupts.Errors.FINE):
-                #off to the mines
+
+                # Drive to the mining area
                 if (self.current_state == States.TRAVERSAL_MINE):
                     # Enable traversal (to mining zone)
                     rospy.loginfo("State: Traversal")
                     traversal_message.data = True
                     self.traversal_publisher.publish(traversal_message)
+                    
                     # Detect when reached mining zone
                     self.current_state = States.PLUNGE
                 
+                # Lower linear actuators and begin spinning excavation
                 if (self.current_state == States.PLUNGING):
                     rospy.loginfo("State: Plunging")
+
                     traversal_message.data = False
                     self.traversal_publisher.publish(traversal_message)
+
                     self.current_state = States.TRENCH
 
+                # Mine, and possibly drive while mining
                 if (self.current_state == States.TRENCH):
                     # trench / mine
-                    self.current_state = States.ASCENT
+                    self.current_state = States.ASCENT_MINING
 
-                if (self.current_state == States.ASCENT):
+                # Raise linear actuators
+                if (self.current_state == States.ASCENT_MINING):
                     rospy.loginfo("State: Ascent")
-                    if not ascent_module.raiseLinearActuators():
+                    ascent_status = ascent_module.raiseLinearActuators()
+
+                    if ascent_status == False: # Robot error
                         break
+                        
                     # Set goal to berm
                     self.current_state = States.TRAVERSAL_BERM
 
+                # Drive to berm area
                 if (self.current_state == States.TRAVERSAL_BERM):
                     # Enable traversal (to berm)
                     rospy.loginfo("State: Traversal")
+
                     traversal_message.data = True
                     self.traversal_publisher.publish(traversal_message)
+
                     # Detect when reached berm
                     self.current_state = States.ALIGN
             
+                # Align with an apriltag at the berm
                 if (self.current_state == States.ALIGN):
                     rospy.loginfo("State: Alignment")
+
                     traversal_message.data = False
                     self.traversal_publisher.publish(traversal_message)
+
                     self.current_state = States.DEPOSIT
                     # Alignment
             
+                # Deposit regolith w/ auger
                 if (self.current_state == States.DEPOSIT):
                     # Deposit
-                    self.current_state = States.ASCENT
+                    self.current_state = States.ASCENT_DEP
 
-                if (self.current_state == States.ASCENT):
+                # Raise linear actuators (??)
+                if (self.current_state == States.ASCENT_DEP):
                     rospy.loginfo("State: Ascent")
-                    if not ascent_module.raiseLinearActuators(): # TODO why do we do this?
+
+                    ascent_status = ascent_module.raiseLinearActuators() # TODO why do we do this?
+                    if ascent_status == False: # Robot error
                         break
+
                     self.current_state = States.TRAVERSAL_MINE
                 # Set goal to mining zone
             
-            #only get here if we have an interrupt of some kind
+            # This block runs when we have an interrupt (some kind of error)
             problem = interrupts.main()
             if problem == interrupts.Errors.ROS_ENDED:
                 #simply exit this loop and the whole program

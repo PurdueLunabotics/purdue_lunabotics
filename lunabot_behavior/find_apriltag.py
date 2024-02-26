@@ -12,6 +12,7 @@ and then reporting back on the estimated locations of the mining zone and berm z
 class FindAprilTag:
 
     def apriltag_callback(self, msg: AprilTagDetectionArray):
+        self.apriltag_detections = msg;
         if len(msg.detections) > 0:
             self.found_apriltag = True
 
@@ -29,6 +30,7 @@ class FindAprilTag:
             self.velocity_publisher = velocity_publisher
 
         self.found_apriltag = False
+        self.apriltag_detections = AprilTagDetectionArray()
         
         #TODO change to parameter
         # Real /d455_front/camera/color/tag_detections
@@ -55,7 +57,7 @@ class FindAprilTag:
 
                 self.velocity_publisher.publish(velocity_message)
 
-                return True
+                return self.apriltag_detections.detections[0]
                 
             if rospy.get_time() - start >= 45: #no tags for too long
                 break # exit and return false
@@ -66,8 +68,7 @@ class FindAprilTag:
             self.velocity_publisher.publish(velocity_message)
 
             if interrupts.main() != interrupts.Errors.FINE:
-                #TODO: tell this false apart from too searching-too-long False
-                return False
+                return "Error"
 
             self.rate.sleep()
             
@@ -75,7 +76,7 @@ class FindAprilTag:
         velocity_message.angular.z = 0
         self.velocity_publisher.publish(velocity_message)
 
-        return False
+        return None
 
     
 if __name__ == '__main__':
