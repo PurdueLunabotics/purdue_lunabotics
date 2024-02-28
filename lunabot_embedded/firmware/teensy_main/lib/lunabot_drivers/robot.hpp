@@ -41,8 +41,4 @@ namespace excavation {
 void cb(int8_t exc);
 void update(int32_t &);
 } // namespace excavation
-
-namespace load_cell {
-void update(float &d1, float &d2);
-}
 #endif
