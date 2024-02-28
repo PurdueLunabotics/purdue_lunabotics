@@ -112,15 +112,4 @@ private:
   static void select_enc_(uint8_t id);
 };
 
-class HX711_Load_Cell {
-public:
-  HX711_Load_Cell(){};
-  static void init();
-  static float read_weight(uint8_t id);
-
-private: 
-  static constexpr int PIN_LIST[4] = {19, 18, 21, 20}; //data, clock, data, clock
-  static HX711 scales[2];
-};
-
 #endif
