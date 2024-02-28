@@ -23,9 +23,8 @@ constexpr uint8_t ACT_LEFT_CURR_MUX = 3; // U4 curr_sense_board
 
 constexpr uint8_t ACT_ENC_MUX = 2;
 
-void update(int32_t &act_right_curr, float &act_angle) {
+void update(int32_t &act_right_curr) {
   act_right_curr = ACS711_Current_Bus::read(ACT_RIGHT_CURR_ADC, ACT_RIGHT_CURR_MUX);
-  act_angle = VLH35_Angle_Bus::read_enc(ACT_ENC_MUX);
 }
 
 void cb(int8_t lin_act_volt) {

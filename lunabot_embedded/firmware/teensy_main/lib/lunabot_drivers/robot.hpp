@@ -19,7 +19,7 @@ extern Sabertooth MC4; // high-current
 
 namespace actuation {
 void cb(int8_t lin_act);
-void update(int32_t &, float &);
+void update(int32_t &);
 
 } // namespace actuation
 
