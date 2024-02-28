@@ -21,8 +21,6 @@ constexpr uint8_t ACT_RIGHT_CURR_MUX = 1; // U6 curr_sense_board
 constexpr uint8_t ACT_LEFT_CURR_ADC = 0;
 constexpr uint8_t ACT_LEFT_CURR_MUX = 3; // U4 curr_sense_board
 
-constexpr uint8_t ACT_ENC_MUX = 2;
-
 void update(int32_t &act_right_curr) {
   act_right_curr = ACS711_Current_Bus::read(ACT_RIGHT_CURR_ADC, ACT_RIGHT_CURR_MUX);
 }
