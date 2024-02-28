@@ -52,7 +52,6 @@ void setup() {
   ACS711_Current_Bus::init_ads1115();
   VLH35_Angle_Bus::init();
   M5Stack_UWB_Trncvr::init();
-  HX711_Load_Cell::init();
 
   enc_timer.begin(VLH35_Angle_Bus::transfer, ENC_TRANSFER_PERIOD);
   uwb_timer.begin(M5Stack_UWB_Trncvr::transfer, UWB_TRANSFER_PERIOD);
