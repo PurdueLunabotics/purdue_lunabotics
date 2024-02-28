@@ -65,7 +65,6 @@ class ManualController:
             effort_msg.left_drive = 0
             effort_msg.right_drive = 0
 
-            effort_msg.lead_screw = 0
             effort_msg.excavate = 0
 
             if self._driving_mode:
@@ -83,8 +82,6 @@ class ManualController:
                     effort_msg.excavate = self._exc_latch_val
                 else:
                     effort_msg.excavate = constrain(joy.axes[1])  # left stick
-
-                effort_msg.lead_screw = constrain(joy.axes[4])  # right stick
 
             if self._exc_latch:  # keeps exc latched even when switching to drive mode
                 effort_msg.excavate = self._exc_latch_val
@@ -106,7 +103,6 @@ class ManualController:
         self._effort_msg.right_drive = 0
         self._effort_msg.excavate = 0
         self._effort_msg.lin_act = 0
-        self._effort_msg.lead_screw = 0
         self._effort_msg.deposit = 0
 
         self._exc_latch_val = 0
