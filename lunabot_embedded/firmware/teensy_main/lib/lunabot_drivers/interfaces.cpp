@@ -264,4 +264,4 @@ void HX711_Load_Cell::init() {
   scales[1].set_scale(-110.096122);
 }
 
-float HX711_Load_Cell::read_weight(uint8_t id) { return scale[id].get_units(); }
+float HX711_Load_Cell::read_weight(uint8_t id) { return scales[id].get_units(); }
