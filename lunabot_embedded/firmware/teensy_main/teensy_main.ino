@@ -30,8 +30,7 @@ void recv() {
 }
 
 void send() {
-  actuation::update(state.act_right_curr, state.lead_screw_curr, state.act_ang,
-                    state.lead_screw_ang);
+  actuation::update(state.act_right_curr, state.act_ang);
   drivetrain::update(state.drive_left_curr, state.drive_right_curr, state.drive_left_ang,
                      state.drive_right_ang);
   deposition::update(state.dep_curr, state.dep_ang);
