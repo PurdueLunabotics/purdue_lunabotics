@@ -19,7 +19,7 @@ typedef struct _RobotSensors {
   int32_t drive_right_curr;
   float drive_left_ang;
   float drive_right_ang;
-  float dep_ang;
+  float exc_ang;
   float uwb_dist_0;
   float uwb_dist_1;
   float uwb_dist_2;
@@ -58,7 +58,7 @@ extern "C" {
 #define RobotSensors_drive_right_curr_tag 6
 #define RobotSensors_drive_left_ang_tag 7
 #define RobotSensors_drive_right_ang_tag 8
-#define RobotSensors_dep_ang_tag 9
+#define RobotSensors_exc_ang_tag 9
 #define RobotSensors_uwb_dist_0_tag 10
 #define RobotSensors_uwb_dist_1_tag 11
 #define RobotSensors_uwb_dist_2_tag 12
@@ -78,7 +78,7 @@ extern "C" {
   X(a, STATIC, SINGULAR, SINT32, drive_right_curr, 6)                                              \
   X(a, STATIC, SINGULAR, FLOAT, drive_left_ang, 7)                                                 \
   X(a, STATIC, SINGULAR, FLOAT, drive_right_ang, 8)                                                \
-  X(a, STATIC, SINGULAR, FLOAT, dep_ang, 9)                                                        \
+  X(a, STATIC, SINGULAR, FLOAT, exc_ang, 9)                                                        \
   X(a, STATIC, SINGULAR, FLOAT, uwb_dist_0, 10)                                                    \
   X(a, STATIC, SINGULAR, FLOAT, uwb_dist_1, 11)                                                    \
   X(a, STATIC, SINGULAR, FLOAT, uwb_dist_2, 12)
