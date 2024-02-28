@@ -34,11 +34,11 @@ void update(float &d0, float &d1, float &d2);
 
 namespace deposition {
 void cb(int8_t dep);
-void update(int32_t &, float &);
+void update(int32_t &);
 } // namespace deposition
 
 namespace excavation {
 void cb(int8_t exc);
-void update(int32_t &);
+void update(int32_t &, float &);
 } // namespace excavation
 #endif

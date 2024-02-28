@@ -78,7 +78,12 @@ Sabertooth_MotorCtrl exc_mtr{&MC4, STMotor::M1};
 constexpr uint8_t EXC_CURR_ADC = 1;
 constexpr uint8_t EXC_CURR_MUX = 0; // U5 curr_sense_board
 
-void update(int32_t &exc_curr) { exc_curr = ACS711_Current_Bus::read(EXC_CURR_ADC, EXC_CURR_MUX); }
+constexpr uint8_t EXC_ENC_MUX = 1;
+
+void update(int32_t &exc_curr, float &exc_angle) { 
+  exc_curr = ACS711_Current_Bus::read(EXC_CURR_ADC, EXC_CURR_MUX); 
+  exc_angle = VLH35_Angle_Bus::read_enc(EXC_ENC_MUX);
+}
 
 void cb(int8_t speed) { exc_mtr.write(speed); }
 } // namespace excavation
@@ -88,11 +93,8 @@ Sabertooth_MotorCtrl dep_mtr{&MC1, STMotor::M2};
 constexpr uint8_t DEP_CURR_ADC = 0;
 constexpr uint8_t DEP_CURR_MUX = 1; // U2 curr_sense_board
 
-constexpr uint8_t DEP_ENC_MUX = 1;
-
-void update(int32_t &dep_curr, float &dep_angle) {
+void update(int32_t &dep_curr) {
   dep_curr = ACS711_Current_Bus::read(DEP_CURR_ADC, DEP_CURR_MUX);
-  dep_angle = VLH35_Angle_Bus::read_enc(DEP_ENC_MUX);
 }
 
 void cb(int8_t volt) { dep_mtr.write(volt); }

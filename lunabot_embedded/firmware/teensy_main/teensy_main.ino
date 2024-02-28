@@ -33,9 +33,9 @@ void send() {
   actuation::update(state.act_right_curr);
   drivetrain::update(state.drive_left_curr, state.drive_right_curr, state.drive_left_ang,
                      state.drive_right_ang);
-  deposition::update(state.dep_curr, state.dep_ang);
+  deposition::update(state.dep_curr);
 
-  excavation::update(state.exc_curr);
+  excavation::update(state.exc_curr, state.exc_ang);
 
   uwb::update(state.uwb_dist_0, state.uwb_dist_1, state.uwb_dist_2);
 
