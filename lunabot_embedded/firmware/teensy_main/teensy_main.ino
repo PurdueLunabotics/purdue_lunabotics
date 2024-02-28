@@ -23,7 +23,7 @@ void recv() {
   /* Now we are ready to decode the message. */
   pb_decode(&stream, RobotEffort_fields, &effort);
 
-  actuation::cb(effort.lead_screw, effort.lin_act);
+  actuation::cb(effort.lin_act);
   drivetrain::cb(effort.left_drive, effort.right_drive);
   deposition::cb(effort.deposit);
   excavation::cb(effort.excavate);

@@ -18,8 +18,8 @@ extern Sabertooth MC3; // bottom
 extern Sabertooth MC4; // high-current
 
 namespace actuation {
-void cb(int8_t lead_screw, int8_t lin_act);
-void update(int32_t &, int32_t &, float &, float &);
+void cb(int8_t lin_act);
+void update(int32_t &, float &);
 
 } // namespace actuation
 
