@@ -265,32 +265,27 @@ void KillSwitchRelay::reset() {
 
 void KillSwitchRelay::kill() { 
   digitalWrite(kill_pin, LOW);
+  kill_time = millis();
   dead = true;
 }
 
 void KillSwitchRelay::logic(RobotSensors state) {
     //check for high current
 
-  if (state.exc_curr >= kill_cur) {
+  if (state.exc_curr >= exdep_kill_curr) {
     kill()
   }
-  if (state.dep_curr >= kill_cur) {
+  if (state.dep_curr >= exdep_kill_curr) {
     kill()
   }
-  if (state.drive_left_curr >= kill_cur) {
+  if (state.drive_left_curr >= drive_kill_curr) {
     kill()
   }
-  if (state.drive_right_curr >= kill_cur) {
-    kill()
-  }
-  if (state.act_right_curr >= kill_cur) {
-    kill()
-  }
-  if (state.lead_screw_curr_curr >= kill_cur) {
+  if (state.drive_right_curr >= drive_kill_curr) {
     kill()
   }
 
-  if (dead) {
+  if (dead && millis() - kill_time >= 500) {
     reset();
   }
 

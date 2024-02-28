@@ -12,7 +12,10 @@
 
 class KillSwitchRelay {
   static constexpr int kill_pin = 11;
-  static constexpr float kill_cur = 10.0;
+  static constexpr float drive_kill_curr = 7.0;
+  static constexpr float exdep_kill_curr = 25.0;
+
+  static long kill_time = 0;
 
   static bool dead = false;
 
