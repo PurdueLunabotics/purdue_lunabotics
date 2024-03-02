@@ -23,20 +23,19 @@ void recv() {
   /* Now we are ready to decode the message. */
   pb_decode(&stream, RobotEffort_fields, &effort);
 
-  actuation::cb(effort.lead_screw, effort.lin_act);
+  actuation::cb(effort.lin_act);
   drivetrain::cb(effort.left_drive, effort.right_drive);
   deposition::cb(effort.deposit);
   excavation::cb(effort.excavate);
 }
 
 void send() {
-  actuation::update(state.act_right_curr, state.lead_screw_curr, state.act_ang,
-                    state.lead_screw_ang);
+  actuation::update(state.act_right_curr);
   drivetrain::update(state.drive_left_curr, state.drive_right_curr, state.drive_left_ang,
                      state.drive_right_ang);
-  deposition::update(state.dep_curr, state.dep_ang);
+  deposition::update(state.dep_curr);
 
-  excavation::update(state.exc_curr);
+  excavation::update(state.exc_curr, state.exc_ang);
 
   uwb::update(state.uwb_dist_0, state.uwb_dist_1, state.uwb_dist_2);
 

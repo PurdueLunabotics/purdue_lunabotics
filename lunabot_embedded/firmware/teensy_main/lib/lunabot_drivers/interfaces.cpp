@@ -1,35 +1,5 @@
 #include "interfaces.hpp"
 
-// Stepper Motor Interfacing
-
-Stepper2Phase_MotorCtrl::Stepper2Phase_MotorCtrl(uint8_t PWM1_P, uint8_t PWM2_P, uint8_t DIR1_P,
-                                                 uint8_t DIR2_P, int steps, int speed,
-                                                 int step_size)
-    : s_(steps, DIR1_P, DIR2_P), PWM1_P_{PWM1_P}, PWM2_P_{PWM2_P}, DIR1_P_{DIR1_P}, DIR2_P_{DIR2_P},
-      enabled_{0}, steps_{steps}, speed_{speed}, step_size_{step_size} {
-  pinMode(PWM1_P_, OUTPUT);
-  pinMode(PWM2_P_, OUTPUT);
-  s_.setSpeed(speed_);
-}
-
-void Stepper2Phase_MotorCtrl::step(StepperDir dir) {
-  if (enabled_) {
-    s_.step(step_size_ * dir);
-  }
-}
-
-void Stepper2Phase_MotorCtrl::on() {
-  digitalWrite(PWM1_P_, HIGH);
-  digitalWrite(PWM2_P_, HIGH);
-  enabled_ = 1;
-}
-
-void Stepper2Phase_MotorCtrl::off() {
-  digitalWrite(PWM1_P_, LOW);
-  digitalWrite(PWM2_P_, LOW);
-  enabled_ = 0;
-}
-
 // PWM Motor Control Interfacing
 
 PWM_MotorCtrl::PWM_MotorCtrl(uint8_t PWM_P, uint8_t DIR_P) : PWM_P_{PWM_P}, DIR_P_{DIR_P} {

@@ -58,10 +58,8 @@ void recv(ros::Publisher &pub) {
   state_msg.act_right_curr = adc_to_current_ACS711_15A(state.act_right_curr);
   state_msg.drive_right_curr = adc_to_current_ACS711_15A(state.drive_right_curr);
   state_msg.drive_left_curr = adc_to_current_ACS711_15A(state.drive_left_curr);
-  state_msg.lead_screw_curr = adc_to_current_ACS711_15A(state.lead_screw_curr);
   state_msg.dep_curr = adc_to_current_ACS711_15A(state.dep_curr);
   state_msg.exc_curr = adc_to_current_ACS711_31A(state.exc_curr);
-  state_msg.act_ang = state.act_ang;
 
   // TODO: add timestamp to each value using StampedValue, allowing for more accurate derivative
   // calculations:
@@ -92,8 +90,7 @@ void recv(ros::Publisher &pub) {
   state_msg.drive_right_ang = DEG2RAD(state.drive_right_ang);
   state_msg.drive_left_vel = DEG2RAD(left_vel);
   state_msg.drive_right_vel = DEG2RAD(right_vel);
-  state_msg.dep_ang = DEG2RAD(state.dep_ang);
-  state_msg.lead_screw_ang = DEG2RAD(state.lead_screw_ang);
+  state_msg.exc_ang = DEG2RAD(state.exc_ang);
   state_msg.uwb_dists.push_back(state.uwb_dist_0);
   state_msg.uwb_dists.push_back(state.uwb_dist_1);
   state_msg.uwb_dists.push_back(state.uwb_dist_2);
@@ -102,7 +99,6 @@ void recv(ros::Publisher &pub) {
 }
 
 void effort_cb(const lunabot_msgs::RobotEffort &msg) {
-  effort.lead_screw = msg.lead_screw;
   effort.lin_act = msg.lin_act;
   effort.left_drive = msg.left_drive;
   effort.right_drive = msg.right_drive;

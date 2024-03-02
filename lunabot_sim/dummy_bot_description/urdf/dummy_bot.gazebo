@@ -12,6 +12,7 @@
     <leftRearJoint>left_back_rev</leftRearJoint>
     <rightRearJoint>right_back_rev</rightRearJoint>
     <wheelDiameter>0.4</wheelDiameter>
+    <wheelSeparation>0.5</wheelSeparation>
     <robotBaseFrame>base_link</robotBaseFrame>
     <torque>35</torque>
     <topicName>cmd_vel</topicName>
@@ -26,8 +27,8 @@
 
 <gazebo reference="right_front">
   <material>${body_color}</material>
-  <mu1 value="1.0"/>
-  <mu2 value="1.0"/>
+  <mu1 value="0.8"/>
+  <mu2 value="0.3"/>
   <kp  value="10000000.0" />
   <kd  value="1.0" />
   <fdir1 value="1 0 0"/>
@@ -35,8 +36,8 @@
 
 <gazebo reference="left_front">
   <material>${body_color}</material>
-  <mu1 value="1.0"/>
-  <mu2 value="1.0"/>
+  <mu1 value="0.8"/>
+  <mu2 value="0.3"/>
   <kp  value="10000000.0" />
   <kd  value="1.0" />
   <fdir1 value="1 0 0"/>
@@ -44,8 +45,8 @@
 
 <gazebo reference="left_back">
   <material>${body_color}</material>
-  <mu1 value="1.0"/>
-  <mu2 value="1.0"/>
+  <mu1 value="0.8"/>
+  <mu2 value="0.3"/>
   <kp  value="10000000.0" />
   <kd  value="1.0" />
   <fdir1 value="1 0 0"/>
@@ -53,8 +54,8 @@
 
 <gazebo reference="right_back">
   <material>${body_color}</material>
-  <mu1 value="1.0"/>
-  <mu2 value="1.0"/>
+  <mu1 value="0.8"/>
+  <mu2 value="0.3"/>
   <kp  value="10000000.0" />
   <kd  value="1.0" />
   <fdir1 value="1 0 0"/>
