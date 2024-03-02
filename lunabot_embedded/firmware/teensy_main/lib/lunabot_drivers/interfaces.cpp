@@ -231,3 +231,88 @@ void M5Stack_UWB_Trncvr::transfer() {
     }
   }
 }
+
+void KillSwitchRelay::setup() { 
+  pinMode(kill_pin, OUTPUT); 
+  reset();
+}
+
+void KillSwitchRelay::reset() { 
+  digitalWrite(kill_pin, HIGH); 
+  dead = false;
+}
+
+void KillSwitchRelay::kill() { 
+  digitalWrite(kill_pin, LOW);
+  kill_time = millis();
+  dead = true;
+}
+
+void KillSwitchRelay::kill_motor(int id, RobotEffort &effort) {
+  switch (id) {
+    case 0:
+      effort.excavate = 0;
+      break;
+    case 1:
+      effort.deposit = 0;
+      break;
+    case 2:
+      effort.left_drive = 0;
+      break;
+    case 3:
+      effort.right_drive = 0;
+      break;
+    default:
+      return;
+  }
+}
+
+//exc, dep, drive_L, drive_R
+volatile float KillSwitchRelay::cutoff_buffer[4] = {0};
+volatile float KillSwitchRelay::kill_buffer[4] = {0};
+volatile bool KillSwitchRelay::is_dead[4] = {false};
+
+void KillSwitchRelay::logic(RobotSensors state, RobotEffort &effort) {
+  if (dead && millis() - kill_time >= relay_dead_time) {
+    reset();
+  } 
+
+  if (state.exc_curr >= exdep_kill_curr) {
+    cutoff_buffer[0] += cutoff_increase;
+  }
+  if (state.dep_curr >= exdep_kill_curr) {
+    cutoff_buffer[1] += cutoff_increase;
+  }
+  if (state.drive_left_curr >= drive_kill_curr) {
+    cutoff_buffer[2] += cutoff_increase;
+  }
+  if (state.drive_right_curr >= drive_kill_curr) {
+    cutoff_buffer[3] += cutoff_increase;
+  }
+
+  for (int i = 0; i < 4; ++i) {
+    cutoff_buffer[i] -= cutoff_decay;
+    if (cutoff_buffer < 0) {
+      cutoff_buffer = 0;
+    }
+    if (is_dead[i]) {
+      if (cutoff_buffer >= reset_thresh) {
+        kill_motor(i, effort);
+      } else {
+        is_dead[i] = false;
+      }
+    } else {
+      if (cutoff_buffer[i] >= cutoff_thresh) {
+        kill_motor(i, effort);
+        is_dead[i] = true;
+        kill_buffer[i] += 1;
+      }
+    }
+
+    if (kill_buffer[i] >= kill_thresh) {
+      kill_buffer[i] = 0;
+      //TODO, send "all fucked" signal back to teensy
+      kill();
+    }
+  }
+}
