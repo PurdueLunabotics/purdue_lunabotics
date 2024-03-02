@@ -269,23 +269,40 @@ void KillSwitchRelay::kill() {
   dead = true;
 }
 
+//exc, dep, drive_L, drive_R
+volatile float KillSwitchRelay::cutoff_buffer[4] = {0};
+volatile float KillSwitchRelay::kill_buffer[4] = {0};
+
 void KillSwitchRelay::logic(RobotSensors state) {
     //check for high current
 
   if (state.exc_curr >= exdep_kill_curr) {
-    kill()
+    cutoff_buffer[0] += cutoff_increase;
   }
   if (state.dep_curr >= exdep_kill_curr) {
-    kill()
+    cutoff_buffer[1] += cutoff_increase;
   }
   if (state.drive_left_curr >= drive_kill_curr) {
-    kill()
+    cutoff_buffer[2] += cutoff_increase;
   }
   if (state.drive_right_curr >= drive_kill_curr) {
-    kill()
+    cutoff_buffer[3] += cutoff_increase;
   }
 
-  if (dead && millis() - kill_time >= 500) {
+  for (int i = 0; i < 4; ++i) {
+    cutoff_buffer[i] -= cutoff_decay;
+    if (cutoff_buffer[i] >= cutoff_thresh) {
+      //kill motor here...
+      kill_buffer[i] += 1;
+    }
+
+    if (kill_buffer[i] >= kill_thresh) {
+      kill_buffer[i] = 0;
+      kill();
+    }
+  }
+
+  if (dead && millis() - kill_time >= 2000) {
     reset();
   }
 

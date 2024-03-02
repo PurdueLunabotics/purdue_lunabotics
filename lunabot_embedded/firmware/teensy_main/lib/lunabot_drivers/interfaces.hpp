@@ -11,18 +11,29 @@
 #define UWBSerial Serial8
 
 class KillSwitchRelay {
-  static constexpr int kill_pin = 11;
-  static constexpr float drive_kill_curr = 7.0;
-  static constexpr float exdep_kill_curr = 25.0;
-
-  static long kill_time = 0;
-
+public:
   static bool dead = false;
 
   void setup();
   void reset();
   void kill();
   void logic(RobotSensors state);
+
+private:
+  static constexpr int kill_pin = 11;
+  static constexpr float drive_kill_curr = 7.0;
+  static constexpr float exdep_kill_curr = 25.0;
+
+  static constexpr int cutoff_thresh = 1000;
+  static constexpr int cutoff_increase = 3;
+  static constexpr int cutoff_decay = 1;
+
+  volatile static float cutoff_buffer[4];
+  volatile static float kill_buffer[4];
+
+  static constexpr int kill_thresh = 3;
+
+  static long kill_time = 0;
 }
 
 enum StepperDir { RETRACT = -1, EXTEND = 1 };
