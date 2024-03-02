@@ -98,10 +98,10 @@ class KillSwitchRelay {
 public:
   static bool dead = false;
 
-  void setup();
+  void init();
   void reset();
   void kill();
-  void logic(RobotSensors state, RobotEffort &effort);
+  void logic(RobotEffort &effort);
 
 private:
   static constexpr int kill_pin = 11;

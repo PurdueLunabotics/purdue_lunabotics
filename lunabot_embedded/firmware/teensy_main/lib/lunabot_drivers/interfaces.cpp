@@ -242,7 +242,7 @@ void M5Stack_UWB_Trncvr::transfer() {
   }
 }
 
-void KillSwitchRelay::setup() { 
+void KillSwitchRelay::init() { 
   pinMode(kill_pin, OUTPUT); 
   reset();
 }
@@ -282,7 +282,7 @@ volatile float KillSwitchRelay::cutoff_buffer[4] = {0};
 volatile float KillSwitchRelay::kill_buffer[4] = {0};
 volatile bool KillSwitchRelay::is_dead[4] = {false};
 
-void KillSwitchRelay::logic(RobotSensors state, RobotEffort &effort) {
+void KillSwitchRelay::logic(RobotEffort &effort) {
   if (dead && millis() - kill_time >= relay_dead_time) {
     reset();
   } 

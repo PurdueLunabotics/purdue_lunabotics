@@ -2,12 +2,12 @@
 #include <RobotMsgs.pb.h>
 #include <pb_decode.h>
 #include <pb_encode.h>
-#include <robot.hpp>
+
+#include "robot.hpp"
+#include "interfaces.hpp"
 
 #define TX_PERIOD 10               // ms
-#define ENC_TRANSFER_PERIOD 1000   // microsec
 #define UWB_TRANSFER_PERIOD 10'000 // microsec
-#define KILL_TRASNFER_PERIOD 1000  // microsec
 #define CURR_UPDATE_PERIOD 8       // ms
 
 RobotSensors state = RobotSensors_init_zero;
@@ -23,6 +23,9 @@ void recv() {
 
   /* Now we are ready to decode the message. */
   pb_decode(&stream, RobotEffort_fields, &effort);
+  
+  //TODO, add timer if robot effort not changing for too long, exit?
+  KillSwitchRelay::logic(effort);
 
   actuation::cb(effort.lin_act);
   drivetrain::cb(effort.left_drive, effort.right_drive);
@@ -44,20 +47,15 @@ void send() {
   pb_encode(&stream, RobotSensors_fields, &state);
 }
 
-IntervalTimer enc_timer;
 IntervalTimer uwb_timer;
-IntervalTimer kill_timer;
-
 
 void setup() {
   Sabertooth_MotorCtrl::init_serial(ST_SERIAL, ST_BAUD_RATE);
   ACS711_Current_Bus::init_ads1115();
-  VLH35_Angle_Bus::init();
   M5Stack_UWB_Trncvr::init();
+  KillSwitchRelay::init();
 
-  enc_timer.begin(VLH35_Angle_Bus::transfer, ENC_TRANSFER_PERIOD);
   uwb_timer.begin(M5Stack_UWB_Trncvr::transfer, UWB_TRANSFER_PERIOD);
-  kill_timer.begin(KillSwitchRelay::logic, KILL_TRASNFER_PERIOD)
 
   // disable timeout
   MC1.setTimeout(0);
