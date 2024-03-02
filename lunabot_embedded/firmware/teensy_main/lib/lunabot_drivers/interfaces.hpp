@@ -105,6 +105,7 @@ public:
   static void kill();
   static void logic(RobotEffort &effort);
   static void kill_motor(int id, RobotEffort &effort);
+  static long kill_time;
 
 private:
   static constexpr int kill_pin = 11;
@@ -123,8 +124,6 @@ private:
   volatile static float cutoff_buffer[4];
   volatile static float kill_buffer[4];
   volatile static bool is_dead[4];
-
-  static long kill_time;
 };
 
 class AMT13_Angle_Bus {
