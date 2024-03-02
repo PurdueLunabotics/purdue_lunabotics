@@ -264,7 +264,7 @@ void KillSwitchRelay::kill() {
 }
 
 
-void KillSwitchRelay::kill_motor(int id, RobotEffort &effort) {
+void KillSwitchRelay::disable_motor(int id, RobotEffort &effort) {
   switch (id) {
     case 0:
       effort.excavate = 0;
@@ -285,8 +285,8 @@ void KillSwitchRelay::kill_motor(int id, RobotEffort &effort) {
 
 //exc, dep, drive_L, drive_R
 volatile int KillSwitchRelay::cutoff_buffer[4] = {0};
-volatile int KillSwitchRelay::kill_buffer[4] = {0};
-volatile bool KillSwitchRelay::is_dead[4] = {false};
+volatile int KillSwitchRelay::disable_counter[4] = {0};
+volatile bool KillSwitchRelay::is_disable[4] = {false};
 
 void KillSwitchRelay::logic(RobotEffort &effort) {
   if (KillSwitchRelay::dead && millis() - KillSwitchRelay::kill_time >= relay_dead_time) {
@@ -307,7 +307,7 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
   if (drive_left_curr >= drive_kill_curr) {
     cutoff_buffer[2] += cutoff_increase;
   }
-  if (drive_right_curr >= drive_kill_curr) {
+  if (drive_right_curr >= drive_curr) {
     cutoff_buffer[3] += cutoff_increase;
   }
 
@@ -316,22 +316,22 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
     if (cutoff_buffer < 0) {
       cutoff_buffer[i] = 0;
     }
-    if (is_dead[i]) {
+    if (is_disable[i]) {
       if (cutoff_buffer[i] >= reset_thresh) {
-        kill_motor(i, effort);
+        disable_motor(i, effort);
       } else {
-        is_dead[i] = false;
+        is_disable[i] = false;
       }
     } else {
       if (cutoff_buffer[i] >= cutoff_thresh) {
-        kill_motor(i, effort);
-        is_dead[i] = true;
-        kill_buffer[i] += 1;
+        disable_motor(i, effort);
+        is_disable[i] = true;
+        disable_counter[i] += 1;
       }
     }
 
-    if (kill_buffer[i] >= kill_thresh) {
-      kill_buffer[i] = 0;
+    if (disable_counter[i] >= kill_thresh) {
+      disable_counter[i] = 0;
       //TODO, send "all fucked" signal back to teensy
       kill();
     }

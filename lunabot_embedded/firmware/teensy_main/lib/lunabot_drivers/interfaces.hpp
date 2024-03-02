@@ -111,7 +111,7 @@ public:
   static void logic(RobotEffort &effort);
 
   //sets an individual motor to 0% power.
-  static void kill_motor(int id, RobotEffort &effort);
+  static void disable_motor(int id, RobotEffort &effort);
 
 private:
   //the pin to cut power to all motors. Active low to kill
@@ -124,7 +124,7 @@ private:
   //the threshold at which a motor set a 0% power is allowed to turn back on
   static constexpr int reset_thresh = 500;
 
-  //Every cycle that a motor is overcurrent, a counter increases by this amount
+  //Every cycle that a motor is overcurrent, a counter increases by this amount (as well as decreasing by cutoff_decay)
   static constexpr int cutoff_increase = 3;
   //Every cycle, that counter decreases by this amount
   static constexpr int cutoff_decay = 1;
@@ -136,8 +136,8 @@ private:
   static constexpr int kill_thresh = 3;
 
   volatile static int cutoff_buffer[4];
-  volatile static int kill_buffer[4];
-  volatile static bool is_dead[4];
+  volatile static int disable_counter[4];
+  volatile static bool is_disable[4];
 };
 
 class AMT13_Angle_Bus {
