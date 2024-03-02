@@ -57,7 +57,7 @@ class Deposition:
 
             self.rate.sleep()
 
-        effort_message.auger = 0
+        effort_message.deposit = 0
         self.effort_publisher.publish(effort_message)
 
         return True
