@@ -11,6 +11,7 @@ Panels:
         - /Map1
         - /Goal1
         - /Path1
+        - /Path2
       Splitter Ratio: 0.5
     Tree Height: 505
   - Class: rviz/Selection
@@ -37,7 +38,7 @@ Panels:
     Property Tree Widget:
       Expanded: ~
       Splitter Ratio: 0.5
-    Tree Height: 511
+    Tree Height: 373
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -243,6 +244,16 @@ Visualization Manager:
           Value: true
         right_front:
           Value: true
+        sieve-marker:
+          Value: true
+        tag_0:
+          Value: true
+        tag_1:
+          Value: true
+        tag_2:
+          Value: true
+        tag_3:
+          Value: true
       Marker Alpha: 1
       Marker Scale: 0.5
       Name: TF
@@ -257,7 +268,16 @@ Visualization Manager:
                 d435_backward_depth_frame:
                   d435_backward_color_frame:
                     d435_backward_color_optical_frame:
-                      {}
+                      sieve-marker:
+                        {}
+                      tag_0:
+                        {}
+                      tag_1:
+                        {}
+                      tag_2:
+                        {}
+                      tag_3:
+                        {}
                   d435_backward_depth_optical_frame:
                     {}
                   d435_backward_left_ir_frame:
@@ -368,6 +388,30 @@ Visualization Manager:
       Topic: /nav/global_path
       Unreliable: false
       Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 200; 5; 0
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.029999999329447746
+      Name: Path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Queue Size: 10
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic: /zone_visual
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -396,7 +440,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 15.486186981201172
+      Distance: 19.425872802734375
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -404,17 +448,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 1.278163194656372
-        Y: 0.9863121509552002
-        Z: -1.4903372526168823
+        X: 4.138773441314697
+        Y: 1.4997692108154297
+        Z: -2.0462615489959717
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.7997967004776001
+      Pitch: 0.7397966980934143
       Target Frame: <Fixed Frame>
-      Yaw: 5.561844348907471
+      Yaw: 4.601844787597656
     Saved: ~
 Window Geometry:
   Displays:
@@ -432,5 +476,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1000
-  X: 608
-  Y: -14
+  X: 37
+  Y: 9

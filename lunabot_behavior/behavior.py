@@ -4,6 +4,7 @@ import math
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 from geometry_msgs.msg import Twist, PoseStamped
+from nav_msgs.msg import Path
 from apriltag_ros.msg import AprilTagDetectionArray, AprilTagDetection
 from lunabot_msgs.msg import RobotEffort, RobotSensors, RobotErrors, Behavior
 from std_msgs.msg import Bool
@@ -52,6 +53,7 @@ class Behavior:
         self.velocity_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
         self.traversal_publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue_size=1, latch=True)
         self.goal_publisher = rospy.Publisher("/goal", PoseStamped, queue_size=1, latch=True)
+        self.zone_visual_publisher = rospy.Publisher("/zone_visual", Path, queue_size=1, latch=True)
 
         self.current_state = States.ASCENT_INIT
 
@@ -118,9 +120,17 @@ class Behavior:
         self.mining_zone: self.Zone = self.find_mining_zone(apriltag_pose_in_odom)
         self.berm_zone: self.Zone = self.find_berm_zone(apriltag_pose_in_odom)
 
-        # TODO Determine positions of mining and berm zones from apriltag
+        # mining_goal = PoseStamped()
+        # mining_goal.pose.position.x = self.mining_zone.bottom_right[0]
+        # mining_goal.pose.position.y = self.mining_zone.bottom_right[1]
+        # mining_goal.pose.position.z = 0
 
-        # TODO Set goal to mining zone
+        # mining_goal.header.stamp = rospy.Time.now()
+        # mining_goal.header.frame_id = "odom"
+
+        # self.goal_publisher.publish(mining_goal)
+
+        self.visualize_zone(self.berm_zone)
 
         #This loop always running until we end the program
         while(not rospy.is_shutdown()):
@@ -214,13 +224,41 @@ class Behavior:
 
     class Zone:
         def __init__(self, top_left: 'tuple[float]', top_right: 'tuple[float]', bottom_left: 'tuple[float]', bottom_right: 'tuple[float]'):
-            # All tuples are (x, y) where x is left-right
+            # tuples are (x, y) where x is left-right and y is bottom-top
             self.top_left = top_left
             self.top_right = top_right
             self.bottom_left = bottom_left
             self.bottom_right = bottom_right
 
             self.middle = ((top_left[0] + top_right[0]) / 2, (top_left[1] + bottom_left[1]) / 2)
+
+    def visualize_zone(self, zone: Zone):
+        # Make a path containing all of the corners of the zone. Make it into a path, and use the self.publisher to publish it.
+        path = Path()
+        path.header.stamp = rospy.Time.now()
+        path.header.frame_id = "odom"
+
+        path.poses.append(PoseStamped())
+        path.poses[-1].pose.position.x = zone.top_left[0]
+        path.poses[-1].pose.position.y = zone.top_left[1]
+
+        path.poses.append(PoseStamped())
+        path.poses[-1].pose.position.x = zone.top_right[0]
+        path.poses[-1].pose.position.y = zone.top_right[1]
+
+        path.poses.append(PoseStamped())
+        path.poses[-1].pose.position.x = zone.bottom_right[0]
+        path.poses[-1].pose.position.y = zone.bottom_right[1]
+
+        path.poses.append(PoseStamped())
+        path.poses[-1].pose.position.x = zone.bottom_left[0]
+        path.poses[-1].pose.position.y = zone.bottom_left[1]
+
+        path.poses.append(PoseStamped())
+        path.poses[-1].pose.position.x = zone.top_left[0]
+        path.poses[-1].pose.position.y = zone.top_left[1]
+
+        self.zone_visual_publisher.publish(path)
 
     def find_mining_zone(self, apriltag_pose_in_odom: PoseStamped)->Zone:
 
