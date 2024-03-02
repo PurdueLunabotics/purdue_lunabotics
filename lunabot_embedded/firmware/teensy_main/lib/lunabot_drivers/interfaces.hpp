@@ -99,8 +99,8 @@ public:
 private:
   static constexpr int NUM_ENCODERS = 3;
   static constexpr int PIN_LIST[NUM_ENCODERS*2] = {4, 5, 6, 7, 8, 9};
-  static constexpr float pulses_per_rev = 400; //4 times the value set on the encoders
-  static constexpr float deg_per_rev = 360
+  static constexpr float pulses_per_rev = 800; //4 times the value set on the encoders
+  static constexpr float deg_per_rev = 360; //TODO, remove the deg2rad conversion and just to rad here
    
   static Encoder encs[NUM_ENCODERS];
 };
