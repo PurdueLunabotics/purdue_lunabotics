@@ -42,8 +42,8 @@ constexpr uint8_t LEFT_CURR_MUX = 0; // U5 curr_sense_board
 constexpr uint8_t RIGHT_CURR_ADC = 0;
 constexpr uint8_t RIGHT_CURR_MUX = 1; // U2 curr_sense_board
 
-constexpr uint8_t LEFT_ENC_ID = 0;
 constexpr uint8_t RIGHT_ENC_ID = 0;
+constexpr uint8_t LEFT_ENC_ID = 1;
 
 void update(int32_t &left_curr, int32_t &right_curr, float &left_angle, float &right_angle) {
   left_curr = ACS711_Current_Bus::read(LEFT_CURR_ADC, LEFT_CURR_MUX);
