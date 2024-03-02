@@ -26,6 +26,7 @@ void update(int32_t &);
 namespace drivetrain {
 void cb(int8_t left, int8_t right);
 void update(int32_t &, int32_t &, float &, float &);
+void update_curr_only((int32_t &, int32_t &)
 } // namespace drivetrain
 
 namespace uwb {
@@ -35,10 +36,12 @@ void update(float &d0, float &d1, float &d2);
 namespace deposition {
 void cb(int8_t dep);
 void update(int32_t &);
+void update_curr_only(int32_t &);
 } // namespace deposition
 
 namespace excavation {
 void cb(int8_t exc);
 void update(int32_t &, float &);
+void update_curr_only(int32_t &);
 } // namespace excavation
 #endif
