@@ -264,7 +264,6 @@ void KillSwitchRelay::kill() {
 }
 
 
-
 void KillSwitchRelay::kill_motor(int id, RobotEffort &effort) {
   switch (id) {
     case 0:
@@ -285,8 +284,8 @@ void KillSwitchRelay::kill_motor(int id, RobotEffort &effort) {
 }
 
 //exc, dep, drive_L, drive_R
-volatile float KillSwitchRelay::cutoff_buffer[4] = {0};
-volatile float KillSwitchRelay::kill_buffer[4] = {0};
+volatile int KillSwitchRelay::cutoff_buffer[4] = {0};
+volatile int KillSwitchRelay::kill_buffer[4] = {0};
 volatile bool KillSwitchRelay::is_dead[4] = {false};
 
 void KillSwitchRelay::logic(RobotEffort &effort) {

@@ -135,8 +135,8 @@ private:
   //If a motor has been set to 0% this many times, activate the kill relay. 
   static constexpr int kill_thresh = 3;
 
-  volatile static float cutoff_buffer[4];
-  volatile static float kill_buffer[4];
+  volatile static int cutoff_buffer[4];
+  volatile static int kill_buffer[4];
   volatile static bool is_dead[4];
 };
 
