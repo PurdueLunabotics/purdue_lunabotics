@@ -300,7 +300,7 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
   }
   if (dep_curr >= exdep_kill_curr) {
     cutoff_buffer[1] += cutoff_increase;
- 
+  }
   if (drive_left_curr >= drive_kill_curr) {
     cutoff_buffer[2] += cutoff_increase;
   }
@@ -311,10 +311,10 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
   for (int i = 0; i < 4; ++i) {
     cutoff_buffer[i] -= cutoff_decay;
     if (cutoff_buffer < 0) {
-      cutoff_buffer = 0;
+      cutoff_buffer[i] = 0;
     }
     if (is_dead[i]) {
-      if (cutoff_buffer >= reset_thresh) {
+      if (cutoff_buffer[i] >= reset_thresh) {
         kill_motor(i, effort);
       } else {
         is_dead[i] = false;

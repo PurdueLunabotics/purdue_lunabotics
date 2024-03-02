@@ -8,6 +8,7 @@
 #include <Wire.h>
 #include <Encoder.h>
 #include <HX711.h>
+#include <RobotMsgs.pb.h>
 #include "robot.hpp"
 
 #define UWBSerial Serial8
