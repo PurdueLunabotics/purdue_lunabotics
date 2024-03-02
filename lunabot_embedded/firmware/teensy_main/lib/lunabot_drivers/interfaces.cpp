@@ -242,8 +242,8 @@ void M5Stack_UWB_Trncvr::transfer() {
   }
 }
 
-KillSwitchRelay::kill_time;
-KillSwitchRelay::dead;
+long KillSwitchRelay::kill_time;
+bool KillSwitchRelay::dead;
 
 void KillSwitchRelay::init() { 
   pinMode(kill_pin, OUTPUT); 
