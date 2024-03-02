@@ -18,8 +18,8 @@ Sabertooth_MotorCtrl act_left_mtr{&MC2, STMotor::M2};
 constexpr uint8_t ACT_RIGHT_CURR_ADC = 1;
 constexpr uint8_t ACT_RIGHT_CURR_MUX = 1; // U6 curr_sense_board
 
-constexpr uint8_t ACT_LEFT_CURR_ADC = 0;
-constexpr uint8_t ACT_LEFT_CURR_MUX = 3; // U4 curr_sense_board
+constexpr uint8_t ACT_LEFT_CURR_ADC = 1;
+constexpr uint8_t ACT_LEFT_CURR_MUX = 0; // U4 curr_sense_board
 
 void update(int32_t &act_right_curr) {
   act_right_curr = ACS711_Current_Bus::read(ACT_RIGHT_CURR_ADC, ACT_RIGHT_CURR_MUX);
@@ -37,10 +37,10 @@ Sabertooth_MotorCtrl left_drive_mtr{&MC3, STMotor::M1};
 Sabertooth_MotorCtrl right_drive_mtr{&MC3, STMotor::M2};
 
 constexpr uint8_t LEFT_CURR_ADC = 0;
-constexpr uint8_t LEFT_CURR_MUX = 2; // U3 curr_sense_board
+constexpr uint8_t LEFT_CURR_MUX = 0; // U5 curr_sense_board
 
 constexpr uint8_t RIGHT_CURR_ADC = 0;
-constexpr uint8_t RIGHT_CURR_MUX = 0; // U1 curr_sense_board
+constexpr uint8_t RIGHT_CURR_MUX = 1; // U2 curr_sense_board
 
 constexpr uint8_t LEFT_ENC_ID = 0;
 constexpr uint8_t RIGHT_ENC_ID = 0;
@@ -73,8 +73,8 @@ void update(float &d0, float &d1, float &d2) {
 namespace excavation {
 Sabertooth_MotorCtrl exc_mtr{&MC4, STMotor::M1};
 
-constexpr uint8_t EXC_CURR_ADC = 1;
-constexpr uint8_t EXC_CURR_MUX = 0; // U5 curr_sense_board
+constexpr uint8_t EXC_CURR_ADC = 0;
+constexpr uint8_t EXC_CURR_MUX = 2; // U1 curr_sense_board
 
 constexpr uint8_t EXC_ENC_ID = 2;
 
@@ -89,7 +89,7 @@ void cb(int8_t speed) { exc_mtr.write(speed); }
 namespace deposition {
 Sabertooth_MotorCtrl dep_mtr{&MC1, STMotor::M2};
 constexpr uint8_t DEP_CURR_ADC = 0;
-constexpr uint8_t DEP_CURR_MUX = 1; // U2 curr_sense_board
+constexpr uint8_t DEP_CURR_MUX = 3; // U3 curr_sense_board
 
 void update(int32_t &dep_curr) {
   dep_curr = ACS711_Current_Bus::read(DEP_CURR_ADC, DEP_CURR_MUX);
