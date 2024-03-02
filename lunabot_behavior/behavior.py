@@ -9,6 +9,7 @@ from std_msgs.msg import Bool
 import ascent
 import find_apriltag
 import plunge
+import deposition
 import interrupts
 import escape
 
@@ -71,6 +72,8 @@ class Behavior:
         ascent_module = ascent.Ascent(self.effort_publisher)
         find_apriltag_module = find_apriltag.FindAprilTag(self.velocity_publisher)
         plunge_module = plunge.Plunge(self.effort_publisher)
+
+        deposition_module = deposition.Deposition(self.effort_publisher)
 
         escape_module = escape.Escape(self.velocity_publisher)
 
@@ -178,7 +181,12 @@ class Behavior:
             
                 # Deposit regolith w/ auger
                 if (self.current_state == States.DEPOSIT):
-                    # Deposit
+                    
+                    deposition_status = deposition_module.deposit()
+
+                    if deposition_status == False:
+                        break
+
                     self.current_state = States.TRAVERSAL_MINE
 
                 # Set goal to mining zone
