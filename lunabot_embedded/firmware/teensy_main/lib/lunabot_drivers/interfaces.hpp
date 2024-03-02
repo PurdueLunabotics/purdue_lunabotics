@@ -2,37 +2,17 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <Sabertooth.h>
-#include <Stepper.h>
 #include <Wire.h>
+#include <Encoder.h>
+#include <HX711.h>
 
 #ifndef __INTERFACES_H__
 #define __INTERFACES_H__
 
 #define UWBSerial Serial8
 
-enum StepperDir { RETRACT = -1, EXTEND = 1 };
 enum MotorDir { CW = HIGH, CCW = LOW };
 enum STMotor { M1 = 1, M2 = 2 };
-
-class Stepper2Phase_MotorCtrl {
-public:
-  Stepper2Phase_MotorCtrl(uint8_t PWM1_P, uint8_t PWM2_P, uint8_t DIR1_P, uint8_t DIR2_P, int steps,
-                          int speed, int step_size);
-  void on();
-  void off();
-  void step(StepperDir dir);
-
-private:
-  Stepper s_;
-  uint8_t PWM1_P_;
-  uint8_t PWM2_P_;
-  uint8_t DIR1_P_;
-  uint8_t DIR2_P_;
-  int enabled_;
-  int steps_;     // steps per revolution
-  int speed_;     // steps per minute
-  int step_size_; // step cnt per step
-};
 
 class PWM_MotorCtrl {
 public:
@@ -140,4 +120,19 @@ private:
 
   static long kill_time = 0;
 }
+
+class AMT13_Angle_Bus {
+public:
+  AMT13_Angle_Bus(){};
+  static float read_enc(uint8_t id);
+
+private:
+  static constexpr int NUM_ENCODERS = 3;
+  static constexpr int PIN_LIST[NUM_ENCODERS*2] = {4, 5, 6, 7, 8, 9};
+  static constexpr float pulses_per_rev = 400; //4 times the value set on the encoders
+  static constexpr float deg_per_rev = 360
+   
+  static Encoder encs[NUM_ENCODERS];
+};
+
 #endif

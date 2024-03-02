@@ -18,8 +18,8 @@ extern Sabertooth MC3; // bottom
 extern Sabertooth MC4; // high-current
 
 namespace actuation {
-void cb(int8_t lead_screw, int8_t lin_act);
-void update(int32_t &, int32_t &, float &, float &);
+void cb(int8_t lin_act);
+void update(int32_t &);
 
 } // namespace actuation
 
@@ -34,12 +34,11 @@ void update(float &d0, float &d1, float &d2);
 
 namespace deposition {
 void cb(int8_t dep);
-void update(int32_t &, float &);
+void update(int32_t &);
 } // namespace deposition
 
 namespace excavation {
 void cb(int8_t exc);
-void update(int32_t &);
+void update(int32_t &, float &);
 } // namespace excavation
-
 #endif

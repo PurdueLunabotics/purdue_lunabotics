@@ -161,27 +161,10 @@ void GazeboRosSkidSteerDrive::Load(physics::ModelPtr _parent, sdf::ElementPtr _s
      this->parent->GetJoint(left_front_joint_name_)->GetAnchor(0).Distance(
         this->parent->GetJoint(right_front_joint_name_)->GetAnchor(0));*/
 
-  this->wheel_separation_ = 0.4;
-
-  if (!_sdf->HasElement("wheelSeparation")) {
-    ROS_WARN_NAMED("skid_steer_drive",
-                   "GazeboRosSkidSteerDrive Plugin (ns = %s) missing "
-                   "<wheelSeparation>, defaults to value from robot_description: %f",
-                   this->robot_namespace_.c_str(), this->wheel_separation_);
-  } else {
-    this->wheel_separation_ = _sdf->GetElement("wheelSeparation")->Get<double>();
-  }
-
-  // TODO get this from robot_description
-  this->wheel_diameter_ = 0.15;
-  if (!_sdf->HasElement("wheelDiameter")) {
-    ROS_WARN_NAMED("skid_steer_drive",
-                   "GazeboRosSkidSteerDrive Plugin (ns = %s) missing "
-                   "<wheelDiameter>, defaults to %f",
-                   this->robot_namespace_.c_str(), this->wheel_diameter_);
-  } else {
-    this->wheel_diameter_ = _sdf->GetElement("wheelDiameter")->Get<double>();
-  }
+  // Hardcode values for wheel separation and diameter
+  // (to get from sdf, use GetElement (like in surrounding code blocks))
+  this->wheel_separation_ = 0.45;
+  this->wheel_diameter_ = 0.4;
 
   this->torque = 5.0;
   if (!_sdf->HasElement("torque")) {
@@ -441,14 +424,17 @@ void GazeboRosSkidSteerDrive::FiniChild() {
 void GazeboRosSkidSteerDrive::getWheelVelocities() {
   boost::mutex::scoped_lock scoped_lock(lock);
 
+  // this function is modified to fix the original skid steer model
+  // the left speed is purposefully reversed as the wheels face the opposite direction in the urdf
+
   double vr = x_;
   double va = rot_;
 
-  wheel_speed_[LEFT_FRONT] = vr + va * wheel_separation_ / 2.0;
-  wheel_speed_[LEFT_REAR] = vr + va * wheel_separation_ / 2.0;
+  wheel_speed_[LEFT_FRONT] = -(vr -  va * wheel_separation_ / 2.0);
+  wheel_speed_[LEFT_REAR] = -(vr -  va * wheel_separation_ / 2.0);
 
-  wheel_speed_[RIGHT_FRONT] = vr - va * wheel_separation_ / 2.0;
-  wheel_speed_[RIGHT_REAR] = vr - va * wheel_separation_ / 2.0;
+  wheel_speed_[RIGHT_FRONT] = vr + va * wheel_separation_ / 2.0;
+  wheel_speed_[RIGHT_REAR] = vr + va * wheel_separation_ / 2.0;
 }
 
 void GazeboRosSkidSteerDrive::cmdVelCallback(const geometry_msgs::Twist::ConstPtr &cmd_msg) {

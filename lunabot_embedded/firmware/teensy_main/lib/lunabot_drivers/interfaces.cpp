@@ -1,35 +1,5 @@
 #include "interfaces.hpp"
 
-// Stepper Motor Interfacing
-
-Stepper2Phase_MotorCtrl::Stepper2Phase_MotorCtrl(uint8_t PWM1_P, uint8_t PWM2_P, uint8_t DIR1_P,
-                                                 uint8_t DIR2_P, int steps, int speed,
-                                                 int step_size)
-    : s_(steps, DIR1_P, DIR2_P), PWM1_P_{PWM1_P}, PWM2_P_{PWM2_P}, DIR1_P_{DIR1_P}, DIR2_P_{DIR2_P},
-      enabled_{0}, steps_{steps}, speed_{speed}, step_size_{step_size} {
-  pinMode(PWM1_P_, OUTPUT);
-  pinMode(PWM2_P_, OUTPUT);
-  s_.setSpeed(speed_);
-}
-
-void Stepper2Phase_MotorCtrl::step(StepperDir dir) {
-  if (enabled_) {
-    s_.step(step_size_ * dir);
-  }
-}
-
-void Stepper2Phase_MotorCtrl::on() {
-  digitalWrite(PWM1_P_, HIGH);
-  digitalWrite(PWM2_P_, HIGH);
-  enabled_ = 1;
-}
-
-void Stepper2Phase_MotorCtrl::off() {
-  digitalWrite(PWM1_P_, LOW);
-  digitalWrite(PWM2_P_, LOW);
-  enabled_ = 0;
-}
-
 // PWM Motor Control Interfacing
 
 PWM_MotorCtrl::PWM_MotorCtrl(uint8_t PWM_P, uint8_t DIR_P) : PWM_P_{PWM_P}, DIR_P_{DIR_P} {
@@ -67,8 +37,8 @@ const int ACS711_Current_Bus::ADS_CHANNELS[ACS711_Current_Bus::CH_SIZE] = {
     ADS1115_REG_CONFIG_MUX_SINGLE_0, ADS1115_REG_CONFIG_MUX_SINGLE_1,
     ADS1115_REG_CONFIG_MUX_SINGLE_2, ADS1115_REG_CONFIG_MUX_SINGLE_3};
 
-ADS1115_lite ACS711_Current_Bus::adc0_(ADS1115_ADDRESS_ADDR_SCL);
-ADS1115_lite ACS711_Current_Bus::adc1_(ADS1115_ADDRESS_ADDR_SDA);
+ADS1115_lite ACS711_Current_Bus::adc0_(ADS1115_ADDRESS_EXDEPDRIVE);
+ADS1115_lite ACS711_Current_Bus::adc1_(ADS1115_ADDRESS_ACT);
 
 int ACS711_Current_Bus::initialized_ = 0;
 int16_t ACS711_Current_Bus::curr_buffer_[ACS711_Current_Bus::BUSES][ACS711_Current_Bus::BUS_SIZE] =
@@ -150,7 +120,6 @@ void VLH35_Angle_Bus::select_enc_(uint8_t id) {
 void VLH35_Angle_Bus::transfer() {
   digitalWriteFast(clk_p_,
                    LOW); // Set CLK line LOW (to inform encoder -> latch data)
-
   // Before in setup() the pinMode() change the CLK pin function to
   // output, now we have to enable usage of this pin by SPI port with
   // calling SPI.begin():
@@ -191,6 +160,16 @@ float VLH35_Angle_Bus::read_enc(uint8_t id) {
   // shift it for 11 bits to align position data right
 
   return static_cast<float>(data) / static_cast<float>(1 << 16) * 360.0F;
+}
+
+Encoder AMT13_Angle_Bus::encs[NUM_ENCODERS] = {
+      Encoder(PIN_LIST[0], PIN_LIST[1]),
+      Encoder(PIN_LIST[2], PIN_LIST[3]),
+      Encoder(PIN_LIST[4], PIN_LIST[5])
+};
+
+float AMT13_Angle_Bus::read_enc(uint8_t id) {
+  return encs[id].read()/pulses_per_rev * deg_per_rev;
 }
 
 volatile float M5Stack_UWB_Trncvr::recv_buffer_[NUM_UWB_TAGS] = {0};
