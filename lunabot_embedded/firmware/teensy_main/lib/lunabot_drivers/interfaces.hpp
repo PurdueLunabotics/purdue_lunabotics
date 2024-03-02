@@ -99,26 +99,40 @@ private:
 class KillSwitchRelay {
 public:
   static bool dead;
-
-  static void init();
-  static void reset();
-  static void kill();
-  static void logic(RobotEffort &effort);
-  static void kill_motor(int id, RobotEffort &effort);
   static long kill_time;
 
+  static void init();
+  
+  //these two functions deal with the relay that kills all power to the motors
+  static void reset();
+  static void kill();
+
+  //the main loop, to be run before the effort values are assigned to motors
+  static void logic(RobotEffort &effort);
+
+  //sets an individual motor to 0% power.
+  static void kill_motor(int id, RobotEffort &effort);
+
 private:
+  //the pin to cut power to all motors. Active low to kill
   static constexpr int kill_pin = 11;
   static constexpr float drive_kill_curr = 7.0;
   static constexpr float exdep_kill_curr = 25.0;
 
+  //the threshold at which the motor is set to 0% power 
   static constexpr int cutoff_thresh = 1000;
-  static constexpr int cutoff_increase = 3;
-  static constexpr int cutoff_decay = 1;
+  //the threshold at which a motor set a 0% power is allowed to turn back on
   static constexpr int reset_thresh = 500;
 
+  //Every cycle that a motor is overcurrent, a counter increases by this amount
+  static constexpr int cutoff_increase = 3;
+  //Every cycle, that counter decreases by this amount
+  static constexpr int cutoff_decay = 1;
+
+  //The relay that kills all motors must be dead for at least this long before resetting
   static constexpr int relay_dead_time = 2000;
 
+  //If a motor has been set to 0% this many times, activate the kill relay. 
   static constexpr int kill_thresh = 3;
 
   volatile static float cutoff_buffer[4];
