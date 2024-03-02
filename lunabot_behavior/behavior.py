@@ -7,9 +7,10 @@ from lunabot_msgs.msg import RobotEffort, RobotSensors, RobotErrors, Behavior
 from std_msgs.msg import Bool
 
 import ascent
-import escape
 import find_apriltag
+import plunge
 import interrupts
+import escape
 
 class States(Enum):
     ASCENT_INIT = auto()
@@ -66,13 +67,12 @@ class Behavior:
     """
     def behavior_loop(self):
 
-        # notes on interrupts: if no functions use rospy.sleep, then they can all 
-        # just check for the kill signal at the end of every loop they go through. 
-        # that can cause them to return false or the error in an enum (need to decide)
-        # and that can be handled by the main process before continuing. 
-        # How to pick up where we were before? Current state enum flag?
-        # also how to cleanly handle the functions returning different values?
-        # and picking back up from somewhere new specificed by the enum flag?
+        # Initialize all of the modules (before the loop)
+        ascent_module = ascent.Ascent(self.effort_publisher)
+        find_apriltag_module = find_apriltag.FindAprilTag(self.velocity_publisher)
+        plunge_module = plunge.Plunge(self.effort_publisher)
+
+        escape_module = escape.Escape(self.velocity_publisher)
 
         # Startup:
 
@@ -84,7 +84,6 @@ class Behavior:
         # Raise linear actuators
         rospy.loginfo("State: Ascent")
         self.current_state = States.ASCENT_INIT
-        ascent_module = ascent.Ascent(self.effort_publisher)
 
         ascent_status = ascent_module.raise_linear_actuators()
         if ascent_status == False: # Robot error
@@ -95,7 +94,6 @@ class Behavior:
         rospy.loginfo("State: Find AprilTag")
         self.current_state = States.FIND_TAG
 
-        find_apriltag_module = find_apriltag.FindAprilTag(self.velocity_publisher)
         apriltag_status = find_apriltag_module.find_apriltag()
 
         if apriltag_status == "Error": # Robot error
@@ -134,6 +132,10 @@ class Behavior:
 
                     traversal_message.data = False
                     self.traversal_publisher.publish(traversal_message)
+
+                    plunge_status = plunge_module.plunge()
+                    if plunge_status == False:
+                        break
 
                     self.current_state = States.TRENCH
 
@@ -191,7 +193,6 @@ class Behavior:
                 pass
             elif problem == interrupts.Errors.STUCK:
                 #if the robot is stuck, unstick it
-                escape_module = escape.Escape(self.velocity_publisher)
                 escape_module.unstickRobot()
             
 
