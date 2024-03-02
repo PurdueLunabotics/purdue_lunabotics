@@ -269,12 +269,31 @@ void KillSwitchRelay::kill() {
   dead = true;
 }
 
+void KillSwitchRelay::kill_motor(int id, RobotEffort &effort) {
+  switch (id) {
+    case 0:
+      effort.excavate = 0;
+      break;
+    case 1:
+      effort.deposit = 0;
+      break;
+    case 2:
+      effort.left_drive = 0;
+      break;
+    case 3:
+      effort.right_drive = 0;
+      break;
+    default:
+      return;
+  }
+}
+
 //exc, dep, drive_L, drive_R
 volatile float KillSwitchRelay::cutoff_buffer[4] = {0};
 volatile float KillSwitchRelay::kill_buffer[4] = {0};
 volatile bool KillSwitchRelay::is_dead[4] = {false};
 
-void KillSwitchRelay::logic(RobotSensors state) {
+void KillSwitchRelay::logic(RobotSensors state, RobotEffort &effort) {
   if (dead && millis() - kill_time >= relay_dead_time) {
     reset();
   } 
@@ -299,13 +318,13 @@ void KillSwitchRelay::logic(RobotSensors state) {
     }
     if (is_dead[i]) {
       if (cutoff_buffer >= reset_thresh) {
-        //motor stays dead
+        kill_motor(i, effort);
       } else {
         is_dead[i] = false;
       }
     } else {
       if (cutoff_buffer[i] >= cutoff_thresh) {
-        //kill motor
+        kill_motor(i, effort);
         is_dead[i] = true;
         kill_buffer[i] += 1;
       }

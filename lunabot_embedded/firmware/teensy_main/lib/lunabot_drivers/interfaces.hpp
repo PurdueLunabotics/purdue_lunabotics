@@ -17,7 +17,7 @@ public:
   void setup();
   void reset();
   void kill();
-  void logic(RobotSensors state);
+  void logic(RobotSensors state, RobotEffort &effort);
 
 private:
   static constexpr int kill_pin = 11;
