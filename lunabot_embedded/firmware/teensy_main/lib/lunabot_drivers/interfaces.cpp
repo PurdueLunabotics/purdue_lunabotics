@@ -258,6 +258,8 @@ void KillSwitchRelay::kill() {
   dead = true;
 }
 
+
+
 void KillSwitchRelay::kill_motor(int id, RobotEffort &effort) {
   switch (id) {
     case 0:
@@ -286,17 +288,22 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
   if (dead && millis() - kill_time >= relay_dead_time) {
     reset();
   } 
+  
+  float exc_curr = ACS711_Current_Bus::adc_to_current_31A(excavation::update_curr());
+  float dep_curr = ACS711_Current_Bus::adc_to_current_31A(deposition::update_curr());
+  float drive_left_curr = ACS711_Current_Bus::adc_to_current_15A(drivetrain::update_curr_left());
+  float drive_right_curr = ACS711_Current_Bus::adc_to_current_15A(drivetrain::update_curr_right());
 
-  if (excavation::update_curr() >= exdep_kill_curr) {
+  if (exc_curr >= exdep_kill_curr) {
     cutoff_buffer[0] += cutoff_increase;
   }
-  if (deposition::update_curr() >= exdep_kill_curr) {
+  if (dep_curr >= exdep_kill_curr) {
     cutoff_buffer[1] += cutoff_increase;
  
-  if (drivetrain::update_curr_left() >= drive_kill_curr) {
+  if (drive_left_curr >= drive_kill_curr) {
     cutoff_buffer[2] += cutoff_increase;
   }
-  if (drivetrain::update_curr_right() >= drive_kill_curr) {
+  if (drive_right_curr >= drive_kill_curr) {
     cutoff_buffer[3] += cutoff_increase;
   }
 
