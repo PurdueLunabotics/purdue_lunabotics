@@ -4,15 +4,14 @@
 // https://docs.google.com/spreadsheets/d/1eX79YtawJqBA8VePFFtKJT6RR21gvK4qH1DKJX_vJE0/edit#gid=0
 
 // MCs
-Sabertooth MC1(128, ST_SERIAL); // top
-Sabertooth MC2(129, ST_SERIAL); // middle
-Sabertooth MC3(130, ST_SERIAL); // bottom
-Sabertooth MC4(131, ST_SERIAL); // high-current
+Sabertooth MC1(128, ST_SERIAL); // DRIVE
+Sabertooth MC2(130, ST_SERIAL); // EXCAVATION
+Sabertooth MC3(131, ST_SERIAL); // DEPOSITION
 
 // ADCs
 namespace actuation {
 
-Sabertooth_MotorCtrl act_right_mtr{&MC2, STMotor::M2};
+Sabertooth_MotorCtrl act_right_mtr{&MC3, STMotor::M2};
 Sabertooth_MotorCtrl act_left_mtr{&MC2, STMotor::M2};
 
 constexpr uint8_t ACT_RIGHT_CURR_ADC = 1;
@@ -33,8 +32,8 @@ void cb(int8_t lin_act_volt) {
 } // namespace actuation
 
 namespace drivetrain {
-Sabertooth_MotorCtrl left_drive_mtr{&MC3, STMotor::M2};
-Sabertooth_MotorCtrl right_drive_mtr{&MC3, STMotor::M1};
+Sabertooth_MotorCtrl left_drive_mtr{&MC1, STMotor::M2};
+Sabertooth_MotorCtrl right_drive_mtr{&MC1, STMotor::M1};
 
 constexpr uint8_t LEFT_CURR_ADC = 0;
 constexpr uint8_t LEFT_CURR_MUX = 0; // U5 curr_sense_board
@@ -74,7 +73,7 @@ void update(float &d0, float &d1, float &d2) {
 } // namespace uwb
 
 namespace excavation {
-Sabertooth_MotorCtrl exc_mtr{&MC4, STMotor::M1};
+Sabertooth_MotorCtrl exc_mtr{&MC2, STMotor::M1};
 
 constexpr uint8_t EXC_CURR_ADC = 0;
 constexpr uint8_t EXC_CURR_MUX = 2; // U1 curr_sense_board
@@ -92,7 +91,7 @@ void cb(int8_t speed) { exc_mtr.write(speed); }
 } // namespace excavation
 
 namespace deposition {
-Sabertooth_MotorCtrl dep_mtr{&MC1, STMotor::M1};
+Sabertooth_MotorCtrl dep_mtr{&MC3, STMotor::M1};
 constexpr uint8_t DEP_CURR_ADC = 0;
 constexpr uint8_t DEP_CURR_MUX = 3; // U3 curr_sense_board
 
