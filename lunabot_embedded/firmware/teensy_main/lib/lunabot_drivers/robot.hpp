@@ -26,7 +26,7 @@ void update(int32_t &);
 namespace drivetrain {
 void cb(int8_t left, int8_t right);
 void update(int32_t &, int32_t &, float &, float &);
-void update_curr_only((int32_t &, int32_t &)
+void update_curr_only(int32_t &, int32_t &)
 } // namespace drivetrain
 
 namespace uwb {
