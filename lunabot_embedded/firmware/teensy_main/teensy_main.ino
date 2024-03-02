@@ -7,6 +7,7 @@
 #include "interfaces.hpp"
 
 #define TX_PERIOD 10               // ms
+#define RX_PERIOD 2                // ms
 #define UWB_TRANSFER_PERIOD 10'000 // microsec
 #define CURR_UPDATE_PERIOD 8       // ms
 
@@ -18,15 +19,6 @@ uint8_t buffer[64];
 uint8_t flags = 0;
 
 void recv() {
-  /* Create a stream that reads from the buffer. */
-  pb_istream_t stream = pb_istream_from_buffer(buffer, sizeof(buffer));
-
-  /* Now we are ready to decode the message. */
-  pb_decode(&stream, RobotEffort_fields, &effort);
-  
-  //TODO, add timer if robot effort not changing for too long, exit?
-  KillSwitchRelay::logic(effort);
-
   actuation::cb(effort.lin_act);
   drivetrain::cb(effort.left_drive, effort.right_drive);
   deposition::cb(effort.deposit);
@@ -69,12 +61,24 @@ void setup() {
 }
 
 elapsedMillis ms_until_send;
+elapsedMillis ms_from_recv;
 elapsedMillis ms_curr_update;
 
 void loop() {
   int n;
   n = RawHID.recv(buffer, 0); // 0 timeout = do not wait
   if (n > 0) {
+    /* Create a stream that reads from the buffer. */
+    pb_istream_t stream = pb_istream_from_buffer(buffer, sizeof(buffer));
+
+    /* Now we are ready to decode the message. */
+    pb_decode(&stream, RobotEffort_fields, &effort);
+  }
+
+  if (ms_from_recv > RX_PERIOD) {
+    ms_until_recv -= RX_PERIOD;
+    // TODO, add timer if robot effort not changing for too long, exit?
+    KillSwitchRelay::logic(effort);
     recv();
   }
 
