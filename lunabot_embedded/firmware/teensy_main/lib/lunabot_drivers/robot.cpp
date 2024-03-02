@@ -42,16 +42,16 @@ constexpr uint8_t LEFT_CURR_MUX = 2; // U3 curr_sense_board
 constexpr uint8_t RIGHT_CURR_ADC = 0;
 constexpr uint8_t RIGHT_CURR_MUX = 0; // U1 curr_sense_board
 
-constexpr uint8_t DRIVE_RIGHT_MUX = 0;
-constexpr uint8_t DRIVE_LEFT_MUX = 3;
+constexpr uint8_t LEFT_ENC_ID = 0;
+constexpr uint8_t RIGHT_ENC_ID = 0;
 
 void update(int32_t &left_curr, int32_t &right_curr, float &left_angle, float &right_angle) {
   left_curr = ACS711_Current_Bus::read(LEFT_CURR_ADC, LEFT_CURR_MUX);
 
   right_curr = ACS711_Current_Bus::read(RIGHT_CURR_ADC, RIGHT_CURR_MUX);
 
-  left_angle = VLH35_Angle_Bus::read_enc(DRIVE_LEFT_MUX);
-  right_angle = VLH35_Angle_Bus::read_enc(DRIVE_RIGHT_MUX);
+  left_angle = AMT13_Angle_Bus::read_enc(LEFT_ENC_ID);
+  right_angle = AMT13_Angle_Bus::read_enc(RIGHT_ENC_ID);
 }
 
 void cb(int8_t left_drive_volt, int8_t right_drive_volt) {

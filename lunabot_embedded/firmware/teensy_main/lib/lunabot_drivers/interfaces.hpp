@@ -3,6 +3,7 @@
 #include <SPI.h>
 #include <Sabertooth.h>
 #include <Wire.h>
+#include <Encoder.h>
 #include <HX711.h>
 
 #ifndef __INTERFACES_H__
@@ -89,5 +90,20 @@ private:
 
   static void select_enc_(uint8_t id);
 };
+
+class AMT13_Angle_Bus {
+public:
+  AMT13_Angle_Bus(){};
+  static float read_enc(uint8_t id);
+
+private:
+  static constexpr int NUM_ENCODERS = 3;
+  static constexpr int PIN_LIST[NUM_ENCODERS*2] = {10, 12, 25, 23, 19, 17};
+  static constexpr float pulses_per_rev = 400; //4 times the value set on the encoders
+  static constexpr float deg_per_rev = 360
+   
+  static Encoder encs[NUM_ENCODERS];
+};
+
 
 #endif

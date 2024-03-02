@@ -120,7 +120,6 @@ void VLH35_Angle_Bus::select_enc_(uint8_t id) {
 void VLH35_Angle_Bus::transfer() {
   digitalWriteFast(clk_p_,
                    LOW); // Set CLK line LOW (to inform encoder -> latch data)
-
   // Before in setup() the pinMode() change the CLK pin function to
   // output, now we have to enable usage of this pin by SPI port with
   // calling SPI.begin():
@@ -161,6 +160,16 @@ float VLH35_Angle_Bus::read_enc(uint8_t id) {
   // shift it for 11 bits to align position data right
 
   return static_cast<float>(data) / static_cast<float>(1 << 16) * 360.0F;
+}
+
+Encoder AMT13_Angle_Bus::encs[NUM_ENCODERS] = {
+      Encoder(PIN_LIST[0], PIN_LIST[1]),
+      Encoder(PIN_LIST[2], PIN_LIST[3]),
+      Encoder(PIN_LIST[4], PIN_LIST[5])
+};
+
+float AMT13_Angle_Bus::read_enc(uint8_t id) {
+  return encs[id].read()/pulses_per_rev * deg_per_rev;
 }
 
 volatile float M5Stack_UWB_Trncvr::recv_buffer_[NUM_UWB_TAGS] = {0};
