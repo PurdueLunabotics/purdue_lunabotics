@@ -100,7 +100,7 @@ public:
   static bool dead;
 
   static void init();
-  static static void reset();
+  static void reset();
   static void kill();
   static void logic(RobotEffort &effort);
 
