@@ -247,6 +247,7 @@ bool KillSwitchRelay::dead;
 
 void KillSwitchRelay::init() { 
   pinMode(kill_pin, OUTPUT); 
+  KillSwitchRelay::dead = false;
   reset();
   KillSwitchRelay::kill_time = millis();
 }
