@@ -45,6 +45,9 @@ public:
   static int16_t read(uint8_t bus, uint8_t mux);
   static void transfer();
 
+  static float adc_to_current_31A(float adc_value, float adc_fsr = 4.096, float vcc = 3.3);
+  static float adc_to_current_15A(float adc_value, float adc_fsr = 4.096, float vcc = 3.3);
+
 private:
   static constexpr int BUSES = 2;
   static constexpr int CH_SIZE = 4;

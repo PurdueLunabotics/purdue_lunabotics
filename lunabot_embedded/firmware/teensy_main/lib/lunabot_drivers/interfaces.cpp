@@ -84,6 +84,16 @@ void ACS711_Current_Bus::transfer() {
   }
 }
 
+float ACS711_Current_Bus::adc_to_current_31A(float adc_value, float adc_fsr, float vcc) {
+  float vout = adc_value / pow(2, 16 - 1) * adc_fsr;
+  return 73.3 * (vout / vcc) - 36.7;
+}
+
+float ACS711_Current_Bus::adc_to_current_15A(float adc_value, float adc_fsr, float vcc) {
+  float vout = adc_value / pow(2, 16 - 1) * adc_fsr;
+  return 36.7 * (vout / vcc) - 18.3;
+}
+
 int16_t ACS711_Current_Bus::read(uint8_t bus, uint8_t mux) { return curr_buffer_[bus][mux]; }
 
 // VLH35_Angles
