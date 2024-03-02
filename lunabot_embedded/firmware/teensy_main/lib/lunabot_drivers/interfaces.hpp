@@ -5,6 +5,7 @@
 #include <Wire.h>
 #include <Encoder.h>
 #include <HX711.h>
+#include "robot.hpp"
 
 #ifndef __INTERFACES_H__
 #define __INTERFACES_H__

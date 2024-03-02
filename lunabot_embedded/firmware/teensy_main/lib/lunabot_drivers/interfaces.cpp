@@ -287,16 +287,16 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
     reset();
   } 
 
-  if (state.exc_curr >= exdep_kill_curr) {
+  if (excavation::update_curr() >= exdep_kill_curr) {
     cutoff_buffer[0] += cutoff_increase;
   }
-  if (state.dep_curr >= exdep_kill_curr) {
+  if (deposition::update_curr() >= exdep_kill_curr) {
     cutoff_buffer[1] += cutoff_increase;
-  }
-  if (state.drive_left_curr >= drive_kill_curr) {
+ 
+  if (drivetrain::update_curr_left() >= drive_kill_curr) {
     cutoff_buffer[2] += cutoff_increase;
   }
-  if (state.drive_right_curr >= drive_kill_curr) {
+  if (drivetrain::update_curr_right() >= drive_kill_curr) {
     cutoff_buffer[3] += cutoff_increase;
   }
 
