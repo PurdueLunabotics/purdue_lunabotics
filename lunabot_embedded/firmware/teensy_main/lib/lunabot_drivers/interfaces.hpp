@@ -97,12 +97,12 @@ private:
 
 class KillSwitchRelay {
 public:
-  static bool dead = false;
+  static bool dead;
 
-  void init();
-  void reset();
-  void kill();
-  void logic(RobotEffort &effort);
+  static void init();
+  static static void reset();
+  static void kill();
+  static void logic(RobotEffort &effort);
 
 private:
   static constexpr int kill_pin = 11;
@@ -122,8 +122,8 @@ private:
   volatile static float kill_buffer[4];
   volatile static bool is_dead[4];
 
-  static long kill_time = 0;
-}
+  static long kill_time;
+};
 
 class AMT13_Angle_Bus {
 public:

@@ -245,6 +245,7 @@ void M5Stack_UWB_Trncvr::transfer() {
 void KillSwitchRelay::init() { 
   pinMode(kill_pin, OUTPUT); 
   reset();
+  kill_time = millis();
 }
 
 void KillSwitchRelay::reset() { 
