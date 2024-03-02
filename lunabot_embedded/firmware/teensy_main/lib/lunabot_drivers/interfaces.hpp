@@ -10,36 +10,6 @@
 
 #define UWBSerial Serial8
 
-class KillSwitchRelay {
-public:
-  static bool dead = false;
-
-  void setup();
-  void reset();
-  void kill();
-  void logic(RobotSensors state, RobotEffort &effort);
-
-private:
-  static constexpr int kill_pin = 11;
-  static constexpr float drive_kill_curr = 7.0;
-  static constexpr float exdep_kill_curr = 25.0;
-
-  static constexpr int cutoff_thresh = 1000;
-  static constexpr int cutoff_increase = 3;
-  static constexpr int cutoff_decay = 1;
-  static constexpr int reset_thresh = 500;
-
-  static constexpr int relay_dead_time = 2000;
-
-  static constexpr int kill_thresh = 3;
-
-  volatile static float cutoff_buffer[4];
-  volatile static float kill_buffer[4];
-  volatile static bool is_dead[4];
-
-  static long kill_time = 0;
-}
-
 enum StepperDir { RETRACT = -1, EXTEND = 1 };
 enum MotorDir { CW = HIGH, CCW = LOW };
 enum STMotor { M1 = 1, M2 = 2 };
@@ -141,4 +111,33 @@ private:
   static void select_enc_(uint8_t id);
 };
 
+class KillSwitchRelay {
+public:
+  static bool dead = false;
+
+  void setup();
+  void reset();
+  void kill();
+  void logic(RobotSensors state, RobotEffort &effort);
+
+private:
+  static constexpr int kill_pin = 11;
+  static constexpr float drive_kill_curr = 7.0;
+  static constexpr float exdep_kill_curr = 25.0;
+
+  static constexpr int cutoff_thresh = 1000;
+  static constexpr int cutoff_increase = 3;
+  static constexpr int cutoff_decay = 1;
+  static constexpr int reset_thresh = 500;
+
+  static constexpr int relay_dead_time = 2000;
+
+  static constexpr int kill_thresh = 3;
+
+  volatile static float cutoff_buffer[4];
+  volatile static float kill_buffer[4];
+  volatile static bool is_dead[4];
+
+  static long kill_time = 0;
+}
 #endif
