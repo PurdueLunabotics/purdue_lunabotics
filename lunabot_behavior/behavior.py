@@ -248,14 +248,16 @@ class Behavior:
     
     def find_berm_zone(self, apriltag_pose_in_odom: PoseStamped)->Zone:
 
-        #TODO decide how to deal with UCF arena
-
         # TODO update these, they are not exact
         DIST_X = 3.88 + 1
+        # KSC = ~4.88  UCF ~7.04
         LENGTH_X = 2
+        # KSC = ~2   UCF ~1.6
 
         DIST_Y = 0.1
+        # KSC = ~0.1   UCF ~3.37
         LENGTH_Y = 1
+        # KSC = ~1    UCF ~1.8
 
         roll, pitch, yaw  = euler_from_quaternion([apriltag_pose_in_odom.pose.orientation.x, apriltag_pose_in_odom.pose.orientation.y, apriltag_pose_in_odom.pose.orientation.z, apriltag_pose_in_odom.pose.orientation.w])
         yaw += math.pi / 2
