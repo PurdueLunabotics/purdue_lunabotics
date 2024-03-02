@@ -1,7 +1,9 @@
 import rospy
 from enum import Enum, auto
+import math
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, PoseStamped
 from apriltag_ros.msg import AprilTagDetectionArray, AprilTagDetection
 from lunabot_msgs.msg import RobotEffort, RobotSensors, RobotErrors, Behavior
 from std_msgs.msg import Bool
@@ -49,10 +51,14 @@ class Behavior:
         self.effort_publisher = rospy.Publisher("/effort", RobotEffort, queue_size=1, latch=True)
         self.velocity_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
         self.traversal_publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue_size=1, latch=True)
+        self.goal_publisher = rospy.Publisher("/goal", PoseStamped, queue_size=1, latch=True)
 
         self.current_state = States.ASCENT_INIT
 
         self.start_apriltag: AprilTagDetection = AprilTagDetection()
+
+        self.mining_zone = None
+        self.berm_zone = None
 
         # TODO change to parameters, determine which are needed
         rospy.Subscriber("/sensors", RobotSensors, self.robot_state_callback)
@@ -107,6 +113,10 @@ class Behavior:
 
         self.current_state = States.TRAVERSAL_MINE
 
+        apriltag_pose_in_odom: PoseStamped = find_apriltag_module.convert_to_odom_frame(self.start_apriltag)
+
+        self.mining_zone: self.Zone = self.find_mining_zone(apriltag_pose_in_odom)
+        self.berm_zone: self.Zone = self.find_berm_zone(apriltag_pose_in_odom)
 
         # TODO Determine positions of mining and berm zones from apriltag
 
@@ -201,6 +211,64 @@ class Behavior:
             elif problem == interrupts.Errors.STUCK:
                 #if the robot is stuck, unstick it
                 escape_module.unstickRobot()
+
+    class Zone:
+        def __init__(self, top_left: 'tuple[float]', top_right: 'tuple[float]', bottom_left: 'tuple[float]', bottom_right: 'tuple[float]'):
+            # All tuples are (x, y) where x is left-right
+            self.top_left = top_left
+            self.top_right = top_right
+            self.bottom_left = bottom_left
+            self.bottom_right = bottom_right
+
+            self.middle = ((top_left[0] + top_right[0]) / 2, (top_left[1] + bottom_left[1]) / 2)
+
+    def find_mining_zone(self, apriltag_pose_in_odom: PoseStamped)->Zone:
+
+        #TODO decide how to deal with UCF arena
+
+        DIST_X = 3.88 # In meters, the distance from the leftmost wall to the left border of the mining zone
+        # KSC = 3.88
+        LENGTH_X = 3 # In meters, the length of the mining zone (left to right)
+        # KSC = 3
+
+        DIST_Y = 2 # In meters, the distance from the bottom-most wall to the bottom border of the mining zone
+        # KSC = 2
+        LENGTH_Y = 3 # In meters, the length of the mining zone (bottom to top)
+        # KSC = 3
+
+        roll, pitch, yaw  = euler_from_quaternion([apriltag_pose_in_odom.pose.orientation.x, apriltag_pose_in_odom.pose.orientation.y, apriltag_pose_in_odom.pose.orientation.z, apriltag_pose_in_odom.pose.orientation.w])
+        yaw += math.pi / 2
+
+        top_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(yaw) * (DIST_Y + LENGTH_Y))
+        top_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(yaw) * (DIST_Y + LENGTH_Y))
+        bottom_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(yaw) * (DIST_Y))
+        bottom_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(yaw) * (DIST_Y))
+
+        return self.Zone(top_left, top_right, bottom_left, bottom_right)
+    
+    def find_berm_zone(self, apriltag_pose_in_odom: PoseStamped)->Zone:
+
+        #TODO decide how to deal with UCF arena
+
+        # TODO update these, they are not exact
+        DIST_X = 3.88 + 1
+        LENGTH_X = 2
+
+        DIST_Y = 0.1
+        LENGTH_Y = 1
+
+        roll, pitch, yaw  = euler_from_quaternion([apriltag_pose_in_odom.pose.orientation.x, apriltag_pose_in_odom.pose.orientation.y, apriltag_pose_in_odom.pose.orientation.z, apriltag_pose_in_odom.pose.orientation.w])
+        yaw += math.pi / 2
+
+        top_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(yaw) * (DIST_Y + LENGTH_Y))
+        top_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(yaw) * (DIST_Y + LENGTH_Y))
+        bottom_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(yaw) * (DIST_Y))
+        bottom_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(yaw) * (DIST_Y))
+
+        return self.Zone(top_left, top_right, bottom_left, bottom_right)
+
+
+        
             
 
 if __name__ == "__main__":

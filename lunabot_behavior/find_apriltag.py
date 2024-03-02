@@ -1,6 +1,9 @@
 import rospy
-from geometry_msgs.msg import Twist
-from apriltag_ros.msg import AprilTagDetectionArray
+from geometry_msgs.msg import Twist, PoseStamped
+from apriltag_ros.msg import AprilTagDetectionArray, AprilTagDetection
+import tf2_ros
+import tf2_geometry_msgs
+
 import interrupts
 
 import time
@@ -77,9 +80,36 @@ class FindAprilTag:
         self.velocity_publisher.publish(velocity_message)
 
         return None
+    
+    def convert_to_odom_frame(self, apriltag_detection: AprilTagDetection):
+        """
+        Convert the first apriltag detection to the odom frame
+        """
+
+        tf_buffer = tf2_ros.Buffer()
+        tf_listener = tf2_ros.TransformListener(tf_buffer)
+
+        source_frame = self.apriltag_detections.header.frame_id
+        target_frame = "odom"
+
+        pose = tf2_geometry_msgs.PoseStamped()
+        pose.header = self.apriltag_detections.header
+        pose.pose = apriltag_detection.pose.pose.pose
+
+        # This requests a transform time half a second in the future.
+        # This is needed because the transform listener is slow, and doesn't have the correct transform from when the apriltag is found exactly
+        pose.header.stamp = rospy.Time(pose.header.stamp.to_sec() + 0.4, 0)
+
+
+        pose_in_odom = tf_buffer.transform(pose, target_frame, rospy.Duration(2.0))
+
+        return pose_in_odom
+        
 
     
 if __name__ == '__main__':
     find_apriltag = FindAprilTag()
     find_apriltag.find_apriltag()
+
+    
 
