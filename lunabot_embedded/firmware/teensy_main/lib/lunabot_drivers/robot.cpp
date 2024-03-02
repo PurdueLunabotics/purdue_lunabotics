@@ -76,11 +76,11 @@ Sabertooth_MotorCtrl exc_mtr{&MC4, STMotor::M1};
 constexpr uint8_t EXC_CURR_ADC = 1;
 constexpr uint8_t EXC_CURR_MUX = 0; // U5 curr_sense_board
 
-constexpr uint8_t EXC_ENC_MUX = 1;
+constexpr uint8_t EXC_ENC_ID = 2;
 
 void update(int32_t &exc_curr, float &exc_angle) { 
   exc_curr = ACS711_Current_Bus::read(EXC_CURR_ADC, EXC_CURR_MUX); 
-  exc_angle = VLH35_Angle_Bus::read_enc(EXC_ENC_MUX);
+  exc_angle = AMT13_Angle_Bus::read_enc(EXC_ENC_ID);
 }
 
 void cb(int8_t speed) { exc_mtr.write(speed); }
