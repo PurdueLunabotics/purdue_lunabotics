@@ -103,6 +103,7 @@ public:
   static void reset();
   static void kill();
   static void logic(RobotEffort &effort);
+  static void kill_motor(int id, RobotEffort &effort);
 
 private:
   static constexpr int kill_pin = 11;
