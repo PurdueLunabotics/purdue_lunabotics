@@ -1,3 +1,6 @@
+#ifndef __INTERFACES_H__
+#define __INTERFACES_H__
+
 #include <ADS1115_lite.h>
 #include <Arduino.h>
 #include <SPI.h>
@@ -6,9 +9,6 @@
 #include <Encoder.h>
 #include <HX711.h>
 #include "robot.hpp"
-
-#ifndef __INTERFACES_H__
-#define __INTERFACES_H__
 
 #define UWBSerial Serial8
 

@@ -1,9 +1,9 @@
+#ifndef __ROBOT_H__
+#define __ROBOT_H__
+
 #include "interfaces.hpp"
 #include <Arduino.h>
 #include <Stepper.h>
-
-#ifndef __ROBOT_H__
-#define __ROBOT_H__
 
 #define ST_SERIAL Serial1
 #define ST_BAUD_RATE 9600
