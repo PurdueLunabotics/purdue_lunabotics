@@ -289,9 +289,10 @@ volatile int KillSwitchRelay::disable_counter[4] = {0};
 volatile bool KillSwitchRelay::is_disable[4] = {false};
 
 void KillSwitchRelay::logic(RobotEffort &effort) {
+  /*
   if (KillSwitchRelay::dead && millis() - KillSwitchRelay::kill_time >= relay_dead_time) {
     reset();
-  } 
+  } */
   
   float exc_curr = ACS711_Current_Bus::adc_to_current_31A(excavation::update_curr());
   float dep_curr = ACS711_Current_Bus::adc_to_current_31A(deposition::update_curr());
