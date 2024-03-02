@@ -52,7 +52,7 @@ class Deposition:
             if weight < self.load_cell_threshold:
                 break
 
-            if (interrupts.main() != interrupts.Errors.FINE):
+            if (interrupts.check_for_interrupts() != interrupts.Errors.FINE):
                 return False
 
             self.rate.sleep()

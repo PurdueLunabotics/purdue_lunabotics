@@ -50,7 +50,6 @@ class Behavior:
         self.velocity_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
         self.traversal_publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue_size=1, latch=True)
 
-        self.current_state = States()
         self.current_state = States.ASCENT_INIT
 
         self.start_apriltag: AprilTagDetection = AprilTagDetection()
@@ -117,7 +116,7 @@ class Behavior:
         while(not rospy.is_shutdown()):
 
             #This loop is running while things are fine. Break out if interrupts
-            while (interrupts.main() == interrupts.Errors.FINE):
+            while (interrupts.check_for_interrupts() == interrupts.Errors.FINE):
 
                 # Drive to the mining area
                 if (self.current_state == States.TRAVERSAL_MINE):
@@ -130,7 +129,7 @@ class Behavior:
                     self.current_state = States.PLUNGE
                 
                 # Lower linear actuators and begin spinning excavation
-                if (self.current_state == States.PLUNGING):
+                if (self.current_state == States.PLUNGE):
                     rospy.loginfo("State: Plunging")
 
                     traversal_message.data = False
@@ -192,7 +191,7 @@ class Behavior:
                 # Set goal to mining zone
             
             # This block runs when we have an interrupt (some kind of error)
-            problem = interrupts.main()
+            problem = interrupts.check_for_interrupts()
             if problem == interrupts.Errors.ROS_ENDED:
                 #simply exit this loop and the whole program
                 break

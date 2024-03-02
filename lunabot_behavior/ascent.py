@@ -51,7 +51,7 @@ class Ascent:
 				# If the current is within EPSILON of 0, then end
 				break
 
-			if (interrupts.main() != interrupts.Errors.FINE):
+			if (interrupts.check_for_interrupts() != interrupts.Errors.FINE):
 				return False
 
 			self.rate.sleep()

@@ -14,8 +14,8 @@ class Interrupts:
     def errors_callback(self, msg: RobotErrors):
         self.robot_errors = msg
 
-    def __init__(self, robot_errors: RobotErrors = None):
-        self.robot_sensors = RobotErrors()
+    def __init__(self):
+        self.robot_errors = RobotErrors()
 
         rospy.Subscriber("/errors", RobotErrors, self.errors_callback)
 
@@ -28,3 +28,10 @@ class Interrupts:
             return Errors.ROS_ENDED
 
         return Errors.FINE
+    
+interrupt_class = Interrupts()
+
+def check_for_interrupts():
+    # This is done so, in every other module, you can call interrupts.check_for_interrupts()
+    # and not every module needs a copy of the class
+    return interrupt_class.main()

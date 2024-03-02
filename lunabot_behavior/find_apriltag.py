@@ -67,7 +67,7 @@ class FindAprilTag:
             velocity_message.angular.z = 0.261799 # Around 15 degrees
             self.velocity_publisher.publish(velocity_message)
 
-            if interrupts.main() != interrupts.Errors.FINE:
+            if interrupts.check_for_interrupts() != interrupts.Errors.FINE:
                 return "Error"
 
             self.rate.sleep()

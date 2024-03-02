@@ -48,10 +48,10 @@ class Plunge:
 
         start_time = rospy.get_time()
 
-        while (rospy.get_time - start_time < self.LOWERING_TIME):
+        while (rospy.get_time() - start_time < self.LOWERING_TIME):
             self.effort_publisher.publish(effort_message)
 
-            if (interrupts.main() != interrupts.Errors.FINE):
+            if (interrupts.check_for_interrupts() != interrupts.Errors.FINE):
                 return False
 
             self.rate.sleep()
