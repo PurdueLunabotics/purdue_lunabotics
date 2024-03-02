@@ -272,9 +272,12 @@ void KillSwitchRelay::kill() {
 //exc, dep, drive_L, drive_R
 volatile float KillSwitchRelay::cutoff_buffer[4] = {0};
 volatile float KillSwitchRelay::kill_buffer[4] = {0};
+volatile bool KillSwitchRelay::is_dead[4] = {false};
 
 void KillSwitchRelay::logic(RobotSensors state) {
-    //check for high current
+  if (dead && millis() - kill_time >= relay_dead_time) {
+    reset();
+  } 
 
   if (state.exc_curr >= exdep_kill_curr) {
     cutoff_buffer[0] += cutoff_increase;
@@ -291,19 +294,27 @@ void KillSwitchRelay::logic(RobotSensors state) {
 
   for (int i = 0; i < 4; ++i) {
     cutoff_buffer[i] -= cutoff_decay;
-    if (cutoff_buffer[i] >= cutoff_thresh) {
-      //kill motor here...
-      kill_buffer[i] += 1;
+    if (cutoff_buffer < 0) {
+      cutoff_buffer = 0;
+    }
+    if (is_dead[i]) {
+      if (cutoff_buffer >= reset_thresh) {
+        //motor stays dead
+      } else {
+        is_dead[i] = false;
+      }
+    } else {
+      if (cutoff_buffer[i] >= cutoff_thresh) {
+        //kill motor
+        is_dead[i] = true;
+        kill_buffer[i] += 1;
+      }
     }
 
     if (kill_buffer[i] >= kill_thresh) {
       kill_buffer[i] = 0;
+      //TODO, send "all fucked" signal back to teensy
       kill();
     }
   }
-
-  if (dead && millis() - kill_time >= 2000) {
-    reset();
-  }
-
 }

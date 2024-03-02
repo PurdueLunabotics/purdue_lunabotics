@@ -27,11 +27,15 @@ private:
   static constexpr int cutoff_thresh = 1000;
   static constexpr int cutoff_increase = 3;
   static constexpr int cutoff_decay = 1;
+  static constexpr int reset_thresh = 500;
+
+  static constexpr int relay_dead_time = 2000;
+
+  static constexpr int kill_thresh = 3;
 
   volatile static float cutoff_buffer[4];
   volatile static float kill_buffer[4];
-
-  static constexpr int kill_thresh = 3;
+  volatile static bool is_dead[4];
 
   static long kill_time = 0;
 }
