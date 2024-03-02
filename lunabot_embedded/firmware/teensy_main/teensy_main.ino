@@ -61,13 +61,11 @@ void setup() {
   MC1.setTimeout(0);
   MC2.setTimeout(0);
   MC3.setTimeout(0);
-  MC4.setTimeout(0);
 
   // set to fast ramp (1-10 - fast, 11-20 slow, 20-80 intermed)
   MC1.setRamping(1);
   MC2.setRamping(1);
   MC3.setRamping(1);
-  MC4.setRamping(1);
 }
 
 elapsedMillis ms_until_send;
