@@ -11,7 +11,6 @@ import escape
 import find_apriltag
 import interrupts
 
-#TODO: differentiate between different ascent states?
 class States(Enum):
     ASCENT_INIT = auto()
     FIND_TAG = auto()
@@ -22,7 +21,6 @@ class States(Enum):
     TRAVERSAL_BERM = auto()
     ALIGN = auto()
     DEPOSIT = auto()
-    ASCENT_DEP = auto() #TODO remove this maybe
 
 '''
 A class that controls the main behavior of the robot, aiming for a cycle of autonomous mining and berm depositing
@@ -179,17 +177,8 @@ class Behavior:
                 # Deposit regolith w/ auger
                 if (self.current_state == States.DEPOSIT):
                     # Deposit
-                    self.current_state = States.ASCENT_DEP
-
-                # Raise linear actuators (??)
-                if (self.current_state == States.ASCENT_DEP):
-                    rospy.loginfo("State: Ascent")
-
-                    ascent_status = ascent_module.raiseLinearActuators() # TODO why do we do this?
-                    if ascent_status == False: # Robot error
-                        break
-
                     self.current_state = States.TRAVERSAL_MINE
+
                 # Set goal to mining zone
             
             # This block runs when we have an interrupt (some kind of error)
