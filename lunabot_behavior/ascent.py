@@ -5,7 +5,7 @@ from lunabot_msgs.msg import RobotEffort, RobotSensors
 import time
 import interrupts
 
-EPSILON = 0.01 #TODO adjust as needed
+ACTUATOR_CURRENT_THRESHOLD = 0.01 #TODO adjust as needed
 
 '''
 This is a transition state used to raise the linear actuators to the maximum height.
@@ -33,7 +33,7 @@ class Ascent:
 
 		self.rate = rospy.Rate(10)  # 10hz
 
-	def raiseLinearActuators(self):
+	def raise_linear_actuators(self):
 		"""
 		Raise linear actuators to the max. height by turning them on until the current received is 0.
 		"""
@@ -47,7 +47,7 @@ class Ascent:
 			self.effort_publisher.publish(effort_message)
 
 			#TODO check for new sensor message / values
-			if (self.robot_sensors.act_right_curr - 0) < EPSILON:
+			if (self.robot_sensors.act_right_curr - 0) < ACTUATOR_CURRENT_THRESHOLD:
 				# If the current is within EPSILON of 0, then end
 				break
 

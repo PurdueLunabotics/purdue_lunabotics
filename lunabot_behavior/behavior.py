@@ -86,7 +86,7 @@ class Behavior:
         self.current_state = States.ASCENT_INIT
         ascent_module = ascent.Ascent(self.effort_publisher)
 
-        ascent_status = ascent_module.raiseLinearActuators()
+        ascent_status = ascent_module.raise_linear_actuators()
         if ascent_status == False: # Robot error
             pass # TODO implement the error functions here
 
@@ -145,7 +145,7 @@ class Behavior:
                 # Raise linear actuators
                 if (self.current_state == States.ASCENT_MINING):
                     rospy.loginfo("State: Ascent")
-                    ascent_status = ascent_module.raiseLinearActuators()
+                    ascent_status = ascent_module.raise_linear_actuators()
 
                     if ascent_status == False: # Robot error
                         break
