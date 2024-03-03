@@ -1,8 +1,8 @@
 import rospy
 from enum import Enum, auto
 import math
-from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from geometry_msgs.msg import Twist, PoseStamped
 from nav_msgs.msg import Path
 from apriltag_ros.msg import AprilTagDetectionArray, AprilTagDetection
@@ -11,6 +11,7 @@ from std_msgs.msg import Bool
 
 import ascent
 import find_apriltag
+import zones
 import plunge
 import deposition
 import interrupts
@@ -119,13 +120,13 @@ class Behavior:
         apriltag_pose_in_odom: PoseStamped = find_apriltag_module.convert_to_odom_frame(self.start_apriltag)
 
         # Find the mininz/berm zones in the odom frame
-        self.mining_zone: self.Zone = self.find_mining_zone(apriltag_pose_in_odom)
-        self.berm_zone: self.Zone = self.find_berm_zone(apriltag_pose_in_odom)
+        self.mining_zone: zones.Zone = zones.find_mining_zone(apriltag_pose_in_odom)
+        self.berm_zone: zones.Zone = zones.find_berm_zone(apriltag_pose_in_odom)
 
         # Set a goal to the mining zone and publish it
         mining_goal = PoseStamped()
-        mining_goal.pose.position.x = self.mining_zone.bottom_right[0]
-        mining_goal.pose.position.y = self.mining_zone.bottom_right[1]
+        mining_goal.pose.position.x = self.mining_zone.middle[0]
+        mining_goal.pose.position.y = self.mining_zone.middle[1]
         mining_goal.pose.position.z = 0
 
         mining_goal.header.stamp = rospy.Time.now()
@@ -134,7 +135,7 @@ class Behavior:
         self.goal_publisher.publish(mining_goal)
 
         # This visualizes the given zone as a red square (visible in rviz)
-        self.visualize_zone(self.mining_zone)
+        self.mining_zone.visualize_zone(self.zone_visual_publisher)
 
         #This loop always running until we end the program
         while(not rospy.is_shutdown()):
@@ -225,97 +226,7 @@ class Behavior:
             elif problem == interrupts.Errors.STUCK:
                 #if the robot is stuck, unstick it
                 escape_module.unstickRobot()
-
-    class Zone:
-        def __init__(self, top_left: 'tuple[float]', top_right: 'tuple[float]', bottom_left: 'tuple[float]', bottom_right: 'tuple[float]'):
-            # tuples are (x, y) where x is left-right and y is bottom-top
-            self.top_left = top_left
-            self.top_right = top_right
-            self.bottom_left = bottom_left
-            self.bottom_right = bottom_right
-
-            self.middle = ((top_left[0] + top_right[0]) / 2, (top_left[1] + bottom_left[1]) / 2)
-
-    def visualize_zone(self, zone: Zone):
-        # Make a path containing all of the corners of the zone. Make it into a path, and use the self.publisher to publish it.
-        path = Path()
-        path.header.stamp = rospy.Time.now()
-        path.header.frame_id = "odom"
-
-        path.poses.append(PoseStamped())
-        path.poses[-1].pose.position.x = zone.top_left[0]
-        path.poses[-1].pose.position.y = zone.top_left[1]
-
-        path.poses.append(PoseStamped())
-        path.poses[-1].pose.position.x = zone.top_right[0]
-        path.poses[-1].pose.position.y = zone.top_right[1]
-
-        path.poses.append(PoseStamped())
-        path.poses[-1].pose.position.x = zone.bottom_right[0]
-        path.poses[-1].pose.position.y = zone.bottom_right[1]
-
-        path.poses.append(PoseStamped())
-        path.poses[-1].pose.position.x = zone.bottom_left[0]
-        path.poses[-1].pose.position.y = zone.bottom_left[1]
-
-        path.poses.append(PoseStamped())
-        path.poses[-1].pose.position.x = zone.top_left[0]
-        path.poses[-1].pose.position.y = zone.top_left[1]
-
-        self.zone_visual_publisher.publish(path)
-
-    def find_mining_zone(self, apriltag_pose_in_odom: PoseStamped)->Zone:
-
-        #TODO decide how to deal with UCF arena
-
-        DIST_X = 3.88 # In meters, the distance from the leftmost wall to the left border of the mining zone
-        # KSC = 3.88
-        LENGTH_X = 3 # In meters, the length of the mining zone (left to right)
-        # KSC = 3
-
-        DIST_Y = 2 # In meters, the distance from the bottom-most wall to the bottom border of the mining zone
-        # KSC = 2
-        LENGTH_Y = 3 # In meters, the length of the mining zone (bottom to top)
-        # KSC = 3
-
-        roll, pitch, yaw  = euler_from_quaternion([apriltag_pose_in_odom.pose.orientation.x, apriltag_pose_in_odom.pose.orientation.y, apriltag_pose_in_odom.pose.orientation.z, apriltag_pose_in_odom.pose.orientation.w])
-        yaw += math.pi / 2
-        y_yaw = yaw + math.pi / 2
-
-        top_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y + LENGTH_Y))
-        top_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y + LENGTH_Y))
-        bottom_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y))
-        bottom_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y))
-
-        return self.Zone(top_left, top_right, bottom_left, bottom_right)
-    
-    def find_berm_zone(self, apriltag_pose_in_odom: PoseStamped)->Zone:
-
-        # TODO update these, they are not exact
-        DIST_X = 3.88 + 1
-        # KSC = ~4.88  UCF ~7.04
-        LENGTH_X = 2
-        # KSC = ~2   UCF ~1.6
-
-        DIST_Y = 0.1
-        # KSC = ~0.1   UCF ~3.37
-        LENGTH_Y = 1
-        # KSC = ~1    UCF ~1.8
-
-        roll, pitch, yaw  = euler_from_quaternion([apriltag_pose_in_odom.pose.orientation.x, apriltag_pose_in_odom.pose.orientation.y, apriltag_pose_in_odom.pose.orientation.z, apriltag_pose_in_odom.pose.orientation.w])
-        yaw += math.pi / 2
-        y_yaw = yaw + math.pi / 2
-
-        top_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y + LENGTH_Y))
-        top_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y + LENGTH_Y))
-        bottom_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y))
-        bottom_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y))
-
-        return self.Zone(top_left, top_right, bottom_left, bottom_right)
-
-
-        
-            
+         
 
 if __name__ == "__main__":
     behavior = Behavior()
