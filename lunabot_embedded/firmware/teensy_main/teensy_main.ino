@@ -7,7 +7,7 @@
 #include "interfaces.hpp"
 
 #define TX_PERIOD 10               // ms
-#define CRTL_PERIOD 2                // ms
+#define CTRL_PERIOD 2                // ms
 #define UWB_TRANSFER_PERIOD 10'000 // microsec
 #define CURR_UPDATE_PERIOD 8       // ms
 
@@ -18,7 +18,7 @@ size_t effort_msg_size;
 uint8_t buffer[64];
 uint8_t flags = 0;
 
-void recv() {
+void ctrl() {
   actuation::cb(effort.lin_act);
   drivetrain::cb(effort.left_drive, effort.right_drive);
   deposition::cb(effort.deposit);
@@ -61,7 +61,7 @@ void setup() {
 }
 
 elapsedMillis ms_until_send;
-elapsedMillis ms_from_recv;
+elapsedMillis ms_until_ctrl;
 elapsedMillis ms_curr_update;
 
 void loop() {
@@ -75,11 +75,11 @@ void loop() {
     pb_decode(&stream, RobotEffort_fields, &effort);
   }
 
-  if (ms_from_recv > CTRL_PERIOD) {
-    ms_until_recv -= CTRL_PERIOD;
+  if (ms_until_ctrl > CTRL_PERIOD) {
+    ms_until_ctrl -= CTRL_PERIOD;
     // TODO, add timer if robot effort not changing for too long, exit?
     KillSwitchRelay::logic(effort);
-    recv();
+    ctrl();
   }
 
   if (ms_until_send > TX_PERIOD) {
