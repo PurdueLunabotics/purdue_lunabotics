@@ -308,7 +308,7 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
   if (drive_left_curr >= drive_kill_curr) {
     cutoff_buffer[2] += cutoff_increase;
   }
-  if (drive_right_curr >= drive_curr) {
+  if (drive_right_curr >= drive_kill_curr) {
     cutoff_buffer[3] += cutoff_increase;
   }
 
