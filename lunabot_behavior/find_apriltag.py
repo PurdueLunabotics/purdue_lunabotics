@@ -96,7 +96,7 @@ class FindAprilTag:
         pose.header = self.apriltag_detections.header
         pose.pose = apriltag_detection.pose.pose.pose
 
-        # This requests a transform time half a second in the future.
+        # This requests a transform time half a second in the future from when the apriltag was found
         # This is needed because the transform listener is slow, and doesn't have the correct transform from when the apriltag is found exactly
         pose.header.stamp = rospy.Time(pose.header.stamp.to_sec() + 0.4, 0)
 
