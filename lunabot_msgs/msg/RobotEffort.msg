@@ -1,6 +1,5 @@
 Header header
 # Actuation
-int8 lead_screw
 int8 lin_act 
 # Drivetrain
 int8 left_drive

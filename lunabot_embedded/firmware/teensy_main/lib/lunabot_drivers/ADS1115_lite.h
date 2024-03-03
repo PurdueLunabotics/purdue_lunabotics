@@ -47,6 +47,8 @@ Status bit (conversion done)
 #define ADS1115_ADDRESS_ADDR_SDA 0x4A // address pin tied to SDA pin
 #define ADS1115_ADDRESS_ADDR_SCL 0x4B // address pin tied to SCL pin
 #define ADS1115_DEFAULT_ADDRESS ADS1115_ADDRESS_ADDR_GND
+#define ADS1115_ADDRESS_ACT 0x41
+#define ADS1115_ADDRESS_EXDEPDRIVE 0x40
 /*=========================================================================*/
 
 /*=========================================================================

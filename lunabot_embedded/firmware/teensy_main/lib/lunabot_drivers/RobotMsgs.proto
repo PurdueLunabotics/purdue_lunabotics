@@ -10,21 +10,18 @@ message RobotSensors {
 
   float drive_left_ang = 7;
   float drive_right_ang = 8;
-  float dep_ang = 9;
-  float lead_screw_ang = 10;
-  float act_ang = 11;
+  float exc_ang = 9;
 
-  float dep_weight = 12;
-  float uwb_dist_0 = 13;
-  float uwb_dist_1 = 14;
-  float uwb_dist_2 = 15;
+  float dep_weight = 10;
+  float uwb_dist_0 = 11;
+  float uwb_dist_1 = 12;
+  float uwb_dist_2 = 13;
 }
 
 message RobotEffort {
-  sint32 lead_screw = 1;
-  sint32 lin_act = 2;
-  sint32 left_drive = 3;
-  sint32 right_drive = 4;
-  sint32 excavate = 5;
-  sint32 deposit = 6;
+  sint32 lin_act = 1;
+  sint32 left_drive = 2;
+  sint32 right_drive = 3;
+  sint32 excavate = 4;
+  sint32 deposit = 5;
 }
