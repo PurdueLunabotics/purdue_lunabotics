@@ -81,13 +81,6 @@ def find_mining_zone(apriltag_pose_in_odom: PoseStamped)->Zone:
     LENGTH_Y = 3 # In meters, the length of the mining zone (bottom to top)
     # KSC = 3
 
-    roll, pitch, yaw  = euler_from_quaternion([apriltag_pose_in_odom.pose.orientation.x, apriltag_pose_in_odom.pose.orientation.y, apriltag_pose_in_odom.pose.orientation.z, apriltag_pose_in_odom.pose.orientation.w])
-
-    # We add pi/2 to the initial angle because the apriltag orientation in the odom frame is 90 degrees off (it points to the right instead of outwards)
-    yaw += math.pi / 2
-    # Add this to move in the correct frame vertically
-    y_yaw = yaw + math.pi / 2
-
     top_left = calc_point_from_apriltag(DIST_X, DIST_Y + LENGTH_Y, apriltag_pose_in_odom)
     top_right = calc_point_from_apriltag(DIST_X + LENGTH_X, DIST_Y + LENGTH_Y, apriltag_pose_in_odom)
     bottom_left = calc_point_from_apriltag(DIST_X, DIST_Y, apriltag_pose_in_odom)
@@ -107,13 +100,6 @@ def find_berm_zone(apriltag_pose_in_odom: PoseStamped)->Zone:
     # KSC = ~0.1   UCF ~3.37
     LENGTH_Y = 1
     # KSC = ~1    UCF ~1.8
-
-    roll, pitch, yaw  = euler_from_quaternion([apriltag_pose_in_odom.pose.orientation.x, apriltag_pose_in_odom.pose.orientation.y, apriltag_pose_in_odom.pose.orientation.z, apriltag_pose_in_odom.pose.orientation.w])
-
-    # We add pi/2 to the initial angle because the apriltag orientation in the odom frame is 90 degrees off (it points to the right instead of outwards)
-    yaw += math.pi / 2
-    # Add this to move in the correct frame vertically
-    y_yaw = yaw + math.pi / 2
 
     top_left = calc_point_from_apriltag(DIST_X, DIST_Y + LENGTH_Y, apriltag_pose_in_odom)
     top_right = calc_point_from_apriltag(DIST_X + LENGTH_X, DIST_Y + LENGTH_Y, apriltag_pose_in_odom)
