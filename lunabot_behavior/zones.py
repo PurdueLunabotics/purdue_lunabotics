@@ -1,7 +1,7 @@
 import rospy
-from geometry_msgs.msg import Twist, PoseStamped
+from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import Path
-from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from tf.transformations import euler_from_quaternion
 import math
 
 class Zone:
@@ -52,6 +52,21 @@ class Zone:
 
         publisher.publish(path)
 
+def calc_point_from_apriltag(x: float, y: float, apriltag_pose_in_odom: PoseStamped)-> 'tuple[float,float]':
+    """
+    Calculates the (x, y) point from the apriltag's location (given in the odom frame)
+    Note that this can also be used to add an offset to any point already calculated in the apriltag-odom frame
+    """
+
+    roll, pitch, yaw  = euler_from_quaternion([apriltag_pose_in_odom.pose.orientation.x, apriltag_pose_in_odom.pose.orientation.y, apriltag_pose_in_odom.pose.orientation.z, apriltag_pose_in_odom.pose.orientation.w])
+
+    # We add pi/2 to the initial angle because the apriltag orientation in the odom frame is 90 degrees off (it points to the right instead of outwards)
+    yaw += math.pi / 2
+    # Add this to move in the correct frame vertically
+    y_yaw = yaw + math.pi / 2
+
+    return (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * x, apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * y)
+
 def find_mining_zone(apriltag_pose_in_odom: PoseStamped)->Zone:
 
     #TODO decide how to deal with UCF arena
@@ -73,10 +88,10 @@ def find_mining_zone(apriltag_pose_in_odom: PoseStamped)->Zone:
     # Add this to move in the correct frame vertically
     y_yaw = yaw + math.pi / 2
 
-    top_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y + LENGTH_Y))
-    top_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y + LENGTH_Y))
-    bottom_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y))
-    bottom_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y))
+    top_left = calc_point_from_apriltag(DIST_X, DIST_Y + LENGTH_Y, apriltag_pose_in_odom)
+    top_right = calc_point_from_apriltag(DIST_X + LENGTH_X, DIST_Y + LENGTH_Y, apriltag_pose_in_odom)
+    bottom_left = calc_point_from_apriltag(DIST_X, DIST_Y, apriltag_pose_in_odom)
+    bottom_right = calc_point_from_apriltag(DIST_X + LENGTH_X, DIST_Y, apriltag_pose_in_odom)
 
     return Zone(top_left, top_right, bottom_left, bottom_right)
 
@@ -100,9 +115,9 @@ def find_berm_zone(apriltag_pose_in_odom: PoseStamped)->Zone:
     # Add this to move in the correct frame vertically
     y_yaw = yaw + math.pi / 2
 
-    top_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y + LENGTH_Y))
-    top_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y + LENGTH_Y))
-    bottom_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y))
-    bottom_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y))
+    top_left = calc_point_from_apriltag(DIST_X, DIST_Y + LENGTH_Y, apriltag_pose_in_odom)
+    top_right = calc_point_from_apriltag(DIST_X + LENGTH_X, DIST_Y + LENGTH_Y, apriltag_pose_in_odom)
+    bottom_left = calc_point_from_apriltag(DIST_X, DIST_Y, apriltag_pose_in_odom)
+    bottom_right = calc_point_from_apriltag(DIST_X + LENGTH_X, DIST_Y, apriltag_pose_in_odom)
 
     return Zone(top_left, top_right, bottom_left, bottom_right)
