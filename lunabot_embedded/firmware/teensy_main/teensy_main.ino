@@ -7,7 +7,7 @@
 #include "interfaces.hpp"
 
 #define TX_PERIOD 10               // ms
-#define RX_PERIOD 2                // ms
+#define CRTL_PERIOD 2                // ms
 #define UWB_TRANSFER_PERIOD 10'000 // microsec
 #define CURR_UPDATE_PERIOD 8       // ms
 
@@ -75,8 +75,8 @@ void loop() {
     pb_decode(&stream, RobotEffort_fields, &effort);
   }
 
-  if (ms_from_recv > RX_PERIOD) {
-    ms_until_recv -= RX_PERIOD;
+  if (ms_from_recv > CTRL_PERIOD) {
+    ms_until_recv -= CTRL_PERIOD;
     // TODO, add timer if robot effort not changing for too long, exit?
     KillSwitchRelay::logic(effort);
     recv();
