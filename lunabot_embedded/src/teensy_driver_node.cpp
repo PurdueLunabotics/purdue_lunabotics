@@ -24,7 +24,7 @@ using namespace std;
 #define MAX_ANGLE_DELTA_DEG 15
 
 // Left encoder reports half the speed due to hardware error
-#define LEFT_ENCODER_MULTIPLIER 2
+#define LEFT_ENCODER_MULTIPLIER 1
 
 #define LEAKY_INTEGRATOR_ALPHA 0.6
 
