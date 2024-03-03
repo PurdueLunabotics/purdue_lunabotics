@@ -15,7 +15,6 @@ extern ADS1115_lite adc1;
 extern Sabertooth MC1; // top
 extern Sabertooth MC2; // middle
 extern Sabertooth MC3; // bottom
-extern Sabertooth MC4; // high-current
 
 namespace actuation {
 void cb(int8_t lin_act);
