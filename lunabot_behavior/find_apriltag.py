@@ -100,8 +100,15 @@ class FindAprilTag:
         # This is needed because the transform listener is slow, and doesn't have the correct transform from when the apriltag is found exactly
         pose.header.stamp = rospy.Time(pose.header.stamp.to_sec() + 0.4, 0)
 
-
-        pose_in_odom = tf_buffer.transform(pose, target_frame, rospy.Duration(2.0))
+        try:
+            pose_in_odom = tf_buffer.transform(pose, target_frame, rospy.Duration(2.0))
+        except:
+            # If this doesn't work (occasionally it doesn't,) look even farther in the future (although this may be less accurate)
+            try:
+                pose.header.stamp = rospy.Time(pose.header.stamp.to_sec() + 0.8, 0)
+                pose_in_odom = tf_buffer.transform(pose, target_frame, rospy.Duration(4.0))
+            except:
+                raise Exception("Failed to transform apriltag pose to odom frame")
 
         return pose_in_odom
         
