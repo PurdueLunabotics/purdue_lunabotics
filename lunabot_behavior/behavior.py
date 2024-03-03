@@ -115,22 +115,26 @@ class Behavior:
 
         self.current_state = States.TRAVERSAL_MINE
 
+        # Translate the apriltag into the odom frame
         apriltag_pose_in_odom: PoseStamped = find_apriltag_module.convert_to_odom_frame(self.start_apriltag)
 
+        # Find the mininz/berm zones in the odom frame
         self.mining_zone: self.Zone = self.find_mining_zone(apriltag_pose_in_odom)
         self.berm_zone: self.Zone = self.find_berm_zone(apriltag_pose_in_odom)
 
-        # mining_goal = PoseStamped()
-        # mining_goal.pose.position.x = self.mining_zone.bottom_right[0]
-        # mining_goal.pose.position.y = self.mining_zone.bottom_right[1]
-        # mining_goal.pose.position.z = 0
+        # Set a goal to the mining zone and publish it
+        mining_goal = PoseStamped()
+        mining_goal.pose.position.x = self.mining_zone.bottom_right[0]
+        mining_goal.pose.position.y = self.mining_zone.bottom_right[1]
+        mining_goal.pose.position.z = 0
 
-        # mining_goal.header.stamp = rospy.Time.now()
-        # mining_goal.header.frame_id = "odom"
+        mining_goal.header.stamp = rospy.Time.now()
+        mining_goal.header.frame_id = "odom"
 
-        # self.goal_publisher.publish(mining_goal)
+        self.goal_publisher.publish(mining_goal)
 
-        self.visualize_zone(self.berm_zone)
+        # This visualizes the given zone as a red square (visible in rviz)
+        self.visualize_zone(self.mining_zone)
 
         #This loop always running until we end the program
         while(not rospy.is_shutdown()):
@@ -276,11 +280,12 @@ class Behavior:
 
         roll, pitch, yaw  = euler_from_quaternion([apriltag_pose_in_odom.pose.orientation.x, apriltag_pose_in_odom.pose.orientation.y, apriltag_pose_in_odom.pose.orientation.z, apriltag_pose_in_odom.pose.orientation.w])
         yaw += math.pi / 2
+        y_yaw = yaw + math.pi / 2
 
-        top_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(yaw) * (DIST_Y + LENGTH_Y))
-        top_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(yaw) * (DIST_Y + LENGTH_Y))
-        bottom_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(yaw) * (DIST_Y))
-        bottom_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(yaw) * (DIST_Y))
+        top_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y + LENGTH_Y))
+        top_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y + LENGTH_Y))
+        bottom_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y))
+        bottom_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y))
 
         return self.Zone(top_left, top_right, bottom_left, bottom_right)
     
@@ -299,11 +304,12 @@ class Behavior:
 
         roll, pitch, yaw  = euler_from_quaternion([apriltag_pose_in_odom.pose.orientation.x, apriltag_pose_in_odom.pose.orientation.y, apriltag_pose_in_odom.pose.orientation.z, apriltag_pose_in_odom.pose.orientation.w])
         yaw += math.pi / 2
+        y_yaw = yaw + math.pi / 2
 
-        top_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(yaw) * (DIST_Y + LENGTH_Y))
-        top_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(yaw) * (DIST_Y + LENGTH_Y))
-        bottom_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(yaw) * (DIST_Y))
-        bottom_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(yaw) * (DIST_Y))
+        top_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y + LENGTH_Y))
+        top_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y + LENGTH_Y))
+        bottom_left = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y))
+        bottom_right = (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * (DIST_X + LENGTH_X), apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * (DIST_Y))
 
         return self.Zone(top_left, top_right, bottom_left, bottom_right)
 
