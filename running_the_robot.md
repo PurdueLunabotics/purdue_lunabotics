@@ -36,19 +36,18 @@ roslaunch lunabot_bringup robot.launch
 - `cameras:=true`: enables cameras
 - `slam:=true`: enables slam
 
-## Joystick commands
+## Manual control scheme
 
-### General commands 
-- cross key left/right: deposition (up/down)
-- cross key up/down: lead screw (up/down
-- B button: stop everything and latch excavation to zero
-- X button: switch mode
-- Y button: latch/unlatch excavation (only done in excavation mode
+### Excavation/Deposition
+- Right trigger- spin excavation forwards (pick up dirt)
+- Left trigger- spin excavation backwards
+- D-pad up/down- move linear actuators (excavation system) up/down
+- Y button: latch/unlatch excavation speed. Excavation will remain at the speed it was latched at until the latch is released
+- B button- spin auger for deposition
 
-### Drive mode
-- left and right joysticks (up/down): tank drive controls for drivetrain (left stick controls left wheel, right stick controls right wheel)
+### Driving
+- Left and Right joysticks (up/down): tank drive controls for drivetrain (left stick controls left wheel, right stick controls right wheel)
+- X button: switch between driving forwards and driving backwards (forwards is in the direction of excavation)
 
-### Excavation mode
-- left joystick (up/down): Excavation (forward/backward)
-  - latch (Y button): will latch current value of excavation and ignore joystick values, press Y again to unlatch
-- right joystick (up/down): Actuation (up/down)
+### Other
+- Start button- stop all motors on the robot
