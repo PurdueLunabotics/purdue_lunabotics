@@ -25,7 +25,7 @@ void update(int32_t &act_right_curr) {
 }
 
 void cb(int8_t lin_act_volt) {
-  act_left_mtr.write(lin_act_volt);
+  //act_left_mtr.write(lin_act_volt);
   act_right_mtr.write(lin_act_volt);
 }
 
@@ -73,7 +73,7 @@ void update(float &d0, float &d1, float &d2) {
 } // namespace uwb
 
 namespace excavation {
-Sabertooth_MotorCtrl exc_mtr{&MC2, STMotor::M1};
+Sabertooth_MotorCtrl exc_mtr{&MC2, STMotor::M2};
 
 constexpr uint8_t EXC_CURR_ADC = 0;
 constexpr uint8_t EXC_CURR_MUX = 2; // U1 curr_sense_board
