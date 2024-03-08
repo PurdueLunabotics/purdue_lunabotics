@@ -21,7 +21,7 @@ uint8_t flags = 0;
 void ctrl() {
   actuation::cb(effort.lin_act);
   drivetrain::cb(effort.left_drive, effort.right_drive);
-  deposition::cb(-effort.deposit);
+  deposition::cb(effort.deposit);
   excavation::cb(effort.excavate);
 }
 
