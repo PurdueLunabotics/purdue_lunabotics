@@ -1,1 +1,1 @@
-../firmware/teensy_main/lib/lunabot_drivers/pb.h
+../firmware/teensy_main/lib/lunabot_includes/pb.h

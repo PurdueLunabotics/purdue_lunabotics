@@ -3,7 +3,6 @@
 
 #include "interfaces.hpp"
 #include <Arduino.h>
-#include <Stepper.h>
 
 #define ST_SERIAL Serial1
 #define ST_BAUD_RATE 9600
