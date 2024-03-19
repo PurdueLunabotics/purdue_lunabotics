@@ -9,157 +9,148 @@ from tf.transformations import quaternion_from_euler
 
 from lunabot_nav.dstar import Dstar
 
-pose = []
-grid = []
-goal = []
-update_grid = False
-need_update_goal = False
-res = 0
-x_offset = 0
-y_offset = 0
+class DstarNode:
+
+    def __init__(self):
+        self.grid: np.ndarray[int] = np.array([]) # 2d array occupancy map: Occupancy probabilities from [0 to 100].  Unknown is -1.
+        self.pose: list[float] = [] # [x, y], in meters/odom frame
+        self.goal: list[float] = [] 
+
+        self.grid_update_needed: bool = False
+        self.goal_update_needed: bool = False
+
+        self.resolution: float = 0  # meters per grid cell
+
+        self.x_offset: float = 0 # real world pose of the point 0,0 in the grid
+        self.y_offset: float = 0
+
+        self.dstar: Dstar = None
+
+        self.path_sampling_rate = 5 # Take every <n-th> point from the path
 
 
-def grid_subscriber(data):
-    global update_grid, grid, res, x_offset, y_offset
-    width = data.info.width
-    height = data.info.height
-    grid = np.reshape(data.data, (height, width))
-    res = data.info.resolution
-    x_offset = data.info.origin.position.x
-    y_offset = data.info.origin.position.y
-    update_grid = True
+    def grid_callback(self, data: OccupancyGrid):
+        """
+        Update the grid given a new occupancy grid. Update the flag such that dstar will update the map.
+        """
+
+        width = data.info.width
+        height = data.info.height
+        self.grid = np.reshape(data.data, (height, width))
+
+        self.resolution = data.info.resolution
+        self.x_offset = data.info.origin.position.x
+        self.y_offset = data.info.origin.position.y
+        self.grid_update_needed = True
 
 
-def grid_update_subscriber(data):
-    global update_grid, grid, res, x_offset, y_offset
+    def grid_update_callback(self, data: OccupancyGridUpdate):
+        """
+        Update the grid given the occupancy grid update (applied on top of the current grid). Also update the flag for dstar to update the map.
+        """
 
-    # grid = np.array(data.data).reshape(
-    #    (data.height, data.width), order="F"
-    # )
-    temp_map = grid.copy()
-    index = 0
-    for i in range(data.y, data.y + data.height):
-        for j in range(data.x, data.x + data.width):
-            temp_map[i][j] = data.data[index]
-            index += 1
+        temp_map = self.grid.copy()
 
-    grid = temp_map.copy()
-    update_grid = True
+        index = 0
+        for i in range(data.y, data.y + data.height):
+            for j in range(data.x, data.x + data.width):
+                temp_map[i][j] = data.data[index]
+                index += 1
 
-
-def position_subscriber(data):
-    global pose
-    position = data.pose.pose.position
-
-    coords = [position.x, position.y]
-    pose = coords
+        self.grid = temp_map.copy()
+        self.grid_update_needed = True
 
 
-def goal_subscriber(data):
-    global goal, need_update_goal
-    print("New Goal")
-    goal = [data.pose.position.x, data.pose.position.y]
-    need_update_goal = True
+    def position_callback(self, data: Odometry):
+        position = data.pose.pose.position
+
+        coords = [position.x, position.y]
+        self.pose = coords
 
 
-def main():
-    global grid, update_grid, pose, goal, res, need_update_goal
+    def goal_callback(self, data: PoseStamped):
+        self.goal = [data.pose.position.x, data.pose.position.y]
+        self.goal_update_needed = True
 
-    rospy.init_node("dstar_ros_script")
 
-    odom_topic = rospy.get_param("/odom_topic")
-    goal_topic = rospy.get_param("/nav_goal_topic")
+    def dstar_loop(self):
+        """
+        Main loop for dstar. Update / manage dstar and its data, and publish the path whenever a new one becomes available.
+        """
 
-    radius = 8  # robot rad (grid units)
+        rospy.init_node("dstar_ros_script")
 
-    frequency = 10  # hz
+        odom_topic = rospy.get_param("/odom_topic")
+        goal_topic = rospy.get_param("/nav_goal_topic")
 
-    dstar = None
+        radius = 8  # robot rad (grid units)
 
-    path_publisher = rospy.Publisher("/nav/global_path", Path, queue_size=10)
+        frequency = 10  # hz
 
-    rospy.Subscriber(
-        "/maps/costmap_node/global_costmap/costmap", OccupancyGrid, grid_subscriber
-    )
+        path_publisher = rospy.Publisher("/nav/global_path", Path, queue_size=10, latch=True)
 
-    rospy.Subscriber(
-        "/maps/costmap_node/global_costmap/costmap_updates",
-        OccupancyGridUpdate,
-        grid_update_subscriber,
-    )
+        rospy.Subscriber("/maps/costmap_node/global_costmap/costmap", OccupancyGrid, self.grid_callback)
+        rospy.Subscriber("/maps/costmap_node/global_costmap/costmap_updates", OccupancyGridUpdate, self.grid_update_callback)
+        rospy.Subscriber(odom_topic, Odometry, self.position_callback)
+        rospy.Subscriber(goal_topic, PoseStamped, self.goal_callback)
 
-    rospy.Subscriber(odom_topic, Odometry, position_subscriber)
+        rate = rospy.Rate(frequency)
 
-    rospy.Subscriber(goal_topic, PoseStamped, goal_subscriber)
+        completed_initial_run = False # Keep track of whether a new Dstar object (algorithm) has processed the initial map or not.
 
-    rate = rospy.Rate(frequency)
+        while not rospy.is_shutdown():
+            if (self.dstar is None) and len(self.grid) > 0 and len(self.pose) > 0 and len(self.goal) > 0:
+                self.dstar = Dstar(self.goal, self.pose, self.grid, radius, self.resolution, self.x_offset, self.y_offset)
 
-    completedInitialRun = False
+            if self.dstar is not None:
 
-    path = []
-    while not rospy.is_shutdown():
-        # print("Loop")
-        if (dstar is None) and len(grid) > 0 and len(pose) > 0 and len(goal) > 0:
-            dstar = Dstar(goal, pose, grid, radius, res, x_offset, y_offset)
-            print("Initialize")
+                self.dstar.update_position(self.pose)
 
-        if dstar is not None:
-            # print("Iterate")
+                if self.goal_update_needed:
+                    self.dstar = Dstar(self.goal, self.pose, self.grid, radius, self.resolution, self.x_offset, self.y_offset)
+                    completed_initial_run = False
+                    self.goal_update_needed = False
 
-            dstar.update_position(pose)
+                if self.grid_update_needed:
+                    self.dstar.update_map(self.grid, self.x_offset, self.y_offset)
+                    self.grid_update_needed = False
 
-            if need_update_goal:
-                print("created new Dstar")
-                dstar = Dstar(goal, pose, grid, radius, res, x_offset, y_offset)
-                completedInitialRun = False
-                # dstar.update_goal(goal)
-                need_update_goal = False
+                if not completed_initial_run:
+                    self.dstar.find_path(True)
+                    completed_initial_run = True
 
-            if update_grid:
-                dstar.update_map(grid, x_offset, y_offset)
-                update_grid = False
+                if self.dstar.needs_new_path:
 
-            if not completedInitialRun:
-                dstar.find_path(True)
-                completedInitialRun = True
+                    path_data = np.array(self.dstar.createPathList())
 
-            if dstar.needs_new_path:
-                print("Start create path")
-                path = np.array(dstar.createPathList())
-                print("End create path")
+                    path: Path = Path()
+                    path.poses = []
+                    path.header.stamp = rospy.Time.now()
+                    path.header.frame_id = "odom"
 
-                # if (len(path) == 0):
-                #     print("publish empty path")
-                # else:
-                #     print("published path")
+                    for index, point in enumerate(path_data):
+                        if index % self.path_sampling_rate == 0 or index == len(path_data) - 1:
+                            # Sample every <path sampling rate> points (+ the last one)
 
-                ros_struct = Path()
-                ros_struct.poses = []
-                ros_struct.header.stamp = rospy.Time.now()
-                ros_struct.header.frame_id = "odom"
+                            path_pose = PoseStamped()
 
-                for index, point in enumerate(path):
-                    if index % 5 == 0 or np.all(path[index] == path[-1]):
+                            path_pose.pose.position.x = point[0]
+                            path_pose.pose.position.y = point[1]
 
-                        path_pose = PoseStamped()
+                            rotation = quaternion_from_euler(0, 0, 0)
+                            path_pose.pose.orientation.x = rotation[0]
+                            path_pose.pose.orientation.y = rotation[1]
+                            path_pose.pose.orientation.z = rotation[2]
+                            path_pose.pose.orientation.w = rotation[3]
 
-                        path_pose.pose.position.x = point[0]
-                        path_pose.pose.position.y = point[1]
+                            path.poses.append(path_pose)
 
-                        rotation = quaternion_from_euler(0, 0, 0)
-                        path_pose.pose.orientation.x = rotation[0]
-                        path_pose.pose.orientation.y = rotation[1]
-                        path_pose.pose.orientation.z = rotation[2]
-                        path_pose.pose.orientation.w = rotation[3]
 
-                        ros_struct.poses.append(path_pose)
+                    path_publisher.publish(path)
 
-                # plt.imshow(temp, cmap='hot', interpolation='nearest')
-                # plt.show()
-                path_publisher.publish(ros_struct)
-
-        rate.sleep()
+            rate.sleep()
 
 
 if __name__ == "__main__":
-    main()
+    dstar_node = DstarNode()
+    dstar_node.dstar_loop()
