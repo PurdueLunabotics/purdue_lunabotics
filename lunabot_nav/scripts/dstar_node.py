@@ -99,6 +99,8 @@ class DstarNode:
         completed_initial_run = False # Keep track of whether a new Dstar object (algorithm) has processed the initial map or not.
 
         while not rospy.is_shutdown():
+
+            # Startup condition: once all data is available, create a new Dstar object
             if (self.dstar is None) and len(self.grid) > 0 and len(self.pose) > 0 and len(self.goal) > 0:
                 self.dstar = Dstar(self.goal, self.pose, self.grid, radius, self.resolution, self.x_offset, self.y_offset)
 
@@ -107,19 +109,26 @@ class DstarNode:
                 self.dstar.update_position(self.pose)
 
                 if self.goal_update_needed:
+                    # If we've gotten a new goal, it is more efficient to reset the dstar data (as it is all based on goal location)
+
                     self.dstar = Dstar(self.goal, self.pose, self.grid, radius, self.resolution, self.x_offset, self.y_offset)
                     completed_initial_run = False
                     self.goal_update_needed = False
 
                 if self.grid_update_needed:
+                    # If the map has changed, let dstar make the necessary updates
+                    
                     self.dstar.update_map(self.grid, self.x_offset, self.y_offset)
                     self.grid_update_needed = False
 
                 if not completed_initial_run:
+                    # Before calculating any new path, ensure the map is processed by the algorithm
+
                     self.dstar.find_path(True)
                     completed_initial_run = True
 
                 if self.dstar.needs_new_path:
+                    # If we have a new path (new data), get the path and publish it
 
                     path_data = np.array(self.dstar.createPathList())
 
