@@ -60,6 +60,65 @@ class DstarNode:
         self.grid = temp_map.copy()
         self.grid_update_needed = True
 
+    def convert_to_grid(self, position: 'list[float]') -> 'list[int]':
+        """
+        Convert a real world (x y) position to grid coordinates. Grid offset should be in the same frame as position, the grid is row-major.
+        """
+
+        shifted_pos = [position[0] - self.x_offset, position[1] - self.y_offset]
+        coord = [
+            int(shifted_pos[1] / self.resolution + 0.5),
+            int(shifted_pos[0] / self.resolution + 0.5),
+        ]
+        return coord
+
+    
+    def adjust_for_goal(self):
+        """
+        Adjust the map (expand if needed) to adjust for a goal that is beyond the range of the map
+        """
+
+        if len(self.goal) == 0:
+            return
+        
+        goal_grid_coords = self.convert_to_grid(self.goal)
+
+        if (goal_grid_coords[0] < 0):
+            # expand map upwards
+            difference = abs(goal_grid_coords[0])
+
+            rows = np.ones((difference, len(self.grid[0]))) * -1
+            self.grid = np.concatenate((rows, self.grid), axis=0)
+
+            # change offset
+            self.y_offset -= difference * self.resolution
+
+        elif (goal_grid_coords[0] >= len(self.grid)):
+            # expand map downwards
+            difference = goal_grid_coords[0] - (len(self.grid) - 1)
+
+            rows = np.ones((difference, len(self.grid[0]))) * -1
+            self.grid = np.concatenate((self.grid, rows), axis=0)
+
+        if (goal_grid_coords[1] < 0):
+            # expand map to the left
+            
+            difference = abs(goal_grid_coords[1])
+
+            columns = np.ones((len(self.grid), difference)) * -1
+            self.grid = np.concatenate((columns, self.grid), axis=1)
+
+            # change offset
+            self.x_offset -= difference * self.resolution
+
+
+        elif (goal_grid_coords[1] >= len(self.grid[0])):
+            # expand map to the right
+            difference = goal_grid_coords[1] - (len(self.grid[0]) - 1)
+            
+            columns = np.ones((len(self.grid), difference)) * -1
+            self.grid = np.concatenate((self.grid, columns), axis=1)
+            
 
     def position_callback(self, data: Odometry):
         position = data.pose.pose.position
@@ -70,6 +129,9 @@ class DstarNode:
 
     def goal_callback(self, data: PoseStamped):
         self.goal = [data.pose.position.x, data.pose.position.y]
+
+        self.adjust_for_goal() # Expand the map if the goal is outside the map
+
         self.goal_update_needed = True
 
 
@@ -117,6 +179,9 @@ class DstarNode:
 
                 if self.grid_update_needed:
                     # If the map has changed, let dstar make the necessary updates
+
+                    # Expand the map if the goal is outside the map
+                    self.adjust_for_goal()
                     
                     self.dstar.update_map(self.grid, self.x_offset, self.y_offset)
                     self.grid_update_needed = False
@@ -142,6 +207,8 @@ class DstarNode:
                             # Sample every <path sampling rate> points (+ the last one)
 
                             path_pose = PoseStamped()
+                            path_pose.header.stamp = rospy.Time.now()
+                            path_pose.header.frame_id = "odom"
 
                             path_pose.pose.position.x = point[0]
                             path_pose.pose.position.y = point[1]
