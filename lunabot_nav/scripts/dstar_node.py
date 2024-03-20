@@ -130,7 +130,7 @@ class DstarNode:
                 if self.dstar.needs_new_path:
                     # If we have a new path (new data), get the path and publish it
 
-                    path_data = np.array(self.dstar.createPathList())
+                    path_data = np.array(self.dstar.create_path_list())
 
                     path: Path = Path()
                     path.poses = []
