@@ -124,7 +124,7 @@ class DstarNode:
                 if not completed_initial_run:
                     # Before calculating any new path, ensure the map is processed by the algorithm
 
-                    self.dstar.find_path(True)
+                    self.dstar.find_path()
                     completed_initial_run = True
 
                 if self.dstar.needs_new_path:

@@ -46,7 +46,7 @@ class Dstar:
         self.needs_new_path: bool = True  # updates when map changes to know when to create new path
 
         # Insert the goal node into the priority queue
-        self.insert(self.goal, self.calculate_key(self.goal, False))
+        self.insert(self.goal, self.calculate_key(self.goal))
 
     def update_position(self, coords):
         """
@@ -104,7 +104,7 @@ class Dstar:
         for node_tuple in newlist:
             self.node_queue.put(node_tuple)
 
-    def hueristic(self, node: list, init: bool) -> float:
+    def hueristic(self, node: list) -> float:
         """
         Calculates the hueristic used for the priority of a node based on its distance to the goal
         """
@@ -145,7 +145,7 @@ class Dstar:
         rospy.loginfo("Dstar: Error in search for non-occupied node")
         return [current_node]
 
-    def calculate_key(self, node: list, init: bool):
+    def calculate_key(self, node: list):
         """
         Calculates the priority of a node based on its g and rhs values
         """
@@ -153,7 +153,7 @@ class Dstar:
         rhs_value = self.node_values_list[node[0]][node[1]][1]
         min_val = min(g_value, rhs_value)
 
-        heuristic = self.hueristic(node, init)
+        heuristic = self.hueristic(node)
 
         key1 = min_val + heuristic + self.km
         key2 = min_val
@@ -221,7 +221,7 @@ class Dstar:
                 
         return min(surrounding_values)
 
-    def update_node(self, node: list, init: bool):
+    def update_node(self, node: list):
         """
         Updates a node's values by calculating its RHS (estimate value). It removes the node from the queue (based on old value) and
         replaces it on the queue if its values are locally inconsistent (if g != RHS)
@@ -247,9 +247,9 @@ class Dstar:
 
         # Place it on the queue if not consistent
         if g_val != rhs_val:
-            self.insert(node, self.calculate_key(node, init))
+            self.insert(node, self.calculate_key(node))
 
-    def find_path(self, init: bool):
+    def find_path(self):
         """
         Find_Path calculates the path for DStar by looping until the current node is locally consistent (g value = rhs) and the priority of the current node is the lowest in the queue.
         It picks the lowest priority node, checks whether its priority is correct, then updates its g value (distance). If the g value is higher then the estimate, it lowers the g value to the estimate.
@@ -266,7 +266,7 @@ class Dstar:
             self.current_node = self.bfs_non_occupied(self.current_node)
 
         while (
-            self.get_top_key() < self.calculate_key(self.current_node, init)
+            self.get_top_key() < self.calculate_key(self.current_node)
             or node_values_list[self.current_node[0]][self.current_node[1]][0]
             != node_values_list[self.current_node[0]][self.current_node[1]][1]
         ):
@@ -275,8 +275,8 @@ class Dstar:
             chosen_node = self.node_queue.get()[1]  # Chosen node to check
 
             # If the priority of the node was incorrect, add back to the queue with the correct priority.
-            if old_key < self.calculate_key(chosen_node, init):
-                self.insert(chosen_node, self.calculate_key(chosen_node, init))
+            if old_key < self.calculate_key(chosen_node):
+                self.insert(chosen_node, self.calculate_key(chosen_node))
 
             # If g value is greater then rhs
             elif (
@@ -287,13 +287,13 @@ class Dstar:
 
                 # update all surrounding nodes
                 if chosen_node[0] > 0:  # above
-                    self.update_node([chosen_node[0] - 1, chosen_node[1]], init)
+                    self.update_node([chosen_node[0] - 1, chosen_node[1]])
                 if chosen_node[0] < len(node_values_list) - 1:  # below
-                    self.update_node([chosen_node[0] + 1, chosen_node[1]], init)
+                    self.update_node([chosen_node[0] + 1, chosen_node[1]])
                 if chosen_node[1] > 0:  # left
-                    self.update_node([chosen_node[0], chosen_node[1] - 1], init)
+                    self.update_node([chosen_node[0], chosen_node[1] - 1])
                 if chosen_node[1] < len(node_values_list[0]) - 1:  # right
-                    self.update_node([chosen_node[0], chosen_node[1] + 1], init)
+                    self.update_node([chosen_node[0], chosen_node[1] + 1])
 
             # G is lower then rhs
             else:
@@ -301,17 +301,17 @@ class Dstar:
                 node_values_list[chosen_node[0]][chosen_node[1]][0] = maxsize
 
                 # Update this node
-                self.update_node(chosen_node, init)
+                self.update_node(chosen_node)
 
                 # update all the surrounding nodes
                 if chosen_node[0] > 0:  # above
-                    self.update_node([chosen_node[0] - 1, chosen_node[1]], init)
+                    self.update_node([chosen_node[0] - 1, chosen_node[1]])
                 if chosen_node[0] < len(node_values_list) - 1:  # below
-                    self.update_node([chosen_node[0] + 1, chosen_node[1]], init)
+                    self.update_node([chosen_node[0] + 1, chosen_node[1]])
                 if chosen_node[1] > 0:  # left
-                    self.update_node([chosen_node[0], chosen_node[1] - 1], init)
+                    self.update_node([chosen_node[0], chosen_node[1] - 1])
                 if chosen_node[1] < len(node_values_list[0]) - 1:  # right
-                    self.update_node([chosen_node[0], chosen_node[1] + 1], init)
+                    self.update_node([chosen_node[0], chosen_node[1] + 1])
 
 
             if self.node_queue.qsize() == 0:
@@ -449,21 +449,21 @@ class Dstar:
                     self.current_map[i][j] != prev_map[i][j]
                 ):  # for all differing values, update it and its surrounding nodes
 
-                    self.update_node([i, j], False)
+                    self.update_node([i, j])
 
                     # The below block also updates every surrounding node, seemingly is not needed.
 
                     # if (i > 0): #above
-                    #     self.update_node([i-1,j], False)
+                    #     self.update_node([i-1,j])
                     # if (i < len(self.node_values_list)-1): #below
-                    #     self.update_node([i+1,j], False)
+                    #     self.update_node([i+1,j])
                     # if (j > 0): #left
-                    #     self.update_node([i,j-1], False)
+                    #     self.update_node([i,j-1])
                     # if (j < len(self.node_values_list[0])-1): #right
-                    #     self.update_node([i,j+1], False)
+                    #     self.update_node([i,j+1])
 
 
-        self.find_path(False)  # recalculate g values
+        self.find_path()  # recalculate g values
 
         self.needs_new_path = True
 
