@@ -12,7 +12,7 @@ from std_msgs.msg import Bool
 import ascent
 import find_apriltag
 import zones
-import plunge
+import lunabot_behavior.excavate as excavate
 import deposition
 import interrupts
 import escape
@@ -21,7 +21,7 @@ class States(Enum):
     ASCENT_INIT = auto()
     FIND_TAG = auto()
     TRAVERSAL_MINE = auto()
-    PLUNGE = auto()
+    EXCAVATE = auto()
     TRENCH = auto()
     ASCENT_MINING = auto()
     TRAVERSAL_BERM = auto()
@@ -79,7 +79,7 @@ class Behavior:
         # Initialize all of the modules (before the loop)
         ascent_module = ascent.Ascent(self.effort_publisher)
         find_apriltag_module = find_apriltag.FindAprilTag(self.velocity_publisher)
-        plunge_module = plunge.Plunge(self.effort_publisher)
+        excavate_module = excavate.Excavate(self.effort_publisher)
 
         deposition_module = deposition.Deposition(self.effort_publisher)
 
@@ -151,17 +151,17 @@ class Behavior:
                     self.traversal_publisher.publish(traversal_message)
                     
                     # Detect when reached mining zone
-                    self.current_state = States.PLUNGE
+                    self.current_state = States.EXCAVATE
                 
                 # Lower linear actuators and begin spinning excavation
-                if (self.current_state == States.PLUNGE):
+                if (self.current_state == States.EXCAVATE):
                     rospy.loginfo("State: Plunging")
 
                     traversal_message.data = False
                     self.traversal_publisher.publish(traversal_message)
 
-                    plunge_status = plunge_module.plunge()
-                    if plunge_status == False:
+                    excavate_status = excavate_module.excavate()
+                    if excavate_status == False:
                         break
 
                     self.current_state = States.TRENCH
