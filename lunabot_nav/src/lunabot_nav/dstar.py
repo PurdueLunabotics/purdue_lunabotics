@@ -180,12 +180,13 @@ class Dstar:
         for direction in directions:
             new_node = [node[0] + direction[0], node[1] + direction[1]]
             # If the node is in bounds, and not an obstacle, add the distance value to the list
-            if (
-                0 <= new_node[0] < len(current_map) and 0 <= new_node[1] < len(current_map[0])
-                and (current_map[new_node[0]][new_node[1]] <= self.OCCUPANCY_THRESHOLD or current_map[new_node[0]][new_node[1]] == 2)
-            ):
-                g_val = node_values_list[new_node[0]][new_node[1]][0]
-                surrounding_values.append(g_val + self.root2 if direction[0] != 0 and direction[1] != 0 else g_val + 1)
+            if (0 <= new_node[0] < len(current_map) and 0 <= new_node[1] < len(current_map[0])):
+
+                if (current_map[new_node[0]][new_node[1]] > self.OCCUPANCY_THRESHOLD or current_map[new_node[0]][new_node[1]] == 2):
+                    surrounding_values.append(maxsize)
+                else:
+                    g_val = node_values_list[new_node[0]][new_node[1]][0]
+                    surrounding_values.append(g_val + self.root2 if (direction[0] != 0 and direction[1] != 0) else g_val + 1)
 
                 
         return min(surrounding_values)
