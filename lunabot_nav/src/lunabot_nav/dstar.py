@@ -131,14 +131,13 @@ class Dstar:
             if self.current_map[node[0]][node[1]] < self.OCCUPANCY_THRESHOLD:
                 return node
 
-            if node[0] > 0:  # above
-                nodequeue.put([node[0] - 1, node[1]])
-            if node[0] < len(self.node_values_list) - 1:  # below
-                nodequeue.put([node[0] + 1, node[1]])
-            if node[1] > 0:  # left
-                nodequeue.put([node[0], node[1] - 1])
-            if node[1] < len(self.node_values_list[0]) - 1:  # right
-                nodequeue.put([node[0], node[1] + 1])
+            directions = [[-1, 0], [1, 0], [0, -1], [0, 1]]  # above, below, left, right
+
+            for direction in directions:
+                new_node = [node[0] + direction[0], node[1] + direction[1]]
+                # Add the node if in bounds
+                if 0 <= new_node[0] < len(self.node_values_list) and 0 <= new_node[1] < len(self.node_values_list[0]):
+                    nodequeue.put(new_node)
 
             visited_nodes.add(tuple(node))
 
@@ -177,46 +176,16 @@ class Dstar:
 
         # For each node (all 4 directions)
 
-        if node[0] > 0:  # above
+        directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]  # left, right, above, below
+        for direction in directions:
+            new_node = [node[0] + direction[0], node[1] + direction[1]]
+            # If the node is in bounds, and not an obstacle, add the distance value to the list
             if (
-                current_map[node[0] - 1][node[1]] > self.OCCUPANCY_THRESHOLD
-                or current_map[node[0] - 1][node[1]] == 2
-            ):  # Check if off grid or it is an obstacle
-                surrounding_values.append(maxsize)  # if so, add inf to the list
-            else:
-                g_val = node_values_list[node[0] - 1][node[1]][
-                    0
-                ]  # Otherwise get the gvalue of the node we're checking
-                surrounding_values.append(
-                    g_val + 1
-                )  # and add 1 or 1.4 based on the euclidean distance to get to the node we're calculating for
-        if node[0] < len(current_map) - 1:  # below
-            if (
-                current_map[node[0] + 1][node[1]] > self.OCCUPANCY_THRESHOLD
-                or current_map[node[0] + 1][node[1]] == 2
+                0 <= new_node[0] < len(current_map) and 0 <= new_node[1] < len(current_map[0])
+                and (current_map[new_node[0]][new_node[1]] <= self.OCCUPANCY_THRESHOLD or current_map[new_node[0]][new_node[1]] == 2)
             ):
-                surrounding_values.append(maxsize)
-            else:
-                g_val = node_values_list[node[0] + 1][node[1]][0]
-                surrounding_values.append(g_val + 1)
-        if node[1] > 0:  # left
-            if (
-                current_map[node[0]][node[1] - 1] > self.OCCUPANCY_THRESHOLD
-                or current_map[node[0]][node[1] - 1] == 2
-            ):
-                surrounding_values.append(maxsize)
-            else:
-                g_val = node_values_list[node[0]][node[1] - 1][0]
-                surrounding_values.append(g_val + 1)
-        if node[1] < len(current_map[0]) - 1:  # right
-            if (
-                current_map[node[0]][node[1] + 1] > self.OCCUPANCY_THRESHOLD
-                or current_map[node[0]][node[1] + 1] == 2
-            ):
-                surrounding_values.append(maxsize)
-            else:
-                g_val = node_values_list[node[0]][node[1] + 1][0]
-                surrounding_values.append(g_val + 1)
+                g_val = node_values_list[new_node[0]][new_node[1]][0]
+                surrounding_values.append(g_val + self.root2 if direction[0] != 0 and direction[1] != 0 else g_val + 1)
 
                 
         return min(surrounding_values)
@@ -286,14 +255,11 @@ class Dstar:
                 node_values_list[chosen_node[0]][chosen_node[1]][0] = node_values_list[chosen_node[0]][chosen_node[1]][1]  # Lower the g value
 
                 # update all surrounding nodes
-                if chosen_node[0] > 0:  # above
-                    self.update_node([chosen_node[0] - 1, chosen_node[1]])
-                if chosen_node[0] < len(node_values_list) - 1:  # below
-                    self.update_node([chosen_node[0] + 1, chosen_node[1]])
-                if chosen_node[1] > 0:  # left
-                    self.update_node([chosen_node[0], chosen_node[1] - 1])
-                if chosen_node[1] < len(node_values_list[0]) - 1:  # right
-                    self.update_node([chosen_node[0], chosen_node[1] + 1])
+                directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]  # left, right, above, below
+                for direction in directions:
+                    new_node = [chosen_node[0] + direction[0], chosen_node[1] + direction[1]]
+                    if 0 <= new_node[0] < len(node_values_list) and 0 <= new_node[1] < len(node_values_list[0]):
+                        self.update_node(new_node)
 
             # G is lower then rhs
             else:
@@ -304,14 +270,11 @@ class Dstar:
                 self.update_node(chosen_node)
 
                 # update all the surrounding nodes
-                if chosen_node[0] > 0:  # above
-                    self.update_node([chosen_node[0] - 1, chosen_node[1]])
-                if chosen_node[0] < len(node_values_list) - 1:  # below
-                    self.update_node([chosen_node[0] + 1, chosen_node[1]])
-                if chosen_node[1] > 0:  # left
-                    self.update_node([chosen_node[0], chosen_node[1] - 1])
-                if chosen_node[1] < len(node_values_list[0]) - 1:  # right
-                    self.update_node([chosen_node[0], chosen_node[1] + 1])
+                directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]  # left, right, above, below
+                for direction in directions:
+                    new_node = [chosen_node[0] + direction[0], chosen_node[1] + direction[1]]
+                    if 0 <= new_node[0] < len(node_values_list) and 0 <= new_node[1] < len(node_values_list[0]):
+                        self.update_node(new_node)
 
 
             if self.node_queue.qsize() == 0:
@@ -344,70 +307,30 @@ class Dstar:
             path_node[0] != self.goal[0] or path_node[1] != self.goal[1]
         ):  # Until robot reaches self.goal
 
-            if node_values_list[path_node[0]][path_node[1]][0] >= (
-                maxsize
-            ):  # If g value of current node is inf
+            if node_values_list[path_node[0]][path_node[1]][0] >= maxsize:  # If g value of current node is inf
                 rospy.loginfo("Dstar: No path (couldn't create a complete path list)")
                 break
 
             # Check all surrounding nodes for the lowest g value
 
             gvals = []  # find smallest g value (closest to self.goal)
-            if path_node[0] > 0:  # above
-                if self.current_map[path_node[0] - 1][path_node[1]] < 50:
-                    hueristic = np.sqrt(
-                        (self.goal[0] - (path_node[0] - 1)) ** 2
-                        + (self.goal[1] - path_node[1]) ** 2
-                    )
-                    gvals.append(
-                        (
-                            node_values_list[path_node[0] - 1][path_node[1]][0] + 1,
-                            hueristic,
-                            [path_node[0] - 1, path_node[1]],
-                        )
-                    )
 
-            if path_node[0] < len(node_values_list) - 1:  # below
-                if self.current_map[path_node[0] + 1][path_node[1]] < 50:
-                    hueristic = np.sqrt(
-                        (self.goal[0] - (path_node[0] + 1)) ** 2
-                        + (self.goal[1] - path_node[1]) ** 2
-                    )
-                    gvals.append(
-                        (
-                            node_values_list[path_node[0] + 1][path_node[1]][0] + 1,
-                            hueristic,
-                            [path_node[0] + 1, path_node[1]],
+            directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]  # left, right, above, below
+            for direction in directions:
+                new_x = path_node[0] + direction[0]
+                new_y = path_node[1] + direction[1]
+                if 0 <= new_x < len(node_values_list) and 0 <= new_y < len(node_values_list[0]):
+                    if self.current_map[new_x][new_y] < self.OCCUPANCY_THRESHOLD:
+                        heuristic = np.sqrt(
+                            (self.goal[0] - new_x) ** 2 + (self.goal[1] - new_y) ** 2
                         )
-                    )
-
-            if path_node[1] > 0:  # left
-                if self.current_map[path_node[0]][path_node[1] - 1] < 50:
-                    hueristic = np.sqrt(
-                        (self.goal[0] - (path_node[0])) ** 2
-                        + (self.goal[1] - (path_node[1] - 1)) ** 2
-                    )
-                    gvals.append(
-                        (
-                            node_values_list[path_node[0]][path_node[1] - 1][0] + 1,
-                            hueristic,
-                            [path_node[0], path_node[1] - 1],
+                        gvals.append(
+                            (
+                                node_values_list[new_x][new_y][0] + 1,
+                                heuristic,
+                                [new_x, new_y],
+                            )
                         )
-                    )
-
-            if path_node[1] < len(node_values_list[0]) - 1:  # right
-                if self.current_map[path_node[0]][path_node[1] + 1] < 50:
-                    hueristic = np.sqrt(
-                        (self.goal[0] - (path_node[0])) ** 2
-                        + (self.goal[1] - (path_node[1] + 1)) ** 2
-                    )
-                    gvals.append(
-                        (
-                            node_values_list[path_node[0]][path_node[1] + 1][0] + 1,
-                            hueristic,
-                            [path_node[0], path_node[1] + 1],
-                        )
-                    )
 
             if len(gvals) == 0:  # Nowhere to go
                 rospy.loginfo("Dstar: No path (couldn't create a complete path list)")
