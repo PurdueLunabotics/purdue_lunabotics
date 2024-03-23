@@ -36,13 +36,13 @@ Status bit (conversion done)
 
 #include <ADS1115_lite.h>
 ADS1115_lite adc(
-    ADS1115_ADDRESS_ADDR_SDA); // Initializes wire library, sets private
+    ADS1115_ADDRESS_ACT); // Initializes wire library, sets private
                                // configuration variables to ADS1115
                                // default(2.048V, 128SPS, Differential mode
                                // between  AIN0 and AIN1.  The Address parameter
                                // is not required if you want default
 ADS1115_lite adc1(
-    ADS1115_ADDRESS_ADDR_SCL); // Initializes wire library, sets private
+    ADS1115_ADDRESS_EXDEPDRIVE); // Initializes wire library, sets private
                                // configuration variables to ADS1115
                                // default(2.048V, 128SPS, Differential mode
                                // between  AIN0 and AIN1.  The Address parameter
