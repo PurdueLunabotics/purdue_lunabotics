@@ -5,13 +5,13 @@
 
 // MCs
 Sabertooth MC1(128, ST_SERIAL); // DRIVE
-Sabertooth MC2(130, ST_SERIAL); // DEPOSITION
-Sabertooth MC3(131, ST_SERIAL); // EXCAVATION
+Sabertooth MC2(130, ST_SERIAL); // EXCAVATON
+Sabertooth MC3(131, ST_SERIAL); // DEPOSIT
 
 // ADCs
 namespace actuation {
 
-Sabertooth_MotorCtrl act_right_mtr{&MC3, STMotor::M1};
+Sabertooth_MotorCtrl act_right_mtr{&MC3, STMotor::M2};
 Sabertooth_MotorCtrl act_left_mtr{&MC2, STMotor::M2};
 
 constexpr uint8_t ACT_RIGHT_CURR_ADC = 1;
@@ -73,7 +73,7 @@ void update(float &d0, float &d1, float &d2) {
 } // namespace uwb
 
 namespace excavation {
-Sabertooth_MotorCtrl exc_mtr{&MC3, STMotor::M1};
+Sabertooth_MotorCtrl exc_mtr{&MC2, STMotor::M1};
 
 constexpr uint8_t EXC_CURR_ADC = 0;
 constexpr uint8_t EXC_CURR_MUX = 2; // U1 curr_sense_board
@@ -91,7 +91,7 @@ void cb(int8_t speed) { exc_mtr.write(speed); }
 } // namespace excavation
 
 namespace deposition {
-Sabertooth_MotorCtrl dep_mtr{&MC3, STMotor::M2};
+Sabertooth_MotorCtrl dep_mtr{&MC3, STMotor::M1};
 //Sabertooth_MotorCtrl exc_mtr{&MC3, STMotor::M1};
 
 constexpr uint8_t DEP_CURR_ADC = 0;
