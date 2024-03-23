@@ -26,7 +26,7 @@ void update(int32_t &act_right_curr) {
 
 void cb(int8_t lin_act_volt) {
   act_left_mtr.write(lin_act_volt);
-  //act_right_mtr.write(lin_act_volt);
+  act_right_mtr.write(lin_act_volt);
 }
 
 } // namespace actuation
