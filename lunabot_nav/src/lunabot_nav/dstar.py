@@ -232,7 +232,7 @@ class Dstar:
             self.node_values_list
         )  # copy values list to avoid async problems
 
-        if self.current_map[self.current_node[0]][self.current_node[1]] > 50:
+        if self.current_map[self.current_node[0]][self.current_node[1]] > self.OCCUPANCY_THRESHOLD:
             self.current_node = self.bfs_non_occupied(self.current_node)
 
         while (
@@ -391,7 +391,7 @@ class Dstar:
 
         self.needs_new_path = True
 
-    def update_map(self, new_map, x_offset=0, y_offset=0):
+    def update_map(self, new_map: np.ndarray[int], x_offset=0, y_offset=0):
         """    
         Updates the map with new grid whenever map is changed
         """
