@@ -86,7 +86,7 @@ void loop() {
   if (ms_until_ctrl > CTRL_PERIOD) {
     ms_until_ctrl -= CTRL_PERIOD;
     // TODO, add timer if robot effort not changing for too long, exit?
-    KillSwitchRelay::logic(effort);
+    //KillSwitchRelay::logic(effort);
     ctrl();
   }
 
