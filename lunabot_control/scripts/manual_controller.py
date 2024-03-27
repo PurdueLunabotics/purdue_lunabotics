@@ -92,6 +92,7 @@ class ManualController:
         self._excavation_is_latched = False
 
         self.DEPOSITION_SPEED = 127
+        self.ACTUATE_SPEED = 0.25
 
         self.hasReadRT = False
         self.hasReadLT = False
@@ -173,7 +174,7 @@ class ManualController:
                     rospy.loginfo(f"Excavation Latched at {self._latched_excavation_speed}")
 
             # Dpad up/down - control linear actuators
-            effort_msg.lin_act = constrain(joy.axes[Axes.DPAD_VERTICAL.value])
+            effort_msg.lin_act = constrain(joy.axes[Axes.DPAD_VERTICAL.value]) * self.ACTUATE_SPEED
 
             if (joy.buttons[Buttons.B.value] == 1):
                 effort_msg.deposit = self.DEPOSITION_SPEED
