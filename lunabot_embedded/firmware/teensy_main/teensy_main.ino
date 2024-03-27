@@ -10,6 +10,7 @@
 #define CTRL_PERIOD 2                // ms
 #define UWB_TRANSFER_PERIOD 10'000 // microsec
 #define CURR_UPDATE_PERIOD 8       // ms
+#define STALE_EFFORT_PERIOD 1000   // ms
 
 RobotSensors state = RobotSensors_init_zero;
 RobotEffort effort = RobotEffort_init_zero;
@@ -40,6 +41,7 @@ void send() {
 }
 
 IntervalTimer uwb_timer;
+float last_effort;
 
 void setup() {
   Sabertooth_MotorCtrl::init_serial(ST_SERIAL, ST_BAUD_RATE);
@@ -58,6 +60,7 @@ void setup() {
   MC1.setRamping(1);
   MC2.setRamping(1);
   MC3.setRamping(1);
+  last_effort = millis();
 }
 
 elapsedMillis ms_until_send;
@@ -73,12 +76,17 @@ void loop() {
 
     /* Now we are ready to decode the message. */
     pb_decode(&stream, RobotEffort_fields, &effort);
+    last_effort = millis();
+  }
+  
+  if (millis() - last_effort > STALE_EFFORT_PERIOD) {
+    effort = RobotEffort_init_zero;
   }
 
   if (ms_until_ctrl > CTRL_PERIOD) {
     ms_until_ctrl -= CTRL_PERIOD;
     // TODO, add timer if robot effort not changing for too long, exit?
-    KillSwitchRelay::logic(effort);
+    //KillSwitchRelay::logic(effort);
     ctrl();
   }
 
