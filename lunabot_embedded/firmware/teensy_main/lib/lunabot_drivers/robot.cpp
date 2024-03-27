@@ -102,7 +102,7 @@ void update(int32_t &dep_curr) {
 
 float update_curr() { return ACS711_Current_Bus::read(DEP_CURR_ADC, DEP_CURR_MUX); }
 
-void cb(int8_t volt) { dep_mtr.write(volt); }
+void cb(int8_t volt) { dep_mtr.write(-volt); }
 //exc_mtr.write(volt); }
 
 } // namespace deposition
