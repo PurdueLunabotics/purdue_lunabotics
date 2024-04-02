@@ -92,6 +92,7 @@ class ManualController:
         self._excavation_is_latched = False
 
         self.DEPOSITION_SPEED = 127
+        self.ACTUATE_SPEED = 0.9
 
         self.hasReadRT = False
         self.hasReadLT = False
@@ -133,9 +134,19 @@ class ManualController:
                 effort_msg.excavate = self._latched_excavation_speed
             else:
                 # Change the range of the trigger axis from [1, -1] to [0, 1]
-                right_trigger_axis_normalized = (-joy.axes[Axes.RIGHT_TRIGGER.value] + 1) / 2
-                left_trigger_axis_normalized = (-joy.axes[Axes.LEFT_TRIGGER.value] + 1) / 2
+                if (joy.axes[Axes.RIGHT_TRIGGER.value] == 0):
+                    right_trigger_axis_normalized = 0
+                    #print("normR")
+                else:
+                    right_trigger_axis_normalized = (-joy.axes[Axes.RIGHT_TRIGGER.value] + 1) / 2
 
+                if (joy.axes[Axes.LEFT_TRIGGER.value] == 0):
+                    left_trigger_axis_normalized = 0
+                    #print("norm")
+                else:
+                    left_trigger_axis_normalized = (-joy.axes[Axes.LEFT_TRIGGER.value] + 1) / 2
+
+                '''
                 if not self.hasReadLT:
                     left_trigger_axis_normalized = 0
                     if joy.axes[Axes.LEFT_TRIGGER.value] != 0:
@@ -145,6 +156,7 @@ class ManualController:
                     right_trigger_axis_normalized = 0
                     if joy.axes[Axes.RIGHT_TRIGGER.value] != 0:
                         self.hasReadRT = True
+                '''
 
                 # Take priority for right trigger. If it is nearly zero, use the left trigger instead
                 if (right_trigger_axis_normalized <= 0.01):
@@ -163,8 +175,7 @@ class ManualController:
                     rospy.loginfo(f"Excavation Latched at {self._latched_excavation_speed}")
 
             # Dpad up/down - control linear actuators
-            effort_msg.lin_act = constrain(joy.axes[Axes.DPAD_VERTICAL.value])
-
+            effort_msg.lin_act = int(constrain(joy.axes[Axes.DPAD_VERTICAL.value]) * self.ACTUATE_SPEED)
 
             if (joy.buttons[Buttons.B.value] == 1):
                 effort_msg.deposit = self.DEPOSITION_SPEED

@@ -5,8 +5,8 @@
 
 // MCs
 Sabertooth MC1(128, ST_SERIAL); // DRIVE
-Sabertooth MC2(130, ST_SERIAL); // EXCAVATION
-Sabertooth MC3(131, ST_SERIAL); // DEPOSITION
+Sabertooth MC2(130, ST_SERIAL); // EXCAVATON
+Sabertooth MC3(131, ST_SERIAL); // DEPOSIT
 
 // ADCs
 namespace actuation {
@@ -25,7 +25,7 @@ void update(int32_t &act_right_curr) {
 }
 
 void cb(int8_t lin_act_volt) {
-  act_left_mtr.write(-lin_act_volt);
+  act_left_mtr.write(lin_act_volt);
   act_right_mtr.write(lin_act_volt);
 }
 
@@ -92,6 +92,8 @@ void cb(int8_t speed) { exc_mtr.write(speed); }
 
 namespace deposition {
 Sabertooth_MotorCtrl dep_mtr{&MC3, STMotor::M1};
+//Sabertooth_MotorCtrl exc_mtr{&MC3, STMotor::M1};
+
 constexpr uint8_t DEP_CURR_ADC = 0;
 constexpr uint8_t DEP_CURR_MUX = 3; // U3 curr_sense_board
 
@@ -100,6 +102,7 @@ void update(int32_t &dep_curr) {
 
 float update_curr() { return ACS711_Current_Bus::read(DEP_CURR_ADC, DEP_CURR_MUX); }
 
-void cb(int8_t volt) { dep_mtr.write(volt); }
+void cb(int8_t volt) { dep_mtr.write(-volt); }
+//exc_mtr.write(volt); }
 
 } // namespace deposition
