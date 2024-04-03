@@ -59,24 +59,25 @@ class Axes(Enum):
     DPAD_HORIZONTAL = 6
     DPAD_VERTICAL = 7
 
-"""
-Manual Controller
-Publishes an effort message to control the robot.
-Control Scheme:
- (tank drive)
-- Left stick: left wheels
-- Right stick: right wheels
-- Right trigger Excavation forwards (pick up dirt)
-- Left trigger: Excavation backwards
-- D-pad up/down: Linear actuator control (move excavation system up/down)
-- Y button: Latch/unlatch excavation speed
-    - When latched, the excavation speed will stay at its last speed until unlatched
-- X button: Switch between forwards and backwards driving
-    - Forwards is defined as leading with excavation
-- B button: Deposition (spin auger)
-- Start button: Stop the robot
-"""
+
 class ManualController:
+    """
+    Manual Controller
+    Publishes an effort message to control the robot.
+    Control Scheme:
+    (tank drive)
+    - Left stick: left wheels
+    - Right stick: right wheels
+    - Right trigger Excavation forwards (pick up dirt)
+    - Left trigger: Excavation backwards
+    - D-pad up/down: Linear actuator control (move excavation system up/down)
+    - Y button: Latch/unlatch excavation speed
+        - When latched, the excavation speed will stay at its last speed until unlatched
+    - X button: Switch between forwards and backwards driving
+        - Forwards is defined as leading with excavation
+    - B button: Deposition (spin auger)
+    - Start button: Stop the robot while held
+    """
 
     def __init__(self):
         self._joy_sub = rospy.Subscriber("joy", Joy, self.joy_callback)
