@@ -36,7 +36,7 @@ void send() {
 
   uwb::update(state.uwb_dist_0, state.uwb_dist_1, state.uwb_dist_2);
 
-  load_cell::update(state.load_cell)
+  load_cell::update(state.load_cell);
 
   pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
   pb_encode(&stream, RobotSensors_fields, &state);
