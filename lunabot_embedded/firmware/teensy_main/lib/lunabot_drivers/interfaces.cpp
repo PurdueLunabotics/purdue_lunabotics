@@ -339,6 +339,8 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
   }
 }
 
+HX711 HX711_Load_Cell::scales[2];
+
 void HX711_Load_Cell::init() {
   scales[0].begin(PIN_LIST[0], PIN_LIST[1]);
   scales[1].begin(PIN_LIST[2], PIN_LIST[3]);
