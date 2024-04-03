@@ -119,7 +119,7 @@ public:
   static float read_weight(uint8_t id);
 
   //calibration values
-  long offsets = 131992;
+  long offsets = 342931;
   float scale = -110.096122;
 
 private: 
