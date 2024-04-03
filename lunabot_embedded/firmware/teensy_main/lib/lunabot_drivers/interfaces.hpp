@@ -162,12 +162,12 @@ public:
   static float read_weight(uint8_t id);
 
   //calibration values
-  long offsets = 342931;
-  float scale_calib = -110.096122;
+  static constexpr long offsets = 342931;
+  static constexpr float scale_calib = -110.096122;
+  static HX711 scales[2];
 
 private: 
   static constexpr int PIN_LIST[4] = {19, 18, 21, 20}; //data, clock, data, clock
-  static HX711 scales[2];
 };
 
 #endif
