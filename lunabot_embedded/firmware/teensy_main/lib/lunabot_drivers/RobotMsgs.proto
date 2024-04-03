@@ -12,12 +12,11 @@ message RobotSensors {
   float drive_right_ang = 8;
   float exc_ang = 9;
 
-  float dep_weight = 10;
-  float uwb_dist_0 = 11;
-  float uwb_dist_1 = 12;
-  float uwb_dist_2 = 13;
+  float uwb_dist_0 = 10;
+  float uwb_dist_1 = 11;
+  float uwb_dist_2 = 12;
 
-  float load_cell = 14;
+  float load_cell = 13;
 }
 
 message RobotEffort {

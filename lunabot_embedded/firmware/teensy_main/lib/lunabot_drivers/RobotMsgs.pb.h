@@ -49,18 +49,18 @@ extern "C" {
   { 0 }
 
 /* Field tags (for use in manual encoding/decoding) */
-#define RobotSensors_lead_screw_curr_tag 1
-#define RobotSensors_act_right_curr_tag 2
-#define RobotSensors_dep_curr_tag 3
-#define RobotSensors_exc_curr_tag 4
-#define RobotSensors_drive_left_curr_tag 5
-#define RobotSensors_drive_right_curr_tag 6
-#define RobotSensors_drive_left_ang_tag 7
-#define RobotSensors_drive_right_ang_tag 8
-#define RobotSensors_exc_ang_tag 9
-#define RobotSensors_uwb_dist_0_tag 10
-#define RobotSensors_uwb_dist_1_tag 11
-#define RobotSensors_uwb_dist_2_tag 12
+#define RobotSensors_act_right_curr_tag 1
+#define RobotSensors_dep_curr_tag 2
+#define RobotSensors_exc_curr_tag 3
+#define RobotSensors_drive_left_curr_tag 4
+#define RobotSensors_drive_right_curr_tag 5
+#define RobotSensors_drive_left_ang_tag 6
+#define RobotSensors_drive_right_ang_tag 7
+#define RobotSensors_exc_ang_tag 8
+#define RobotSensors_uwb_dist_0_tag 9
+#define RobotSensors_uwb_dist_1_tag 10
+#define RobotSensors_uwb_dist_2_tag 11
+#define RobotSensors_load_cell_tag 12
 #define RobotEffort_lin_act_tag 1
 #define RobotEffort_left_drive_tag 2
 #define RobotEffort_right_drive_tag 3
@@ -80,7 +80,8 @@ extern "C" {
   X(a, STATIC, SINGULAR, FLOAT, exc_ang, 9)                                                        \
   X(a, STATIC, SINGULAR, FLOAT, uwb_dist_0, 10)                                                    \
   X(a, STATIC, SINGULAR, FLOAT, uwb_dist_1, 11)                                                    \
-  X(a, STATIC, SINGULAR, FLOAT, uwb_dist_2, 12)
+  X(a, STATIC, SINGULAR, FLOAT, uwb_dist_2, 12)                                                    \
+  X(a, STATIC, SINGULAR, FLOAT, load_cell, 12)
 #define RobotSensors_CALLBACK NULL
 #define RobotSensors_DEFAULT NULL
 
