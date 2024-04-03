@@ -118,6 +118,10 @@ public:
   static void init();
   static float read_weight(uint8_t id);
 
+  //calibration values
+  long offsets = 131992;
+  float scale = -110.096122;
+
 private: 
   static constexpr int PIN_LIST[4] = {19, 18, 21, 20}; //data, clock, data, clock
   static HX711 scales[2];
