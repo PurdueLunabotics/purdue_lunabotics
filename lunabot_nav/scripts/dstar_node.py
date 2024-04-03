@@ -98,16 +98,11 @@ class DstarNode:
 
         rate = rospy.Rate(frequency)
 
-        completed_initial_run = False # Keep track of whether a new Dstar object (algorithm) has processed the initial map or not.
-
         while not rospy.is_shutdown():
 
-            # rospy.loginfo("Dstar iterate")
-
-            # Startup condition: once all data is available, create a new Dstar object
+            # Startup condition: once all data is available, create a new Dstar object and find the path
             if (self.dstar is None) and len(self.map) > 0 and len(self.pose) > 0 and len(self.goal) > 0:
 
-                rospy.loginfo("Dstar new Dstar")
                 self.dstar = Dstar(self.goal, self.pose, self.map.copy(), self.resolution, self.x_offset, self.y_offset)
                 self.publish_path(self.dstar.find_path())
                 self.goal_update_needed = False
@@ -117,8 +112,8 @@ class DstarNode:
             if self.dstar is not None:
 
                 if self.goal_update_needed:
-                    rospy.loginfo("Dstar goal update, new Dstar")
                     # If we've gotten a new goal, it is more efficient to reset the dstar data (as it is all based on goal location)
+                    # so we do so and find a new path
 
                     self.dstar = Dstar(self.goal, self.pose, self.map.copy(), self.resolution, self.x_offset, self.y_offset)
                     self.publish_path(self.dstar.find_path())
@@ -127,7 +122,8 @@ class DstarNode:
                 
 
                 if self.grid_update_needed:
-                    # If the map has changed, let dstar make the necessary updates. Publish a new path
+                    # If the map has changed, let dstar make the necessary updates.
+                    # Update the position and map, then find and publish a new path
 
                     self.dstar.update_position(self.pose)
 
@@ -142,6 +138,11 @@ class DstarNode:
             rate.sleep()
 
     def publish_path(self, path_data: list):
+        """
+        Publish the calculated path using the class's path publisher.
+        Reduces the size/complexity of the path using the path sampling rate
+        """
+
         rospy.loginfo("Dstar publishing path")
 
         if path_data == "same":

@@ -8,42 +8,55 @@ import numpy as np
 
 class Dstar:
     """
-    Initializes the Dstar algorithm by creating a priority queue, initializing accumulation (km),
-    creating a list of node values (g and rhs), all initialized to infinity, setting the rhs of the goal node to 0, and inserting
-    the goal node into the priority queue
-
+    A class that implements the dstar lite path planning algorithm
     http://idm-lab.org/bib/abstracts/papers/aaai02b.pdf
+
+    Finds the shortest path between the current position and goal position. Allows 'quick' replanning
+    when the map changes by saving the processed data and updating only what is necessary.
     """
 
     def __init__(self, goal: 'list[float]', start: 'list[float]', init_map: np.ndarray, resolution: float, x_offset: float, y_offset: float):
+        """
+        Initializes the Dstar algorithm by setting up the map, node values, start, and the goal. The map/node values will be buffered to include the goal if necessary.
+        Creates the priority queue, adds the first node to check, and marks the node's estimate value as 0.
+
+        The goal/start should be given in real-world coordinates.
+        The map, resolution, and offsets should come from the occupancy map.
+        """
+
         self.node_queue: PriorityQueue = PriorityQueue()
         self.km: float = 0.0
 
-        self.OCCUPANCY_THRESHOLD = 50
+        # What number on the map corresponds to occupied
+        self.OCCUPANCY_THRESHOLD = 50  
 
-        self.root2 = np.sqrt(2) # faster than computing sqrt 2 over and over
+         # faster than computing sqrt 2 over and over
+        self.root2 = np.sqrt(2)
 
-        self.node_values_list: np.ndarray[float] = maxsize * np.ones((init_map.shape[0], init_map.shape[1], 2))  # 2d Array of nodes: each value is [Distance (g), Estimate (rhs)]
+        # 2d Array of nodes that corresponds to the map: each value is [Distance (g), Estimate (rhs)]
+        self.node_values_list: np.ndarray[float] = maxsize * np.ones((init_map.shape[0], init_map.shape[1], 2))  
 
-        self.x_offset: float = x_offset # Real-world location of the 0,0 in the grid
+        # Real-world location of the 0,0 in the grid (not including buffer in the map)
+        self.x_offset: float = x_offset 
         self.y_offset: float = y_offset
 
-        self.buffer_offset_left: int = 0 # where in the buffered map the real map starts
+        # The amount of buffer on any side of the map
+        self.buffer_offset_left: int = 0
         self.buffer_offset_up: int = 0
         self.buffer_offset_right: int = 0
         self.buffer_offset_down: int = 0
 
-        self.current_map: np.ndarray[int] = init_map # 2d array occupancy map: Occupancy probabilities from [0 to 100].  Unknown is -1.
+        # 2d array occupancy map: Occupancy probabilities from [0 to 100].  Unknown is -1.
+        self.current_map: np.ndarray[int] = init_map
 
         self.resolution: float = resolution # meters per grid cell
 
-        self.real_goal = goal
+        # Save the real-world position of the goal
+        self.real_goal = goal 
 
-        self.goal: list[int] = self.convert_to_grid(goal) # Convert the goal to grid coordinates
-
-        self.buffer_map_for_goal() # Add a buffer to the map so we can plan to the goal when it is outside the map
-
-        self.goal = self.convert_to_grid(goal) # Reconvert given the new buffer
+        self.goal: list[int] = self.convert_to_grid(goal) # Convert the goal to grid coordinates initially
+        self.buffer_map_for_goal()                        # Add a buffer to the map so we can plan to the goal when it is outside the map
+        self.goal = self.convert_to_grid(goal)            # Reconvert given the new buffer
 
         self.node_values_list[self.goal[0], self.goal[1], 1] = 0 # Set the estimate (rhs) value of the goal to 0
 
@@ -51,8 +64,6 @@ class Dstar:
 
         self.current_node: list[int] = start
         self.prev_node: list[int] = start
-
-        self.needs_new_path: bool = True  # updates when map changes to know when to create new path
 
         # Insert the goal node into the priority queue
         self.insert(self.goal, self.calculate_key(self.goal))
@@ -237,23 +248,27 @@ class Dstar:
         If the g value is lower then the estimate, it sets it for correction by setting the g value to infinity. It then marks all surrounding nodes to be checked.
 
         Through this process, all nodes on the grid have their g value calculated correctly so the path can be found.
+
+        Once finished, returns the calculated path from the start to the goal.
         """
 
         rospy.loginfo("Dstar: Finding path")
 
+        # If the start is out of the map, or is an obstacle, search for the closest non-occupied node
         if (self.current_node[0] < 0 or self.current_node[0] >= len(self.current_map) or 
             self.current_node[1] < 0 or self.current_node[1] >= len(self.current_map[0]) or
             self.current_map[self.current_node[0]][self.current_node[1]] > self.OCCUPANCY_THRESHOLD):
 
             self.current_node = self.bfs_non_occupied(self.current_node)
 
+
+        # Loop until current node (start) is locally consistent (g == rhs) and its priority is lowest in the queue
         while (
             self.get_top_key() < self.calculate_key(self.current_node)
             or self.node_values_list[self.current_node[0]][self.current_node[1]][0]
             != self.node_values_list[self.current_node[0]][self.current_node[1]][1]
         ):
 
-            # Loop until current node is locally consistent and priority is lowest in the queue
             old_key = self.get_top_key()
             chosen_node = self.node_queue.get()[1]  # Chosen node to check
 
@@ -266,7 +281,8 @@ class Dstar:
                 self.node_values_list[chosen_node[0]][chosen_node[1]][0]
                 > self.node_values_list[chosen_node[0]][chosen_node[1]][1]
             ):
-                self.node_values_list[chosen_node[0]][chosen_node[1]][0] = self.node_values_list[chosen_node[0]][chosen_node[1]][1]  # Lower the g value
+                # Lower the g value (the estimate is the more recent data)
+                self.node_values_list[chosen_node[0]][chosen_node[1]][0] = self.node_values_list[chosen_node[0]][chosen_node[1]][1]
 
                 # update all surrounding nodes
                 directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]  # left, right, above, below
@@ -277,7 +293,7 @@ class Dstar:
 
             # G is lower then rhs
             else:
-                # Set g to infinity
+                # Set g to infinity (mark it for replanning)
                 self.node_values_list[chosen_node[0]][chosen_node[1]][0] = maxsize
 
                 # Update this node
@@ -306,9 +322,9 @@ class Dstar:
 
         rospy.loginfo("Dstar: Generating path")
 
-        node_values_list = self.node_values_list  # copy to avoid async problems
+        node_values_list = self.node_values_list 
 
-        # if start = goal
+        # if start = goal, there is no path
         if (
             self.current_node[0] == self.goal[0]
             and self.current_node[1] == self.goal[1]
@@ -324,31 +340,35 @@ class Dstar:
 
         path_list = []
 
-        while (
-            path_node[0] != self.goal[0] or path_node[1] != self.goal[1]
-        ):  # Until robot reaches self.goal
+        # Until robot reaches self.goal
+        while (path_node[0] != self.goal[0] or path_node[1] != self.goal[1]):
 
             # Check all surrounding nodes for the lowest g value
 
-            gvals = []  # find smallest g value (closest to self.goal)
+            gvals = [] 
 
             directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]  # left, right, above, below
             for direction in directions:
-                new_x = path_node[0] + direction[0]
-                new_y = path_node[1] + direction[1]
-                if 0 <= new_x < len(node_values_list) and 0 <= new_y < len(node_values_list[0]):
-                    if self.current_map[new_x][new_y] < self.OCCUPANCY_THRESHOLD:
+                new_y = path_node[0] + direction[0]
+                new_x = path_node[1] + direction[1]
 
-                        heuristic = np.sqrt(
-                            (self.goal[0] - new_x) ** 2 + (self.goal[1] - new_y) ** 2
-                        )
+                # if in bounds, and not an obstacle, add the g value to the list
+                if 0 <= new_y < len(node_values_list) and 0 <= new_x < len(node_values_list[0]):
+                    if self.current_map[new_y][new_x] < self.OCCUPANCY_THRESHOLD:
+
+                        heuristic = np.sqrt((self.goal[0] - new_y) ** 2 + (self.goal[1] - new_x) ** 2)
 
                         gvals.append(
                             (
+                                # We sort the path to take by two values- first the g value, then the euclidean distance to the goal.
+                                # This should pick, in event of a tie, the closer node to the goal.
 
-                                (node_values_list[new_x][new_y][0] + 1) if (self.goal[0] != new_x or self.goal[1] != new_y) else (-1),
+                                # If we encounter the goal in the surrounding nodes, make its priority the smallest
+                                (node_values_list[new_y][new_x][0] + 1) if (self.goal[0] != new_y or self.goal[1] != new_x) else (-1),
+
                                 heuristic,
-                                [new_x, new_y],
+                                
+                                [new_y, new_x],
                             )
                         )
 
@@ -364,26 +384,13 @@ class Dstar:
             if path_node in path_list:  # Doubling back- no more path
                 rospy.loginfo("Dstar: No path (path list incomplete (would double back))")
 
-                import csv
-
-                with open('node_values.csv', mode='w') as file:
-                    writer = csv.writer(file)
-                    writer.writerows(self.node_values_list[:, :, 0])
-
-                    writer.writerow(self.current_node)
-                    writer.writerows(self.node_values_list[:, :, 1])
-                    writer.writerow(self.goal)
-
-                    writer.writerows(self.current_map)
-
                 self.needs_new_path = False
                 return []
 
             path_list.append(path_node)
             gvals.clear()
 
-        self.needs_new_path = False
-
+        # Convert the path to real-world coordinates
         for i in range(len(path_list)):
             path_list[i] = self.convert_to_real(path_list[i])
 
@@ -393,26 +400,31 @@ class Dstar:
         """
         Update and replanning: Should trigger whenever there is a new map.
         Sets affected nodes to update, and calculates new g values (finds new path)
-        This function runs when the map changes
+        This function runs when the map changes.
+
+        Left offset and up offset are the amount of buffer added to the left and up sides of the map
+        and are used to compare the correct parts of the map.
+
+        Finally, it calculates the new path and returns the result
         """
 
         rospy.loginfo("Dstar: Updating values for new map")
 
+        # Add to the accumulation value the distance from the last point (of changed map) to the current point
         self.km += ((self.prev_node[0] - self.current_node[0]) ** 2
                    + (self.prev_node[1] - self.current_node[1]) ** 2) ** 0.5
         
-        # Add to the accumulation value the distance from the last point (of changed map) to the current point
+        
         self.prev_node = self.current_node.copy()  # update the prev_node
 
         for i in range(len(prev_map)):
             for j in range(len(prev_map[i])):
-                if (
-                    self.current_map[i + up_offset][j + left_offset] != prev_map[i][j]
-                ):  # for all differing values, update it and its surrounding nodes
+                # for all differing values, update it
+                if (self.current_map[i + up_offset][j + left_offset] != prev_map[i][j]):
 
                     self.update_node([i + up_offset, j + left_offset])
 
-                    # The below block also updates every surrounding node, seemingly is not needed.
+                    # The below block can update every surrounding node, seemingly is not needed.
 
                     # if (i > 0): #above
                     #     self.update_node([i-1,j])
@@ -423,17 +435,19 @@ class Dstar:
                     # if (j < len(self.node_values_list[0])-1): #right
                     #     self.update_node([i,j+1])
 
-        return self.find_path()  # recalculate g values
+        # After all done updating, calculate the new path
+        return self.find_path()
 
     def buffer_map_for_goal(self):
         """
-        Add a buffer to the map so we can plan to the goal when it is outside the map
+        Add a buffer to the map so we can plan to the goal when it is outside the map.
+        Saves the amount of buffer to allow for correct translations between real-world coords and grid coords.
         """
 
-        rospy.loginfo(self.goal)
+        EXTRA_BUFFER = 3  # extra buffer to add to the map, needed because the real-world coordinates can be slightly off
 
         if self.goal[0] < 0: # expand map up
-            numRows = abs(self.goal[0]) + 3
+            numRows = abs(self.goal[0]) + EXTRA_BUFFER
 
             mapRows = -1 * np.ones((numRows, len(self.current_map[0])))
             nodeValueRows = maxsize * np.ones((numRows, len(self.node_values_list[0]), 2))
@@ -444,7 +458,7 @@ class Dstar:
             self.node_values_list = np.concatenate((nodeValueRows, self.node_values_list), axis=0)
 
         if self.goal[0] >= len(self.current_map): # expand map down
-            numRows = self.goal[0] - len(self.current_map) + 1 + 3
+            numRows = self.goal[0] - len(self.current_map) + 1 + EXTRA_BUFFER
 
             mapRows = -1 * np.ones((numRows, len(self.current_map[0])))
             nodeValueRows = maxsize * np.ones((numRows, len(self.node_values_list[0]), 2))
@@ -455,7 +469,7 @@ class Dstar:
             self.node_values_list = np.concatenate((self.node_values_list, nodeValueRows), axis=0)
 
         if self.goal[1] < 0: # expand map left
-            numCols = abs(self.goal[1]) + 3
+            numCols = abs(self.goal[1]) + EXTRA_BUFFER
 
             mapCols = -1 * np.ones((len(self.current_map), numCols))
             nodeValueCols = maxsize * np.ones((len(self.node_values_list), numCols, 2))
@@ -467,7 +481,7 @@ class Dstar:
 
         if self.goal[1] >= len(self.current_map[0]): # expand map right
 
-            numCols = self.goal[1] - len(self.current_map[0]) + 1 + 3
+            numCols = self.goal[1] - len(self.current_map[0]) + 1 + EXTRA_BUFFER
 
             mapCols = -1 * np.ones((len(self.current_map), numCols))
             nodeValueCols = maxsize * np.ones((len(self.node_values_list), numCols, 2))
@@ -477,46 +491,45 @@ class Dstar:
             self.current_map = np.concatenate((self.current_map, mapCols), axis=1)
             self.node_values_list = np.concatenate((self.node_values_list, nodeValueCols), axis=1)
 
-        print("left", self.buffer_offset_left, "right", self.buffer_offset_right, "up", self.buffer_offset_up, "down", self.buffer_offset_down)
-
 
     def update_map(self, new_map: np.ndarray, x_offset=0, y_offset=0):
         """    
-        Updates the map with new grid whenever map is changed
+        Updates the map with new grid whenever map is changed. The node values list is expanded if needed to match the new size of the map.
+        The map is updated with the new given map, and buffer is added so that we never have to shrink the map/node values.
+        
+        After the new map is built, we call update/replan, updating the needed node values, which later calculates the path and returns the new path
         """
 
         prev_x_offset = self.x_offset
         prev_y_offset = self.y_offset
 
-        # set prev_map
+        # set prev_map- keeps track of the old map
         prev_map = self.current_map.copy()
 
         new_map = np.array(new_map)
 
-        # compare the prev map with the new one (remove the buffer first)
+        # compare the prev map with the new one (remove the buffer off of the old map first)
         true_prev_map = prev_map[self.buffer_offset_up:len(prev_map) - self.buffer_offset_down, self.buffer_offset_left:len(prev_map[0]) - self.buffer_offset_right]
         if np.array_equal(true_prev_map, new_map):
-            return "same"
+            return "same" # This case is handled specifically in dstar-node- basically, don't calculate a new path if nothing changed
         
         rospy.loginfo("Dstar: Building map")
         
-        print("trueprevmap", true_prev_map.shape, "newmap", new_map.shape, "old new values", self.node_values_list.shape)
-
         new_node_values = self.node_values_list.copy()
 
-        # Find how many columns and rows are present in the new given map
-        columnsLeft = int((prev_x_offset - x_offset) / self.resolution) # number of new columns for the left given in the new map
-        columnsRight = len(new_map[0]) - len(true_prev_map[0]) - columnsLeft # number of new columns for the right
+        # Find how many columns and rows are present in the new given map (how much the real map expanded by)
+        columnsLeft = int((prev_x_offset - x_offset) / self.resolution)
+        columnsRight = len(new_map[0]) - len(true_prev_map[0]) - columnsLeft 
 
-        rowsUp = int((prev_y_offset - y_offset) / self.resolution) # number of new rows for the top
-        rowsDown = len(new_map) - len(true_prev_map) - rowsUp # number of new rows for the bottom
+        rowsUp = int((prev_y_offset - y_offset) / self.resolution) 
+        rowsDown = len(new_map) - len(true_prev_map) - rowsUp 
 
         # Find how many columns and rows we'll have to append to node values (the number of new columns/rows, unless already present in the buffer)
-        columns_left_node_values = columnsLeft - self.buffer_offset_left if columnsLeft > self.buffer_offset_left else 0  # how many we'll have to append to the left for node values
-        columns_right_node_values = columnsRight - self.buffer_offset_right if columnsRight > self.buffer_offset_right else 0  # columns on right
+        columns_left_node_values = columnsLeft - self.buffer_offset_left if columnsLeft > self.buffer_offset_left else 0  
+        columns_right_node_values = columnsRight - self.buffer_offset_right if columnsRight > self.buffer_offset_right else 0  
 
-        rows_up_node_values = rowsUp - self.buffer_offset_up if rowsUp > self.buffer_offset_up else 0  # rows on the top
-        rows_down_node_values = rowsDown - self.buffer_offset_down if rowsDown > self.buffer_offset_down else 0  # rows on the bottom
+        rows_up_node_values = rowsUp - self.buffer_offset_up if rowsUp > self.buffer_offset_up else 0  
+        rows_down_node_values = rowsDown - self.buffer_offset_down if rowsDown > self.buffer_offset_down else 0  
 
         # Find how much buffer we'll have to add to the map (to keep it the same size as earlier, the earlier buffer length minus anything new)
         buffer_cols_left = self.buffer_offset_left - columnsLeft if columnsLeft < self.buffer_offset_left else 0
@@ -525,7 +538,7 @@ class Dstar:
         buffer_rows_up = self.buffer_offset_up - rowsUp if rowsUp < self.buffer_offset_up else 0
         buffer_rows_down = self.buffer_offset_down - rowsDown if rowsDown < self.buffer_offset_down else 0
 
-        # create new map
+        # Create the new map by taking the new data, and adding any needed buffer to the sides
         buffer_left = -1 * np.ones((len(new_map), buffer_cols_left))
         buffer_right = -1 * np.ones((len(new_map), buffer_cols_right))
 
@@ -536,7 +549,7 @@ class Dstar:
 
         new_map = np.concatenate((buffer_up, new_map, buffer_down), axis=0)
 
-        # create new node values
+        # create new node values by adding any needed new rows/columns to the sides
         new_cols_left = maxsize * np.ones((len(new_node_values), columns_left_node_values, 2))
         new_cols_right = maxsize * np.ones((len(new_node_values), columns_right_node_values, 2))
 
@@ -547,8 +560,6 @@ class Dstar:
 
         new_node_values = np.concatenate((new_rows_up, new_node_values, new_rows_down), axis=0)
 
-        print("new current map", new_map.shape, "new node values", new_node_values.shape)
-
         # update the offsets
         self.buffer_offset_left = buffer_cols_left
         self.buffer_offset_right = buffer_cols_right
@@ -558,9 +569,10 @@ class Dstar:
         self.x_offset = x_offset
         self.y_offset = y_offset
 
-        # change goal
+        # change goal- as the size/buffer of the map has changed, the goal should be reconverted
         self.goal = self.convert_to_grid(self.real_goal)
 
+        # Change the value of the current node- these values (new rows/cols of node values) represent how much the physical size of the map has changed
         self.current_node[0] += rows_up_node_values
         self.current_node[1] += columns_left_node_values
 
@@ -568,4 +580,6 @@ class Dstar:
 
         self.current_map = new_map
 
+        # Call update-replan, which compares the prev map and new map to mark any differences.
+        # This eventually calcualtes the new path and returns it.
         return self.update_replan(true_prev_map, columnsLeft, rowsUp)
