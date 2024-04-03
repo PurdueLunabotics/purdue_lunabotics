@@ -344,10 +344,10 @@ void HX711_Load_Cell::init() {
   scales[1].begin(PIN_LIST[2], PIN_LIST[3]);
 
   scales[0].set_offset(offsets);
-  scales[0].set_scale(scale);
+  scales[0].set_scale(scale_calib);
 
   scales[1].set_offset(offsets);
-  scales[1].set_scale(scale);
+  scales[1].set_scale(scale_calib);
 }
 
 float HX711_Load_Cell::read_weight(uint8_t id) { return scale[id].get_units(); }
