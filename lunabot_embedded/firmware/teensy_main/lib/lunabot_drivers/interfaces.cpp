@@ -1,35 +1,5 @@
 #include "interfaces.hpp"
 
-// Stepper Motor Interfacing
-
-Stepper2Phase_MotorCtrl::Stepper2Phase_MotorCtrl(uint8_t PWM1_P, uint8_t PWM2_P, uint8_t DIR1_P,
-                                                 uint8_t DIR2_P, int steps, int speed,
-                                                 int step_size)
-    : s_(steps, DIR1_P, DIR2_P), PWM1_P_{PWM1_P}, PWM2_P_{PWM2_P}, DIR1_P_{DIR1_P}, DIR2_P_{DIR2_P},
-      enabled_{0}, steps_{steps}, speed_{speed}, step_size_{step_size} {
-  pinMode(PWM1_P_, OUTPUT);
-  pinMode(PWM2_P_, OUTPUT);
-  s_.setSpeed(speed_);
-}
-
-void Stepper2Phase_MotorCtrl::step(StepperDir dir) {
-  if (enabled_) {
-    s_.step(step_size_ * dir);
-  }
-}
-
-void Stepper2Phase_MotorCtrl::on() {
-  digitalWrite(PWM1_P_, HIGH);
-  digitalWrite(PWM2_P_, HIGH);
-  enabled_ = 1;
-}
-
-void Stepper2Phase_MotorCtrl::off() {
-  digitalWrite(PWM1_P_, LOW);
-  digitalWrite(PWM2_P_, LOW);
-  enabled_ = 0;
-}
-
 // PWM Motor Control Interfacing
 
 PWM_MotorCtrl::PWM_MotorCtrl(uint8_t PWM_P, uint8_t DIR_P) : PWM_P_{PWM_P}, DIR_P_{DIR_P} {
@@ -67,8 +37,8 @@ const int ACS711_Current_Bus::ADS_CHANNELS[ACS711_Current_Bus::CH_SIZE] = {
     ADS1115_REG_CONFIG_MUX_SINGLE_0, ADS1115_REG_CONFIG_MUX_SINGLE_1,
     ADS1115_REG_CONFIG_MUX_SINGLE_2, ADS1115_REG_CONFIG_MUX_SINGLE_3};
 
-ADS1115_lite ACS711_Current_Bus::adc0_(ADS1115_ADDRESS_ADDR_SCL);
-ADS1115_lite ACS711_Current_Bus::adc1_(ADS1115_ADDRESS_ADDR_SDA);
+ADS1115_lite ACS711_Current_Bus::adc0_(ADS1115_ADDRESS_EXDEPDRIVE);
+ADS1115_lite ACS711_Current_Bus::adc1_(ADS1115_ADDRESS_ACT);
 
 int ACS711_Current_Bus::initialized_ = 0;
 int16_t ACS711_Current_Bus::curr_buffer_[ACS711_Current_Bus::BUSES][ACS711_Current_Bus::BUS_SIZE] =
@@ -114,6 +84,16 @@ void ACS711_Current_Bus::transfer() {
   }
 }
 
+float ACS711_Current_Bus::adc_to_current_31A(float adc_value, float adc_fsr, float vcc) {
+  float vout = adc_value / pow(2, 16 - 1) * adc_fsr;
+  return 73.3 * (vout / vcc) - 36.7;
+}
+
+float ACS711_Current_Bus::adc_to_current_15A(float adc_value, float adc_fsr, float vcc) {
+  float vout = adc_value / pow(2, 16 - 1) * adc_fsr;
+  return 36.7 * (vout / vcc) - 18.3;
+}
+
 int16_t ACS711_Current_Bus::read(uint8_t bus, uint8_t mux) { return curr_buffer_[bus][mux]; }
 
 // VLH35_Angles
@@ -150,7 +130,6 @@ void VLH35_Angle_Bus::select_enc_(uint8_t id) {
 void VLH35_Angle_Bus::transfer() {
   digitalWriteFast(clk_p_,
                    LOW); // Set CLK line LOW (to inform encoder -> latch data)
-
   // Before in setup() the pinMode() change the CLK pin function to
   // output, now we have to enable usage of this pin by SPI port with
   // calling SPI.begin():
@@ -191,6 +170,16 @@ float VLH35_Angle_Bus::read_enc(uint8_t id) {
   // shift it for 11 bits to align position data right
 
   return static_cast<float>(data) / static_cast<float>(1 << 16) * 360.0F;
+}
+
+Encoder AMT13_Angle_Bus::encs[NUM_ENCODERS] = {
+      Encoder(PIN_LIST[0], PIN_LIST[1]),
+      Encoder(PIN_LIST[2], PIN_LIST[3]),
+      Encoder(PIN_LIST[4], PIN_LIST[5])
+};
+
+float AMT13_Angle_Bus::read_enc(uint8_t id) {
+  return encs[id].read()/pulses_per_rev * deg_per_rev;
 }
 
 volatile float M5Stack_UWB_Trncvr::recv_buffer_[NUM_UWB_TAGS] = {0};
@@ -249,6 +238,103 @@ void M5Stack_UWB_Trncvr::transfer() {
 
       // Assign the values to d0, d1, or d2 based on sensor number
       M5Stack_UWB_Trncvr::recv_buffer_[sensorNumber] = num;
+    }
+  }
+}
+
+long KillSwitchRelay::kill_time;
+bool KillSwitchRelay::dead;
+
+void KillSwitchRelay::init() { 
+  pinMode(kill_pin, OUTPUT); 
+  KillSwitchRelay::dead = false;
+  reset();
+  KillSwitchRelay::kill_time = millis();
+}
+
+void KillSwitchRelay::reset() { 
+  digitalWrite(kill_pin, HIGH); 
+  KillSwitchRelay::dead = false;
+}
+
+void KillSwitchRelay::kill() { 
+  digitalWrite(kill_pin, LOW);
+  KillSwitchRelay::kill_time = millis();
+  KillSwitchRelay::dead = true;
+}
+
+
+void KillSwitchRelay::disable_motor(int id, RobotEffort &effort) {
+  switch (id) {
+    case 0:
+      effort.excavate = 0;
+      break;
+    case 1:
+      effort.deposit = 0;
+      break;
+    case 2:
+      effort.left_drive = 0;
+      break;
+    case 3:
+      effort.right_drive = 0;
+      break;
+    default:
+      return;
+  }
+}
+
+//exc, dep, drive_L, drive_R
+volatile int KillSwitchRelay::cutoff_buffer[4] = {0};
+volatile int KillSwitchRelay::disable_counter[4] = {0};
+volatile bool KillSwitchRelay::is_disable[4] = {false};
+
+void KillSwitchRelay::logic(RobotEffort &effort) {
+  /*
+  if (KillSwitchRelay::dead && millis() - KillSwitchRelay::kill_time >= relay_dead_time) {
+    reset();
+  } */
+  
+  float exc_curr = ACS711_Current_Bus::adc_to_current_31A(excavation::update_curr());
+  float dep_curr = ACS711_Current_Bus::adc_to_current_31A(deposition::update_curr());
+  float drive_left_curr = ACS711_Current_Bus::adc_to_current_15A(drivetrain::update_curr_left());
+  float drive_right_curr = ACS711_Current_Bus::adc_to_current_15A(drivetrain::update_curr_right());
+
+  if (exc_curr >= exdep_kill_curr) {
+    cutoff_buffer[0] += cutoff_increase;
+  }
+  if (dep_curr >= exdep_kill_curr) {
+    cutoff_buffer[1] += cutoff_increase;
+  }
+  if (drive_left_curr >= drive_kill_curr) {
+    cutoff_buffer[2] += cutoff_increase;
+  }
+  if (drive_right_curr >= drive_kill_curr) {
+    cutoff_buffer[3] += cutoff_increase;
+  }
+
+  for (int i = 0; i < 4; ++i) {
+    cutoff_buffer[i] -= cutoff_decay;
+    if (cutoff_buffer < 0) {
+      cutoff_buffer[i] = 0;
+    }
+    if (is_disable[i]) {
+      if (cutoff_buffer[i] >= reset_thresh) {
+        disable_motor(i, effort);
+      } else {
+        is_disable[i] = false;
+      }
+    } else {
+      if (cutoff_buffer[i] >= cutoff_thresh) {
+        disable_motor(i, effort);
+        is_disable[i] = true;
+        disable_counter[i] += 1;
+      }
+    }
+
+    if (disable_counter[i] >= kill_thresh) {
+      disable_counter[i] = 0;
+      //TODO, send "all fucked" signal back to teensy
+      kill();
     }
   }
 }

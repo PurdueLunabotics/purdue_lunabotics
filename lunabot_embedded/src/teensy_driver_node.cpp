@@ -24,7 +24,7 @@ using namespace std;
 #define MAX_ANGLE_DELTA_DEG 15
 
 // Left encoder reports half the speed due to hardware error
-#define LEFT_ENCODER_MULTIPLIER 2
+#define LEFT_ENCODER_MULTIPLIER 1
 
 #define LEAKY_INTEGRATOR_ALPHA 0.6
 
@@ -90,7 +90,7 @@ void recv(ros::Publisher &pub) {
   state_msg.drive_right_ang = DEG2RAD(state.drive_right_ang);
   state_msg.drive_left_vel = DEG2RAD(left_vel);
   state_msg.drive_right_vel = DEG2RAD(right_vel);
-  state_msg.dep_ang = DEG2RAD(state.dep_ang);
+  state_msg.exc_ang = DEG2RAD(state.exc_ang);
   state_msg.uwb_dists.push_back(state.uwb_dist_0);
   state_msg.uwb_dists.push_back(state.uwb_dist_1);
   state_msg.uwb_dists.push_back(state.uwb_dist_2);

@@ -10,7 +10,7 @@ message RobotSensors {
 
   float drive_left_ang = 7;
   float drive_right_ang = 8;
-  float dep_ang = 9;
+  float exc_ang = 9;
 
   float dep_weight = 10;
   float uwb_dist_0 = 11;
