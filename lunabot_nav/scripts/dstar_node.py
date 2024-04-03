@@ -26,9 +26,13 @@ class DstarNode:
 
         self.dstar: Dstar = None
 
-        self.path_sampling_rate = 5 # Take every <n-th> point from the path
+        self.path_sampling_rate = rospy.get_param("/nav/dstar_node/path_sampling_rate") # Take every <n-th> point from the path
 
-        self.path_publisher = rospy.Publisher("/nav/global_path", Path, queue_size=10, latch=True)
+        path_topic = rospy.get_param("/nav/global_path_topic")
+        self.path_publisher = rospy.Publisher(path_topic, Path, queue_size=10, latch=True)
+
+        self.occupancy_threshold = rospy.get_param("/nav/occ_threshold")
+
 
 
     def grid_callback(self, data: OccupancyGrid):
@@ -86,13 +90,13 @@ class DstarNode:
         odom_topic = rospy.get_param("/odom_topic")
         goal_topic = rospy.get_param("/nav_goal_topic")
 
-        radius = 8  # robot rad (grid units)
-        # TODO why was this here
+        map_topic = rospy.get_param("/nav/map_topic")
+        map_update_topic = rospy.get_param("/nav/map_update_topic")
 
         frequency = 10  # hz
 
-        rospy.Subscriber("/maps/costmap_node/global_costmap/costmap", OccupancyGrid, self.grid_callback)
-        rospy.Subscriber("/maps/costmap_node/global_costmap/costmap_updates", OccupancyGridUpdate, self.grid_update_callback)
+        rospy.Subscriber(map_topic, OccupancyGrid, self.grid_callback)
+        rospy.Subscriber(map_update_topic, OccupancyGridUpdate, self.grid_update_callback)
         rospy.Subscriber(odom_topic, Odometry, self.position_callback)
         rospy.Subscriber(goal_topic, PoseStamped, self.goal_callback)
 
@@ -103,7 +107,7 @@ class DstarNode:
             # Startup condition: once all data is available, create a new Dstar object and find the path
             if (self.dstar is None) and len(self.map) > 0 and len(self.pose) > 0 and len(self.goal) > 0:
 
-                self.dstar = Dstar(self.goal, self.pose, self.map.copy(), self.resolution, self.x_offset, self.y_offset)
+                self.dstar = Dstar(self.goal, self.pose, self.map.copy(), self.resolution, self.x_offset, self.y_offset, self.occupancy_threshold)
                 self.publish_path(self.dstar.find_path())
                 self.goal_update_needed = False
 
@@ -115,7 +119,7 @@ class DstarNode:
                     # If we've gotten a new goal, it is more efficient to reset the dstar data (as it is all based on goal location)
                     # so we do so and find a new path
 
-                    self.dstar = Dstar(self.goal, self.pose, self.map.copy(), self.resolution, self.x_offset, self.y_offset)
+                    self.dstar = Dstar(self.goal, self.pose, self.map.copy(), self.resolution, self.x_offset, self.y_offset, self.occupancy_threshold)
                     self.publish_path(self.dstar.find_path())
                     self.goal_update_needed = False
                     continue
@@ -127,7 +131,7 @@ class DstarNode:
 
                     self.dstar.update_position(self.pose)
 
-                    rospy.loginfo("Dstar grid update")
+                    rospy.logdebug("Dstar grid update")
                     
                     self.publish_path(self.dstar.update_map(self.map.copy(), self.x_offset, self.y_offset))
 
@@ -143,7 +147,7 @@ class DstarNode:
         Reduces the size/complexity of the path using the path sampling rate
         """
 
-        rospy.loginfo("Dstar publishing path")
+        rospy.logdebug("Dstar publishing path")
 
         if path_data == "same":
             return

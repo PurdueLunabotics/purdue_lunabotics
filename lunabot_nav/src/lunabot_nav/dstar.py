@@ -15,7 +15,7 @@ class Dstar:
     when the map changes by saving the processed data and updating only what is necessary.
     """
 
-    def __init__(self, goal: 'list[float]', start: 'list[float]', init_map: np.ndarray, resolution: float, x_offset: float, y_offset: float):
+    def __init__(self, goal: 'list[float]', start: 'list[float]', init_map: np.ndarray, resolution: float, x_offset: float, y_offset: float, occupancy_threshold: int = 50):
         """
         Initializes the Dstar algorithm by setting up the map, node values, start, and the goal. The map/node values will be buffered to include the goal if necessary.
         Creates the priority queue, adds the first node to check, and marks the node's estimate value as 0.
@@ -25,10 +25,10 @@ class Dstar:
         """
 
         self.node_queue: PriorityQueue = PriorityQueue()
-        self.km: float = 0.0
+        self.km: float = 0.0    # Accumulation of distance from the last point (of changed map) to the current point
 
         # What number on the map corresponds to occupied
-        self.OCCUPANCY_THRESHOLD = 50  
+        self.OCCUPANCY_THRESHOLD = occupancy_threshold
 
          # faster than computing sqrt 2 over and over
         self.root2 = np.sqrt(2)
@@ -252,7 +252,7 @@ class Dstar:
         Once finished, returns the calculated path from the start to the goal.
         """
 
-        rospy.loginfo("Dstar: Finding path")
+        rospy.logdebug("Dstar: Finding path")
 
         # If the start is out of the map, or is an obstacle, search for the closest non-occupied node
         if (self.current_node[0] < 0 or self.current_node[0] >= len(self.current_map) or 
@@ -320,7 +320,7 @@ class Dstar:
         repeats until the goal is reached. All of these points in order are the path.
         """
 
-        rospy.loginfo("Dstar: Generating path")
+        rospy.logdebug("Dstar: Generating path")
 
         node_values_list = self.node_values_list 
 
@@ -408,7 +408,7 @@ class Dstar:
         Finally, it calculates the new path and returns the result
         """
 
-        rospy.loginfo("Dstar: Updating values for new map")
+        rospy.logdebug("Dstar: Updating values for new map")
 
         # Add to the accumulation value the distance from the last point (of changed map) to the current point
         self.km += ((self.prev_node[0] - self.current_node[0]) ** 2
@@ -513,7 +513,7 @@ class Dstar:
         if np.array_equal(true_prev_map, new_map):
             return "same" # This case is handled specifically in dstar-node- basically, don't calculate a new path if nothing changed
         
-        rospy.loginfo("Dstar: Building map")
+        rospy.logdebug("Dstar: Building map")
         
         new_node_values = self.node_values_list.copy()
 
@@ -581,5 +581,5 @@ class Dstar:
         self.current_map = new_map
 
         # Call update-replan, which compares the prev map and new map to mark any differences.
-        # This eventually calcualtes the new path and returns it.
+        # This eventually calculates the new path and returns it.
         return self.update_replan(true_prev_map, columnsLeft, rowsUp)

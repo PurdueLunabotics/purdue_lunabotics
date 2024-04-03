@@ -9,10 +9,15 @@ cmd_vel_topic: "/cmd_vel"
 
 nav:
     map_topic: "/maps/costmap_node/global_costmap/costmap"
+    map_update_topic: "/maps/costmap_node/global_costmap/costmap_updates"
     global_path_topic: "/nav/global_path"
-    occ_threshold: 50 # corresponds to possibly-in-collision
+    occ_threshold: 50 # greater than this corresponds to possibly-in-collision
     bezier_step: 0.01
     lerp_step: 0.05
+
+    dstar_node:
+        path_sampling_rate: 5 # Take every <n-th> point from the path
+
     mpc_node:
         rollout_count: 50
         top_rollouts: 15
