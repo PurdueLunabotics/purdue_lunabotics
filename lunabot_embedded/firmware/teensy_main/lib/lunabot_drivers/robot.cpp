@@ -108,8 +108,7 @@ void cb(int8_t volt) { dep_mtr.write(-volt); }
 } // namespace deposition
 
 namespace load_cell {
-void update(float &d0, float &d1) {
-  d0 = HX711_Load_Cell::read_weight(0);
-  d1 = HX711_Load_Cell::read_weight(1);
+void update(float &d0) {
+  d0 = HX711_Load_Cell::read_weight(0) + HX711_Load_Cell::read_weight(1);
 }
 } // namespace load_cell

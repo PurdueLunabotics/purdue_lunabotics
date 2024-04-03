@@ -46,6 +46,6 @@ float update_curr();
 } // namespace excavation
 
 namespace load_cell {
-void update(float &d1, float &d2);
+void update(float &d2);
 }
 #endif
