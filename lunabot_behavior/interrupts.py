@@ -8,6 +8,7 @@ class Errors(Enum):
     OVERCURRENT = auto()
     ROS_ENDED = auto()
     STUCK = auto()
+    MANUAL_STOP = auto()
 
 
 class Interrupts:
@@ -24,6 +25,8 @@ class Interrupts:
             return Errors.STUCK
         if self.robot_errors.overcurrent:
             return Errors.OVERCURRENT
+        if self.robot_errors.manual_stop:
+            return Errors.MANUAL_STOP
         if rospy.is_shutdown():
             return Errors.ROS_ENDED
 

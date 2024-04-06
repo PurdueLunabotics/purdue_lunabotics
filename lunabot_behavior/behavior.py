@@ -292,6 +292,9 @@ class Behavior:
             if problem == interrupts.Errors.ROS_ENDED:
                 #simply exit this loop and the whole program
                 break
+            elif problem == interrupts.Errors.MANUAL_STOP:
+                # also exit the loop/stop autonomy
+                break
             elif problem == interrupts.Errors.OVERCURRENT:
                 #TODO: what goes here?
                 pass
