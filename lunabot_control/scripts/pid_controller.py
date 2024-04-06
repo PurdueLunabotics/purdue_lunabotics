@@ -1,9 +1,9 @@
-"""
-Velocity PID Controller
-Takes in setpoint, PID values, and feedforward term
-Feedforward term should be max speed in control space / max speed in sensor space (127 / max speed of motor for most cases)
-"""
 class VelocityPIDController:
+    """
+    Velocity PID Controller
+    Takes in setpoint, PID values, and feedforward term
+    Feedforward term should be max speed in control space / max speed in sensor space (127 / max speed of motor for most cases)
+    """
 
     def __init__(self, setpoint, kp, ki, kd, kf):
         self.setpoint = setpoint

@@ -36,10 +36,10 @@ class Excavate:
         # 90 percent of max speed
         TARGET_EXCAVATION_VELOCITY = 127 * 0.9
 
-        self.excavation_pid_controller = VelocityPIDController(TARGET_EXCAVATION_VELOCITY, 1, 0, 0, 1) #TODO find values
+        self.excavation_pid_controller = VelocityPIDController(TARGET_EXCAVATION_VELOCITY, 1, 0, 0, 127) #TODO find values
 
-        self.left_drivetrain_pid_controller = VelocityPIDController(1, 1, 0, 0, 1) #TODO find values
-        self.right_drivetrain_pid_controller = VelocityPIDController(1, 1, 0, 0, 1) #TODO find values
+        self.left_drivetrain_pid_controller = VelocityPIDController(1, 1, 0, 0, 127) #TODO find values
+        self.right_drivetrain_pid_controller = VelocityPIDController(1, 1, 0, 0, 127) #TODO find values
         
         # Constants (in meters)
         self.TARGET_DEPTH_OF_CUT = 0.003175 # Currently set to 1/8 inch, TODO tune this
@@ -123,7 +123,6 @@ class Excavate:
 
         load_cell_weight = self.robot_sensors.load_cell_weights[0] + self.robot_sensors.load_cell_weights[1]
 
-        # TODO add logic for bucket stall
         # TODO add logic for stopping if obstacles exist (both rocks and craters)
 
         # Until the load cells are full (enough soil), keep moving the robot forward and spinning excavation
