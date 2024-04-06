@@ -85,7 +85,6 @@ class FindAprilTag:
         """
         Convert the first apriltag detection to the odom frame
         """
-
         tf_buffer = tf2_ros.Buffer()
         tf_listener = tf2_ros.TransformListener(tf_buffer)
 
@@ -96,19 +95,10 @@ class FindAprilTag:
         pose.header = self.apriltag_detections.header
         pose.pose = apriltag_detection.pose.pose.pose
 
-        # This requests a transform time half a second in the future from when the apriltag was found
-        # This is needed because the transform listener is slow, and doesn't have the correct transform from when the apriltag is found exactly
-        pose.header.stamp = rospy.Time(pose.header.stamp.to_sec() + 0.4, 0)
+        # Set the time to 0 to get the latest available transform
+        pose.header.stamp = rospy.Time(0)
 
-        try:
-            pose_in_odom = tf_buffer.transform(pose, target_frame, rospy.Duration(2.0))
-        except:
-            # If this doesn't work (occasionally it doesn't,) look even farther in the future (although this may be less accurate)
-            try:
-                pose.header.stamp = rospy.Time(pose.header.stamp.to_sec() + 0.8, 0)
-                pose_in_odom = tf_buffer.transform(pose, target_frame, rospy.Duration(4.0))
-            except:
-                raise Exception("Failed to transform apriltag pose to odom frame")
+        pose_in_odom = tf_buffer.transform(pose, target_frame, rospy.Duration(2.0))
 
         return pose_in_odom
         
