@@ -239,6 +239,7 @@ class Behavior:
                     # Set a goal to the berm zone and publish it
                     berm_goal.header.stamp = rospy.Time.now()
                     self.goal_publisher.publish(berm_goal)
+                    self.berm_zone.visualize_zone(self.zone_visual_publisher)
                     
                     self.current_state = States.TRAVERSAL_BERM
 
@@ -281,6 +282,7 @@ class Behavior:
                     # Set a goal to the mining zone and publish it
                     mining_goal.header.stamp = rospy.Time.now()
                     self.goal_publisher.publish(mining_goal)
+                    self.mining_zone.visualize_zone(self.zone_visual_publisher)
 
                     self.current_state = States.TRAVERSAL_MINE
 
