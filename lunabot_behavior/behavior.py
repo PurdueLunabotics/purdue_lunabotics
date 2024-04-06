@@ -1,10 +1,12 @@
+#!/usr/bin/env python3
+
 import rospy
 from enum import Enum, auto
 import math
 
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from geometry_msgs.msg import Twist, PoseStamped
-from nav_msgs.msg import Path
+from nav_msgs.msg import Path, Odometry
 from apriltag_ros.msg import AprilTagDetectionArray, AprilTagDetection
 from lunabot_msgs.msg import RobotEffort, RobotSensors, RobotErrors, Behavior
 from std_msgs.msg import Bool
@@ -28,13 +30,13 @@ class States(Enum):
     ALIGN = auto()
     DEPOSIT = auto()
 
-'''
-A class that controls the main behavior of the robot, aiming for a cycle of autonomous mining and berm depositing
-Consists of a variety of states, most of which are imported python modules. Publishes robot effort and cmd_vel,
-along with the various submodules (which share publishers when possible). For autonomous driving, the class
-publishes a boolean state that enables or disables MPC.
-'''
 class Behavior:
+    '''
+    A class that controls the main behavior of the robot, aiming for a cycle of autonomous mining and berm depositing
+    Consists of a variety of states, most of which are imported python modules. Publishes robot effort and cmd_vel,
+    along with the various submodules (which share publishers when possible). For autonomous driving, the class
+    publishes a boolean state that enables or disables MPC.
+    '''
 
     def robot_state_callback(self, msg: RobotSensors):
         self.robot_state = msg
@@ -45,10 +47,17 @@ class Behavior:
     def errors_callback(self, msg: RobotErrors):
         self.robot_errors = msg
 
+    def odom_callback(self, msg: Odometry):
+        self.robot_odom = msg
+
     def __init__(self):
+
+        rospy.init_node('behavior_node')
+
         self.robot_state: RobotSensors = RobotSensors()
         self.robot_effort: RobotEffort = RobotEffort()
         self.robot_errors: RobotErrors = RobotErrors()
+        self.robot_odom: Odometry = Odometry()
 
         self.effort_publisher = rospy.Publisher("/effort", RobotEffort, queue_size=1, latch=True)
         self.velocity_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
@@ -63,18 +72,49 @@ class Behavior:
         self.mining_zone = None
         self.berm_zone = None
 
+        self.rate = rospy.Rate(1) #hz
+
         # TODO change to parameters, determine which are needed
         rospy.Subscriber("/sensors", RobotSensors, self.robot_state_callback)
         rospy.Subscriber("/effort", RobotEffort, self.effort_callback)
         rospy.Subscriber("/errors", RobotErrors, self.errors_callback)
+        rospy.Subscriber("/odom", Odometry, self.odom_callback)
 
-        rospy.init_node('behavior_node')
 
-    """
-    The main method of the class: enables autonomous behavior. Starts up with a few states,
-    then goes in a loop of mining/deposition.
-    """
+    def is_close_to_goal(self, goal: PoseStamped) -> bool:
+        """
+        Checks if the robot is close to a given goal
+        """
+
+        THRESHOLD = 0.15
+
+        x = self.robot_odom.pose.pose.position.x
+        y = self.robot_odom.pose.pose.position.y
+
+        goal_x = goal.pose.position.x
+        goal_y = goal.pose.position.y
+
+        distance = math.sqrt((x - goal_x)**2 + (y - goal_y)**2)
+        print(distance)
+
+        return distance < THRESHOLD
+    
+    def stop_moving(self):
+        """
+        Publishes a 0 cmd_vel
+        """
+
+        twist = Twist()
+        twist.linear.x = 0
+        twist.angular.z = 0
+
+        self.velocity_publisher.publish(twist)
+
     def behavior_loop(self):
+        """
+        The main method of the class: enables autonomous behavior. Starts up with a few states,
+        then goes in a loop of mining/deposition.
+        """
 
         # Initialize all of the modules (before the loop)
         ascent_module = ascent.Ascent(self.effort_publisher)
@@ -132,6 +172,16 @@ class Behavior:
         mining_goal.header.stamp = rospy.Time.now()
         mining_goal.header.frame_id = "odom"
 
+
+        # create a goal for the berm
+        berm_goal = PoseStamped()
+        berm_goal.pose.position.x = self.berm_zone.middle[0]
+        berm_goal.pose.position.y = self.berm_zone.middle[1]
+        berm_goal.pose.position.z = 0
+
+        berm_goal.header.stamp = rospy.Time.now()
+        berm_goal.header.frame_id = "odom"
+
         self.goal_publisher.publish(mining_goal)
 
         # This visualizes the given zone as a red square (visible in rviz)
@@ -149,8 +199,16 @@ class Behavior:
                     rospy.loginfo("State: Traversal")
                     traversal_message.data = True
                     self.traversal_publisher.publish(traversal_message)
+
+
+                    while (not self.is_close_to_goal(mining_goal)):
+                        # Wait until close enough
+                        self.rate.sleep()
+                        if (interrupts.check_for_interrupts() != interrupts.Errors.FINE):
+                            break
+
+                    self.stop_moving()
                     
-                    # Detect when reached mining zone
                     self.current_state = States.PLUNGE
                 
                 # Lower linear actuators and begin spinning excavation
@@ -179,7 +237,10 @@ class Behavior:
                     if ascent_status == False: # Robot error
                         break
                         
-                    # Set goal to berm
+                    # Set a goal to the berm zone and publish it
+                    berm_goal.header.stamp = rospy.Time.now()
+                    self.goal_publisher.publish(berm_goal)
+                    
                     self.current_state = States.TRAVERSAL_BERM
 
                 # Drive to berm area
@@ -189,6 +250,14 @@ class Behavior:
 
                     traversal_message.data = True
                     self.traversal_publisher.publish(traversal_message)
+
+                    while (not self.is_close_to_goal(berm_goal)):
+                        # Wait until close enough
+                        self.rate.sleep()
+                        if (interrupts.check_for_interrupts() != interrupts.Errors.FINE):
+                            break
+
+                    self.stop_moving()
 
                     # Detect when reached berm
                     self.current_state = States.ALIGN
@@ -211,9 +280,14 @@ class Behavior:
                     if deposition_status == False:
                         break
 
+                    # Set a goal to the mining zone and publish it
+                    mining_goal.header.stamp = rospy.Time.now()
+                    self.goal_publisher.publish(mining_goal)
+
                     self.current_state = States.TRAVERSAL_MINE
 
-                # Set goal to mining zone
+                self.rate.sleep()
+                
             
             # This block runs when we have an interrupt (some kind of error)
             problem = interrupts.check_for_interrupts()
