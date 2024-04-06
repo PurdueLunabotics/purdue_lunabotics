@@ -5,10 +5,12 @@ import interrupts
 from lunabot_control.scripts.pid_controller import VelocityPIDController
 from lunabot_control.scripts.clamp_output import clamp_output
 
-'''
-This is a transition state that spins excavation and lowers the linear actuators to begin mining.
-'''
+
 class Excavate:
+    '''
+    A state used to autonomously excavate. Plunge lowers linear actuators while spinning the buckets,
+    and excavate drives forwards/spins the buckets to try and meet a target depth of cut.
+    '''
     
     def sensors_callback(self, msg: RobotSensors):
         self.robot_sensors = msg
@@ -20,10 +22,10 @@ class Excavate:
         """
 
         if effort_publisher is None:
-            self.effort_publisher = rospy.Publisher("/effort", RobotEffort, queue_size=1, latch=True)
+            self.effort_publisher: rospy.Publisher = rospy.Publisher("/effort", RobotEffort, queue_size=1, latch=True)
             rospy.init_node('plunge_node')
         else:
-            self.effort_publisher = effort_publisher
+            self.effort_publisher: rospy.Publisher = effort_publisher
 
         self.robot_sensors = RobotSensors()
 
@@ -33,17 +35,21 @@ class Excavate:
 
         self.lin_act_curr_threshold = 10 # TODO find value
 
-        self.excavation_pid_controller = VelocityPIDController(1, 1, 0, 0, 1) #TODO find values
+        # 90 percent of max speed
+        TARGET_EXCAVATION_VELOCITY = 127 * 0.9
+
+        self.excavation_pid_controller = VelocityPIDController(TARGET_EXCAVATION_VELOCITY, 1, 0, 0, 1) #TODO find values
 
         self.left_drivetrain_pid_controller = VelocityPIDController(1, 1, 0, 0, 1) #TODO find values
         self.right_drivetrain_pid_controller = VelocityPIDController(1, 1, 0, 0, 1) #TODO find values
 
         self.target_depth_of_cut = 0 #TODO find values
 
-        self.bucket_radius = 0.0948
-        self.bucket_spacing = 0.0853 #TODO place constants somewhere else?
+        self.BUCKET_RADIUS = 0.0948
+        self.BUCKET_SPACING = 0.0853 #TODO place constants somewhere else?
 
         self.load_cell_weight_threshold = 0 #TODO find value
+        self.max_lin_act_vel = 1 #TODO find value
     
     def excavate(self):
         self.plunge()
@@ -51,7 +57,7 @@ class Excavate:
 
     def plunge(self):
         """
-        Controls plunging (moving linear actuators + spinning excavation)
+        Controls plunging (moving linear actuators down + spinning excavation)
         """
 
         time.sleep(0.1) #Why is time.sleep() here. TODO investigate
@@ -73,15 +79,14 @@ class Excavate:
 
             dt = new_time - time
 
-            excavation_vel = (new_excavation_ang - excavation_ang) / dt #TODO check calculations are good
+            excavation_velocity = (new_excavation_ang - excavation_ang) / dt #TODO check calculations are good
 
-            excavation_ctrl = self.excavation_pid_controller.update(excavation_vel, dt)
+            excavation_control = self.excavation_pid_controller.update(excavation_velocity, dt)
+            effort_message.excavate = clamp_output(excavation_control)
 
-            self.effort_publisher.excavate = clamp_output(excavation_ctrl)
+            target_actuator_velocity = self.target_depth_of_cut * excavation_velocity * self.BUCKET_RADIUS / self.BUCKET_SPACING
 
-            target_lin_vel = self.target_depth_of_cut * excavation_vel * self.bucket_radius / self.bucket_spacing
-
-            self.effort_publisher.lin_act = clamp_output(127 / self.max_lin_act_vel * target_lin_vel) #No encoders so cannot do PID, estimating (will slighly underestimate on lower voltage)
+            effort_message.lin_act = clamp_output(127 / self.max_lin_act_vel * target_actuator_velocity) #No encoders so cannot do PID, estimating (will slighly underestimate on lower voltage)
 
             self.effort_publisher.publish(effort_message)
 
@@ -98,18 +103,15 @@ class Excavate:
 
     def trench(self):
         """
-        Controls trenching (moving linear actuators + driving forward)
+        Controls trenching (spinning excavation + driving forward)
         """
 
         time.sleep(0.1) #Why is time.sleep() here. TODO investigate
 
-        effort_message = RobotEffort()
-
+        effort_message = RobotEffort() 
 
         excavation_ang = self.robot_sensors.exc_ang #TODO have firmware give excavation angle directly?
         time = rospy.get_time()
-        self.bucket_radius = 0.0948
-        self.bucket_spacing = 0.0853 #TODO place constatns somewhere else?
 
         load_cell_weight = self.robot_sensors.load_cell_weights[0] + self.robot_sensors.load_cell_weights[1]
 
@@ -128,19 +130,18 @@ class Excavate:
 
             excavation_vel = (new_excavation_ang - excavation_ang) / dt #TODO check calculations are good
 
-            excavation_ctrl = self.excavation_pid_controller.update(excavation_vel, dt)
+            excavation_control = self.excavation_pid_controller.update(excavation_vel, dt)
+            effort_message.excavate = clamp_output(excavation_control)
 
-            self.effort_publisher.excavate = clamp_output(excavation_ctrl)
+            target_linear_vel = self.target_depth_of_cut * excavation_vel * self.BUCKET_RADIUS / self.BUCKET_SPACING
 
-            target_lin_vel = self.target_depth_of_cut * excavation_vel * self.bucket_radius / self.bucket_spacing
-
-            self.left_drivetrain_pid_controller.set_setpoint(target_lin_vel)
+            self.left_drivetrain_pid_controller.set_setpoint(target_linear_vel)
             left_drivetrain_ctrl = self.left_drivetrain_pid_controller.update(self.robot_sensors.drive_left_vel)
-            self.effort_publisher.left_drive = clamp_output(left_drivetrain_ctrl)
+            effort_message.left_drive = clamp_output(left_drivetrain_ctrl)
 
-            self.right_drivetrain_pid_controller.set_setpoint(target_lin_vel)
+            self.right_drivetrain_pid_controller.set_setpoint(target_linear_vel)
             right_drivetrain_ctrl = self.right_drivetrain_pid_controller.update(self.robot_sensors.drive_right_vel)
-            self.effort_publisher.right_drive = clamp_output(right_drivetrain_ctrl)
+            effort_message.right_drive = clamp_output(right_drivetrain_ctrl)
 
             self.effort_publisher.publish(effort_message)
 
@@ -158,3 +159,7 @@ class Excavate:
         self.effort_publisher.publish(effort_message)
 
         return True
+    
+if __name__ == "__main__":
+    excavate_module = Excavate()
+    excavate_module.excavate()
