@@ -338,3 +338,18 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
     }
   }
 }
+
+HX711 HX711_Load_Cell::scales[2];
+
+void HX711_Load_Cell::init() {
+  scales[0].begin(PIN_LIST[0], PIN_LIST[1]);
+  scales[1].begin(PIN_LIST[2], PIN_LIST[3]);
+
+  scales[0].set_offset(offsets);
+  scales[0].set_scale(scale_calib);
+
+  scales[1].set_offset(offsets);
+  scales[1].set_scale(scale_calib);
+}
+
+float HX711_Load_Cell::read_weight(uint8_t id) { return scales[id].get_units(); }

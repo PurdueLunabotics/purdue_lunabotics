@@ -10,6 +10,7 @@
 #include <HX711.h>
 #include <RobotMsgs.pb.h>
 #include "robot.hpp"
+#include <HX711.h>
 
 #define UWBSerial Serial8
 
@@ -152,6 +153,21 @@ private:
   static constexpr float deg_per_rev = 360; //TODO, remove the deg2rad conversion and just to rad here
    
   static Encoder encs[NUM_ENCODERS];
+};
+
+class HX711_Load_Cell {
+public:
+  HX711_Load_Cell(){};
+  static void init();
+  static float read_weight(uint8_t id);
+
+  //calibration values
+  static constexpr long offsets = 342931;
+  static constexpr float scale_calib = -110.096122;
+  static HX711 scales[2];
+
+private: 
+  static constexpr int PIN_LIST[4] = {19, 18, 21, 20}; //data, clock, data, clock
 };
 
 #endif

@@ -3,7 +3,6 @@
 
 #include "interfaces.hpp"
 #include <Arduino.h>
-#include <Stepper.h>
 
 #define ST_SERIAL Serial1
 #define ST_BAUD_RATE 9600
@@ -44,4 +43,8 @@ void cb(int8_t exc);
 void update(int32_t &, float &);
 float update_curr();
 } // namespace excavation
+
+namespace load_cell {
+void update(float &d2);
+}
 #endif
