@@ -207,6 +207,8 @@ class Behavior:
                         if (interrupts.check_for_interrupts() != interrupts.Errors.FINE):
                             break
 
+                    traversal_message.data = False
+                    self.traversal_publisher.publish(traversal_message)
                     self.stop_moving()
                     
                     self.current_state = States.PLUNGE
@@ -214,9 +216,6 @@ class Behavior:
                 # Lower linear actuators and begin spinning excavation
                 if (self.current_state == States.PLUNGE):
                     rospy.loginfo("State: Plunging")
-
-                    traversal_message.data = False
-                    self.traversal_publisher.publish(traversal_message)
 
                     plunge_status = plunge_module.plunge()
                     if plunge_status == False:
@@ -257,6 +256,8 @@ class Behavior:
                         if (interrupts.check_for_interrupts() != interrupts.Errors.FINE):
                             break
 
+                    traversal_message.data = False
+                    self.traversal_publisher.publish(traversal_message)
                     self.stop_moving()
 
                     # Detect when reached berm
@@ -265,12 +266,9 @@ class Behavior:
                 # Align with an apriltag at the berm
                 if (self.current_state == States.ALIGN):
                     rospy.loginfo("State: Alignment")
-
-                    traversal_message.data = False
-                    self.traversal_publisher.publish(traversal_message)
+                    # Alignment
 
                     self.current_state = States.DEPOSIT
-                    # Alignment
             
                 # Deposit regolith w/ auger
                 if (self.current_state == States.DEPOSIT):
