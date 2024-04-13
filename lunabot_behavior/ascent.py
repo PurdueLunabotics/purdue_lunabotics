@@ -33,10 +33,18 @@ class Ascent:
 
 		self.ACTUATOR_CURRENT_THRESHOLD = 0.01 #TODO adjust as needed
 
+		self.is_sim = rospy.get_param("is_sim")
+
 	def raise_linear_actuators(self):
 		"""
 		Raise linear actuators to the max. height by turning them on until the current received is 0.
 		"""
+
+		# don't run if in sim
+		if (self.is_sim):
+			rospy.loginfo("Ascent: would raise actuators")
+			time.sleep(2)
+			return True
 
 		time.sleep(0.1)
 
@@ -60,3 +68,7 @@ class Ascent:
 		self.effort_publisher.publish(effort_message)
 		
 		return True
+	
+if __name__ == "__main__":
+	ascent = Ascent()
+	ascent.raise_linear_actuators()

@@ -86,7 +86,7 @@ class Behavior:
         Checks if the robot is close to a given goal
         """
 
-        THRESHOLD = 0.15
+        THRESHOLD = 0.15 # meters
 
         x = self.robot_odom.pose.pose.position.x
         y = self.robot_odom.pose.pose.position.y
@@ -95,7 +95,6 @@ class Behavior:
         goal_y = goal.pose.position.y
 
         distance = math.sqrt((x - goal_x)**2 + (y - goal_y)**2)
-        print(distance)
 
         return distance < THRESHOLD
     
@@ -154,8 +153,6 @@ class Behavior:
         else:
             self.start_apriltag = apriltag_status
 
-        self.current_state = States.TRAVERSAL_MINE
-
         # Translate the apriltag into the odom frame
         apriltag_pose_in_odom: PoseStamped = find_apriltag_module.convert_to_odom_frame(self.start_apriltag)
 
@@ -181,6 +178,8 @@ class Behavior:
 
         berm_goal.header.stamp = rospy.Time.now()
         berm_goal.header.frame_id = "odom"
+
+        self.current_state = States.TRAVERSAL_MINE
 
         self.goal_publisher.publish(mining_goal)
 

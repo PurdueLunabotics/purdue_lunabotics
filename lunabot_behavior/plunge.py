@@ -5,10 +5,10 @@ import interrupts
 
 import time
 
-'''
-This is a transition state that spins excavation and lowers the linear actuators to begin mining.
-'''
 class Plunge:
+    '''
+    This is a transition state that spins excavation and lowers the linear actuators to begin mining.
+    '''
     
     def sensors_callback(self, msg: RobotSensors):
         self.robot_sensors = msg
@@ -34,10 +34,17 @@ class Plunge:
         # TODO: check and test this value
         self.LOWERING_TIME = 5 #In seconds, how long it takes to lower the linear actuators 90% of the way
 
+        self.is_sim = rospy.get_param("is_sim")
+
     def plunge(self):
         """
         Spin excavation at full speed, lower linear actuators 90% to begin mining, and then reduce speed to 25%
         """
+
+        if (self.is_sim):
+            rospy.loginfo("Plunge: would plunge")
+            time.sleep(2)
+            return True
 
         time.sleep(0.1)
 
@@ -62,3 +69,7 @@ class Plunge:
         self.effort_publisher.publish(effort_message)
 
         return True
+    
+if __name__ == "__main__":
+    plunge = Plunge()
+    plunge.plunge()

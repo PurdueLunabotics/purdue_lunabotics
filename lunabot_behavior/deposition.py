@@ -34,10 +34,17 @@ class Deposition:
 
         self.load_cell_threshold = 1 # in kilograms, TODO test / verify
 
+        self.is_sim = rospy.get_param("is_sim")
+
     def deposit(self):
         """
         Spin the auger until the load cell detects that the bin is empty
         """
+
+        if (self.is_sim):
+            rospy.loginfo("Deposition: would deposit")
+            time.sleep(2)
+            return True
 
         time.sleep(0.1)
 
@@ -61,3 +68,7 @@ class Deposition:
         self.effort_publisher.publish(effort_message)
 
         return True
+    
+if __name__ == "__main__":
+    deposition = Deposition()
+    deposition.deposit()

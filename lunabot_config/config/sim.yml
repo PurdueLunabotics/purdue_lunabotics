@@ -32,3 +32,5 @@ nav:
         velocity_limits:
             linear: [-0.5, 0.5]
             angular: [-0.785, 0.785]
+
+is_sim: true
