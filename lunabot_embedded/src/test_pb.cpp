@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <ctime>
 #include <iostream>
 #include <lunabot_embedded/sensor_proc.h>
@@ -20,7 +21,6 @@ RobotSensors state = RobotSensors_init_zero;
 RobotEffort effort = RobotEffort_init_zero;
 
 int main(int argc, char **argv) {
-
   state.lead_screw_curr = 65535;
   state.act_right_curr = 65535;
   state.dep_curr = 65535;
@@ -40,14 +40,16 @@ int main(int argc, char **argv) {
   effort.right_drive = 126;
   effort.excavate = 126;
   effort.deposit = 126;
-  size_t sensors_size;
-  size_t effort_size;
+  size_t sensors_size = 0;
+  size_t effort_size = 0;
   bool res = pb_get_encoded_size(&sensors_size, RobotSensors_fields, &state);
-
-  cout << "sensors nanopb msg encoding success: " << res << endl;
+  assert(res);
   res = pb_get_encoded_size(&effort_size, RobotEffort_fields, &effort);
-  cout << "effort nanopb msg encoding success: " << res << endl;
-
+  assert(res);
   cout << "sensors nanopb msg size (bytes): " << sensors_size << endl;
   cout << "effort nanopb msg size (bytes): " << effort_size << endl;
+  // rawhid can transfer up to 64 bytes each way at 1khz, this file sanity checks this:
+  // https://www.pjrc.com/teensy/rawhid.html
+  assert(sensors_size < 64);
+  assert(effort_size < 64);
 }
