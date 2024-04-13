@@ -133,3 +133,20 @@ target_link_libraries(${PROJECT_NAME}_teensy_driver_node
   ${catkin_LIBRARIES}
 )
 
+
+if(CATKIN_ENABLE_TESTING)
+  find_package(GTest REQUIRED)
+  include_directories(${GTEST_INCLUDE_DIRS})
+  ## Add the Google Test to the testing framework of catkin
+  catkin_add_gtest(${PROJECT_NAME}_test_protobuf 
+    src/test_pb.cpp
+    src/pb_common.c 
+    src/pb_encode.c 
+    src/pb_decode.c 
+    src/RobotMsgs.pb.c  
+  )
+  target_link_libraries(${PROJECT_NAME}_test_protobuf
+    ${catkin_LIBRARIES}
+    ${GTEST_LIBRARIES}
+  )
+endif()
