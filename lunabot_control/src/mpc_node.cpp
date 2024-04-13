@@ -1,6 +1,6 @@
 #include <lunabot_control/mpc.h>
 
-bool traversal_enabled = false;
+bool traversal_enabled = true;
 
 void traversal_bool_callback(const std_msgs::Bool& msg) {
   traversal_enabled = msg.data;
