@@ -96,18 +96,10 @@ class Behavior:
 
         distance = math.sqrt((x - goal_x)**2 + (y - goal_y)**2)
 
+        rospy.logdebug("Behavior: Distance to goal: " + str(distance))
+
         return distance < THRESHOLD
-    
-    def stop_moving(self):
-        """
-        Publishes a 0 cmd_vel
-        """
 
-        twist = Twist()
-        twist.linear.x = 0
-        twist.angular.z = 0
-
-        self.velocity_publisher.publish(twist)
 
     def behavior_loop(self):
         """
@@ -208,7 +200,6 @@ class Behavior:
 
                     traversal_message.data = False
                     self.traversal_publisher.publish(traversal_message)
-                    self.stop_moving()
                     
                     self.current_state = States.PLUNGE
                 
@@ -258,7 +249,6 @@ class Behavior:
 
                     traversal_message.data = False
                     self.traversal_publisher.publish(traversal_message)
-                    self.stop_moving()
 
                     # Detect when reached berm
                     self.current_state = States.ALIGN

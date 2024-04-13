@@ -108,7 +108,7 @@ void MPC::update_setpoint_() {
 void MPC::update_grid(const nav_msgs::OccupancyGrid &grid) { map_.update_map(grid); }
 
 void MPC::update_path(const nav_msgs::Path &path) {
-  ROS_INFO("PATH");
+  ROS_DEBUG("MPC: New path");
   this->path_.clear();
   this->path_ind_ = 0;
   for (int i = 0; i < path.poses.size(); ++i) {
@@ -277,7 +277,7 @@ void MPC::calculate_velocity() {
     publish_velocity_(0, 0);
     return;
   }
-  
+
   int horizon_length = this->horizon_length_;
   Eigen::MatrixXd means = Eigen::MatrixXd::Zero(horizon_length, 2);    // v, omega
   Eigen::MatrixXd std_devs = Eigen::MatrixXd::Ones(horizon_length, 2); // v, omega

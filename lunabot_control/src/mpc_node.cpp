@@ -2,8 +2,14 @@
 
 bool traversal_enabled = true;
 
+MPC* mpc_ptr = NULL;
+
 void traversal_bool_callback(const std_msgs::Bool& msg) {
   traversal_enabled = msg.data;
+
+  if (!traversal_enabled & mpc_ptr != NULL) {
+    mpc_ptr->publish_velocity_(0, 0);
+  }
 }
 
 int main(int argc, char **argv) {
@@ -11,6 +17,7 @@ int main(int argc, char **argv) {
   ros::NodeHandle nh;
 
   MPC mpc(&nh);
+  mpc_ptr = &mpc;
 
   double frequency;
   ros::param::get("~frequency", frequency);

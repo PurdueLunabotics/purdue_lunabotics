@@ -55,7 +55,6 @@ private:
   Eigen::MatrixXd calculate_model_(Eigen::MatrixXd actions);
   std::vector<Eigen::MatrixXd> normal_distribute_(Eigen::MatrixXd means, Eigen::MatrixXd std_devs,
                                                   int count);
-  void publish_velocity_(double linear, double angular);
   Eigen::MatrixXd mean_(std::vector<std::pair<Eigen::MatrixXd, double>>);
   Eigen::MatrixXd std_dev_(std::vector<std::pair<Eigen::MatrixXd, double>>);
   double clamp_(double val, double low, double high);
@@ -70,6 +69,8 @@ public:
   void update_path(const nav_msgs::Path &path);
   void update_robot_pos(const nav_msgs::Odometry &odometry);
   void calculate_velocity();
+  void publish_velocity_(double linear, double angular);
+
 };
 
 #endif
