@@ -8,7 +8,7 @@ void traversal_bool_callback(const std_msgs::Bool& msg) {
   traversal_enabled = msg.data;
 
   if (!traversal_enabled & mpc_ptr != NULL) {
-    mpc_ptr->publish_velocity_(0, 0);
+    mpc_ptr->publish_velocity(0, 0);
   }
 }
 

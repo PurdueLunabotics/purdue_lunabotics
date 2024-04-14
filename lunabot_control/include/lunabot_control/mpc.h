@@ -2,6 +2,13 @@
 #define MPC_H
 
 #include <algorithm>
+#include <assert.h>
+#include <bits/stdc++.h>
+#include <cmath>
+#include <random>
+#include <vector>
+
+#include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Quaternion.h>
 #include <geometry_msgs/Twist.h>
@@ -9,16 +16,10 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/Path.h>
-#include <ros/ros.h>
 #include <std_msgs/Bool.h>
-#include <swri_profiler/profiler.h>
 
+#include <swri_profiler/profiler.h>
 #include <Eigen/Dense>
-#include <assert.h>
-#include <bits/stdc++.h>
-#include <cmath>
-#include <random>
-#include <vector>
 
 #include <lunabot_control/map.h>
 
@@ -59,7 +60,7 @@ private:
   Eigen::MatrixXd std_dev_(std::vector<std::pair<Eigen::MatrixXd, double>>);
   double clamp_(double val, double low, double high);
 
-  int is_close_();
+  bool is_close_();
   void update_setpoint_();
   double dist_to_setpoint_();
 
@@ -69,7 +70,7 @@ public:
   void update_path(const nav_msgs::Path &path);
   void update_robot_pos(const nav_msgs::Odometry &odometry);
   void calculate_velocity();
-  void publish_velocity_(double linear, double angular);
+  void publish_velocity(double linear, double angular);
 
 };
 
