@@ -55,10 +55,10 @@ void recv(ros::Publisher &pub) {
   /* Now we are ready to decode the message. */
   pb_decode(&stream, RobotSensors_fields, &state);
   lunabot_msgs::RobotSensors state_msg;
-  state_msg.act_right_curr = adc_to_current_ACS711_15A(state.act_right_curr);
-  state_msg.drive_right_curr = adc_to_current_ACS711_15A(state.drive_right_curr);
-  state_msg.drive_left_curr = adc_to_current_ACS711_15A(state.drive_left_curr);
-  state_msg.dep_curr = adc_to_current_ACS711_15A(state.dep_curr);
+  state_msg.act_right_curr = adc_to_current_ACS711_31A(state.act_right_curr);
+  state_msg.drive_right_curr = adc_to_current_ACS711_31A(state.drive_right_curr);
+  state_msg.drive_left_curr = adc_to_current_ACS711_31A(state.drive_left_curr);
+  state_msg.dep_curr = adc_to_current_ACS711_31A(state.dep_curr);
   state_msg.exc_curr = adc_to_current_ACS711_31A(state.exc_curr);
 
   // TODO: add timestamp to each value using StampedValue, allowing for more accurate derivative
