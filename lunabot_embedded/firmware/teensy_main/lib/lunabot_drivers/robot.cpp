@@ -36,10 +36,10 @@ Sabertooth_MotorCtrl left_drive_mtr{&MC1, STMotor::M2};
 Sabertooth_MotorCtrl right_drive_mtr{&MC1, STMotor::M1};
 
 constexpr uint8_t LEFT_CURR_ADC = 1;
-constexpr uint8_t LEFT_CURR_MUX = 0; // U5 curr_sense_board
+constexpr uint8_t LEFT_CURR_MUX = 1; // U5 curr_sense_board
 
 constexpr uint8_t RIGHT_CURR_ADC = 1;
-constexpr uint8_t RIGHT_CURR_MUX = 1; // U2 curr_sense_board
+constexpr uint8_t RIGHT_CURR_MUX = 0; // U2 curr_sense_board
 
 constexpr uint8_t RIGHT_ENC_ID = 0;
 constexpr uint8_t LEFT_ENC_ID = 1;
