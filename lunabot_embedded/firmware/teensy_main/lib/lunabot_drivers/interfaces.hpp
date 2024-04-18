@@ -11,7 +11,7 @@
 #include <RobotMsgs.pb.h>
 #include "robot.hpp"
 
-#define UWBSerial Serial8
+#define UWBSerial Serial4
 
 enum MotorDir { CW = HIGH, CCW = LOW };
 enum STMotor { M1 = 1, M2 = 2 };
