@@ -33,6 +33,8 @@ class Ascent:
 
 		self.ACTUATOR_CURRENT_THRESHOLD = 0.01 #TODO adjust as needed
 
+		self.RAISING_TIME = 15
+
 		self.is_sim = rospy.get_param("is_sim")
 
 	def raise_linear_actuators(self):
@@ -49,9 +51,11 @@ class Ascent:
 		time.sleep(0.1)
 
 		effort_message = RobotEffort()
-		effort_message.lin_act = 127 #TODO check max
+		effort_message.lin_act = 110 #TODO check max
 
-		while True:
+		start_time = rospy.get_time()
+
+		while (rospy.get_time() - start_time < self.RAISING_TIME):
 			self.effort_publisher.publish(effort_message)
 
 			#TODO check for new sensor message / values

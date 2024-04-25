@@ -32,7 +32,7 @@ class Plunge:
         self.rate = rospy.Rate(10)
 
         # TODO: check and test this value
-        self.LOWERING_TIME = 5 #In seconds, how long it takes to lower the linear actuators 90% of the way
+        self.LOWERING_TIME = 15 #In seconds, how long it takes to lower the linear actuators 90% of the way
 
         self.is_sim = rospy.get_param("is_sim")
 
@@ -49,9 +49,9 @@ class Plunge:
         time.sleep(0.1)
 
         effort_message = RobotEffort()
-        effort_message.excavate = True
+        effort_message.excavate = 127
 
-        effort_message.lin_act = -127 #TODO check if the direction is right/what the max is
+        effort_message.lin_act = -110 #TODO check if the direction is right/what the max is
 
         start_time = rospy.get_time()
 
