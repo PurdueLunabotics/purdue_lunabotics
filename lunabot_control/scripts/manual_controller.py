@@ -16,7 +16,7 @@ import numpy as np
 4 LB
 5 RB
 6 back (view button)
-7 start
+====7 start
 8 power
 9 button stick left
 10 button stick right
@@ -89,18 +89,19 @@ class ManualController:
         self.error_pub = rospy.Publisher("errors", RobotErrors, queue_size=1, latch=True)
 
         self.last_joy = Joy()
+        self.last_joy.buttons = [0,0,0,0,0,0,0,0,0,0,0]
 
         self._driving_mode = "Forwards"
         
         self._drive_speed_modifier = 1
-        self._slow_drive_speed = 0.1
+        self._slow_drive_speed = 0.25
         self._fast_drive_speed = 1
 
         self._latched_excavation_speed = 0
         self._excavation_is_latched = False
 
         self.DEPOSITION_SPEED = 127
-        self.ACTUATE_SPEED = 0.9
+        self.ACTUATE_SPEED = 0.8
 
         self.has_read_RT = False
         self.has_read_LT = False
@@ -119,20 +120,22 @@ class ManualController:
         self.error_pub.publish(self.error_msg)
 
     def joy_callback(self, joy):
-        # X button: Switch between driving forwards and backwards
+        # X button: Switch between driving forwards and backwards'
+        # print(joy.buttons, " joy buttons ")
+        # print(self.last_joy.buttons, "last joy")
         if joy.buttons[Buttons.X.value] == 1 and self.last_joy.buttons[Buttons.X.value] == 0:
-            if (self.driving_mode == "Forwards"):
-                self.driving_mode = "Backwards"
+            if (self._driving_mode == "Forwards"):
+                self._driving_mode = "Backwards"
             else:
-                self.driving_mode = "Forwards"
+                self._driving_mode = "Forwards"
 
-            rospy.loginfo(f"Driving Direction: {self.driving_mode}")
+            rospy.loginfo(f"Driving Direction: {self._driving_mode}")
 
         if joy.buttons[Buttons.LB.value] == 1 and self.last_joy.buttons[Buttons.LB.value] == 0:
             if (self._drive_speed_modifier <= self._slow_drive_speed):
                 self._drive_speed_modifier = self._fast_drive_speed
             else:
-                self._drive_speed_modifier = self._slow_drive_speed-0.01
+                self._drive_speed_modifier = self._slow_drive_speed-0.0001
 
             rospy.loginfo(f"Driving Speed: {self._drive_speed_modifier}")
 
@@ -157,10 +160,14 @@ class ManualController:
             else:
                 effort_msg.left_drive = -1 * constrain(joy.axes[Axes.R_STICK_VERTICAL.value]) * self._drive_speed_modifier
                 effort_msg.right_drive = -1 * constrain(joy.axes[Axes.L_STICK_VERTICAL.value]) * self._drive_speed_modifier
-            
+
+            effort_msg.left_drive = int(effort_msg.left_drive)
+            effort_msg.right_drive = int(effort_msg.right_drive)
+
+
             # If not latched, use the trigger axis to control the excavation speed. Otherwise, use the latched speed
-            if self.excavation_is_latched:
-                effort_msg.excavate = self.latched_excavation_speed
+            if self._excavation_is_latched:
+                effort_msg.excavate = self._latched_excavation_speed
             else:
                 # Change the range of the trigger axis from [1, -1] to [0, 1]
                 if (joy.axes[Axes.RIGHT_TRIGGER.value] == 0):
@@ -183,13 +190,13 @@ class ManualController:
 
             # Y button: latch excavation speed. This keeps excavation at the same speed until the latch is released
             if joy.buttons[Buttons.Y.value] == 1 and self.last_joy.buttons[Buttons.Y.value] == 0:  
-                if (self.excavation_is_latched):
-                    self.excavation_is_latched = False
+                if (self._excavation_is_latched):
+                    self._excavation_is_latched = False
                     rospy.loginfo("Excavation Released")
                 else:
-                    self.excavation_is_latched = True
-                    self.latched_excavation_speed = effort_msg.excavate
-                    rospy.loginfo(f"Excavation Latched at {self.latched_excavation_speed}")
+                    self._excavation_is_latched = True
+                    self._latched_excavation_speed = effort_msg.excavate
+                    rospy.loginfo(f"Excavation Latched at {self._latched_excavation_speed}")
 
             # Dpad up/down - control linear actuators
             effort_msg.lin_act = int(constrain(joy.axes[Axes.DPAD_VERTICAL.value]) * self.ACTUATE_SPEED)
@@ -199,6 +206,7 @@ class ManualController:
 
             self.effort_msg = effort_msg
             self.last_joy = joy
+            #print(self.last_joy)
 
     def loop(self):
         self.effort_publisher.publish(self.effort_msg)

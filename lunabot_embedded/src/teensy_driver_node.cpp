@@ -71,7 +71,7 @@ void recv(ros::Publisher &pub) {
   dt = ros::Time::now().toSec() - prev_time;
   prev_time = ros::Time::now().toSec();
 
-  float left_vel, right_vel;
+  float left_vel, right_vel, exc_vel;
   left_vel = deg_angle_delta(state.drive_left_ang, prev_state.drive_left_ang) / dt;
   right_vel = deg_angle_delta(state.drive_right_ang, prev_state.drive_right_ang) / dt;
   exc_vel = deg_angle_delta(state.exc_ang, prev_state.exc_ang) / dt;
@@ -94,7 +94,7 @@ void recv(ros::Publisher &pub) {
   state_msg.drive_left_vel = DEG2RAD(left_vel);
   state_msg.drive_right_vel = DEG2RAD(right_vel);
   state_msg.exc_ang = DEG2RAD(state.exc_ang);
-  state_msg.exc_vel = DEG2RAD(state.exc_vel);
+  state_msg.exc_vel = DEG2RAD(exc_vel);
   state_msg.uwb_dists.push_back(state.uwb_dist_0);
   state_msg.uwb_dists.push_back(state.uwb_dist_1);
   state_msg.uwb_dists.push_back(state.uwb_dist_2);
@@ -118,7 +118,7 @@ void publish(const ros::TimerEvent &) {
 }
 
 int main(int argc, char **argv) {
-
+  int num_read_fails = 0;
   int i, r, num;
 
   r = rawhid_open(1, 0x16C0, 0x0486, 0xFFAB, 0x0200);
@@ -143,8 +143,16 @@ int main(int argc, char **argv) {
     ros::spinOnce();
     num = rawhid_recv(0, buf, BUF_SIZE, 0);
     if (num < 0) {
-      printf("\nerror reading, device went offline\n");
-      break;
+      printf("error reading. Retrying connection\n");
+      num_read_fails += 1;
+      if (num_read_fails >= 5) {
+        printf("Sorry, too many read errors. Giving up.\n");
+        printf("sleeping\n!");
+        //ros::Duration(1).sleep();
+        r = rawhid_open(1, 0x16C0, 0x0486, 0xFFAB, 0x0200);
+        printf("Reopened rawhid, r is %d\n", r);
+        num_read_fails = 0;
+      }
     }
 
     if (num > 0) {
