@@ -118,6 +118,7 @@ void publish(const ros::TimerEvent &) {
 }
 
 int main(int argc, char **argv) {
+  int num_read_fails = 0;
 
   int i, r, num;
 
@@ -143,8 +144,12 @@ int main(int argc, char **argv) {
     ros::spinOnce();
     num = rawhid_recv(0, buf, BUF_SIZE, 0);
     if (num < 0) {
-      printf("\nerror reading, device went offline\n");
-      break;
+      printf("\nerror reading. Retrying connection\n");
+      num_read_fails += 1;
+      if (num_read_fails >= 5) {
+        printf("\nSorry, too many read errors. Giving up.\n")
+        break;
+      }
     }
 
     if (num > 0) {
