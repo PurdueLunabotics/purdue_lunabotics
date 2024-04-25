@@ -73,3 +73,5 @@ void loop() {
             Serial.println(num, 2);
         }
     }
+    Serial.println(Serial2.available());
+}

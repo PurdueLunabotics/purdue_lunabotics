@@ -11,7 +11,7 @@
 #include <RobotMsgs.pb.h>
 #include "robot.hpp"
 
-#define UWBSerial Serial8
+#define UWBSerial Serial4
 
 enum MotorDir { CW = HIGH, CCW = LOW };
 enum STMotor { M1 = 1, M2 = 2 };
@@ -115,7 +115,7 @@ public:
 
 private:
   //the pin to cut power to all motors. Active low to kill
-  static constexpr int kill_pin = 11;
+  static constexpr int kill_pin = 9;
   static constexpr float drive_kill_curr = 7.0;
   static constexpr float exdep_kill_curr = 25.0;
 
@@ -147,7 +147,7 @@ public:
 
 private:
   static constexpr int NUM_ENCODERS = 3;
-  static constexpr int PIN_LIST[NUM_ENCODERS*2] = {4, 5, 6, 7, 8, 9};
+  static constexpr int PIN_LIST[NUM_ENCODERS*2] = {2, 3, 4, 5, 6, 7};
   static constexpr float pulses_per_rev = 800; //4 times the value set on the encoders
   static constexpr float deg_per_rev = 360; //TODO, remove the deg2rad conversion and just to rad here
    

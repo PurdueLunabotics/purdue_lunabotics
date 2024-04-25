@@ -23,9 +23,6 @@ using namespace std;
 #define BUF_SIZE 64
 #define MAX_ANGLE_DELTA_DEG 15
 
-// Left encoder reports half the speed due to hardware error
-#define LEFT_ENCODER_MULTIPLIER 1
-
 #define LEAKY_INTEGRATOR_ALPHA 0.6
 
 uint8_t buf[BUF_SIZE];
@@ -37,12 +34,15 @@ lunabot_msgs::RobotSensors prev_state_msg;
 
 float prev_valid_drive_ang_left = 0;
 float prev_valid_drive_ang_right = 0;
+float prev_valid_exc_ang = 0;
 
-RingBuffer<20> left_buffer;
+RingBuffer<10> left_buffer;
 RingBuffer<10> right_buffer;
+RingBuffer<10> exc_buffer;
 
 float prev_drive_left_vel = 0;
 float prev_drive_right_vel = 0;
+float prev_exc_vel = 0;
 
 double prev_time = 0;
 
@@ -55,10 +55,10 @@ void recv(ros::Publisher &pub) {
   /* Now we are ready to decode the message. */
   pb_decode(&stream, RobotSensors_fields, &state);
   lunabot_msgs::RobotSensors state_msg;
-  state_msg.act_right_curr = adc_to_current_ACS711_15A(state.act_right_curr);
-  state_msg.drive_right_curr = adc_to_current_ACS711_15A(state.drive_right_curr);
-  state_msg.drive_left_curr = adc_to_current_ACS711_15A(state.drive_left_curr);
-  state_msg.dep_curr = adc_to_current_ACS711_15A(state.dep_curr);
+  state_msg.act_right_curr = adc_to_current_ACS711_31A(state.act_right_curr);
+  state_msg.drive_right_curr = adc_to_current_ACS711_31A(state.drive_right_curr);
+  state_msg.drive_left_curr = adc_to_current_ACS711_31A(state.drive_left_curr);
+  state_msg.dep_curr = adc_to_current_ACS711_31A(state.dep_curr);
   state_msg.exc_curr = adc_to_current_ACS711_31A(state.exc_curr);
 
   // TODO: add timestamp to each value using StampedValue, allowing for more accurate derivative
@@ -72,25 +72,29 @@ void recv(ros::Publisher &pub) {
   prev_time = ros::Time::now().toSec();
 
   float left_vel, right_vel;
-  left_vel = LEFT_ENCODER_MULTIPLIER *
-             deg_angle_delta(state.drive_left_ang, prev_state.drive_left_ang) / dt;
+  left_vel = deg_angle_delta(state.drive_left_ang, prev_state.drive_left_ang) / dt;
   right_vel = deg_angle_delta(state.drive_right_ang, prev_state.drive_right_ang) / dt;
+  exc_vel = deg_angle_delta(state.exc_ang, prev_state.exc_ang) / dt;
 
   left_buffer.push(left_vel);
   right_buffer.push(right_vel);
+  exc_buffer.push(exc_vel);
 
   left_vel = leaky_integrator(left_buffer.mean(), prev_drive_left_vel, LEAKY_INTEGRATOR_ALPHA);
   right_vel = leaky_integrator(right_buffer.mean(), prev_drive_right_vel, LEAKY_INTEGRATOR_ALPHA);
+  exc_vel = leaky_integrator(exc_buffer.mean(), prev_exc_vel, LEAKY_INTEGRATOR_ALPHA);
 
   prev_state = state;
   prev_drive_left_vel = left_vel;
   prev_drive_right_vel = right_vel;
+  prev_exc_vel = exc_vel;
 
   state_msg.drive_left_ang = DEG2RAD(state.drive_left_ang);
   state_msg.drive_right_ang = DEG2RAD(state.drive_right_ang);
   state_msg.drive_left_vel = DEG2RAD(left_vel);
   state_msg.drive_right_vel = DEG2RAD(right_vel);
   state_msg.exc_ang = DEG2RAD(state.exc_ang);
+  state_msg.exc_vel = DEG2RAD(state.exc_vel);
   state_msg.uwb_dists.push_back(state.uwb_dist_0);
   state_msg.uwb_dists.push_back(state.uwb_dist_1);
   state_msg.uwb_dists.push_back(state.uwb_dist_2);
