@@ -38,13 +38,13 @@ class Stuck:
         stuck_msg.stuck = False
         effort_publisher.publish(stuck_msg)
 
-        stuck_time_lock = False
+        currently_stuck = False
         stuck_time = rospy.get_time()
 
         rate = rospy.Rate(20)
 
         while not rospy.is_shutdown():
-            if stuck_time - rospy.get_time() >= self.MIN_STUCK_TIME:
+            if rospy.get_time() - stuck_time >= self.MIN_STUCK_TIME and currently_stuck:
                 stuck_msg.stuck = True
             else:
                 stuck_msg.stuck = False
@@ -55,12 +55,12 @@ class Stuck:
             if self.robot_effort.left_drive >= 15 or self.robot_effort.right_drive >= 15:
                 # check if not going anywhere
                 if self.robot_sensors.drive_left_vel <= 0.1 and self.robot_sensors.drive_right_vel <= 0.1:
-                    if not stuck_time_lock:
-                        stuck_time_lock = True
+                    if not currently_stuck:
+                        currently_stuck = True
                         stuck_time = rospy.get_time()
                     continue
 
-            stuck_time_lock = False
+            currently_stuck = False
             rate.sleep()
 
         stuck_msg.stuck = False
