@@ -71,7 +71,7 @@ void recv(ros::Publisher &pub) {
   dt = ros::Time::now().toSec() - prev_time;
   prev_time = ros::Time::now().toSec();
 
-  float left_vel, right_vel;
+  float left_vel, right_vel, exc_vel;
   left_vel = deg_angle_delta(state.drive_left_ang, prev_state.drive_left_ang) / dt;
   right_vel = deg_angle_delta(state.drive_right_ang, prev_state.drive_right_ang) / dt;
   exc_vel = deg_angle_delta(state.exc_ang, prev_state.exc_ang) / dt;
@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
       printf("\nerror reading. Retrying connection\n");
       num_read_fails += 1;
       if (num_read_fails >= 5) {
-        printf("\nSorry, too many read errors. Giving up.\n")
+        printf("\nSorry, too many read errors. Giving up.\n");
         break;
       }
     }
