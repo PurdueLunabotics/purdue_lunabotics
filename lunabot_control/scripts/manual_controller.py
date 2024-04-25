@@ -91,7 +91,6 @@ class ManualController:
         self.last_joy = Joy()
 
         self._driving_mode = "Forwards"
-        self._autonomy = False
         
         self._drive_speed_modifier = 1
         self._slow_drive_speed = 0.1
@@ -113,6 +112,10 @@ class ManualController:
 
     def publish_manual_stop(self):
         self.error_msg.manual_stop = True
+        self.error_pub.publish(self.error_msg)
+
+    def unpublish_manual_stop(self):
+        self.error_msg.manual_stop = False
         self.error_pub.publish(self.error_msg)
 
     def joy_callback(self, joy):
@@ -139,6 +142,7 @@ class ManualController:
             self.publish_manual_stop()
             rospy.loginfo("Manual Control: Stopped")
         else:
+            self.unpublish_manual_stop()
             effort_msg = RobotEffort()
 
             effort_msg.left_drive = 0
