@@ -32,7 +32,9 @@ class Deposition:
 
         self.deposition_power = 127 # TODO change if needed
 
-        self.load_cell_threshold = 1 # in kilograms, TODO test / verify
+        # self.load_cell_threshold = 1 # in kilograms, TODO test / verify WHEN LOAD CELLS EXIST
+
+        self.deposition_time = 30.00
 
         self.is_sim = rospy.get_param("is_sim")
 
@@ -51,13 +53,22 @@ class Deposition:
         effort_message = RobotEffort()
         effort_message.deposit = self.deposition_power
 
+        start_time = time.time()
+
         while True:
             self.effort_publisher.publish(effort_message)
+            
+            if time.time() - start_time > self.deposition_time:
+                break
+
+            '''
+            # no load cells yet... :(
 
             weight = self.robot_sensors.load_cell_weights[0] + self.robot_sensors.load_cell_weights[1]
 
             if weight < self.load_cell_threshold:
                 break
+            '''
 
             if (interrupts.check_for_interrupts() != interrupts.Errors.FINE):
                 return False
