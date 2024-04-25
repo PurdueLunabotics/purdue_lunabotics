@@ -40,7 +40,6 @@ class Plunge:
         self.is_sim = rospy.get_param("is_sim")
 
     def check_exc_stuck(self):
-
         # check if trying to go somewhere
         if self.robot_effort.excavate >= 15:
             # check if not going anywhere
