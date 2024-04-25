@@ -59,6 +59,7 @@ class Axes(Enum):
     DPAD_HORIZONTAL = 6
     DPAD_VERTICAL = 7
 
+
 class ManualController:
     """
     Manual Controller
@@ -75,7 +76,7 @@ class ManualController:
     - X button: Switch between forwards and backwards driving
         - Forwards is defined as leading with excavation
     - B button: Deposition (spin auger)
-    - Start button: Stop the robot
+    - Start button: Stop the robot while held
     """
 
     def __init__(self):
@@ -89,12 +90,18 @@ class ManualController:
 
         self.last_joy = Joy()
 
-        self.driving_mode = "Forwards"
+        self._driving_mode = "Forwards"
+        self._autonomy = False
+        
+        self._drive_speed_modifier = 1
+        self._slow_drive_speed = 0.1
+        self._fast_drive_speed = 1
 
-        self.latched_excavation_speed = 0
-        self.excavation_is_latched = False
+        self._latched_excavation_speed = 0
+        self._excavation_is_latched = False
 
         self.DEPOSITION_SPEED = 127
+        self.ACTUATE_SPEED = 0.9
 
         self.has_read_RT = False
         self.has_read_LT = False
@@ -118,6 +125,14 @@ class ManualController:
 
             rospy.loginfo(f"Driving Direction: {self.driving_mode}")
 
+        if joy.buttons[Buttons.LB.value] == 1 and self.last_joy.buttons[Buttons.LB.value] == 0:
+            if (self._drive_speed_modifier <= self._slow_drive_speed):
+                self._drive_speed_modifier = self._fast_drive_speed
+            else:
+                self._drive_speed_modifier = self._slow_drive_speed-0.01
+
+            rospy.loginfo(f"Driving Speed: {self._drive_speed_modifier}")
+
         # Start button: Stop the robot (Pause)
         if joy.buttons[Buttons.START.value] == 1:
             self.stop()
@@ -132,30 +147,29 @@ class ManualController:
             effort_msg.excavate = 0
 
             # Set the drive effort to the left and right stick vertical axes (Tank Drive)
-            if self.driving_mode == "Forwards":
-                effort_msg.left_drive = constrain(joy.axes[Axes.L_STICK_VERTICAL.value])
-                effort_msg.right_drive = constrain(joy.axes[Axes.R_STICK_VERTICAL.value])
+            if self._driving_mode == "Forwards":
+                effort_msg.left_drive = constrain(joy.axes[Axes.L_STICK_VERTICAL.value]) * self._drive_speed_modifier
+                effort_msg.right_drive = constrain(joy.axes[Axes.R_STICK_VERTICAL.value]) * self._drive_speed_modifier
             else:
-                effort_msg.left_drive = -1 * constrain(joy.axes[Axes.R_STICK_VERTICAL.value])
-                effort_msg.right_drive = -1 * constrain(joy.axes[Axes.L_STICK_VERTICAL.value])
+                effort_msg.left_drive = -1 * constrain(joy.axes[Axes.R_STICK_VERTICAL.value]) * self._drive_speed_modifier
+                effort_msg.right_drive = -1 * constrain(joy.axes[Axes.L_STICK_VERTICAL.value]) * self._drive_speed_modifier
             
             # If not latched, use the trigger axis to control the excavation speed. Otherwise, use the latched speed
             if self.excavation_is_latched:
                 effort_msg.excavate = self.latched_excavation_speed
             else:
                 # Change the range of the trigger axis from [1, -1] to [0, 1]
-                right_trigger_axis_normalized = (-joy.axes[Axes.RIGHT_TRIGGER.value] + 1) / 2
-                left_trigger_axis_normalized = (-joy.axes[Axes.LEFT_TRIGGER.value] + 1) / 2
-
-                if not self.has_read_LT:
-                    left_trigger_axis_normalized = 0
-                    if joy.axes[Axes.LEFT_TRIGGER.value] != 0:
-                        self.has_read_LT = True
-
-                if not self.has_read_RT:
+                if (joy.axes[Axes.RIGHT_TRIGGER.value] == 0):
                     right_trigger_axis_normalized = 0
-                    if joy.axes[Axes.RIGHT_TRIGGER.value] != 0:
-                        self.has_read_RT = True
+                    #print("normR")
+                else:
+                    right_trigger_axis_normalized = (-joy.axes[Axes.RIGHT_TRIGGER.value] + 1) / 2
+
+                if (joy.axes[Axes.LEFT_TRIGGER.value] == 0):
+                    left_trigger_axis_normalized = 0
+                    #print("norm")
+                else:
+                    left_trigger_axis_normalized = (-joy.axes[Axes.LEFT_TRIGGER.value] + 1) / 2
 
                 # Take priority for right trigger. If it is nearly zero, use the left trigger instead
                 if (right_trigger_axis_normalized <= 0.01):
@@ -174,8 +188,7 @@ class ManualController:
                     rospy.loginfo(f"Excavation Latched at {self.latched_excavation_speed}")
 
             # Dpad up/down - control linear actuators
-            effort_msg.lin_act = constrain(joy.axes[Axes.DPAD_VERTICAL.value])
-
+            effort_msg.lin_act = int(constrain(joy.axes[Axes.DPAD_VERTICAL.value]) * self.ACTUATE_SPEED)
 
             if (joy.buttons[Buttons.B.value] == 1):
                 effort_msg.deposit = self.DEPOSITION_SPEED
