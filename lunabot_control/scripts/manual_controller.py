@@ -98,7 +98,7 @@ class ManualController:
         self._excavation_is_latched = False
 
         self.DEPOSITION_SPEED = 127
-        self.ACTUATE_SPEED = 0.9
+        self.ACTUATE_SPEED = 0.8
 
         self.hasReadRT = False
         self.hasReadLT = False

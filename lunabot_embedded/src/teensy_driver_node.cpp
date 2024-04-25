@@ -119,7 +119,6 @@ void publish(const ros::TimerEvent &) {
 
 int main(int argc, char **argv) {
   int num_read_fails = 0;
-
   int i, r, num;
 
   r = rawhid_open(1, 0x16C0, 0x0486, 0xFFAB, 0x0200);
@@ -144,11 +143,15 @@ int main(int argc, char **argv) {
     ros::spinOnce();
     num = rawhid_recv(0, buf, BUF_SIZE, 0);
     if (num < 0) {
-      printf("\nerror reading. Retrying connection\n");
+      printf("error reading. Retrying connection\n");
       num_read_fails += 1;
       if (num_read_fails >= 5) {
-        printf("\nSorry, too many read errors. Giving up.\n");
-        break;
+        printf("Sorry, too many read errors. Giving up.\n");
+        printf("sleeping\n!");
+        //ros::Duration(1).sleep();
+        r = rawhid_open(1, 0x16C0, 0x0486, 0xFFAB, 0x0200);
+        printf("Reopened rawhid, r is %d\n", r);
+        num_read_fails = 0;
       }
     }
 
