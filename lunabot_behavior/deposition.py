@@ -53,12 +53,12 @@ class Deposition:
         effort_message = RobotEffort()
         effort_message.deposit = self.deposition_power
 
-        start_time = time.time()
+        start_time = rospy.get_time()
 
         while True:
             self.effort_publisher.publish(effort_message)
             
-            if time.time() - start_time > self.deposition_time:
+            if rospy.get_time() - start_time > self.deposition_time:
                 break
 
             '''
