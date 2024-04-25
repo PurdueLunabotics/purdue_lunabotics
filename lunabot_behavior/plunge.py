@@ -31,10 +31,21 @@ class Plunge:
 
         self.rate = rospy.Rate(10)
 
+        self.exc_stuck = False
+        self.stuck_time = rospy.get_time()
+
         # TODO: check and test this value
         self.LOWERING_TIME = 15 #In seconds, how long it takes to lower the linear actuators 90% of the way
 
         self.is_sim = rospy.get_param("is_sim")
+
+    def check_exc_stuck(self):
+
+        # check if trying to go somewhere
+        if self.robot_effort.excavate >= 15:
+            # check if not going anywhere
+            if self.robot_sensors.exc_vel <= 0.1:
+                self.exc_stuck = True
 
     def plunge(self):
         """
@@ -57,6 +68,12 @@ class Plunge:
 
         while (rospy.get_time() - start_time < self.LOWERING_TIME):
             self.effort_publisher.publish(effort_message)
+
+            self.check_exc_stuck()
+            
+            if self.exc_stuck:
+                effort_message.lin_act = 0
+                effort_message.excavate = 0
 
             if (interrupts.check_for_interrupts() != interrupts.Errors.FINE):
                 return False
