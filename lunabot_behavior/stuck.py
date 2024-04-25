@@ -52,9 +52,9 @@ class Stuck:
             effort_publisher.publish(stuck_msg)
 
             # check if trying to go somewhere
-            if self.robot_effort.left_drive >= 0.05 or self.robot_effort.right_drive >= 0.05:
+            if self.robot_effort.left_drive >= 15 or self.robot_effort.right_drive >= 15:
                 # check if not going anywhere
-                if self.robot_sensors.drive_left_vel <= 0.05 and self.robot_sensors.drive_right_vel <= 0.05:
+                if self.robot_sensors.drive_left_vel <= 0.1 and self.robot_sensors.drive_right_vel <= 0.1:
                     if not stuck_time_lock:
                         stuck_time_lock = True
                         stuck_time = rospy.get_time()
