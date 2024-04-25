@@ -71,7 +71,7 @@ void recv(ros::Publisher &pub) {
   dt = ros::Time::now().toSec() - prev_time;
   prev_time = ros::Time::now().toSec();
 
-  float left_vel, right_vel;
+  float left_vel, right_vel, exc_vel;
   left_vel = deg_angle_delta(state.drive_left_ang, prev_state.drive_left_ang) / dt;
   right_vel = deg_angle_delta(state.drive_right_ang, prev_state.drive_right_ang) / dt;
   exc_vel = deg_angle_delta(state.exc_ang, prev_state.exc_ang) / dt;
@@ -94,7 +94,7 @@ void recv(ros::Publisher &pub) {
   state_msg.drive_left_vel = DEG2RAD(left_vel);
   state_msg.drive_right_vel = DEG2RAD(right_vel);
   state_msg.exc_ang = DEG2RAD(state.exc_ang);
-  state_msg.exc_vel = DEG2RAD(state.exc_vel);
+  state_msg.exc_vel = DEG2RAD(exc_vel);
   state_msg.uwb_dists.push_back(state.uwb_dist_0);
   state_msg.uwb_dists.push_back(state.uwb_dist_1);
   state_msg.uwb_dists.push_back(state.uwb_dist_2);
