@@ -26,7 +26,7 @@ class DstarNode:
 
         self.dstar: Dstar = None
 
-        self.path_sampling_rate = rospy.get_param("/nav/dstar_node/path_sampling_rate") # Take every <n-th> point from the path
+        self.path_sampling_rate = 5 # TODO: WTF rospy.get_param("/nav/dstar_node/path_sampling_rate") # Take every <n-th> point from the path
 
         path_topic = rospy.get_param("/nav/global_path_topic")
         self.path_publisher = rospy.Publisher(path_topic, Path, queue_size=10, latch=True)
