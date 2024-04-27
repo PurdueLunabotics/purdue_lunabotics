@@ -13,7 +13,6 @@ class DifferentialDriveController:
         # ROS Publishers and subsribers to get / send data
 
         self._vel_sub = rospy.Subscriber("/cmd_vel", Twist, self._vel_cb)
-        self._effort_pub = rospy.Publisher("/effort", RobotEffort, queue_size=1)
         self._right_drive_pub = rospy.Publisher("/right_drive", Int8, queue_size=1)
         self._left_drive_pub = rospy.Publisher("/left_drive", Int8, queue_size=1)
         self._state_sub = rospy.Subscriber("state", RobotSensors, self._robot_state_cb)
