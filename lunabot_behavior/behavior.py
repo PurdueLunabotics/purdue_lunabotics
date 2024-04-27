@@ -14,7 +14,7 @@ from std_msgs.msg import Bool, Int8
 import ascent
 import find_apriltag
 import zones
-import plunge
+import excavate
 import deposition
 import interrupts
 import escape
@@ -110,8 +110,7 @@ class Behavior:
         # Initialize all of the modules (before the loop)
         ascent_module = ascent.Ascent(self.lin_act_publisher)
         find_apriltag_module = find_apriltag.FindAprilTag(self.velocity_publisher)
-        plunge_module = plunge.Plunge(self.excavate_publisher, self.lin_act_publisher)
-
+        excavation_module = excavate.Excavate(self.excavate_publisher, self.lin_act_publisher, self.left_drive_publisher, self.right_drive_publisher)
         deposition_module = deposition.Deposition(self.deposition_publisher)
 
         escape_module = escape.Escape(self.velocity_publisher)
@@ -208,7 +207,7 @@ class Behavior:
                 if (self.current_state == States.PLUNGE):
                     rospy.loginfo("State: Plunging")
 
-                    plunge_status = plunge_module.plunge()
+                    plunge_status = excavation_module.plunge()
                     if plunge_status == False:
                         break
 
@@ -216,7 +215,12 @@ class Behavior:
 
                 # Mine, and possibly drive while mining
                 if (self.current_state == States.TRENCH):
-                    # trench / mine
+                    rospy.loginfo("State: Trenching")
+                    
+                    trench_status = excavation_module.trench()
+                    if trench_status == False:
+                        break
+
                     self.current_state = States.ASCENT_MINING
 
                 # Raise linear actuators
@@ -263,6 +267,7 @@ class Behavior:
             
                 # Deposit regolith w/ auger
                 if (self.current_state == States.DEPOSIT):
+                    rospy.loginfo("State: Deposit")
                     
                     deposition_status = deposition_module.deposit()
 

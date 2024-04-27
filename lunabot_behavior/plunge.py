@@ -9,6 +9,7 @@ import time
 class Plunge:
     '''
     This is a transition state that spins excavation and lowers the linear actuators to begin mining.
+    Outdated: Use excavate.py which has plunge/trench
     '''
     
     def sensors_callback(self, msg: RobotSensors):

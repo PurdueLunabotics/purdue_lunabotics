@@ -74,7 +74,9 @@ class Excavate:
         self.lin_act_curr_threshold = 10 # TODO find value
 
         self.excavation_current_threshold = 25 # Amps; TODO find/confirm value
-    
+
+        self.is_sim = rospy.get_param("is_sim")
+
     def excavate(self):
         self.plunge()
         self.trench()
@@ -85,6 +87,11 @@ class Excavate:
         """
 
         time.sleep(0.1) #Why is time.sleep() here. TODO investigate
+
+        if (self.is_sim):
+            rospy.loginfo("Plunge: would plunge")
+            time.sleep(3)
+            return True
 
         excavation_message = Int8()
         lin_act_message = Int8()
@@ -138,6 +145,11 @@ class Excavate:
         """
 
         time.sleep(0.1) #Why is time.sleep() here. TODO investigate
+
+        if (self.is_sim):
+            rospy.loginfo("Trenching: would trench")
+            time.sleep(3)
+            return True
 
         excavation_message = Int8()
         right_drive_message = Int8()
