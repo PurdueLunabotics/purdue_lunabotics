@@ -48,7 +48,7 @@ class EffortFactory():
         self.effort.left_drive = self.left_drive
         self.effort.right_drive = self.right_drive
         self.effort.excavate = self.excavate
-        self.effort.deposition = self.deposition
+        self.effort.deposit = self.deposition
 
         self.effort_publisher.publish(self.effort)
 
