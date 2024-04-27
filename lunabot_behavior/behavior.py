@@ -173,6 +173,7 @@ class Behavior:
 
         self.current_state = States.TRAVERSAL_MINE
 
+        print(mining_goal)
         self.goal_publisher.publish(mining_goal)
 
         # This visualizes the given zone as a red square (visible in rviz)
