@@ -68,7 +68,7 @@ class Excavate:
         self.rate = rospy.Rate(10)
 
         # 90 percent of max speed
-        TARGET_EXCAVATION_VELOCITY = 127 * 0.9
+        TARGET_EXCAVATION_VELOCITY = 8 * 0.9
 
         self.excavation_pid_controller = VelocityPIDController(
             TARGET_EXCAVATION_VELOCITY, 1, 0, 0, 127
@@ -82,7 +82,7 @@ class Excavate:
         )  # TODO find values
 
         # Constants (in meters)
-        self.TARGET_DEPTH_OF_CUT = 0.003175  # Currently set to 1/8 inch, TODO tune this
+        self.TARGET_DEPTH_OF_CUT = 0.10  # Currently set to 1/8 inch, TODO tune this
 
         self.BUCKET_RADIUS = 0.0948
         self.BUCKET_SPACING = 0.0853
@@ -104,13 +104,15 @@ class Excavate:
         self.is_sim = rospy.get_param("is_sim")
 
     def excavate(self):
-        self.plunge()
+        #self.plunge()
         self.trench()
 
     def plunge(self):
         """
         Controls plunging (moving linear actuators down + spinning excavation)
         """
+
+        print("plunging")
 
         time.sleep(0.1)  # Why is time.sleep() here. TODO investigate
 
@@ -143,10 +145,13 @@ class Excavate:
             excavation_velocity = (
                 new_excavation_ang - excavation_ang
             ) / dt  # TODO check calculations are good
+            #print("exc vel: ", excavation_velocity)
+            #print("filtered: ", self.robot_sensors.exc_vel)
 
             excavation_control = self.excavation_pid_controller.update(
                 excavation_velocity, dt
             )
+            #print(excavation_control, "control")
             excavation_message.data = clamp_output(excavation_control)
 
             # Set the target linear actuator velocity to target the depth of cut
@@ -158,7 +163,7 @@ class Excavate:
             )
 
             lin_act_message.data = clamp_output(
-                target_actuator_velocity / self.max_lin_act_vel * self.lin_act_max_power
+                -target_actuator_velocity / self.max_lin_act_vel * self.lin_act_max_power
             )  # No encoders so cannot do PID, estimating (will slighly underestimate on lower voltage)
 
             self.lin_act_publisher.publish(lin_act_message)
@@ -182,6 +187,8 @@ class Excavate:
         """
         Controls trenching (spinning excavation + driving forward)
         """
+
+        print("trenching")
 
         time.sleep(0.1)  # Why is time.sleep() here. TODO investigate
 
@@ -225,10 +232,15 @@ class Excavate:
                 new_excavation_ang - excavation_ang
             ) / dt  # TODO check calculations are good
 
+            excavation_velocity = self.robot_sensors.exc_vel
+
             excavation_control = self.excavation_pid_controller.update(
                 excavation_velocity, dt
             )
             excavation_message.data = clamp_output(excavation_control)
+            print(excavation_message.data)
+
+            self.excavation_publisher.publish(excavation_message)
 
             target_linear_vel = (
                 self.TARGET_DEPTH_OF_CUT
@@ -236,6 +248,8 @@ class Excavate:
                 * self.BUCKET_RADIUS
                 / self.BUCKET_SPACING
             )
+
+            print(target_linear_vel)
 
             self.left_drivetrain_pid_controller.set_setpoint(target_linear_vel)
             left_drivetrain_ctrl = self.left_drivetrain_pid_controller.update(
@@ -249,7 +263,8 @@ class Excavate:
             )
             right_drive_message.data = clamp_output(right_drivetrain_ctrl)
 
-            self.excavation_publisher.publish(excavation_message)
+            print(right_drive_message.data)
+
             self.left_drive_publisher.publish(left_drive_message)
             self.right_drive_publisher.publish(right_drive_message)
 
@@ -260,10 +275,10 @@ class Excavate:
             current_time = new_time
             excavation_ang = new_excavation_ang
 
-            load_cell_weight = (
-                self.robot_sensors.load_cell_weights[0]
-                + self.robot_sensors.load_cell_weights[1]
-            )
+            #load_cell_weight = (
+            #    self.robot_sensors.load_cell_weights[0]
+            #    + self.robot_sensors.load_cell_weights[1]
+            #)
 
             self.rate.sleep()
 
@@ -281,6 +296,8 @@ class Excavate:
         """
         Spins excavation backwards for 1 second. Used to unstick rocks from buckets (if excavation gets high current)
         """
+
+        print("spinning backwards")
 
         # 90% of max speed, backwards
         EXCAVATION_SPEED = int(-127 * 0.9)
