@@ -67,7 +67,9 @@ class Excavate:
         self.TRENCHING_TIME = 12 # seconds
 
         self.load_cell_weight_threshold = 0 #TODO find value
-        self.max_lin_act_vel = 1 #TODO find value
+        self.max_lin_act_vel = 0.00688405797 # In meters/s, the speed of the linear actuators at the max power
+        self.lin_act_max_power = 110
+        # from experiment - 19 cm / 27.6 seconds
 
         self.lin_act_curr_threshold = 10 # TODO find value
 
@@ -111,7 +113,7 @@ class Excavate:
             # Set the target linear actuator velocity to target the depth of cut
             target_actuator_velocity = self.TARGET_DEPTH_OF_CUT * excavation_velocity * self.BUCKET_RADIUS / self.BUCKET_SPACING
 
-            lin_act_message.data = clamp_output(127 / self.max_lin_act_vel * target_actuator_velocity) #No encoders so cannot do PID, estimating (will slighly underestimate on lower voltage)
+            lin_act_message.data = clamp_output(target_actuator_velocity / self.max_lin_act_vel * self.lin_act_max_power) #No encoders so cannot do PID, estimating (will slighly underestimate on lower voltage)
 
             self.lin_act_publisher.publish(lin_act_message)
             self.excavation_publisher.publish(excavation_message)
