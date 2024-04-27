@@ -30,13 +30,13 @@ class Stuck:
 
         rospy.init_node("stuck_node")
 
-        effort_publisher = rospy.Publisher("/errors", RobotErrors, queue_size=1)
+        error_publisher = rospy.Publisher("/errors", RobotErrors, queue_size=1)
         rospy.Subscriber("/effort", RobotEffort, self.effort_callback)
         rospy.Subscriber("/sensors", RobotSensors, self.robot_sensors_callback)
 
         stuck_msg = RobotErrors()
         stuck_msg.stuck = False
-        effort_publisher.publish(stuck_msg)
+        error_publisher.publish(stuck_msg)
 
         currently_stuck = False
         stuck_time = rospy.get_time()
@@ -49,7 +49,7 @@ class Stuck:
             else:
                 stuck_msg.stuck = False
 
-            effort_publisher.publish(stuck_msg)
+            error_publisher.publish(stuck_msg)
 
             # check if trying to go somewhere
             if self.robot_effort.left_drive >= 15 or self.robot_effort.right_drive >= 15:
@@ -64,7 +64,7 @@ class Stuck:
             rate.sleep()
 
         stuck_msg.stuck = False
-        effort_publisher.publish(stuck_msg)
+        error_publisher.publish(stuck_msg)
 
 if __name__ == "__main__":
     stuck = Stuck()

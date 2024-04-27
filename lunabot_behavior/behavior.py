@@ -9,7 +9,7 @@ from geometry_msgs.msg import Twist, PoseStamped
 from nav_msgs.msg import Path, Odometry
 from apriltag_ros.msg import AprilTagDetectionArray, AprilTagDetection
 from lunabot_msgs.msg import RobotEffort, RobotSensors, RobotErrors, Behavior
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, Int8
 
 import ascent
 import find_apriltag
@@ -41,9 +41,6 @@ class Behavior:
     def robot_state_callback(self, msg: RobotSensors):
         self.robot_state = msg
 
-    def effort_callback(self, msg: RobotEffort):
-        self.robot_effort = msg
-
     def errors_callback(self, msg: RobotErrors):
         self.robot_errors = msg
 
@@ -55,11 +52,15 @@ class Behavior:
         rospy.init_node('behavior_node')
 
         self.robot_state: RobotSensors = RobotSensors()
-        self.robot_effort: RobotEffort = RobotEffort()
         self.robot_errors: RobotErrors = RobotErrors()
         self.robot_odom: Odometry = Odometry()
 
-        self.effort_publisher = rospy.Publisher("/effort", RobotEffort, queue_size=1, latch=True)
+        self.lin_act_publisher = rospy.Publisher("/lin_act", Int8, queue_size=1, latch=True)
+        self.left_drive_publisher = rospy.Publisher("/left_drive", Int8, queue_size=1, latch=True)
+        self.right_drive_publisher = rospy.Publisher("/right_drive", Int8, queue_size=1, latch=True)
+        self.excavate_publisher = rospy.Publisher("/excavate", Int8, queue_size=1, latch=True)
+        self.deposition_publisher = rospy.Publisher("/deposition", Int8, queue_size=1, latch=True)
+
         self.velocity_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
         self.traversal_publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue_size=1, latch=True)
         self.goal_publisher = rospy.Publisher("/goal", PoseStamped, queue_size=1, latch=True)
@@ -76,7 +77,6 @@ class Behavior:
 
         # TODO change to parameters, determine which are needed
         rospy.Subscriber("/sensors", RobotSensors, self.robot_state_callback)
-        rospy.Subscriber("/effort", RobotEffort, self.effort_callback)
         rospy.Subscriber("/errors", RobotErrors, self.errors_callback)
         rospy.Subscriber("/odom", Odometry, self.odom_callback)
 
@@ -108,11 +108,11 @@ class Behavior:
         """
 
         # Initialize all of the modules (before the loop)
-        ascent_module = ascent.Ascent(self.effort_publisher)
+        ascent_module = ascent.Ascent(self.lin_act_publisher)
         find_apriltag_module = find_apriltag.FindAprilTag(self.velocity_publisher)
-        plunge_module = plunge.Plunge(self.effort_publisher)
+        plunge_module = plunge.Plunge(self.excavate_publisher, self.lin_act_publisher)
 
-        deposition_module = deposition.Deposition(self.effort_publisher)
+        deposition_module = deposition.Deposition(self.deposition_publisher)
 
         escape_module = escape.Escape(self.velocity_publisher)
 

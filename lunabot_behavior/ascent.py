@@ -1,29 +1,30 @@
 import rospy
 
-from lunabot_msgs.msg import RobotEffort, RobotSensors
+from lunabot_msgs.msg import RobotSensors
+from std_msgs.msg import Int8
 
 import time
 import interrupts
 
-'''
-This is a transition state used to raise the linear actuators to the maximum height.
-'''
 class Ascent:
+	'''
+	This is a transition state used to raise the linear actuators to the maximum height.
+	'''
 
 	def sensors_callback(self, msg: RobotSensors):
 		self.robot_sensors = msg
 	
-	def __init__(self, effort_publisher: rospy.Publisher = None):
+	def __init__(self, lin_act_publisher: rospy.Publisher = None):
 		"""
 		If passed a publisher, then it is assumed a node is already running, and the publisher is shared.
 		Else, initialize this node to run on its own.
 		"""
 
-		if effort_publisher is None:
-			self.effort_publisher = rospy.Publisher("/effort", RobotEffort, queue_size=1, latch=True)
+		if lin_act_publisher is None:
+			self.lin_act_publisher = rospy.Publisher("/lin_act", Int8, queue_size=1, latch=True)
 			rospy.init_node('ascent_node')
 		else:
-			self.effort_publisher = effort_publisher
+			self.lin_act_publisher = lin_act_publisher
 
 		self.robot_sensors = RobotSensors()
 
@@ -34,6 +35,8 @@ class Ascent:
 		self.ACTUATOR_CURRENT_THRESHOLD = 0.01 #TODO adjust as needed
 
 		self.RAISING_TIME = 15
+
+		self.LIN_ACT_POWER = 110
 
 		self.is_sim = rospy.get_param("is_sim")
 
@@ -50,13 +53,13 @@ class Ascent:
 
 		time.sleep(0.1)
 
-		effort_message = RobotEffort()
-		effort_message.lin_act = 110 #TODO check max
+		lin_act_msg = Int8()
+		lin_act_msg.data = self.LIN_ACT_POWER
 
 		start_time = rospy.get_time()
 
 		while (rospy.get_time() - start_time < self.RAISING_TIME):
-			self.effort_publisher.publish(effort_message)
+			self.lin_act_publisher.publish(lin_act_msg)
 
 			#TODO check for new sensor message / values
 			if (self.robot_sensors.act_right_curr - 0) < self.ACTUATOR_CURRENT_THRESHOLD:
@@ -68,8 +71,8 @@ class Ascent:
 
 			self.rate.sleep()
 
-		effort_message.lin_act = 0
-		self.effort_publisher.publish(effort_message)
+		lin_act_msg.data = 0
+		self.lin_act_publisher.publish(lin_act_msg)
 		
 		return True
 	

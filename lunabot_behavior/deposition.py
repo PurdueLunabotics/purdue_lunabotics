@@ -1,28 +1,30 @@
 import rospy
 
-from lunabot_msgs.msg import RobotEffort, RobotSensors
+from lunabot_msgs.msg import RobotSensors
+from std_msgs.msg import Int8
 
 import time
 import interrupts
 
-'''
-State to deposit collected regolith onto the berm by spinning the auger
-'''
 class Deposition:
+    '''
+    State to deposit collected regolith onto the berm by spinning the auger
+    '''
+
     def sensors_callback(self, msg: RobotSensors):
         self.robot_sensors = msg
 
-    def __init__(self, effort_publisher: rospy.Publisher = None):
+    def __init__(self, deposition_publisher: rospy.Publisher = None):
         """
         If passed a publisher, then it is assumed a node is already running, and the publisher is shared.
         Else, initialize this node to run on its own.
         """
 
-        if effort_publisher is None:
-            self.effort_publisher = rospy.Publisher("/effort", RobotEffort, queue_size=1, latch=True)
+        if deposition_publisher is None:
+            self.deposition_publisher = rospy.Publisher("/deposition", Int8, queue_size=1, latch=True)
             rospy.init_node('deposition_node')
         else:
-            self.effort_publisher = effort_publisher
+            self.deposition_publisher = deposition_publisher
 
         self.robot_sensors = RobotSensors()
 
@@ -34,7 +36,7 @@ class Deposition:
 
         # self.load_cell_threshold = 1 # in kilograms, TODO test / verify WHEN LOAD CELLS EXIST
 
-        self.deposition_time = 30.00
+        self.DEPOSITION_TIME = 30.00
 
         self.is_sim = rospy.get_param("is_sim")
 
@@ -50,15 +52,15 @@ class Deposition:
 
         time.sleep(0.1)
 
-        effort_message = RobotEffort()
-        effort_message.deposit = self.deposition_power
+        deposition_msg = Int8()
+        deposition_msg.data = self.deposition_power
 
         start_time = rospy.get_time()
 
         while True:
-            self.effort_publisher.publish(effort_message)
+            self.deposition_publisher.publish(deposition_msg)
             
-            if rospy.get_time() - start_time > self.deposition_time:
+            if rospy.get_time() - start_time > self.DEPOSITION_TIME:
                 break
 
             '''
@@ -75,8 +77,8 @@ class Deposition:
 
             self.rate.sleep()
 
-        effort_message.deposit = 0
-        self.effort_publisher.publish(effort_message)
+        deposition_msg.data = 0
+        self.deposition_publisher.publish(deposition_msg)
 
         return True
     
