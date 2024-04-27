@@ -5,6 +5,7 @@ import interrupts
 from lunabot_control.scripts.pid_controller import VelocityPIDController
 from lunabot_control.scripts.clamp_output import clamp_output
 
+from std_msgs.msg import Int8
 
 class Excavate:
     '''
@@ -15,17 +16,32 @@ class Excavate:
     def sensors_callback(self, msg: RobotSensors):
         self.robot_sensors = msg
 
-    def __init__(self, effort_publisher: rospy.Publisher = None):
+    def __init__(self, excavation_publisher: rospy.Publisher = None, lin_act_publisher: rospy.Publisher = None, left_drive_publisher: rospy.Publisher = None, right_drive_publisher: rospy.Publisher = None):
         """
         If passed a publisher, then it is assumed a node is already running, and the publisher is shared.
         Else, initialize this node to run on its own.
         """
 
-        if effort_publisher is None:
-            self.effort_publisher: rospy.Publisher = rospy.Publisher("/effort", RobotEffort, queue_size=1, latch=True)
+        if excavation_publisher is None:
+            self.excavation_publisher: rospy.Publisher = rospy.Publisher("/excavate", Int8, queue_size=1, latch=True)
             rospy.init_node('plunge_node')
         else:
-            self.effort_publisher: rospy.Publisher = effort_publisher
+            self.excavation_publisher: rospy.Publisher = excavation_publisher
+
+        if lin_act_publisher is None:
+            self.lin_act_publisher: rospy.Publisher = rospy.Publisher("/lin_act", Int8, queue_size=1, latch=True)
+        else:
+            self.lin_act_publisher: rospy.Publisher = lin_act_publisher
+
+        if left_drive_publisher is None:
+            self.left_drive_publisher: rospy.Publisher = rospy.Publisher("/left_drive", Int8, queue_size=1, latch=True)
+        else:
+            self.left_drive_publisher: rospy.Publisher = left_drive_publisher
+
+        if right_drive_publisher is None:
+            self.right_drive_publisher: rospy.Publisher = rospy.Publisher("/right_drive", Int8, queue_size=1, latch=True)
+        else:
+            self.right_drive_publisher: rospy.Publisher = right_drive_publisher
 
         self.robot_sensors = RobotSensors()
 
@@ -47,6 +63,9 @@ class Excavate:
         self.BUCKET_RADIUS = 0.0948
         self.BUCKET_SPACING = 0.0853 
 
+        self.LOWERING_TIME = 30 # seconds
+        self.TRENCHING_TIME = 12 # seconds
+
         self.load_cell_weight_threshold = 0 #TODO find value
         self.max_lin_act_vel = 1 #TODO find value
 
@@ -65,13 +84,15 @@ class Excavate:
 
         time.sleep(0.1) #Why is time.sleep() here. TODO investigate
 
-        effort_message = RobotEffort()
+        excavation_message = Int8()
+        lin_act_message = Int8()
 
         excavation_ang = self.robot_sensors.exc_ang #TODO have firmware give excavation angle directly?
-        time = rospy.get_time()
+        start_time = rospy.get_time()
+        time = start_time
 
-        # Until the linear actuators reach the end (have high current), keep moving them down
-        while (self.robot_sensors.act_right_curr < self.lin_act_curr_threshold): #TODO do proper method for end stop detection
+        # Until the linear actuators reach the end (based on time), keep moving them down
+        while (rospy.get_time() - start_time < self.LOWERING_TIME):
 
             if (interrupts.check_for_interrupts() != interrupts.Errors.FINE):
                 return False
@@ -85,14 +106,15 @@ class Excavate:
             excavation_velocity = (new_excavation_ang - excavation_ang) / dt #TODO check calculations are good
 
             excavation_control = self.excavation_pid_controller.update(excavation_velocity, dt)
-            effort_message.excavate = clamp_output(excavation_control)
+            excavation_message.data = clamp_output(excavation_control)
 
             # Set the target linear actuator velocity to target the depth of cut
             target_actuator_velocity = self.TARGET_DEPTH_OF_CUT * excavation_velocity * self.BUCKET_RADIUS / self.BUCKET_SPACING
 
-            effort_message.lin_act = clamp_output(127 / self.max_lin_act_vel * target_actuator_velocity) #No encoders so cannot do PID, estimating (will slighly underestimate on lower voltage)
+            lin_act_message.data = clamp_output(127 / self.max_lin_act_vel * target_actuator_velocity) #No encoders so cannot do PID, estimating (will slighly underestimate on lower voltage)
 
-            self.effort_publisher.publish(effort_message)
+            self.lin_act_publisher.publish(lin_act_message)
+            self.excavation_publisher.publish(excavation_message)
 
             # Check for excavation getting stuck (high current)
             if (self.robot_sensors.exc_curr > self.excavation_current_threshold):
@@ -103,9 +125,8 @@ class Excavate:
 
             self.rate.sleep()
 
-        effort_message.lin_act = 0
-
-        self.effort_publisher.publish(effort_message)
+        lin_act_message.data = 0
+        self.lin_act_publisher.publish(lin_act_message)
 
         return True
 
@@ -116,17 +137,26 @@ class Excavate:
 
         time.sleep(0.1) #Why is time.sleep() here. TODO investigate
 
-        effort_message = RobotEffort() 
+        excavation_message = Int8()
+        right_drive_message = Int8()
+        left_drive_message = Int8() 
 
         excavation_ang = self.robot_sensors.exc_ang #TODO have firmware give excavation angle directly?
         time = rospy.get_time()
+        start_time = time
+
+        '''
+        TODO: no load cells yet
 
         load_cell_weight = self.robot_sensors.load_cell_weights[0] + self.robot_sensors.load_cell_weights[1]
 
+        original while condition: load_cell_weight < self.load_cell_weight_threshold
+        '''
+
         # TODO add logic for stopping if obstacles exist (both rocks and craters)
 
-        # Until the load cells are full (enough soil), keep moving the robot forward and spinning excavation
-        while (load_cell_weight < self.load_cell_weight_threshold): #TODO do proper method for end stop detection
+        # Until the set amount of time, keep moving the robot forward and spinning excavation
+        while (rospy.get_time() - start_time < self.TRENCHING_TIME):
 
             if (interrupts.check_for_interrupts() != interrupts.Errors.FINE):
                 return False
@@ -139,19 +169,21 @@ class Excavate:
             excavation_velocity = (new_excavation_ang - excavation_ang) / dt #TODO check calculations are good
 
             excavation_control = self.excavation_pid_controller.update(excavation_velocity, dt)
-            effort_message.excavate = clamp_output(excavation_control)
+            excavation_message.data = clamp_output(excavation_control)
 
             target_linear_vel = self.TARGET_DEPTH_OF_CUT * excavation_velocity * self.BUCKET_RADIUS / self.BUCKET_SPACING
 
             self.left_drivetrain_pid_controller.set_setpoint(target_linear_vel)
             left_drivetrain_ctrl = self.left_drivetrain_pid_controller.update(self.robot_sensors.drive_left_vel)
-            effort_message.left_drive = clamp_output(left_drivetrain_ctrl)
+            left_drive_message.data = clamp_output(left_drivetrain_ctrl)
 
             self.right_drivetrain_pid_controller.set_setpoint(target_linear_vel)
             right_drivetrain_ctrl = self.right_drivetrain_pid_controller.update(self.robot_sensors.drive_right_vel)
-            effort_message.right_drive = clamp_output(right_drivetrain_ctrl)
+            right_drive_message.data = clamp_output(right_drivetrain_ctrl)
 
-            self.effort_publisher.publish(effort_message)
+            self.excavation_publisher.publish(excavation_message)
+            self.left_drive_publisher.publish(left_drive_message)
+            self.right_drive_publisher.publish(right_drive_message)
 
             # Check for excavation getting stuck (high current)
             if (self.robot_sensors.exc_curr > self.excavation_current_threshold):
@@ -164,11 +196,13 @@ class Excavate:
 
             self.rate.sleep()
 
-        effort_message.excavate = 0
-        effort_message.left_drive = 0
-        effort_message.right_drive = 0
+        excavation_message.data = 0
+        left_drive_message.data = 0
+        right_drive_message.data = 0
 
-        self.effort_publisher.publish(effort_message)
+        self.excavation_publisher.publish(excavation_message)
+        self.left_drive_publisher.publish(left_drive_message)
+        self.right_drive_publisher.publish(right_drive_message)
 
         return True
     
@@ -180,15 +214,15 @@ class Excavate:
         # 90% of max speed, backwards
         EXCAVATION_SPEED = -127 * 0.9
 
-        effort_message = RobotEffort()
+        excavation_message = Int8()
+        excavation_message.data = EXCAVATION_SPEED
 
-        effort_message.excavate = EXCAVATION_SPEED
-        self.effort_publisher.publish(effort_message)
+        self.excavation_publisher.publish(excavation_message)
 
         rospy.sleep(1)
 
-        effort_message.excavate = 0
-        self.effort_publisher.publish(effort_message)
+        excavation_message.data = 0
+        self.excavation_publisher.publish(excavation_message)
 
 
 
