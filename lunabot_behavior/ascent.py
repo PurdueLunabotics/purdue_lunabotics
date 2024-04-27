@@ -34,7 +34,7 @@ class Ascent:
 
 		self.ACTUATOR_CURRENT_THRESHOLD = 0.01 #TODO adjust as needed
 
-		self.RAISING_TIME = 15
+		self.RAISING_TIME = 30
 
 		self.LIN_ACT_POWER = 110
 
@@ -64,7 +64,8 @@ class Ascent:
 			#TODO check for new sensor message / values
 			if (self.robot_sensors.act_right_curr - 0) < self.ACTUATOR_CURRENT_THRESHOLD:
 				# If the current is within EPSILON of 0, then end
-				break
+				#break
+				pass
 
 			if (interrupts.check_for_interrupts() != interrupts.Errors.FINE):
 				return False

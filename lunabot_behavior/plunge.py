@@ -21,7 +21,7 @@ class Plunge:
         """
 
         if excavation_publisher is None:
-            self.excavation_publisher = rospy.Publisher("/excavation", Int8, queue_size=1, latch=True)
+            self.excavation_publisher = rospy.Publisher("/excavate", Int8, queue_size=1, latch=True)
             rospy.init_node('plunge_node')
         else:
             self.excavation_publisher = excavation_publisher
