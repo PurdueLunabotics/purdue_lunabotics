@@ -106,6 +106,8 @@ class ManualController:
         self.has_read_RT = False
         self.has_read_LT = False
 
+        self.publish = True
+
         self.stop()
 
     def error_callback(self, error_msg: RobotErrors):
@@ -138,6 +140,11 @@ class ManualController:
                 self._drive_speed_modifier = self._slow_drive_speed-0.0001
 
             rospy.loginfo(f"Driving Speed: {self._drive_speed_modifier}")
+
+        if joy.buttons[Buttons.RB.value] == 1:
+            self.publish = False
+        else:
+            self.publish = True
 
         # Start button: Stop the robot (Pause)
         if joy.buttons[Buttons.START.value] == 1:
@@ -209,7 +216,8 @@ class ManualController:
             #print(self.last_joy)
 
     def loop(self):
-        self.effort_publisher.publish(self.effort_msg)
+        if self.publish:
+            self.effort_publisher.publish(self.effort_msg)
 
     def stop(self):
         self.effort_msg.left_drive = 0

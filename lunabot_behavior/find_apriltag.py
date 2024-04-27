@@ -16,6 +16,7 @@ class FindAprilTag:
 
     def apriltag_callback(self, msg: AprilTagDetectionArray):
         self.apriltag_detections = msg;
+        #print(len(msg.detections))
         if len(msg.detections) > 0:
             self.found_apriltag = True
 
@@ -38,7 +39,7 @@ class FindAprilTag:
         #TODO change to parameter
         # Real /d455_front/camera/color/tag_detections
         # Sim /d435_backward/color/tag_detections
-        rospy.Subscriber("/d435_backward/color/tag_detections", AprilTagDetectionArray, self.apriltag_callback)
+        rospy.Subscriber("/d455_back/camera/color/tag_detections", AprilTagDetectionArray, self.apriltag_callback)
 
         self.rate = rospy.Rate(10)  # 10hz
 
@@ -55,10 +56,13 @@ class FindAprilTag:
 
         while True:
             if self.found_apriltag:
+                print("found tag!")
                 velocity_message.linear.x = 0
                 velocity_message.angular.z = 0
 
-                self.velocity_publisher.publish(velocity_message)
+                for i in range(10):
+                    self.velocity_publisher.publish(velocity_message)
+                    rospy.sleep(0.25)
 
                 return self.apriltag_detections.detections[0]
                 
