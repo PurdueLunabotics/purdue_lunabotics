@@ -52,14 +52,14 @@
     <xacro:cylinder_inertia m="${wheelMass}" r="${wheelRadius}" h="${wheelWidth}"/>
   </inertial>
   <visual>
-    <origin rpy="0 0 0" xyz="-0.254 0.254 -0.101276"/>
+    <origin rpy="0 0 0" xyz="-0.275 0.3 0.14"/>
     <geometry>
       <mesh filename="package://lunabot_description/meshes/right_front.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
-    <origin rpy="0 0 0" xyz="-0.254 0.254 -0.101276"/>
+    <origin rpy="0 0 0" xyz="-0.275 0.3 0.14"/>
     <geometry>
       <mesh filename="package://lunabot_description/meshes/right_front.stl" scale="0.001 0.001 0.001"/>
     </geometry>
@@ -73,14 +73,14 @@
     <xacro:cylinder_inertia m="${wheelMass}" r="${wheelRadius}" h="${wheelWidth}"/>
   </inertial>
   <visual>
-    <origin rpy="0 0 0" xyz="-0.254 -0.254 -0.101276"/>
+    <origin rpy="0 0 0" xyz="-0.275 -0.3 0.14"/>
     <geometry>
       <mesh filename="package://lunabot_description/meshes/left_front.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
-    <origin rpy="0 0 0" xyz="-0.254 -0.254 -0.101276"/>
+    <origin rpy="0 0 0" xyz="-0.275 -0.3 0.14"/>
     <geometry>
       <mesh filename="package://lunabot_description/meshes/left_front.stl" scale="0.001 0.001 0.001"/>
     </geometry>
@@ -89,19 +89,19 @@
 
 <link name="left_back">
   <inertial>
-    <origin rpy="0 0 0" xyz="-4.346523141407488e-14 0.02222499999999994 -2.7362609036907237e-07"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
     <mass value="${wheelMass}"/>
     <xacro:cylinder_inertia m="${wheelMass}" r="${wheelRadius}" h="${wheelWidth}"/>
   </inertial>
   <visual>
-    <origin rpy="0 0 0" xyz="0.254 -0.254 -0.101276"/>
+    <origin rpy="0 0 0" xyz="0.275 -0.3 0.14"/>
     <geometry>
       <mesh filename="package://lunabot_description/meshes/left_back.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
-    <origin rpy="0 0 0" xyz="0.254 -0.254 -0.101276"/>
+    <origin rpy="0 0 0" xyz="0.275 -0.3 0.14"/>
     <geometry>
       <mesh filename="package://lunabot_description/meshes/left_back.stl" scale="0.001 0.001 0.001"/>
     </geometry>
@@ -115,14 +115,14 @@
     <xacro:cylinder_inertia m="${wheelMass}" r="${wheelRadius}" h="${wheelWidth}"/>
   </inertial>
   <visual>
-    <origin rpy="0 0 0" xyz="0.254 0.254 -0.101276"/>
+    <origin rpy="0 0 0" xyz="0.275 0.3 0.14"/>
     <geometry>
       <mesh filename="package://lunabot_description/meshes/right_back.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
-    <origin rpy="0 0 0" xyz="0.254 0.254 -0.101276"/>
+    <origin rpy="0 0 0" xyz="0.275 0.3 0.14"/>
     <geometry>
       <mesh filename="package://lunabot_description/meshes/right_back.stl" scale="0.001 0.001 0.001"/>
     </geometry>
@@ -130,7 +130,7 @@
 </link>
 
 <joint name="base_link" type="fixed">
-  <origin rpy="0 0 0" xyz="0 0 -0.25"/>
+  <origin rpy="0 0 0" xyz="0 0 0"/>
   <parent link="base_link"/>
   <child link="chassis"/>
   <axis xyz="0.0 1.0 0.0"/>
@@ -144,7 +144,7 @@
 </joint>
 
 <joint name="left_front_rev" type="continuous">
-  <origin rpy="0 0 0" xyz="0.275 0.23 0.14"/>
+  <origin rpy="0 0 0" xyz="0.275 0.3 0.14"/>
   <parent link="chassis"/>
   <child link="left_front"/>
   <axis xyz="0.0 -1.0 0.0"/>
