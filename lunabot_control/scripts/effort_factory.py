@@ -2,7 +2,7 @@
 
 import rospy
 
-from lunabot_msgs import RobotEffort
+from lunabot_msgs.msg import RobotEffort
 from std_msgs.msg import Int8
 
 class EffortFactory():
