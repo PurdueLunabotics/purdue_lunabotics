@@ -3,6 +3,7 @@ cmd_vel_topic: "/cmd_vel"
 nav_goal_topic: "/goal"
 nav:
     map_topic: "/maps/costmap_node/global_costmap/costmap"
+    map_update_topic: "/maps/costmap_node/global_costmap/costmap_updates"
     global_path_topic: "/nav/global_path"
     occ_threshold: 80 # corresponds to possibly-in-collision
     bezier_step: 0.01
