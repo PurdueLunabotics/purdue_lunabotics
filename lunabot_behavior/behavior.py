@@ -110,7 +110,7 @@ class Behavior:
         # Initialize all of the modules (before the loop)
         ascent_module = ascent.Ascent(self.lin_act_publisher)
         find_apriltag_module = find_apriltag.FindAprilTag(self.velocity_publisher)
-        excavation_module = excavate.Excavate(self.excavate_publisher, self.lin_act_publisher, self.left_drive_publisher, self.right_drive_publisher)
+        excavation_module = excavate.Excavate(self.excavate_publisher, self.lin_act_publisher, self.velocity_publisher)
         deposition_module = deposition.Deposition(self.deposition_publisher)
 
         escape_module = escape.Escape(self.velocity_publisher)

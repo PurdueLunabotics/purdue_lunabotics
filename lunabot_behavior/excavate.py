@@ -3,6 +3,7 @@ import time
 
 from lunabot_msgs.msg import RobotEffort, RobotSensors
 import interrupts
+from geometry_msgs.msg import Twist
 #from lunabot_control.scripts.pid_controller import VelocityPIDController
 #from lunabot_control.scripts.clamp_output import clamp_output
 from pid_controller import VelocityPIDController 
@@ -24,8 +25,7 @@ class Excavate:
         self,
         excavation_publisher: rospy.Publisher = None,
         lin_act_publisher: rospy.Publisher = None,
-        left_drive_publisher: rospy.Publisher = None,
-        right_drive_publisher: rospy.Publisher = None,
+        cmd_vel_publisher: rospy.Publisher = None,
     ):
         """
         If passed a publisher, then it is assumed a node is already running, and the publisher is shared.
@@ -36,7 +36,7 @@ class Excavate:
             self.excavation_publisher: rospy.Publisher = rospy.Publisher(
                 "/excavate", Int8, queue_size=1, latch=True
             )
-            rospy.init_node("plunge_node")
+            rospy.init_node("excavation_node")
         else:
             self.excavation_publisher: rospy.Publisher = excavation_publisher
 
@@ -47,19 +47,10 @@ class Excavate:
         else:
             self.lin_act_publisher: rospy.Publisher = lin_act_publisher
 
-        if left_drive_publisher is None:
-            self.left_drive_publisher: rospy.Publisher = rospy.Publisher(
-                "/left_drive", Int8, queue_size=1, latch=True
-            )
+        if cmd_vel_publisher is None:
+            self.cmd_vel_publisher: rospy.Publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
         else:
-            self.left_drive_publisher: rospy.Publisher = left_drive_publisher
-
-        if right_drive_publisher is None:
-            self.right_drive_publisher: rospy.Publisher = rospy.Publisher(
-                "/right_drive", Int8, queue_size=1, latch=True
-            )
-        else:
-            self.right_drive_publisher: rospy.Publisher = right_drive_publisher
+            self.cmd_vel_publisher: rospy.Publisher = cmd_vel_publisher
 
         self.robot_sensors = RobotSensors()
 
@@ -198,8 +189,7 @@ class Excavate:
             return True
 
         excavation_message = Int8()
-        right_drive_message = Int8()
-        left_drive_message = Int8()
+        cmd_vel_message = Twist()
 
         excavation_ang = (
             self.robot_sensors.exc_ang
@@ -251,22 +241,10 @@ class Excavate:
 
             print(target_linear_vel)
 
-            self.left_drivetrain_pid_controller.set_setpoint(target_linear_vel)
-            left_drivetrain_ctrl = self.left_drivetrain_pid_controller.update(
-                self.robot_sensors.drive_left_vel, dt
-            )
-            left_drive_message.data = clamp_output(left_drivetrain_ctrl)
+            cmd_vel_message.linear.x = target_linear_vel
+            cmd_vel_message.angular.z = 0
 
-            self.right_drivetrain_pid_controller.set_setpoint(target_linear_vel)
-            right_drivetrain_ctrl = self.right_drivetrain_pid_controller.update(
-                self.robot_sensors.drive_right_vel, dt
-            )
-            right_drive_message.data = clamp_output(right_drivetrain_ctrl)
-
-            print(right_drive_message.data)
-
-            self.left_drive_publisher.publish(left_drive_message)
-            self.right_drive_publisher.publish(right_drive_message)
+            self.cmd_vel_publisher.publish(cmd_vel_message)
 
             # Check for excavation getting stuck (high current)
             if self.robot_sensors.exc_curr > self.excavation_current_threshold:
@@ -283,12 +261,11 @@ class Excavate:
             self.rate.sleep()
 
         excavation_message.data = 0
-        left_drive_message.data = 0
-        right_drive_message.data = 0
+        cmd_vel_message.linear.x = 0
+        cmd_vel_message.angular.z = 0
 
         self.excavation_publisher.publish(excavation_message)
-        self.left_drive_publisher.publish(left_drive_message)
-        self.right_drive_publisher.publish(right_drive_message)
+        self.cmd_vel_publisher.publish(cmd_vel_message)
 
         return True
 
