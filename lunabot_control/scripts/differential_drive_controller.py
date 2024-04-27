@@ -100,8 +100,8 @@ class DifferentialDriveController:
 
         # print("left", left_set)
         # print("right", right_set)
-        left_drive_msg.data = self.constraint(left)
-        right_drive_msg.data = self.constraint(right)
+        left_drive_msg.data = self.constrain(left)
+        right_drive_msg.data = self.constrain(right)
         # print("left i_sum", self.left_error_sum)
         # print("right i_sum", self.right_error_sum)
         self._left_drive_pub.publish(left_drive_msg)
