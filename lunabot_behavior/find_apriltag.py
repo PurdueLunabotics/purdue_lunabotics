@@ -4,7 +4,6 @@ from apriltag_ros.msg import AprilTagDetectionArray, AprilTagDetection
 import tf2_ros
 import tf2_geometry_msgs
 
-
 import interrupts
 
 import time
@@ -48,6 +47,8 @@ class FindAprilTag:
         """
         Spin in a circle (in the starting zone) until an apriltag is found. Then stop and return.
         """
+
+        # TODO look for the right apriltag bundle
         
         time.sleep(0.1)
 

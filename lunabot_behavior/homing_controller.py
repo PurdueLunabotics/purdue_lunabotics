@@ -11,9 +11,7 @@ import tf2_ros
 import tf2_geometry_msgs
 from tf.transformations import euler_from_quaternion
 
-def in_range(val, limits):
-    return val > limits[0] and val < limits[1]
-
+import interrupts
 
 class HomingController:
     """
@@ -24,6 +22,8 @@ class HomingController:
     linear_setpoint = 0.8
     angular_setpoint = 0
 
+    alignment_threshold = 0.05 # in rad, how close to align before stopping
+
     # Linear, Angular
     KP = np.array([0.0, 1.0])
     KI = np.array([0.0, 0.0])
@@ -32,11 +32,20 @@ class HomingController:
     linear_limits = np.array([-0.5, 0.5]) #m/s
     angular_limits = np.array([-1.0, 1.0]) #rad/s
 
-    def __init__(self):
-        # /d455_front/camera/color/tag_detections for real robot
-        self.apriltag_subscriber = rospy.Subscriber("/d435_backward/color/tag_detections",  AprilTagDetectionArray, self.apritag_callback,)
+    def __init__(self, cmd_vel_publisher: rospy.Publisher = None):
+        """
+        If passed a publisher, then it is assumed a node is already running, and the publisher is shared.
+        Else, initialize this node to run on its own.
+        """
 
-        self.cmd_vel_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
+        # /d455_front/camera/color/tag_detections for real robot
+        self.apriltag_subscriber = rospy.Subscriber("/d435_backward/color/tag_detections",  AprilTagDetectionArray, self.apritag_callback)
+
+        if cmd_vel_publisher is None:
+            self.cmd_vel_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
+            rospy.init_node("homing_controller_node")
+        else:
+            self.cmd_vel_publisher = cmd_vel_publisher
 
         self.cmd_vel = Twist()
 
@@ -49,8 +58,6 @@ class HomingController:
         self.prev_error = np.zeros(2)
         self.curr_error = np.zeros(2)
         self.error_total = np.zeros(2)
-
-        rospy.init_node("homing_controller_node")
 
         self.rate = rospy.Rate(20)
 
@@ -67,6 +74,8 @@ class HomingController:
 
     def spin_until_apriltag(self):
 
+        # TODO look for the right apriltag bundle
+
         self.cmd_vel.angular.z = 0.261799 # around 15 degrees per second
 
         while self.berm_apriltag_position is None:
@@ -80,6 +89,9 @@ class HomingController:
         self.spin_until_apriltag()
 
         while (True):
+
+            if interrupts.check_for_interrupts() != interrupts.Errors.FINE:
+                return False
 
             tf_buffer = tf2_ros.Buffer()
             tf_listener = tf2_ros.TransformListener(tf_buffer)
@@ -105,6 +117,11 @@ class HomingController:
             angular_error = apriltag_yaw - robot_yaw
             angular_error = (angular_error + np.pi) % (2 * np.pi) - np.pi
 
+            # Stopping point
+            if angular_error < self.alignment_threshold:
+                self.stop()
+                break
+
             # TODO right now this linear error is not right
             linear_dist = np.sqrt(pose_in_odom.pose.position.x - self.odom.pose.pose.orientation.x) ** 2 + (pose_in_odom.pose.position.y - self.odom.pose.pose.orientation.y) ** 2
 
@@ -117,7 +134,6 @@ class HomingController:
             control += self.error_total * self.KI
             control += (self.curr_error - self.prev_error) * self.KD
 
-
             # Set current error to previous error (for D)
             self.prev_error = self.curr_error
 
@@ -128,8 +144,9 @@ class HomingController:
 
             self.cmd_vel_publisher.publish(cmd_vel_message)
 
-
             self.rate.sleep()
+
+        return True
 
 
     def stop(self):
