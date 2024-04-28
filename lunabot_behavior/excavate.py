@@ -73,7 +73,7 @@ class Excavate:
         )  # TODO find values
 
         # Constants (in meters)
-        self.TARGET_DEPTH_OF_CUT = 0.10  # Currently set to 1/8 inch, TODO tune this
+        self.TARGET_DEPTH_OF_CUT = 0.010  # Currently set to 1 cm, TODO tune this
 
         self.BUCKET_RADIUS = 0.0948
         self.BUCKET_SPACING = 0.0853
@@ -95,7 +95,7 @@ class Excavate:
         self.is_sim = rospy.get_param("is_sim")
 
     def excavate(self):
-        #self.plunge()
+        self.plunge()
         self.trench()
 
     def plunge(self):
@@ -265,6 +265,7 @@ class Excavate:
         cmd_vel_message.angular.z = 0
 
         self.excavation_publisher.publish(excavation_message)
+        
         self.cmd_vel_publisher.publish(cmd_vel_message)
 
         return True
