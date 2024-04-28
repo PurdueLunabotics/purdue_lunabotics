@@ -20,11 +20,11 @@ class DifferentialDriveController:
         self.width = rospy.get_param("~width", 0.5588)
         self.max_speed_percentage = rospy.get_param("~max_speed_percentage", 0.8)
         self.hz = rospy.get_param("~hz", 20)
-        self._max_speed = rospy.get_param("~max_speed", 4.3)
+        self._max_speed = rospy.get_param("~max_speed", 4.3) # rad/s
         self.p = rospy.get_param("~p", 3.9)  # P gain for PID controller
         self.i = rospy.get_param("~i", 0.015)  # I gain for PID controller
         self.d = rospy.get_param("~d", -0)  # D gain for PID controller
-        self.i_sat = rospy.get_param("~i_saturate", 10)  # P gain for PD controller
+        self.i_sat = rospy.get_param("~i_saturate", 10) # The maximum value of the integral term
 
         self.lin = 0
         self.ang = 0

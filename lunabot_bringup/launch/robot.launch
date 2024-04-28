@@ -30,7 +30,7 @@
 
       <node pkg="lunabot_control" type="effort_factory.py" name="effort_factory" output="screen"/>
 
-      <node pkg="lunabot_control" type="differential_drive_controller.py" name="diff_drive_controller" output="screen"/>
+      <node pkg="lunabot_control" type="differential_drive_controller.py" name="differential_drive_controller" output="screen"/>
 
       <group ns="nav">
           <node pkg="lunabot_control" type="mpc_node" name="mpc_node" output="screen"/>
