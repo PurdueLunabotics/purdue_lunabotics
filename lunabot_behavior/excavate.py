@@ -103,8 +103,6 @@ class Excavate:
         Controls plunging (moving linear actuators down + spinning excavation)
         """
 
-        print("plunging")
-
         time.sleep(0.1)  # Why is time.sleep() here. TODO investigate
 
         if self.is_sim:
@@ -178,8 +176,6 @@ class Excavate:
         """
         Controls trenching (spinning excavation + driving forward)
         """
-
-        print("trenching")
 
         time.sleep(0.1)  # Why is time.sleep() here. TODO investigate
 

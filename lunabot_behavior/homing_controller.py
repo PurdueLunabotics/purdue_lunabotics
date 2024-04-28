@@ -38,8 +38,13 @@ class HomingController:
         Else, initialize this node to run on its own.
         """
 
-        # /d455_front/camera/color/tag_detections for real robot
-        self.apriltag_subscriber = rospy.Subscriber("/d435_backward/color/tag_detections",  AprilTagDetectionArray, self.apritag_callback)
+        is_sim = rospy.get_param("/is_sim")
+        if is_sim:
+            cam_topic = "/d455_front/camera/color/tag_detections"
+        else:
+            cam_topic = "/d435_backward/color/tag_detections"
+
+        self.apriltag_subscriber = rospy.Subscriber(cam_topic,  AprilTagDetectionArray, self.apritag_callback)
 
         if cmd_vel_publisher is None:
             self.cmd_vel_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
