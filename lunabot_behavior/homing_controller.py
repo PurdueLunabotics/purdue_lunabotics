@@ -57,8 +57,10 @@ class HomingController:
         self.berm_apriltag_position: Pose = None
         self.berm_apriltag_header: Header = None
 
+        odom_topic = rospy.get_param("/odom_topic")
+
         self.odom: Odometry = None
-        self.odom_subscriber = rospy.Subscriber("/odom", Odometry, self.odom_callback)
+        self.odom_subscriber = rospy.Subscriber(odom_topic, Odometry, self.odom_callback)
 
         self.prev_error = np.zeros(2)
         self.curr_error = np.zeros(2)
@@ -81,7 +83,7 @@ class HomingController:
 
         # TODO look for the right apriltag bundle
 
-        self.cmd_vel.angular.z = 0.261799 # around 15 degrees per second
+        self.cmd_vel.angular.z = 0.785398 # around 45 degrees per second
 
         while self.berm_apriltag_position is None:
             self.cmd_vel_publisher.publish(self.cmd_vel)
@@ -123,7 +125,7 @@ class HomingController:
             angular_error = (angular_error + np.pi) % (2 * np.pi) - np.pi
 
             # Stopping point
-            if angular_error < self.alignment_threshold:
+            if abs(angular_error) < self.alignment_threshold:
                 self.stop()
                 break
 

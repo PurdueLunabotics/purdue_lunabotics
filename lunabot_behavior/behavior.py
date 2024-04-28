@@ -76,10 +76,12 @@ class Behavior:
 
         self.rate = rospy.Rate(1) #hz
 
+        odom_topic = rospy.get_param("/odom_topic")
+
         # TODO change to parameters, determine which are needed
         rospy.Subscriber("/sensors", RobotSensors, self.robot_state_callback)
         rospy.Subscriber("/errors", RobotErrors, self.errors_callback)
-        rospy.Subscriber("/odom", Odometry, self.odom_callback)
+        rospy.Subscriber(odom_topic, Odometry, self.odom_callback)
 
 
     def is_close_to_goal(self, goal: PoseStamped) -> bool:
