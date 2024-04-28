@@ -271,7 +271,7 @@ Visualization Manager:
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /nav/zone_visual
+      Topic: /zone_visual
       Unreliable: false
       Value: true
   Enabled: true
@@ -302,7 +302,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.9561378955841064
+      Distance: 14.690755844116211
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -310,17 +310,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0.5662492513656616
-        Y: 0.12441588193178177
-        Z: -0.4329623878002167
+        X: 1.9205611944198608
+        Y: 0.16268233954906464
+        Z: -0.5202109217643738
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.38479745388031006
+      Pitch: 0.47979751229286194
       Target Frame: <Fixed Frame>
-      Yaw: 5.406868934631348
+      Yaw: 3.4668474197387695
     Saved: ~
 Window Geometry:
   Displays:

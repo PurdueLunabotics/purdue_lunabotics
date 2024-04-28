@@ -18,9 +18,9 @@ class DifferentialDriveController:
         self._state_sub = rospy.Subscriber("state", RobotSensors, self._robot_state_cb)
 
         self.width = rospy.get_param("~width", 0.5588)
-        self.max_speed_percentage = rospy.get_param("~max_speed_percentage", 0.5)
+        self.max_speed_percentage = rospy.get_param("~max_speed_percentage", 0.8)
         self.hz = rospy.get_param("~hz", 20)
-        self._max_speed = rospy.get_param("~max_speed", 4.3)
+        self._max_speed = rospy.get_param("~max_speed", 2.0)
         self.p = rospy.get_param("~p", 2)  # P gain for PID controller
         self.i = rospy.get_param("~i", 0.1)  # I gain for PID controller
         self.d = rospy.get_param("~d", 0.02)  # D gain for PID controller
