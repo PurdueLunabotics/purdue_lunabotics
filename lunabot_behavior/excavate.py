@@ -33,17 +33,13 @@ class Excavate:
         """
 
         if excavation_publisher is None:
-            self.excavation_publisher: rospy.Publisher = rospy.Publisher(
-                "/excavate", Int8, queue_size=1, latch=True
-            )
+            self.excavation_publisher: rospy.Publisher = rospy.Publisher("/excavate", Int8, queue_size=1, latch=True)
             rospy.init_node("excavation_node")
         else:
             self.excavation_publisher: rospy.Publisher = excavation_publisher
 
         if lin_act_publisher is None:
-            self.lin_act_publisher: rospy.Publisher = rospy.Publisher(
-                "/lin_act", Int8, queue_size=1, latch=True
-            )
+            self.lin_act_publisher: rospy.Publisher = rospy.Publisher("/lin_act", Int8, queue_size=1, latch=True)
         else:
             self.lin_act_publisher: rospy.Publisher = lin_act_publisher
 
@@ -79,7 +75,7 @@ class Excavate:
         self.BUCKET_SPACING = 0.0853
 
         self.LOWERING_TIME = 30  # seconds
-        self.TRENCHING_TIME = 12  # seconds
+        self.TRENCHING_TIME = 20  # seconds
 
         self.load_cell_weight_threshold = 0  # TODO find value
         self.max_lin_act_vel = (
