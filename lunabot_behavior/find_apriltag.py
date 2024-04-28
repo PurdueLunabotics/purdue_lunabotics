@@ -4,6 +4,7 @@ from apriltag_ros.msg import AprilTagDetectionArray, AprilTagDetection
 import tf2_ros
 import tf2_geometry_msgs
 
+
 import interrupts
 
 import time
@@ -56,7 +57,7 @@ class FindAprilTag:
 
         while True:
             if self.found_apriltag:
-                print("found tag!")
+                rospy.loginfo("Behavior: found apriltag")
                 velocity_message.linear.x = 0
                 velocity_message.angular.z = 0
 
