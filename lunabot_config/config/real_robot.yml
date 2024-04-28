@@ -29,5 +29,14 @@ nav:
             linear: [-0.5, 0.5]
             angular: [-0.785, 0.785]
 
+differential_drive_controller:
+    max_speed_percentage: 0.8
+    hz: 20
+    max_speed: 4.3 # rad/s of wheels
+    p: 3.9
+    i: 0.015
+    d: 0.0
+    i_saturate: 10
+
 
 is_sim: false

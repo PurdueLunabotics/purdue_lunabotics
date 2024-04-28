@@ -35,11 +35,14 @@ class FindAprilTag:
 
         self.found_apriltag = False
         self.apriltag_detections = AprilTagDetectionArray()
-        
-        #TODO change to parameter
-        # Real /d455_front/camera/color/tag_detections
-        # Sim /d435_backward/color/tag_detections
-        rospy.Subscriber("/d455_back/camera/color/tag_detections", AprilTagDetectionArray, self.apriltag_callback)
+
+        is_sim = rospy.get_param("/is_sim")
+        if is_sim:
+            cam_topic = "/d435_backward/color/tag_detections"
+        else:
+            cam_topic = "/d455_back/camera/color/tag_detections"
+
+        rospy.Subscriber(cam_topic, AprilTagDetectionArray, self.apriltag_callback)
 
         self.rate = rospy.Rate(10)  # 10hz
 
@@ -47,6 +50,8 @@ class FindAprilTag:
         """
         Spin in a circle (in the starting zone) until an apriltag is found. Then stop and return.
         """
+
+        # TODO look for the right apriltag bundle
         
         time.sleep(0.1)
 
@@ -56,7 +61,7 @@ class FindAprilTag:
 
         while True:
             if self.found_apriltag:
-                print("found tag!")
+                rospy.loginfo("Behavior: found apriltag")
                 velocity_message.linear.x = 0
                 velocity_message.angular.z = 0
 
