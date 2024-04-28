@@ -50,12 +50,11 @@
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <depend>lunabot_msgs</depend>
+  <depend>lunabot_control</depend>
   <depend>apriltag_ros</depend>
   <depend>std_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>geometry_msgs</depend>
-  <depend>lunabot_control</depend>
-  <depend>nav_msgs</depend>
   <depend>rospy</depend>
   <depend>tf2_ros</depend>
 
