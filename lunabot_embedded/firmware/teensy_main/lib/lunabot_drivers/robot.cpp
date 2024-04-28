@@ -49,7 +49,7 @@ void update(int32_t &left_curr, int32_t &right_curr, float &left_angle, float &r
   right_curr = ACS711_Current_Bus::read(RIGHT_CURR_ADC, RIGHT_CURR_MUX);
 
   left_angle = AMT13_Angle_Bus::read_enc(LEFT_ENC_ID);
-  right_angle = AMT13_Angle_Bus::read_enc(RIGHT_ENC_ID);
+  right_angle = -AMT13_Angle_Bus::read_enc(RIGHT_ENC_ID);
 }
 
 float update_curr_left() { return ACS711_Current_Bus::read(LEFT_CURR_ADC, LEFT_CURR_MUX); }
@@ -82,7 +82,7 @@ constexpr uint8_t EXC_ENC_ID = 2;
 
 void update(int32_t &exc_curr, float &exc_angle) { 
   exc_curr = ACS711_Current_Bus::read(EXC_CURR_ADC, EXC_CURR_MUX); 
-  exc_angle = AMT13_Angle_Bus::read_enc(EXC_ENC_ID);
+  exc_angle = -AMT13_Angle_Bus::read_enc(EXC_ENC_ID);
 }
 
 float update_curr() { return ACS711_Current_Bus::read(EXC_CURR_ADC, EXC_CURR_MUX); }
