@@ -130,7 +130,7 @@ float ADS1119_Current_Bus::read(uint8_t bus, uint8_t mux) {
     case 0:
       return ads1.readVoltage(configurations[0][mux]);
     case 1: 
-      return ads2.readVoltage(configurations[0][mux]);
+      return ads2.readVoltage(configurations[1][mux]);
     default:
       //we only have two muxes
       return 69.420;
