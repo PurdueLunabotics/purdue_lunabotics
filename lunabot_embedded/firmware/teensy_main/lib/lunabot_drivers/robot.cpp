@@ -21,7 +21,11 @@ constexpr uint8_t ACT_LEFT_CURR_ADC = 0;
 constexpr uint8_t ACT_LEFT_CURR_MUX = 3; // U4 curr_sense_board
 
 void update(int32_t &act_right_curr) {
+#ifdef OLD_CURRENT_SENSOR
   act_right_curr = ACS711_Current_Bus::read(ACT_RIGHT_CURR_ADC, ACT_RIGHT_CURR_MUX);
+#else
+  act_right_curr = ADS1119_Current_Bus::read(ACT_RIGHT_CURR_ADC, ACT_RIGHT_CURR_MUX);
+#endif
 }
 
 void cb(int8_t lin_act_volt) {
@@ -59,9 +63,21 @@ void update(int32_t &left_curr, int32_t &right_curr, float &left_angle, float &r
   right_angle = -AMT13_Angle_Bus::read_enc(RIGHT_ENC_ID);
 }
 
-float update_curr_left() { return ACS711_Current_Bus::read(LEFT_CURR_ADC, LEFT_CURR_MUX); }
+float update_curr_left() { 
+#ifdef OLD_CURRENT_SENSOR
+  return ACS711_Current_Bus::read(LEFT_CURR_ADC, LEFT_CURR_MUX);
+#else
+  return ADS1119_Current_Bus::read(LEFT_CURR_ADC, LEFT_CURR_MUX);
+#endif
+}
 
-float update_curr_right() { return ACS711_Current_Bus::read(RIGHT_CURR_ADC, RIGHT_CURR_MUX); }
+float update_curr_right() {
+#ifdef OLD_CURRENT_SENSOR
+  return ACS711_Current_Bus::read(RIGHT_CURR_ADC, RIGHT_CURR_MUX);
+#else
+  return ADS1119_Current_Bus::read(RIGHT_CURR_ADC, RIGHT_CURR_MUX);
+#endif
+}
 
 void cb(int8_t left_drive_volt, int8_t right_drive_volt) {
   // Tank drive steering
@@ -97,6 +113,15 @@ void update(int32_t &exc_curr, float &exc_angle) {
   exc_angle = -AMT13_Angle_Bus::read_enc(EXC_ENC_ID);
 }
 
+float update_curr() {
+#ifdef OLD_CURRENT_SENSOR
+  return ACS711_Current_Bus::read(EXC_CURR_ADC, EXC_CURR_MUX);
+#else
+  return ADS1119_Current_Bus::read(EXC_CURR_ADC, EXC_CURR_MUX);
+#endif
+}
+
+
 void cb(int8_t speed) { exc_mtr.write(speed); }
 } // namespace excavation
 
@@ -108,10 +133,18 @@ constexpr uint8_t DEP_CURR_ADC = 0;
 constexpr uint8_t DEP_CURR_MUX = 1; // U3 curr_sense_board
 
 void update(int32_t &dep_curr) {
+#ifdef OLD_CURRENT_SENSOR
+  dep_curr = ACS711_Current_Bus::read(DEP_CURR_ADC, DEP_CURR_MUX);
+#else
+  dep_curr = ADS1119_Current_Bus::read(DEP_CURR_ADC, DEP_CURR_MUX);
+#endif
+}
+
+float update_curr() {
   #ifdef OLD_CURRENT_SENSOR
-  dep_curr = ACS711_Current_Bus::read(DEP_CURR_ADC, DEP_CURR_MUX); 
+  return ACS711_Current_Bus::read(DEP_CURR_ADC, DEP_CURR_MUX); 
   #else
-  dep_curr = ADS1119_Current_Bus::read(DEP_CURR_ADC, DEP_CURR_MUX); 
+  return ADS1119_Current_Bus::read(DEP_CURR_ADC, DEP_CURR_MUX); 
   #endif
 }
 

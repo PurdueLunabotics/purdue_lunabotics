@@ -8,8 +8,11 @@
 #define ST_SERIAL Serial1
 #define ST_BAUD_RATE 9600
 
+#ifdef OLD_CURRENT_SENSOR
 extern ADS1115_lite adc0;
 extern ADS1115_lite adc1;
+#endif
+
 
 // MCs
 extern Sabertooth MC1; // top

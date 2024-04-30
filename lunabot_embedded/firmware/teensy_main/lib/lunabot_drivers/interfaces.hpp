@@ -74,16 +74,16 @@ public:
   static void init_ads1119();
   static float read(uint8_t bus, uint8_t mux);
 
-private:
   static constexpr int BUSES = 2;
   static constexpr int MUXES = 4;
+private:
 
   static constexpr uint8_t ads1_addr = 0x40;
-  static constexpr uint8_t ads1_addr = 0x41;
+  static constexpr uint8_t ads2_addr = 0x41;
   
   static ADS1119Configuration configurations[BUSES][MUXES];
-  static ADS1119 ads1 = ADS1119(ads1_addr);
-  static ADS1119 ads2 = ADS1119(ads2_addr);
+  static ADS1119 ads1;
+  static ADS1119 ads2;
 };
 #endif
 

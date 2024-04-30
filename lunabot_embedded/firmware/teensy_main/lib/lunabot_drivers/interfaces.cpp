@@ -96,7 +96,9 @@ float ACS711_Current_Bus::adc_to_current_15A(float adc_value, float adc_fsr, flo
 
 int16_t ACS711_Current_Bus::read(uint8_t bus, uint8_t mux) { return curr_buffer_[bus][mux]; }
 #else
-static ADS1119Configuration configurations[BUSES][MUXES] = {};
+ADS1119Configuration ADS1119_Current_Bus::configurations[BUSES][MUXES] = {};
+ADS1119 ADS1119_Current_Bus::ads1 = ADS1119(ads1_addr);
+ADS1119 ADS1119_Current_Bus::ads2 = ADS1119(ads2_addr);
 
 void ADS1119_Current_Bus::init_ads1119() {
   //init all channels to same general config, but with different mux config. 
@@ -333,11 +335,17 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
   if (KillSwitchRelay::dead && millis() - KillSwitchRelay::kill_time >= relay_dead_time) {
     reset();
   } */
-  
+#ifdef OLD_CURRENT_SENSOR
   float exc_curr = ACS711_Current_Bus::adc_to_current_31A(excavation::update_curr());
   float dep_curr = ACS711_Current_Bus::adc_to_current_31A(deposition::update_curr());
   float drive_left_curr = ACS711_Current_Bus::adc_to_current_15A(drivetrain::update_curr_left());
   float drive_right_curr = ACS711_Current_Bus::adc_to_current_15A(drivetrain::update_curr_right());
+#else
+  float exc_curr = excavation::update_curr();
+  float dep_curr = deposition::update_curr();
+  float drive_left_curr = drivetrain::update_curr_left();
+  float drive_right_curr = drivetrain::update_curr_right();
+#endif
 
   if (exc_curr >= exdep_kill_curr) {
     cutoff_buffer[0] += cutoff_increase;
