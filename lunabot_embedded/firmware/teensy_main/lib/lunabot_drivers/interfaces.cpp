@@ -32,7 +32,7 @@ void Sabertooth_MotorCtrl::write(int8_t power) {
 // ---- Sensors ----
 
 // Current Sensor
-
+#ifdef OLD_CURRENT_SENSOR
 const int ACS711_Current_Bus::ADS_CHANNELS[ACS711_Current_Bus::CH_SIZE] = {
     ADS1115_REG_CONFIG_MUX_SINGLE_0, ADS1115_REG_CONFIG_MUX_SINGLE_1,
     ADS1115_REG_CONFIG_MUX_SINGLE_2, ADS1115_REG_CONFIG_MUX_SINGLE_3};
@@ -95,6 +95,46 @@ float ACS711_Current_Bus::adc_to_current_15A(float adc_value, float adc_fsr, flo
 }
 
 int16_t ACS711_Current_Bus::read(uint8_t bus, uint8_t mux) { return curr_buffer_[bus][mux]; }
+#else
+static ADS1119Configuration configurations[BUSES][MUXES] = {};
+
+void ADS1119_Current_Bus::init_ads1119() {
+  //init all channels to same general config, but with different mux config. 
+  //different configs for both chips for futureproofing, not because they're any different
+  for (int i = 0; i < BUSES; ++i) {
+    configurations[i][0].mux = ADS1119MuxConfiguration::positiveAIN0negativeAGND;
+    configurations[i][1].mux = ADS1119MuxConfiguration::positiveAIN1negativeAGND;
+    configurations[i][2].mux = ADS1119MuxConfiguration::positiveAIN2negativeAGND;
+    configurations[i][3].mux = ADS1119MuxConfiguration::positiveAIN3negativeAGND;
+
+    for (int j = 0; j < MUXES; ++j) {
+      configurations[i][j].gain = ADS1119Configuration::Gain::one;
+      configurations[i][j].dataRate = ADS1119Configuration::DataRate::sps330;
+      configurations[i][j].conversionMode = ADS1119Configuration::ConversionMode::continuous;
+      configurations[i][j].voltageReference = ADS1119Configuration::VoltageReferenceSource::external;
+      configurations[i][j].externalReferenceVoltage = 5.0;
+    }
+  }
+
+  ads1.begin();
+  ads1.reset();
+  
+  ads2.begin();
+  ads2.reset();
+}
+
+float ADS1119_Current_Bus::read(uint8_t bus, uint8_t mux) {
+  switch (bus) {
+    case 0:
+      return ads1.readVoltage(configurations[0][mux]);
+    case 1: 
+      return ads2.readVoltage(configurations[0][mux]);
+    default:
+      //we only have two muxes
+      return 69.420;
+  }
+}
+#endif// OLD_CURRENT_SENSOR
 
 // VLH35_Angles
 

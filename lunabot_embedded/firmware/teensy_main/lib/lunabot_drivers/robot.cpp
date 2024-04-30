@@ -45,9 +45,16 @@ constexpr uint8_t RIGHT_ENC_ID = 0;
 constexpr uint8_t LEFT_ENC_ID = 1;
 
 void update(int32_t &left_curr, int32_t &right_curr, float &left_angle, float &right_angle) {
+  #ifdef OLD_CURRENT_SENSOR
   left_curr = ACS711_Current_Bus::read(LEFT_CURR_ADC, LEFT_CURR_MUX);
   right_curr = ACS711_Current_Bus::read(RIGHT_CURR_ADC, RIGHT_CURR_MUX);
+  #else 
+  left_curr = ADS1119_Current_Bus::read(LEFT_CURR_ADC, LEFT_CURR_MUX);
+  right_curr = ADS1119_Current_Bus::read(RIGHT_CURR_ADC, RIGHT_CURR_MUX);
+  #endif
 
+
+  
   left_angle = AMT13_Angle_Bus::read_enc(LEFT_ENC_ID);
   right_angle = -AMT13_Angle_Bus::read_enc(RIGHT_ENC_ID);
 }
@@ -81,11 +88,14 @@ constexpr uint8_t EXC_CURR_MUX = 0; // U1 curr_sense_board
 constexpr uint8_t EXC_ENC_ID = 2;
 
 void update(int32_t &exc_curr, float &exc_angle) { 
+  #ifdef OLD_CURRENT_SENSOR
   exc_curr = ACS711_Current_Bus::read(EXC_CURR_ADC, EXC_CURR_MUX); 
+  #else
+  exc_curr = ADS1119_Current_Bus::read(EXC_CURR_ADC, EXC_CURR_MUX); 
+  #endif
+
   exc_angle = -AMT13_Angle_Bus::read_enc(EXC_ENC_ID);
 }
-
-float update_curr() { return ACS711_Current_Bus::read(EXC_CURR_ADC, EXC_CURR_MUX); }
 
 void cb(int8_t speed) { exc_mtr.write(speed); }
 } // namespace excavation
@@ -98,9 +108,12 @@ constexpr uint8_t DEP_CURR_ADC = 0;
 constexpr uint8_t DEP_CURR_MUX = 1; // U3 curr_sense_board
 
 void update(int32_t &dep_curr) {
-  dep_curr = ACS711_Current_Bus::read(DEP_CURR_ADC, DEP_CURR_MUX); }
-
-float update_curr() { return ACS711_Current_Bus::read(DEP_CURR_ADC, DEP_CURR_MUX); }
+  #ifdef OLD_CURRENT_SENSOR
+  dep_curr = ACS711_Current_Bus::read(DEP_CURR_ADC, DEP_CURR_MUX); 
+  #else
+  dep_curr = ADS1119_Current_Bus::read(DEP_CURR_ADC, DEP_CURR_MUX); 
+  #endif
+}
 
 void cb(int8_t volt) { dep_mtr.write(-volt); }
 //exc_mtr.write(volt); }

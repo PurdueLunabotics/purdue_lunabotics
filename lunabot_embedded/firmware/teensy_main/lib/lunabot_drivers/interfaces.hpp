@@ -1,7 +1,12 @@
 #ifndef __INTERFACES_H__
 #define __INTERFACES_H__
 
+#ifdef OLD_CURRENT_SENSOR
 #include <ADS1115_lite.h>
+#else
+#include <ADS1119.h>
+#endif
+
 #include <Arduino.h>
 #include <SPI.h>
 #include <Sabertooth.h>
@@ -39,7 +44,7 @@ private:
 };
 
 // Sensors
-
+#ifdef OLD_CURRENT_SENSOR
 class ACS711_Current_Bus {
 public:
   ACS711_Current_Bus(){};
@@ -62,6 +67,25 @@ private:
   static uint8_t adc1_ch_;
   static int16_t curr_buffer_[BUSES][BUS_SIZE];
 };
+#else
+class ADS1119_Current_Bus {
+public:
+  ADS1119_Current_Bus(){};
+  static void init_ads1119();
+  static float read(uint8_t bus, uint8_t mux);
+
+private:
+  static constexpr int BUSES = 2;
+  static constexpr int MUXES = 4;
+
+  static constexpr uint8_t ads1_addr = 0x40;
+  static constexpr uint8_t ads1_addr = 0x41;
+  
+  static ADS1119Configuration configurations[BUSES][MUXES];
+  static ADS1119 ads1 = ADS1119(ads1_addr);
+  static ADS1119 ads2 = ADS1119(ads2_addr);
+};
+#endif
 
 class M5Stack_UWB_Trncvr {
 public:
