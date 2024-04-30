@@ -114,7 +114,7 @@ void ADS1119_Current_Bus::init_ads1119() {
       configurations[i][j].dataRate = ADS1119Configuration::DataRate::sps330;
       configurations[i][j].conversionMode = ADS1119Configuration::ConversionMode::continuous;
       configurations[i][j].voltageReference = ADS1119Configuration::VoltageReferenceSource::external;
-      configurations[i][j].externalReferenceVoltage = 5.0;
+      configurations[i][j].externalReferenceVoltage = 3.3;
     }
   }
 
