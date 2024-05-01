@@ -52,7 +52,6 @@ void recv(ros::Publisher &pub) {
   int status;
   /* Create a stream that reads from the buffer. */
   pb_istream_t stream = pb_istream_from_buffer(buf, sizeof(buf));
-  print(buf);
   /* Now we are ready to decode the message. */
   pb_decode(&stream, RobotSensors_fields, &state);
   lunabot_msgs::RobotSensors state_msg;
