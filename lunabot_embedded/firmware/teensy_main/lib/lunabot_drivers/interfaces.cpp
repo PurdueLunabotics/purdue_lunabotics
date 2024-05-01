@@ -128,9 +128,9 @@ void ADS1119_Current_Bus::init_ads1119() {
 float ADS1119_Current_Bus::read(uint8_t bus, uint8_t mux) {
   switch (bus) {
     case 0:
-      return ads1.readVoltage(configurations[0][mux]);
+    return ADS1119_Current_Bus::adc_to_current_31A(ads1.readVoltage(configurations[0][mux]));
     case 1: 
-      return ads2.readVoltage(configurations[1][mux]);
+      return ADS1119_Current_Bus::adc_to_current_31A(ads2.readVoltage(configurations[1][mux]));
     default:
       //we only have two muxes
       return 69.420;
@@ -138,8 +138,8 @@ float ADS1119_Current_Bus::read(uint8_t bus, uint8_t mux) {
 }
 
 float ADS1119_Current_Bus::adc_to_current_31A(float adc_value, float adc_fsr, float vcc) {
-  float vout = adc_value / pow(2, 16 - 1) * adc_fsr;
-  return 73.3 * (vout / vcc) - 36.7;
+  float vout = adc_value / pow(2, 2) * adc_fsr;
+  return 73.3 * (vout / vcc) - 37.52;
 }
 
 #endif// OLD_CURRENT_SENSOR
