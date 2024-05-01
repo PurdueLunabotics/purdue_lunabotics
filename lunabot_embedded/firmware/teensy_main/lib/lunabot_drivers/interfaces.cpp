@@ -136,6 +136,12 @@ float ADS1119_Current_Bus::read(uint8_t bus, uint8_t mux) {
       return 69.420;
   }
 }
+
+float ADS1119_Current_Bus::adc_to_current_31A(float adc_value, float adc_fsr, float vcc) {
+  float vout = adc_value / pow(2, 16 - 1) * adc_fsr;
+  return 73.3 * (vout / vcc) - 36.7;
+}
+
 #endif// OLD_CURRENT_SENSOR
 
 // VLH35_Angles
@@ -341,10 +347,10 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
   float drive_left_curr = ACS711_Current_Bus::adc_to_current_15A(drivetrain::update_curr_left());
   float drive_right_curr = ACS711_Current_Bus::adc_to_current_15A(drivetrain::update_curr_right());
 #else
-  float exc_curr = excavation::update_curr();
-  float dep_curr = deposition::update_curr();
-  float drive_left_curr = drivetrain::update_curr_left();
-  float drive_right_curr = drivetrain::update_curr_right();
+  float exc_curr = ADS1119_Current_Bus::adc_to_current_31A(excavation::update_curr());
+  float dep_curr = ADS1119_Current_Bus::adc_to_current_31A(deposition::update_curr());
+  float drive_left_curr = ADS1119_Current_Bus::adc_to_current_31A(drivetrain::update_curr_left());
+  float drive_right_curr = ADS1119_Current_Bus::adc_to_current_31A(drivetrain::update_curr_right());
 #endif
 
   if (exc_curr >= exdep_kill_curr) {

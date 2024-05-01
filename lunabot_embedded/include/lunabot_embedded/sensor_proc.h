@@ -78,12 +78,7 @@ bool angle_noise_rej_filter(float *curr_raw_angle_deg, float *prev_valid_angle_d
   return abs(delta) >= max_delta;
 }
 
-float adc_to_current_ACS711_31A(float adc_value, float adc_fsr = 4.096, float vcc = 3.3) {
+float adc_to_current_31A(float adc_value, float adc_fsr = 4.096, float vcc = 3.3) {
   float vout = adc_value / pow(2, 16 - 1) * adc_fsr;
   return 73.3 * (vout / vcc) - 36.7;
-}
-
-float adc_to_current_ACS711_15A(float adc_value, float adc_fsr = 4.096, float vcc = 3.3) {
-  float vout = adc_value / pow(2, 16 - 1) * adc_fsr;
-  return 36.7 * (vout / vcc) - 18.3;
 }
