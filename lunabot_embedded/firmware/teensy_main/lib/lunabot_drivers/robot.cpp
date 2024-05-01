@@ -15,10 +15,10 @@ Sabertooth_MotorCtrl act_right_mtr{&MC3, STMotor::M2};
 Sabertooth_MotorCtrl act_left_mtr{&MC2, STMotor::M2};
 
 constexpr uint8_t ACT_RIGHT_CURR_ADC = 0;
-constexpr uint8_t ACT_RIGHT_CURR_MUX = 2; // U6 curr_sense_board
+constexpr uint8_t ACT_RIGHT_CURR_MUX = 1; // U6 curr_sense_board
 
-constexpr uint8_t ACT_LEFT_CURR_ADC = 0;
-constexpr uint8_t ACT_LEFT_CURR_MUX = 3; // U4 curr_sense_board
+constexpr uint8_t ACT_LEFT_CURR_ADC = 1;
+constexpr uint8_t ACT_LEFT_CURR_MUX = 1; // U4 curr_sense_board
 
 void update(float &act_right_curr) {
 #ifdef OLD_CURRENT_SENSOR
@@ -39,11 +39,11 @@ namespace drivetrain {
 Sabertooth_MotorCtrl left_drive_mtr{&MC1, STMotor::M2};
 Sabertooth_MotorCtrl right_drive_mtr{&MC1, STMotor::M1};
 
-constexpr uint8_t LEFT_CURR_ADC = 1;
-constexpr uint8_t LEFT_CURR_MUX = 1; // U5 curr_sense_board
+constexpr uint8_t LEFT_CURR_ADC = 0;
+constexpr uint8_t LEFT_CURR_MUX = 2; // U5 curr_sense_board
 
-constexpr uint8_t RIGHT_CURR_ADC = 1;
-constexpr uint8_t RIGHT_CURR_MUX = 0; // U2 curr_sense_board
+constexpr uint8_t RIGHT_CURR_ADC = 0;
+constexpr uint8_t RIGHT_CURR_MUX = 3; // U2 curr_sense_board
 
 constexpr uint8_t RIGHT_ENC_ID = 0;
 constexpr uint8_t LEFT_ENC_ID = 1;
@@ -129,8 +129,8 @@ namespace deposition {
 Sabertooth_MotorCtrl dep_mtr{&MC3, STMotor::M1};
 //Sabertooth_MotorCtrl exc_mtr{&MC3, STMotor::M1};
 
-constexpr uint8_t DEP_CURR_ADC = 0;
-constexpr uint8_t DEP_CURR_MUX = 1; // U3 curr_sense_board
+constexpr uint8_t DEP_CURR_ADC = 1;
+constexpr uint8_t DEP_CURR_MUX = 0; // U3 curr_sense_board
 
 void update(float &dep_curr) {
 #ifdef OLD_CURRENT_SENSOR
