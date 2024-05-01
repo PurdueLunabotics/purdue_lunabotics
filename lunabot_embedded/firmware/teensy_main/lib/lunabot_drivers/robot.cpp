@@ -20,7 +20,7 @@ constexpr uint8_t ACT_RIGHT_CURR_MUX = 2; // U6 curr_sense_board
 constexpr uint8_t ACT_LEFT_CURR_ADC = 0;
 constexpr uint8_t ACT_LEFT_CURR_MUX = 3; // U4 curr_sense_board
 
-void update(int32_t &act_right_curr) {
+void update(float &act_right_curr) {
 #ifdef OLD_CURRENT_SENSOR
   act_right_curr = ACS711_Current_Bus::read(ACT_RIGHT_CURR_ADC, ACT_RIGHT_CURR_MUX);
 #else
@@ -48,7 +48,7 @@ constexpr uint8_t RIGHT_CURR_MUX = 0; // U2 curr_sense_board
 constexpr uint8_t RIGHT_ENC_ID = 0;
 constexpr uint8_t LEFT_ENC_ID = 1;
 
-void update(int32_t &left_curr, int32_t &right_curr, float &left_angle, float &right_angle) {
+void update(float &left_curr, float &right_curr, float &left_angle, float &right_angle) {
   #ifdef OLD_CURRENT_SENSOR
   left_curr = ACS711_Current_Bus::read(LEFT_CURR_ADC, LEFT_CURR_MUX);
   right_curr = ACS711_Current_Bus::read(RIGHT_CURR_ADC, RIGHT_CURR_MUX);
@@ -103,7 +103,7 @@ constexpr uint8_t EXC_CURR_MUX = 0; // U1 curr_sense_board
 
 constexpr uint8_t EXC_ENC_ID = 2;
 
-void update(int32_t &exc_curr, float &exc_angle) { 
+void update(float &exc_curr, float &exc_angle) { 
   #ifdef OLD_CURRENT_SENSOR
   exc_curr = ACS711_Current_Bus::read(EXC_CURR_ADC, EXC_CURR_MUX); 
   #else
@@ -132,7 +132,7 @@ Sabertooth_MotorCtrl dep_mtr{&MC3, STMotor::M1};
 constexpr uint8_t DEP_CURR_ADC = 0;
 constexpr uint8_t DEP_CURR_MUX = 1; // U3 curr_sense_board
 
-void update(int32_t &dep_curr) {
+void update(float &dep_curr) {
 #ifdef OLD_CURRENT_SENSOR
   dep_curr = ACS711_Current_Bus::read(DEP_CURR_ADC, DEP_CURR_MUX);
 #else
