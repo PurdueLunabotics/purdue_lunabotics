@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 <launch>
   <arg name="exp_name" default="exp" />
-  <node name="recorder" pkg="rosbag" type="record" args="-o $(find lunabot_bringup)/bags/$(arg exp_name) /imu /goal /cmd_vel /maps/costmap_node/global_costmap/costmap /nav/global_path /rtabmap/odom /tf /d455_back/camera/color/image_rect_color /d455_back/camera/color/tag_detections /effort /d455_back/camera/aligned_depth_to_color/image_raw /d455_back/camera/aligned_depth_to_color/camera_info /d455_back/camera/color/camera_info /usb_cam/tag_detections /sensors /errors" output="screen"/> 
+  <node name="recorder" pkg="rosbag" type="record" args="-o $(find lunabot_bringup)/bags/$(arg exp_name) /imu /goal /cmd_vel /maps/costmap_node/global_costmap/costmap /nav/global_path /rtabmap/odom /tf /d455_back/camera/color/image_rect_color /d455_back/camera/color/tag_detections /effort /d455_back/camera/aligned_depth_to_color/image_raw /d455_back/camera/aligned_depth_to_color/camera_info /d455_back/camera/color/camera_info /usb_cam/tag_detections /sensors /zone_visual /errors" output="screen"/> 
 </launch>
