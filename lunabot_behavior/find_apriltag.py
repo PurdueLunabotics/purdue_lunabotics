@@ -76,7 +76,7 @@ class FindAprilTag:
 
             # keep turning and searching for april_tags
             velocity_message.linear.x = 0
-            velocity_message.angular.z = 0.261799 # Around 15 degrees
+            velocity_message.angular.z = 0.5 #0.261799 # Around 15 degrees
             self.velocity_publisher.publish(velocity_message)
 
             if interrupts.check_for_interrupts() != interrupts.Errors.FINE:

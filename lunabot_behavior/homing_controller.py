@@ -25,11 +25,11 @@ class HomingController:
     alignment_threshold = 0.05 # in rad, how close to align before stopping
 
     # Linear, Angular
-    KP = np.array([0.0, 1.0])
+    KP = np.array([0.0, 5.0])
     KI = np.array([0.0, 0.0])
     KD = np.array([0.0, 0.0])
 
-    linear_limits = np.array([-0.5, 0.5]) #m/s
+    linear_limits = np.array([-0.25, 0.25]) #m/s
     angular_limits = np.array([-1.0, 1.0]) #rad/s
 
     def __init__(self, cmd_vel_publisher: rospy.Publisher = None):
@@ -42,7 +42,7 @@ class HomingController:
         if is_sim:
             cam_topic = "/d455_front/camera/color/tag_detections"
         else:
-            cam_topic = "/d435_backward/color/tag_detections"
+            cam_topic = "/d455_back/camera/color/tag_detections"
 
         self.apriltag_subscriber = rospy.Subscriber(cam_topic,  AprilTagDetectionArray, self.apritag_callback)
 
@@ -70,9 +70,9 @@ class HomingController:
 
     def apritag_callback(self, msg: AprilTagDetectionArray):
         if len(msg.detections) != 0:
-
             self.berm_apriltag_position = msg.detections[0].pose.pose.pose
             self.berm_apriltag_header = msg.detections[0].pose.header
+            #print(self.berm_apriltag_position)
         else:
             self.berm_apriltag_position = None
 
@@ -92,7 +92,7 @@ class HomingController:
         self.stop()
 
     def home(self):
-
+        
         self.spin_until_apriltag()
 
         while (True):
@@ -123,10 +123,11 @@ class HomingController:
 
             angular_error = apriltag_yaw - robot_yaw
             angular_error = (angular_error + np.pi) % (2 * np.pi) - np.pi
-
+            print(angular_error)
             # Stopping point
             if abs(angular_error) < self.alignment_threshold:
                 self.stop()
+                print("Homed!")
                 break
 
             # TODO right now this linear error is not right
@@ -147,7 +148,8 @@ class HomingController:
             # Publish the control (and constrain it)
             cmd_vel_message = Twist()
             cmd_vel_message.linear.x = np.clip(control[0], self.linear_limits[0], self.linear_limits[1])
-            cmd_vel_message.angular.z = np.clip(control[1], self.angular_limits[0], self.angular_limits[1])
+            #cmd_vel_message.linear.x = 0
+            cmd_vel_message.angular.z = np.clip(control[1]*2, self.angular_limits[0], self.angular_limits[1])
 
             self.cmd_vel_publisher.publish(cmd_vel_message)
 
