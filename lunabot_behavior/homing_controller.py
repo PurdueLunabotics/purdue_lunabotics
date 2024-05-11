@@ -87,9 +87,16 @@ class HomingController:
 
     def apritag_callback(self, msg: AprilTagDetectionArray):
         if len(msg.detections) != 0:
+            
+            frameid = msg.detections[0].pose.header.frame_id
+
+            if (self.using_back_cam and frameid != "d455_back_link") or (not self.using_back_cam and frameid != "usb_cam_link"):
+                self.berm_apriltag_position = None
+
             self.berm_apriltag_position = msg.detections[0].pose.pose.pose
             self.berm_apriltag_header = msg.detections[0].pose.header
             #print(self.berm_apriltag_position)
+
         else:
             self.berm_apriltag_position = None
 
