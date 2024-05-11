@@ -173,4 +173,13 @@
   <axis xyz="0.0 1.0 0.0"/>
 </joint>
 
+<link name="usb_cam_link"/>
+
+<joint name="usb_cam_jnt" type="fixed">
+    <origin rpy="0 0 3.14" xyz="-0.405 0.10 0.65"/>
+  <parent link="base_link"/>
+  <child link="usb_cam_link"/>
+  <axis xyz="0.0 1.0 0.0"/>
+</joint>
+
 </robot>

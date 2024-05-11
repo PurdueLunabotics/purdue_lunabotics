@@ -39,10 +39,26 @@ class HomingController:
         """
 
         is_sim = rospy.get_param("/is_sim")
+
+        self.using_back_cam = True
+
         if is_sim:
             cam_topic = "/d455_front/camera/color/tag_detections"
         else:
-            cam_topic = "/d455_back/camera/color/tag_detections"
+            # check if back camera is connected
+            topics = rospy.get_published_topics()
+            topic_exists = False
+            for topic in topics:
+                if (topic[0] == "/usb_cam/tag_detections"):
+                    topic_exists = True
+
+            if topic_exists:
+                cam_topic = "/usb_cam/tag_detections"
+                print("Homing Controller: Using Back Cam")
+            else:
+                cam_topic = "/d455_back/camera/color/tag_detections"
+                print("Homing Controller: Using front cam")
+                self.using_back_cam = False
 
         self.apriltag_subscriber = rospy.Subscriber(cam_topic,  AprilTagDetectionArray, self.apritag_callback)
 
@@ -74,7 +90,7 @@ class HomingController:
             self.berm_apriltag_header = msg.detections[0].pose.header
             #print(self.berm_apriltag_position)
         else:
-            self.berm_apriltag_position = None
+            pass
 
     def odom_callback(self, msg: Odometry):
         self.odom = msg
@@ -116,6 +132,8 @@ class HomingController:
 
             euler_angles = euler_from_quaternion([pose_in_odom.pose.orientation.x, pose_in_odom.pose.orientation.y, pose_in_odom.pose.orientation.z, pose_in_odom.pose.orientation.w])
             apriltag_yaw = euler_angles[2] + np.pi / 2  # The yaw 'out of' the face of the apriltag (adjusted by 90 degrees)
+            if (not self.using_back_cam):
+                apriltag_yaw += np.pi  # If we are using the front camera, align to the opposite of the apriltag (rotate this by 180)
 
             robot_yaw = euler_from_quaternion([self.odom.pose.pose.orientation.x, self.odom.pose.pose.orientation.y, self.odom.pose.pose.orientation.z, self.odom.pose.pose.orientation.w])[2]
 
@@ -127,7 +145,7 @@ class HomingController:
             # Stopping point
             if abs(angular_error) < self.alignment_threshold:
                 self.stop()
-                print("Homed!")
+                print("Homing Controller: Done Homing")
                 break
 
             # TODO right now this linear error is not right
@@ -148,7 +166,6 @@ class HomingController:
             # Publish the control (and constrain it)
             cmd_vel_message = Twist()
             cmd_vel_message.linear.x = np.clip(control[0], self.linear_limits[0], self.linear_limits[1])
-            #cmd_vel_message.linear.x = 0
             cmd_vel_message.angular.z = np.clip(control[1]*2, self.angular_limits[0], self.angular_limits[1])
 
             self.cmd_vel_publisher.publish(cmd_vel_message)
