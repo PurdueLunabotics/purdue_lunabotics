@@ -61,7 +61,7 @@ def calc_point_from_apriltag(x: float, y: float, apriltag_pose_in_odom: PoseStam
     roll, pitch, yaw  = euler_from_quaternion([apriltag_pose_in_odom.pose.orientation.x, apriltag_pose_in_odom.pose.orientation.y, apriltag_pose_in_odom.pose.orientation.z, apriltag_pose_in_odom.pose.orientation.w])
 
     # We add pi/2 to the initial angle because the apriltag orientation in the odom frame is 90 degrees off (it points to the right instead of outwards)
-    yaw += math.pi / 2
+    yaw -= math.pi / 2 # Note: in sim, add pi/2; in real subtract
     
 
     x0 = apriltag_pose_in_odom.pose.position.x

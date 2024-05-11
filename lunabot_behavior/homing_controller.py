@@ -22,7 +22,7 @@ class HomingController:
     linear_setpoint = 0.8
     angular_setpoint = 0
 
-    alignment_threshold = 0.05 # in rad, how close to align before stopping
+    alignment_threshold = 0.12 # in rad, how close to align before stopping
 
     # Linear, Angular
     KP = np.array([0.0, 5.0])
@@ -51,7 +51,8 @@ class HomingController:
             for topic in topics:
                 if (topic[0] == "/usb_cam/tag_detections"):
                     topic_exists = True
-            topic_exists = False
+
+            #topic_exists = False
             if topic_exists:
                 cam_topic = "/usb_cam/tag_detections"
                 print("Homing Controller: Using Back Cam")
@@ -127,11 +128,16 @@ class HomingController:
 
             # Set the time to 0 to get the latest available transform
             pose.header.stamp = rospy.Time(0)
-
-            pose_in_odom = tf_buffer.transform(pose, target_frame, rospy.Duration(2.0))
-
+            try:
+                pose_in_odom = tf_buffer.transform(pose, target_frame, rospy.Duration(2.0))
+            except AttributeError:
+                print("apriltag gone")
+                continue
             euler_angles = euler_from_quaternion([pose_in_odom.pose.orientation.x, pose_in_odom.pose.orientation.y, pose_in_odom.pose.orientation.z, pose_in_odom.pose.orientation.w])
-            apriltag_yaw = euler_angles[2] + np.pi / 2  # The yaw 'out of' the face of the apriltag (adjusted by 90 degrees)
+            if (self.using_back_cam):
+                apriltag_yaw = euler_angles[1] + 0  # The yaw 'out of' the face of the apriltag (adjusted by 90 degrees)
+            else:
+                apriltag_yaw = euler_angles[2] + np.pi / 2
             if (not self.using_back_cam):
                 apriltag_yaw += np.pi  # If we are using the front camera, align to the opposite of the apriltag (rotate this by 180)
 
@@ -141,9 +147,12 @@ class HomingController:
 
             angular_error = apriltag_yaw - robot_yaw
             angular_error = (angular_error + np.pi) % (2 * np.pi) - np.pi
+
+            if (self.using_back_cam):
+                angular_error *= -1
             print(angular_error)
             # Stopping point
-            if abs(angular_error) < self.alignment_threshold:
+            if abs(angular_error) < self.alignment_threshold or abs(abs(angular_error)-3.1415) < self.alignment_threshold:
                 self.stop()
                 print("Homing Controller: Done Homing")
                 break
@@ -165,7 +174,8 @@ class HomingController:
 
             # Publish the control (and constrain it)
             cmd_vel_message = Twist()
-            cmd_vel_message.linear.x = np.clip(control[0], self.linear_limits[0], self.linear_limits[1])
+            #cmd_vel_message.linear.x = np.clip(control[0], self.linear_limits[0], self.linear_limits[1])
+            cmd_vel_message.linear.x = 0
             cmd_vel_message.angular.z = np.clip(control[1]*2, self.angular_limits[0], self.angular_limits[1])
 
             self.cmd_vel_publisher.publish(cmd_vel_message)

@@ -54,6 +54,7 @@ class EffortFactory:
         self.robot_errors = msg
 
     def publish_effort(self):
+        print("published effort")
         self.effort.lin_act = self.lin_act
         self.effort.left_drive = self.left_drive
         self.effort.right_drive = self.right_drive
@@ -63,6 +64,7 @@ class EffortFactory:
         self.effort_publisher.publish(self.effort)
 
     def stop(self):
+        print("stopped")
         self.effort.lin_act = 0
         self.effort.left_drive = 0
         self.effort.right_drive = 0
