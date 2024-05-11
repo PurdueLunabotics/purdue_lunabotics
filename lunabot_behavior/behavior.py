@@ -76,6 +76,8 @@ class Behavior:
 
         self.rate = rospy.Rate(1) #hz
 
+        self.is_sim = rospy.get_param("/is_sim")
+
         odom_topic = rospy.get_param("/odom_topic")
 
         # TODO change to parameters, determine which are needed
@@ -152,8 +154,8 @@ class Behavior:
         apriltag_pose_in_odom: PoseStamped = find_apriltag_module.convert_to_odom_frame(self.start_apriltag)
 
         # Find the mininz/berm zones in the odom frame
-        self.mining_zone: zones.Zone = zones.find_mining_zone(apriltag_pose_in_odom)
-        self.berm_zone: zones.Zone = zones.find_berm_zone(apriltag_pose_in_odom)
+        self.mining_zone: zones.Zone = zones.find_mining_zone(apriltag_pose_in_odom, self.is_sim)
+        self.berm_zone: zones.Zone = zones.find_berm_zone(apriltag_pose_in_odom, self.is_sim)
 
         # Set a goal to the mining zone and publish it
         mining_goal = PoseStamped()
