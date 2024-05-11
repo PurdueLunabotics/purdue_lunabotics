@@ -62,7 +62,6 @@ def calc_point_from_apriltag(x: float, y: float, apriltag_pose_in_odom: PoseStam
 
     # We add pi/2 to the initial angle because the apriltag orientation in the odom frame is 90 degrees off (it points to the right instead of outwards)
     yaw -= math.pi / 2 # Note: in sim, add pi/2; in real subtract
-    
 
     x0 = apriltag_pose_in_odom.pose.position.x
     y0 = apriltag_pose_in_odom.pose.position.y
