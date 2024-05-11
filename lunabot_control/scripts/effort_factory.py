@@ -31,6 +31,8 @@ class EffortFactory:
         self.excavate_subscriber = rospy.Subscriber("/excavate", Int8, self.set_excavate)
         self.deposition_subscriber = rospy.Subscriber("/deposition", Int8, self.set_deposition)
 
+        self.error_subscriber = rospy.Subscriber("/errors", RobotErrors, self.error_callback)
+
         self.rate = rospy.Rate(50)
 
     def set_lin_act(self, lin_act: int):

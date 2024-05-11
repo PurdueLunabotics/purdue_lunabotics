@@ -51,7 +51,7 @@ class HomingController:
             for topic in topics:
                 if (topic[0] == "/usb_cam/tag_detections"):
                     topic_exists = True
-
+            topic_exists = False
             if topic_exists:
                 cam_topic = "/usb_cam/tag_detections"
                 print("Homing Controller: Using Back Cam")
@@ -90,7 +90,7 @@ class HomingController:
             self.berm_apriltag_header = msg.detections[0].pose.header
             #print(self.berm_apriltag_position)
         else:
-            pass
+            self.berm_apriltag_position = None
 
     def odom_callback(self, msg: Odometry):
         self.odom = msg
