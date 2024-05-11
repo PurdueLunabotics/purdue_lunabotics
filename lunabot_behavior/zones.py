@@ -16,7 +16,7 @@ class Zone:
         self.bottom_left = bottom_left
         self.bottom_right = bottom_right
 
-        self.middle = ((top_left[0] + top_right[0]) / 2, (top_left[1] + bottom_left[1]) / 2)
+        self.middle = ((bottom_left[0] + top_right[0]) / 2, (bottom_left[1] + top_right[1]) / 2)
 
     def visualize_zone(self, publisher: rospy.Publisher):
         """
@@ -62,10 +62,15 @@ def calc_point_from_apriltag(x: float, y: float, apriltag_pose_in_odom: PoseStam
 
     # We add pi/2 to the initial angle because the apriltag orientation in the odom frame is 90 degrees off (it points to the right instead of outwards)
     yaw += math.pi / 2
-    # Add this to move in the correct frame vertically
-    y_yaw = yaw + math.pi / 2
+    
 
-    return (apriltag_pose_in_odom.pose.position.x + math.cos(yaw) * x, apriltag_pose_in_odom.pose.position.y + math.sin(y_yaw) * y)
+    x0 = apriltag_pose_in_odom.pose.position.x
+    y0 = apriltag_pose_in_odom.pose.position.y
+
+    x1 = x0 + math.cos(yaw) * x - math.sin(yaw) * y
+    y1 = y0 + math.sin(yaw) * x + math.cos(yaw) * y
+
+    return (x1, y1)
 
 def find_mining_zone(apriltag_pose_in_odom: PoseStamped)->Zone:
 
