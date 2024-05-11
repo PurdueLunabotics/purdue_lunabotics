@@ -94,7 +94,7 @@ class ManualController:
         self.driving_mode = "Forwards"
         
         self.drive_speed_modifier = 1
-        self.slow_drive_speed = 0.25
+        self.slow_drive_speed = 0.5
         self.fast_drive_speed = 1
 
         self.latched_excavation_speed = 0
