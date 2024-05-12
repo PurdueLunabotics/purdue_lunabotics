@@ -26,7 +26,7 @@ nav:
         frequency: 30
         min_distance_threshold: 0.5
         velocity_limits:
-            linear: [-0.15, 0.15]
+            linear: [-0.20, 0.20]
             angular: [-0.785, 0.785]
 
 differential_drive_controller:
