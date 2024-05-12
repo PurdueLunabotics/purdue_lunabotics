@@ -2,9 +2,13 @@ import rospy
 
 from lunabot_msgs.msg import RobotSensors
 from std_msgs.msg import Int8
+from geometry_msgs.msg import Twist
+
+from homing_controller import HomingController
 
 import time
 import interrupts
+import sys
 
 class Deposition:
     '''
@@ -83,5 +87,16 @@ class Deposition:
         return True
     
 if __name__ == "__main__":
-    deposition = Deposition()
-    deposition.deposit()
+
+    if len(sys.argv) > 1 and sys.argv[1] == "no-homing":
+        deposition = Deposition()
+        deposition.deposit()
+    else:
+
+        deposition = Deposition()
+        cmd_vel_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
+        homing_controller = HomingController(cmd_vel_publisher)
+
+        homing_controller.home()
+        homing_controller.approach()
+        deposition.deposit()
