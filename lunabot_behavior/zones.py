@@ -31,22 +31,32 @@ class Zone:
         path.header.frame_id = "odom"
 
         path.poses.append(PoseStamped())
+        path.poses[-1].header.frame_id = "odom"
+
         path.poses[-1].pose.position.x = self.top_left[0]
         path.poses[-1].pose.position.y = self.top_left[1]
 
         path.poses.append(PoseStamped())
+        path.poses[-1].header.frame_id = "odom"
+
         path.poses[-1].pose.position.x = self.top_right[0]
         path.poses[-1].pose.position.y = self.top_right[1]
 
         path.poses.append(PoseStamped())
+        path.poses[-1].header.frame_id = "odom"
+
         path.poses[-1].pose.position.x = self.bottom_right[0]
         path.poses[-1].pose.position.y = self.bottom_right[1]
 
         path.poses.append(PoseStamped())
+        path.poses[-1].header.frame_id = "odom"
+
         path.poses[-1].pose.position.x = self.bottom_left[0]
         path.poses[-1].pose.position.y = self.bottom_left[1]
 
         path.poses.append(PoseStamped())
+        path.poses[-1].header.frame_id = "odom"
+
         path.poses[-1].pose.position.x = self.top_left[0]
         path.poses[-1].pose.position.y = self.top_left[1]
 
@@ -101,14 +111,14 @@ def calc_offset(x: float, y: float, apriltag_pose_in_odom: PoseStamped, is_sim: 
 
 def find_mining_zone(apriltag_pose_in_odom: PoseStamped, is_sim: bool)->Zone:
 
-    DIST_X = 4.8 # In meters, the distance from the leftmost wall to the left border of the mining zone
+    DIST_X = 4.6 # In meters, the distance from the leftmost wall to the left border of the mining zone
     # KSC = 3.88
-    LENGTH_X = 3.34 # In meters, the length of the mining zone (left to right)
+    LENGTH_X = 3.44 # In meters, the length of the mining zone (left to right)
     # KSC = 3
 
-    DIST_Y = 0 # In meters, the distance from the bottom-most wall to the bottom border of the mining zone
+    DIST_Y = .4 # In meters, the distance from the bottom-most wall to the bottom border of the mining zone
     # KSC = 2
-    LENGTH_Y = 2.57 # In meters, the length of the mining zone (bottom to top)
+    LENGTH_Y = -2.13 # In meters, the length of the mining zone (bottom to top)
     # KSC = 3
 
     top_left = calc_point_from_apriltag(DIST_X, DIST_Y + LENGTH_Y, apriltag_pose_in_odom, is_sim)

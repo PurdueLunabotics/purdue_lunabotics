@@ -162,7 +162,7 @@ class Behavior:
         mining_goal.pose.position.x = self.mining_zone.middle[0]
         mining_goal.pose.position.y = self.mining_zone.middle[1]
 
-        offset = zones.calc_offset(1.5, 0, apriltag_pose_in_odom, self.is_sim)
+        offset = zones.calc_offset(0.5, 0, apriltag_pose_in_odom, self.is_sim)
         mining_goal.pose.position.x += offset[0]
         mining_goal.pose.position.y += offset[1]
 
@@ -171,12 +171,12 @@ class Behavior:
         mining_goal.header.stamp = rospy.Time.now()
         mining_goal.header.frame_id = "odom"
 
-        # create a goal for the berm
+        # create a goal for the berm, use the same mining goal
         berm_goal = PoseStamped()
-        berm_goal.pose.position.x = self.berm_zone.middle[0]
-        berm_goal.pose.position.y = self.berm_zone.middle[1]
+        berm_goal.pose.position.x = mining_goal.pose.position.x
+        berm_goal.pose.position.y = mining_goal.pose.position.y
 
-        offset = zones.calc_offset(0, 2, apriltag_pose_in_odom, self.is_sim)
+        offset = zones.calc_offset(0, -.4, apriltag_pose_in_odom, self.is_sim)
         berm_goal.pose.position.x += offset[0]
         berm_goal.pose.position.y += offset[1]
 
