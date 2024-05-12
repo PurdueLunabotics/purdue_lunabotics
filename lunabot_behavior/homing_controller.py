@@ -156,7 +156,7 @@ class HomingController:
             # Set the time to 0 to get the latest available transform
             pose.header.stamp = rospy.Time(0)
             try:
-                pose_in_odom = tf_buffer.transform(pose, target_frame, rospy.Duration(2.0))
+                pose_in_odom = tf_buffer.transform(pose, target_frame, rospy.Duration(1.0))
             except AttributeError:
                 continue
 
@@ -172,6 +172,8 @@ class HomingController:
 
             angular_error = apriltag_yaw - robot_yaw
             angular_error = (angular_error + np.pi) % (2 * np.pi) - np.pi
+
+            print(angular_error)
             
             # Stopping point
             if abs(angular_error) < self.alignment_threshold:
@@ -210,7 +212,7 @@ class HomingController:
         Approach the apriltag. After you have homed/ are facing the apriltag, drive in straight line
         """
 
-        DIST_THRESHOLD = 1.0 # meters, how close to the apriltag to stop
+        DIST_THRESHOLD = 1 # meters, how close to the apriltag to stop
         APPROACH_SPEED = -0.2 # m/s
 
         last_apriltag_position = self.berm_apriltag_position
@@ -226,11 +228,12 @@ class HomingController:
             if (self.berm_apriltag_position is None):
                 self.berm_apriltag_position = last_apriltag_position
 
-            print("apriltag", self.berm_apriltag_position.position.x, self.berm_apriltag_position.position.y, "odom", self.odom.pose.pose.position.x, self.odom.pose.pose.position.y)
-
-            distance_squared = (self.berm_apriltag_position.position.x - self.odom.pose.pose.position.x) ** 2 + (self.berm_apriltag_position.position.y - self.odom.pose.pose.position.y) ** 2
-
-            if (distance_squared < DIST_THRESHOLD ** 2):
+            print("apriltag", self.berm_apriltag_position.position.x,
+                    self.berm_apriltag_position.position.y,
+                    self.berm_apriltag_position.position.z)
+            
+            #print(distance_notsquared)
+            if (self.berm_apriltag_position.position.z < DIST_THRESHOLD):
                 self.stop()
                 return True
 
