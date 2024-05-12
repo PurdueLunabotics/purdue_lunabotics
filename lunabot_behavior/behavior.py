@@ -161,6 +161,11 @@ class Behavior:
         mining_goal = PoseStamped()
         mining_goal.pose.position.x = self.mining_zone.middle[0]
         mining_goal.pose.position.y = self.mining_zone.middle[1]
+
+        offset = zones.calc_offset(1.5, 0, apriltag_pose_in_odom, self.is_sim)
+        mining_goal.pose.position.x += offset[0]
+        mining_goal.pose.position.y += offset[1]
+
         mining_goal.pose.position.z = 0
 
         mining_goal.header.stamp = rospy.Time.now()
@@ -170,6 +175,11 @@ class Behavior:
         berm_goal = PoseStamped()
         berm_goal.pose.position.x = self.berm_zone.middle[0]
         berm_goal.pose.position.y = self.berm_zone.middle[1]
+
+        offset = zones.calc_offset(0, 2, apriltag_pose_in_odom, self.is_sim)
+        berm_goal.pose.position.x += offset[0]
+        berm_goal.pose.position.y += offset[1]
+
         berm_goal.pose.position.z = 0
 
         berm_goal.header.stamp = rospy.Time.now()
@@ -177,7 +187,6 @@ class Behavior:
 
         self.current_state = States.TRAVERSAL_MINE
 
-        print(mining_goal)
         self.goal_publisher.publish(mining_goal)
 
         # This visualizes the given zone as a red square (visible in rviz)

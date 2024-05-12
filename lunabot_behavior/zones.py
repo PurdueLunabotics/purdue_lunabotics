@@ -55,7 +55,6 @@ class Zone:
 def calc_point_from_apriltag(x: float, y: float, apriltag_pose_in_odom: PoseStamped, is_sim: bool)-> 'tuple[float,float]':
     """
     Calculates the (x, y) point from the apriltag's location (given in the odom frame)
-    Note that this can also be used to add an offset to any point already calculated in the apriltag-odom frame
     """
 
     roll, pitch, yaw  = euler_from_quaternion([apriltag_pose_in_odom.pose.orientation.x, apriltag_pose_in_odom.pose.orientation.y, apriltag_pose_in_odom.pose.orientation.z, apriltag_pose_in_odom.pose.orientation.w])
@@ -75,6 +74,30 @@ def calc_point_from_apriltag(x: float, y: float, apriltag_pose_in_odom: PoseStam
     y1 = y0 + math.sin(yaw) * x + math.cos(yaw) * y
 
     return (x1, y1)
+
+def calc_offset(x: float, y: float, apriltag_pose_in_odom: PoseStamped, is_sim: bool)-> 'tuple[float,float]':
+    """
+    Calc the offset from the apriltag's location (without inbuilt position)
+    """
+
+    roll, pitch, yaw  = euler_from_quaternion([apriltag_pose_in_odom.pose.orientation.x, apriltag_pose_in_odom.pose.orientation.y, apriltag_pose_in_odom.pose.orientation.z, apriltag_pose_in_odom.pose.orientation.w])
+
+    # Add pi/2 in sim to the initial angle because the apriltag orientation in the odom frame is 90 degrees off (it points to the right instead of outwards)
+    # In the real robot, subtract (go the other way)
+
+    if (is_sim):
+        yaw += math.pi / 2
+    else:
+        yaw -= math.pi / 2 
+
+    x0 = 0
+    y0 = 0
+
+    x1 = x0 + math.cos(yaw) * x - math.sin(yaw) * y
+    y1 = y0 + math.sin(yaw) * x + math.cos(yaw) * y
+
+    return (x1, y1)
+
 
 def find_mining_zone(apriltag_pose_in_odom: PoseStamped, is_sim: bool)->Zone:
 
