@@ -162,7 +162,7 @@ class HomingController:
 
             euler_angles = euler_from_quaternion([pose_in_odom.pose.orientation.x, pose_in_odom.pose.orientation.y, pose_in_odom.pose.orientation.z, pose_in_odom.pose.orientation.w])
             if (self.cam_mode == "back"):
-                apriltag_yaw = euler_angles[1] + 0 # TODO check if this is right
+                apriltag_yaw = euler_angles[2] - np.pi / 2
             elif (self.cam_mode == "sim"):
                 apriltag_yaw = euler_angles[2] + np.pi / 2 # In sim, adjust the apriltag to point 'out' of the apriltag, by 90 deg
             elif (self.cam_mode == "front"):
