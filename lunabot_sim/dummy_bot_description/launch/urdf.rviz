@@ -12,6 +12,7 @@ Panels:
         - /Goal1
         - /Path1
         - /Path2
+        - /Pose1
       Splitter Ratio: 0.5
     Tree Height: 505
   - Class: rviz/Selection
@@ -189,10 +190,14 @@ Visualization Manager:
       Visual Enabled: true
     - Class: rviz/TF
       Enabled: true
+      Filter (blacklist): ""
+      Filter (whitelist): ""
       Frame Timeout: 15
       Frames:
         All Enabled: true
         base_link:
+          Value: true
+        berm:
           Value: true
         d435_backward_bottom_screw_frame:
           Value: true
@@ -268,6 +273,8 @@ Visualization Manager:
                 d435_backward_depth_frame:
                   d435_backward_color_frame:
                     d435_backward_color_optical_frame:
+                      berm:
+                        {}
                       sieve-marker:
                         {}
                       tag_0:
@@ -412,6 +419,22 @@ Visualization Manager:
       Topic: /zone_visual
       Unreliable: false
       Value: true
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.10000000149011612
+      Class: rviz/Pose
+      Color: 15; 19; 255
+      Enabled: true
+      Head Length: 0.30000001192092896
+      Head Radius: 0.20000000298023224
+      Name: Pose
+      Queue Size: 10
+      Shaft Length: 0.4000000059604645
+      Shaft Radius: 0.10000000149011612
+      Shape: Arrow
+      Topic: /apriltag_visual
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -440,7 +463,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 19.425872802734375
+      Distance: 11.43298053741455
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -448,9 +471,9 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 4.138773441314697
-        Y: 1.4997692108154297
-        Z: -2.0462615489959717
+        X: 1.2210460901260376
+        Y: 1.3719233274459839
+        Z: -2.5381414890289307
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
@@ -476,5 +499,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1000
-  X: 37
-  Y: 9
+  X: 7
+  Y: -29

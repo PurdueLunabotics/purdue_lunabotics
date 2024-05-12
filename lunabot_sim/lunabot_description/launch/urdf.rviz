@@ -274,6 +274,22 @@ Visualization Manager:
       Topic: /zone_visual
       Unreliable: false
       Value: true
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.10000000149011612
+      Class: rviz/Pose
+      Color: 15; 19; 255
+      Enabled: true
+      Head Length: 0.30000001192092896
+      Head Radius: 0.20000000298023224
+      Name: Pose
+      Queue Size: 10
+      Shaft Length: 0.4000000059604645
+      Shaft Radius: 0.10000000149011612
+      Shape: Arrow
+      Topic: /apriltag_visual
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48

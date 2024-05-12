@@ -4,7 +4,7 @@ import numpy as np
 
 import rospy
 from apriltag_ros.msg import AprilTagDetectionArray
-from geometry_msgs.msg import Pose, Twist
+from geometry_msgs.msg import Pose, Twist, PoseStamped
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Header
 import tf2_ros
@@ -38,36 +38,41 @@ class HomingController:
         Else, initialize this node to run on its own.
         """
 
-        is_sim = rospy.get_param("/is_sim")
-
-        self.using_back_cam = True
-
-        if is_sim:
-            cam_topic = "/d455_front/camera/color/tag_detections"
-        else:
-            # check if back camera is connected
-            topics = rospy.get_published_topics()
-            topic_exists = False
-            for topic in topics:
-                if (topic[0] == "/usb_cam/tag_detections"):
-                    topic_exists = True
-
-            #topic_exists = False
-            if topic_exists:
-                cam_topic = "/usb_cam/tag_detections"
-                print("Homing Controller: Using Back Cam")
-            else:
-                cam_topic = "/d455_back/camera/color/tag_detections"
-                print("Homing Controller: Using front cam")
-                self.using_back_cam = False
-
-        self.apriltag_subscriber = rospy.Subscriber(cam_topic,  AprilTagDetectionArray, self.apritag_callback)
-
         if cmd_vel_publisher is None:
             self.cmd_vel_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
             rospy.init_node("homing_controller_node")
         else:
             self.cmd_vel_publisher = cmd_vel_publisher
+
+
+        self.is_sim = rospy.get_param("/is_sim")
+
+        self.cam_mode = "front"  # front, back, or sim
+
+        # Decide on which camera to use
+        if self.is_sim:
+            cam_topic = "/d435_backward/color/tag_detections"
+            self.cam_mode = "sim"
+            rospy.loginfo("Homing Controller: Sim")
+        else:
+            # check if back camera is connected
+            topics = rospy.get_published_topics() # 2d list of topics (by name, type)
+            topic_exists = False
+            for topic in topics:
+                if (topic[0] == "/usb_cam/tag_detections"):
+                    topic_exists = True
+
+            if topic_exists:
+                cam_topic = "/usb_cam/tag_detections"
+                self.cam_mode = "back"
+                rospy.loginfo("Homing Controller: Back Cam")
+
+            else:
+                cam_topic = "/d455_back/camera/color/tag_detections"
+                self.cam_mode = "front"
+                rospy.loginfo("Homing Controller: Using front cam")
+
+        self.apriltag_subscriber = rospy.Subscriber(cam_topic,  AprilTagDetectionArray, self.apritag_callback)
 
         self.cmd_vel = Twist()
 
@@ -78,6 +83,8 @@ class HomingController:
 
         self.odom: Odometry = None
         self.odom_subscriber = rospy.Subscriber(odom_topic, Odometry, self.odom_callback)
+
+        self.apriltag_publisher = rospy.Publisher("/apriltag_visual", PoseStamped, queue_size=1)
 
         self.prev_error = np.zeros(2)
         self.curr_error = np.zeros(2)
@@ -90,12 +97,19 @@ class HomingController:
             
             frameid = msg.detections[0].pose.header.frame_id
 
-            if (self.using_back_cam and frameid != "d455_back_link") or (not self.using_back_cam and frameid != "usb_cam_link"):
-                self.berm_apriltag_position = None
+            if (self.cam_mode == "front" and frameid != "d455_back_color_optical_frame"): #TODO check this!
+                return
+            
+            if (self.cam_mode == "back" and frameid != "usb_cam_link"):  # TODO check this!
+                return
 
             self.berm_apriltag_position = msg.detections[0].pose.pose.pose
             self.berm_apriltag_header = msg.detections[0].pose.header
-            #print(self.berm_apriltag_position)
+
+            tag_pose_stamped = PoseStamped()
+            tag_pose_stamped.header = self.berm_apriltag_header
+            tag_pose_stamped.pose = self.berm_apriltag_position
+            self.apriltag_publisher.publish(tag_pose_stamped)
 
         else:
             self.berm_apriltag_position = None
@@ -109,6 +123,9 @@ class HomingController:
 
         self.cmd_vel.angular.z = 0.785398 # around 45 degrees per second
 
+        if self.cam_mode == "sim":
+            self.cmd_vel.angular.z = 0.392699 # around 22.5 degrees per second this needs to be slower
+
         while self.berm_apriltag_position is None:
             self.cmd_vel_publisher.publish(self.cmd_vel)
             rospy.sleep(0.1)
@@ -116,6 +133,9 @@ class HomingController:
         self.stop()
 
     def home(self):
+        """
+        Align the robot to the apriltag
+        """
         
         self.spin_until_apriltag()
 
@@ -138,34 +158,29 @@ class HomingController:
             try:
                 pose_in_odom = tf_buffer.transform(pose, target_frame, rospy.Duration(2.0))
             except AttributeError:
-                print("apriltag gone")
                 continue
+
             euler_angles = euler_from_quaternion([pose_in_odom.pose.orientation.x, pose_in_odom.pose.orientation.y, pose_in_odom.pose.orientation.z, pose_in_odom.pose.orientation.w])
-            if (self.using_back_cam):
-                apriltag_yaw = euler_angles[1] + 0  # The yaw 'out of' the face of the apriltag (adjusted by 90 degrees)
-            else:
-                apriltag_yaw = euler_angles[2] + np.pi / 2
-            if (not self.using_back_cam):
-                apriltag_yaw += np.pi  # If we are using the front camera, align to the opposite of the apriltag (rotate this by 180)
+            if (self.cam_mode == "back"):
+                apriltag_yaw = euler_angles[1] + 0 # TODO check if this is right
+            elif (self.cam_mode == "sim"):
+                apriltag_yaw = euler_angles[2] + np.pi / 2 # In sim, adjust the apriltag to point 'out' of the apriltag, by 90 deg
+            elif (self.cam_mode == "front"):
+                apriltag_yaw += np.pi  # TODO check if this is right
 
             robot_yaw = euler_from_quaternion([self.odom.pose.pose.orientation.x, self.odom.pose.pose.orientation.y, self.odom.pose.pose.orientation.z, self.odom.pose.pose.orientation.w])[2]
 
-            # Define the errors
-
             angular_error = apriltag_yaw - robot_yaw
             angular_error = (angular_error + np.pi) % (2 * np.pi) - np.pi
-
-            if (self.using_back_cam):
-                angular_error *= -1
-            print(angular_error)
+            
             # Stopping point
-            if abs(angular_error) < self.alignment_threshold or abs(abs(angular_error)-3.1415) < self.alignment_threshold:
+            if abs(angular_error) < self.alignment_threshold:
                 self.stop()
-                print("Homing Controller: Done Homing")
+                rospy.loginfo("Homing Controller: Done Homing")
                 break
 
-            # TODO right now this linear error is not right
-            linear_dist = np.sqrt(pose_in_odom.pose.position.x - self.odom.pose.pose.orientation.x) ** 2 + (pose_in_odom.pose.position.y - self.odom.pose.pose.orientation.y) ** 2
+            # TODO unused
+            linear_dist = np.sqrt((pose_in_odom.pose.position.x - self.odom.pose.pose.orientation.x) ** 2 + (pose_in_odom.pose.position.y - self.odom.pose.pose.orientation.y) ** 2)
 
             self.curr_error = np.array([self.linear_setpoint - linear_dist, angular_error])
 
@@ -181,7 +196,6 @@ class HomingController:
 
             # Publish the control (and constrain it)
             cmd_vel_message = Twist()
-            #cmd_vel_message.linear.x = np.clip(control[0], self.linear_limits[0], self.linear_limits[1])
             cmd_vel_message.linear.x = 0
             cmd_vel_message.angular.z = np.clip(control[1]*2, self.angular_limits[0], self.angular_limits[1])
 
@@ -190,6 +204,42 @@ class HomingController:
             self.rate.sleep()
 
         return True
+    
+    def approach(self):
+        """
+        Approach the apriltag. After you have homed/ are facing the apriltag, drive in straight line
+        """
+
+        DIST_THRESHOLD = 1.0 # meters, how close to the apriltag to stop
+        APPROACH_SPEED = -0.2 # m/s
+
+        last_apriltag_position = self.berm_apriltag_position
+
+        while (True):
+
+            if interrupts.check_for_interrupts() != interrupts.Errors.FINE:
+                return False
+            
+            if (last_apriltag_position != self.berm_apriltag_position and self.berm_apriltag_position is not None):
+                last_apriltag_position = self.berm_apriltag_position
+            
+            if (self.berm_apriltag_position is None):
+                self.berm_apriltag_position = last_apriltag_position
+
+            print("apriltag", self.berm_apriltag_position.position.x, self.berm_apriltag_position.position.y, "odom", self.odom.pose.pose.position.x, self.odom.pose.pose.position.y)
+
+            distance_squared = (self.berm_apriltag_position.position.x - self.odom.pose.pose.position.x) ** 2 + (self.berm_apriltag_position.position.y - self.odom.pose.pose.position.y) ** 2
+
+            if (distance_squared < DIST_THRESHOLD ** 2):
+                self.stop()
+                return True
+
+            self.cmd_vel.linear.x = APPROACH_SPEED
+            self.cmd_vel.angular.z = 0
+
+            self.cmd_vel_publisher.publish(self.cmd_vel)
+
+            self.rate.sleep()
 
 
     def stop(self):
