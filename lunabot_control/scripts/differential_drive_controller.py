@@ -63,6 +63,12 @@ class DifferentialDriveController:
 
         left_percent_estimate = np.clip(self._left_vel / self._max_speed, -1, 1)
         right_percent_estimate = np.clip(self._right_vel / self._max_speed, -1, 1)
+        
+
+        WEIGHT = 0.5
+
+        self.lin *= WEIGHT
+        self.ang *= 1/WEIGHT
 
         left_set = self.lin - self.ang * self.width / 2
         right_set = self.lin + self.ang * self.width / 2
