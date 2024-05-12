@@ -70,7 +70,7 @@ class Excavate:
         )  # TODO find values
 
         # Constants (in meters)
-        self.TARGET_DEPTH_OF_CUT = 0.005  # Currently set to .5 cm
+        self.TARGET_DEPTH_OF_CUT = 0.0075  # Currently set to .5 cm
 
         self.BUCKET_RADIUS = 0.0948
         self.BUCKET_SPACING = 0.0853
