@@ -8,6 +8,7 @@ from geometry_msgs.msg import Twist
 #from lunabot_control.scripts.clamp_output import clamp_output
 from pid_controller import VelocityPIDController 
 from clamp_output import clamp_output  
+import ascent
 
 from std_msgs.msg import Int8
 
@@ -286,3 +287,7 @@ class Excavate:
 if __name__ == "__main__":
     excavate_module = Excavate()
     excavate_module.excavate()
+
+    lin_act_publisher = rospy.Publisher("/lin_act", Int8, queue_size=1, latch=True)
+    ascent_module = ascent.Ascent(lin_act_publisher)
+    ascent_module.raise_linear_actuators()
