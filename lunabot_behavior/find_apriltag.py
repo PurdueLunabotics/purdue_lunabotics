@@ -18,12 +18,13 @@ class FindAprilTag:
         self.apriltag_detections = msg;
         #print(len(msg.detections))
         if len(msg.detections) > 0:
-
+            #xprint(self.found_apriltag)
             detection = msg.detections[0]
             frameid = detection.pose.header.frame_id
 
-            if (not self.is_sim and frameid != "d455_back_link"): # only use front camera
-                return
+            if (not self.is_sim and frameid != "d455_back_color_optical_frame"): # only use front camera
+                print("wrong camera")
+                #return
 
             self.found_apriltag = True
 
@@ -48,7 +49,7 @@ class FindAprilTag:
             cam_topic = "/d435_backward/color/tag_detections"
         else:
             cam_topic = "/d455_back/camera/color/tag_detections"
-
+        #print(cam_topic)
         rospy.Subscriber(cam_topic, AprilTagDetectionArray, self.apriltag_callback)
 
         self.rate = rospy.Rate(10)  # 10hz
