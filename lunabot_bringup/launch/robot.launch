@@ -4,7 +4,7 @@
     <arg name="record" default="true" />
     <arg name="teensy" default="true" />
     <arg name="cameras" default="true" />
-    <arg name="overhead" default="false" />
+    <arg name="overhead" default="true" />
     <arg name="slam" default="true" />
     <arg name="exp_name" default="exp" />
 
