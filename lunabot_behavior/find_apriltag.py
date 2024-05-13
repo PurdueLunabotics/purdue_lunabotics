@@ -118,6 +118,27 @@ class FindAprilTag:
         pose_in_odom = tf_buffer.transform(pose, target_frame, rospy.Duration(2.0))
 
         return pose_in_odom
+    
+    def spin(self):
+
+        TIME = 3 # seconds
+        SPEED = 0.5 # radians/s
+
+        velocity_message = Twist()
+        velocity_message.linear.x = 0
+
+        start_time = rospy.get_time()
+
+        velocity_message.angular.z = SPEED
+
+        while rospy.get_time() - start_time < TIME:
+            self.velocity_publisher.publish(velocity_message)
+            self.rate.sleep()
+
+        velocity_message.angular.z = 0
+
+        self.velocity_publisher.publish(velocity_message)
+
         
 
     

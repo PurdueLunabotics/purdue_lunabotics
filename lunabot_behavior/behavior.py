@@ -141,6 +141,8 @@ class Behavior:
         rospy.loginfo("State: Find AprilTag")
         self.current_state = States.FIND_TAG
 
+        # find_apriltag_module.spin()
+
         apriltag_status = find_apriltag_module.find_apriltag()
 
         if apriltag_status == "Error": # Robot error
