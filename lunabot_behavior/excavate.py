@@ -70,13 +70,13 @@ class Excavate:
         )  # TODO find values
 
         # Constants (in meters)
-        self.TARGET_DEPTH_OF_CUT = 0.0075  # Currently set to .5 cm
+        self.TARGET_DEPTH_OF_CUT = 0.005  # Currently set to .5 cm
 
         self.BUCKET_RADIUS = 0.0948
         self.BUCKET_SPACING = 0.0853
 
         self.LOWERING_TIME = 30  # seconds
-        self.TRENCHING_TIME = 20  # seconds
+        self.TRENCHING_TIME = 5  # seconds
 
         self.load_cell_weight_threshold = 0  # TODO find value
         self.max_lin_act_vel = (
@@ -221,7 +221,6 @@ class Excavate:
                 excavation_velocity, dt
             )
             excavation_message.data = clamp_output(excavation_control)
-            print(excavation_message.data)
 
             self.excavation_publisher.publish(excavation_message)
 
@@ -231,8 +230,6 @@ class Excavate:
                 * self.BUCKET_RADIUS
                 / self.BUCKET_SPACING
             )
-
-            print(target_linear_vel)
 
             cmd_vel_message.linear.x = target_linear_vel
             cmd_vel_message.angular.z = 0
