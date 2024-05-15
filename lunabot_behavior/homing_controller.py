@@ -273,6 +273,7 @@ class HomingController:
 
             angular_error = apriltag_yaw - robot_yaw
             angular_error = (angular_error + np.pi) % (2 * np.pi) - np.pi
+            print(angular_error)
 
             if abs(angular_error) < self.alignment_threshold:
                 self.stop()

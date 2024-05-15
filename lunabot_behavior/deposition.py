@@ -40,7 +40,7 @@ class Deposition:
 
         # self.load_cell_threshold = 1 # in kilograms, TODO test / verify WHEN LOAD CELLS EXIST
 
-        self.DEPOSITION_TIME = 45.00
+        self.DEPOSITION_TIME = 75.00
 
         self.is_sim = rospy.get_param("is_sim")
 
