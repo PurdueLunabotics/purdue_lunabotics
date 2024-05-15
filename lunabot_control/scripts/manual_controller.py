@@ -207,8 +207,11 @@ class ManualController:
             # Dpad up/down - control linear actuators
             effort_msg.lin_act = int(constrain(joy.axes[Axes.DPAD_VERTICAL.value]) * self.ACTUATE_SPEED)
 
+            # Deposition- B to go, view/select/back to move backwards
             if (joy.buttons[Buttons.B.value] == 1):
                 effort_msg.deposit = self.DEPOSITION_SPEED
+            elif (joy.buttons[Buttons.BACK.value] == 1):
+                effort_msg.deposit = -1 * self.DEPOSITION_SPEED
 
             self.effort_msg = effort_msg
             self.last_joy = joy
