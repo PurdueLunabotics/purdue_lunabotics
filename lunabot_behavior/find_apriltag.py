@@ -84,7 +84,7 @@ class FindAprilTag:
 
             # keep turning and searching for april_tags
             velocity_message.linear.x = 0
-            velocity_message.angular.z = 0.5 #0.261799 # Around 15 degrees
+            velocity_message.angular.z = -0.5 #0.261799 # Around 15 degrees
             self.velocity_publisher.publish(velocity_message)
 
             if interrupts.check_for_interrupts() != interrupts.Errors.FINE:
@@ -121,8 +121,8 @@ class FindAprilTag:
     
     def spin(self):
 
-        TIME = 3 # seconds
-        SPEED = 0.5 # radians/s
+        TIME = 10 # seconds
+        SPEED = 1 # radians/s
 
         velocity_message = Twist()
         velocity_message.linear.x = 0
@@ -144,6 +144,7 @@ class FindAprilTag:
     
 if __name__ == '__main__':
     find_apriltag = FindAprilTag()
+    #find_apriltag.spin()
     find_apriltag.find_apriltag()
 
     

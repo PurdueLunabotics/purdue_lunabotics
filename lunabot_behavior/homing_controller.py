@@ -228,9 +228,7 @@ class HomingController:
             if (self.berm_apriltag_position is None):
                 self.berm_apriltag_position = last_apriltag_position
 
-            print("apriltag", self.berm_apriltag_position.position.x,
-                    self.berm_apriltag_position.position.y,
-                    self.berm_apriltag_position.position.z)
+            print("apriltag", self.berm_apriltag_position.position.z)
             
             #print(distance_notsquared)
             if (self.berm_apriltag_position.position.z < DIST_THRESHOLD):
