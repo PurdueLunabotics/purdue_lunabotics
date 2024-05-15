@@ -91,7 +91,7 @@ class Behavior:
         Checks if the robot is close to a given goal
         """
 
-        THRESHOLD = 0.15 # meters
+        THRESHOLD = 0.6 # meters
 
         x = self.robot_odom.pose.pose.position.x
         y = self.robot_odom.pose.pose.position.y
@@ -282,6 +282,8 @@ class Behavior:
                     alignment_status = homing_module.home()
                     if alignment_status == False:
                         break
+
+                    homing_module.approach()
 
                     self.current_state = States.DEPOSIT
             
