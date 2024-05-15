@@ -22,7 +22,7 @@ class HomingController:
     linear_setpoint = 0.8
     angular_setpoint = 0
 
-    alignment_threshold = 0.12 # in rad, how close to align before stopping
+    alignment_threshold = 0.1 # in rad, how close to align before stopping
 
     # Linear, Angular
     KP = np.array([0.0, 5.0])
@@ -241,6 +241,66 @@ class HomingController:
             self.cmd_vel_publisher.publish(self.cmd_vel)
 
             self.rate.sleep()
+
+
+    def align_to_angle(self, apriltag_pos_in_odom: Pose, angle: float):
+        """
+        Align to an angle in the field. Based on the start apriltag, angle in radians
+        """
+
+        rospy.loginfo("Homing: Aligning to angle")
+
+        euler_angles = euler_from_quaternion([apriltag_pos_in_odom.orientation.x, apriltag_pos_in_odom.orientation.y, apriltag_pos_in_odom.orientation.z, apriltag_pos_in_odom.orientation.w])
+        if (self.cam_mode != "sim"):
+            apriltag_yaw = euler_angles[2] - np.pi / 2
+        else:
+            apriltag_yaw = euler_angles[2] + np.pi / 2
+
+
+        # apply angle
+        apriltag_yaw += angle
+
+        local_error_total = np.zeros(2)
+        local_curr_error = np.zeros(2)
+        local_prev_error = np.zeros(2)
+
+        while True:
+
+            if interrupts.check_for_interrupts() != interrupts.Errors.FINE:
+                return False
+
+            robot_yaw = euler_from_quaternion([self.odom.pose.pose.orientation.x, self.odom.pose.pose.orientation.y, self.odom.pose.pose.orientation.z, self.odom.pose.pose.orientation.w])[2]
+
+            angular_error = apriltag_yaw - robot_yaw
+            angular_error = (angular_error + np.pi) % (2 * np.pi) - np.pi
+
+            if abs(angular_error) < self.alignment_threshold:
+                self.stop()
+                rospy.loginfo("Homing: Done aligning")
+                break
+
+
+            local_curr_error = np.array([0, angular_error])
+
+            local_error_total += local_curr_error # add for I
+
+            # Computing PID control from error
+            control = local_curr_error * self.KP
+            control += local_error_total * self.KI
+            control += (local_curr_error - local_prev_error) * self.KD
+
+            # Set current error to previous error (for D)
+            local_prev_error = local_curr_error
+
+            # Publish the control (and constrain it)
+            cmd_vel_message = Twist()
+            cmd_vel_message.linear.x = 0
+            cmd_vel_message.angular.z = np.clip(control[1]*2, self.angular_limits[0], self.angular_limits[1]) #TODO why *2
+ 
+            self.cmd_vel_publisher.publish(cmd_vel_message)
+
+            self.rate.sleep()
+
 
 
     def stop(self):
