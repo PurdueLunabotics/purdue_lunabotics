@@ -164,7 +164,7 @@ class Behavior:
         mining_goal.pose.position.x = self.mining_zone.middle[0]
         mining_goal.pose.position.y = self.mining_zone.middle[1]
 
-        offset = zones.calc_offset(0.5, 0, apriltag_pose_in_odom, self.is_sim)
+        offset = zones.calc_offset(-1, 0, apriltag_pose_in_odom, self.is_sim)
         mining_goal.pose.position.x += offset[0]
         mining_goal.pose.position.y += offset[1]
 
@@ -178,7 +178,7 @@ class Behavior:
         berm_goal.pose.position.x = mining_goal.pose.position.x
         berm_goal.pose.position.y = mining_goal.pose.position.y
 
-        offset = zones.calc_offset(0, -.4, apriltag_pose_in_odom, self.is_sim)
+        offset = zones.calc_offset(1, -1.5, apriltag_pose_in_odom, self.is_sim)
         berm_goal.pose.position.x += offset[0]
         berm_goal.pose.position.y += offset[1]
 
@@ -282,6 +282,9 @@ class Behavior:
                     alignment_status = homing_module.home()
                     if alignment_status == False:
                         break
+
+                    rospy.loginfo("State: approach")
+                    homing_module.approach()
 
                     self.current_state = States.DEPOSIT
             
