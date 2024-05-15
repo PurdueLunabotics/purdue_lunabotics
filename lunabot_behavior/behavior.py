@@ -277,14 +277,15 @@ class Behavior:
                 # Align with an apriltag at the berm
                 if (self.current_state == States.ALIGN):
                     rospy.loginfo("State: Alignment")
-                    # Alignment
 
                     alignment_status = homing_module.home()
                     if alignment_status == False:
                         break
 
                     rospy.loginfo("State: approach")
-                    homing_module.approach()
+                    approach_status = homing_module.approach()
+                    if approach_status == False:
+                        break
 
                     self.current_state = States.DEPOSIT
             
