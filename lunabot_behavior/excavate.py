@@ -200,6 +200,8 @@ class Excavate:
 
         # TODO add logic for stopping if obstacles exist (both rocks and craters)
 
+        exc_failure_counter = 0
+
         # Until the set amount of time, keep moving the robot forward and spinning excavation
         while rospy.get_time() - start_time < self.TRENCHING_TIME:
 
@@ -238,7 +240,11 @@ class Excavate:
 
             # Check for excavation getting stuck (high current)
             if self.robot_sensors.exc_curr > self.excavation_current_threshold:
+                exc_failure_counter += 1
                 self.spin_excavation_backwards()
+
+            if (exc_failure_counter >= 7):
+                break
 
             current_time = new_time
             excavation_ang = new_excavation_ang
