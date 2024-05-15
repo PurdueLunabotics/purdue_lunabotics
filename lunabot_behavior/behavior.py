@@ -3,6 +3,7 @@
 import rospy
 from enum import Enum, auto
 import math
+import numpy as np
 
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from geometry_msgs.msg import Twist, PoseStamped
@@ -178,7 +179,7 @@ class Behavior:
         berm_goal.pose.position.x = mining_goal.pose.position.x
         berm_goal.pose.position.y = mining_goal.pose.position.y
 
-        offset = zones.calc_offset(1, -1.5, apriltag_pose_in_odom, self.is_sim)
+        offset = zones.calc_offset(1.5, -1.5, apriltag_pose_in_odom, self.is_sim)
         berm_goal.pose.position.x += offset[0]
         berm_goal.pose.position.y += offset[1]
 
@@ -188,6 +189,8 @@ class Behavior:
         berm_goal.header.frame_id = "odom"
 
         self.current_state = States.TRAVERSAL_MINE
+
+        homing_module.align_to_angle(apriltag_pose_in_odom.pose, np.pi / 2)
 
         self.goal_publisher.publish(mining_goal)
 
@@ -277,6 +280,8 @@ class Behavior:
                 # Align with an apriltag at the berm
                 if (self.current_state == States.ALIGN):
                     rospy.loginfo("State: Alignment")
+
+                    homing_module.align_to_angle(apriltag_pose_in_odom.pose, np.pi / 2)
 
                     alignment_status = homing_module.home()
                     if alignment_status == False:
