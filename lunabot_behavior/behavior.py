@@ -165,7 +165,7 @@ class Behavior:
         mining_goal.pose.position.x = self.mining_zone.middle[0]
         mining_goal.pose.position.y = self.mining_zone.middle[1]
 
-        offset = zones.calc_offset(-1, 0, apriltag_pose_in_odom, self.is_sim)
+        offset = zones.calc_offset(-0.7, 0, apriltag_pose_in_odom, self.is_sim)
         mining_goal.pose.position.x += offset[0]
         mining_goal.pose.position.y += offset[1]
 
@@ -179,7 +179,7 @@ class Behavior:
         berm_goal.pose.position.x = mining_goal.pose.position.x
         berm_goal.pose.position.y = mining_goal.pose.position.y
 
-        offset = zones.calc_offset(1.5, -1.5, apriltag_pose_in_odom, self.is_sim)
+        offset = zones.calc_offset(1.2, -1.5, apriltag_pose_in_odom, self.is_sim)
         berm_goal.pose.position.x += offset[0]
         berm_goal.pose.position.y += offset[1]
 

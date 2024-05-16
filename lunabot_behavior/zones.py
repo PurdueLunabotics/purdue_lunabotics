@@ -116,8 +116,8 @@ def find_mining_zone(apriltag_pose_in_odom: PoseStamped, is_sim: bool)->Zone:
     LENGTH_X = 3 # In meters, the length of the mining zone (left to right)
     # KSC = 3
 
-    DIST_Y = 1.9 # In meters, the distance from the bottom-most wall to the bottom border of the mining zone
-    # KSC = 2
+    DIST_Y = 1 # In meters, the distance from the bottom-most wall to the bottom border of the mining zone
+    # KSC = 1
     LENGTH_Y = 3 # In meters, the length of the mining zone (bottom to top)
     # KSC = 3
 
@@ -137,7 +137,7 @@ def find_berm_zone(apriltag_pose_in_odom: PoseStamped, is_sim: bool)->Zone:
 
     DIST_Y = 0
     # KSC = ~0.1
-    LENGTH_Y = 1
+    LENGTH_Y = -1
     # KSC = ~1
 
     top_left = calc_point_from_apriltag(DIST_X, DIST_Y + LENGTH_Y, apriltag_pose_in_odom, is_sim)

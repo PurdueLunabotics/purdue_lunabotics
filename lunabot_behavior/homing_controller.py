@@ -212,10 +212,12 @@ class HomingController:
         Approach the apriltag. After you have homed/ are facing the apriltag, drive in straight line
         """
 
-        DIST_THRESHOLD = 1 # meters, how close to the apriltag to stop
+        DIST_THRESHOLD = 0.6 # meters, how close to the apriltag to stop
         APPROACH_SPEED = -0.2 # m/s
 
         last_apriltag_position = self.berm_apriltag_position
+
+        missed_apriltag_counter = 0
 
         while (True):
 
@@ -227,6 +229,12 @@ class HomingController:
             
             if (self.berm_apriltag_position is None):
                 self.berm_apriltag_position = last_apriltag_position
+                missed_apriltag_counter += 1
+
+                if (missed_apriltag_counter >= 6):
+                    self.stop()
+                    rospy.loginfo("Homing: Early end")
+                    return True
 
             print("apriltag", self.berm_apriltag_position.position.z)
             
