@@ -91,6 +91,8 @@ class Excavate:
 
         self.is_sim = rospy.get_param("is_sim")
 
+        self.exc_failure_counter = 0
+
     def excavate(self):
         self.plunge()
         self.trench()
@@ -148,16 +150,18 @@ class Excavate:
                 / self.BUCKET_SPACING
             )
 
-            lin_act_message.data = clamp_output(
-                -target_actuator_velocity / self.max_lin_act_vel * self.lin_act_max_power
-            )  # No encoders so cannot do PID, estimating (will slighly underestimate on lower voltage)
+            lin_act_message.data = clamp_output(-target_actuator_velocity / self.max_lin_act_vel * self.lin_act_max_power)  # No encoders so cannot do PID, estimating (will slighly underestimate on lower voltage)
 
             self.lin_act_publisher.publish(lin_act_message)
             self.excavation_publisher.publish(excavation_message)
 
             # Check for excavation getting stuck (high current)
             if self.robot_sensors.exc_curr > self.excavation_current_threshold:
+                self.exc_failure_counter += 1
                 self.spin_excavation_backwards()
+
+            if (self.exc_failure_counter >= 7):
+                break
 
             current_time = new_time
             excavation_ang = new_excavation_ang
@@ -184,9 +188,7 @@ class Excavate:
         excavation_message = Int8()
         cmd_vel_message = Twist()
 
-        excavation_ang = (
-            self.robot_sensors.exc_ang
-        )  # TODO have firmware give excavation angle directly?
+        excavation_ang = self.robot_sensors.exc_ang 
         current_time = rospy.get_time()
         start_time = current_time
 
@@ -200,8 +202,6 @@ class Excavate:
 
         # TODO add logic for stopping if obstacles exist (both rocks and craters)
 
-        exc_failure_counter = 0
-
         # Until the set amount of time, keep moving the robot forward and spinning excavation
         while rospy.get_time() - start_time < self.TRENCHING_TIME:
 
@@ -213,15 +213,10 @@ class Excavate:
 
             dt = new_time - current_time
 
-            excavation_velocity = (
-                new_excavation_ang - excavation_ang
-            ) / dt  # TODO check calculations are good
-
             excavation_velocity = self.robot_sensors.exc_vel
 
-            excavation_control = self.excavation_pid_controller.update(
-                excavation_velocity, dt
-            )
+            excavation_control = self.excavation_pid_controller.update(excavation_velocity, dt)
+
             excavation_message.data = clamp_output(excavation_control)
 
             self.excavation_publisher.publish(excavation_message)
@@ -240,10 +235,10 @@ class Excavate:
 
             # Check for excavation getting stuck (high current)
             if self.robot_sensors.exc_curr > self.excavation_current_threshold:
-                exc_failure_counter += 1
+                self.exc_failure_counter += 1
                 self.spin_excavation_backwards()
 
-            if (exc_failure_counter >= 7):
+            if (self.exc_failure_counter >= 7):
                 break
 
             current_time = new_time
@@ -271,7 +266,7 @@ class Excavate:
         Spins excavation backwards for 1 second. Used to unstick rocks from buckets (if excavation gets high current)
         """
 
-        print("spinning backwards")
+        print("Excavation: spinning backwards (", self.exc_failure_counter, ")")
 
         # 90% of max speed, backwards
         EXCAVATION_SPEED = int(-127 * 0.9)
