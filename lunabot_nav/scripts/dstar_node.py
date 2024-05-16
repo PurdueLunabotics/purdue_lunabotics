@@ -147,6 +147,9 @@ class DstarNode:
         Reduces the size/complexity of the path using the path sampling rate
         """
 
+        if (len(path_data) == 0):
+            return
+
         rospy.logdebug("Dstar publishing path")
 
         if path_data == "same":
