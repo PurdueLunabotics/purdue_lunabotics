@@ -104,6 +104,8 @@ class Excavate:
 
         time.sleep(0.1)  # Why is time.sleep() here. TODO investigate
 
+        print("Excavation: Plunging")
+
         if self.is_sim:
             rospy.loginfo("Plunge: would plunge")
             time.sleep(3)
@@ -179,6 +181,8 @@ class Excavate:
         """
 
         time.sleep(0.1)  # Why is time.sleep() here. TODO investigate
+
+        print("Excavation: Trenching")
 
         if self.is_sim:
             rospy.loginfo("Trenching: would trench")
@@ -288,4 +292,5 @@ if __name__ == "__main__":
 
     lin_act_publisher = rospy.Publisher("/lin_act", Int8, queue_size=1, latch=True)
     ascent_module = ascent.Ascent(lin_act_publisher)
+    print("Exc: Raising")
     ascent_module.raise_linear_actuators()
