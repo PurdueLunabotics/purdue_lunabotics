@@ -55,20 +55,6 @@ class Excavate:
 
         self.rate = rospy.Rate(10)
 
-        # 90 percent of max speed
-        TARGET_EXCAVATION_VELOCITY = 8 * 0.9
-
-        self.excavation_pid_controller = VelocityPIDController(
-            TARGET_EXCAVATION_VELOCITY, 1, 0, 0, 127
-        )  # TODO find values
-
-        self.left_drivetrain_pid_controller = VelocityPIDController(
-            1, 1, 0, 0, 127
-        )  # TODO find values
-        self.right_drivetrain_pid_controller = VelocityPIDController(
-            1, 1, 0, 0, 127
-        )  # TODO find values
-
         # Constants (in meters)
         self.TARGET_DEPTH_OF_CUT = 0.005  # Currently set to .5 cm
 
@@ -114,9 +100,6 @@ class Excavate:
         excavation_message = Int8()
         lin_act_message = Int8()
 
-        excavation_ang = (
-            self.robot_sensors.exc_ang
-        )  # TODO have firmware give excavation angle directly?
         start_time = rospy.get_time()
         current_time = start_time
 
@@ -127,47 +110,17 @@ class Excavate:
                 return False
 
             new_time = rospy.get_time()
-            new_excavation_ang = self.robot_sensors.exc_ang
 
             dt = new_time - current_time
 
-            # Set excavation based on the PID controller
-            excavation_velocity = (
-                new_excavation_ang - excavation_ang
-            ) / dt  # TODO check calculations are good
-            
-            #print("exc vel: ", excavation_velocity)
-            #print("filtered: ", self.robot_sensors.exc_vel)
+            excavation_message.data = int(127 * 0.8)
 
-            excavation_control = self.excavation_pid_controller.update(
-                excavation_velocity, dt
-            )
-            #print(excavation_control, "control")
-            excavation_message.data = clamp_output(excavation_control)
-
-            # Set the target linear actuator velocity to target the depth of cut
-            target_actuator_velocity = (
-                self.TARGET_DEPTH_OF_CUT
-                * excavation_velocity
-                * self.BUCKET_RADIUS
-                / self.BUCKET_SPACING
-            )
-
-            lin_act_message.data = clamp_output(-target_actuator_velocity / self.max_lin_act_vel * self.lin_act_max_power)  # No encoders so cannot do PID, estimating (will slighly underestimate on lower voltage)
+            lin_act_message.data = -110
 
             self.lin_act_publisher.publish(lin_act_message)
             self.excavation_publisher.publish(excavation_message)
 
-            # Check for excavation getting stuck (high current)
-            if self.robot_sensors.exc_curr > self.excavation_current_threshold:
-                self.exc_failure_counter += 1
-                self.spin_excavation_backwards()
-
-            if (self.exc_failure_counter >= 7):
-                break
-
             current_time = new_time
-            excavation_ang = new_excavation_ang
 
             self.rate.sleep()
 
@@ -193,7 +146,6 @@ class Excavate:
         excavation_message = Int8()
         cmd_vel_message = Twist()
 
-        excavation_ang = self.robot_sensors.exc_ang 
         current_time = rospy.get_time()
         start_time = current_time
 
@@ -214,45 +166,19 @@ class Excavate:
                 return False
 
             new_time = rospy.get_time()
-            new_excavation_ang = self.robot_sensors.exc_ang
 
             dt = new_time - current_time
 
-            excavation_velocity = self.robot_sensors.exc_vel
-
-            excavation_control = self.excavation_pid_controller.update(excavation_velocity, dt)
-
-            excavation_message.data = clamp_output(excavation_control)
+            excavation_message.data = int(127 * 0.8)
 
             self.excavation_publisher.publish(excavation_message)
 
-            target_linear_vel = (
-                self.TARGET_DEPTH_OF_CUT
-                * excavation_velocity
-                * self.BUCKET_RADIUS
-                / self.BUCKET_SPACING
-            )
-
-            cmd_vel_message.linear.x = target_linear_vel
+            cmd_vel_message.linear.x = 0.1
             cmd_vel_message.angular.z = 0
 
             self.cmd_vel_publisher.publish(cmd_vel_message)
 
-            # Check for excavation getting stuck (high current)
-            if self.robot_sensors.exc_curr > self.excavation_current_threshold:
-                self.exc_failure_counter += 1
-                self.spin_excavation_backwards()
-
-            if (self.exc_failure_counter >= 7):
-                break
-
             current_time = new_time
-            excavation_ang = new_excavation_ang
-
-            #load_cell_weight = (
-            #    self.robot_sensors.load_cell_weights[0]
-            #    + self.robot_sensors.load_cell_weights[1]
-            #)
 
             self.rate.sleep()
 

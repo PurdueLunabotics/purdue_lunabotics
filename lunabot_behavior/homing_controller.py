@@ -311,7 +311,6 @@ class HomingController:
             self.rate.sleep()
 
 
-
     def stop(self):
         self.cmd_vel.linear.x = 0
         self.cmd_vel.angular.z = 0

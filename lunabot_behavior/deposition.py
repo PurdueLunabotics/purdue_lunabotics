@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import rospy
 
 from lunabot_msgs.msg import RobotSensors
@@ -88,7 +90,7 @@ class Deposition:
     
 if __name__ == "__main__":
 
-    if len(sys.argv) > 1 and sys.argv[1] == "no-homing":
+    if len(sys.argv) > 1 and (sys.argv[1] == "-n" or sys.argv[1] == "-no-homing"):
         deposition = Deposition()
         deposition.deposit()
     else:
