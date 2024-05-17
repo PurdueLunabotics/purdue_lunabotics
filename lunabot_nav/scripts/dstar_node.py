@@ -40,12 +40,14 @@ class DstarNode:
         Update the map given a new occupancy grid. Update the flag such that dstar will update the map.
         """
 
-        if np.all(data.data == 0): #ignore blank maps
+        data_arr = np.array(data.data)
+
+        if (np.all(data_arr == 0)): # ignore blank maps
             return
 
         width = data.info.width
         height = data.info.height
-        self.map = np.reshape(data.data, (height, width))
+        self.map = np.reshape(data_arr, (height, width))
 
         self.resolution = data.info.resolution
         self.x_offset = data.info.origin.position.x
@@ -58,7 +60,9 @@ class DstarNode:
         Update the grid given the occupancy grid update (applied on top of the current grid). Also update the flag for dstar to update the map.
         """
 
-        if np.all(data.data == 0): #ignore blank maps
+        data_arr = np.array(data.data)
+
+        if (np.all(data_arr == 0)):
             return
 
         temp_map = self.map.copy()
@@ -66,7 +70,7 @@ class DstarNode:
         index = 0
         for i in range(data.y, data.y + data.height):
             for j in range(data.x, data.x + data.width):
-                temp_map[i][j] = data.data[index]
+                temp_map[i][j] = data_arr[index]
                 index += 1
 
         self.map = temp_map.copy()
