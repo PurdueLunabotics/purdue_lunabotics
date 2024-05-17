@@ -55,20 +55,6 @@ class Excavate:
 
         self.rate = rospy.Rate(10)
 
-        # 90 percent of max speed
-        TARGET_EXCAVATION_VELOCITY = 8 * 0.9
-
-        self.excavation_pid_controller = VelocityPIDController(
-            TARGET_EXCAVATION_VELOCITY, 1, 0, 0, 127
-        )  # TODO find values
-
-        self.left_drivetrain_pid_controller = VelocityPIDController(
-            1, 1, 0, 0, 127
-        )  # TODO find values
-        self.right_drivetrain_pid_controller = VelocityPIDController(
-            1, 1, 0, 0, 127
-        )  # TODO find values
-
         # Constants (in meters)
         self.TARGET_DEPTH_OF_CUT = 0.005  # Currently set to .5 cm
 
@@ -114,9 +100,6 @@ class Excavate:
         excavation_message = Int8()
         lin_act_message = Int8()
 
-        excavation_ang = (
-            self.robot_sensors.exc_ang
-        )  # TODO have firmware give excavation angle directly?
         start_time = rospy.get_time()
         current_time = start_time
 
