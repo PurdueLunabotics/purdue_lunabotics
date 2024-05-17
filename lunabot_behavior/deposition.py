@@ -98,5 +98,6 @@ if __name__ == "__main__":
         homing_controller = HomingController(cmd_vel_publisher)
 
         homing_controller.home()
+        rospy.sleep(0.5)
         homing_controller.approach()
         deposition.deposit()
