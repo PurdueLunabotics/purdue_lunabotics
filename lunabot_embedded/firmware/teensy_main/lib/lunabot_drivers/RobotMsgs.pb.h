@@ -11,12 +11,12 @@
 
 /* Struct definitions */
 typedef struct _RobotSensors {
-  int32_t lead_screw_curr;
-  int32_t act_right_curr;
-  int32_t dep_curr;
-  int32_t exc_curr;
-  int32_t drive_left_curr;
-  int32_t drive_right_curr;
+  float lead_screw_curr;
+  float act_right_curr;
+  float dep_curr;
+  float exc_curr;
+  float drive_left_curr;
+  float drive_right_curr;
   float drive_left_ang;
   float drive_right_ang;
   float exc_ang;

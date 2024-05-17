@@ -51,7 +51,7 @@ rosdep install --from-paths src --ignore-src --rosdistro=noetic -y
 sudo ./src/purdue_lunabotics/install-non-ros-deps.sh
 ```
 
-4. Build + source (Do this every time you download new packages)
+4. Build + source (Do this every time you download new packages). NOTE, on the lunabotics computer this is luna_ws
 
 ```
 catkin build

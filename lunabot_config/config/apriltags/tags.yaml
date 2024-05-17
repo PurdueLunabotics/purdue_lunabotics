@@ -5,9 +5,21 @@ standalone_tags:
           {id: 2, size: 0.19},
           {id: 3, size: 0.19},
           {id: 4, size: 0.19},
+          {id: 5, size: 0.19},
+          {id: 6, size: 0.19},
+          {id: 7, size: 0.19},
+          {id: 8, size: 0.19},
   ]
 tag_bundles:
   [
+    {
+      name: 'berm',
+      layout:
+        [
+          {id: 2, size: 0.19, x: 0.0000, y: 0.0000, z: 0.0000, qw: 1.0000, qx: 0.0000, qy: 0.0000, qz: 0.0000},
+          {id: 6, size: 0.19, x: 0, y: 0, z: -0.225, qw: 0, qx: 0, qy: 0, qz: 0},
+        ]
+    },
     {
       name: 'sieve-marker',
       layout:

@@ -9,7 +9,7 @@
   <group ns="usb_cam" >
     <node pkg="image_proc" type="image_proc" name="image_proc" args="image:=image_raw"/>
     <include file="$(find lunabot_perception)/launch/apriltag.launch">
-      <arg name="camera_frame" value="overhead" />
+      <arg name="camera_frame" value="usb_cam_link" />
     </include>
   </group>
 

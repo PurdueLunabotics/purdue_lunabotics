@@ -2,11 +2,15 @@
 <launch>
     <arg name="autonomy" default="false" />
     <arg name="overhead" default="false" />
+    <arg name="foxglove" default="false"  />
 
     <rosparam file="$(find lunabot_config)/config/real_robot.yml" command="load" />
 
+    <include if="$(arg foxglove)" file="$(find foxglove_bridge)/launch/foxglove_bridge.launch" />
     <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch" />
-    <include unless="$(arg autonomy)" file="$(find lunabot_control)/launch/manual_control.launch"/>
+    <include file="$(find lunabot_control)/launch/manual_control.launch">
+        <arg name="autonomy" value="$(arg autonomy)"/>
+    </include>
     <include file="$(find lunabot_description)/launch/display.launch"/>
 
 </launch>

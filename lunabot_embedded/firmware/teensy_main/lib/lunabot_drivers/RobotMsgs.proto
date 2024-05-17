@@ -1,12 +1,12 @@
 syntax = "proto3";
 
 message RobotSensors {
-  sint32 lead_screw_curr = 1;
-  sint32 act_right_curr = 2;
-  sint32 dep_curr = 3;
-  sint32 exc_curr = 4;
-  sint32 drive_left_curr = 5;
-  sint32 drive_right_curr = 6;
+  float lead_screw_curr = 1;
+  float act_right_curr = 2;
+  float dep_curr = 3;
+  float exc_curr = 4;
+  float drive_left_curr = 5;
+  float drive_right_curr = 6;
 
   float drive_left_ang = 7;
   float drive_right_ang = 8;
