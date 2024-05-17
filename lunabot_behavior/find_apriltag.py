@@ -115,7 +115,7 @@ class FindAprilTag:
         # Set the time to 0 to get the latest available transform
         pose.header.stamp = rospy.Time(0)
 
-        pose_in_odom = tf_buffer.transform(pose, target_frame, rospy.Duration(2.0))
+        pose_in_odom = tf_buffer.transform(pose, target_frame, rospy.Duration(5.0))
 
         return pose_in_odom
     
