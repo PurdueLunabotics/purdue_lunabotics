@@ -135,6 +135,7 @@ class Excavate:
             excavation_velocity = (
                 new_excavation_ang - excavation_ang
             ) / dt  # TODO check calculations are good
+            
             #print("exc vel: ", excavation_velocity)
             #print("filtered: ", self.robot_sensors.exc_vel)
 
