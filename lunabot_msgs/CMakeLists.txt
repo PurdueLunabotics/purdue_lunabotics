@@ -1,5 +1,12 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.5)
 project(lunabot_msgs)
+
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 17)
+endif()
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -7,15 +14,16 @@ project(lunabot_msgs)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
- message_generation
- std_msgs
-)
+#find_package(catkin REQUIRED COMPONENTS
+# message_generation
+# std_msgs
+#)
+
+find_package(ament_cmake REQUIRED)
+find_package(std_msgs REQUIRED)
 
 
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-
+find_package(rosidl_default_generators REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -27,17 +35,15 @@ find_package(catkin REQUIRED COMPONENTS
 ################################################
 
 ## Generate messages in the 'msg' folder
-add_message_files(FILES
-  RobotEffort.msg
-  RobotSensors.msg
-  RobotErrors.msg
-  Behavior.msg
+rosidl_generate_interfaces(${PROJECT_NAME}
+    msg/RobotEffort.msg
+    msg/RobotSensors.msg
+    msg/RobotErrors.msg
+    msg/Behavior.msg
+    DEPENDENCIES std_msgs
 )
 
-## Generate added messages and services with any dependencies listed here
-generate_messages(DEPENDENCIES
-  std_msgs
-)
+# find_package(Boost REQUIRED COMPONENTS system filesystem thread)
 
 ###################################
 ## catkin specific configuration ##
@@ -48,12 +54,15 @@ generate_messages(DEPENDENCIES
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(
+#catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES lunabot_msgs
-   CATKIN_DEPENDS message_runtime
+#   CATKIN_DEPENDS message_runtime
 #  DEPENDS system_lib
-)
+#)
+
+ament_export_dependencies(message_runtime)
+ament_package()
 
 ###########
 ## Build ##
@@ -61,7 +70,8 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(
+# include_directories(include ${Boost_INCLUDE_DIRS})
+#include_directories(
   # include
-  ${catkin_INCLUDE_DIRS}
-)
+#  ${catkin_INCLUDE_DIRS}
+#)
