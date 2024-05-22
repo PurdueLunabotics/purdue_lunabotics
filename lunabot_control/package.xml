@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package format="2">
+<package format="3">
   <name>lunabot_control</name>
   <version>0.0.0</version>
   <description>The lunabot_control package</description>
@@ -7,23 +7,11 @@
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="raghava13@todo.todo">raghava13</maintainer>
+  <maintainer email="arepikov@todo.todo">arepikov</maintainer>
   <!-- One license tag required, multiple allowed, one license per tag -->
   <!-- Commonly used license strings: -->
   <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
   <license>TODO</license>
-
-
-  <!-- Url tags are optional, but multiple are allowed, one per tag -->
-  <!-- Optional attribute type can be: website, bugtracker, or repository -->
-  <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/lunabot_control</url> -->
-
-
-  <!-- Author tags are optional, multiple are allowed, one per tag -->
-  <!-- Authors do not have to be maintainers, but could be -->
-  <!-- Example: -->
-  <!-- <author email="jane.doe@example.com">Jane Doe</author> -->
 
 
   <!-- The *depend tags are used to specify dependencies -->
@@ -41,8 +29,8 @@
   <!-- Use buildtool_depend for build tool packages: -->
   <!--   <buildtool_depend>catkin</buildtool_depend> -->
   <!-- Use exec_depend for packages you need at runtime: -->
-  <depend>rospy</depend>
-  <depend>roscpp</depend>
+  <depend>rclicpp</depend>
+  <depend>rclpy</depend>
   <depend>tf2_ros</depend>
   <depend>geometry_msgs</depend>
   <depend>costmap_2d</depend>
@@ -56,11 +44,12 @@
   <!--   <test_depend>gtest</test_depend> -->
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
+    <build_type>ament_cmake</build_type>
     <!-- Other tools can request additional information be placed here -->
 
   </export>
