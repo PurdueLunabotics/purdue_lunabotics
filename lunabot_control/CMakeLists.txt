@@ -47,12 +47,9 @@ include_directories(include)
 #)
 
 add_executable(${PROJECT_NAME}_mpc_node src/mpc_node.cpp src/mpc.cpp )
-set_target_properties(${PROJECT_NAME}_mpc_node PROPERTIES OUTPUT_NAME mpc_node PREFIX "")
+# set_target_properties(${PROJECT_NAME}_mpc_node PROPERTIES OUTPUT_NAME mpc_node PREFIX "")
 # add_dependencies(${PROJECT_NAME}_mpc_node {${PROJECT_NAME}_EXPORTED_TARGETS})
-ament_target_dependencies(${PROJECT_NAME}_mpc_node
-    ${Eigen3_LIBRARIES}
-    rclcpp
-)
+ament_target_dependencies(${PROJECT_NAME}_mpc_node ${Eigen3_LIBRARIES} rclcpp geometry_msgs tf2_ros nav2_costmap_2d nav_msgs)
 
 ament_package()
 

@@ -1,6 +1,6 @@
 #include <lunabot_control/mpc.h>
 
-MPC::MPC(ros::NodeHandle *nh) {
+MPC::MPC() : Node("mpc_node") {
   double frequency;
   std::string map_topic, path_topic, odom_topic, cmd_vel_topic;
   // Global params

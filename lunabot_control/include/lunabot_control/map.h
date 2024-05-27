@@ -6,10 +6,10 @@
 #include <math.h>
 #include <vector>
 
-#include <ros/ros.h>
-#include <nav_msgs/OccupancyGrid.h>
+#include "rclcpp/rclcpp.hpp"
+#include <nav_msgs/msg/occupancy_grid.hpp>
 
-class Map {
+class Map : public rclcpp::Node {
   private:
     int width_;
     int height_;
@@ -24,12 +24,14 @@ class Map {
 
   public:
     Map() : width_{-1}, height_{-1}, resolution_{-1} {
-        ros::param::get("/nav/occ_threshold", occupied_val_);
+      //ros::param::get("/nav/occ_threshold", occupied_val_);
+      occupied_val_ = this->get_parameter("/nav/occ_threshold");
     }
 
     Map(const nav_msgs::OccupancyGrid &map) { 
         update_map(map); 
-        ros::param::get("/nav/occ_threshold", occupied_val_);
+        //ros::param::get("/nav/occ_threshold", occupied_val_);
+        occupied_val_ = this->get_parameter("/nav/occ_threshold");
     }
 
     // Find whether a 2d coordinate (in the real world) is occupied

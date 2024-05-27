@@ -8,22 +8,21 @@
 #include <random>
 #include <vector>
 
-#include <ros/ros.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <geometry_msgs/Quaternion.h>
-#include <geometry_msgs/Twist.h>
-#include <geometry_msgs/TwistStamped.h>
-#include <nav_msgs/OccupancyGrid.h>
-#include <nav_msgs/Odometry.h>
-#include <nav_msgs/Path.h>
-#include <std_msgs/Bool.h>
+#include "rclcpp/rclcpp.hpp"
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <geometry_msgs/msg/quaternion.hpp>
+#include <geometry_msgs/msg/twist.hpp>
+#include <geometry_msgs/msg/twist_stamped.hpp>
+#include <nav_msgs/msg/occupancy_grid.hpp>
+#include <nav_msgs/msg/odometry.hpp>
+#include <nav_msgs/msg/path.hpp>
+#include <std_msgs/msg/bool.hpp>
 
-#include <swri_profiler/profiler.h>
 #include <Eigen/Dense>
 
 #include <lunabot_control/map.h>
 
-class MPC {
+class MPC : public rclcpp::Node {
 private:
   ros::Publisher velocity_pub_;
   ros::Subscriber grid_sub_;
@@ -65,7 +64,7 @@ private:
   double dist_to_setpoint_();
 
 public:
-  MPC(ros::NodeHandle *nh);
+  MPC();
   void update_grid(const nav_msgs::OccupancyGrid &grid);
   void update_path(const nav_msgs::Path &path);
   void update_robot_pos(const nav_msgs::Odometry &odometry);
