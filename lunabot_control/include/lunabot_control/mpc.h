@@ -22,12 +22,14 @@
 
 #include <lunabot_control/map.h>
 
+using std::placeholders::_1;
+
 class MPC : public rclcpp::Node {
 private:
-  ros::Publisher velocity_pub_;
-  ros::Subscriber grid_sub_;
-  ros::Subscriber path_sub_;
-  ros::Subscriber robot_pos_sub_;
+  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr velocity_pub_;
+  rclcpp::Subscription < nav_msgs::msg::OccupancyGrid >::SharedPtr grid_sub_;
+  rclcpp::Subscription<nav_msgs::msg::Path>::SharedPtr path_sub_;
+  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr robot_pos_sub_;
 
   int rollout_count_;
   int top_rollouts_;
@@ -65,9 +67,9 @@ private:
 
 public:
   MPC();
-  void update_grid(const nav_msgs::OccupancyGrid &grid);
-  void update_path(const nav_msgs::Path &path);
-  void update_robot_pos(const nav_msgs::Odometry &odometry);
+  void update_grid(const nav_msgs::msg::OccupancyGrid &grid);
+  void update_path(const nav_msgs::msg::Path &path);
+  void update_robot_pos(const nav_msgs::msg::Odometry &odometry);
   void calculate_velocity();
   void publish_velocity(double linear, double angular);
 

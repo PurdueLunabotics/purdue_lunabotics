@@ -1,0 +1,35 @@
+/**:
+    ros__parameters:
+        odom_topic: "/rtabmap/odom"
+        cmd_vel_topic: "/cmd_vel"
+        nav_goal_topic: "/goal"
+
+        map_topic: "/maps/costmap_node/global_costmap/costmap"
+        map_update_topic: "/maps/costmap_node/global_costmap/costmap_updates"
+        global_path_topic: "/nav/global_path"
+        occ_threshold: 50 # corresponds to possibly-in-collision
+        bezier_step: 0.01
+        lerp_step: 0.05
+        is_sim: false
+        path_sampling_rate: 5 # Take every <n-th> point from the path
+        rollout_count: 50
+        top_rollouts: 15
+        iterations: 10
+        w_linear: 1.0
+        w_angular: 5.0
+        w_waypoint: 20.0
+        w_occupied: 0.0
+        horizon_length: 10
+        frequency: 30
+        min_distance_threshold: 0.5
+        velocity_limits:
+            linear: [-0.20, 0.20]
+            angular: [-0.785, 0.785]
+        max_speed_percentage: 0.8
+        hz: 20
+        max_speed: 4.3 # rad/s of wheels
+        p: 3.9
+        i: 0.015
+        d: 0.0
+        i_saturate: 10
+

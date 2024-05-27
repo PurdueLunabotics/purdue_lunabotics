@@ -4,37 +4,41 @@ MPC::MPC() : Node("mpc_node") {
   double frequency;
   std::string map_topic, path_topic, odom_topic, cmd_vel_topic;
   // Global params
-  ros::param::get("/odom_topic", odom_topic);
-  ros::param::get("/cmd_vel_topic", cmd_vel_topic);
+  odom_topic = this->get_parameter("odom_topic").as_string();
+  cmd_vel_topic = this->get_parameter("cmd_vel_topic").as_string();
 
   // Nav params
-  ros::param::get("map_topic", map_topic);
-  ros::param::get("global_path_topic", path_topic);
+  map_topic = this->get_parameter("map_topic").as_string();
+  path_topic = this->get_parameter("global_path_topic").as_string();
 
   // MPC params
-  ros::param::get("~rollout_count", this->rollout_count_); // Number of samples to generate
-  ros::param::get("~top_rollouts", this->top_rollouts_); // The top n samples to use for the next iteration
-  ros::param::get("~iterations", this->iterations_);
-  ros::param::get("~w_linear", this->w_linear_); // weights for the cost function
-  ros::param::get("~w_angular", this->w_angular_);
-  ros::param::get("~w_waypoint", this->w_waypoint_);
-  ros::param::get("~w_occupied", this->w_occupied_);
-  ros::param::get("~horizon_length", this->horizon_length_); // How many steps in the future to look ahead
-  ros::param::get("~frequency", frequency);
-  ros::param::get("~min_distance_threshold", this->min_dist_thres_); // How close the robot must be to a targeted point
-  ros::param::get("~velocity_limits/linear", lin_lim_);
-  ros::param::get("~velocity_limits/angular", ang_lim_);
+  this->rollout_count_ = this->get_parameter("rollout_count").as_int(); // Number of samples to generate
+  this->top_rollouts_ = this->get_parameter("top_rollouts").as_int(); // The top n samples to use for the next iteration
+  this->iterations_ = this->get_parameter("iterations").as_int();
+  this->w_linear_ = this->get_parameter("w_linear").as_double(); // weights for the cost function
+  this->w_angular_ = this->get_parameter("w_angular").as_double();
+  this->w_waypoint_ = this->get_parameter("w_waypoint").as_double();
+  this->w_occupied_ = this->get_parameter("w_occupied").as_double();
+  this->horizon_length_ = this->get_parameter("horizon_length").as_int(); // How many steps in the future to look ahead
+  frequency = this->get_parameter("frequency").as_double();
+  this->min_dist_thres_ = this->get_parameter("min_distance_threshold").as_double(); // How close the robot must be to a targeted point
+  lin_lim_ = this->get_parameter("velocity_limits.linear").as_double_array();
+  ang_lim_ = this->get_parameter("velocity_limits.angular").as_double_array();
 
   // MPC Variables
   this->delta_time_ = 1 / frequency;
   this->path_ind_ = 0; // Keep track of where on the path we're targeting
   this->enabled_ = false;
 
-  // Ros publishers and subscribers
-  this->velocity_pub_ = nh->advertise<geometry_msgs::Twist>(cmd_vel_topic, 10);
-  this->grid_sub_ = nh->subscribe(map_topic, 10, &MPC::update_grid, this);
-  this->path_sub_ = nh->subscribe(path_topic, 10, &MPC::update_path, this); // Convert to Map
-  this->robot_pos_sub_ = nh->subscribe(odom_topic, 10, &MPC::update_robot_pos, this); // Convert to Map
+  // RCLCPP publishers and subscribers
+  this->velocity_pub_ = this->create_publisher<geometry_msgs::msg::Twist>(cmd_vel_topic, 10);
+  
+  this->grid_sub_ = this->create_subscription<nav_msgs::msg::OccupancyGrid>(
+      cmd_vel_topic, 10, std::bind(&MPC::update_grid, this, _1));
+  this->path_sub_ = this->create_subscription<nav_msgs::msg::Path>(
+      path_topic, 10, std::bind(&MPC::update_path, this, _1));
+  this->robot_pos_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
+      odom_topic, 10, std::bind(&MPC::update_robot_pos, this, _1));
 }
 
 // The columns of a generated sample
@@ -124,17 +128,17 @@ void MPC::update_setpoint_() {
   }
 }
 
-void MPC::update_grid(const nav_msgs::OccupancyGrid &grid) { 
+void MPC::update_grid(const nav_msgs::msg::OccupancyGrid &grid) { 
   map_.update_map(grid); 
 }
 
 // Create a new path when given a new path. Reset the target point to the first point on the path.
-void MPC::update_path(const nav_msgs::Path &path) {
-  ROS_DEBUG("MPC: New path");
+void MPC::update_path(const nav_msgs::msg::Path &path) {
+  RCLCPP_DEBUG(this->get_logger(), "MPC: New path");
   this->path_.clear();
   this->path_ind_ = 0;
   for (int i = 0; i < path.poses.size(); ++i) {
-    geometry_msgs::Point position = path.poses[i].pose.position;
+    geometry_msgs::msg::Point position = path.poses[i].pose.position;
     std::vector<double> pos;
     pos.push_back(position.x);
     pos.push_back(position.y);
@@ -144,12 +148,12 @@ void MPC::update_path(const nav_msgs::Path &path) {
   this->enabled_ = true; // Re-enable path following
 }
 
-static double get_yaw_(geometry_msgs::Quaternion q) {
+static double get_yaw_(geometry_msgs::msg::Quaternion q) {
   return std::atan2(2 * (q.z * q.w + q.x * q.y), 1 - 2 * (q.z * q.z + q.y * q.y));
 }
 
-void MPC::update_robot_pos(const nav_msgs::Odometry &odometry) {
-  geometry_msgs::Pose pose = odometry.pose.pose;
+void MPC::update_robot_pos(const nav_msgs::msg::Odometry &odometry) {
+  geometry_msgs::msg::Pose pose = odometry.pose.pose;
   this->robot_pos_.clear();
   this->robot_pos_.push_back(pose.position.x);
   this->robot_pos_.push_back(pose.position.y);
@@ -168,12 +172,12 @@ double MPC::clamp_(double val, double low, double high) {
 
 // Clamp the given velocity with the velocity limits, and publish the new cmd_vel
 void MPC::publish_velocity(double linear, double angular) {
-  geometry_msgs::Twist twist;
+  geometry_msgs::msg::Twist twist;
   linear = clamp_(linear, lin_lim_[0], lin_lim_[1]);
   angular = clamp_(angular, ang_lim_[0], ang_lim_[1]);
   twist.linear.x = linear;
   twist.angular.z = angular;
-  this->velocity_pub_.publish(twist);
+  this->velocity_pub_->publish(twist);
 }
 
 // See Boundary and Constraint Handling
@@ -238,7 +242,8 @@ Eigen::MatrixXd MPC::std_dev_(std::vector<std::pair<Eigen::MatrixXd, double>> ro
                                         (rollouts[i].first(j, MODEL_ANGULAR_VEL) - temp_mean(j, SAMPLE_ANGULAR_VEL));
     }
   }
-  ROS_ASSERT(this->top_rollouts_ > 1);
+  
+  //ROS_ASSERT(this->top_rollouts_ > 1);
 
   std_dev /= this->top_rollouts_ - 1;
   for (int i = 0; i < std_dev.rows(); ++i) {
@@ -257,7 +262,7 @@ double MPC::dist_to_setpoint_() {
 
 // Given a modeled sample, calculate the cost (Input has shape (horizon_length, 5) where the columns are x, y, theta, linear vel, angular vel)
 double MPC::calculate_cost_(Eigen::MatrixXd rollout) {
-  SWRI_PROFILE("calculate-cost");
+  //SWRI_PROFILE("calculate-cost");
 
   double cost = 0;
   std::vector<double> robot_pos = this->robot_pos_;
@@ -290,7 +295,7 @@ double MPC::calculate_cost_(Eigen::MatrixXd rollout) {
 // Given a generated sample (lin/angular velocities for each timestep), model the robot to generate
 // the positions for each timestep. Returns a modeled sample (of shape (horizon_length, 5) where the columns are x, y, theta, linear vel, angular vel)
 Eigen::MatrixXd MPC::calculate_model_(Eigen::MatrixXd actions) {
-  SWRI_PROFILE("calculate-model");
+  //SWRI_PROFILE("calculate-model");
 
   // Initialize the current position with x, y, theta
   Eigen::VectorXd current_pos(3); 
@@ -320,7 +325,7 @@ bool comparator(std::pair<Eigen::MatrixXd, double> a, std::pair<Eigen::MatrixXd,
 
 // The main function for MPC- given the current robot position and path, find the best velocities to follow the path
 void MPC::calculate_velocity() {
-  SWRI_PROFILE("calculate-velocity");
+  //SWRI_PROFILE("calculate-velocity");
 
   // If not yet enabled, don't do anything
   if (this->robot_pos_.empty() || !this->enabled_) {

@@ -23,15 +23,15 @@ class Map : public rclcpp::Node {
 
 
   public:
-    Map() : width_{-1}, height_{-1}, resolution_{-1} {
+    Map() : Node("mpc_node"), width_{-1}, height_{-1}, resolution_{-1} {
       //ros::param::get("/nav/occ_threshold", occupied_val_);
-      occupied_val_ = this->get_parameter("/nav/occ_threshold");
+      occupied_val_ = this->get_parameter("/occ_threshold").as_int();
     }
 
-    Map(const nav_msgs::OccupancyGrid &map) { 
+    Map(const nav_msgs::msg::OccupancyGrid &map) : Node("mpc_node") { 
         update_map(map); 
         //ros::param::get("/nav/occ_threshold", occupied_val_);
-        occupied_val_ = this->get_parameter("/nav/occ_threshold");
+        occupied_val_ = this->get_parameter("/occ_threshold").as_int();
     }
 
     // Find whether a 2d coordinate (in the real world) is occupied
@@ -65,7 +65,7 @@ class Map : public rclcpp::Node {
     }
 
     // Update the map when given a new occupancy grid
-    void update_map(const nav_msgs::OccupancyGrid &map) {
+    void update_map(const nav_msgs::msg::OccupancyGrid &map) {
         resolution_ = map.info.resolution;
         width_ = map.info.width;
         height_ = map.info.height;
