@@ -1,12 +1,24 @@
-plugins: 
-  - {name: static,  type: "costmap_2d::StaticLayer"} 
-  - {name: inflation,  type: "costmap_2d::InflationLayer"} 
-publish_frequency: 30.0
-global_frame: "odom"
-robot_base_frame: "base_link"
-footprint: "[ [0.54615446154,0.295590],[0.546154,-0.295590],[-0.546154,-0.295590],[-0.546154,0.295590] ]"
-map_topic: "/projected_map"
-inflation: {
-  inflation_radius: 0.6,
-  cost_scaling_factor: 3,
-}
+global_costmap:
+    global_costmap:
+        ros__parameters:
+            plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+            publish_frequency: 30.0
+            global_frame: "odom"
+            robot_base_frame: "base_link"
+            footprint: "[ [0.54615446154,0.295590],[0.546154,-0.295590],[-0.546154,-0.295590],[-0.546154,0.295590] ]"
+            map_topic: "/projected_map"
+            use_sim_time: True
+            inflation_layer:
+                inflation_radius: 0.6
+                cost_scaling_factor: 3
+            
+local_costmap:
+    local_costmap:
+        ros__parameters:
+            update_frequency: 5.0
+            publish_frequency: 2.0
+            global_frame: odom
+            robot_base_frame: base_link
+            rolling_window: true
+            resolution: 0.05
+            use_sim_time: True
