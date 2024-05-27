@@ -1,20 +1,24 @@
-odom_topic: "/rtabmap/odom"
-cmd_vel_topic: "/cmd_vel"
-nav_goal_topic: "/goal"
+/**:
+    ros__parameters:
+        odom_topic: "/rtabmap/odom"
+        cmd_vel_topic: "/cmd_vel"
+        nav_goal_topic: "/goal"
 
+        map_topic: "/maps/costmap_node/global_costmap/costmap"
+        map_update_topic: "/maps/costmap_node/global_costmap/costmap_updates"
+        global_path_topic: "/nav/global_path"
+        occ_threshold: 50 # corresponds to possibly-in-collision
+        bezier_step: 0.01
+        lerp_step: 0.05
+        
+        is_sim: false
 
-nav:
-    map_topic: "/maps/costmap_node/global_costmap/costmap"
-    map_update_topic: "/maps/costmap_node/global_costmap/costmap_updates"
-    global_path_topic: "/nav/global_path"
-    occ_threshold: 50 # corresponds to possibly-in-collision
-    bezier_step: 0.01
-    lerp_step: 0.05
-
-    dstar_node:
+dstar_node:
+    ros__parameters:
         path_sampling_rate: 5 # Take every <n-th> point from the path
 
-    mpc_node:
+mpc_node:
+    ros__parameters:
         rollout_count: 50
         top_rollouts: 15
         iterations: 10
@@ -30,13 +34,12 @@ nav:
             angular: [-0.785, 0.785]
 
 differential_drive_controller:
-    max_speed_percentage: 0.8
-    hz: 20
-    max_speed: 4.3 # rad/s of wheels
-    p: 3.9
-    i: 0.015
-    d: 0.0
-    i_saturate: 10
+    ros__parameters:
+        max_speed_percentage: 0.8
+        hz: 20
+        max_speed: 4.3 # rad/s of wheels
+        p: 3.9
+        i: 0.015
+        d: 0.0
+        i_saturate: 10
 
-
-is_sim: false
