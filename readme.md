@@ -7,13 +7,13 @@ This is the official git repo of the Purdue Lunabotics software team.
   - Ubuntu 20.04
 - Partly-supported
   - Windows:
-    - Use WSL2 (caveat: gui will appear more laggy) 
+    - Use WSL2 (caveat: gui may appear more laggy) 
     - Dual boot linux (caveat: can be hard to set up, not recommended for beginners)
 - Not supported
   - MacOS (both Intel and M1)
 
 ## Other installation methods 
-- Docker (native support coming soon), adds support for MacOS and Windows
+- Docker (not tested), adds support for MacOS and Windows
     - [Get docker](https://docs.docker.com/get-docker/)
     - [Use this ROS noetic Docker image (choose arm if you're on M1 Mac)](https://hub.docker.com/layers/library/ros/noetic/images/sha256-41a0aad743d47e08bec68cf48005706c27a3d7aad10632d204cada99ef3642b2?context=explore)
     - [Useful docker-ros tutorial for learning how docker can be used with ROS](https://roboticseabass.com/2021/04/21/docker-and-ros/) 
