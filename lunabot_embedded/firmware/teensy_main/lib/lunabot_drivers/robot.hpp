@@ -13,7 +13,6 @@ extern ADS1115_lite adc0;
 extern ADS1115_lite adc1;
 #endif
 
-
 // MCs
 extern Sabertooth MC1; // top
 extern Sabertooth MC2; // middle
@@ -35,6 +34,11 @@ float update_curr_right();
 namespace uwb {
 void update(float &d0, float &d1, float &d2);
 } // namespace uwb
+
+namespace load_cell {
+void init();
+void update(float &weight);
+} // namespace load_cell
 
 namespace deposition {
 void cb(int8_t dep);
