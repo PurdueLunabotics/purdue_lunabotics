@@ -3,7 +3,6 @@
 
 #include "interfaces.hpp"
 #include <Arduino.h>
-#include <Stepper.h>
 
 #define ST_SERIAL Serial1
 #define ST_BAUD_RATE 9600
@@ -35,6 +34,10 @@ float update_curr_right();
 namespace uwb {
 void update(float &d0, float &d1, float &d2);
 } // namespace uwb
+
+namespace load {
+void update(float &);
+}
 
 namespace deposition {
 void cb(int8_t dep);

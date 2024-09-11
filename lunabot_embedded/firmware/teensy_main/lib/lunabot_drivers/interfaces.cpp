@@ -18,7 +18,7 @@ int Sabertooth_MotorCtrl::initialized_serial_ = 0;
 
 Sabertooth_MotorCtrl::Sabertooth_MotorCtrl(Sabertooth *s, STMotor m) : st_{s}, motor_{m} {}
 
-void Sabertooth_MotorCtrl::init_serial(HardwareSerial s, int baud_rate) {
+void Sabertooth_MotorCtrl::init_serial(HardwareSerialIMXRT s, int baud_rate) {
   s.begin(baud_rate);
   initialized_serial_ = 1;
 }
@@ -391,4 +391,14 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
       kill();
     }
   }
+}
+
+void HX711_BUS::init() {
+  HX711_BUS::load_sensors[NUM_LOAD_CELLS] = {HX711(), HX711()}
+  HX711_BUS::load_sensors[0].begin(PIN_LIST[0], PIN_LIST[1]);
+  HX711_BUS::load_sensors[1].begin(PIN_LIST[2], PIN_LIST[3]);
+}
+
+float HX711_BUS::read_load() {
+  return (HX711_BUS::load_sensors[0].read_average(TIMES_FOR_AVG) + HX711_BUS::load_sensors[1].read_average(TIMES_FOR_AVG)) / 2
 }

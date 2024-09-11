@@ -23,6 +23,7 @@ typedef struct _RobotSensors {
   float uwb_dist_0;
   float uwb_dist_1;
   float uwb_dist_2;
+  float load_cell_weight;
 } RobotSensors;
 
 typedef struct _RobotEffort {
@@ -39,11 +40,11 @@ extern "C" {
 
 /* Initializer values for message structs */
 #define RobotSensors_init_default                                                                  \
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 #define RobotEffort_init_default                                                                   \
   { 0, 0, 0, 0, 0 }
 #define RobotSensors_init_zero                                                                     \
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 #define RobotEffort_init_zero                                                                      \
   { 0, 0, 0, 0, 0 }
 
@@ -65,6 +66,7 @@ extern "C" {
 #define RobotEffort_right_drive_tag 3
 #define RobotEffort_excavate_tag 4
 #define RobotEffort_deposit_tag 5
+#define RobotSensors_load_cell_weight 13
 
 /* Struct field encoding specification for nanopb */
 #define RobotSensors_FIELDLIST(X, a)                                                               \
@@ -79,7 +81,8 @@ extern "C" {
   X(a, STATIC, SINGULAR, FLOAT, exc_ang, 9)                                                        \
   X(a, STATIC, SINGULAR, FLOAT, uwb_dist_0, 10)                                                    \
   X(a, STATIC, SINGULAR, FLOAT, uwb_dist_1, 11)                                                    \
-  X(a, STATIC, SINGULAR, FLOAT, uwb_dist_2, 12)
+  X(a, STATIC, SINGULAR, FLOAT, uwb_dist_2, 12)                                                    \
+  X(a, STATIC, SINGULAR, FLOAT, load_cell_weight, 13)
 #define RobotSensors_CALLBACK NULL
 #define RobotSensors_DEFAULT NULL
 

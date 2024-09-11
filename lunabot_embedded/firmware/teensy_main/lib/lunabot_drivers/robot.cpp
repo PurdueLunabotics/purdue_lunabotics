@@ -152,3 +152,11 @@ void cb(int8_t volt) { dep_mtr.write(-volt); }
 //exc_mtr.write(volt); }
 
 } // namespace deposition
+
+namespace load
+{
+void update(float &load_cell) {
+  load_cell = HX711_BUS::read_load();
+;}
+} // namespace load
+

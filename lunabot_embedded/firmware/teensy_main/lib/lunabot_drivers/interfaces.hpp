@@ -35,7 +35,7 @@ class Sabertooth_MotorCtrl {
 public:
   Sabertooth_MotorCtrl(Sabertooth *st, STMotor motor);
   void write(int8_t pwm);
-  static void init_serial(HardwareSerial s, int baud_rate);
+  static void init_serial(HardwareSerialIMXRT s, int baud_rate);
 
 private:
   static int initialized_serial_;
@@ -178,5 +178,20 @@ private:
    
   static Encoder encs[NUM_ENCODERS];
 };
+
+class HX711_BUS {
+  public:
+    HX711_BUS(){};
+    static void init();
+    static float read_load();
+  private:
+    static const int NUM_LOAD_CELLS = 2;
+    static constexpr int PIN_LIST[NUM_LOAD_CELLS*2] = {2, 3, 4, 5};
+    static const uint8_t TIMES_FOR_AVG = 10;
+
+    static HX711 load_sensors[NUM_LOAD_CELLS];
+
+
+}
 
 #endif
