@@ -3,7 +3,6 @@
 
 #include "interfaces.hpp"
 #include <Arduino.h>
-#include <Stepper.h>
 
 #define ST_SERIAL Serial1
 #define ST_BAUD_RATE 9600
@@ -12,7 +11,6 @@
 extern ADS1115_lite adc0;
 extern ADS1115_lite adc1;
 #endif
-
 
 // MCs
 extern Sabertooth MC1; // top
