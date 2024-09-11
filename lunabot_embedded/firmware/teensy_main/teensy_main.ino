@@ -51,7 +51,7 @@ float last_effort;
 
 void setup() {
   // Serial.begin(115200);
-  // Sabertooth_MotorCtrl::init_serial(ST_SERIAL, ST_BAUD_RATE);
+  Sabertooth_MotorCtrl::init_serial(ST_SERIAL, ST_BAUD_RATE);
 
   M5Stack_UWB_Trncvr::init();
   KillSwitchRelay::init();

@@ -18,10 +18,10 @@ int Sabertooth_MotorCtrl::initialized_serial_ = 0;
 
 Sabertooth_MotorCtrl::Sabertooth_MotorCtrl(Sabertooth *s, STMotor m) : st_{s}, motor_{m} {}
 
-// void Sabertooth_MotorCtrl::init_serial(HardwareSerial s, int baud_rate) {
-//   s.begin(baud_rate);
-//   initialized_serial_ = 1;
-// }
+void Sabertooth_MotorCtrl::init_serial(HardwareSerialIMXRT s, int baud_rate) {
+  s.begin(baud_rate);
+  initialized_serial_ = 1;
+}
 void Sabertooth_MotorCtrl::write(int8_t power) {
   if (initialized_serial_) {
     power = min(power, 127);
