@@ -35,6 +35,7 @@ void send() {
   excavation::update(state.exc_curr, state.exc_ang);
 
   uwb::update(state.uwb_dist_0, state.uwb_dist_1, state.uwb_dist_2);
+  load_cell::update(state.load_cell_weight);
 
   /*
   Serial.print("Raw: ");
@@ -55,6 +56,7 @@ void setup() {
 
   M5Stack_UWB_Trncvr::init();
   KillSwitchRelay::init();
+  load_cell::init();
 
 #ifdef OLD_CURRENT_SENSOR
   ACS711_Current_Bus::init_ads1115();
