@@ -8,8 +8,4 @@
 
 PB_BIND(RobotSensors, RobotSensors, AUTO)
 
-
 PB_BIND(RobotEffort, RobotEffort, AUTO)
-
-
-
