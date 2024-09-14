@@ -93,9 +93,7 @@ void update(float &d0, float &d1, float &d2) {
 }
 } // namespace uwb
 namespace load_cell {
-void update(float &d0) {
-  d0 = M5Stack_UWB_Trncvr::read_scale(0) + M5Stack_UWB_Trncvr::read_scale(1);
-}
+void update(float &d0) { d0 = HX711_Bus::read_scale(0) + HX711_Bus::read_scale(1); }
 } // namespace load_cell
 
 namespace excavation {
