@@ -35,7 +35,7 @@ class Sabertooth_MotorCtrl {
 public:
   Sabertooth_MotorCtrl(Sabertooth *st, STMotor motor);
   void write(int8_t pwm);
-  static void init_serial(HardwareSerial &s, int baud_rate);
+  static void init_serial(HardwareSerialIMXRT s, int baud_rate);
 
 private:
   static int initialized_serial_;
