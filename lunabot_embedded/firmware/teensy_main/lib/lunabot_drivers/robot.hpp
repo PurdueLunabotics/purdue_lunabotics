@@ -3,6 +3,7 @@
 
 #include "interfaces.hpp"
 #include <Arduino.h>
+#include <Sabertooth.h>
 
 #define ST_SERIAL Serial1
 #define ST_BAUD_RATE 9600
