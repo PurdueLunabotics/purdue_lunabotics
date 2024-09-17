@@ -240,7 +240,7 @@ void HX711_Bus::init() {
   }
 }
 
-float HX711_Bus::read_scale(uint8_t id) { return encs[id].read_average() }
+float HX711_Bus::read_scale(uint8_t id) { return encs[id].read_average(); }
 
 volatile float M5Stack_UWB_Trncvr::recv_buffer_[NUM_UWB_TAGS] = {0};
 
@@ -379,7 +379,7 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
 
   for (int i = 0; i < 4; ++i) {
     cutoff_buffer[i] -= cutoff_decay;
-    if (cutoff_buffer < 0) {
+    if (cutoff_buffer[i] < 0) {
       cutoff_buffer[i] = 0;
     }
     if (is_disable[i]) {
