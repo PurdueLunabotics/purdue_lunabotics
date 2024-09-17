@@ -237,10 +237,12 @@ HX711 HX711_Bus::encs[NUM_SENSORS] = {
 void HX711_Bus::init() {
   for (int i = 0; i < NUM_SENSORS; i++) {
     encs[i].begin(PIN_LIST[i * 2], PIN_LIST[i * 2 + 1]);
+    encs[i].set_scale(SCALE_CALIBRATION[i]);
+    encs[i].tare();
   }
 }
 
-float HX711_Bus::read_scale(uint8_t id) { return encs[id].read_average(); }
+float HX711_Bus::read_scale(uint8_t id) { return encs[id].get_units(3); }
 
 volatile float M5Stack_UWB_Trncvr::recv_buffer_[NUM_UWB_TAGS] = {0};
 
