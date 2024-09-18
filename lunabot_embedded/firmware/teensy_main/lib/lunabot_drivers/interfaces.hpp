@@ -7,14 +7,14 @@
 #include <ADS1119.h>
 #endif
 
+#include "robot.hpp"
 #include <Arduino.h>
-#include <SPI.h>
-#include <Sabertooth.h>
-#include <Wire.h>
 #include <Encoder.h>
 #include <HX711.h>
 #include <RobotMsgs.pb.h>
-#include "robot.hpp"
+#include <SPI.h>
+#include <Sabertooth.h>
+#include <Wire.h>
 
 #define UWBSerial Serial4
 
@@ -180,6 +180,20 @@ private:
   static constexpr float deg_per_rev = 360;    // TODO, remove the deg2rad conversion and just to rad here
 
   static Encoder encs[NUM_ENCODERS];
+};
+
+class HX711_Bus {
+public:
+  HX711_Bus() {};
+  static void init();
+  static float read_scale(uint8_t id);
+
+private:
+  static constexpr int NUM_SENSORS = 2;
+  static constexpr int PIN_LIST[NUM_SENSORS * 2] = {2, 3, 4, 5};
+  static constexpr float SCALE_CALIBRATION = {-459.542, -459.542}; // TODO, calibrate these
+
+  static HX711 encs[NUM_SENSORS];
 };
 
 #endif

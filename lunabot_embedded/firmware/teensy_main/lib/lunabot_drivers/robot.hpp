@@ -3,6 +3,7 @@
 
 #include "interfaces.hpp"
 #include <Arduino.h>
+#include <Sabertooth.h>
 
 #define ST_SERIAL Serial1
 #define ST_BAUD_RATE 9600
@@ -33,6 +34,9 @@ float update_curr_right();
 namespace uwb {
 void update(float &d0, float &d1, float &d2);
 } // namespace uwb
+namespace load_cell {
+void update(float &);
+} // namespace load_cell
 
 namespace deposition {
 void cb(int8_t dep);

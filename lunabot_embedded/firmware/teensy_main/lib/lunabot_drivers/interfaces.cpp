@@ -113,7 +113,8 @@ void ADS1119_Current_Bus::init_ads1119() {
       configurations[i][j].gain = ADS1119Configuration::Gain::one;
       configurations[i][j].dataRate = ADS1119Configuration::DataRate::sps330;
       configurations[i][j].conversionMode = ADS1119Configuration::ConversionMode::continuous;
-      configurations[i][j].voltageReference = ADS1119Configuration::VoltageReferenceSource::external;
+      configurations[i][j].voltageReference =
+          ADS1119Configuration::VoltageReferenceSource::external;
       configurations[i][j].externalReferenceVoltage = 3.3;
     }
   }
@@ -220,14 +221,28 @@ float VLH35_Angle_Bus::read_enc(uint8_t id) {
   return static_cast<float>(data) / static_cast<float>(1 << 16) * 360.0F;
 }
 
-Encoder AMT13_Angle_Bus::encs[NUM_ENCODERS] = {
-    Encoder(PIN_LIST[0], PIN_LIST[1]),
-    Encoder(PIN_LIST[2], PIN_LIST[3]),
-    Encoder(PIN_LIST[4], PIN_LIST[5])};
+Encoder AMT13_Angle_Bus::encs[NUM_ENCODERS] = {Encoder(PIN_LIST[0], PIN_LIST[1]),
+                                               Encoder(PIN_LIST[2], PIN_LIST[3]),
+                                               Encoder(PIN_LIST[4], PIN_LIST[5])};
 
 float AMT13_Angle_Bus::read_enc(uint8_t id) {
   return encs[id].read() / pulses_per_rev * deg_per_rev;
 }
+
+HX711 HX711_Bus::encs[NUM_SENSORS] = {
+    HX711(),
+    HX711(),
+};
+
+void HX711_Bus::init() {
+  for (int i = 0; i < NUM_SENSORS; i++) {
+    encs[i].begin(PIN_LIST[i * 2], PIN_LIST[i * 2 + 1]);
+    encs[i].set_scale(SCALE_CALIBRATION[i]);
+    encs[i].tare();
+  }
+}
+
+float HX711_Bus::read_scale(uint8_t id) { return encs[id].get_units(3); }
 
 volatile float M5Stack_UWB_Trncvr::recv_buffer_[NUM_UWB_TAGS] = {0};
 
