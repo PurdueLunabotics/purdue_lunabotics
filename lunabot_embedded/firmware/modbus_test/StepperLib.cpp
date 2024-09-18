@@ -56,9 +56,9 @@ void write_short_frame(uint8_t motor_id, uint16_t param, uint16_t data) {
   RS485.beginTransmission();
   RS485.write(buf, 8);
 
-  // Serial.println("Writing data: ");
   // for (int j = 0; j < 8; j++) {
-  //   Serial.print(buf[j]);
+  //   Serial.print(buf[j], HEX);
+  //   Serial.print(" ");
   // }
 
   RS485.endTransmission();
