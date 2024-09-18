@@ -6,6 +6,8 @@ void setup(void) {
   Serial.begin(115200);
   Serial.println("Serial connected");
 
+  setup_motors(9600); // TODO - baud rate
+
   Serial.println("Sample 1:");
   move_to_abs_pos(MyMotor, 200000);
   write_estop(MyMotor);
