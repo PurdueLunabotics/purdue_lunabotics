@@ -18,8 +18,10 @@
 
 #define UWBSerial Serial4
 
-enum MotorDir { CW = HIGH, CCW = LOW };
-enum STMotor { M1 = 1, M2 = 2 };
+enum MotorDir { CW = HIGH,
+                CCW = LOW };
+enum STMotor { M1 = 1,
+               M2 = 2 };
 
 class PWM_MotorCtrl {
 public:
@@ -150,8 +152,7 @@ private:
   // the threshold at which a motor set a 0% power is allowed to turn back on
   static constexpr int reset_thresh = 500;
 
-  // Every cycle that a motor is overcurrent, a counter increases by this amount (as well as
-  // decreasing by cutoff_decay)
+  // Every cycle that a motor is overcurrent, a counter increases by this amount (as well as decreasing by cutoff_decay)
   static constexpr int cutoff_increase = 3;
   // Every cycle, that counter decreases by this amount
   static constexpr int cutoff_decay = 1;
@@ -176,8 +177,7 @@ private:
   static constexpr int NUM_ENCODERS = 3;
   static constexpr int PIN_LIST[NUM_ENCODERS * 2] = {2, 3, 4, 5, 6, 7};
   static constexpr float pulses_per_rev = 800; // 4 times the value set on the encoders
-  static constexpr float deg_per_rev =
-      360; // TODO, remove the deg2rad conversion and just to rad here
+  static constexpr float deg_per_rev = 360;    // TODO, remove the deg2rad conversion and just to rad here
 
   static Encoder encs[NUM_ENCODERS];
 };
