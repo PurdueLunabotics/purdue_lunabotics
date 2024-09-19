@@ -1,4 +1,5 @@
 #include "StepperLib.hpp"
+#include "ArduinoRS485.h"
 
 #define OPERATING_MODE_SINGLE_DATA 0x06
 
@@ -56,7 +57,7 @@ StepperMotor::StepperMotor(uint8_t MotorID, unsigned long baudrate, uint16_t def
   this->def_deceleration = def_deceleration;
   if (!serial_has_started) {
     serial_has_started = true;
-    // RS485.begin(baudrate);
+    RS485.begin(baudrate);
   }
 }
 
@@ -134,8 +135,8 @@ void StepperMotor::write_short_frame(uint16_t param, uint16_t data) {
   uint8_t buf[8] = {MotorID, OPERATING_MODE_SINGLE_DATA, (uint8_t)(param >> 8), (uint8_t)(param & 0xFF),
                     (uint8_t)(data >> 8), (uint8_t)(data & 0xFF), 0, 0};
   modbusCRC(buf, 6);
-  // RS485.beginTransmission();
-  // RS485.write(buf, 8);
+  RS485.beginTransmission();
+  RS485.write(buf, 8);
 
   for (int j = 0; j < 8; j++) {
     Serial.print(buf[j], HEX);
@@ -143,7 +144,7 @@ void StepperMotor::write_short_frame(uint16_t param, uint16_t data) {
   }
   Serial.println();
 
-  // RS485.endTransmission();
+  RS485.endTransmission();
 }
 
 // internal function to write 2 frames of data (32 bits)
