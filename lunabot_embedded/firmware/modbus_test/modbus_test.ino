@@ -1,32 +1,39 @@
-#include "StepperLib.h"
+#include "StepperLib.hpp"
+#include "Arduino.h"
 
-#define MyMotor 1
+#define MyMotorID 1
+#define RS485_BAUD 9600
 
 void setup(void) {
   Serial.begin(115200);
   Serial.println("Serial connected");
 
-  setup_motors(9600); // TODO - baud rate
+  StepperMotor MyMotor(MyMotorID, RS485_BAUD);
 
   Serial.println("Sample 1:");
-  move_to_abs_pos(MyMotor, 200000);
-  write_estop(MyMotor);
+  MyMotor.move_to_abs_pos(200000);
+  delay(1000);
+  MyMotor.write_estop();
 
   Serial.println("Sample 2:");
-  move_to_rel_pos(MyMotor, 10000);
-  write_estop(MyMotor);
+  MyMotor.move_to_rel_pos(10000);
+  delay(1000);
+  MyMotor.write_estop();
 
   Serial.println("Sample 3:");
-  move_at_speed(MyMotor, 600);
-  write_estop(MyMotor);
+  MyMotor.move_at_speed(600);
+  delay(1000);
+  MyMotor.write_estop();
 
   Serial.println("Sample 4 (ish):");
-  move_to_abs_pos(MyMotor, -200000); // feeding a negative number is fine
-  write_estop(MyMotor);
+  MyMotor.move_to_abs_pos(-200000); // feeding a negative number is fine
+  delay(1000);
+  MyMotor.write_estop();
 
   Serial.println("Sample 1 (no defaults):");
-  move_to_abs_pos(MyMotor, 200000, 600, 50, 50); // manually setting the default params
-  write_estop(MyMotor);
+  MyMotor.move_to_abs_pos(200000, 600, 50, 50);
+  delay(1000);
+  MyMotor.write_estop();
 }
 
 void loop(void) {

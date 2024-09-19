@@ -1,15 +1,14 @@
-#include <ArduinoRS485.h>
-#include "StepperLib.h"
-#include <Arduino.h>
+#include "StepperLib.hpp"
 
 #define OPERATING_MODE_SINGLE_DATA 0x06
+
+bool serial_has_started = true;
 
 struct Addrs {
   uint16_t ControlReg = 0x6002;
 
   uint16_t PathMode = 0x6200;
-  uint16_t Pos_H = 0x6201;
-  uint16_t Pos_L = 0x6202;
+  uint16_t Pos = 0x6201; // high, low is +1
   uint16_t Speed = 0x6203;
   uint16_t Acceleration = 0x6204;
   uint16_t Deceleration = 0x6205;
@@ -45,62 +44,117 @@ void modbusCRC(uint8_t *buf, int data_range) {
   buf[data_range + 1] = (uint8_t)(crc >> 8);
 }
 
-void setup_motors(unsigned long baudrate) {
-  RS485.begin(baudrate);
+// Create a StepperMotor object
+// MotorID and baudrate are required
+// Optional default values for speed, acceleration, deceleration
+// speed in rpm
+// acceleration and deceleration in ms/1000 rpm
+StepperMotor::StepperMotor(uint8_t MotorID, unsigned long baudrate, uint16_t def_speed, uint16_t def_acceleration, uint16_t def_deceleration) {
+  this->MotorID = MotorID;
+  this->def_speed = def_speed;
+  this->def_acceleration = def_acceleration;
+  this->def_deceleration = def_deceleration;
+  if (!serial_has_started) {
+    serial_has_started = true;
+    // RS485.begin(baudrate);
+  }
 }
 
-void write_short_frame(uint8_t motor_id, uint16_t param, uint16_t data) {
-  uint8_t buf[8] = {motor_id, OPERATING_MODE_SINGLE_DATA, (uint8_t)(param >> 8), (uint8_t)(param & 0xFF),
+// emergency stops motor
+void StepperMotor::write_estop() {
+  write_short_frame(Addrs.ControlReg, ControlReg.ESTOP);
+}
+
+// move the motor at constant velocity, using default values for acceleration and deceleration unless specified
+// speed in rpm
+// acceleration and deceleration in ms/1000 rpm
+void StepperMotor::move_at_speed(uint16_t speed, uint16_t acceleration, uint16_t deceleration) {
+  if (acceleration == USE_DEFAULT) {
+    acceleration = def_acceleration;
+  }
+  if (deceleration == USE_DEFAULT) {
+    deceleration = def_deceleration;
+  }
+
+  write_short_frame(Addrs.PathMode, PathMode.VelocityMode);
+  write_short_frame(Addrs.Speed, speed);
+  write_short_frame(Addrs.Acceleration, acceleration);
+  write_short_frame(Addrs.Deceleration, deceleration);
+  trigger_motion();
+}
+
+// move the motor to an absolute position, using default values for speed, acceleration, and deceleration unless specified
+// position in encoder pulses
+// speed in rpm
+// acceleration and deceleration in ms/1000 rpm
+void StepperMotor::move_to_abs_pos(uint32_t position, uint16_t speed, uint16_t acceleration, uint16_t deceleration) {
+  if (speed == USE_DEFAULT) {
+    speed = def_speed;
+  }
+  if (acceleration == USE_DEFAULT) {
+    acceleration = def_acceleration;
+  }
+  if (deceleration == USE_DEFAULT) {
+    deceleration = def_deceleration;
+  }
+
+  write_short_frame(Addrs.PathMode, PathMode.AbsolutePosMode);
+  write_multi_byte(Addrs.Pos, position);
+  write_short_frame(Addrs.Speed, speed);
+  write_short_frame(Addrs.Acceleration, acceleration);
+  write_short_frame(Addrs.Deceleration, deceleration);
+  trigger_motion();
+}
+
+// move the motor to a relative position, using default values for speed, acceleration, and deceleration unless specified
+// position in encoder pulses
+// speed in rpm
+// acceleration and deceleration in ms/1000 rpm
+void StepperMotor::move_to_rel_pos(uint32_t position, uint16_t speed, uint16_t acceleration, uint16_t deceleration) {
+  if (speed == USE_DEFAULT) {
+    speed = def_speed;
+  }
+  if (acceleration == USE_DEFAULT) {
+    acceleration = def_acceleration;
+  }
+  if (deceleration == USE_DEFAULT) {
+    deceleration = def_deceleration;
+  }
+
+  write_short_frame(Addrs.PathMode, PathMode.RelativePosMode);
+  write_multi_byte(Addrs.Pos, position);
+  write_short_frame(Addrs.Speed, speed);
+  write_short_frame(Addrs.Acceleration, acceleration);
+  write_short_frame(Addrs.Deceleration, deceleration);
+  trigger_motion();
+}
+
+// internal function to send frame of modbus data on RS485
+void StepperMotor::write_short_frame(uint16_t param, uint16_t data) {
+  uint8_t buf[8] = {MotorID, OPERATING_MODE_SINGLE_DATA, (uint8_t)(param >> 8), (uint8_t)(param & 0xFF),
                     (uint8_t)(data >> 8), (uint8_t)(data & 0xFF), 0, 0};
   modbusCRC(buf, 6);
-  RS485.beginTransmission();
-  RS485.write(buf, 8);
+  // RS485.beginTransmission();
+  // RS485.write(buf, 8);
 
-  // for (int j = 0; j < 8; j++) {
-  //   Serial.print(buf[j], HEX);
-  //   Serial.print(" ");
-  // }
+  for (int j = 0; j < 8; j++) {
+    Serial.print(buf[j], HEX);
+    Serial.print(" ");
+  }
+  Serial.println();
 
-  RS485.endTransmission();
+  // RS485.endTransmission();
 }
 
-void write_estop(uint8_t motor_id) {
-  write_short_frame(motor_id, Addrs.ControlReg, ControlReg.ESTOP);
+// internal function to write 2 frames of data (32 bits)
+void StepperMotor::write_multi_byte(uint16_t param, uint32_t data) {
+  uint16_t data_high = (uint16_t)(data >> 16);
+  uint16_t data_low = (uint16_t)(data & 0xFFFF);
+  write_short_frame(param, data_high);
+  write_short_frame(param + 1, data_low);
 }
 
-void trigger_motion(uint8_t motor_id) {
-  write_short_frame(motor_id, Addrs.ControlReg, ControlReg.TrigPath);
-}
-
-void write_path_position(uint8_t motor_id, uint32_t position) {
-  uint16_t data_high = (uint16_t)(position >> 16);
-  uint16_t data_low = (uint16_t)(position & 0xFFFF);
-  write_short_frame(motor_id, Addrs.Pos_H, data_high);
-  write_short_frame(motor_id, Addrs.Pos_L, data_low);
-}
-
-void move_at_speed(uint8_t motor_id, uint16_t speed, uint16_t acceleration, uint16_t deceleration) {
-  write_short_frame(motor_id, Addrs.PathMode, PathMode.VelocityMode);
-  write_short_frame(motor_id, Addrs.Speed, speed);
-  write_short_frame(motor_id, Addrs.Acceleration, acceleration);
-  write_short_frame(motor_id, Addrs.Deceleration, deceleration);
-  trigger_motion(motor_id);
-}
-
-void move_to_abs_pos(uint8_t motor_id, uint32_t position, uint16_t speed, uint16_t acceleration, uint16_t deceleration) {
-  write_short_frame(motor_id, Addrs.PathMode, PathMode.AbsolutePosMode);
-  write_path_position(motor_id, position);
-  write_short_frame(motor_id, Addrs.Speed, speed);
-  write_short_frame(motor_id, Addrs.Acceleration, acceleration);
-  write_short_frame(motor_id, Addrs.Deceleration, deceleration);
-  trigger_motion(motor_id);
-}
-
-void move_to_rel_pos(uint8_t motor_id, uint32_t position, uint16_t speed, uint16_t acceleration, uint16_t deceleration) {
-  write_short_frame(motor_id, Addrs.PathMode, PathMode.RelativePosMode);
-  write_path_position(motor_id, position);
-  write_short_frame(motor_id, Addrs.Speed, speed);
-  write_short_frame(motor_id, Addrs.Acceleration, acceleration);
-  write_short_frame(motor_id, Addrs.Deceleration, deceleration);
-  trigger_motion(motor_id);
+// internal function to start motion path (see motor docs for more info)
+void StepperMotor::trigger_motion() {
+  write_short_frame(Addrs.ControlReg, ControlReg.TrigPath);
 }
