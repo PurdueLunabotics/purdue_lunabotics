@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 from matplotlib import animation
 import numpy as np
 
+# Paper for Reference: https://www.chiefdelphi.com/uploads/default/original/3X/b/e/be0e06de00e07db66f97686505c3f4dde2e332dc.pdf
 
 MAX_VELOCITY = 13
 MAX_ACCELERATION = 0.7
