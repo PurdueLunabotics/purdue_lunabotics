@@ -1,9 +1,6 @@
 #include "StepperLib.hpp"
-#include "ArduinoRS485.h"
 
-#define OPERATING_MODE_SINGLE_DATA 0x06
-
-bool serial_has_started = true;
+bool serial_has_started = false;
 
 struct Addrs {
   uint16_t ControlReg = 0x6002;
@@ -50,14 +47,16 @@ void modbusCRC(uint8_t *buf, int data_range) {
 // Optional default values for speed, acceleration, deceleration
 // speed in rpm
 // acceleration and deceleration in ms/1000 rpm
-StepperMotor::StepperMotor(uint8_t MotorID, unsigned long baudrate, uint16_t def_speed, uint16_t def_acceleration, uint16_t def_deceleration) {
+StepperMotor::StepperMotor(uint8_t MotorID, uint16_t def_speed, uint16_t def_acceleration, uint16_t def_deceleration) {
   this->MotorID = MotorID;
   this->def_speed = def_speed;
   this->def_acceleration = def_acceleration;
   this->def_deceleration = def_deceleration;
   if (!serial_has_started) {
     serial_has_started = true;
-    RS485.begin(baudrate);
+    pinMode(RS485_TX_CONTROL, OUTPUT);
+    digitalWrite(RS485_TX_CONTROL, RS485Receive); // Init Transceiver
+    RS485Serial.begin(RS485_BAUD);
   }
 }
 
@@ -135,16 +134,18 @@ void StepperMotor::write_short_frame(uint16_t param, uint16_t data) {
   uint8_t buf[8] = {MotorID, OPERATING_MODE_SINGLE_DATA, (uint8_t)(param >> 8), (uint8_t)(param & 0xFF),
                     (uint8_t)(data >> 8), (uint8_t)(data & 0xFF), 0, 0};
   modbusCRC(buf, 6);
-  RS485.beginTransmission();
-  RS485.write(buf, 8);
+
+  digitalWrite(RS485_TX_CONTROL, RS485Transmit); // Enable RS485 Transmit
+  delay(10);
+  RS485Serial.write(buf, 8);
+  delay(10);
+  digitalWrite(RS485_TX_CONTROL, RS485Receive); // Disable RS485 Transmit
 
   for (int j = 0; j < 8; j++) {
     Serial.print(buf[j], HEX);
     Serial.print(" ");
   }
   Serial.println();
-
-  RS485.endTransmission();
 }
 
 // internal function to write 2 frames of data (32 bits)

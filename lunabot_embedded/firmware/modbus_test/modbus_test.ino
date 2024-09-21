@@ -2,13 +2,12 @@
 #include "Arduino.h"
 
 #define MyMotorID 1
-#define RS485_BAUD 9600
 
 void setup(void) {
   Serial.begin(115200);
   Serial.println("Serial connected");
 
-  StepperMotor MyMotor(MyMotorID, RS485_BAUD);
+  StepperMotor MyMotor(MyMotorID);
 
   Serial.println("Sample 1:");
   MyMotor.move_to_abs_pos(200000);
