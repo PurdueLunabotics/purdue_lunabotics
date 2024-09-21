@@ -2,8 +2,10 @@
 import numpy as np
 import rospy
 from geometry_msgs.msg import Twist
+from std_msgs.msg import Int8
 
-from lunabot_msgs.msg import RobotEffort, RobotSensors
+from lunabot_msgs.msg import RobotSensors
+
 
 
 class DifferentialDriveController:
@@ -11,17 +13,19 @@ class DifferentialDriveController:
         # ROS Publishers and subsribers to get / send data
 
         self._vel_sub = rospy.Subscriber("/cmd_vel", Twist, self._vel_cb)
-        self._effort_pub = rospy.Publisher("/effort", RobotEffort, queue_size=1)
-        self._state_sub = rospy.Subscriber("state", RobotSensors, self._robot_state_cb)
+        self._right_drive_pub = rospy.Publisher("/right_drive", Int8, queue_size=1)
+        self._left_drive_pub = rospy.Publisher("/left_drive", Int8, queue_size=1)
+        self._state_sub = rospy.Subscriber("sensors", RobotSensors, self._robot_state_cb)
 
         self.width = rospy.get_param("~width", 0.5588)
-        self.max_speed_percentage = rospy.get_param("~max_speed_percentage", 0.5)
+        self.max_speed_percentage = rospy.get_param("~max_speed_percentage", 0.8)
         self.hz = rospy.get_param("~hz", 20)
-        self._max_speed = rospy.get_param("~max_speed", 4.3)
-        self.p = rospy.get_param("~p", 2)  # P gain for PID controller
-        self.i = rospy.get_param("~i", 0.1)  # I gain for PID controller
-        self.d = rospy.get_param("~d", 0.02)  # D gain for PID controller
-        self.i_sat = rospy.get_param("~i_saturate", 10)  # P gain for PD controller
+
+        self._max_speed = rospy.get_param("~max_speed", 2.0) # In rad/s
+        self.p = rospy.get_param("~p", 3.9)  # P gain for PID controller
+        self.i = rospy.get_param("~i", 0.0)  # I gain for PID controller
+        self.d = rospy.get_param("~d", 0)  # D gain for PID controller
+        self.i_sat = rospy.get_param("~i_saturate", 10)  # Max for integral term
 
         self.lin = 0
         self.ang = 0
@@ -54,10 +58,17 @@ class DifferentialDriveController:
         self._left_vel = msg.drive_left_vel
 
     def _loop(self):
-        effort_msg = RobotEffort()
+        left_drive_msg = Int8()
+        right_drive_msg = Int8()
 
         left_percent_estimate = np.clip(self._left_vel / self._max_speed, -1, 1)
         right_percent_estimate = np.clip(self._right_vel / self._max_speed, -1, 1)
+        
+
+        WEIGHT = 0.9
+
+        self.lin *= WEIGHT
+        self.ang *= 1/WEIGHT
 
         left_set = self.lin - self.ang * self.width / 2
         right_set = self.lin + self.ang * self.width / 2
@@ -94,22 +105,29 @@ class DifferentialDriveController:
         self._left_prev_error = left_error
         self._right_prev_error = right_error
 
-        # print("left", left_set)
-        # print("right", right_set)
-        effort_msg.left_drive = self.constrain(left)
-        effort_msg.right_drive = self.constrain(right)
-        # print("left i_sum", self.left_error_sum)
-        # print("right i_sum", self.right_error_sum)
-        self._effort_pub.publish(effort_msg)
+        left_drive_msg.data = self.constrain(left)
+        right_drive_msg.data = self.constrain(right)
+
+        if self.lin == 0 and self.ang == 0:
+            left_drive_msg.data = 0
+            right_drive_msg.data = 0
+        self._left_drive_pub.publish(left_drive_msg)
+        self._right_drive_pub.publish(right_drive_msg)
 
     def constrain(self, val):
         val = np.clip(-1, val, 1)  # Clipping speed to not go over 100%
         return np.int8(val * 127 * self.max_speed_percentage)
 
     def shutdown_hook(self):
-        effort_msg = RobotEffort()
-        self._effort_pub.publish(effort_msg)
-        print("stopping diff_drive control")
+        left_drive_msg = Int8()
+        right_drive_msg = Int8()
+
+        left_drive_msg.data = 0
+        right_drive_msg.data = 0
+
+        self._left_drive_pub.publish(left_drive_msg)
+        self._right_drive_pub.publish(right_drive_msg)
+        rospy.loginfo("Differential Drive Controller: Stopping")
 
 
 if __name__ == "__main__":

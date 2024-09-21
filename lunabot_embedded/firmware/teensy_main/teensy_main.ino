@@ -36,6 +36,12 @@ void send() {
 
   uwb::update(state.uwb_dist_0, state.uwb_dist_1, state.uwb_dist_2);
 
+  /*
+  Serial.print("Raw: ");
+  Serial.print(state.act_right_curr);
+  Serial.print(" To_curr: ");
+  Serial.println(ADS1119_Current_Bus::adc_to_current_31A(state.act_right_curr));
+  */
   pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
   pb_encode(&stream, RobotSensors_fields, &state);
 }
@@ -44,10 +50,17 @@ IntervalTimer uwb_timer;
 float last_effort;
 
 void setup() {
+  //Serial.begin(115200);
   Sabertooth_MotorCtrl::init_serial(ST_SERIAL, ST_BAUD_RATE);
-  ACS711_Current_Bus::init_ads1115();
+  
   M5Stack_UWB_Trncvr::init();
   KillSwitchRelay::init();
+
+  #ifdef OLD_CURRENT_SENSOR
+  ACS711_Current_Bus::init_ads1115();
+  #else 
+  ADS1119_Current_Bus::init_ads1119();
+  #endif
 
   uwb_timer.begin(M5Stack_UWB_Trncvr::transfer, UWB_TRANSFER_PERIOD);
 
@@ -68,6 +81,7 @@ elapsedMillis ms_until_ctrl;
 elapsedMillis ms_curr_update;
 
 void loop() {
+  
   int n;
   n = RawHID.recv(buffer, 0); // 0 timeout = do not wait
   if (n > 0) {
@@ -96,8 +110,10 @@ void loop() {
     n = RawHID.send(buffer, 0);
   }
 
+  #ifdef OLD_CURRENT_SENSOR
   if (ms_curr_update > CURR_UPDATE_PERIOD) {
     ms_curr_update -= CURR_UPDATE_PERIOD;
     ACS711_Current_Bus::transfer();
   }
+  #endif
 }

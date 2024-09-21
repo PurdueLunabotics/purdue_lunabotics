@@ -4,40 +4,42 @@
 String DATA = " ";
 int UWB_T_NUMBER = 0;
 
+#define UWBSerial Serial3
+
 float d0, d1, d2; // Declare variables to store distances
 
 void setup() {
     // Initialize Serial1 and Serial2 with baud rates
     Serial.begin(115200);
-    Serial2.begin(115200);
+    UWBSerial.begin(115200);
 
     // serial 2 setup as tag on bot (does dist calc)
     for (int b = 0; b < 2; b++) { // Repeat twice to stabilize the connection
         delay(50);
-        Serial2.write("AT+anchor_tag=0\r\n"); // Set up the Tag
+        UWBSerial.write("AT+anchor_tag=0\r\n"); // Set up the Tag
         delay(50);
-        Serial2.write("AT+interval=50\r\n"); // Set the calculation precision,
+        UWBSerial.write("AT+interval=50\r\n"); // Set the calculation precision,
                                              // the larger the response is, the
                                              // slower it will be
         delay(50); // 设置计算精度，越大响应越慢
-        Serial2.write("AT+switchdis=1\r\n"); // Began to distance 开始测距
+        UWBSerial.write("AT+switchdis=1\r\n"); // Began to distance 开始测距
         delay(50);
         if (b == 0) {
-            Serial2.write("AT+RST\r\n"); // RESET 复位
+            UWBSerial.write("AT+RST\r\n"); // RESET 复位
         }
     }
-    if (Serial2.available()) {
+    if (UWBSerial.available()) {
         delay(3);
-        DATA = Serial2.readString();
+        DATA = UWBSerial.readString();
     }
     DATA = "";
 }
 
 void loop() {
 
-    if (Serial2.available()) {
+    if (UWBSerial.available()) {
         // Read the original input
-        String originalInput = Serial2.readStringUntil('\n');
+        String originalInput = UWBSerial.readStringUntil('\n');
         originalInput.trim();
 
         // Check if the message starts with "anX:" where X is a digit
@@ -73,3 +75,5 @@ void loop() {
             Serial.println(num, 2);
         }
     }
+    //Serial.println(Serial2.available());
+}

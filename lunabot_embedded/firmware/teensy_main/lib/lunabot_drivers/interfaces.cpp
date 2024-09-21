@@ -32,7 +32,7 @@ void Sabertooth_MotorCtrl::write(int8_t power) {
 // ---- Sensors ----
 
 // Current Sensor
-
+#ifdef OLD_CURRENT_SENSOR
 const int ACS711_Current_Bus::ADS_CHANNELS[ACS711_Current_Bus::CH_SIZE] = {
     ADS1115_REG_CONFIG_MUX_SINGLE_0, ADS1115_REG_CONFIG_MUX_SINGLE_1,
     ADS1115_REG_CONFIG_MUX_SINGLE_2, ADS1115_REG_CONFIG_MUX_SINGLE_3};
@@ -95,6 +95,54 @@ float ACS711_Current_Bus::adc_to_current_15A(float adc_value, float adc_fsr, flo
 }
 
 int16_t ACS711_Current_Bus::read(uint8_t bus, uint8_t mux) { return curr_buffer_[bus][mux]; }
+#else
+ADS1119Configuration ADS1119_Current_Bus::configurations[BUSES][MUXES] = {};
+ADS1119 ADS1119_Current_Bus::ads1 = ADS1119(ads1_addr);
+ADS1119 ADS1119_Current_Bus::ads2 = ADS1119(ads2_addr);
+
+void ADS1119_Current_Bus::init_ads1119() {
+  //init all channels to same general config, but with different mux config. 
+  //different configs for both chips for futureproofing, not because they're any different
+  for (int i = 0; i < BUSES; ++i) {
+    configurations[i][0].mux = ADS1119MuxConfiguration::positiveAIN0negativeAGND;
+    configurations[i][1].mux = ADS1119MuxConfiguration::positiveAIN1negativeAGND;
+    configurations[i][2].mux = ADS1119MuxConfiguration::positiveAIN2negativeAGND;
+    configurations[i][3].mux = ADS1119MuxConfiguration::positiveAIN3negativeAGND;
+
+    for (int j = 0; j < MUXES; ++j) {
+      configurations[i][j].gain = ADS1119Configuration::Gain::one;
+      configurations[i][j].dataRate = ADS1119Configuration::DataRate::sps330;
+      configurations[i][j].conversionMode = ADS1119Configuration::ConversionMode::continuous;
+      configurations[i][j].voltageReference = ADS1119Configuration::VoltageReferenceSource::external;
+      configurations[i][j].externalReferenceVoltage = 3.3;
+    }
+  }
+
+  ads1.begin();
+  ads1.reset();
+  
+  ads2.begin();
+  ads2.reset();
+}
+
+float ADS1119_Current_Bus::read(uint8_t bus, uint8_t mux) {
+  switch (bus) {
+    case 0:
+    return ADS1119_Current_Bus::adc_to_current_31A(ads1.readVoltage(configurations[0][mux]));
+    case 1: 
+      return ADS1119_Current_Bus::adc_to_current_31A(ads2.readVoltage(configurations[1][mux]));
+    default:
+      //we only have two muxes
+      return 69.420;
+  }
+}
+
+float ADS1119_Current_Bus::adc_to_current_31A(float adc_value, float adc_fsr, float vcc) {
+  float vout = adc_value / pow(2, 2) * adc_fsr;
+  return 73.3 * (vout / vcc) - 37.52;
+}
+
+#endif// OLD_CURRENT_SENSOR
 
 // VLH35_Angles
 
@@ -293,11 +341,17 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
   if (KillSwitchRelay::dead && millis() - KillSwitchRelay::kill_time >= relay_dead_time) {
     reset();
   } */
-  
+#ifdef OLD_CURRENT_SENSOR
   float exc_curr = ACS711_Current_Bus::adc_to_current_31A(excavation::update_curr());
   float dep_curr = ACS711_Current_Bus::adc_to_current_31A(deposition::update_curr());
   float drive_left_curr = ACS711_Current_Bus::adc_to_current_15A(drivetrain::update_curr_left());
   float drive_right_curr = ACS711_Current_Bus::adc_to_current_15A(drivetrain::update_curr_right());
+#else
+  float exc_curr = ADS1119_Current_Bus::adc_to_current_31A(excavation::update_curr());
+  float dep_curr = ADS1119_Current_Bus::adc_to_current_31A(deposition::update_curr());
+  float drive_left_curr = ADS1119_Current_Bus::adc_to_current_31A(drivetrain::update_curr_left());
+  float drive_right_curr = ADS1119_Current_Bus::adc_to_current_31A(drivetrain::update_curr_right());
+#endif
 
   if (exc_curr >= exdep_kill_curr) {
     cutoff_buffer[0] += cutoff_increase;
