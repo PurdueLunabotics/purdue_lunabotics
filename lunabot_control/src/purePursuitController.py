@@ -1,10 +1,10 @@
 import math
+import random
 from operator import sub, mul
 
 from matplotlib import pyplot as plt
 from matplotlib import animation
 import numpy as np
-from lunabot_behavior.pid_controller import VelocityPIDController 
 
 
 class PurePursuitController:
@@ -23,7 +23,7 @@ class PurePursuitController:
         self.wheels = [0.0, 0.0]
         self.pos = self.robot_pose[0:2]
         self.angle = self.robot_pose[2]
-        
+
     def injection(self, spacing):
         new_points = []
         for i in range(len(self.path) - 1):
@@ -81,7 +81,8 @@ class PurePursuitController:
             k1 = 0.5 * (x1 ** 2 + y1 ** 2 - x2 ** 2 - y2 ** 2) / (x1 - x2) if x1 != x2 else (x1 + 1E-10 - x2)
             k2 = (y1 - y2) / (x1 - x2) if x1 != x2 else (x1 + 1E-10 - x2)
 
-            b = 0.5 * (x2 ** 2 - 2 * x2 * k1 + y2 ** 2 - x3 ** 2 + 2 * x3 * k1 - y3 ** 2) / (x3 * k2 - y3 + y2 - x2 * k2 + 1e-50)
+            b = 0.5 * (x2 ** 2 - 2 * x2 * k1 + y2 ** 2 - x3 ** 2 + 2 * x3 * k1 - y3 ** 2) / (
+                    x3 * k2 - y3 + y2 - x2 * k2 + 1e-50)
             a = k1 - k2 * b
 
             r = math.sqrt((x1 - a) ** 2 + (y1 - b) ** 2)
@@ -96,9 +97,8 @@ class PurePursuitController:
         curvatures.append(0)
         return curvatures
 
-    # TODO: add slip-based control
-    def controller(self, target_vel, target_accel, actual_vel, kv, ka, kp, ki, kd, last_error, integral, last_time, current_time):
-        v_l_pid = VelocityPIDController(target_vel, kp, ki, kd, kv)
+    def controller(self, target_vel, target_accel, actual_vel, kv, ka, kp, ki, kd, last_error, integral, last_time,
+                   current_time):
         error = target_vel - actual_vel
         dt = current_time - last_time
         integral += error * dt
@@ -109,8 +109,14 @@ class PurePursuitController:
 
         return kv * target_vel + ka * target_accel + kp * error + ki * integral + kd * derivative, last_error, integral, last_time
 
+    def combine_wheel_vels(self, left, right, wheel_base):
+        linear = (left + right) / 2
+        angular = (right - left) / wheel_base
+        return [linear, angular]
+
     def closest(self):
-        mindist = (0, math.sqrt((self.path[0][0] - self.robot_pose[0]) ** 2 + (self.path[0][1] - self.robot_pose[1]) ** 2))
+        mindist = (
+            0, math.sqrt((self.path[0][0] - self.robot_pose[0]) ** 2 + (self.path[0][1] - self.robot_pose[1]) ** 2))
         for i, p in enumerate(self.path):
             dist = math.sqrt((p[0] - self.robot_pose[0]) ** 2 + (p[1] - self.robot_pose[1]) ** 2)
             if dist < mindist[1]:
@@ -150,8 +156,9 @@ class PurePursuitController:
         return self.path[self.closest()][0:2]
 
     def curvature(self, lookahead):
-        side = np.sign(math.sin(3.1415 / 2 - self.robot_pose[2]) * (lookahead[0] - self.robot_pose[0]) - math.cos(3.1415 / 2 - self.robot_pose[2]) * (
-                    lookahead[1] - self.robot_pose[1]))
+        side = np.sign(math.sin(3.1415 / 2 - self.robot_pose[2]) * (lookahead[0] - self.robot_pose[0]) - math.cos(
+            3.1415 / 2 - self.robot_pose[2]) * (
+                               lookahead[1] - self.robot_pose[1]))
         a = -math.tan(3.1415 / 2 - self.robot_pose[2])
         c = math.tan(3.1415 / 2 - self.robot_pose[2]) * self.robot_pose[0] - self.robot_pose[1]
         # x = abs(-math.tan(3.1415/2 - angle) * lookahead[0] + lookahead[1] + math.tan(3.1415/2 - angle)*pos[0] - pos[1]) / math.sqrt((math.tan(3.1415/2 - angle))**2 + 1)
@@ -164,6 +171,22 @@ class PurePursuitController:
     def generate_path(self, spacing, weight_data, weight_smooth, tolerance):
         self.injection(spacing)
         self.smoothing(weight_data, weight_smooth, tolerance)
+
+    def update_vel(self, dt, current_pos, current_vel):
+        self.robot_pose = current_pos
+        target_vels = self.target_velocity(5)
+        look = self.lookahead()
+        close = self.closest()
+        curv = self.curvature(look) if self.t_i > close else 0.00001
+        vel = target_vels[close]
+        last_wheels = self.wheels
+        self.wheels = self.turn(curv, vel, 4)
+
+        for i, w in enumerate(self.wheels):
+            self.wheels[i] = last_wheels[i] + min(float(self.MAX_VEL_CHANGE * dt),
+                                                  max(-float(self.MAX_VEL_CHANGE * dt), w - last_wheels[i]))
+
+        # TODO: Add controller when done and output velocities
 
     def simulate(self, dt):
         print("Simulating...")
@@ -194,10 +217,13 @@ class PurePursuitController:
             self.wheels = self.turn(curv, vel, 4)
 
             for i, w in enumerate(self.wheels):
-                self.wheels[i] = last_wheels[i] + min(float(self.MAX_VEL_CHANGE * dt), max(-float(self.MAX_VEL_CHANGE * dt), w - last_wheels[i]))
+                self.wheels[i] = last_wheels[i] + min(float(self.MAX_VEL_CHANGE * dt),
+                                                      max(-float(self.MAX_VEL_CHANGE * dt), w - last_wheels[i]))
+                # self.wheels[i] = random.randrange(850, 1000) * self.wheels[i] / 1000
+                self.wheels[i] = max(min(np.random.normal(0.90, 0.05), 1), 0.5) * self.wheels[i]
 
             self.pos = (self.pos[0] + (self.wheels[0] + self.wheels[1]) / 2 * dt * math.sin(self.angle),
-                   self.pos[1] + (self.wheels[0] + self.wheels[1]) / 2 * dt * math.cos(self.angle))
+                        self.pos[1] + (self.wheels[0] + self.wheels[1]) / 2 * dt * math.cos(self.angle))
             self.angle += math.atan((self.wheels[0] - self.wheels[1]) / 4 * dt)
             # pose = forward_kinematics(wheels[0], wheels[1], 4, (pos[0], pos[1], angle), dt * i)
             # pos = pose[0:2]
@@ -223,8 +249,11 @@ class PurePursuitController:
 
         print("Done!")
 
+
 def main():
-    controller = PurePursuitController([(0, 0), (10, 30), (20, 40), (30, 30), (40, 60), (20, 80), (70,70), (100, 13)], 8, 1.4, 4, 8, (0, 0, 0))
+    controller = PurePursuitController([(0, 0), (10, 30), (20, 40), (30, 30), (40, 60), (20, 80), (70, 70), (100, 13)],
+                                       12, 5, 15, 8, (0, 0, 0))
     controller.simulate(0.1)
+
 
 main()
