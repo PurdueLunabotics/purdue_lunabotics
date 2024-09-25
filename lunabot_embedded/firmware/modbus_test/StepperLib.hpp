@@ -1,14 +1,7 @@
 #ifndef STEPPERLIB_H
 #define STEPPERLIB_H
 #include <Arduino.h>
-
-#define OPERATING_MODE_SINGLE_DATA 0x06
-#define RS485_TX_CONTROL 23 // RS485 Direction control
-#define RS485Serial Serial2 // TODO - set these on the actual system
-#define RS485_BAUD 19200
-
-#define RS485Transmit HIGH
-#define RS485Receive LOW
+#include "ModbusLite.hpp"
 
 #define USE_DEFAULT 0
 
@@ -22,13 +15,25 @@ public:
 
   void write_estop();
   void move_at_speed(uint16_t speed, uint16_t acceleration = USE_DEFAULT, uint16_t deceleration = USE_DEFAULT);
-  void move_to_abs_pos(uint32_t position, uint16_t speed = USE_DEFAULT, uint16_t acceleration = USE_DEFAULT, uint16_t deceleration = USE_DEFAULT);
-  void move_to_rel_pos(uint32_t position, uint16_t speed = USE_DEFAULT, uint16_t acceleration = USE_DEFAULT, uint16_t deceleration = USE_DEFAULT);
+  void move_to_pos(uint32_t position, bool absolute, uint16_t speed = USE_DEFAULT, uint16_t acceleration = USE_DEFAULT, uint16_t deceleration = USE_DEFAULT);
+
+  int read_raw_velocity();
+  int read_velocity();
+  int read_torque();
+  float read_current();
+  int read_voltage();
+  int read_temperature();
+  int read_over_load_ratio();
+  int read_regen_load_ratio();
+  int read_motor_position_raw();
+  float read_motor_position_radians();
+
+  void print_motor_state();
 
 private:
   uint8_t MotorID;
-  void write_short_frame(uint16_t param, uint16_t data);
-  void write_multi_byte(uint16_t param, uint32_t data);
   void trigger_motion();
+  void write_register(uint16_t address, uint16_t value);
+  int read_register(uint16_t address, uint16_t num_to_read = 1);
 };
 #endif
