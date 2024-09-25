@@ -24,6 +24,7 @@ class PurePursuitController:
         self.pos = self.robot_pose[0:2]
         self.angle = self.robot_pose[2]
 
+    # To 
     def injection(self, spacing):
         new_points = []
         for i in range(len(self.path) - 1):
@@ -154,6 +155,33 @@ class PurePursuitController:
         self.t = 0
         self.t_i = 0
         return self.path[self.closest()][0:2]
+    
+    def calc_heading_err(self, lookahead):
+        vec_look = (lookahead[0] - self.robot_pose[0], lookahead[1] - self.robot_pose[1])
+        robot_vec = (math.cos(self.robot_pose[2]), math.sin(self.robot_pose[2]))
+        return self.angle_between_vectors(vec_look, robot_vec)
+    
+    def forward_kinematics(self, wheels, robot_pose, wheelbase, dt):
+        return (robot_pose[0] + (wheels[0] + wheels[1]) / 2 * dt * math.sin(robot_pose[2]),
+               robot_pose[1] + (wheels[0] + wheels[1]) / 2 * dt * math.cos(robot_pose[2]), 
+               robot_pose[2] + math.atan((wheels[0] - wheels[1]) / wheelbase * dt))
+        
+    def calc_slip(self, robot_pose_kf, actual_robot_pose):
+        return self.subtract_vectors(robot_pose_kf, actual_robot_pose)
+    
+    def subtract_vectors(v1, v2):
+        return tuple(map(sub, v1, v2))
+        
+    def angle_between_vectors(v1, v2):
+    # Implementation of angle_between_vectors method
+    # dot = v1[0] * v2[0] + v1[1] * v2[1]
+    # mag = magnitude(v1) * magnitude(v2)
+    # return math.acos(dot / mag)
+        v1_u = unit_vector(v1)
+        v2_u = unit_vector(v2)
+        return 0.0 if math.isnan(np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))) else np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
+        
 
     def curvature(self, lookahead):
         side = np.sign(math.sin(3.1415 / 2 - self.robot_pose[2]) * (lookahead[0] - self.robot_pose[0]) - math.cos(
@@ -208,6 +236,7 @@ class PurePursuitController:
         ax.scatter(*zip(*self.path))
 
         def animate(i):
+            # TODO: Add wheelbase var
             look = self.lookahead()
             circles[1].center = look
             close = self.closest()

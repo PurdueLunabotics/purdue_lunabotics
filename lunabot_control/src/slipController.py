@@ -6,13 +6,15 @@ class SlipController:
     waypoints = [(0, 0), (10, 30), (20, 40), (30, 30), (40, 60), (20, 80), (50, 80)]
     MAX_VELOCITY = 13
     MAX_ACCELERATION = 0.7
+    k_1 = 1
+    k_2 = 1
     pose = {'x':0, 'y':0,'theta':0,'vx':0,'vy':0,'vtheta':0}
     wheelSpeed = [0,0]
     
     def __init__(self):
         pass
 
-    def calculate(self, pose, ):
+    def slip(self, robot_pose, heading_error, ):
         wheelSpeeds = []
         
         
