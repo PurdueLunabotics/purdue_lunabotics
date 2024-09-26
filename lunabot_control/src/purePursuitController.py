@@ -263,6 +263,7 @@ class PurePursuitController:
         self.injection(spacing)
         self.smoothing(weight_data, weight_smooth, tolerance)
 
+    # TODO: Add slip controller to update function (Use sim for reference)
     def update_vel(self, dt, current_pos, current_vel):
         self.robot_pose = current_pos
         target_vels = self.target_velocity(5)
