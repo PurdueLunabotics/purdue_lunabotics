@@ -5,16 +5,40 @@ from operator import sub, mul
 from matplotlib import pyplot as plt
 from matplotlib import animation
 import numpy as np
-from slipController import SlipController
+from slip_controller import SlipController
 
-# TODO: Add case for endpoint lookahead
+import rospy
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from geometry_msgs.msg import Twist, PoseStamped
+from nav_msgs.msg import Path, Odometry
+from apriltag_ros.msg import AprilTagDetectionArray, AprilTagDetection
+from lunabot_msgs.msg import RobotEffort, RobotSensors, RobotErrors, Behavior
+from std_msgs.msg import Bool, Int8
+
 class PurePursuitController:
+    
+    def path_callback(self, msg: Path):
+        for point in msg.poses:
+            self.path.append(tuple((point.pose.position.x, point.pose.position.y)))
+            
+    def odom_callback(self, msg: Odometry):
+        self.robot_velocity = [msg.twist.twist.linear, msg.twist.twist.angular]
+        angles = euler_from_quaternion([msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w])
+        self.robot_pose = (msg.pose.pose.position.x, msg.pose.pose.position.y, angles[2])
+        
+    def publish_velocity(self, lin_ang_velocities):
+        twist = Twist()
+        # TODO: clamp if necessary
+        twist.linear.x = lin_ang_velocities[0]
+        twist.angular.z = lin_ang_velocities[1]
+        self.vel_publisher.publish(twist) 
+    
     def __init__(self, path, MAX_VELOCITY, MAX_ACCEL, MAX_VEL_CHANGE, LOOKAHEAD, robot_pos):
         self.path = path
         self.MAX_VELOCITY = MAX_VELOCITY
         self.MAX_ACCELERATION = MAX_ACCEL
         self.MAX_VEL_CHANGE = MAX_VEL_CHANGE
-
+        
         self.robot_pose = robot_pos
         self.LOOKAHEAD = LOOKAHEAD
 
@@ -25,6 +49,29 @@ class PurePursuitController:
         self.pos = self.robot_pose[0:2]
         self.angle = self.robot_pose[2]
         self.actual_lin_ang_wel = [0, 0]
+        
+        self.LOOKAHEAD_STOPPING_THRESHOLD = 5
+        self.STOPPING_THRESHOLD = 2
+        
+        self.vel_controller = SlipController(k_1=0.03, k_2=0.03, kp=0.03, ki=0.0001, kd=0.004, kv=1, ka=0.0002)
+        
+        rospy.init_node('pure_pursuit_node')
+        
+        self.frequency = rospy.get_param("~frequency")
+        
+        path_topic = rospy.get_param("/nav/global_path_topic")
+        rospy.Subscriber(path_topic, Path, self.path_callback)
+        
+        odom_topic = rospy.get_param("/od")
+        rospy.Subscriber(odom_topic, Odometry, self.odom_callback)
+        
+        cmd_vel_topic = rospy.get_param("/cmd_vel_topic")
+        self.vel_publisher = rospy.Publisher(cmd_vel_topic, Twist, queue_size=10)
+        
+                
+        
+        
+        
 
     def injection(self, spacing):
         """Adds points in between sparse waypoints
@@ -263,21 +310,37 @@ class PurePursuitController:
         self.injection(spacing)
         self.smoothing(weight_data, weight_smooth, tolerance)
 
-    # TODO: Add slip controller to update function (Use sim for reference)
-    def update_vel(self, dt, current_pos, current_vel):
-        self.robot_pose = current_pos
+    # TODO: Need to test
+    def update_vel(self, wheelbase, dt):
         target_vels = self.target_velocity(5)
         look = self.lookahead()
         close = self.closest()
+        if (abs(self.robot_pose[0] - self.path[-1][0]) < self.LOOKAHEAD) and (abs(self.robot_pose[1] - self.path[-1][1]) < self.LOOKAHEAD):
+                close = len(self.path) - 1
+                look = self.path[-1]
         curv = self.curvature(look) if self.t_i > close else 0.00001
         vel = target_vels[close]
         last_wheels = self.wheels
-        self.wheels = self.turn(curv, vel, 4)
+        self.wheels = self.turn(curv, vel, wheelbase)
+        
+        target_lin_ang_vel = self.combine_wheel_vels(self.wheels[0], self.wheels[1], wheelbase)
+
+        slip = self.calc_slip(self.robot_velocity, target_lin_ang_vel)
+        heading_error = self.calc_heading_err(look)
+        
+        control_loop_vels = self.vel_controller.update_vel(slip, heading_error, dt, target_vel=vel, target_accel=self.MAX_ACCELERATION)
+        self.wheels = self.get_wheel_vels(control_loop_vels, wheelbase)
 
         for i, w in enumerate(self.wheels):
             self.wheels[i] = last_wheels[i] + min(float(self.MAX_VEL_CHANGE * dt),
                                                   max(-float(self.MAX_VEL_CHANGE * dt), w - last_wheels[i]))
-
+            
+        if (abs(self.robot_pose[0] - self.path[-1][0]) < self.STOPPING_THRESHOLD) and (abs(self.robot_pose[1] - self.path[-1][1]) < self.STOPPING_THRESHOLD):
+                self.wheels = [0,0]
+                
+        final_vels = self.combine_wheel_vels(self.wheels[0], self.wheels[1], wheelbase)
+        self.publish_velocity(final_vels)
+        
 
     def simulate(self, dt):
         print("Simulating...")
@@ -307,6 +370,11 @@ class PurePursuitController:
             look = self.lookahead()
             circles[1].center = look
             close = self.closest()
+            print("Close point:", self.path[close])
+            if (abs(self.robot_pose[0] - self.path[-1][0]) < self.LOOKAHEAD) and (abs(self.robot_pose[1] - self.path[-1][1]) < self.LOOKAHEAD):
+                close = len(self.path) - 1
+                look = self.path[-1]
+                circles[1].center = look
             curv = self.curvature(look) if self.t_i > close else 0.00001
             vel = target_vels[close]
             last_wheels = self.wheels
@@ -330,6 +398,9 @@ class PurePursuitController:
             self.wheels = self.get_wheel_vels(control_loop_vels, 4)
 
             print("control loop R/L: ", self.wheels)
+            
+            if (abs(self.robot_pose[0] - self.path[-1][0]) < self.STOPPING_THRESHOLD) and (abs(self.robot_pose[1] - self.path[-1][1]) < self.STOPPING_THRESHOLD):
+                self.wheels = [0,0]
 
             for i in range(len(self.wheels)):
                 self.wheels[i] = max(min(max(min(np.random.normal(0.40, 0.1), 1), 0.1) * self.wheels[i], 1), 0)
