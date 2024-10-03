@@ -15,6 +15,7 @@ from apriltag_ros.msg import AprilTagDetectionArray, AprilTagDetection
 from lunabot_msgs.msg import RobotEffort, RobotSensors, RobotErrors, Behavior
 from std_msgs.msg import Bool, Int8
 
+# TODO: See whether a node file is necessary
 class PurePursuitController:
     
     def path_callback(self, msg: Path):
@@ -33,17 +34,21 @@ class PurePursuitController:
         twist.angular.z = lin_ang_velocities[1]
         self.vel_publisher.publish(twist) 
     
-    def __init__(self, path, MAX_VELOCITY, MAX_ACCEL, MAX_VEL_CHANGE, LOOKAHEAD, robot_pos):
+    def __init__(self, path, MAX_VELOCITY, MAX_ACCEL, MAX_VEL_CHANGE, LOOKAHEAD, robot_pos, trackwidth):
         self.path = path
         self.MAX_VELOCITY = MAX_VELOCITY
         self.MAX_ACCELERATION = MAX_ACCEL
         self.MAX_VEL_CHANGE = MAX_VEL_CHANGE
+        
+        self.trackwidth = trackwidth
         
         self.robot_pose = robot_pos
         self.LOOKAHEAD = LOOKAHEAD
 
         self.t = 0
         self.t_i = 0
+        
+        self.target_vel = self.target_velocity(5)
 
         self.wheels = [0.0, 0.0]
         self.pos = self.robot_pose[0:2]
@@ -54,16 +59,9 @@ class PurePursuitController:
         self.STOPPING_THRESHOLD = 2
         
         self.vel_controller = SlipController(k_1=0.03, k_2=0.03, kp=0.03, ki=0.0001, kd=0.004, kv=1, ka=0.0002)
-        
-        rospy.init_node('pure_pursuit_node')
-        
+                
         self.frequency = rospy.get_param("~frequency")
-        
-        path_topic = rospy.get_param("/nav/global_path_topic")
-        rospy.Subscriber(path_topic, Path, self.path_callback)
-        
-        odom_topic = rospy.get_param("/od")
-        rospy.Subscriber(odom_topic, Odometry, self.odom_callback)
+        self.dt = 1/self.frequency
         
         cmd_vel_topic = rospy.get_param("/cmd_vel_topic")
         self.vel_publisher = rospy.Publisher(cmd_vel_topic, Twist, queue_size=10)
@@ -312,7 +310,7 @@ class PurePursuitController:
 
     # TODO: Need to test
     def update_vel(self, wheelbase, dt):
-        target_vels = self.target_velocity(5)
+        target_vels = self.target_velocity()
         look = self.lookahead()
         close = self.closest()
         if (abs(self.robot_pose[0] - self.path[-1][0]) < self.LOOKAHEAD) and (abs(self.robot_pose[1] - self.path[-1][1]) < self.LOOKAHEAD):
@@ -340,6 +338,21 @@ class PurePursuitController:
                 
         final_vels = self.combine_wheel_vels(self.wheels[0], self.wheels[1], wheelbase)
         self.publish_velocity(final_vels)
+        
+    def loop(self):
+        rospy.init_node('pure_pursuit_node')
+        
+        path_topic = rospy.get_param("/nav/global_path_topic")
+        rospy.Subscriber(path_topic, Path, self.path_callback)
+        
+        odom_topic = rospy.get_param("/odom_topic")
+        rospy.Subscriber(odom_topic, Odometry, self.odom_callback)
+        
+        rate = rospy.Rate(self.frequency)
+        
+        while not rospy.is_shutdown():
+            self.update_vel(self.trackwidth, self.dt)
+            rate.sleep()
         
 
     def simulate(self, dt):
