@@ -197,7 +197,7 @@ class Excavate:
         current_time = rospy.get_time()
         start_time = current_time
 
-        load_cell_weight = self.robot_sensors.load_cell_weights[0] + self.robot_sensors.load_cell_weights[1]
+        # load_cell_weight = self.robot_sensors.load_cell_weights[0] + self.robot_sensors.load_cell_weights[1]
 
 
         """
@@ -210,7 +210,7 @@ class Excavate:
         # TODO add logic for stopping if obstacles exist (both rocks and craters)
 
         # Until the set amount of time, keep moving the robot forward and spinning excavation
-        while load_cell_weight < self.load_cell_weight_threshold:
+        while self.robot_sensors.load_cell_weight < self.load_cell_weight_threshold:
 
             if interrupts.check_for_interrupts() != interrupts.Errors.FINE:
                 return False
@@ -251,7 +251,7 @@ class Excavate:
             current_time = new_time
             excavation_ang = new_excavation_ang
 
-            load_cell_weight = self.robot_sensors.load_cell_weights[0] + self.robot_sensors.load_cell_weights[1]
+            # load_cell_weight = self.robot_sensors.load_cell_weights[0] + self.robot_sensors.load_cell_weights[1]
             
             self.rate.sleep()
 
