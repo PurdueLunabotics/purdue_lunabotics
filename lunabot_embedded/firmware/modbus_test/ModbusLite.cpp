@@ -33,6 +33,15 @@ void modbus_begin() {
   }
 }
 
+// debug function to print out hex buffer
+void print_hex_buffer(uint8_t *buf, int len) {
+  for (int j = 0; j < len; j++) {
+    Serial.print(buf[j], HEX);
+    Serial.print(" ");
+  }
+  Serial.println();
+}
+
 // sends buf_to_send out on RS485, wait briefly for data to come back and read it into buf_to_read
 // if MODBUS_DEBUG is defined, print information about the outgoing data
 // returns size of data read
@@ -55,10 +64,10 @@ int modbus_send_rcv(uint8_t *buf_to_send, int len_to_send, uint8_t *buf_to_recv)
 
 #ifdef MODBUS_DEBUG
   Serial.println("TX: ");
-  print_hex_buffer(buf, len_to_send);
+  print_hex_buffer(buf_to_send, len_to_send);
   Serial.println();
   Serial.println("RX: ");
-  print_hex_buffer(ret_buf, recv_size);
+  print_hex_buffer(buf_to_recv, recv_size);
   Serial.println('\n');
 #endif
 
@@ -85,16 +94,18 @@ int modbus_read_register(uint8_t ID, uint16_t addr, uint16_t num_to_read) {
     if (recv_size == 9) { // start + stop bits (2), device addr, func code, number of data bits, DATA [2], crc (2)
       return buf_to_recv[4] * 0x100 + buf_to_recv[5];
     } else {
-      Serial.println("Error reading from single register - size mismatch.");
+      Serial.print("Error reading from single register - size mismatch. ");
+      Serial.println(recv_size);
       return -1;
     }
   }
 
-  else if (num_to_read == 1) {
+  else if (num_to_read == 2) {
     if (recv_size == 11) { // start + stop bits (2), device addr, func code, number of data bits, DATA [4], crc (2)
       return buf_to_recv[4] * 0x1000000 + buf_to_recv[5] * 0x10000 + buf_to_recv[6] * 0x100 + buf_to_recv[7];
     } else {
       Serial.println("Error reading from single register - size mismatch.");
+      Serial.println(recv_size);
       return -1;
     }
   }

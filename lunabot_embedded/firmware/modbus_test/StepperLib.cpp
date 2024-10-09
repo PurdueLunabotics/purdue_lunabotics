@@ -28,7 +28,7 @@ struct Addrs {             // addrs of various motor params
   uint16_t Read_RegenLoadRatio = 0x0B10; // %
   // digital input stuff
   // motor position stuff
-  uint16_t Read_MotorPosition = 0x620C; // unit: pulses - 32 bit! (low is +1)
+  uint16_t Read_MotorPosition = 0x602c; // unit: pulses - 32 bit! (low is +1)
 
   uint16_t ControlReg = 0x6002;
 
@@ -179,7 +179,7 @@ int StepperMotor::read_motor_position_raw() {
 
 // radians
 float StepperMotor::read_motor_position_radians() {
-  return read_motor_position_raw() / 2500.0 * 2 * PI; // 2500 pulses per rotation, * 2 * PI
+  return read_motor_position_raw() / 10000.0 * 2 * PI; // 2500 pulses per rotation, * 2 * PI
 }
 
 // print the motor state from the state register
