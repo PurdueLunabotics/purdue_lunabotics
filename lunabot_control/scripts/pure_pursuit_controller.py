@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import math
 import random
 from operator import sub, mul
@@ -19,17 +21,19 @@ from std_msgs.msg import Bool, Int8
 class PurePursuitController:
     
     def path_callback(self, msg: Path):
+        self.path = [(0,0)]
         for point in msg.poses:
             self.path.append(tuple((point.pose.position.x, point.pose.position.y)))
             
     # TODO:         
     def odom_callback(self, msg: Odometry):
         # self.robot_velocity = [msg.twist.twist.linear, msg.twist.twist.angular]
-        
         angles = euler_from_quaternion([msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w])
         self.robot_pose = (msg.pose.pose.position.x, msg.pose.pose.position.y, angles[2])
-        self.robot_velocity = [math.sqrt((self.robot_pose[0] - self.last_pos[0]) ** 2 + (self.robot_pose[1] - self.last_pos[1]) ** 2) / self.dt, ((self.robot_pose[2] - self.last_pos[2])/self.dt)]
+        self.robot_velocity = [math.sqrt((self.robot_pose[0] - self.last_pos[0]) ** 2 + (self.robot_pose[1] - self.last_pos[1]) ** 2)
+                               / (self.dt), ((self.robot_pose[2] - self.last_pos[2])/(self.dt))]
         self.last_pos = self.robot_pose
+        
         
     def publish_velocity(self, lin_ang_velocities):
         twist = Twist()
@@ -39,12 +43,14 @@ class PurePursuitController:
         self.vel_publisher.publish(twist) 
     
     def __init__(self, MAX_VELOCITY, MAX_ACCEL, MAX_VEL_CHANGE, LOOKAHEAD, trackwidth):
-        self.path = []
+        self.path = [(0,0)]
         self.MAX_VELOCITY = MAX_VELOCITY
         self.MAX_ACCELERATION = MAX_ACCEL
         self.MAX_VEL_CHANGE = MAX_VEL_CHANGE
         
         self.trackwidth = trackwidth
+        
+        self.robot_velocity = [0,0]
         
         self.robot_pose = (0,0,0)
         self.LOOKAHEAD = LOOKAHEAD
@@ -52,22 +58,20 @@ class PurePursuitController:
         self.t = 0
         self.t_i = 0
         
-        self.target_vel = self.target_velocity(5)
-
         self.wheels = [0.0, 0.0]
         self.pos = self.robot_pose[0:2]
         self.angle = self.robot_pose[2]
         self.actual_lin_ang_wel = [0, 0]
         
-        self.LOOKAHEAD_STOPPING_THRESHOLD = 5
-        self.STOPPING_THRESHOLD = 2
+        self.LOOKAHEAD_STOPPING_THRESHOLD = 2
+        self.STOPPING_THRESHOLD = 1.5
         
         self.last_pos = (0,0,0)
         
-        self.vel_controller = SlipController(k_1=0.03, k_2=0.03, kp=0.03, ki=0.0001, kd=0.004, kv=1, ka=0.0002)
+        self.vel_controller = SlipController(k_1=0.16, k_2=0.03, kp=0.03, ki=0, kd=0, kv=1, ka=0)
                 
-        self.frequency = rospy.get_param("~frequency")
-        self.dt = 1/self.frequency
+        self.last_time = 0        
+        self.frequency = 30
         
         cmd_vel_topic = rospy.get_param("/cmd_vel_topic")
         self.vel_publisher = rospy.Publisher(cmd_vel_topic, Twist, queue_size=10)
@@ -147,6 +151,7 @@ class PurePursuitController:
 
         return target_vel
 
+    # TODO: Backwards driving?
     def target_velocity(self):
         """Generates target velocity using MAX_VEL as constant across all points
 
@@ -195,6 +200,7 @@ class PurePursuitController:
         return [combined_vels[0] + (combined_vels[1] * trackwidth / 2),
                 combined_vels[0] - (combined_vels[1] * trackwidth / 2)]
 
+    # TODO: account for empty path
     def closest(self):
         mindist = (
             0, math.sqrt((self.path[0][0] - self.robot_pose[0]) ** 2 + (self.path[0][1] - self.robot_pose[1]) ** 2))
@@ -238,9 +244,9 @@ class PurePursuitController:
 
     def calc_heading_err(self, lookahead):
         vec_look = (lookahead[0] - self.robot_pose[0], lookahead[1] - self.robot_pose[1])
-        print("Vec look: ", vec_look)
+        # print("Vec look: ", vec_look)
         robot_vec = (math.cos(self.robot_pose[2]), math.sin(self.robot_pose[2]))
-        print("Robot vec: ", robot_vec)
+        # print("Robot vec: ", robot_vec)
         return self.angle_between_vectors(vec_look, robot_vec)
 
     # def forward_kinematics(self, wheels, robot_pose, wheelbase, dt):
@@ -315,6 +321,7 @@ class PurePursuitController:
     def update_vel(self, wheelbase, dt):
         target_vels = self.target_velocity()
         look = self.lookahead()
+        print("LOOKAHEAD:", look)
         close = self.closest()
         if (abs(self.robot_pose[0] - self.path[-1][0]) < self.LOOKAHEAD) and (abs(self.robot_pose[1] - self.path[-1][1]) < self.LOOKAHEAD):
                 close = len(self.path) - 1
@@ -325,12 +332,17 @@ class PurePursuitController:
         self.wheels = self.turn(curv, vel, wheelbase)
         
         target_lin_ang_vel = self.combine_wheel_vels(self.wheels[0], self.wheels[1], wheelbase)
+        print("TARGET VEL:", target_lin_ang_vel)
 
         slip = self.calc_slip(self.robot_velocity, target_lin_ang_vel)
         heading_error = self.calc_heading_err(look)
         
+        print("ERROR:", slip, heading_error)
+        
         control_loop_vels = self.vel_controller.update_vel(slip, heading_error, dt, target_vel=vel, target_accel=self.MAX_ACCELERATION)
         self.wheels = self.get_wheel_vels(control_loop_vels, wheelbase)
+        
+        print("VEL AFTER CONTROLLER:", self.combine_wheel_vels(self.wheels[0], self.wheels[1], wheelbase))
 
         for i, w in enumerate(self.wheels):
             self.wheels[i] = last_wheels[i] + min(float(self.MAX_VEL_CHANGE * dt),
@@ -340,6 +352,7 @@ class PurePursuitController:
                 self.wheels = [0,0]
                 
         final_vels = self.combine_wheel_vels(self.wheels[0], self.wheels[1], wheelbase)
+        print("VELS", final_vels)
         self.publish_velocity(final_vels)
         
     def loop(self):
@@ -354,7 +367,14 @@ class PurePursuitController:
         rate = rospy.Rate(self.frequency)
         
         while not rospy.is_shutdown():
+            # print("WHAT IS THE TIME", rospy.get_time())
+            # print("PATH:", self.path)
+            self.dt = rospy.get_time() - self.last_time + 1e-99
+            self.last_time = rospy.get_time()
+            print("ROBOT POSE:", self.robot_pose)
+            print("ROBOT VEL:", self.robot_velocity)
             self.update_vel(self.trackwidth, self.dt)
+            print("===================================")
             rate.sleep()
         
 
@@ -460,8 +480,6 @@ class PurePursuitController:
         print("Done!")
 
 
-def main():
-    controller = PurePursuitController(1.5, 1, 2, 8, 4)
+if __name__ == "__main__":
+    controller = PurePursuitController(0.5, 0.5, 1, 1.5, 4)
     controller.loop()
-
-main()
