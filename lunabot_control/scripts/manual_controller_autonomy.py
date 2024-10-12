@@ -63,7 +63,7 @@ class ManualController:
     """
 
     def __init__(self):
-        self.joy_subscriber = rospy.Subscriber("joy", Joy, self.joy_callback)
+        self.joy_subscriber = rospy.Subscriber("joy0", Joy, self.joy_callback)
         self.effort_publisher = rospy.Publisher("effort", RobotEffort, queue_size=1, latch=True)
         self.effort_msg = RobotEffort()
 
