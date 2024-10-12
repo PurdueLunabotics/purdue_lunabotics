@@ -22,10 +22,14 @@ class PurePursuitController:
         for point in msg.poses:
             self.path.append(tuple((point.pose.position.x, point.pose.position.y)))
             
+    # TODO:         
     def odom_callback(self, msg: Odometry):
-        self.robot_velocity = [msg.twist.twist.linear, msg.twist.twist.angular]
+        # self.robot_velocity = [msg.twist.twist.linear, msg.twist.twist.angular]
+        
         angles = euler_from_quaternion([msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w])
         self.robot_pose = (msg.pose.pose.position.x, msg.pose.pose.position.y, angles[2])
+        self.robot_velocity = [math.sqrt((self.robot_pose[0] - self.last_pos[0]) ** 2 + (self.robot_pose[1] - self.last_pos[1]) ** 2) / self.dt, ((self.robot_pose[2] - self.last_pos[2])/self.dt)]
+        self.last_pos = self.robot_pose
         
     def publish_velocity(self, lin_ang_velocities):
         twist = Twist()
@@ -34,15 +38,15 @@ class PurePursuitController:
         twist.angular.z = lin_ang_velocities[1]
         self.vel_publisher.publish(twist) 
     
-    def __init__(self, path, MAX_VELOCITY, MAX_ACCEL, MAX_VEL_CHANGE, LOOKAHEAD, robot_pos, trackwidth):
-        self.path = path
+    def __init__(self, MAX_VELOCITY, MAX_ACCEL, MAX_VEL_CHANGE, LOOKAHEAD, trackwidth):
+        self.path = []
         self.MAX_VELOCITY = MAX_VELOCITY
         self.MAX_ACCELERATION = MAX_ACCEL
         self.MAX_VEL_CHANGE = MAX_VEL_CHANGE
         
         self.trackwidth = trackwidth
         
-        self.robot_pose = robot_pos
+        self.robot_pose = (0,0,0)
         self.LOOKAHEAD = LOOKAHEAD
 
         self.t = 0
@@ -58,6 +62,8 @@ class PurePursuitController:
         self.LOOKAHEAD_STOPPING_THRESHOLD = 5
         self.STOPPING_THRESHOLD = 2
         
+        self.last_pos = (0,0,0)
+        
         self.vel_controller = SlipController(k_1=0.03, k_2=0.03, kp=0.03, ki=0.0001, kd=0.004, kv=1, ka=0.0002)
                 
         self.frequency = rospy.get_param("~frequency")
@@ -65,9 +71,6 @@ class PurePursuitController:
         
         cmd_vel_topic = rospy.get_param("/cmd_vel_topic")
         self.vel_publisher = rospy.Publisher(cmd_vel_topic, Twist, queue_size=10)
-        
-                
-        
         
         
 
@@ -458,8 +461,7 @@ class PurePursuitController:
 
 
 def main():
-    controller = PurePursuitController([(0, 0), (10, 30), (20, 40), (30, 30), (40, 60), (20, 80), (70, 70), (100, 13)],
-                                       1.5, 1, 2, 8, (0, 0, math.pi / 2))
-    controller.simulate(0.1)
+    controller = PurePursuitController(1.5, 1, 2, 8, 4)
+    controller.loop()
 
 main()
