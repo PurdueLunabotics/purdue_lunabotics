@@ -13,6 +13,12 @@ extern ADS1115_lite adc0;
 extern ADS1115_lite adc1;
 #endif
 
+
+// MCs
+extern Sabertooth MC1; // top
+extern Sabertooth MC2; // middle
+extern Sabertooth MC3; // bottom
+
 namespace actuation {
 void cb(int8_t lin_act);
 void update(float &);
