@@ -17,6 +17,8 @@ from apriltag_ros.msg import AprilTagDetectionArray, AprilTagDetection
 from lunabot_msgs.msg import RobotEffort, RobotSensors, RobotErrors, Behavior
 from std_msgs.msg import Bool, Int8
 
+# Paper on the Adaptive Pure Pursit Controller Used: https://www.chiefdelphi.com/uploads/default/original/3X/b/e/be0e06de00e07db66f97686505c3f4dde2e332dc.pdf
+
 # TODO: See whether a node file is necessary
 class PurePursuitController:
     
@@ -42,7 +44,7 @@ class PurePursuitController:
         twist.angular.z = lin_ang_velocities[1]
         self.vel_publisher.publish(twist) 
     
-    def __init__(self, MAX_VELOCITY, MAX_ACCEL, MAX_VEL_CHANGE, LOOKAHEAD, trackwidth):
+    def __init__(self, MAX_VELOCITY, MAX_ACCEL, MAX_VEL_CHANGE, LOOKAHEAD, trackwidth, slipController = SlipController(k_1=0.05, k_2=0.03, kp=0.03, ki=0, kd=0, kv=1, ka=0.0002)):
         self.path = [(0,0)]
         self.MAX_VELOCITY = MAX_VELOCITY
         self.MAX_ACCELERATION = MAX_ACCEL
@@ -68,7 +70,7 @@ class PurePursuitController:
         
         self.last_pos = (0,0,0)
         
-        self.vel_controller = SlipController(k_1=0.16, k_2=0.03, kp=0.03, ki=0, kd=0, kv=1, ka=0)
+        self.vel_controller = slipController
                 
         self.last_time = 0        
         self.frequency = 30
@@ -387,7 +389,7 @@ class PurePursuitController:
         circle1 = plt.Circle((0, 0), 0.1, color='r', fill=True)
         circles = [circle2, circle1]
 
-        vel_controller = SlipController(k_1=0.03, k_2=0.03, kp=0.03, ki=0.0001, kd=0.004, kv=1, ka=0.0002)
+        vel_controller = SlipController(k_1=0.13, k_2=0.03, kp=0.03, ki=0.0001, kd=0.004, kv=0.8, ka=0.0002)
 
         def init():
             ax.add_patch(circle2)
@@ -481,5 +483,5 @@ class PurePursuitController:
 
 
 if __name__ == "__main__":
-    controller = PurePursuitController(0.5, 0.5, 1, 1.5, 4)
+    controller = PurePursuitController(0.2, 0.2, 0.2, 1.5, 0.45, SlipController(k_1=0.05, k_2=0.03, kp=0.03, ki=0, kd=0, kv=1, ka=0.0002))
     controller.loop()
