@@ -3,7 +3,7 @@
 // USER MANUAL HERE:
 // https://www.omc-stepperonline.com/index.php?route=product/product/get_file&file=3354/User%20Manual%20Of%20iSV2-RS.pdf
 
-// TODO - deal with alarms and error codes
+// TODO RJN - deal with alarms and error codes
 
 struct Addrs {             // addrs of various motor params
   uint16_t Reset = 0x0033; // reset alarms or the entire motor
