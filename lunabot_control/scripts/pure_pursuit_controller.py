@@ -23,11 +23,11 @@ from std_msgs.msg import Bool, Int8
 class PurePursuitController:
     
     def path_callback(self, msg: Path):
-        self.path = [(0,0)]
+        self.path = [self.robot_pose[:2]]
         for point in msg.poses:
             self.path.append(tuple((point.pose.position.x, point.pose.position.y)))
+
             
-    # TODO:         
     def odom_callback(self, msg: Odometry):
         # self.robot_velocity = [msg.twist.twist.linear, msg.twist.twist.angular]
         angles = euler_from_quaternion([msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w])
@@ -44,8 +44,8 @@ class PurePursuitController:
         twist.angular.z = lin_ang_velocities[1]
         self.vel_publisher.publish(twist) 
     
-    def __init__(self, MAX_VELOCITY, MAX_ACCEL, MAX_VEL_CHANGE, LOOKAHEAD, trackwidth, slipController = SlipController(k_1=0.05, k_2=0.03, kp=0.03, ki=0, kd=0, kv=1, ka=0.0002)):
-        self.path = [(0,0)]
+    def __init__(self, MAX_VELOCITY, MAX_ACCEL, MAX_VEL_CHANGE, LOOKAHEAD, trackwidth, slipController = SlipController(k_1=0.05, k_2=0.03, kp=0.03, ki=0, kd=0, kv=1, ka=0.0002), robot_start_pos = (0,0,0)):
+        self.path = [robot_start_pos[:2]]
         self.MAX_VELOCITY = MAX_VELOCITY
         self.MAX_ACCELERATION = MAX_ACCEL
         self.MAX_VEL_CHANGE = MAX_VEL_CHANGE
@@ -54,7 +54,7 @@ class PurePursuitController:
         
         self.robot_velocity = [0,0]
         
-        self.robot_pose = (0,0,0)
+        self.robot_pose = robot_start_pos
         self.LOOKAHEAD = LOOKAHEAD
 
         self.t = 0
@@ -66,7 +66,7 @@ class PurePursuitController:
         self.actual_lin_ang_wel = [0, 0]
         
         self.LOOKAHEAD_STOPPING_THRESHOLD = 2
-        self.STOPPING_THRESHOLD = 1.5
+        self.STOPPING_THRESHOLD = 0.4
         
         self.last_pos = (0,0,0)
         
@@ -483,5 +483,5 @@ class PurePursuitController:
 
 
 if __name__ == "__main__":
-    controller = PurePursuitController(0.2, 0.2, 0.2, 1.5, 0.45, SlipController(k_1=0.05, k_2=0.03, kp=0.03, ki=0, kd=0, kv=1, ka=0.0002))
+    controller = PurePursuitController(0.2, 0.2, 0.2, 0.7, 0.45, SlipController(k_1=0.08, k_2=0.045, kp=0.03, ki=0, kd=0, kv=1, ka=0.0002), (0.9, -1.2, 0))
     controller.loop()
