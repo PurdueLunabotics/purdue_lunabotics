@@ -33,7 +33,8 @@
             <param name="map_negative_scan_empty_ray_tracing" type="bool" value="false" /> <!-- don't
             fill empty space between the generated scans-->
 
-            <remap from="rgbd_image0" to="/d455_back/rgbd_image" />
+            <remap from="rgbd_image0" to="/d455_back/rgbd_image" /> <!-- TODO: Need to find where the
+            cameras output the images and change this-->
             <remap from="rgbd_image1" to="/d455_front/rgbd_image" />
 
             <param name="Vis/EstimationType" type="string" value="0" /> <!-- should be 0 for

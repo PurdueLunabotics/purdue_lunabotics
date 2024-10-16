@@ -16,10 +16,10 @@
       <param name="topic_name" type="string" value="/imu" />
     </node>
     <group ns="d455_front" if="$(arg front)">
-      <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+      <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
         <arg name="serial_no" value="$(arg serial_no_d455_front)" />
         <arg name="tf_prefix" value="d455_front" />
-        <arg name="filters" value="disparity,decimation" />
+        <arg name="filters" value="colorizer" />
         <arg name="align_depth" value="true" />
         <arg name="depth_width" value="$(arg width)" />
         <arg name="depth_height" value="$(arg height)" />
@@ -43,10 +43,11 @@
     </group>
 
     <group ns="d455_back" if="$(arg back)">
-      <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+      <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
         <arg name="serial_no" value="$(arg serial_no_d455_back)" />
         <arg name="tf_prefix" value="d455_back" />
-        <arg name="filters" value="disparity,decimation" />
+        <arg name="filters" value="disparity,decimation,colorizer" /> <!-- TODO: test this
+        "colorizer" https://github.com/IntelRealSense/realsense-ros/issues/861 -->
         <arg name="align_depth" value="true" />
         <arg name="initial_reset" value="$(arg initial_reset)" />
         <arg name="depth_width" value="$(arg width)" />
