@@ -237,7 +237,7 @@ HX711 HX711_Bus::encs[NUM_SENSORS] = {
 void HX711_Bus::init() {
   for (int i = 0; i < NUM_SENSORS; i++) {
     encs[i].begin(PIN_LIST[i * 2], PIN_LIST[i * 2 + 1]);
-    // encs[i].set_scale(SCALE_CALIBRATION[i]);
+    encs[i].set_scale(SCALE_CALIBRATION[i]);
     // encs[i].tare();
   }
 }
