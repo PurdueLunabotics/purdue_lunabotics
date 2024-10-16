@@ -53,10 +53,10 @@ float update_curr_right() {
   return right_drive_mtr.read_current();
 }
 
-void cb(int8_t left_drive_volt, int8_t right_drive_volt) { // TODO RJN - convert from volts to rpm
+void cb(int32_t left_drive_rpm, int32_t right_drive_rpm) { // TODO RJN - ensure this entire message chain is int32 RPM
   // Tank drive steering
-  left_drive_mtr.move_at_speed(left_drive_volt);
-  right_drive_mtr.move_at_speed(right_drive_volt);
+  left_drive_mtr.move_at_speed(left_drive_rpm);
+  right_drive_mtr.move_at_speed(right_drive_rpm);
 }
 
 } // namespace drivetrain
@@ -85,8 +85,8 @@ float update_curr() {
   return exc_mtr.read_current();
 }
 
-void cb(int8_t speed) {
-  exc_mtr.move_at_speed(speed);
+void cb(int32_t speed_rpm) {
+  exc_mtr.move_at_speed(speed_rpm);
 }
 } // namespace excavation
 
@@ -105,8 +105,8 @@ float update_curr() {
   return dep_mtr.read_current();
 }
 
-void cb(int8_t volt) {
-  dep_mtr.move_at_speed(-volt);
+void cb(int32_t speed_rpm) {
+  dep_mtr.move_at_speed(-speed_rpm);
 }
 
 } // namespace deposition
