@@ -8,43 +8,64 @@
     <arg name="slam" default="true" />
     <arg name="exp_name" default="exp" />
 
-    <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node" output="screen"/>
+    <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node"
+        output="screen" />
 
-    <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch"/>
-    <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch"/>
+    <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch" />
+    <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch" />
     <include if="$(arg record)" file="$(find lunabot_bringup)/launch/record.launch">
-        <arg name="exp_name" value="$(arg exp_name)"/>
+        <arg name="exp_name" value="$(arg exp_name)" />
     </include>
 
     <group if="$(arg autonomy)">
 
-      <include if="$(arg slam)" file="$(find rtabmap_ros)/launch/rtabmap.launch" >
-        <arg name="rtabmap_args" value="--delete_db_on_start"/>
-        <arg name="depth_topic" value="/d455_back/camera/aligned_depth_to_color/image_raw"/>
-        <arg name="rgb_topic" value="/d455_back/camera/color/image_rect_color"/>
-        <arg name="camera_info_topic" value="/d455_back/camera/color/camera_info"/>
-        <arg name="rtabmapviz" value="false" />
-        <arg name="imu_topic" value="/imu" />
-        <arg name="frame_id" value="base_link" />
-      </include>
+        <node if="$(arg slam)" name="rtabmap" pkg="rtabmap_slam" type="rtabmap" output="screen"
+            args="--delete_db_on_start">
 
-      <node pkg="lunabot_control" type="effort_factory.py" name="effort_factory" output="screen"/>
+            <param name="rgbd_cameras" type="int" value="2" />
+            <param name="frame_id" type="string" value="base_link" />
+            <param name="gen_scan" type="bool" value="true" />
+            <param name="wait_for_transform" type="bool" value="false" />
+            <param name="map_negative_poses_ignored" type="bool" value="false" />        <!-- refresh grid
+            map even if we are not moving-->
+            <param name="map_negative_scan_empty_ray_tracing" type="bool" value="false" /> <!-- don't
+            fill empty space between the generated scans-->
 
-      <node pkg="lunabot_control" type="differential_drive_controller.py" name="differential_drive_controller" output="screen"/>
+            <remap from="rgbd_image0" to="/d455_back/rgbd_image" />
+            <remap from="rgbd_image1" to="/d455_front/rgbd_image" />
 
-      <group ns="nav">
-          <node pkg="lunabot_control" type="mpc_node" name="mpc_node" output="screen"/>
+            <param name="Vis/EstimationType" type="string" value="0" /> <!-- should be 0 for
+            multi-cameras -->
 
-          <node name="global_planner_node" pkg="lunabot_nav" type="dstar_node.py" output="screen" respawn="true">
-              <!-- <rosparam file="$(find lunabot_config)/config/rrtstar.yml" command="load"/> -->
-          </node>
-      </group>
+            <!-- <arg name="depth_topic" value="/d455_back/camera/aligned_depth_to_color/image_raw"
+            />
+            <arg name="rgb_topic" value="/d455_back/camera/color/image_rect_color" />
+            <arg name="camera_info_topic" value="/d455_back/camera/color/camera_info" />
+            <arg name="rtabmapviz" value="false" />
+            <arg name="imu_topic" value="/imu" />
+            <arg name="frame_id" value="base_link" /> -->
+        </node>
 
-      <group ns="maps">
-          <node name="costmap_node" pkg="lunabot_perception" type="costmap_node" output="screen">
-              <rosparam file="$(find lunabot_config)/config/global_costmap.yml" command="load" ns="global_costmap" />
-          </node>
-      </group>
+        <node pkg="lunabot_control" type="effort_factory.py" name="effort_factory" output="screen" />
+
+        <node pkg="lunabot_control" type="differential_drive_controller.py"
+            name="differential_drive_controller" output="screen" />
+
+        <group ns="nav">
+            <node pkg="lunabot_control" type="mpc_node" name="mpc_node" output="screen" />
+
+            <node name="global_planner_node" pkg="lunabot_nav" type="dstar_node.py" output="screen"
+                respawn="true">
+                <!-- <rosparam file="$(find lunabot_config)/config/rrtstar.yml" command="load"/> -->
+            </node>
+        </group>
+
+        <group ns="maps">
+            <node name="costmap_node" pkg="lunabot_perception" type="costmap_node" output="screen">
+                <rosparam file="$(find lunabot_config)/config/global_costmap.yml" command="load"
+                    ns="global_costmap" />
+            </node>
+        </group>
 
     </group>
 </launch>

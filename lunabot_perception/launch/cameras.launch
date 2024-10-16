@@ -30,6 +30,8 @@
           <arg name="enable_gyro" value="false"/>
           <arg name="enable_accel" value="false"/>
           <arg name="initial_reset" value="$(arg initial_reset)"/>
+          <arg name="camera" value="camera1" />
+          <arg name="device_id" value="#1" />
         </include>
         <group ns="camera/color" >
             <node pkg="image_proc" type="image_proc" name="image_proc" args="image:=camera/color/image_raw"/>
@@ -54,6 +56,8 @@
           <arg name="color_fps" value="$(arg fps)" />
           <arg name="enable_gyro" value="false"/>
           <arg name="enable_accel" value="false"/>
+          <arg name="camera" value="camera2" />
+          <arg name="device_id" value="#2" />
         </include>
 
         <group ns="camera/color" >
