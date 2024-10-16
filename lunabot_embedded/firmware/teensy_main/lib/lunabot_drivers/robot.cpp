@@ -19,11 +19,7 @@ constexpr uint8_t ACT_LEFT_CURR_ADC = 1;
 constexpr uint8_t ACT_LEFT_CURR_MUX = 1; // U4 curr_sense_board
 
 void update(float &act_right_curr) {
-#ifdef OLD_CURRENT_SENSOR
-  act_right_curr = ACS711_Current_Bus::read(ACT_RIGHT_CURR_ADC, ACT_RIGHT_CURR_MUX);
-#else
   act_right_curr = ADS1119_Current_Bus::read(ACT_RIGHT_CURR_ADC, ACT_RIGHT_CURR_MUX);
-#endif
 }
 
 void cb(int8_t lin_act_volt) {

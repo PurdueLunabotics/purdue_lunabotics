@@ -8,17 +8,12 @@
 #define ST_SERIAL Serial1
 #define ST_BAUD_RATE 9600
 
-#ifdef OLD_CURRENT_SENSOR
-extern ADS1115_lite adc0;
-extern ADS1115_lite adc1;
-#endif
-
 // MCs
 extern Sabertooth MC1; // top
 extern Sabertooth MC2; // middle
 extern Sabertooth MC3; // bottom
 
-#define LEFT_DRIVE_MOTOR_ID 0x01
+#define LEFT_DRIVE_MOTOR_ID 0x01 // TODO RJN - set these ids on robot
 #define RIGHT_DRIVE_MOTOR_ID 0x02
 #define EXC_MOTOR_ID 0x03
 #define DEP_MOTOR_ID 0x04

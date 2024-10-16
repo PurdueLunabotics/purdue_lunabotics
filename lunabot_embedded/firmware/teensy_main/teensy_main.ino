@@ -56,11 +56,7 @@ void setup() {
   M5Stack_UWB_Trncvr::init();
   KillSwitchRelay::init();
 
-#ifdef OLD_CURRENT_SENSOR
-  ACS711_Current_Bus::init_ads1115();
-#else
   ADS1119_Current_Bus::init_ads1119();
-#endif
 
   uwb_timer.begin(M5Stack_UWB_Trncvr::transfer, UWB_TRANSFER_PERIOD);
 
@@ -109,11 +105,4 @@ void loop() {
     send();
     n = RawHID.send(buffer, 0);
   }
-
-#ifdef OLD_CURRENT_SENSOR
-  if (ms_curr_update > CURR_UPDATE_PERIOD) {
-    ms_curr_update -= CURR_UPDATE_PERIOD;
-    ACS711_Current_Bus::transfer();
-  }
-#endif
 }
