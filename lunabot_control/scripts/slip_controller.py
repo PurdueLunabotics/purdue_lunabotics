@@ -45,7 +45,7 @@ class SlipController:
 
         self.last_error = error
 
-        return self.kv * target_vel + self.ka * target_accel + self.kp * error + self.ki * self.integral + self.kd * derivative
+        return (self.kv * target_vel) + (self.ka * target_accel) + (self.kp * error) + (self.ki * self.integral) + (self.kd * derivative)
 
 
 # Use this to find the theoretical pose (ignores slip)

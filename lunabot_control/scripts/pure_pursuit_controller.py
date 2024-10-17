@@ -39,12 +39,13 @@ class PurePursuitController:
         
     def publish_velocity(self, lin_ang_velocities):
         twist = Twist()
-        # TODO: clamp if necessary
-        twist.linear.x = lin_ang_velocities[0]
-        twist.angular.z = lin_ang_velocities[1]
+        twist.linear.x = self.clamp(lin_ang_velocities[0], self.lin_lim[0], self.lin_lim[1])
+        twist.angular.z = self.clamp(lin_ang_velocities[1], self.ang_lim[0], self.ang_lim[1])
+        print("VELS", [self.clamp(lin_ang_velocities[0], self.lin_lim[0], self.lin_lim[1]), self.clamp(lin_ang_velocities[1], self.ang_lim[0], self.ang_lim[1])])
+
         self.vel_publisher.publish(twist) 
     
-    def __init__(self, MAX_VELOCITY, MAX_ACCEL, MAX_VEL_CHANGE, LOOKAHEAD, trackwidth, slipController = SlipController(k_1=0.05, k_2=0.03, kp=0.03, ki=0, kd=0, kv=1, ka=0.0002), robot_start_pos = (0,0,0)):
+    def __init__(self, MAX_VELOCITY, MAX_ACCEL, MAX_VEL_CHANGE, trackwidth, robot_start_pos = (0,0,0)):
         self.path = [robot_start_pos[:2]]
         self.MAX_VELOCITY = MAX_VELOCITY
         self.MAX_ACCELERATION = MAX_ACCEL
@@ -55,7 +56,7 @@ class PurePursuitController:
         self.robot_velocity = [0,0]
         
         self.robot_pose = robot_start_pos
-        self.LOOKAHEAD = LOOKAHEAD
+        self.LOOKAHEAD = rospy.get_param("/nav/pure_pursuit/lookahead")
 
         self.t = 0
         self.t_i = 0
@@ -70,10 +71,14 @@ class PurePursuitController:
         
         self.last_pos = (0,0,0)
         
-        self.vel_controller = slipController
+        self.vel_controller = SlipController(k_1=rospy.get_param("/nav/pure_pursuit/slip_k1"), k_2=rospy.get_param("/nav/pure_pursuit/heading_k2"), kp=rospy.get_param("/nav/pure_pursuit/kp"), ki=rospy.get_param("/nav/pure_pursuit/ki"), kd=rospy.get_param("/nav/pure_pursuit/kd"), kv=rospy.get_param("/nav/pure_pursuit/kv"), ka=rospy.get_param("/nav/pure_pursuit/ka"))
                 
         self.last_time = 0        
-        self.frequency = 30
+        self.frequency = rospy.get_param("/nav/pure_pursuit/frequency_p")
+        
+        self.lin_lim = rospy.get_param("/nav/pure_pursuit/velocity_limits_p/linear")
+        self.ang_lim = rospy.get_param("/nav/pure_pursuit/velocity_limits_p/angular")
+
         
         cmd_vel_topic = rospy.get_param("/cmd_vel_topic")
         self.vel_publisher = rospy.Publisher(cmd_vel_topic, Twist, queue_size=10)
@@ -303,11 +308,11 @@ class PurePursuitController:
         return math.atan2(v1[0] * v2[1] - v1[1] * v2[0], v1[0] * v2[0] + v1[1] * v2[1])
 
     def curvature(self, lookahead):
-        side = np.sign(math.sin(3.1415 / 2 - self.robot_pose[2]) * (lookahead[0] - self.robot_pose[0]) - math.cos(
-            3.1415 / 2 - self.robot_pose[2]) * (
+        side = np.sign(math.sin(self.robot_pose[2]) * (lookahead[0] - self.robot_pose[0]) - math.cos(
+            self.robot_pose[2]) * (
                                lookahead[1] - self.robot_pose[1]))
-        a = -math.tan(3.1415 / 2 - self.robot_pose[2])
-        c = math.tan(3.1415 / 2 - self.robot_pose[2]) * self.robot_pose[0] - self.robot_pose[1]
+        a = -math.tan(self.robot_pose[2])
+        c = math.tan(self.robot_pose[2]) * self.robot_pose[0] - self.robot_pose[1]
         # x = abs(-math.tan(3.1415/2 - angle) * lookahead[0] + lookahead[1] + math.tan(3.1415/2 - angle)*pos[0] - pos[1]) / math.sqrt((math.tan(3.1415/2 - angle))**2 + 1)
         x = abs(a * lookahead[0] + lookahead[1] + c) / math.sqrt(a ** 2 + 1)
         return side * (2 * x / (float(self.LOOKAHEAD) ** 2))
@@ -318,6 +323,9 @@ class PurePursuitController:
     def generate_path(self, spacing, weight_data, weight_smooth, tolerance):
         self.injection(spacing)
         self.smoothing(weight_data, weight_smooth, tolerance)
+        
+    def clamp(self, value: float, min_val: float, max_val: float):
+        return min(max(value, min_val), max_val)
 
     # TODO: Need to test
     def update_vel(self, wheelbase, dt):
@@ -325,10 +333,12 @@ class PurePursuitController:
         look = self.lookahead()
         print("LOOKAHEAD:", look)
         close = self.closest()
+        print("CLOSEST:", close)
         if (abs(self.robot_pose[0] - self.path[-1][0]) < self.LOOKAHEAD) and (abs(self.robot_pose[1] - self.path[-1][1]) < self.LOOKAHEAD):
                 close = len(self.path) - 1
                 look = self.path[-1]
         curv = self.curvature(look) if self.t_i > close else 0.00001
+        print("CURVATURE:", curv)
         vel = target_vels[close]
         last_wheels = self.wheels
         self.wheels = self.turn(curv, vel, wheelbase)
@@ -354,7 +364,6 @@ class PurePursuitController:
                 self.wheels = [0,0]
                 
         final_vels = self.combine_wheel_vels(self.wheels[0], self.wheels[1], wheelbase)
-        print("VELS", final_vels)
         self.publish_velocity(final_vels)
         
     def loop(self):
@@ -483,5 +492,5 @@ class PurePursuitController:
 
 
 if __name__ == "__main__":
-    controller = PurePursuitController(0.2, 0.2, 0.2, 0.7, 0.45, SlipController(k_1=0.08, k_2=0.045, kp=0.03, ki=0, kd=0, kv=1, ka=0.0002), (0.9, -1.2, 0))
+    controller = PurePursuitController(0.2, 0.2, 0.2, 0.45, (0.9, -1.2, 0))
     controller.loop()
