@@ -22,6 +22,7 @@ class SlipController:
         return (self.vel_pid_update(robot_vel_slip, dt, target_accel, target_vel),
                 self.vel_ang_slip_update(robot_vel_slip, heading_error, dt))
 
+    # TODO: Check whether heading errors and slip vectors are going against each other (one neg, one pos)
     # Slip controller from paper for angular velocity, takes in slip vector and heading diff between robot and lookahead point
     def vel_ang_slip_update(self, robot_vel_slip, heading_error, dt):
         return (self.k_1 * heading_error + self.k_2 * robot_vel_slip[1]) / dt
