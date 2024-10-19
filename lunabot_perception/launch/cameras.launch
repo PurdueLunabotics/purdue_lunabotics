@@ -15,6 +15,10 @@
       <param name="imu_frame_id" type="string" value="d455_back" />
       <param name="topic_name" type="string" value="/imu" />
     </node>
+    <node pkg="tf" type="static_transform_publisher" name="base_to_camera1_tf"
+      args="0.0 0.0 0.0 0.0 0.0 0.0 /base_link /camera1_link 100" />
+    <node pkg="tf" type="static_transform_publisher" name="base_to_camera2_tf"
+      args="-0.1325 -0.1975 0.0 -1.570796327 0.0 0.0 /base_link /camera2_link 100" />
     <group ns="d455_front" if="$(arg front)">
       <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="serial_no" value="$(arg serial_no_d455_front)" />
@@ -42,14 +46,12 @@
       </group>
 
       <!-- sync rgb/depth images per camera -->
-      <group ns="d455_front">
-        <node pkg="nodelet" type="nodelet" name="rgbd_sync"
-          args="load rtabmap_sync/rgbd_sync camera1_nodelet_manager">
-          <remap from="rgb/image" to="d455_front/camera/color/image_rect_color" />
-          <remap from="depth/image" to="d455_front/camera/aligned_depth_to_color/image_raw" />
-          <remap from="rgb/camera_info" to="d455_front/camera/color/camera_info" />
-        </node>
-      </group>
+      <node pkg="nodelet" type="nodelet" name="rgbd_sync" args="standalone rtabmap_sync/rgbd_sync"
+        output="screen">
+        <remap from="rgb/image_rect_color" to="d455_front/camera/color/image_rect_color" />
+        <remap from="depth/image" to="d455_front/camera/aligned_depth_to_color/image_raw" />
+        <remap from="rgb/camera_info" to="d455_front/camera/color/camera_info" />
+      </node>
 
 
     </group>
@@ -85,14 +87,12 @@
     </group>
 
     <!-- sync rgb/depth images per camera -->
-    <group ns="d455_back">
-      <node pkg="nodelet" type="nodelet" name="rgbd_sync"
-        args="load rtabmap_sync/rgbd_sync camera1_nodelet_manager">
-        <remap from="rgb/image" to="d455_back/camera/color/image_rect_color" />
-        <remap from="depth/image" to="d455_back/camera/aligned_depth_to_color/image_raw" />
-        <remap from="rgb/camera_info" to="d455_back/camera/color/camera_info" />
-      </node>
-    </group>
+    <node pkg="nodelet" type="nodelet" name="rgbd_sync" args="standalone rtabmap_sync/rgbd_sync"
+      output="screen">
+      <remap from="rgb/image" to="d455_back/camera/color/image_rect_color" />
+      <remap from="depth/image" to="d455_back/camera/aligned_depth_to_color/image_raw" />
+      <remap from="rgb/camera_info" to="d455_back/camera/color/camera_info" />
+    </node>
   </group>
 
   <group if="$(arg sim)">
