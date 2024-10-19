@@ -16,7 +16,7 @@
       <param name="topic_name" type="string" value="/imu" />
     </node>
     <group ns="d455_front" if="$(arg front)">
-      <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
+      <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="serial_no" value="$(arg serial_no_d455_front)" />
         <arg name="tf_prefix" value="d455_front" />
         <arg name="filters" value="colorizer" />
@@ -40,10 +40,23 @@
           <arg name="camera_frame" value="d455_front_base" />
         </include>
       </group>
+
+      <!-- sync rgb/depth images per camera -->
+      <group ns="d455_front">
+        <node pkg="nodelet" type="nodelet" name="rgbd_sync"
+          args="load rtabmap_sync/rgbd_sync camera1_nodelet_manager">
+          <remap from="rgb/image" to="d455_front/camera/color/image_rect_color" />
+          <remap from="depth/image" to="d455_front/camera/aligned_depth_to_color/image_raw" />
+          <remap from="rgb/camera_info" to="d455_front/camera/color/camera_info" />
+        </node>
+      </group>
+
+
     </group>
 
     <group ns="d455_back" if="$(arg back)">
-      <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
+      <include file="$(find realsense2_camera)/launch/rs_camera.launch"> <!-- TODO: rs_rgbd.launch it
+        was rs_camera.launch-->
         <arg name="serial_no" value="$(arg serial_no_d455_back)" />
         <arg name="tf_prefix" value="d455_back" />
         <arg name="filters" value="disparity,decimation,colorizer" /> <!-- TODO: test this
@@ -71,6 +84,15 @@
       </group>
     </group>
 
+    <!-- sync rgb/depth images per camera -->
+    <group ns="d455_back">
+      <node pkg="nodelet" type="nodelet" name="rgbd_sync"
+        args="load rtabmap_sync/rgbd_sync camera1_nodelet_manager">
+        <remap from="rgb/image" to="d455_back/camera/color/image_rect_color" />
+        <remap from="depth/image" to="d455_back/camera/aligned_depth_to_color/image_raw" />
+        <remap from="rgb/camera_info" to="d455_back/camera/color/camera_info" />
+      </node>
+    </group>
   </group>
 
   <group if="$(arg sim)">
