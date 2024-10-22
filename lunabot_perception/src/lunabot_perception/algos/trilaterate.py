@@ -7,18 +7,18 @@ from tqdm import tqdm
 
 
 # Convert Bag to csv
-# import bagpy
-# from bagpy import bagreader
-# import pandas as pd
+import bagpy
+from bagpy import bagreader
+import pandas as pd
 
-# b = bagreader('only-odom.bag')
+# b = bagreader('test.bag')
 
-# # replace the topic name as per your need
-# LASER_MSG = b.message_by_topic('')
+# # # replace the topic name as per your need
+# LASER_MSG = b.message_by_topic('/sensors')
 # LASER_MSG
 # df_laser = pd.read_csv(LASER_MSG)
-# df_laser = df_laser[['pose.pose.position.x','pose.pose.position.y','pose.pose.position.z']]
-# df_laser.to_csv('bag1auto_odom.csv', index=False)  
+# df_laser = df_laser[['uwb_dists_0','uwb_dists_1','uwb_dists_2']]
+# df_laser.to_csv('test_sensors.csv', index=False)  
 
 # Function to minimize (from cited paper (Eqn 18)
 def S(v, d1, d2, d3, a1, a2, a3):
@@ -80,17 +80,17 @@ class Trilaterate:
         pt2 = pts_cfg[1]
         pt3 = pts_cfg[2]
         
-        # # Formula from: https://www.101computing.net/cell-phone-trilateration-algorithm/    
-        ## 2D trilateration
-        A = 2*pt2[0] - 2*pt1[0]
-        B = 2*pt2[1] - 2*pt1[1]
-        C = Dists[0]**2 - Dists[1]**2 - pt1[0]**2 + pt2[0]**2 - pt1[1]**2 + pt2[1]**2
-        D = 2*pt3[0] - 2*pt2[0]
-        E = 2*pt3[1] - 2*pt2[1]
-        F = Dists[1]**2 - Dists[2]**2 - pt2[0]**2 + pt3[0]**2 - pt2[1]**2 + pt3[1]**2
-        x = (C*E - F*B) / (E*A - B*D)
-        y = (C*D - A*F) / (B*D - A*E)
-        return [[x,y,0],[x,y,0]]
+        # # # Formula from: https://www.101computing.net/cell-phone-trilateration-algorithm/    
+        # ## 2D trilateration
+        # A = 2*pt2[0] - 2*pt1[0]
+        # B = 2*pt2[1] - 2*pt1[1]
+        # C = Dists[0]**2 - Dists[1]**2 - pt1[0]**2 + pt2[0]**2 - pt1[1]**2 + pt2[1]**2
+        # D = 2*pt3[0] - 2*pt2[0]
+        # E = 2*pt3[1] - 2*pt2[1]
+        # F = Dists[1]**2 - Dists[2]**2 - pt2[0]**2 + pt3[0]**2 - pt2[1]**2 + pt3[1]**2
+        # x = (C*E - F*B) / (E*A - B*D)
+        # y = (C*D - A*F) / (B*D - A*E)
+        # return [[x,y,0],[x,y,0]]
     
         # Formula from: https://math.stackexchange.com/q/2969614
         ## 3D Trilateration
@@ -231,7 +231,7 @@ if __name__ == "__main__":
 
     # a1,a2,a3 = np.array([1.5, 0.9, 0]), np.array([0, 0, 0]), np.array([0, 0.9, 0]) #Maybe (4.621,5.2967,+- 2.809)
     
-    a1,a2,a3 = np.array([0, 0, 0]), np.array([1.5, 0, 0]), np.array([0, 0.9, 0]) 
+    a1,a2,a3 = np.array([0, 0, 0]), np.array([1.8288, 0, 0]), np.array([0, 1.8288, 0]) 
     
     # a1 = np.array([0, -0.876, 0])  # TX1
     # a2 = np.array([0, 0, 0])  # TX2
@@ -240,7 +240,7 @@ if __name__ == "__main__":
     pts_cfg = np.array([a1, a2, a3])
 
     tril = Trilaterate(pts_cfg)
-    df = pd.read_csv("bag1auto_sensors.csv")
+    df = pd.read_csv("test_sensors.csv")
     df = df[['uwb_dists_0','uwb_dists_1','uwb_dists_2']]
     poses = []
     print(df.head(3))
@@ -266,12 +266,12 @@ if __name__ == "__main__":
         
         poses.append(pos)
         print(posLst)
-        break
+        # break
     
-    # df['posex'] = [i[0] for i in poses]
-    # df['posey'] = [i[1] for i in poses]
-    # df['posez'] = [i[2] for i in poses]
-    # df.to_csv('poses.csv', index=False)  
+    df['posex'] = [i[0] for i in poses]
+    df['posey'] = [i[1] for i in poses]
+    df['posez'] = [i[2] for i in poses]
+    df.to_csv('poses.csv', index=False)  
 
 
 
