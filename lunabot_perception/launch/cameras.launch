@@ -51,7 +51,7 @@
         <remap from="rgb/image_rect_color" to="camera/color/image_rect_color" />
         <remap from="depth/image" to="camera/aligned_depth_to_color/image_raw" />
         <remap from="rgb/camera_info" to="camera/color/camera_info" />
-        <param name="approx_sync" value="false" />
+        <param name="approx_sync" value="true" />
       </node>
 
 
@@ -91,7 +91,7 @@
         <remap from="rgb/image" to="camera/color/image_rect_color" />
         <remap from="depth/image" to="camera/aligned_depth_to_color/image_raw" />
         <remap from="rgb/camera_info" to="camera/color/camera_info" />
-        <param name="approx_sync" value="false" />
+        <param name="approx_sync" value="true" />
       </node>
     </group>
 
