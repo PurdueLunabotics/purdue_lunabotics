@@ -232,7 +232,7 @@ float AMT13_Angle_Bus::read_enc(uint8_t id) {
 HX711 HX711_Bus::enc = HX711();
 
 void HX711_Bus::init() {
-  enc.begin(18, 19);
+  enc.begin(21, 20);
   enc.set_scale(420.0983);
   // for (int i = 0; i < NUM_SENSORS; i++) {
   //   encs[i].begin(PIN_LIST[i * 2], PIN_LIST[i * 2 + 1]);
