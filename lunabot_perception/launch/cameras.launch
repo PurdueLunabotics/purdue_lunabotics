@@ -48,9 +48,9 @@
       <!-- sync rgb/depth images per camera -->
       <node pkg="nodelet" type="nodelet" name="rgbd_sync" args="standalone rtabmap_sync/rgbd_sync"
         output="screen">
-        <remap from="rgb/image_rect_color" to="d455_front/camera/color/image_rect_color" />
-        <remap from="depth/image" to="d455_front/camera/aligned_depth_to_color/image_raw" />
-        <remap from="rgb/camera_info" to="d455_front/camera/color/camera_info" />
+        <remap from="rgb/image_rect_color" to="camera/color/image_rect_color" />
+        <remap from="depth/image" to="camera/aligned_depth_to_color/image_raw" />
+        <remap from="rgb/camera_info" to="camera/color/camera_info" />
         <param name="approx_sync" value="false" />
       </node>
 
