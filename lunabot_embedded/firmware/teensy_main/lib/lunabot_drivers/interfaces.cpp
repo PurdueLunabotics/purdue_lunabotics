@@ -238,7 +238,7 @@ void HX711_Bus::init() {
   for (int i = 0; i < NUM_SENSORS; i++) {
     encs[i].begin(PIN_LIST[i * 2], PIN_LIST[i * 2 + 1]);
     // encs[i].reset();
-    if (encs[id].is_ready()) {
+    if (encs[i].is_ready()) {
       encs[i].tare();
     }
     encs[i].set_scale(420.0983);
