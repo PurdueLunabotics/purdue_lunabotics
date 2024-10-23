@@ -244,9 +244,7 @@ void HX711_Bus::init() {
   }
 }
 
-float HX711_Bus::read_scale(uint8_t id) {
-  return encs[id].is_ready() ? encs[id].read_median(7) : -1;
-}
+float HX711_Bus::read_scale(uint8_t id) { return encs[id].is_ready() ? encs[id].read() : -1; }
 
 volatile float M5Stack_UWB_Trncvr::recv_buffer_[NUM_UWB_TAGS] = {0};
 
