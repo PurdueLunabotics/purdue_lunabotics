@@ -99,7 +99,7 @@ class PurePursuitController:
         self.actual_lin_ang_wel = [0, 0]
         
         self.LOOKAHEAD_STOPPING_THRESHOLD = 2
-        self.STOPPING_THRESHOLD = 0.4
+        self.STOPPING_THRESHOLD = 0.2
         
         self.last_pos = (0,0,0)
         
