@@ -33,7 +33,7 @@ import numpy as np
 """
 
 # Take an input from -1 to 1, and convert it to an 8 bit int from -127 to 127
-def constrain(joy_in: float):
+def constrain(joy_in: float): # TODO RJN - set to RPM now
     return np.int8(np.clip(joy_in, -1, 1) * 127)
 
 class Buttons(Enum):

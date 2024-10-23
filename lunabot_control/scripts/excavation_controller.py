@@ -122,7 +122,7 @@ class ExcavationController:
 
     def constrain(self, val, max_percent):
         val = np.clip(-1, val, 1)  # Clipping speed to not go over 100%
-        return np.int8(val * 127 * max_percent)
+        return np.int8(val * 127 * max_percent) # TODO RJN - set to RPM now
 
     def stop(self):
         effort_msg = RobotEffort()

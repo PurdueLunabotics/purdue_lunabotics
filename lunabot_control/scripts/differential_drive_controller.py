@@ -2,7 +2,7 @@
 import numpy as np
 import rospy
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Int8
+from std_msgs.msg import Int32
 
 from lunabot_msgs.msg import RobotSensors
 
@@ -13,15 +13,15 @@ class DifferentialDriveController:
         # ROS Publishers and subsribers to get / send data
 
         self._vel_sub = rospy.Subscriber("/cmd_vel", Twist, self._vel_cb)
-        self._right_drive_pub = rospy.Publisher("/right_drive", Int8, queue_size=1)
-        self._left_drive_pub = rospy.Publisher("/left_drive", Int8, queue_size=1)
+        self._right_drive_pub = rospy.Publisher("/right_drive", Int32, queue_size=1)
+        self._left_drive_pub = rospy.Publisher("/left_drive", Int32, queue_size=1)
         self._state_sub = rospy.Subscriber("sensors", RobotSensors, self._robot_state_cb)
 
         self.width = rospy.get_param("~width", 0.5588)
         self.max_speed_percentage = rospy.get_param("~max_speed_percentage", 0.8)
         self.hz = rospy.get_param("~hz", 20)
 
-        self._max_speed = rospy.get_param("~max_speed", 2.0) # In rad/s
+        self._max_speed = rospy.get_param("~max_speed", 2.0) * 60 / 2 / np.pi # In rad/s converted to RPM
         self.p = rospy.get_param("~p", 3.9)  # P gain for PID controller
         self.i = rospy.get_param("~i", 0.0)  # I gain for PID controller
         self.d = rospy.get_param("~d", 0)  # D gain for PID controller
@@ -58,12 +58,8 @@ class DifferentialDriveController:
         self._left_vel = msg.drive_left_vel
 
     def _loop(self):
-        left_drive_msg = Int8()
-        right_drive_msg = Int8()
-
-        left_percent_estimate = np.clip(self._left_vel / self._max_speed, -1, 1)
-        right_percent_estimate = np.clip(self._right_vel / self._max_speed, -1, 1)
-        
+        left_drive_msg = Int32()
+        right_drive_msg = Int32()
 
         WEIGHT = 0.9
 
@@ -73,40 +69,8 @@ class DifferentialDriveController:
         left_set = self.lin - self.ang * self.width / 2
         right_set = self.lin + self.ang * self.width / 2
 
-        # Measured Velocity in m / s
-        left_measured = self._left_vel * self._meters_per_rad
-        right_measured = self._right_vel * self._meters_per_rad
-
-        # Calculating error
-        left_error = left_set - left_measured
-        right_error = right_set - right_measured
-
-        self.left_error_sum += left_error
-        self.right_error_sum += right_error
-
-        self.left_error_sum = np.clip(self.left_error_sum, -self.i_sat, self.i_sat)
-        self.right_error_sum = np.clip(self.right_error_sum, -self.i_sat, self.i_sat)
-
-        # Calculating motor velocities
-        left = (
-            left_percent_estimate
-            + left_error * self.p
-            + self.left_error_sum * self.i
-            + (left_error - self._left_prev_error) / self.loop_dt * self.d
-        )
-        right = (
-            right_percent_estimate
-            + right_error * self.p
-            + self.right_error_sum * self.i
-            + (right_error - self._right_prev_error) / self.loop_dt * self.d
-        )
-
-        # Calculating previous error
-        self._left_prev_error = left_error
-        self._right_prev_error = right_error
-
-        left_drive_msg.data = self.constrain(left)
-        right_drive_msg.data = self.constrain(right)
+        left_drive_msg.data = self.constrain(left_set) # TODO RJN - convert linear velocity to RPM through wheel diameter
+        right_drive_msg.data = self.constrain(right_set)
 
         if self.lin == 0 and self.ang == 0:
             left_drive_msg.data = 0
@@ -114,13 +78,14 @@ class DifferentialDriveController:
         self._left_drive_pub.publish(left_drive_msg)
         self._right_drive_pub.publish(right_drive_msg)
 
+     # TODO RJN - check this constrain
     def constrain(self, val):
-        val = np.clip(-1, val, 1)  # Clipping speed to not go over 100%
-        return np.int8(val * 127 * self.max_speed_percentage)
+        val = np.clip(-self._max_speed, val, self._max_speed)  # Clipping speed to not go over 100%
+        return np.int32(val)
 
     def shutdown_hook(self):
-        left_drive_msg = Int8()
-        right_drive_msg = Int8()
+        left_drive_msg = Int32()
+        right_drive_msg = Int32()
 
         left_drive_msg.data = 0
         right_drive_msg.data = 0

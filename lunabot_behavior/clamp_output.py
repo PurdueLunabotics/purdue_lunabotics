@@ -1,5 +1,5 @@
 
-def clamp_output(input):
+def clamp_output(input): # TODO RJN - set to RPM now
     """
     Function to clamp output to integer between [-127, 127]
     """
