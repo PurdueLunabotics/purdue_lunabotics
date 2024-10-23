@@ -22,6 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
   geometry_msgs
   costmap_2d
+  rtabmap_sync
 )
 
 catkin_python_setup()
