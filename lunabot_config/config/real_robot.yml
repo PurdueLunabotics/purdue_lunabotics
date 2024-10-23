@@ -30,9 +30,9 @@ nav:
             angular: [-0.785, 0.785]
 
     pure_pursuit:
-        slip_k1: 0.22
-        heading_k2: 0.10
-        kp: 0.05
+        slip_k1: 0.02
+        heading_k2: 0.02
+        kp: 0.001
         ki: 0
         kd: 0
         kv: 0.8
