@@ -195,6 +195,7 @@ private:
                                                            -459.542}; // TODO, calibrate these
 
   static HX711 encs[NUM_SENSORS];
+  static HX711 enc;
 };
 
 #endif

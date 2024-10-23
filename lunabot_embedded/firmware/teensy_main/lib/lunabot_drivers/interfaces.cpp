@@ -235,19 +235,19 @@ HX711 HX711_Bus::encs[NUM_SENSORS] = {
 };
 
 void HX711_Bus::init() {
-  for (int i = 0; i < NUM_SENSORS; i++) {
-    encs[i].begin(PIN_LIST[i * 2], PIN_LIST[i * 2 + 1]);
-    // encs[i].reset();
-    if (encs[i].is_ready()) {
-      encs[i].tare();
-    }
-    encs[i].set_scale(420.0983);
-  }
+  enc.begin(19, 18);
+  enc.set_scale(420.0983);
+  // for (int i = 0; i < NUM_SENSORS; i++) {
+  //   encs[i].begin(PIN_LIST[i * 2], PIN_LIST[i * 2 + 1]);
+  //   // encs[i].reset();
+  //   if (encs[i].is_ready()) {
+  //     encs[i].tare();
+  //   }
+  //   encs[i].set_scale(420.0983);
+  // }
 }
 
-float HX711_Bus::read_scale(uint8_t id) {
-  return encs[id].is_ready() ? encs[id].read_median(7) : -1;
-}
+float HX711_Bus::read_scale(uint8_t id) { return enc.is_ready() ? enc.read_median(7) : -1; }
 
 volatile float M5Stack_UWB_Trncvr::recv_buffer_[NUM_UWB_TAGS] = {0};
 
