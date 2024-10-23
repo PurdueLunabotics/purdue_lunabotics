@@ -62,6 +62,8 @@
   <depend>joint_state_publisher</depend>
   <depend>lunabot_description</depend>
   <depend>rtabmap_ros</depend>
+  <depend>rtabmap_slam</depend>
+  <depend>rtabmap_sync</depend>
   <depend>dummy_bot_description</depend>
   <depend>image_proc</depend>
   <depend>octomap_server</depend>
