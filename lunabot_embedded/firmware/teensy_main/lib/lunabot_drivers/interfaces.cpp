@@ -240,6 +240,7 @@ void HX711_Bus::init() {
     if (encs[i].is_ready()) {
       encs[i].tare();
     }
+    encs[i].set_gain(HX711_CHANNEL_A_GAIN_128);
     encs[i].set_scale(420.0983);
   }
 }
