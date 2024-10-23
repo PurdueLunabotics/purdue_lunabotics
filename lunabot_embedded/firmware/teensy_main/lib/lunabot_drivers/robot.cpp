@@ -93,7 +93,22 @@ void update(float &d0, float &d1, float &d2) {
 }
 } // namespace uwb
 namespace load_cell {
-void update(float &d0) { d0 = HX711_Bus::read_scale(0); }
+void update(float &d0) {
+  uint8_t val = HX711_Bus::read_scale(0);
+  uint8_t val2 = HX711_Bus::read_scale(1);
+  uint8_t sum = 0;
+
+  if (val != -1) {
+    sum += val;
+  }
+  if (val2 != -1) {
+    sum += val2;
+  }
+
+  if (sum != 0.0) {
+    d0 = sum;
+  }
+}
 } // namespace load_cell
 
 namespace excavation {
