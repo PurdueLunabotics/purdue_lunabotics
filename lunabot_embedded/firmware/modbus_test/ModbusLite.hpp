@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 #define RS485_TX_CONTROL 23 // RS485 Direction control
-#define RS485Serial Serial2 // TODO - set these on the actual system
+#define RS485Serial Serial2 // TODO RJN - set these on the actual system
 #define RS485Transmit HIGH
 #define RS485Receive LOW
 

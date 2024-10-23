@@ -1,5 +1,10 @@
 #include "StepperLib.hpp"
 
+// HOW TO SETUP MOTOR
+// set ID using rotating dial
+// set DIP switch 1 to on to set baud rate
+// set DIP switch 3 to on on the final motor to enable resistor
+
 // USER MANUAL HERE:
 // https://www.omc-stepperonline.com/index.php?route=product/product/get_file&file=3354/User%20Manual%20Of%20iSV2-RS.pdf
 
@@ -137,12 +142,12 @@ int StepperMotor::read_register(uint16_t addr, uint16_t num_to_read) {
 
 // rpm - unfilitered
 int StepperMotor::read_raw_velocity() {
-  return read_register(Addrs.Read_RawVelocity);
+  return (int16_t)read_register(Addrs.Read_RawVelocity);
 }
 
 // rpm
 int StepperMotor::read_velocity() {
-  return read_register(Addrs.Read_Velocity);
+  return (int16_t)read_register(Addrs.Read_Velocity);
 }
 
 // % of rated

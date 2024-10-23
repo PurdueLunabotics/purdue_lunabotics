@@ -13,6 +13,7 @@ public:
 
   StepperMotor(uint8_t MotorID, uint16_t def_speed = 500, uint16_t def_acceleration = 250, uint16_t def_deceleration = 250);
 
+  void begin();
   void write_estop();
   void move_at_speed(uint16_t speed, uint16_t acceleration = USE_DEFAULT, uint16_t deceleration = USE_DEFAULT);
   void move_to_pos(uint32_t position, bool absolute, uint16_t speed = USE_DEFAULT, uint16_t acceleration = USE_DEFAULT, uint16_t deceleration = USE_DEFAULT);
