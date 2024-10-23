@@ -229,22 +229,22 @@ float AMT13_Angle_Bus::read_enc(uint8_t id) {
   return encs[id].read() / pulses_per_rev * deg_per_rev;
 }
 
-HX711 HX711_Bus::enc = HX711();
+HX711 HX711_Bus::encs[NUM_SENSORS] = {
+    HX711(),
+    HX711(),
+};
 
 void HX711_Bus::init() {
-  enc.begin(21, 20);
-  enc.set_scale(420.0983);
-  // for (int i = 0; i < NUM_SENSORS; i++) {
-  //   encs[i].begin(PIN_LIST[i * 2], PIN_LIST[i * 2 + 1]);
-  //   // encs[i].reset();
-  //   if (encs[i].is_ready()) {
-  //     encs[i].tare();
-  //   }
-  //   encs[i].set_scale(420.0983);
-  // }
+  for (int i = 0; i < NUM_SENSORS; i++) {
+    encs[i].begin(PIN_LIST[i * 2], PIN_LIST[i * 2 + 1]);
+    if (encs[i].is_ready()) {
+      encs[i].tare();
+    }
+    encs[i].set_scale(420.0983);
+  }
 }
 
-float HX711_Bus::read_scale(uint8_t id) { return enc.is_ready() ? enc.read() : -1; }
+float HX711_Bus::read_scale(uint8_t id) { return encs[id].is_ready() ? encs[id].read() : -1; }
 
 volatile float M5Stack_UWB_Trncvr::recv_buffer_[NUM_UWB_TAGS] = {0};
 

@@ -190,12 +190,12 @@ public:
 
 private:
   static constexpr int NUM_SENSORS = 2;
-  static constexpr int PIN_LIST[NUM_SENSORS * 2] = {19, 18, 21, 20};
+  static constexpr int PIN_LIST[NUM_SENSORS * 2] = {27, 26, 29, 28};
   static constexpr float SCALE_CALIBRATION[NUM_SENSORS] = {-459.542,
                                                            -459.542}; // TODO, calibrate these
 
   static HX711 encs[NUM_SENSORS];
-  static HX711 enc;
+  // static HX711 enc;
 };
 
 #endif
