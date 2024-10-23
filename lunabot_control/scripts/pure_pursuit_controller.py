@@ -15,7 +15,7 @@ from geometry_msgs.msg import Twist, PoseStamped
 from nav_msgs.msg import Path, Odometry
 from apriltag_ros.msg import AprilTagDetectionArray, AprilTagDetection
 from lunabot_msgs.msg import RobotEffort, RobotSensors, RobotErrors, Behavior
-from std_msgs.msg import Bool, Int8
+from std_msgs.msg import Bool, Int8, Float32
 
 # Paper on the Adaptive Pure Pursit Controller Used: https://www.chiefdelphi.com/uploads/default/original/3X/b/e/be0e06de00e07db66f97686505c3f4dde2e332dc.pdf
 
@@ -44,6 +44,38 @@ class PurePursuitController:
         print("VELS", [self.clamp(lin_ang_velocities[0], self.lin_lim[0], self.lin_lim[1]), self.clamp(lin_ang_velocities[1], self.ang_lim[0], self.ang_lim[1])])
 
         self.vel_publisher.publish(twist) 
+        
+    def publish_telemetry_data(self, lin_ang_before, slip_vec, heading_err, controller_vel, final_vel):
+        twist_before = Twist()
+        twist_after = Twist()
+        twist_slip = Twist()
+        heading = Float32()
+        twist_final = Twist()
+        
+        twist_before.linear.x = lin_ang_before[0]
+        twist_before.angular.z = lin_ang_before[1]
+        
+        twist_before.linear.x = lin_ang_before[0]
+        twist_before.angular.z = lin_ang_before[1]
+    
+        twist_after.linear.x = controller_vel[0]
+        twist_after.angular.z = controller_vel[1]
+    
+        twist_slip.linear.x = slip_vec[0]
+        twist_slip.angular.z = slip_vec[1]
+        
+        twist_final.linear.x = final_vel[0]
+        twist_final.angular.z = final_vel[1]
+        
+        heading.data = heading_err
+        
+        self.target_vel_publisher.publish(twist_before)
+        self.controller_vel_publisher.publish(twist_after)
+        self.slip_vec_publisher.publish(twist_slip)
+        self.final_vel_publisher.publish(twist_final)
+        self.heading_err_publisher.publish(heading)
+        
+        
     
     def __init__(self, MAX_VELOCITY, MAX_ACCEL, MAX_VEL_CHANGE, trackwidth, robot_start_pos = (0,0,0)):
         self.path = [robot_start_pos[:2]]
@@ -82,6 +114,12 @@ class PurePursuitController:
         
         cmd_vel_topic = rospy.get_param("/cmd_vel_topic")
         self.vel_publisher = rospy.Publisher(cmd_vel_topic, Twist, queue_size=10)
+        self.target_vel_publisher = rospy.Publisher("/purePursuit/target_vel", Twist, queue_size=10)
+        self.controller_vel_publisher = rospy.Publisher("/purePursuit/controller_vel", Twist, queue_size=10)
+        self.slip_vec_publisher = rospy.Publisher("/purePursuit/slip_vec", Twist, queue_size=10)
+        self.final_vel_publisher = rospy.Publisher("/purePursuit/final_vel", Twist, queue_size=10)
+        self.heading_err_publisher = rospy.Publisher("/purePursuit/heading_err", Float32, queue_size=10)
+
         
         
 
@@ -365,6 +403,7 @@ class PurePursuitController:
                 
         final_vels = self.combine_wheel_vels(self.wheels[0], self.wheels[1], wheelbase)
         self.publish_velocity(final_vels)
+        self.publish_telemetry_data(target_lin_ang_vel, slip, heading_error, self.combine_wheel_vels(self.wheels[0], self.wheels[1], wheelbase), final_vels)
         
     def loop(self):
         rospy.init_node('pure_pursuit_node')
