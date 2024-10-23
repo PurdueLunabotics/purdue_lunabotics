@@ -229,10 +229,7 @@ float AMT13_Angle_Bus::read_enc(uint8_t id) {
   return encs[id].read() / pulses_per_rev * deg_per_rev;
 }
 
-HX711 HX711_Bus::encs[NUM_SENSORS] = {
-    HX711(),
-    HX711(),
-};
+HX711 HX711_Bus::enc = HX711();
 
 void HX711_Bus::init() {
   enc.begin(19, 18);
