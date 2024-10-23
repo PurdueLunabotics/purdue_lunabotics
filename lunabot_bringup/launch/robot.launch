@@ -37,9 +37,9 @@
 
             <!-- <remap from="rgbd_image0" to="/d455_back/rgbd_image" /> -->
             <!-- <remap from="rgbd_image1" to="/d455_front/rgbd_image" /> -->
-            <remap from="rgb/image" to="d455_back/camera/color/image_rect_color" />
-            <remap from="depth/image" to="d455_back/camera/aligned_depth_to_color/image_raw" />
-            <remap from="rgb/camera_info" to="d455_back/camera/color/camera_info" />
+            <remap from="rgb/image" to="camera/color/image_rect_color" />
+            <remap from="depth/image" to="camera/aligned_depth_to_color/image_raw" />
+            <remap from="rgb/camera_info" to="camera/color/camera_info" />
 
             <param name="Vis/EstimationType" type="string" value="0" />
             <!-- should be 0 for multi-cameras -->
