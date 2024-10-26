@@ -11,19 +11,23 @@
   <arg name="back" default="true" />
 
   <group unless="$(arg sim)">
+
+    <!-- IMU -->
     <node name="imu" pkg="lunabot_perception" type="imu_node" output="screen">
       <param name="imu_frame_id" type="string" value="d455_back" />
       <param name="topic_name" type="string" value="/imu" />
     </node>
+
+    <!-- Static Transforms for both realsense cameras -->
     <node pkg="tf" type="static_transform_publisher" name="base_to_camera1_tf"
       args="0.0 0.0 0.0 0.0 0.0 0.0 /base_link /camera1_link 100" />
     <node pkg="tf" type="static_transform_publisher" name="base_to_camera2_tf"
       args="-0.1325 -0.1975 0.0 -1.570796327 0.0 0.0 /base_link /camera2_link 100" />
+
     <group ns="d455_front" if="$(arg front)">
       <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="serial_no" value="$(arg serial_no_d455_front)" />
         <arg name="tf_prefix" value="d455_front" />
-        <arg name="filters" value="colorizer" />
         <arg name="align_depth" value="true" />
         <arg name="depth_width" value="$(arg width)" />
         <arg name="depth_height" value="$(arg height)" />
@@ -34,9 +38,8 @@
         <arg name="enable_gyro" value="false" />
         <arg name="enable_accel" value="false" />
         <arg name="initial_reset" value="$(arg initial_reset)" />
-        <!-- <arg name="camera" value="camera1" /> -->
-        <!-- <arg name="device_id" value="#1" /> -->
       </include>
+
       <group ns="camera/color">
         <node pkg="image_proc" type="image_proc" name="image_proc"
           args="image:=camera/color/image_raw" />
@@ -48,8 +51,8 @@
       <!-- sync rgb/depth images per camera -->
       <node pkg="nodelet" type="nodelet" name="rgbd_sync" args="standalone rtabmap_sync/rgbd_sync"
         output="screen">
-        <remap from="rgb/image_rect_color" to="camera/color/image_rect_color" />
-        <remap from="depth/image" to="camera/aligned_depth_to_color/image_raw" />
+        <remap from="rgb/image" to="camera/color/image_rect_color" />
+        <remap from="depth/image" to="camera/depth/image_rect_raw" />
         <remap from="rgb/camera_info" to="camera/color/camera_info" />
         <param name="approx_sync" value="true" />
       </node>
@@ -58,12 +61,10 @@
     </group>
 
     <group ns="d455_back" if="$(arg back)">
-      <include file="$(find realsense2_camera)/launch/rs_camera.launch"> <!-- TODO: rs_rgbd.launch it
-        was rs_camera.launch-->
+      <include file="$(find realsense2_camera)/launch/rs_camera.launch"> 
         <arg name="serial_no" value="$(arg serial_no_d455_back)" />
         <arg name="tf_prefix" value="d455_back" />
-        <arg name="filters" value="disparity,decimation,colorizer" /> <!-- TODO: test this
-        "colorizer" https://github.com/IntelRealSense/realsense-ros/issues/861 -->
+        <arg name="filters" value="disparity,decimation" /> 
         <arg name="align_depth" value="true" />
         <arg name="initial_reset" value="$(arg initial_reset)" />
         <arg name="depth_width" value="$(arg width)" />
@@ -74,8 +75,7 @@
         <arg name="color_fps" value="$(arg fps)" />
         <arg name="enable_gyro" value="false" />
         <arg name="enable_accel" value="false" />
-        <!-- <arg name="camera" value="camera2" /> -->
-        <!-- <arg name="device_id" value="#2" /> -->
+
       </include>
 
       <group ns="camera/color">
@@ -85,11 +85,12 @@
           <arg name="camera_frame" value="d455_back_base" />
         </include>
       </group>
+
       <!-- sync rgb/depth images per camera -->
       <node pkg="nodelet" type="nodelet" name="rgbd_sync" args="standalone rtabmap_sync/rgbd_sync"
         output="screen">
         <remap from="rgb/image" to="camera/color/image_rect_color" />
-        <remap from="depth/image" to="camera/aligned_depth_to_color/image_raw" />
+        <remap from="depth/image" to="camera/depth/image_rect_raw" />
         <remap from="rgb/camera_info" to="camera/color/camera_info" />
         <param name="approx_sync" value="true" />
       </node>

@@ -12,9 +12,8 @@
     <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node"
         output="screen" />
 
-    <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch">
-        <arg name="front" value="true" />
-    </include>
+    <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch" />
+
     <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch" />
     <include if="$(arg record)" file="$(find lunabot_bringup)/launch/record.launch">
         <arg name="exp_name" value="$(arg exp_name)" />
@@ -33,16 +32,14 @@
         <arg name="wait_for_transform" default="true" />
         <!-- Odometry -->
         <node pkg="rtabmap_odom" type="rgbd_odometry" name="rgbd_odometry" output="screen">
-            <remap from="rgbd_image0" to="/camera1/rgbd_image" />
-            <remap from="rgbd_image1" to="/camera2/rgbd_image" />
-            <!-- <remap from="rgb/image" to="d455_back/camera/color/image_rect_color" />
-            <remap from="depth/image" to="d455_back/camera/aligned_depth_to_color/image_raw" />
-            <remap from="rgb/camera_info" to="d455_back/camera/color/camera_info" /> -->
+            <remap from="rgbd_image" to="/d455_back/rgbd_image" />
+            <!-- <remap from="rgbd_image1" to="/camera2/rgbd_image" /> -->
+
 
             <!-- <param name="subscribe_depth" type='bool' value='true' /> -->
             <param name="subscribe_rgbd" type="bool" value="true" />
             <param name="frame_id" type="string" value="base_link" />
-            <param name="rgbd_cameras" type="int" value="2" />
+            <param name="rgbd_cameras" type="int" value="1" />
             <param name="wait_for_transform" type="bool" value="$(arg wait_for_transform)" />
             <param name="Odom/Strategy" type="string" value="$(arg strategy)" />
             <param name="OdomF2M/BundleAdjustment" type="string" value="0" /> <!-- should be 0 for
@@ -67,48 +64,23 @@
             <param name="frame_id" type="string" value="base_link" />
             <param name="gen_scan" type="bool" value="true" />
             <param name="wait_for_transform" type="bool" value="false" />
-            <!-- <param name="subscribe_rgbd" type="bool" value='true' /> -->
-            <param name="subscribe_depth" type='bool' value='true' />
+            <param name="subscribe_rgbd" type="bool" value='true' />
+            <param name="subscribe_depth" type="bool" value='false' />
+            <param name="rgbd_cameras" type="int" value="1" />
+
             <param name="map_negative_poses_ignored" type="bool" value="false" />
             <!-- refresh grid map even if we are not moving-->
             <param name="map_negative_scan_empty_ray_tracing" type="bool" value="false" />
             <!-- don't fill empty space between the generated scans-->
 
-            <!-- <remap from="rgbd_image0" to="/d455_back/rgbd_image" /> -->
+            <remap from="rgbd_image" to="/d455_back/rgbd_image" />
             <!-- <remap from="rgbd_image1" to="/d455_front/rgbd_image" /> -->
-            <remap from="rgb/image" to="d455_back/camera/color/image_rect_color" />
-            <remap from="depth/image" to="d455_back/camera/aligned_depth_to_color/image_raw" />
-            <remap from="rgb/camera_info" to="d455_back/camera/color/camera_info" />
 
             <param name="Vis/EstimationType" type="string" value="0" />
             <!-- should be 0 for multi-cameras -->
 
-            <!-- <arg name="depth_topic" value="/d455_back/camera/aligned_depth_to_color/image_raw"
-            />
-            <arg name="rgb_topic" value="/d455_back/camera/color/image_rect_color" />
-            <arg name="camera_info_topic" value="/d455_back/camera/color/camera_info" />
-            <arg name="rtabmapviz" value="false" />
-            <arg name="imu_topic" value="/imu" />
-            <arg name="frame_id" value="base_link" /> -->
         </node>
 
-        <!-- Visualisation RTAB-Map -->
-        <node pkg="rtabmap_viz" type="rtabmap_viz" name="rtabmap_viz"
-            args="-d $(find rtabmap_demos)/launch/config/rgbd_gui.ini" output="screen">
-            <!-- <param name="subscribe_depth" type="bool" value="true" /> -->
-            <param name="subscribe_rgbd" type="bool" value="true" />
-            <param name="subscribe_odom_info" type="bool" value="$(arg odom_info_data)" />
-            <param name="frame_id" type="string" value="base_link" />
-            <param name="rgbd_cameras" type="int" value="2" />
-            <param name="wait_for_transform" type="bool" value="$(arg wait_for_transform)" />
-
-            <remap from="rgbd_image0" to="/camera1/rgbd_image" />
-            <remap from="rgbd_image1" to="/camera2/rgbd_image" />
-
-            <!-- <remap from="rgb/image" to="d455_back/camera/color/image_rect_color" />
-            <remap from="depth/image" to="d455_back/camera/aligned_depth_to_color/image_raw" />
-            <remap from="rgb/camera_info" to="d455_back/camera/color/camera_info" /> -->
-        </node>
 
         <node pkg="lunabot_control" type="effort_factory.py" name="effort_factory" output="screen" />
 
