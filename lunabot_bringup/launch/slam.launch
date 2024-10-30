@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="slam" default="true"/>
     <include file="$(find rtabmap_ros)/launch/rtabmap.launch">
         <arg name="rtabmap_args" value="--delete_db_on_start"/>
         <arg name="depth_topic" value="/d455_back/camera/aligned_depth_to_color/image_raw"/>
