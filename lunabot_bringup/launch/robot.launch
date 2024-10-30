@@ -13,5 +13,7 @@
     <include if="$(arg record)" file="$(find lunabot_bringup)/launch/record.launch">
         <arg name="exp_name" value="$(arg exp_name)"/>
     </include>
-    <include if="$(arg autonomy)" file="$(find lunabot_bringup)/launch/autonomy.launch"/>
+    <include if="$(arg autonomy)" file="$(find lunabot_bringup)/launch/autonomy.launch">
+        <arg name="slam" value="$(arg slam)"/>
+    </include>
 </launch>

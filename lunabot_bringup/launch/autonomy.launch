@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <launch>
+    
     <include if="$(arg slam)" file="$(find rtabmap_ros)/launch/slam.launch"/>
 
     <node pkg="lunabot_control" type="effort_factory.py" name="effort_factory" output="screen"/>
