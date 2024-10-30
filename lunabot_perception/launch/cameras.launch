@@ -20,7 +20,7 @@
 
     <!-- Static Transforms for both realsense cameras -->
     <node pkg="tf" type="static_transform_publisher" name="base_to_camera1_tf"
-      args="0 0 0 -1.5707963267948966 0 -1.5707963267948966 /odom /camera1_link 100" />
+      args="0 0 0 0 0 0 /odom /camera1_link 100" />
     <node pkg="tf" type="static_transform_publisher" name="base_to_camera2_tf"
       args="-0.1325 -0.1975 0.0 -1.570796327 0.0 0.0 /odom /camera2_link 100" />
 
