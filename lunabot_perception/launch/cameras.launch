@@ -7,78 +7,82 @@
   <arg name="width"                           default="424"/>
   <arg name="height"                           default="240"/>
   <arg name="fps"                           default="60"/>
-  <arg name="front"                           default="false"/>
+  <arg name="front"                           default="true"/>
   <arg name="back"                           default="true"/>
 
   <group unless="$(arg sim)">
-      <node name="imu" pkg="lunabot_perception" type="imu_node" output="screen">
-          <param name="imu_frame_id" type="string" value="d455_back" />
-	  <param name="topic_name" type="string" value="/imu" />
-      </node>
-      <group ns="d455_front" if="$(arg front)">
-        <include file="$(find realsense2_camera)/launch/rs_camera.launch">
-          <arg name="serial_no" value="$(arg serial_no_d455_front)" />
-          <arg name="tf_prefix" value="d455_front" />
-          <arg name="filters" value="disparity,decimation"/>
-          <arg name="align_depth" value="true" />
-          <arg name="depth_width" value="$(arg width)" />
-          <arg name="depth_height" value="$(arg height)" />
-          <arg name="depth_fps" value="$(arg fps)" />
-          <arg name="color_width" value="$(arg width)" />
-          <arg name="color_height" value="$(arg height)" />
-          <arg name="color_fps" value="$(arg fps)" />
-          <arg name="enable_gyro" value="false"/>
-          <arg name="enable_accel" value="false"/>
-          <arg name="initial_reset" value="$(arg initial_reset)"/>
-        </include>
-        <group ns="camera/color" >
-            <node pkg="image_proc" type="image_proc" name="image_proc" args="image:=camera/color/image_raw"/>
-            <include file="$(find lunabot_perception)/launch/apriltag.launch">
-              <arg name="camera_frame" value="d455_front_base" />
-            </include>
-        </group>
+    <node name="imu" pkg="lunabot_perception" type="imu_node" output="screen">
+      <param name="imu_frame_id" type="string" value="d455_back" />
+	    <param name="topic_name" type="string" value="/imu" />
+    </node>
+
+    <group ns="d455_front" if="$(arg front)">
+
+      <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+        <arg name="serial_no" value="$(arg serial_no_d455_front)" />
+        <arg name="tf_prefix" value="d455_front" />
+        <arg name="filters" value="disparity,decimation"/>
+        <arg name="align_depth" value="true" />
+        <arg name="depth_width" value="$(arg width)" />
+        <arg name="depth_height" value="$(arg height)" />
+        <arg name="depth_fps" value="$(arg fps)" />
+        <arg name="color_width" value="$(arg width)" />
+        <arg name="color_height" value="$(arg height)" />
+        <arg name="color_fps" value="$(arg fps)" />
+        <arg name="enable_gyro" value="false"/>
+        <arg name="enable_accel" value="false"/>
+        <arg name="initial_reset" value="$(arg initial_reset)"/>
+      </include>
+
+      <group ns="camera/color" >
+          <node pkg="image_proc" type="image_proc" name="image_proc" args="image:=camera/color/image_raw"/>
+          <include file="$(find lunabot_perception)/launch/apriltag.launch">
+            <arg name="camera_frame" value="d455_front_base" />
+          </include>
       </group>
 
-      <group ns="d455_back" if="$(arg back)">
-        <include file="$(find realsense2_camera)/launch/rs_camera.launch">
-          <arg name="serial_no" value="$(arg serial_no_d455_back)" />
-          <arg name="tf_prefix" value="d455_back" />
-          <arg name="filters" value="disparity,decimation"/>
-          <arg name="align_depth" value="true" />
-          <arg name="initial_reset" value="$(arg initial_reset)"/>
-          <arg name="depth_width" value="$(arg width)" />
-          <arg name="depth_height" value="$(arg height)" />
-          <arg name="depth_fps" value="$(arg fps)" />
-          <arg name="color_width" value="$(arg width)" />
-          <arg name="color_height" value="$(arg height)" />
-          <arg name="color_fps" value="$(arg fps)" />
-          <arg name="enable_gyro" value="false"/>
-          <arg name="enable_accel" value="false"/>
-        </include>
+    </group>
 
-        <group ns="camera/color" >
-            <node pkg="image_proc" type="image_proc" name="image_proc" args="image:=camera/color/image_raw"/>
-            <include file="$(find lunabot_perception)/launch/apriltag.launch">
-              <arg name="camera_frame" value="d455_back_base" />
-            </include>
-        </group>
+    <group ns="d455_back" if="$(arg back)">
+      <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+        <arg name="serial_no" value="$(arg serial_no_d455_back)" />
+        <arg name="tf_prefix" value="d455_back" />
+        <arg name="filters" value="disparity,decimation"/>
+        <arg name="align_depth" value="true" />
+        <arg name="initial_reset" value="$(arg initial_reset)"/>
+        <arg name="depth_width" value="$(arg width)" />
+        <arg name="depth_height" value="$(arg height)" />
+        <arg name="depth_fps" value="$(arg fps)" />
+        <arg name="color_width" value="$(arg width)" />
+        <arg name="color_height" value="$(arg height)" />
+        <arg name="color_fps" value="$(arg fps)" />
+        <arg name="enable_gyro" value="false"/>
+        <arg name="enable_accel" value="false"/>
+      </include>
+
+      <group ns="camera/color" >
+        <node pkg="image_proc" type="image_proc" name="image_proc" args="image:=camera/color/image_raw"/>
+        <include file="$(find lunabot_perception)/launch/apriltag.launch">
+          <arg name="camera_frame" value="d455_back_base" />
+        </include>
       </group>
+    </group>
 
   </group>
 
   <group if="$(arg sim)">
-      <group ns="d435_forward/color" if="$(arg front)">
-        <node pkg="image_proc" type="image_proc" name="image_proc"/>
-        <include file="$(find lunabot_perception)/launch/apriltag.launch">
-          <arg name="camera_frame" value="d435_forward_link" />
-        </include>
-      </group>
+    <group ns="d435_forward/color" if="$(arg front)">
+      <node pkg="image_proc" type="image_proc" name="image_proc"/>
+      <include file="$(find lunabot_perception)/launch/apriltag.launch">
+        <arg name="camera_frame" value="d435_forward_link" />
+      </include>
+    </group>
 
-      <group ns="d435_backward/color" if="$(arg back)">
-        <node pkg="image_proc" type="image_proc" name="image_proc"/>
-        <include file="$(find lunabot_perception)/launch/apriltag.launch">
-          <arg name="camera_frame" value="d435_backward_link" />
-        </include>
-      </group>
+    <group ns="d435_backward/color" if="$(arg back)">
+      <node pkg="image_proc" type="image_proc" name="image_proc"/>
+      <include file="$(find lunabot_perception)/launch/apriltag.launch">
+        <arg name="camera_frame" value="d435_backward_link" />
+      </include>
+    </group>
   </group> 
 </launch>
