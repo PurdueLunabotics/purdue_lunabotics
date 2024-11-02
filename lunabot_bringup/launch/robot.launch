@@ -84,12 +84,6 @@
 
         </node>
 
-        <node name="rtabmap_viz" pkg="rtabmap_viz" type="rtabmap_viz" output="screen">
-
-
-        </node>
-
-
         <node pkg="lunabot_control" type="effort_factory.py" name="effort_factory" output="screen" />
 
         <node pkg="lunabot_control" type="differential_drive_controller.py"
