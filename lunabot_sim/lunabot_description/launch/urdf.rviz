@@ -127,6 +127,18 @@ Visualization Manager:
           Value: true
         d455_back_link:
           Value: true
+        d455_front_aligned_depth_to_color_frame:
+          Value: true
+        d455_front_color_frame:
+          Value: true
+        d455_front_color_optical_frame:
+          Value: true
+        d455_front_depth_frame:
+          Value: true
+        d455_front_depth_optical_frame:
+          Value: true
+        d455_front_link:
+          Value: true
         left_back:
           Value: true
         left_front:
@@ -173,6 +185,18 @@ Visualization Manager:
                   {}
                 d455_back_depth_frame:
                   d455_back_depth_optical_frame:
+                    {}
+              d455_front_link:
+                d455_front_aligned_depth_to_color_frame:
+                  d455_front_color_optical_frame:
+                    tag_1:
+                      {}
+                    tag_6:
+                      {}
+                d455_front_color_frame:
+                  {}
+                d455_front_depth_frame:
+                  d455_front_depth_optical_frame:
                     {}
       Update Interval: 0
       Value: true
