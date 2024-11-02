@@ -62,8 +62,8 @@
 
             <!-- <param name="rgbd_cameras" type="int" value="1" /> -->
             <param name="frame_id" type="string" value="camera1_link" />
-            <param name="Grid/Sensor" tpye="string" value="1" />
-            <param name="Grid/RangeMax" tpye="string" value="0" />
+            <param name="Grid/Sensor" type="string" value="1" />
+            <param name="Grid/RangeMax" type="string" value="0" />
 
             <param name="gen_scan" type="bool" value="false" />
             <param name="wait_for_transform" type="bool" value="false" />
