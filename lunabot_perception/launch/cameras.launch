@@ -22,7 +22,7 @@
     <node pkg="tf" type="static_transform_publisher" name="base_to_camera1_tf"
       args="0 0 0 0 0 0 /odom /camera1_link 100" />
     <node pkg="tf" type="static_transform_publisher" name="base_to_camera2_tf"
-      args="-0.9144 -0.3556 0.127 -1.570796327 0.0 0.0 /odom /camera2_link 100" />
+      args="-0.9144 -0.3556 0.127 -1.570796327 0.0 0.0 /odom /d455_front_color_optical_frame 100" />
 
     <group ns="d455_front" if="$(arg front)">
       <include file="$(find realsense2_camera)/launch/rs_camera.launch">
@@ -54,7 +54,7 @@
         <remap from="rgb/image" to="camera/color/image_rect_color" />
         <remap from="depth/image" to="camera/depth/image_rect_raw" />
         <remap from="rgb/camera_info" to="camera/color/camera_info" />
-        <param name="approx_sync" value="true" />
+        <param name="approx_sync" value="false" />
       </node>
 
 
@@ -92,7 +92,7 @@
         <remap from="rgb/image" to="camera/color/image_rect_color" />
         <remap from="depth/image" to="camera/depth/image_rect_raw" />
         <remap from="rgb/camera_info" to="camera/color/camera_info" />
-        <param name="approx_sync" value="true" />
+        <param name="approx_sync" value="false" />
       </node>
     </group>
 
