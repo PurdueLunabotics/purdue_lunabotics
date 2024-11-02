@@ -63,7 +63,7 @@
                 args="--delete_db_on_start">
 
                 <!-- <param name="rgbd_cameras" type="int" value="1" /> -->
-                <param name="frame_id" type="string" value="camera1_link" />
+                <param name="frame_id" type="string" value="odom" />
                 <param name="Grid/Sensor" type="string" value="1" />
                 <param name="Grid/RangeMax" type="string" value="0" />
 
