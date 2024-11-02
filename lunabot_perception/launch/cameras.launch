@@ -7,7 +7,7 @@
   <arg name="width" default="424" />
   <arg name="height" default="240" />
   <arg name="fps" default="60" />
-  <arg name="front" default="false" />
+  <arg name="front" default="true" />
   <arg name="back" default="true" />
 
   <group unless="$(arg sim)">
