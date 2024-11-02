@@ -19,7 +19,7 @@
         <arg name="exp_name" value="$(arg exp_name)" />
     </include>
 
-    <group name="rtabmap" if="$(arg autonomy)">
+    <group ns="rtabmap" if="$(arg autonomy)">
 
         <arg name="strategy" default="0" />
         <arg name="feature" default="6" />
