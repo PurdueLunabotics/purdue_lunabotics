@@ -28,9 +28,9 @@ camera_name: back_usb            # ROS internal name for the camera, used to gen
 camera_frame_id: usb_cam_link        # Frame ID used to generate coordinate transformations
 camera_transport_suffix: image_raw  # Suffix used by image_transport to generate topic names
 camera_info_url: package://lunabot_config/config/overhead_calib.yml # URI for camera calibration data (likely a YML file obtained from camera_calibration)
-image_width: 640                    # Frame dimensions, should be supported by camera hardware
-image_height: 480
-framerate: 30                       # Camera polling frequency, Hz (integer)
+image_width: 320                    # Frame dimensions, should be supported by camera hardware
+image_height: 240
+framerate: 10                       # Camera polling frequency, Hz (integer)
 
 # Auxiliary camera parameters provided by libv4l2.
     # Names for these parameters are generated automatically according to the intrinsic control names exported by the
