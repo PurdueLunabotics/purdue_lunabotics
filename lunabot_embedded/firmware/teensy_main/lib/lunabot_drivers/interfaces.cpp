@@ -250,7 +250,7 @@ float HX711_Bus::read_scale(uint8_t id) {
     float val = encs[id].read();
     if (val == 0) // if load cell is not returning any data, but HX711 is connected
       return -1;
-    return encs[id].read();
+    return val;
   } else {
     return -1;
   }
