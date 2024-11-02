@@ -94,12 +94,12 @@ void update(float &d0, float &d1, float &d2) {
 } // namespace uwb
 namespace load_cell {
 void update(float &d0) {
-  float val1 = HX711_Bus::read_scale(0);
-  // float val2 = HX711_Bus::read_scale(1);
+  // float val1 = HX711_Bus::read_scale(0);
+  float val2 = HX711_Bus::read_scale(1);
   // if (val1 != -1 && val2 != -1) {
   //   d0 = val1 + val2;
-  if (val1 != -1) {
-    d0 = val1;
+  if (val2 != -1) {
+    d0 = val2;
   }
 }
 } // namespace load_cell
