@@ -28,7 +28,9 @@
       <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="serial_no" value="$(arg serial_no_d455_front)" />
         <arg name="tf_prefix" value="d455_front" />
+        <arg name="filters" value="disparity,decimation" />
         <arg name="align_depth" value="true" />
+        <arg name="initial_reset" value="$(arg initial_reset)" />
         <arg name="depth_width" value="$(arg width)" />
         <arg name="depth_height" value="$(arg height)" />
         <arg name="depth_fps" value="$(arg fps)" />
@@ -37,7 +39,7 @@
         <arg name="color_fps" value="$(arg fps)" />
         <arg name="enable_gyro" value="false" />
         <arg name="enable_accel" value="false" />
-        <arg name="initial_reset" value="$(arg initial_reset)" />
+
       </include>
 
       <group ns="camera/color">
@@ -56,8 +58,6 @@
         <remap from="rgb/camera_info" to="camera/color/camera_info" />
         <param name="approx_sync" value="false" />
       </node>
-
-
     </group>
 
     <group ns="d455_back" if="$(arg back)">
