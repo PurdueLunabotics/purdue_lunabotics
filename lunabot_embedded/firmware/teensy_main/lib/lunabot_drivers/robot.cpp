@@ -96,7 +96,7 @@ namespace load_cell {
 void update(float &d0) {
   float val = HX711_Bus::read_scale(0);
   if (val != -1) {
-    d0 = HX711_Bus::read_scale(0);
+    d0 = val;
   }
   // d0 = HX711_Bus::read_scale(0);
   // uint8_t val2 = HX711_Bus::read_scale(1);
