@@ -242,6 +242,7 @@ void HX711_Bus::init() {
     }
     encs[i].set_gain(HX711_CHANNEL_A_GAIN_128);
     encs[i].set_scale(SCALE_CALIBRATION[i]);
+    encs[i].set_raw_mode();
   }
 }
 
