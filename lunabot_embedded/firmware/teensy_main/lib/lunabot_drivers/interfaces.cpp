@@ -241,6 +241,7 @@ void HX711_Bus::init() {
     // if (encs[i].is_ready()) {
     //   encs[i].tare();
     // }
+    encs[i].set_offset(ZERO_POINT[i]);
     encs[i].set_gain(HX711_CHANNEL_A_GAIN_128);
     encs[i].set_scale(SCALE_CALIBRATION[i]);
   }
@@ -250,7 +251,7 @@ float HX711_Bus::read_scale(uint8_t id) {
   if (encs[id].is_ready()) {
     // since we could start with weight on the load cell, manually subtract zero point instead of
     // taring
-    float val = encs[id].read() - 8142300F;
+    float val = encs[id].get_value(1);
     // if load cell is not returning any data, but HX711 is connected
     if (val == 0)
       return -1;
