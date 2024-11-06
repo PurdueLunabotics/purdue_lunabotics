@@ -115,14 +115,19 @@ class ExcavationController:
         effort_msg.lead_screw = self.constrain(
             self.lead_screw_voltage, max_percent=self.max_lead_screw_percent
         )
-        effort_msg.excavate = self.constrain(
+        effort_msg.excavate = self.constrain_RPM(
             self.exc_voltage, max_percent=self.max_exc_percent
         )
         self._effort_pub.publish(effort_msg)
 
     def constrain(self, val, max_percent):
         val = np.clip(-1, val, 1)  # Clipping speed to not go over 100%
-        return np.int8(val * 127 * max_percent) # TODO RJN - set to RPM now
+        return np.int32(val * 127 * max_percent)
+    
+    def constrain_RPM(self, val, max_percent):
+        val = np.clip(-1, val, 1)  # Clipping speed to not go over 100%
+        return np.int32(val * 1000 * max_percent)
+
 
     def stop(self):
         effort_msg = RobotEffort()

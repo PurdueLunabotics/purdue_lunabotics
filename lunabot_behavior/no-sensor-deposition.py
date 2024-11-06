@@ -38,7 +38,7 @@ class Deposition:
 
         self.rate = rospy.Rate(10)  # 10hz
 
-        self.deposition_power = 127 # TODO RJN - set to RPM now
+        self.deposition_RPM = 1000 # RPM
 
         # self.load_cell_threshold = 1 # in kilograms, TODO test / verify WHEN LOAD CELLS EXIST
 
@@ -59,7 +59,7 @@ class Deposition:
         time.sleep(0.1)
 
         deposition_msg = Int32()
-        deposition_msg.data = self.deposition_power
+        deposition_msg.data = self.deposition_RPM
 
         start_time = rospy.get_time()
 

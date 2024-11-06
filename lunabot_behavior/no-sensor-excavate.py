@@ -113,7 +113,7 @@ class Excavate:
 
             dt = new_time - current_time
 
-            excavation_message.data = int(127 * 0.8) # TODO RJN - set to RPM now
+            excavation_message.data = int(1000 * 0.8)
 
             lin_act_message.data = -110
 
@@ -169,7 +169,7 @@ class Excavate:
 
             dt = new_time - current_time
 
-            excavation_message.data = int(127 * 0.8) # TODO RJN - set to RPM now
+            excavation_message.data = int(1000 * 0.8)
 
             self.excavation_publisher.publish(excavation_message)
 
@@ -200,7 +200,7 @@ class Excavate:
         print("Excavation: spinning backwards (", self.exc_failure_counter, ")")
 
         # 90% of max speed, backwards
-        EXCAVATION_SPEED = int(-127 * 0.9) # TODO RJN - set to RPM now
+        EXCAVATION_SPEED = int(-1000 * 0.9) #RPM
 
         excavation_message = Int32()
         excavation_message.data = EXCAVATION_SPEED

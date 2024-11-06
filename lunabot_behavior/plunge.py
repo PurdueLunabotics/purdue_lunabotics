@@ -44,7 +44,7 @@ class Plunge:
         # TODO: check and test this value
         self.LOWERING_TIME = 23 #In seconds, how long it takes to lower the linear actuators 90% of the way
 
-        self.EXCAVATION_SPEED = 127 # TODO RJN - set to RPM now
+        self.EXCAVATION_SPEED = 1000 #RPM
         self.LIN_ACT_SPEED = -110
 
         self.is_sim = rospy.get_param("is_sim")

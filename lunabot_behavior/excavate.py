@@ -58,7 +58,7 @@ class Excavate:
         # 90 percent of max speed
         TARGET_EXCAVATION_VELOCITY = 8 * 0.9
 
-        # TODO RJN - set to RPM now
+        # TODO RJN - update this whole script to use RPM
         self.excavation_pid_controller = VelocityPIDController(
             TARGET_EXCAVATION_VELOCITY, 1, 0, 0, 127
         )  # TODO find values

@@ -65,8 +65,8 @@ class DifferentialDriveController:
         left_set = self.lin - self.ang * self.width / 2
         right_set = self.lin + self.ang * self.width / 2
 
-        left_drive_msg.data = self.constrain(left_set) # TODO RJN - convert linear velocity to RPM through wheel diameter
-        right_drive_msg.data = self.constrain(right_set)
+        left_drive_msg.data = self.constrain(left_set * self._meters_per_rad)
+        right_drive_msg.data = self.constrain(right_set * self._meters_per_rad)
 
         if self.lin == 0 and self.ang == 0:
             left_drive_msg.data = 0
@@ -74,7 +74,6 @@ class DifferentialDriveController:
         self._left_drive_pub.publish(left_drive_msg)
         self._right_drive_pub.publish(right_drive_msg)
 
-     # TODO RJN - check this constrain
     def constrain(self, val):
         val = np.clip(-self._max_speed, val, self._max_speed)  # Clipping speed to not go over 100%
         return np.int32(val)
