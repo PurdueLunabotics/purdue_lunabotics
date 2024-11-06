@@ -44,7 +44,7 @@
         <group ns="rtabmap">
 
             <!-- Odometry -->
-            <node pkg="rtabmap_odom" type="rgbd_odometry" name="rgbd_odometry" output="screen">
+            <node pkg="rtabmap_odom" type="rgbd_odometry" name="rgbd_odometry">
                 <!-- <remap from="rgbd_image" to="/d455_back/rgbd_image" /> -->
                 <!-- <remap from="rgbd_image1" to="/d455_front/rgbd_image" /> -->
 
@@ -72,7 +72,7 @@
             </node>
 
 
-            <node if="$(arg slam)" name="rtabmap" pkg="rtabmap_slam" type="rtabmap" output="screen"
+            <node if="$(arg slam)" name="rtabmap" pkg="rtabmap_slam" type="rtabmap"
                 args="--delete_db_on_start">
 
                 <param name="frame_id" type="string" value="base_link" />
