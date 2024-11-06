@@ -191,8 +191,8 @@ public:
 private:
   static constexpr int NUM_SENSORS = 2;
   static constexpr int PIN_LIST[NUM_SENSORS * 2] = {27, 26, 29, 28};
-  static constexpr float SCALE_CALIBRATION[NUM_SENSORS] = {420.0983,
-                                                           420.0983}; // TODO, calibrate these
+  static constexpr float SCALE_CALIBRATION[NUM_SENSORS] = {-0.04147473,
+                                                           -0.04147473}; // TODO, calibrate these
 
   static HX711 encs[NUM_SENSORS];
 };
