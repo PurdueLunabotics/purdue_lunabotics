@@ -4,8 +4,8 @@
   <arg name="serial_no_d455_front" default="053122251335" />
   <arg name="initial_reset" default="true" />
   <arg name="sim" default="false" />
-  <arg name="width" default="640" />
-  <arg name="height" default="480" />
+  <arg name="width" default="424" />
+  <arg name="height" default="240" />
   <arg name="fps" default="60" />
   <arg name="front" default="true" />
   <arg name="back" default="true" />
