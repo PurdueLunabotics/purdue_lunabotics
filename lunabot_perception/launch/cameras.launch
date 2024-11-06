@@ -39,6 +39,7 @@
         <arg name="color_fps" value="$(arg fps)" />
         <arg name="enable_gyro" value="false" />
         <arg name="enable_accel" value="false" />
+        <arg name="enable_sync" value="true" />
 
       </include>
 
@@ -75,6 +76,7 @@
         <arg name="color_fps" value="$(arg fps)" />
         <arg name="enable_gyro" value="false" />
         <arg name="enable_accel" value="false" />
+        <arg name="enable_sync" value="true" />
 
       </include>
 
