@@ -31,7 +31,8 @@
         <arg name="odom_info_data" default="true" />
         <arg name="wait_for_transform" default="false" />
 
-        <node pkg="rtabmap_sync" type="rgbdx_sync" name="rgbdx_sync" output="screen">
+        <node pkg="nodelet" type="nodelet" name="rgbdx_sync"
+            args="standalone rtabmap_sync/rgbdx_sync">
             <param name="rgbd_cameras" type="int" value="2" />
             <param name="approx_sync" type="bool" value="true" />
 
