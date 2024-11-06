@@ -31,18 +31,17 @@
         <arg name="odom_info_data" default="true" />
         <arg name="wait_for_transform" default="false" />
 
-        <node pkg="nodelet" type="nodelet" name="rgbdx_sync"
-            args="standalone rtabmap_sync/rgbdx_sync">
-            <param name="rgbd_cameras" type="int" value="2" />
-            <param name="approx_sync" type="bool" value="true" />
-
-
-            <remap from="rgbd_image0" to="/d455_back/rgbd_image" />
-            <remap from="rgbd_image1" to="/d455_front/rgbd_image" />
-        </node>
 
         <group ns="rtabmap">
+            <node pkg="nodelet" type="nodelet" name="rgbdx_sync"
+                args="standalone rtabmap_sync/rgbdx_sync">
+                <param name="rgbd_cameras" type="int" value="2" />
+                <param name="approx_sync" type="bool" value="true" />
 
+
+                <remap from="rgbd_image0" to="/d455_back/rgbd_image" />
+                <remap from="rgbd_image1" to="/d455_front/rgbd_image" />
+            </node>
             <!-- Odometry -->
             <node pkg="rtabmap_odom" type="rgbd_odometry" name="rgbd_odometry">
                 <!-- <remap from="rgbd_image" to="/d455_back/rgbd_image" /> -->
