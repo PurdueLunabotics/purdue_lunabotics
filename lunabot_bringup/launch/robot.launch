@@ -88,18 +88,18 @@
                     value='true' />
                 <param name="subscribe_depth" type="bool" value='false' />
                 <param
-                    name="rgbd_cameras" type="int" value="1" />x <param
+                    name="rgbd_cameras" type="int" value="0" />x <param
                     name="map_negative_poses_ignored" type="bool" value="false" />
                 <!-- refresh grid map even if we are not moving-->
                 <param
                     name="map_negative_scan_empty_ray_tracing" type="bool" value="false" />
                 <!-- don't fill empty space between the generated scans-->
 
-                <remap
-                    from="rgbd_image0" to="/d455_back/rgbd_image" />
+                <!-- <remap from="rgbd_image0" to="/d455_back/rgbd_image" /> -->
                 <!-- <remap from="rgbd_image1" to="/d455_front/rgbd_image" />  -->
 
-                <!-- <remap from="rgbd_images" to="rgbd_images" /> -->
+                <remap
+                    from="rgbd_images" to="rgbd_images" />
                 <param name="Vis/EstimationType"
                     type="string" value="0" />
 

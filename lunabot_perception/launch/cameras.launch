@@ -6,7 +6,7 @@
   <arg name="sim" default="false" />
   <arg name="width" default="640" />
   <arg name="height" default="480" />
-  <arg name="fps" default="60" />
+  <arg name="fps" default="30" />
   <arg name="front" default="true" />
   <arg name="back" default="true" />
 
