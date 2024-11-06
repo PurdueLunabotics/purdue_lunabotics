@@ -251,7 +251,7 @@ float HX711_Bus::read_scale(uint8_t id) {
   if (encs[id].is_ready()) {
     // since we could start with weight on the load cell, manually subtract zero point instead of
     // taring
-    float val = encs[id].get_value(1);
+    float val = encs[id].read();
     // if load cell is not returning any data, but HX711 is connected
     if (val == 0)
       return -1;
