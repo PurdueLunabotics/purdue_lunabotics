@@ -191,7 +191,7 @@ public:
 private:
   static constexpr int NUM_SENSORS = 2;
   static constexpr int PIN_LIST[NUM_SENSORS * 2] = {27, 26, 29, 28};
-  static constexpr float ZERO_POINT[NUM_SENSORS] = {8143500f, 8143500f};
+  static constexpr float ZERO_POINT[NUM_SENSORS] = {8143500.0f, 8143500.0f};
   static constexpr float SCALE_CALIBRATION[NUM_SENSORS] = {-24.111f,
                                                            -24.111f}; // TODO, calibrate these
 
