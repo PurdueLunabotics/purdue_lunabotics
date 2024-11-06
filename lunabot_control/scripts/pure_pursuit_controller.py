@@ -531,5 +531,5 @@ class PurePursuitController:
 
 
 if __name__ == "__main__":
-    controller = PurePursuitController(0.2, 0.05, 0.05, 0.45, (0.9, -1.2, 0))
+    controller = PurePursuitController(0.4, 0.05, 0.05, 0.45, (0.9, -1.2, 0))
     controller.loop()
