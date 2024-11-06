@@ -35,7 +35,7 @@ nav:
 
     pure_pursuit:
         slip_k1: 0.4
-        heading_k2: 0.25
+        heading_k2: 0.15
         kp: 0.05
         ki: 0
         kd: 0
