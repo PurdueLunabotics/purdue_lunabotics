@@ -1,11 +1,8 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="autonomy" default="false" />
+  <node pkg="lunabot_control" type="manual_controller.py" name="manual_control" output="screen"/>
 
-  <node unless="$(arg autonomy)" pkg="lunabot_control" type="manual_controller.py" name="manual_control" output="screen"/>
-  <node if="$(arg autonomy)" pkg="lunabot_control" type="manual_controller_autonomy.py" name="manual_control_autonomy" output="screen"/>
-
- <!-- joy node -->
+  <!-- joy node -->
   <node respawn="true" pkg="joy" type="joy_node" name="joy" output="screen">
     <param name="dev" type="string" value="/dev/input/js0" />
   </node>

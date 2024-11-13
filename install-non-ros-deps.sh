@@ -1,6 +1,6 @@
 #!/bin/bash
-apt-get update  # To get the latest package lists
-apt-get install libusb-dev libtool dh-autoreconf libudev-dev ninja-build -y
+sudo apt-get update  # To get the latest package lists
+sudo apt-get install libusb-dev libtool dh-autoreconf libudev-dev ninja-build -y
 
 if [ $(arch) == 'aarch64' ]; then
     if [ -f /etc/nv_tegra_release ]; then
