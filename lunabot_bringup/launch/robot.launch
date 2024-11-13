@@ -29,7 +29,7 @@
         <arg name="inlier_distance" default="0.02" />
         <arg name="local_map" default="1000" />
         <arg name="odom_info_data" default="true" />
-        <arg name="wait_for_transform" default="false" />
+        <arg name="wait_for_transform" default="true" />
 
 
         <group ns="rtabmap">

@@ -18,12 +18,6 @@
       <param name="topic_name" type="string" value="/imu" />
     </node>
 
-    <!-- Static Transforms for both realsense cameras -->
-    <node pkg="tf" type="static_transform_publisher" name="base_to_camera1_tf"
-      args="0 0 0 0 0 0 /odom /camera1_link 100" />
-    <node pkg="tf" type="static_transform_publisher" name="base_to_camera2_tf"
-      args="-0.9144 -0.3556 0.127 3.1415926 0.0 0.0 /odom /camera2_link 100" />
-
     <group ns="d455_front" if="$(arg front)">
       <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="serial_no" value="$(arg serial_no_d455_front)" />
