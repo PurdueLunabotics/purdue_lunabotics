@@ -240,6 +240,6 @@ if __name__ == "__main__":
     rate = rospy.Rate(20)
 
     while not rospy.is_shutdown():
-        if !rospy.get_param("autonomy"):
+        if not rospy.get_param("autonomy"):
             man_ctrl.loop()
         rate.sleep()
