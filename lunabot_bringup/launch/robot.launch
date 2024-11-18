@@ -44,7 +44,7 @@
 				<arg name="rviz" value="true"/>
 			</include>
 
-			<node pkg="nodelet" type="nodelet" name="obstacles_detection_front" args="load rtabmap_util/obstacles_detection obstacles_manager">
+			<node pkg="nodelet" ns="front" type="nodelet" name="obstacles_detection" args="load rtabmap_util/obstacles_detection obstacles_manager">
 				<remap from="cloud" to="/d455_front/depth/color/points"/>
 
 				<param name="frame_id" type="string" value="base_link"/>
@@ -53,7 +53,7 @@
 				<param name="max_obstacles_height" type="double" value="0.0"/>
 			</node>
 
-			<node pkg="nodelet" type="nodelet" name="obstacles_detection_back" args="load rtabmap_util/obstacles_detection obstacles_manager">
+			<node pkg="nodelet" ns="back" type="nodelet" name="obstacles_detection" args="load rtabmap_util/obstacles_detection obstacles_manager">
 				<remap from="cloud" to="/d455_back/depth/color/points"/>
 
 				<param name="frame_id" type="string" value="base_link"/>
