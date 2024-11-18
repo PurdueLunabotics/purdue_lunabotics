@@ -9,6 +9,7 @@
   <arg name="fps" default="30" />
   <arg name="front" default="true" />
   <arg name="back" default="true" />
+  <arg name="pointcloud" default="true" />
 
   <group unless="$(arg sim)">
 
@@ -35,6 +36,7 @@
         <arg name="enable_accel" value="false" />
         <arg name="enable_sync" value="true" />
         <arg name="publish_tf" value="true" />
+		<arg name="enable_pointcloud" value="$(arg pointcloud)"/>
 
 
       </include>
@@ -74,6 +76,7 @@
         <arg name="enable_accel" value="false" />
         <arg name="enable_sync" value="true" />
         <arg name="publish_tf" value="true" />
+		<arg name="enable_pointcloud" value="$(arg pointcloud)"/>
 
       </include>
 
