@@ -36,7 +36,7 @@
         <arg name="enable_accel" value="false" />
         <arg name="enable_sync" value="true" />
         <arg name="publish_tf" value="true" />
-		<arg name="enable_pointcloud" value="$(arg pointcloud)"/>
+        <arg name="enable_pointcloud" value="$(arg pointcloud)" />
 
 
       </include>
@@ -76,7 +76,7 @@
         <arg name="enable_accel" value="false" />
         <arg name="enable_sync" value="true" />
         <arg name="publish_tf" value="true" />
-		<arg name="enable_pointcloud" value="$(arg pointcloud)"/>
+        <arg name="enable_pointcloud" value="$(arg pointcloud)" />
 
       </include>
 

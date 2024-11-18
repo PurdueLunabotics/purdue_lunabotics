@@ -1,6 +1,7 @@
 plugins: 
   - {name: static,  type: "costmap_2d::StaticLayer"} 
   - {name: inflation,  type: "costmap_2d::InflationLayer"} 
+  - {name: obstacles,        type: "costmap_2d::VoxelLayer"}
 publish_frequency: 30.0
 global_frame: "odom"
 robot_base_frame: "base_link"
@@ -10,3 +11,6 @@ inflation: {
   inflation_radius: 0.3,
   cost_scaling_factor: 4,
 }
+obstacles:
+    observation_sources: d455_front
+    base_scan: {data_type: PointCloud2, sensor_frame: /d455_front_link, clearing: true, marking: true, topic: /front/obstacles}
