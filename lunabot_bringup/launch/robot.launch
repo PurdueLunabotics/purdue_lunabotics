@@ -45,7 +45,7 @@
             </include>
             <node pkg="nodelet" type="nodelet" name="obstacles_manager" args="manager" />
             <node pkg="nodelet" ns="front" type="nodelet" name="obstacles_detection"
-                args="load rtabmap_util/obstacles_detection obstacles_manager">
+                args="load rtabmap_util/obstacles_detection /obstacles_manager">
                 <remap from="cloud" to="/d455_front/camera/depth/color/points" />
 
                 <param name="frame_id" type="string" value="base_link" />
@@ -54,7 +54,7 @@
             </node>
 
             <node pkg="nodelet" ns="back" type="nodelet" name="obstacles_detection"
-                args="load rtabmap_util/obstacles_detection obstacles_manager">
+                args="load rtabmap_util/obstacles_detection /obstacles_manager">
                 <remap from="cloud" to="/d455_back/camera/depth/color/points" />
 
                 <param name="frame_id" type="string" value="base_link" />

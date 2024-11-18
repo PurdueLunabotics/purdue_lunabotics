@@ -23,7 +23,7 @@
       <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="serial_no" value="$(arg serial_no_d455_front)" />
         <arg name="tf_prefix" value="d455_front" />
-        <arg name="filters" value="disparity,decimation" />
+        <arg name="filters" value="disparity,decimation,pointcloud" />
         <arg name="align_depth" value="true" />
         <arg name="initial_reset" value="$(arg initial_reset)" />
         <arg name="depth_width" value="$(arg width)" />
@@ -63,7 +63,7 @@
       <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="serial_no" value="$(arg serial_no_d455_back)" />
         <arg name="tf_prefix" value="d455_back" />
-        <arg name="filters" value="disparity,decimation" />
+        <arg name="filters" value="disparity,decimation,pointcloud" />
         <arg name="align_depth" value="true" />
         <arg name="initial_reset" value="$(arg initial_reset)" />
         <arg name="depth_width" value="$(arg width)" />
