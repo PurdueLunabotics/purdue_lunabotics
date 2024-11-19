@@ -48,7 +48,7 @@
                 args="load rtabmap_util/obstacles_detection /obstacles_manager">
                 <remap from="cloud" to="/d455_front/camera/depth/color/points" />
 
-                <param name="frame_id" type="string" value="base_link" />
+                <param name="frame_id" type="string" value="d455_back_link" />
                 <param name="min_cluster_size" type="int" value="20" />
                 <param name="max_obstacles_height" type="double" value="0.0" />
             </node>
@@ -57,7 +57,7 @@
                 args="load rtabmap_util/obstacles_detection /obstacles_manager">
                 <remap from="cloud" to="/d455_back/camera/depth/color/points" />
 
-                <param name="frame_id" type="string" value="base_link" />
+                <param name="frame_id" type="string" value="d455_front_link" />
                 <param name="min_cluster_size" type="int" value="20" />
                 <param name="max_obstacles_height" type="double" value="0.0" />
             </node>
