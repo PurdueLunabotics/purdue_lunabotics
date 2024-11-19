@@ -186,7 +186,7 @@
   <link name="d455_front_link" />
 
   <joint name="depth_cam_2_jnt" type="fixed">
-    <origin rpy="0 0 3.1415926" xyz="-0.508 0.25 0.5207" />
+    <origin rpy="3.1415926 0 3.1415926" xyz="-0.508 0.25 0.5207" />
     <parent link="base_link" />
     <child link="d455_front_link" />
     <axis xyz="0.0 1.0 0.0" />
