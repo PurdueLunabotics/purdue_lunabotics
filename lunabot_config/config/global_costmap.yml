@@ -13,5 +13,5 @@ inflation: {
 }
 obstacles: {
     observation_sources: d455_front,
-    d455_front: {data_type: PointCloud2, sensor_frame: d455_front_link, clearing: true, marking: true, topic: /front/obstacles}
+    d455_front: {data_type: PointCloud2, sensor_frame: d455_front_link, clearing: false, marking: false, topic: /front/obstacles}
 }
