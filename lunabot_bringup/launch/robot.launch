@@ -7,6 +7,7 @@
     <arg name="overhead" default="true" />
     <arg name="slam" default="true" />
     <arg name="exp_name" default="exp" />
+    <arg name="lidar" default="true" />
 
 
     <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node"
@@ -18,6 +19,8 @@
     <include if="$(arg record)" file="$(find lunabot_bringup)/launch/record.launch">
         <arg name="exp_name" value="$(arg exp_name)" />
     </include>
+
+    <include if="$(arg lidar)" file="$(find lunabot_perception)/launch/lidar.launch" />
 
     <group if="$(arg autonomy)">
 
@@ -75,6 +78,7 @@
             <node ns="pointcloud" pkg="nodelet" type='nodelet' name="point_cloud_aggregator" args="standalone rtabmap_util/point_cloud_aggregator">
                 <remap from="cloud1" to="/back/obstacles"/>
                 <remap from="cloud2" to="/front/obstacles"/>
+                <remap from="cloud3" to="/lidar_cloud" />
                 <param name="fixed_frame_id" value="base_link"/>
 
             </node>
