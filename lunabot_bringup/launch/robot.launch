@@ -7,6 +7,7 @@
     <arg name="overhead" default="true" />
     <arg name="slam" default="true" />
     <arg name="exp_name" default="exp" />
+    <arg name="loginternet" default="false" />
 
     <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node" output="screen"/>
 
@@ -47,4 +48,6 @@
       </group>
 
     </group>
+
+    <node if="$(arg loginternet)" pkg="lunabot_perception" type="log_internet.py" name="loginternet" output="screen"/>
 </launch>

@@ -12,18 +12,21 @@ def log_internet(link_quality_publisher: rospy.Publisher, signal_level_publisher
         output = os.popen("iwconfig 2>/dev/null | grep \"Link Quality\"").read()
         output.strip()
 
+        # Expected Output: Link Quality=xx/100 Signal level=xx/100 Noise level=xx/100
+
         tokens = output.split(" ")
 
-        if len(tokens) < 4:
+        if len(tokens) <= 1:
             raise Exception("Cannot parse iwconfig output")
 
-        quality = tokens[1]  # "Quality=xx/70"
+        quality = tokens[1]  # "Quality=xx/100"
 
-        quality = quality.split("=")[1]  # "xx/70"
+        quality = quality.split("=")[1]  # "xx/100"
         quality = int(quality.split("/")[0])  # xx
 
-        signal_level  = tokens[3]   # "level=-xx"
-        signal_level = int(signal_level.split("=")[1])  # -xx
+        signal_level = tokens[3]  # "Signal level=xx/100"
+        signal_level = signal_level.split("=")[1]  # "xx/100"
+        signal_level = int(signal_level.split("/")[0])  # xx
 
         link_quality_publisher.publish(quality)
         signal_level_publisher.publish(signal_level)
