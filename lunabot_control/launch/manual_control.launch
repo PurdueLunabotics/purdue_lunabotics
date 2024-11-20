@@ -1,9 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="autonomy" default="false" />
-
-  <node unless="$(arg autonomy)" pkg="lunabot_control" type="manual_controller.py" name="manual_control" output="screen"/>
-  <node if="$(arg autonomy)" pkg="lunabot_control" type="manual_controller_autonomy.py" name="manual_control_autonomy" output="screen"/>
+  <node pkg="lunabot_control" type="manual_controller.py" name="manual_control" output="screen"/>
 
  <!-- joystick nodes -->
   <group >
