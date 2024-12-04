@@ -203,7 +203,49 @@ class PurePursuitController:
         Returns:
             List[float]: Target velocity for waypoint at index i
         """
-        return [self.MAX_VELOCITY] * len(self.path)
+        """for i in range(len(self.path)):
+            if (math.dist(self.last_pos, self.path[i]) < dist):
+                dist = math.dist(self.last_pos, self.path[i])
+                closest_point = self.path[i]"""
+                
+        #return [self.MAX_VELOCITY] * len(self.path) commented out just for now
+
+
+        #EDITED CODE BELOW
+        closest_point = self.lookahead()
+        dist = math.inf
+        #closest_point = (0,0,0)
+
+        target_velocities = []
+        for i, waypoint in enumerate(self.path): #
+            # Calculate the lookahead position and direction to it
+            lookahead = self.lookahead()
+            direction_to_lookahead = (lookahead[0] - self.robot_pose[0], lookahead[1] - self.robot_pose[1])
+
+            # Calculate the unit vector in the direction the robot is currently facing
+            #robot_facing_vector = (math.cos(self.robot_pose[2]), math.sin(self.robot_pose[2]))
+            
+            # Determine the dot product between the direction to the lookahead and the robot's facing vector
+            #dot_product = direction_to_lookahead[0] * robot_facing_vector[0] + direction_to_lookahead[1] * robot_facing_vector[1]
+
+            # Calculate the angle between the robot's current heading and the direction to the lookahead
+            angle_to_lookahead = math.atan2(direction_to_lookahead[1], direction_to_lookahead[0]) - self.robot_pose[2]
+            angle_to_lookahead = (angle_to_lookahead + math.pi) % (2 * math.pi) - math.pi  # Normalize to [-pi, pi]
+
+            # Determine if the robot should move forward or backward
+            if abs(angle_to_lookahead) > math.pi / 2:  # Robot is facing away from the lookahead
+                # Drive backward if the angle to the lookahead exceeds 90 degrees
+                target_speed = -self.MAX_VELOCITY * (1 - abs(angle_to_lookahead) / math.pi)
+            else:
+                # Drive forward otherwise
+                target_speed = self.MAX_VELOCITY * (1 - abs(angle_to_lookahead) / math.pi)
+
+            # Clamp target speed to ensure smooth operation
+            target_speed = self.clamp(target_speed, -self.MAX_VELOCITY, self.MAX_VELOCITY)
+            target_velocities.append(target_speed)
+
+        return target_velocities
+
 
     def curvature_p(self):
         """Calculate curvature at each waypoint
