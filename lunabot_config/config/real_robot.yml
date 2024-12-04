@@ -30,8 +30,8 @@ nav:
             angular: [-0.785, 0.785]
 
     pure_pursuit:
-        slip_k1: 0.02
-        heading_k2: 0.02
+        slip_k1: 0.2
+        heading_k2: 0.05
         kp: 0.001
         ki: 0
         kd: 0
@@ -44,7 +44,7 @@ nav:
             angular: [-0.785, 0.785]
 
     pure_pursuit_test_wheels:
-        slip_k1: 0.02
+      slip_k1: 0.02
         heading_k2: 0.02
         kp: 0.001
         ki: 0
