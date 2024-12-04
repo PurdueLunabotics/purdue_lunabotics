@@ -33,8 +33,9 @@
       <node pkg="lunabot_control" type="differential_drive_controller.py" name="differential_drive_controller" output="screen"/>
 
       <group ns="nav">
-          <node pkg="lunabot_control" type="mpc_node" name="mpc_node" output="screen"/>
+          <!-- <node pkg="lunabot_control" type="mpc_node" name="mpc_node" output="screen"/> -->
 
+          <node name="pure_pursuit_node" pkg="lunabot_control" type="pure_pursuit_controller.py" output="screen" respawn="true"/>
           <node name="global_planner_node" pkg="lunabot_nav" type="dstar_node.py" output="screen" respawn="true">
               <!-- <rosparam file="$(find lunabot_config)/config/rrtstar.yml" command="load"/> -->
           </node>
