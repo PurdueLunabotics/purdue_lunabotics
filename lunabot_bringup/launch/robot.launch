@@ -78,8 +78,8 @@
 
             <node ns="pointcloud" pkg="nodelet" type='nodelet' name="point_cloud_aggregator"
                 args="standalone rtabmap_util/point_cloud_aggregator">
-                <remap from="cloud1" to="/back/voxel_grid/output" />
-                <remap from="cloud2" to="/front/voxel_grid/output" />
+                <remap from="cloud1" to="/back/obstacles" />
+                <remap from="cloud2" to="/front/obstacles" />
                 <remap from="cloud3" to="/lidar_cloud" />
                 <param name="fixed_frame_id" value="base_link" />
 
@@ -88,7 +88,7 @@
             <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />
             <!-- Run a VoxelGrid filter to clean NaNs and downsample the data -->
             <node ns="front" pkg="nodelet" type="nodelet" name="voxel_grid"
-                args="load pcl/VoxelGrid pcl_manager" output="screen">
+                args="load pcl/VoxelGrid /pcl_manager" output="screen">
                 <remap from="~input" to="/d455_front/camera/depth/color/points" />
                 <rosparam>
                     filter_field_name: z
@@ -99,7 +99,7 @@
                 </rosparam>
             </node>
             <node ns="back" pkg="nodelet" type="nodelet" name="voxel_grid"
-                args="load pcl/VoxelGrid pcl_manager" output="screen">
+                args="load pcl/VoxelGrid /pcl_manager" output="screen">
                 <remap from="~input" to="/d455_back/camera/depth/color/points" />
                 <rosparam> 
                     filter_field_name: z 
