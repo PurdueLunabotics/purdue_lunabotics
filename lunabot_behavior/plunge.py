@@ -51,7 +51,7 @@ class Plunge:
 
     def check_exc_stuck(self, exc_msg):
         # check if trying to go somewhere
-        if exc_msg >= 15:
+        if exc_msg >= 300:
             # check if not going anywhere
             if self.robot_sensors.exc_vel <= 0.1:
                 self.exc_stuck = True

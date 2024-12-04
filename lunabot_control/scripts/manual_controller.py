@@ -106,7 +106,7 @@ class ManualController:
         self.latched_excavation_speed = 0
         self.excavation_is_latched = False
 
-        self.DEPOSITION_SPEED = 127
+        self.DEPOSITION_SPEED = 3000 #TODO RJN - this speed
         self.ACTUATE_SPEED = 0.8 # percentage of max power
 
         self.publish = True
