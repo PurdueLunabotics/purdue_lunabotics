@@ -50,6 +50,7 @@ class PurePursuitController:
         
         # make weights updatable without restarting
         # switch between pure pursuit and test wheel nodes in yml file
+        # add option for displaying outputs
         
         self.vel_controller = SlipController(k_1=rospy.get_param("/nav/pure_pursuit/slip_k1"), k_2=rospy.get_param("/nav/pure_pursuit/heading_k2"), kp=rospy.get_param("/nav/pure_pursuit/kp"), ki=rospy.get_param("/nav/pure_pursuit/ki"), kd=rospy.get_param("/nav/pure_pursuit/kd"), kv=rospy.get_param("/nav/pure_pursuit/kv"), ka=rospy.get_param("/nav/pure_pursuit/ka"))
                 
