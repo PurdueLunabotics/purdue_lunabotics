@@ -22,6 +22,53 @@ from std_msgs.msg import Bool, Int8, Float32
 # TODO: See whether a node file is necessary
 class PurePursuitController:
     
+    def __init__(self, MAX_VELOCITY, MAX_ACCEL, MAX_VEL_CHANGE, trackwidth, robot_start_pos = (0,0,0)):
+        self.path = [robot_start_pos[:2]]
+        self.MAX_VELOCITY = MAX_VELOCITY
+        self.MAX_ACCELERATION = MAX_ACCEL
+        self.MAX_VEL_CHANGE = MAX_VEL_CHANGE
+        
+        self.trackwidth = trackwidth
+        
+        self.robot_velocity = [0,0]
+        
+        self.robot_pose = robot_start_pos
+        self.LOOKAHEAD = rospy.get_param("/nav/pure_pursuit/lookahead")
+
+        self.t = 0
+        self.t_i = 0
+        
+        self.wheels = [0.0, 0.0]
+        self.pos = self.robot_pose[0:2]
+        self.angle = self.robot_pose[2]
+        self.actual_lin_ang_wel = [0, 0]
+        
+        self.LOOKAHEAD_STOPPING_THRESHOLD = 2
+        self.STOPPING_THRESHOLD = 0.2
+        
+        self.last_pos = (0,0,0)
+        
+        # make weights updatable without restarting
+        # switch between pure pursuit and test wheel nodes in yml file
+        
+        self.vel_controller = SlipController(k_1=rospy.get_param("/nav/pure_pursuit/slip_k1"), k_2=rospy.get_param("/nav/pure_pursuit/heading_k2"), kp=rospy.get_param("/nav/pure_pursuit/kp"), ki=rospy.get_param("/nav/pure_pursuit/ki"), kd=rospy.get_param("/nav/pure_pursuit/kd"), kv=rospy.get_param("/nav/pure_pursuit/kv"), ka=rospy.get_param("/nav/pure_pursuit/ka"))
+                
+        self.last_time = 0        
+        self.frequency = rospy.get_param("/nav/pure_pursuit/frequency_p")
+        
+        self.lin_lim = rospy.get_param("/nav/pure_pursuit/velocity_limits_p/linear")
+        self.ang_lim = rospy.get_param("/nav/pure_pursuit/velocity_limits_p/angular")
+
+        
+        cmd_vel_topic = rospy.get_param("/cmd_vel_topic")
+        self.vel_publisher = rospy.Publisher(cmd_vel_topic, Twist, queue_size=10)
+        self.target_vel_publisher = rospy.Publisher("/purePursuit/target_vel", Twist, queue_size=10)
+        self.controller_vel_publisher = rospy.Publisher("/purePursuit/controller_vel", Twist, queue_size=10)
+        self.slip_vec_publisher = rospy.Publisher("/purePursuit/slip_vec", Twist, queue_size=10)
+        self.final_vel_publisher = rospy.Publisher("/purePursuit/final_vel", Twist, queue_size=10)
+        self.heading_err_publisher = rospy.Publisher("/purePursuit/heading_err", Float32, queue_size=10)
+
+        
     def path_callback(self, msg: Path):
         self.path = [self.robot_pose[:2]]
         for point in msg.poses:
@@ -74,53 +121,6 @@ class PurePursuitController:
         self.slip_vec_publisher.publish(twist_slip)
         self.final_vel_publisher.publish(twist_final)
         self.heading_err_publisher.publish(heading)
-        
-        
-    
-    def __init__(self, MAX_VELOCITY, MAX_ACCEL, MAX_VEL_CHANGE, trackwidth, robot_start_pos = (0,0,0)):
-        self.path = [robot_start_pos[:2]]
-        self.MAX_VELOCITY = MAX_VELOCITY
-        self.MAX_ACCELERATION = MAX_ACCEL
-        self.MAX_VEL_CHANGE = MAX_VEL_CHANGE
-        
-        self.trackwidth = trackwidth
-        
-        self.robot_velocity = [0,0]
-        
-        self.robot_pose = robot_start_pos
-        self.LOOKAHEAD = rospy.get_param("/nav/pure_pursuit/lookahead")
-
-        self.t = 0
-        self.t_i = 0
-        
-        self.wheels = [0.0, 0.0]
-        self.pos = self.robot_pose[0:2]
-        self.angle = self.robot_pose[2]
-        self.actual_lin_ang_wel = [0, 0]
-        
-        self.LOOKAHEAD_STOPPING_THRESHOLD = 2
-        self.STOPPING_THRESHOLD = 0.2
-        
-        self.last_pos = (0,0,0)
-        
-        self.vel_controller = SlipController(k_1=rospy.get_param("/nav/pure_pursuit/slip_k1"), k_2=rospy.get_param("/nav/pure_pursuit/heading_k2"), kp=rospy.get_param("/nav/pure_pursuit/kp"), ki=rospy.get_param("/nav/pure_pursuit/ki"), kd=rospy.get_param("/nav/pure_pursuit/kd"), kv=rospy.get_param("/nav/pure_pursuit/kv"), ka=rospy.get_param("/nav/pure_pursuit/ka"))
-                
-        self.last_time = 0        
-        self.frequency = rospy.get_param("/nav/pure_pursuit/frequency_p")
-        
-        self.lin_lim = rospy.get_param("/nav/pure_pursuit/velocity_limits_p/linear")
-        self.ang_lim = rospy.get_param("/nav/pure_pursuit/velocity_limits_p/angular")
-
-        
-        cmd_vel_topic = rospy.get_param("/cmd_vel_topic")
-        self.vel_publisher = rospy.Publisher(cmd_vel_topic, Twist, queue_size=10)
-        self.target_vel_publisher = rospy.Publisher("/purePursuit/target_vel", Twist, queue_size=10)
-        self.controller_vel_publisher = rospy.Publisher("/purePursuit/controller_vel", Twist, queue_size=10)
-        self.slip_vec_publisher = rospy.Publisher("/purePursuit/slip_vec", Twist, queue_size=10)
-        self.final_vel_publisher = rospy.Publisher("/purePursuit/final_vel", Twist, queue_size=10)
-        self.heading_err_publisher = rospy.Publisher("/purePursuit/heading_err", Float32, queue_size=10)
-
-        
         
 
     def injection(self, spacing):
@@ -573,5 +573,5 @@ class PurePursuitController:
 
 
 if __name__ == "__main__":
-    controller = PurePursuitController(0.4, 0.4, 0.4, 0.45, (0.9, -1.2, 0))
+    controller = PurePursuitController(0.4, 0.4, 0.4, 0.45, (0, 0, 0))
     controller.loop()
