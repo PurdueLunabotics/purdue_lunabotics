@@ -23,7 +23,7 @@
       <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="serial_no" value="$(arg serial_no_d455_front)" />
         <arg name="tf_prefix" value="d455_front" />
-        <arg name="filters" value="disparity,decimation,pointcloud" />
+        <arg name="filters" value="pointcloud" />
         <arg name="align_depth" value="true" />
         <arg name="initial_reset" value="$(arg initial_reset)" />
         <arg name="depth_width" value="$(arg width)" />
@@ -50,20 +50,20 @@
       </group>
 
       <!-- sync rgb/depth images per camera -->
-      <node pkg="nodelet" type="nodelet" name="rgbd_sync" args="standalone rtabmap_sync/rgbd_sync"
+      <!-- <node pkg="nodelet" type="nodelet" name="rgbd_sync" args="standalone rtabmap_sync/rgbd_sync"
         output="screen">
         <remap from="rgb/image" to="camera/color/image_rect_color" />
         <remap from="depth/image" to="camera/depth/image_rect_raw" />
         <remap from="rgb/camera_info" to="camera/color/camera_info" />
         <param name="approx_sync" value="false" />
-      </node>
+      </node> -->
     </group>
 
     <group ns="d455_back" if="$(arg back)">
       <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="serial_no" value="$(arg serial_no_d455_back)" />
         <arg name="tf_prefix" value="d455_back" />
-        <arg name="filters" value="disparity,decimation,pointcloud" />
+        <arg name="filters" value="pointcloud" />
         <arg name="align_depth" value="true" />
         <arg name="initial_reset" value="$(arg initial_reset)" />
         <arg name="depth_width" value="$(arg width)" />
@@ -89,13 +89,13 @@
       </group>
 
       <!-- sync rgb/depth images per camera -->
-      <node pkg="nodelet" type="nodelet" name="rgbd_sync" args="standalone rtabmap_sync/rgbd_sync"
+      <!-- <node pkg="nodelet" type="nodelet" name="rgbd_sync" args="standalone rtabmap_sync/rgbd_sync"
         output="screen">
         <remap from="rgb/image" to="camera/color/image_rect_color" />
         <remap from="depth/image" to="camera/depth/image_rect_raw" />
         <remap from="rgb/camera_info" to="camera/color/camera_info" />
         <param name="approx_sync" value="false" />
-      </node>
+      </node> -->
     </group>
 
 
