@@ -25,3 +25,59 @@ class VelocityPIDController:
         self.prev_error = error
         return self.setpoint * self.kf + error * self.kp + self.total_error * self.ki + error_diff * self.kd
 
+
+class PIDController:
+    """
+    PID Controller
+    Generic controller that gives PID-computed value based on setpoint and current position.
+    """
+
+    def __init__(self, kp, ki, kd, setpoint=0):
+        """
+        Initialize PID controller with setpoint and PID values
+        
+        :param kp: Proportional gain
+        :param ki: Integral gain
+        :param kd: Derivative gain
+        :param setpoint: Setpoint
+        """
+        self.setpoint = setpoint
+        self.kp = kp
+        self.ki = ki
+        self.kd = kd
+        self.total_error = 0
+        self.prev_error = 0
+        self.max_value = 0.5
+
+    def set_max_value(self, max_value: float):
+        """
+        Set maximum value for PID controller
+        
+        :param max_value: Maximum value
+        """
+        self.max_value = max_value
+
+    def set_setpoint(self, setpoint: float):
+        """
+        Set new setpoint for PID controller
+        
+        :param setpoint: New setpoint"""
+        self.prev_setpoint = self.setpoint
+        self.setpoint = setpoint
+        if (self.prev_setpoint != self.setpoint):
+            self.total_error = 0 # reset I when changing goal
+
+    def calculate(self, state: float, dt: float, setpoint=0) -> float:
+        """
+        Calculate PID value based on current state and time step
+
+        :param state: Current state
+        :param dt: Time step
+        :return: PID value
+        """
+        error = self.setpoint - state
+        self.total_error += error * dt
+        error_diff = (error - self.prev_error) / dt
+        self.prev_error = error
+        output = self.setpoint * self.kf + error * self.kp + self.total_error * self.ki + error_diff * self.kd
+        return max(min(output, self.max_value), -self.max_value)
