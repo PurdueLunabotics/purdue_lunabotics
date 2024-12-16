@@ -1,13 +1,17 @@
+#!/usr/bin/env python3
+
 import rospy
 import math
+from std_msgs.msg import Float32
 from nav_msgs.msg import Path, Odometry
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, Point
 from pid_controller import PIDController
 from tf.transformations import euler_from_quaternion
+import traceback
 
 
 class PointToPoint:
-    def __init__(self, linear_kP=0.1, linear_kI=0, linear_kD=0, angular_kP=0.1, angular_kI=0, angular_kD=0, angular_tolerance=0.1, pos_tolerance=0.05, max_linear_vel=0.5, max_angular_vel=0.5):
+    def __init__(self, linear_kP=0.1, linear_kI=0, linear_kD=0, angular_kP=1, angular_kI=0, angular_kD=0, angular_tolerance=0.05, pos_tolerance=0.05, max_linear_vel=0.25, max_angular_vel=0.25):
         """
         Initializes the PointToPoint controller with the given PID values and tolerances.
         
@@ -22,6 +26,9 @@ class PointToPoint:
         :param max_linear_vel: Maximum linear velocity
         :param max_angular_vel: Maximum angular velocity
         """
+
+        rospy.init_node('point_to_point_node')
+
         self.LINEAR_P = linear_kP
         self.LINEAR_I = linear_kI
         self.LINEAR_D = linear_kD
@@ -30,10 +37,11 @@ class PointToPoint:
         self.ANGULAR_I = angular_kI
         self.ANGULAR_D = angular_kD
 
-        self.FREQUENCY = 60 # Hz
-
         self.ANGULAR_TOLERANCE = angular_tolerance # radians
         self.POSITION_TOLERANCE = pos_tolerance # meters
+
+        self.LINEAR_VELOCITY_TOLERANCE = 0.05 # m/s
+        self.ANGULAR_VELOCITY_TOLERANCE = 0.05 # rad/s
 
         self.linear_controller = PIDController(self.LINEAR_P, self.LINEAR_I, self.LINEAR_D)
         self.angular_controller = PIDController(self.ANGULAR_P, self.ANGULAR_I, self.ANGULAR_D)
@@ -41,21 +49,39 @@ class PointToPoint:
         self.angular_velocity = 0
         self.linear_velocity = 0
 
-        self.robot_pose = (0, 0, 0) # (x, y, theta)
-        self.robot_velocity = [0, 0] # [linear, angular]
-        self.last_pos = (0, 0, 0)
+        self.robot_pose = [0, 0, 0] # (x, y, theta)
+        self.odom_velocity = [0, 0] # [linear, angular]
+        self.last_pos = [0, 0, 0]
 
-        self.target = (0, 0)
+        self.target = [0, 0]
         self.path = [self.robot_pose[:2]]
+        self.i = 0 # index of current target point
 
+        self.FREQUENCY = 20
         self.dt = 1 / self.FREQUENCY
         self.prev_time = rospy.Time.now().to_sec()
 
         self.MAX_LINEAR_VELOCITY = max_linear_vel
         self.MAX_ANGULAR_VELOCITY = max_angular_vel
 
-        cmd_vel_topic = rospy.get_param('/cmd_vel_topic')
+        # SUBSCRIBERS =================================================================================================
+        path_topic = rospy.get_param('/nav/global_path_topic', '/nav/global_path')
+        rospy.Subscriber(path_topic, Path, self.read_path_callback)
+
+        odom_topic = rospy.get_param('/odom_topic', '/odom')
+        rospy.Subscriber(odom_topic, Odometry, self.odom_callback)
+
+        # PUBLISHERS ==================================================================================================
+        cmd_vel_topic = rospy.get_param('/cmd_vel_topic', '/cmd_vel')
         self.cmd_vel_publisher = rospy.Publisher(cmd_vel_topic, Twist, queue_size=10)
+
+        # TODO: debugging
+        self.angular_disparity_pub = rospy.Publisher('/ptp/angular_disparity', Float32, queue_size=10)
+        self.linear_disparity_pub = rospy.Publisher('/ptp/linear_disparity', Float32, queue_size=10)
+        self.pid_linear_pub = rospy.Publisher('/ptp/pid_linear', Float32, queue_size=10)
+        self.pid_angular_pub = rospy.Publisher('/ptp/pid_angular', Float32, queue_size=10)
+        self.current_target_pub = rospy.Publisher('/ptp/current_target', Point, queue_size=10)
+        self.velocity_pub = rospy.Publisher('/ptp/velocity', Twist, queue_size=10)
 
     def read_path_callback(self, msg: Path):
         path = [self.robot_pose[:2]]
@@ -63,20 +89,35 @@ class PointToPoint:
             path.append(tuple((point.pose.position.x, point.pose.position.y)))
 
         if path != self.path: # only update path if it's different
+            # print(path)
             self.path = path
             self.initialize_target_point(self.robot_pose)
+        # pass # TODO: debugging
             
     def odom_callback(self, msg: Odometry):
         # self.robot_velocity = [msg.twist.twist.linear, msg.twist.twist.angular]
         angles = euler_from_quaternion([msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w])
         self.robot_pose = (msg.pose.pose.position.x, msg.pose.pose.position.y, angles[2])
-        self.robot_velocity = [math.sqrt((self.robot_pose[0] - self.last_pos[0]) ** 2 + (self.robot_pose[1] - self.last_pos[1]) ** 2)
-                               / (self.dt), ((self.robot_pose[2] - self.last_pos[2])/(self.dt))]
+        
+        if (self.dt == 0):
+            self.dt = rospy.Time.now().to_sec() - self.prev_time
+            self.prev_time = rospy.Time.now().to_sec()
+            if (self.dt == 0):
+                self.dt = 1 / self.FREQUENCY
+
+        # linear velocity
+        self.odom_velocity[0] = math.sqrt((self.robot_pose[0] - self.last_pos[0]) ** 2 + (self.robot_pose[1] - self.last_pos[1]) ** 2) / (self.dt)
+        # angular velocity
+        self.odom_velocity[1] = (self.robot_pose[2] - self.last_pos[2]) / self.dt
+
+        # update last position
+        self.last_pos = self.robot_pose
 
     def initialize_target_point(self, robot_pose: tuple) -> None:
-        for self.i in range(self.path - 1):
-            if robot_pose[0] > self.path[self.i][0] and robot_pose[1] > self.path[self.i][1] and robot_pose[0] < self.path[self.i + 1][0] and robot_pose[1] < self.path[self.i + 1][1]:
-                self.target = self.path[self.i + 1] # return next point if robot is in path
+        for i in range(len(self.path) - 1):
+            if robot_pose[0] > self.path[i][0] and robot_pose[1] > self.path[i][1] and robot_pose[0] < self.path[i + 1][0] and robot_pose[1] < self.path[i + 1][1]:
+                self.target = self.path[i + 1] # return next point if robot is in path
+                self.i = i + 1
                 return
             
         self.i = 0
@@ -86,48 +127,93 @@ class PointToPoint:
         """
         Follows the path by turning to the target point and then moving towards it. Called periodically. 
         """
+        # self.target = [2, -2]
+
+        dist_to_target = math.sqrt((self.target[0] - self.robot_pose[0]) ** 2 + (self.target[1] - self.robot_pose[1]) ** 2)
+        self.linear_disparity_pub.publish(dist_to_target) # TODO: debugging
+
+        angle_target = math.atan2(self.target[1] - self.robot_pose[1], self.target[0] - self.robot_pose[0])
+        # angle_target = math.pi / 6.0 # TODO: debugging
+        angular_disparity = angle_target - self.robot_pose[2]
+        self.angular_disparity_pub.publish(angular_disparity) # TODO: debugging
+
+        at_angle_target = abs(angular_disparity) < self.ANGULAR_TOLERANCE
+        at_linear_target = abs(dist_to_target) < self.POSITION_TOLERANCE
+
+        if (self.dt == 0):
+            self.dt = rospy.Time.now().to_sec() - self.prev_time
+            self.prev_time = rospy.Time.now().to_sec()
+            if (self.dt == 0):
+                self.dt = 1 / self.FREQUENCY
+
+        angular_vel = -self.angular_controller.calculate(angular_disparity, self.dt, setpoint=0)
+        linear_vel = -self.linear_controller.calculate(dist_to_target, self.dt, setpoint=0)
+        
         # turn to point
-        angle_target = math.atan2(self.target[1] - self.robot_pose[1], self.target[0] - self.robot_pose[0]) + self.robot_pose[2]
-        if (abs(self.robot_pose[2] - angle_target) > self.ANGULAR_TOLERANCE):
+        if (not at_angle_target):
             self.linear_velocity = 0
-            self.angular_velocity = self.angular_controller.calculate(self.robot_pose[2], self.dt, setpoint=angle_target)
+            self.angular_velocity = angular_vel
+            # if (abs(linear_vel) <= self.LINEAR_VELOCITY_TOLERANCE):
+            #     self.angular_velocity = -self.angular_controller.calculate(angular_disparity, self.dt, setpoint=0)
+            #     self.pid_angular_pub.publish(self.angular_velocity) # TODO: debugging
+            # else:
+            #     self.angular_velocity = 0
         else: # translate to point
-            dist_to_target = math.sqrt((self.target[0] - self.robot_pose[0]) ** 2 + (self.target[1] - self.robot_pose[1]) ** 2)
-            if (dist_to_target < self.POSITION_TOLERANCE):
-                if (self.i + 1 < len(self.path)):
-                    self.i += 1
-                    self.target = self.path[self.i]
+            self.angular_velocity = 0
+            if (not at_linear_target):
+                self.linear_velocity = linear_vel
             else:
-                self.angular_velocity = 0
-                self.linear_velocity = self.linear_controller.calculate(dist_to_target, self.dt, setpoint=0)
+                self.linear_velocity = 0
+
+            # if (abs(self.odom_velocity[1]) <= self.ANGULAR_VELOCITY_TOLERANCE):
+            #     if (not at_linear_target):
+            #         self.linear_velocity = 0
+            #     else:
+            #         self.linear_velocity = self.linear_controller.calculate(dist_to_target, self.dt, setpoint=0)
+            #         self.pid_linear_pub.publish(self.linear_velocity) # TODO: debugging
+            # else:
+            #     self.linear_velocity = 0
+
+        if (at_angle_target and at_linear_target):
+            if (self.i < len(self.path) - 1):
+                self.i += 1
+                self.target = self.path[self.i]
+
+        self.pid_linear_pub.publish(self.linear_velocity) # TODO: debugging
+        self.pid_angular_pub.publish(self.angular_velocity) # TODO: debugging
+
+        rospy.loginfo(f"self.target: {self.target}, type: {type(self.target)}")
+        rospy.loginfo(f"self.robot_pose: {self.robot_pose}, type: {type(self.robot_pose)}")
+
+        self.publish_telemetry()
 
     def publish_telemetry(self):
         vel = Twist()
         vel.linear.x = self.clamp(self.linear_velocity, -self.MAX_LINEAR_VELOCITY, self.MAX_LINEAR_VELOCITY)
         vel.angular.z = self.clamp(self.angular_velocity, -self.MAX_ANGULAR_VELOCITY, self.MAX_ANGULAR_VELOCITY)
         self.cmd_vel_publisher.publish(vel)
+        
+        self.current_target_pub.publish(Point(self.target[0], self.target[1], 0)) # TODO: debugging
 
     def clamp(self, value, min_value, max_value) -> float:
         return max(min(value, max_value), min_value)
 
     def run_node(self):
-        rospy.init_node('point_to_point_controller')
-
-        path_topic = rospy.get_param('/nav/global_path_topic')
-        rospy.Subscriber(path_topic, Path, self.read_path_callback)
-
-        odom_topic = rospy.get_param('/odom_topic')
-        rospy.Subscriber(odom_topic, Odometry, self.odom_callback)
-
         rate = rospy.Rate(self.FREQUENCY)
 
         while not rospy.is_shutdown():
-            self.follow_path()
-            self.publish_telemetry()
-            self.dt = rospy.Time.now().to_sec() - self.prev_time
+            try:
+                self.follow_path()
+                self.publish_telemetry()
+                self.dt = rospy.Time.now().to_sec() - self.prev_time
+                self.prev_time = rospy.Time.now().to_sec()
+            except Exception as e:
+                rospy.logerr(f"ERROR OCCURRED HEEHAW: {e}")
+                rospy.logerr(traceback.format_exc())
+            
             rate.sleep()
 
+
 if __name__ == '__main__':
-    rospy.init_node('point_to_point_node')
     ptp = PointToPoint()
     ptp.run_node()

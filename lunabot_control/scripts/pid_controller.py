@@ -75,9 +75,11 @@ class PIDController:
         :param dt: Time step
         :return: PID value
         """
+        self.setpoint = setpoint
+        
         error = self.setpoint - state
         self.total_error += error * dt
         error_diff = (error - self.prev_error) / dt
         self.prev_error = error
-        output = self.setpoint * self.kf + error * self.kp + self.total_error * self.ki + error_diff * self.kd
+        output = error * self.kp + self.total_error * self.ki + error_diff * self.kd
         return max(min(output, self.max_value), -self.max_value)
