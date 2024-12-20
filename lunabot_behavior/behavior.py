@@ -277,7 +277,8 @@ class Behavior:
                     # Detect when reached berm
                     self.current_state = States.ALIGN
             
-                # Align with an apriltag at the berm
+                # Align with the berm
+                # TODO: base this off initial apriltag data
                 if (self.current_state == States.ALIGN):
                     rospy.loginfo("State: Alignment")
 
