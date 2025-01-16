@@ -10,11 +10,9 @@
 class DstarNode {
 public:
   DstarNode() {
-    ROS_WARN("inside constructor");
   }
 
   void dstar_loop() {
-    ROS_WARN("before!");
     ros::param::get("/odom_topic", odom_topic);
     ros::param::get("/nav_goal_topic", goal_topic);
     ros::param::get("/nav/map_topic", map_topic);
@@ -23,8 +21,6 @@ public:
     ros::param::get("/nav/global_path_topic", path_topic);
     ros::param::get("/nav/occ_threshold", occupancy_threshold);
 
-    ROS_WARN("hi!");
-
     int frequency = 10; // hz
 
     map_sub = nh.subscribe(map_topic, 1, &DstarNode::grid_callback, this);
@@ -32,8 +28,6 @@ public:
     odom_sub = nh.subscribe(odom_topic, 1, &DstarNode::position_callback, this);
     goal_sub = nh.subscribe(goal_topic, 1, &DstarNode::goal_callback, this);
     path_pub = nh.advertise<nav_msgs::Path>(path_topic, 10, true);
-
-    ROS_WARN("here!");
 
     ros::Rate rate(frequency);
     while (ros::ok()) {
@@ -123,8 +117,8 @@ private:
 
     map = std::vector<std::vector<int>>(width, std::vector<int>(height));
 
-    for (int i = 0; i < height; ++i) {
-      for (int j = 0; j < width; ++j) {
+    for (int i = 0; i < width; ++i) {
+      for (int j = 0; j < height; ++j) {
         map[i][j] = data->data[i * width + j];
       }
     }
@@ -151,8 +145,8 @@ private:
     }
 
     int index = 0;
-    for (int i = data->y; i < data->y + data->height; i++) {
-      for (int j = data->x; j < data->x + data->width; j++) {
+    for (int i = data->x; i < data->x + data->width; i++) {
+      for (int j = data->y; j < data->y + data->height; j++) {
         map[i][j] = data->data[index];
         index++;
       }
@@ -164,12 +158,14 @@ private:
   void position_callback(const nav_msgs::Odometry::ConstPtr &data) {
     pose.x = data->pose.pose.position.x;
     pose.y = data->pose.pose.position.y;
+    pose_init = true;
   }
 
   void goal_callback(const geometry_msgs::PoseStamped::ConstPtr &data) {
     goal.x = data->pose.position.x;
     goal.y = data->pose.position.y;
     goal_update_needed = true;
+    goal_init = true;
   }
 
   // Publish the calculated path using the class's path publisher.
@@ -212,9 +208,7 @@ private:
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "dstar_node");
-  ROS_WARN("a!");
   DstarNode dstar_node = DstarNode();
-  ROS_WARN("b!");
   dstar_node.dstar_loop();
   return 0;
 }

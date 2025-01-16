@@ -17,7 +17,7 @@ Dstar::Dstar(real_world_point goal, real_world_point start, std::vector<std::vec
 
   // 2d Array of nodes that corresponds to the map : each value is[Distance(g), Estimate(rhs)]
   for (int x = 0; x < node_values_list.size(); x++) {
-    for (int y = 0; y < node_values_list[y].size(); y++) {
+    for (int y = 0; y < node_values_list[x].size(); y++) {
       node_values_list[x][y].distance_g = INT_MAX;
       node_values_list[x][y].estimate_rhs = INT_MAX;
     }
