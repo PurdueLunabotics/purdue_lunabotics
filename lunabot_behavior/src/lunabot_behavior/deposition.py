@@ -4,17 +4,13 @@ import rospy
 
 from lunabot_msgs.msg import RobotSensors
 from std_msgs.msg import Int8
-from geometry_msgs.msg import Twist
-
-from homing_controller import HomingController
 
 import time
-import interrupts
 import sys
 
-class Deposition:
+class DepositionManager:
     '''
-    State to deposit collected regolith onto the berm by spinning the auger
+    Used to run deposition system
     '''
 
     def sensors_callback(self, msg: RobotSensors):
@@ -38,9 +34,9 @@ class Deposition:
 
         self.rate = rospy.Rate(10)  # 10hz
 
-        self.deposition_power = 127 # TODO change if needed
+        self.DEPOSITION_SPEED = 1 # TODO find what unit this is in, and pick a value
 
-        # self.load_cell_threshold = 1 # in kilograms, TODO test / verify WHEN LOAD CELLS EXIST
+        self.WEIGHT_THRESHOLD = 1 # in kilograms, TODO choose value / verify WHEN LOAD CELLS EXIST
 
         self.DEPOSITION_TIME = 45.00
 
@@ -48,7 +44,7 @@ class Deposition:
 
     def deposit(self):
         """
-        Spin the auger until the load cell detects that the bin is empty
+        Spin deposition until the load cell detects that the bin is empty (or up to a max time)
         """
 
         if (self.is_sim):
@@ -59,7 +55,7 @@ class Deposition:
         time.sleep(0.1)
 
         deposition_msg = Int8()
-        deposition_msg.data = self.deposition_power
+        deposition_msg.data = self.DEPOSITION_SPEED
 
         start_time = rospy.get_time()
 
@@ -69,17 +65,38 @@ class Deposition:
             if rospy.get_time() - start_time > self.DEPOSITION_TIME:
                 break
 
-            '''
-            # no load cells yet... :(
-
             weight = self.robot_sensors.load_cell_weights[0] + self.robot_sensors.load_cell_weights[1]
 
-            if weight < self.load_cell_threshold:
+            if weight < self.WEIGHT_THRESHOLD:
                 break
-            '''
 
-            if (interrupts.check_for_interrupts() != interrupts.Errors.FINE):
-                return False
+            self.rate.sleep()
+
+        deposition_msg.data = 0
+        self.deposition_publisher.publish(deposition_msg)
+
+    def no_sensor_deposit(self):
+        """
+        Spin the auger for a set amount of time
+        """
+
+        if (self.is_sim):
+            rospy.loginfo("Deposition: would deposit")
+            time.sleep(2)
+            return True
+
+        time.sleep(0.1)
+
+        deposition_msg = Int8()
+        deposition_msg.data = self.DEPOSITION_SPEED
+
+        start_time = rospy.get_time()
+
+        while True:
+            self.deposition_publisher.publish(deposition_msg)
+            
+            if rospy.get_time() - start_time > self.DEPOSITION_TIME:
+                break
 
             self.rate.sleep()
 
@@ -87,19 +104,13 @@ class Deposition:
         self.deposition_publisher.publish(deposition_msg)
 
         return True
+
     
 if __name__ == "__main__":
 
-    if len(sys.argv) > 1 and (sys.argv[1] == "-n" or sys.argv[1] == "-no-homing"):
-        deposition = Deposition()
-        deposition.deposit()
+    deposition = DepositionManager()
+
+    if len(sys.argv) > 1 and (sys.argv[1] == "-n" or sys.argv[1] == "-no-sensor"):
+        deposition.no_sensor_deposit()
     else:
-
-        deposition = Deposition()
-        cmd_vel_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
-        homing_controller = HomingController(cmd_vel_publisher)
-
-        homing_controller.home()
-        rospy.sleep(0.5)
-        homing_controller.approach()
         deposition.deposit()

@@ -1,6 +1,7 @@
 odom_topic: "/rtabmap/odom"
 cmd_vel_topic: "/cmd_vel"
 nav_goal_topic: "/goal"
+apriltag_topic: "/apriltag_pose"
 
 
 nav:

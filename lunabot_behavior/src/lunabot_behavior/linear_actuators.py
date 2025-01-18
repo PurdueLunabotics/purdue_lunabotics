@@ -4,11 +4,10 @@ from lunabot_msgs.msg import RobotSensors
 from std_msgs.msg import Int8
 
 import time
-import interrupts
 
-class Ascent:
+class LinearActuatorManager:
 	'''
-	This is a transition state used to raise the linear actuators to the maximum height.
+	Used to raise or lower linear actuators
 	'''
 
 	def sensors_callback(self, msg: RobotSensors):
@@ -22,7 +21,7 @@ class Ascent:
 
 		if lin_act_publisher is None:
 			self.lin_act_publisher = rospy.Publisher("/lin_act", Int8, queue_size=1, latch=True)
-			rospy.init_node('ascent_node')
+			rospy.init_node('lin_act_node')
 		else:
 			self.lin_act_publisher = lin_act_publisher
 
@@ -32,7 +31,7 @@ class Ascent:
 
 		self.rate = rospy.Rate(10)  # 10hz
 
-		self.ACTUATOR_CURRENT_THRESHOLD = 0.01 #TODO adjust as needed
+		self.ACTUATOR_CURRENT_THRESHOLD = 0.01 #TODO find best value or remove
 
 		self.RAISING_TIME = 30
 
@@ -40,15 +39,15 @@ class Ascent:
 
 		self.is_sim = rospy.get_param("is_sim")
 
-	def raise_linear_actuators(self):
+	def raise_linear_actuators(self, use_current: bool = False):
 		"""
 		Raise linear actuators to the max. height by turning them on until the current received is 0.
 		"""
 
 		# don't run if in sim
 		if (self.is_sim):
-			rospy.loginfo("Ascent: would raise actuators")
-			time.sleep(2)
+			rospy.loginfo("Behavior: would raise actuators")
+			time.sleep(4)
 			return True
 
 		time.sleep(0.1)
@@ -58,17 +57,13 @@ class Ascent:
 
 		start_time = rospy.get_time()
 
+		# raise for the given time, at max
 		while (rospy.get_time() - start_time < self.RAISING_TIME):
 			self.lin_act_publisher.publish(lin_act_msg)
 
-			#TODO check for new sensor message / values
-			if (self.robot_sensors.act_right_curr - 0) < self.ACTUATOR_CURRENT_THRESHOLD:
-				# If the current is within EPSILON of 0, then end
-				#break
-				pass
-
-			if (interrupts.check_for_interrupts() != interrupts.Errors.FINE):
-				return False
+			# if we are using current data, then stop if the current is close to 0
+			if use_current and (self.robot_sensors.act_right_curr - 0) < self.ACTUATOR_CURRENT_THRESHOLD:
+				return
 
 			self.rate.sleep()
 
@@ -78,5 +73,5 @@ class Ascent:
 		return True
 	
 if __name__ == "__main__":
-	ascent = Ascent()
-	ascent.raise_linear_actuators()
+	lin_actuators = LinearActuatorManager()
+	lin_actuators.raise_linear_actuators()

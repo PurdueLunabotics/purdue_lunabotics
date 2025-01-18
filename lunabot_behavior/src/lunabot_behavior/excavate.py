@@ -1,21 +1,20 @@
 import rospy
 import time
+import sys
 
 from lunabot_msgs.msg import RobotEffort, RobotSensors
-import interrupts
 from geometry_msgs.msg import Twist
-#from lunabot_control.scripts.pid_controller import VelocityPIDController
-#from lunabot_control.scripts.clamp_output import clamp_output
-from pid_controller import VelocityPIDController 
-from clamp_output import clamp_output  
-import ascent
+
+from lunabot_control.pid_controller import VelocityPIDController
+from lunabot_control.clamp_output import clamp_output
+from lunabot_behavior.linear_actuators import LinearActuatorManager
 
 from std_msgs.msg import Int8
 
 
-class Excavate:
+class ExcavationController:
     """
-    A state used to autonomously excavate. Plunge lowers linear actuators while spinning the buckets,
+    Used to autonomously excavate. Plunge lowers linear actuators while spinning the buckets,
     and excavate drives forwards/spins the buckets to try and meet a target depth of cut.
     """
 
@@ -33,20 +32,14 @@ class Excavate:
         Else, initialize this node to run on its own.
         """
 
-        if excavation_publisher is None:
+        if excavation_publisher is None or lin_act_publisher is None or cmd_vel_publisher is None:
             self.excavation_publisher: rospy.Publisher = rospy.Publisher("/excavate", Int8, queue_size=1, latch=True)
+            self.lin_act_publisher: rospy.Publisher = rospy.Publisher("/lin_act", Int8, queue_size=1, latch=True)
+            self.cmd_vel_publisher: rospy.Publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
             rospy.init_node("excavation_node")
         else:
             self.excavation_publisher: rospy.Publisher = excavation_publisher
-
-        if lin_act_publisher is None:
-            self.lin_act_publisher: rospy.Publisher = rospy.Publisher("/lin_act", Int8, queue_size=1, latch=True)
-        else:
             self.lin_act_publisher: rospy.Publisher = lin_act_publisher
-
-        if cmd_vel_publisher is None:
-            self.cmd_vel_publisher: rospy.Publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
-        else:
             self.cmd_vel_publisher: rospy.Publisher = cmd_vel_publisher
 
         self.robot_sensors = RobotSensors()
@@ -56,38 +49,25 @@ class Excavate:
         self.rate = rospy.Rate(10)
 
         # 90 percent of max speed
-        TARGET_EXCAVATION_VELOCITY = 8 * 0.9
+        TARGET_EXCAVATION_VELOCITY = 8 * 0.9   # TODO find max speed, and what unit it's in
 
-        self.excavation_pid_controller = VelocityPIDController(
-            TARGET_EXCAVATION_VELOCITY, 1, 0, 0, 127
-        )  # TODO find values
-
-        self.left_drivetrain_pid_controller = VelocityPIDController(
-            1, 1, 0, 0, 127
-        )  # TODO find values
-        self.right_drivetrain_pid_controller = VelocityPIDController(
-            1, 1, 0, 0, 127
-        )  # TODO find values
+        self.excavation_pid_controller = VelocityPIDController(TARGET_EXCAVATION_VELOCITY, 1, 0, 0, 127)  # TODO pick feed-forward value from new control space
 
         # Constants (in meters)
-        self.TARGET_DEPTH_OF_CUT = 0.005  # Currently set to .5 cm
-
+        self.TARGET_DEPTH_OF_CUT = 0.005  # (.5 cm)
         self.BUCKET_RADIUS = 0.0948
         self.BUCKET_SPACING = 0.0853
 
         self.LOWERING_TIME = 30  # seconds
         self.TRENCHING_TIME = 5  # seconds
 
-        self.load_cell_weight_threshold = 0  # TODO find value
-        self.max_lin_act_vel = (
-            0.00688405797
-        )  # In meters/s, the speed of the linear actuators at the max power
-        self.lin_act_max_power = 110
-        # from experiment - 19 cm / 27.6 seconds
+        self.LOAD_CELL_WEIGHT_THRESHOLD = 1  # In kg, TODO find value
+        self.MAX_LIN_ACT_VEL = 0.00688405797  # In meters/s, the speed of the linear actuators at the max power (from experiment - 19 cm / 27.6 seconds)
+        self.LIN_ACT_MAX_POWER = 110
 
-        self.lin_act_curr_threshold = 10  # TODO find value
+        self.LIN_ACT_CURR_THRESHOLD = 10  # Amps; TODO find value
 
-        self.excavation_current_threshold = 25  # Amps; TODO find/confirm value
+        self.EXCAVATION_CURR_THRESHOLD = 25  # Amps; TODO find/confirm value
 
         self.is_sim = rospy.get_param("is_sim")
 
@@ -102,48 +82,34 @@ class Excavate:
         Controls plunging (moving linear actuators down + spinning excavation)
         """
 
-        time.sleep(0.1)  # Why is time.sleep() here. TODO investigate
+        time.sleep(0.1)  
 
         print("Excavation: Plunging")
 
         if self.is_sim:
             rospy.loginfo("Plunge: would plunge")
             time.sleep(3)
-            return True
+            return
 
         excavation_message = Int8()
         lin_act_message = Int8()
 
-        excavation_ang = (
-            self.robot_sensors.exc_ang
-        )  # TODO have firmware give excavation angle directly?
         start_time = rospy.get_time()
         current_time = start_time
 
         # Until the linear actuators reach the end (based on time), keep moving them down
         while rospy.get_time() - start_time < self.LOWERING_TIME:
 
-            if interrupts.check_for_interrupts() != interrupts.Errors.FINE:
-                return False
-
             new_time = rospy.get_time()
-            new_excavation_ang = self.robot_sensors.exc_ang
 
             dt = new_time - current_time
 
             # Set excavation based on the PID controller
-            excavation_velocity = (
-                new_excavation_ang - excavation_ang
-            ) / dt  # TODO check calculations are good
-            
-            #print("exc vel: ", excavation_velocity)
-            #print("filtered: ", self.robot_sensors.exc_vel)
+            excavation_velocity = self.robot_sensors.exc_vel
+        
 
-            excavation_control = self.excavation_pid_controller.update(
-                excavation_velocity, dt
-            )
-            #print(excavation_control, "control")
-            excavation_message.data = clamp_output(excavation_control)
+            excavation_control = self.excavation_pid_controller.update(excavation_velocity, dt)
+            excavation_message.data = excavation_control  #TODO clip this to a maximum
 
             # Set the target linear actuator velocity to target the depth of cut
             target_actuator_velocity = (
@@ -153,13 +119,13 @@ class Excavate:
                 / self.BUCKET_SPACING
             )
 
-            lin_act_message.data = clamp_output(-target_actuator_velocity / self.max_lin_act_vel * self.lin_act_max_power)  # No encoders so cannot do PID, estimating (will slighly underestimate on lower voltage)
+            lin_act_message.data = clamp_output(-target_actuator_velocity / self.MAX_LIN_ACT_VEL * self.LIN_ACT_MAX_POWER)  # No encoders on actuators so cannot do PID
 
             self.lin_act_publisher.publish(lin_act_message)
             self.excavation_publisher.publish(excavation_message)
 
             # Check for excavation getting stuck (high current)
-            if self.robot_sensors.exc_curr > self.excavation_current_threshold:
+            if self.robot_sensors.exc_curr > self.EXCAVATION_CURR_THRESHOLD:
                 self.exc_failure_counter += 1
                 self.spin_excavation_backwards()
 
@@ -167,51 +133,77 @@ class Excavate:
                 break
 
             current_time = new_time
-            excavation_ang = new_excavation_ang
 
             self.rate.sleep()
 
         lin_act_message.data = 0
         self.lin_act_publisher.publish(lin_act_message)
 
-        return True
+    def no_sensor_plunge(self):
+        """
+        Plunge for when no sensors are running. Just lowers linear actuators.
+        """
+
+        time.sleep(0.1)  
+
+        print("Excavation: Plunging")
+
+        if self.is_sim:
+            rospy.loginfo("Plunge: would plunge")
+            time.sleep(3)
+            return
+
+        excavation_message = Int8()
+        lin_act_message = Int8()
+
+        start_time = rospy.get_time()
+        current_time = start_time
+
+        # Until the linear actuators reach the end (based on time), keep moving them down
+        while rospy.get_time() - start_time < self.LOWERING_TIME:
+
+            lin_act_message.data = self.LIN_ACT_MAX_POWER
+            excavation_message.data = 1  # TODO find max exc speed
+
+            self.lin_act_publisher.publish(lin_act_message)
+            self.excavation_publisher.publish(excavation_message)
+
+            self.rate.sleep()
+
+        lin_act_message.data = 0
+        self.lin_act_publisher.publish(lin_act_message)
+
+        # also stop excavation because we don't go into trenching
+        excavation_message.data = 0
+        self.excavation_publisher.publish(excavation_message)
+
 
     def trench(self):
         """
         Controls trenching (spinning excavation + driving forward)
         """
 
-        time.sleep(0.1)  # Why is time.sleep() here. TODO investigate
+        time.sleep(0.1)
 
         print("Excavation: Trenching")
 
         if self.is_sim:
             rospy.loginfo("Trenching: would trench")
             time.sleep(3)
-            return True
+            return
 
         excavation_message = Int8()
         cmd_vel_message = Twist()
 
-        excavation_ang = self.robot_sensors.exc_ang 
         current_time = rospy.get_time()
         start_time = current_time
 
-        """
-        TODO: no load cells yet
-
         load_cell_weight = self.robot_sensors.load_cell_weights[0] + self.robot_sensors.load_cell_weights[1]
 
-        original while condition: load_cell_weight < self.load_cell_weight_threshold
-        """
+        # maybe TODO add logic for stopping if obstacles exist (both rocks and craters)
 
-        # TODO add logic for stopping if obstacles exist (both rocks and craters)
-
-        # Until the set amount of time, keep moving the robot forward and spinning excavation
-        while rospy.get_time() - start_time < self.TRENCHING_TIME:
-
-            if interrupts.check_for_interrupts() != interrupts.Errors.FINE:
-                return False
+        # Until the set amount of time and while the robot is not yet full, keep moving the robot forward and spinning excavation
+        while rospy.get_time() - start_time < self.TRENCHING_TIME and load_cell_weight < self.LOAD_CELL_WEIGHT_THRESHOLD:
 
             new_time = rospy.get_time()
             new_excavation_ang = self.robot_sensors.exc_ang
@@ -222,7 +214,7 @@ class Excavate:
 
             excavation_control = self.excavation_pid_controller.update(excavation_velocity, dt)
 
-            excavation_message.data = clamp_output(excavation_control)
+            excavation_message.data = excavation_control # TODO clip this to a maximum
 
             self.excavation_publisher.publish(excavation_message)
 
@@ -239,7 +231,7 @@ class Excavate:
             self.cmd_vel_publisher.publish(cmd_vel_message)
 
             # Check for excavation getting stuck (high current)
-            if self.robot_sensors.exc_curr > self.excavation_current_threshold:
+            if self.robot_sensors.exc_curr > self.EXCAVATION_CURR_THRESHOLD:
                 self.exc_failure_counter += 1
                 self.spin_excavation_backwards()
 
@@ -247,12 +239,11 @@ class Excavate:
                 break
 
             current_time = new_time
-            excavation_ang = new_excavation_ang
 
-            #load_cell_weight = (
-            #    self.robot_sensors.load_cell_weights[0]
-            #    + self.robot_sensors.load_cell_weights[1]
-            #)
+            load_cell_weight = (
+               self.robot_sensors.load_cell_weights[0]
+               + self.robot_sensors.load_cell_weights[1]
+            )
 
             self.rate.sleep()
 
@@ -264,34 +255,47 @@ class Excavate:
         
         self.cmd_vel_publisher.publish(cmd_vel_message)
 
-        return True
+    def no_sensor_excavate(self):
+        """
+        Excavation for when no sensors are running. Just plunges.
+        """
+        self.no_sensor_plunge()
+
 
     def spin_excavation_backwards(self):
         """
-        Spins excavation backwards for 1 second. Used to unstick rocks from buckets (if excavation gets high current)
+        Stop excavation and spin excavation backwards for 2 seconds. Used to unstick rocks from buckets (if excavation gets high current)
         """
 
         print("Excavation: spinning backwards (", self.exc_failure_counter, ")")
 
         # 90% of max speed, backwards
-        EXCAVATION_SPEED = int(-127 * 0.9)
+        EXCAVATION_SPEED = int(-127 * 0.9)  #TODO find max speed
 
         excavation_message = Int8()
+        excavation_message.data = 0
+        self.excavation_publisher.publish(excavation_message)
+        rospy.sleep(1)
+
+
         excavation_message.data = EXCAVATION_SPEED
 
         self.excavation_publisher.publish(excavation_message)
 
-        rospy.sleep(1)
+        rospy.sleep(2)
 
         excavation_message.data = 0
         self.excavation_publisher.publish(excavation_message)
 
 
 if __name__ == "__main__":
-    excavate_module = Excavate()
-    excavate_module.excavate()
+    excavate_module = ExcavationController()
 
-    lin_act_publisher = rospy.Publisher("/lin_act", Int8, queue_size=1, latch=True)
-    ascent_module = ascent.Ascent(lin_act_publisher)
+    if len(sys.argv) > 1 and (sys.argv[1] == "-n" or sys.argv[1] == "-no-sensor"):
+        excavate_module.no_sensor_plunge()
+    else:
+        excavate_module.excavate()
+
+    linear_actuators = LinearActuatorManager()
     print("Exc: Raising")
-    ascent_module.raise_linear_actuators()
+    linear_actuators.raise_linear_actuators()

@@ -20,7 +20,7 @@ class Zone:
 
     def visualize_zone(self, publisher: rospy.Publisher):
         """
-        Visualzies a given zone (its four corners) as a square in rviz.
+        Visualizes a given zone (its four corners) as a square in rviz.
         Publisher should be a rospy publisher that publishes the Path message type. 
         (Make sure the publisher's topic is being visualized in rviz)
         """

@@ -6,6 +6,7 @@ pc_topic: "/point_cloud"
 odom_topic: "/odom"
 nav_goal_topic: "/goal"
 cmd_vel_topic: "/cmd_vel"
+apriltag_topic: "/apriltag_pose"
 
 nav:
     map_topic: "/maps/costmap_node/global_costmap/costmap"
