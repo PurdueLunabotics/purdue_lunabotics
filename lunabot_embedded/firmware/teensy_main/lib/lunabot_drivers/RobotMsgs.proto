@@ -13,9 +13,6 @@ message RobotSensors {
   float exc_ang = 9;
 
   float dep_weight = 10;
-  float uwb_dist_0 = 11;
-  float uwb_dist_1 = 12;
-  float uwb_dist_2 = 13;
 }
 
 message RobotEffort {

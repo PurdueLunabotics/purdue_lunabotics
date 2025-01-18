@@ -16,8 +16,6 @@
 #include <RobotMsgs.pb.h>
 #include "robot.hpp"
 
-#define UWBSerial Serial4
-
 enum MotorDir { CW = HIGH, CCW = LOW };
 enum STMotor { M1 = 1, M2 = 2 };
 
@@ -87,18 +85,6 @@ private:
   static ADS1119 ads2;
 };
 #endif
-
-class M5Stack_UWB_Trncvr {
-public:
-  M5Stack_UWB_Trncvr(){};
-  static void init();
-  static float read_uwb(uint8_t id);
-  static void transfer();
-
-private:
-  static constexpr int NUM_UWB_TAGS = 3;
-  volatile static float recv_buffer_[NUM_UWB_TAGS];
-};
 
 class VLH35_Angle_Bus {
 public:

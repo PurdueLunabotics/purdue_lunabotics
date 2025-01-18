@@ -8,7 +8,6 @@
 
 #define TX_PERIOD 10               // ms
 #define CTRL_PERIOD 2                // ms
-#define UWB_TRANSFER_PERIOD 10'000 // microsec
 #define CURR_UPDATE_PERIOD 8       // ms
 #define STALE_EFFORT_PERIOD 1000   // ms
 
@@ -34,8 +33,6 @@ void send() {
 
   excavation::update(state.exc_curr, state.exc_ang);
 
-  uwb::update(state.uwb_dist_0, state.uwb_dist_1, state.uwb_dist_2);
-
   /*
   Serial.print("Raw: ");
   Serial.print(state.act_right_curr);
@@ -46,14 +43,12 @@ void send() {
   pb_encode(&stream, RobotSensors_fields, &state);
 }
 
-IntervalTimer uwb_timer;
 float last_effort;
 
 void setup() {
   //Serial.begin(115200);
   Sabertooth_MotorCtrl::init_serial(ST_SERIAL, ST_BAUD_RATE);
   
-  M5Stack_UWB_Trncvr::init();
   KillSwitchRelay::init();
 
   #ifdef OLD_CURRENT_SENSOR
@@ -61,8 +56,6 @@ void setup() {
   #else 
   ADS1119_Current_Bus::init_ads1119();
   #endif
-
-  uwb_timer.begin(M5Stack_UWB_Trncvr::transfer, UWB_TRANSFER_PERIOD);
 
   // disable timeout
   MC1.setTimeout(0);
