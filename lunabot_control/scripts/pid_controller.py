@@ -99,5 +99,6 @@ class PIDController:
 
         if (abs(output) < self.min_output):
             output = 0
+            self.total_error = 0  # reset error sum to avoid messing with future control
 
         return output
