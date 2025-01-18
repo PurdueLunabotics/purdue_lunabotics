@@ -105,7 +105,11 @@
         <remap from="depth/image" to="camera/depth/image_rect_raw"/>
         <remap from="depth/camera_info" to="camera/color/camera_info"/>
         <param name="roi_ratios" value="0.0 0.0 0.3 0.0"/>
-      </node>
+        <param name="decimation" value="2"/>
+        <param name="voxel_size" value="0.05"/>
+        <param name="noise_filter_radius" value="0.1"/>
+        <param name="max_depth" value="10"/>
+        <param name="min_depth" value="0.5"/>      </node>
 
       <!-- sync rgb/depth images per camera -->
       <!-- <node pkg="nodelet" type="nodelet" name="rgbd_sync" args="standalone rtabmap_sync/rgbd_sync"
