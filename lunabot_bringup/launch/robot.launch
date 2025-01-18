@@ -42,5 +42,7 @@
         <rosparam file="$(find lunabot_config)/config/global_costmap.yml" command="load" ns="global_costmap" />
       </node>
     </group>
+      
+    <node name="apriltag_node" pkg="lunabot_perception" type="apriltag_node.py" output="screen" respawn="true"></node>
 
 </launch>

@@ -6,13 +6,11 @@ from apriltag_ros.msg import AprilTagDetectionArray, AprilTagDetection
 import tf2_ros
 import tf2_geometry_msgs
 
-class AprilTag:
+class ApriltagNode:
     
     def apriltag_callback(self, msg: AprilTagDetectionArray):
         self.apriltag_detections = msg;
-        #print(len(msg.detections))
         if len(msg.detections) > 0:
-            #xprint(self.found_apriltag)
             detection = msg.detections[0]
             frameid = detection.pose.header.frame_id
 
@@ -20,13 +18,10 @@ class AprilTag:
                 print("wrong camera")
                 #return
 
-            rospy.loginfo("Behavior: found apriltag")
-            self.apriltag_pub.publish(self.convert_to_odom_frame(detection))
-            print(self.convert_to_odom_frame(self.apriltag_detections.detections[0]))
-        
+            self.apriltag_publisher.publish(self.convert_to_odom_frame(detection))        
     
     def __init__(self):        
-        self.apriltag_pub = rospy.Publisher("/apriltag_pose", PoseStamped, queue_size=10)
+        self.apriltag_publisher = rospy.Publisher("/apriltag_pose", PoseStamped, queue_size=10, latch=True)
         
         self.is_sim = rospy.get_param("/is_sim")
         
@@ -49,8 +44,6 @@ class AprilTag:
         rate = rospy.Rate(self.frequency)
         
         while not rospy.is_shutdown():
-            # if self.found_apriltag:
-            #     self.found_apriltag = False
             rate.sleep()    
             
         
@@ -58,6 +51,7 @@ class AprilTag:
         """
         Convert the first apriltag detection to the odom frame
         """
+
         tf_buffer = tf2_ros.Buffer()
         tf_listener = tf2_ros.TransformListener(tf_buffer)
 
@@ -77,6 +71,6 @@ class AprilTag:
 
 
 if __name__ == "__main__":
-    detection = AprilTag()
-    detection.loop()
+    apriltag_node = ApriltagNode()
+    apriltag_node.loop()
     
