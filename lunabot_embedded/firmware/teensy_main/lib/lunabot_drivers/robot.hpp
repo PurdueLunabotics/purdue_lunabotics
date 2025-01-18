@@ -32,10 +32,6 @@ float update_curr_left();
 float update_curr_right();
 } // namespace drivetrain
 
-namespace uwb {
-void update(float &d0, float &d1, float &d2);
-} // namespace uwb
-
 namespace deposition {
 void cb(int8_t dep);
 void update(float &);

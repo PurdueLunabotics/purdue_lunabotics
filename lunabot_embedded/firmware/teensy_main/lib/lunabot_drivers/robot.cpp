@@ -87,14 +87,6 @@ void cb(int8_t left_drive_volt, int8_t right_drive_volt) {
 
 } // namespace drivetrain
 
-namespace uwb {
-void update(float &d0, float &d1, float &d2) {
-  d0 = M5Stack_UWB_Trncvr::read_uwb(0);
-  d1 = M5Stack_UWB_Trncvr::read_uwb(1);
-  d2 = M5Stack_UWB_Trncvr::read_uwb(2);
-}
-} // namespace uwb
-
 namespace excavation {
 Sabertooth_MotorCtrl exc_mtr{&MC2, STMotor::M1};
 
