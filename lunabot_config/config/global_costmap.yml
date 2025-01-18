@@ -1,14 +1,13 @@
 plugins: 
-  - {name: static,  type: "costmap_2d::StaticLayer"} 
   - {name: inflation,  type: "costmap_2d::InflationLayer"} 
   - {name: obstacles,        type: "costmap_2d::ObstacleLayer"}
 publish_frequency: 10.0
 global_frame: "odom"
 robot_base_frame: "base_link"
 footprint: "[ [0.54615446154,0.295590],[0.546154,-0.295590],[-0.546154,-0.295590],[-0.546154,0.295590] ]"
-map_topic: "/rtabmap/octomap_grid"
 width: 20.0
 height: 20.0
+rolling_window: true
 
 inflation: 
   inflation_radius: 0.3,
