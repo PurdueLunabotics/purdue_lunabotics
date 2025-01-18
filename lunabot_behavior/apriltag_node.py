@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import rospy
 from geometry_msgs.msg import Twist, PoseStamped
 from apriltag_ros.msg import AprilTagDetectionArray, AprilTagDetection
@@ -7,6 +9,7 @@ import tf2_geometry_msgs
 class AprilTag:
     
     def apriltag_callback(self, msg: AprilTagDetectionArray):
+        self.apriltag_detections = msg;
         #print(len(msg.detections))
         if len(msg.detections) > 0:
             #xprint(self.found_apriltag)
@@ -16,31 +19,39 @@ class AprilTag:
             if (not self.is_sim and frameid != "d455_back_color_optical_frame"): # only use front camera
                 print("wrong camera")
                 #return
-            else:
-                rospy.loginfo("Behavior: found apriltag")
-                self.apriltag_pub.publish(self.convert_to_odom_frame(detection))
+
+            rospy.loginfo("Behavior: found apriltag")
+            self.apriltag_pub.publish(self.convert_to_odom_frame(detection))
+            print(self.convert_to_odom_frame(self.apriltag_detections.detections[0]))
         
     
-    def __init__(self):
+    def __init__(self):        
+        self.apriltag_pub = rospy.Publisher("/apriltag_pose", PoseStamped, queue_size=10)
         
         self.is_sim = rospy.get_param("/is_sim")
+        
         if self.is_sim:
             cam_topic = "/d435_backward/color/tag_detections"
         else:
             cam_topic = "/d455_back/camera/color/tag_detections"
-                
-                
-        self.apriltag_pub = rospy.Publisher("/apriltag_pose", PoseStamped, queue_size=10)
-        rospy.Subscriber(cam_topic, AprilTagDetectionArray, self.apriltag_callback)
         
-        self.rate = rospy.Rate(10)  # 10hz
+        rospy.Subscriber(cam_topic, AprilTagDetectionArray, self.apriltag_callback)   
+        
+        self.frequency = 10  # 10hz
+        
+        self.found_apriltag = False
+        self.apriltag_detections = AprilTagDetectionArray()
         
         
     def loop(self):
-        rospy.init_node("apriltag_node")    
+        rospy.init_node("apriltag_node") 
+        
+        rate = rospy.Rate(self.frequency)
         
         while not rospy.is_shutdown():
-            self.rate.sleep()    
+            # if self.found_apriltag:
+            #     self.found_apriltag = False
+            rate.sleep()    
             
         
     def convert_to_odom_frame(self, apriltag_detection: AprilTagDetection):

@@ -15,7 +15,7 @@ and then reporting back on the estimated locations of the mining zone and berm z
 class FindAprilTag:
 
     def apriltag_callback(self, msg: AprilTagDetectionArray):
-        self.apriltag_detections = msg;
+        self.apriltag_detections = msg
         #print(len(msg.detections))
         if len(msg.detections) > 0:
             #xprint(self.found_apriltag)
