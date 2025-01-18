@@ -62,8 +62,11 @@ class AlignmentController:
 
         rospy.loginfo("Homing: Aligning to angle")
 
-        euler_angles = euler_from_quaternion([self.apriltag_pos_in_odom.orientation.x, self.apriltag_pos_in_odom.orientation.y, self.apriltag_pos_in_odom.orientation.z, self.apriltag_pos_in_odom.orientation.w])
-        if (self.cam_mode != "sim"):
+        while self.odom is None or self.apriltag_pose_in_odom is None:
+            self.rate.sleep()
+
+        euler_angles = euler_from_quaternion([self.apriltag_pose_in_odom.pose.orientation.x, self.apriltag_pose_in_odom.pose.orientation.y, self.apriltag_pose_in_odom.pose.orientation.z, self.apriltag_pose_in_odom.pose.orientation.w])
+        if (self.is_sim):
             apriltag_yaw = euler_angles[2] - np.pi / 2
         else:
             apriltag_yaw = euler_angles[2] + np.pi / 2
@@ -111,9 +114,10 @@ class AlignmentController:
 
 
     def stop(self):
-        self.cmd_vel.linear.x = 0
-        self.cmd_vel.angular.z = 0
-        self.cmd_vel_publisher.publish(self.cmd_vel)
+        cmd_vel = Twist()
+        cmd_vel.linear.x = 0
+        cmd_vel.angular.z = 0
+        self.cmd_vel_publisher.publish(cmd_vel)
 
 if __name__ == "__main__":
     pass

@@ -24,6 +24,7 @@ class ExdepController:
     def apriltag_pose_callback(self, msg: PoseStamped):
         self.apriltag_pose_in_odom = msg
         
+        print("got apriltag")
         # Find the mining/berm zones in the odom frame
         self.mining_zone: zones.Zone = zones.find_mining_zone(self.apriltag_pose_in_odom, self.is_sim)
         self.berm_zone: zones.Zone = zones.find_berm_zone(self.apriltag_pose_in_odom, self.is_sim)
@@ -65,6 +66,8 @@ class ExdepController:
         self.linear_actuators = LinearActuatorManager(self.lin_act_publisher)
         self.alignment = AlignmentController(self.cmd_vel_publisher)
 
+        self.is_sim = rospy.get_param("/is_sim")
+
         self.apriltag_pose_in_odom = None
         self.mining_zone: zones.Zone = None
         self.berm_zone: zones.Zone = None
@@ -76,8 +79,6 @@ class ExdepController:
         self.robot_odom = Odometry()
         odom_topic = rospy.get_param("/odom_topic")
         rospy.Subscriber(odom_topic, Odometry, self.odom_callback)
-
-        self.is_sim = rospy.get_param("/is_sim")
 
         self.rate = rospy.Rate(10) #hz
 
@@ -107,10 +108,12 @@ class ExdepController:
         """
         rospy.sleep(0.1)
 
+        print("wait")
         # wait until we have our apriltag position
-        while (self.april_tag_pose_in_odom is None):
+        while (self.apriltag_pose_in_odom is None):
             rospy.sleep(0.1)
 
+        print("done")
         while (not rospy.is_shutdown):
 
             # we start in the mining zone, hopefully at a good mining location
@@ -133,6 +136,7 @@ class ExdepController:
             self.goal_publisher.publish(berm_goal)
 
             # move to the berm area
+            rospy.loginfo("Behavior: Moving to berm area")
             traversal_message = Bool()
             traversal_message.data = True
             self.traversal_publisher.publish(traversal_message)
@@ -169,6 +173,7 @@ class ExdepController:
             self.goal_publisher.publish(mining_goal)
 
             # move to the mining area
+            rospy.loginfo("Behavior: Moving to mining area")
             traversal_message.data = True
             self.traversal_publisher.publish(traversal_message)
 
