@@ -9,7 +9,7 @@
   <arg name="fps" default="30" />
   <arg name="front" default="true" />
   <arg name="back" default="true" />
-  <arg name="pointcloud" default="true" />
+  <arg name="pointcloud" default="false" />
 
   <group unless="$(arg sim)">
 
@@ -23,7 +23,7 @@
       <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="serial_no" value="$(arg serial_no_d455_front)" />
         <arg name="tf_prefix" value="d455_front" />
-        <arg name="filters" value="pointcloud" />
+        <!-- <arg name="filters" value="pointcloud" /> -->
         <arg name="align_depth" value="true" />
         <arg name="initial_reset" value="$(arg initial_reset)" />
         <arg name="depth_width" value="$(arg width)" />
@@ -41,6 +41,8 @@
 
       </include>
 
+
+
       <group ns="camera/color">
         <node pkg="image_proc" type="image_proc" name="image_proc"
           args="image:=camera/color/image_raw" />
@@ -48,6 +50,12 @@
           <arg name="camera_frame" value="d455_front_base" />
         </include>
       </group>
+
+      <node pkg="nodelet" type="nodelet" name="point_cloud_xyz" args="standalone rtabmap_util/point_cloud_xyz" output="screen">
+        <remap from="depth/image" to="camera/depth/image_rect_raw"/>
+        <remap from="depth/camera_info" to="camera/color/camera_info"/>
+        <param name="roi_ratios" value="0.0 0.0 0.3 0.0"/>
+      </node>
 
       <!-- sync rgb/depth images per camera -->
       <!-- <node pkg="nodelet" type="nodelet" name="rgbd_sync" args="standalone rtabmap_sync/rgbd_sync"
@@ -63,7 +71,7 @@
       <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="serial_no" value="$(arg serial_no_d455_back)" />
         <arg name="tf_prefix" value="d455_back" />
-        <arg name="filters" value="pointcloud" />
+        <!-- <arg name="filters" value="pointcloud" /> -->
         <arg name="align_depth" value="true" />
         <arg name="initial_reset" value="$(arg initial_reset)" />
         <arg name="depth_width" value="$(arg width)" />
@@ -87,6 +95,12 @@
           <arg name="camera_frame" value="d455_back_base" />
         </include>
       </group>
+
+      <node pkg="nodelet" type="nodelet" name="point_cloud_xyz" args="standalone rtabmap_util/point_cloud_xyz" output="screen">
+        <remap from="depth/image" to="camera/depth/image_rect_raw"/>
+        <remap from="depth/camera_info" to="camera/color/camera_info"/>
+        <param name="roi_ratios" value="0.0 0.0 0.3 0.0"/>
+      </node>
 
       <!-- sync rgb/depth images per camera -->
       <!-- <node pkg="nodelet" type="nodelet" name="rgbd_sync" args="standalone rtabmap_sync/rgbd_sync"
