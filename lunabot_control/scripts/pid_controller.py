@@ -1,3 +1,5 @@
+import numpy as np
+
 class VelocityPIDController:
     """
     Velocity PID Controller
@@ -48,6 +50,8 @@ class PIDController:
         self.total_error = 0
         self.prev_error = 0
         self.max_value = 0.5
+        self.min_output = 0
+        self.tolerance = 0
 
     def set_max_value(self, max_value: float):
         """
@@ -56,6 +60,14 @@ class PIDController:
         :param max_value: Maximum value
         """
         self.max_value = max_value
+
+    def set_tolerance(self, min_output: float):
+        """
+        Set minimum output value for PID controller.
+
+        :param min_output: minimum output
+        """
+        self.min_output = min_output
 
     def set_setpoint(self, setpoint: float):
         """
@@ -82,4 +94,8 @@ class PIDController:
         error_diff = (error - self.prev_error) / dt
         self.prev_error = error
         output = error * self.kp + self.total_error * self.ki + error_diff * self.kd
-        return max(min(output, self.max_value), -self.max_value)
+        
+        if (abs(output) < self.min_output):
+            output = 0
+
+        return np.clip(output, self.max_value, -self.max_value)
