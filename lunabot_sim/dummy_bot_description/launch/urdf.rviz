@@ -14,7 +14,7 @@ Panels:
         - /Path2
         - /Pose1
         - /Marker1
-        - /Marker1/Status1
+        - /Marker2
       Splitter Ratio: 0.5
     Tree Height: 505
   - Class: rviz/Selection
@@ -419,7 +419,15 @@ Visualization Manager:
       Marker Topic: /ptp/current_target
       Name: Marker
       Namespaces:
-        target: true
+        {}
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /ptp/line_path
+      Name: Marker
+      Namespaces:
+        {}
       Queue Size: 100
       Value: true
   Enabled: true
@@ -486,5 +494,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1000
-  X: 103
-  Y: 16
+  X: 38
+  Y: 50
