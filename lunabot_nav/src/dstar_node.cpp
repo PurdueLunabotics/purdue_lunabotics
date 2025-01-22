@@ -117,9 +117,9 @@ private:
 
     map = std::vector<std::vector<int>>(width, std::vector<int>(height));
 
-    for (int i = 0; i < width; ++i) {
-      for (int j = 0; j < height; ++j) {
-        map[i][j] = data->data[i * width + j];
+    for (int i = 0; i < height; ++i) {
+      for (int j = 0; j < width; ++j) {
+        map[j][i] = data->data[i * width + j];
       }
     }
 
@@ -145,9 +145,9 @@ private:
     }
 
     int index = 0;
-    for (int i = data->x; i < data->x + data->width; i++) {
-      for (int j = data->y; j < data->y + data->height; j++) {
-        map[i][j] = data->data[index];
+    for (int i = data->y; i < data->y + data->height; i++) {
+      for (int j = data->x; j < data->x + data->width; j++) {
+        map[j][i] = data->data[index];
         index++;
       }
     }

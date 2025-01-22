@@ -113,7 +113,6 @@ private:
   std::vector<real_world_point> create_path_list();
 
   grid_point goal;
-  grid_point start;
 
   grid_point current_point;
   grid_point prev_point;

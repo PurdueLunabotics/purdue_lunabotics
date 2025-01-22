@@ -31,12 +31,10 @@ Dstar::Dstar(real_world_point goal, real_world_point start, std::vector<std::vec
   this->y_offset = y_offset;
 
   this->goal = convert_to_grid(goal);
-  this->start = convert_to_grid(start);
-
   this->node_values_list[this->goal.x][this->goal.y].estimate_rhs = 0;
 
-  this->current_point = this->start;
-  this->prev_point = this->start;
+  this->current_point = convert_to_grid(start);
+  this->prev_point = convert_to_grid(start);
 
   // Insert the goal node into the priority queue
   this->insert(this->goal, this->calculate_key(this->goal));
