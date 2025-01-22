@@ -17,7 +17,7 @@ class PointToPoint:
         self.LINEAR_P = 5.0
         self.LINEAR_I = 0
         self.LINEAR_D = 0
-        self.LINEAR_TOLERANCE = 0.1  # meters
+        self.LINEAR_TOLERANCE = 0.2  # meters
         self.MAX_LINEAR_SPEED = 0.5  # m/s
         self.linear_pid = PIDController(
             self.LINEAR_P,
@@ -164,7 +164,7 @@ class PointToPoint:
     # PATH PROCESSING
     # ==================================================================================================================
 
-    def __simplify_path(self, points, difference_threshold=0.97):
+    def __simplify_path(self, points, difference_threshold=0.88):
         filtered_points = []
         marker_points = []
 
@@ -201,7 +201,8 @@ class PointToPoint:
 
         if len(filtered_points) == 0:
             filtered_points = points
-            marker_points = self.__point_list_to_ros_point_list(points)
+        
+        marker_points = self.__point_list_to_ros_point_list(filtered_points)
 
         marker_points.insert(0, marker_points[0])
         marker_points.insert(0, Point(self.robot_pose[0], self.robot_pose[1], 0))
@@ -210,8 +211,9 @@ class PointToPoint:
 
     def __point_list_to_ros_point_list(self, points):
         results = []
-        for point in points:
-            results.append(Point(point[0], point[1], 0))
+        for i in range(len(points) - 1):
+            results.append(Point(points[i][0], points[i][1], 0))
+            results.append(Point(points[i + 1][0], points[i + 1][1], 0))
 
         return results
 
@@ -240,6 +242,8 @@ class PointToPoint:
             # normalize to make error reflect around-the-world
             angle_error = 2 * np.pi - angle_error
 
+        self.angular_disparity_publisher.publish(angle_error)
+
         # check if robot heading is within tolerance - if so, terminate turning procedure
         self.at_angle_target = np.abs(angle_error) < self.ANGULAR_TOLERANCE_RAD
 
@@ -251,6 +255,7 @@ class PointToPoint:
             self.angular_vel = -self.angular_pid.calculate(
                 state=angle_error, dt=self.pid_dt, setpoint=0
             )
+            self.pid_angular_publisher.publish(self.angular_vel)
         else:
             self.angular_vel = 0
 
