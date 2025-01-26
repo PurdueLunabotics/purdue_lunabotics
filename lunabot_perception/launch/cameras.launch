@@ -24,7 +24,7 @@
       <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="serial_no" value="$(arg serial_no_d455_front)" />
         <arg name="tf_prefix" value="d455_front" />
-        <arg name="filters" value="disparity,decimation,pointcloud" />
+        <arg name="filters" value="disparity,decimation" />
         <arg name="align_depth" value="true" />
         <arg name="initial_reset" value="$(arg initial_reset)" />
         <arg name="depth_width" value="$(arg width)" />
@@ -33,7 +33,7 @@
         <arg name="color_width" value="$(arg width)" />
         <arg name="color_height" value="$(arg height)" />
         <arg name="color_fps" value="$(arg fps)" />
-        <arg name="enable_color" value="false"/>
+        <arg name="enable_color" value="true"/>
         <arg name="enable_gyro" value="false" />
         <arg name="enable_accel" value="false" />
         <arg name="enable_sync" value="true" />
@@ -79,7 +79,7 @@
       <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="serial_no" value="$(arg serial_no_d455_back)" />
         <arg name="tf_prefix" value="d455_back" />
-        <arg name="filters" value="disparity,decimation,pointcloud" />
+        <arg name="filters" value="disparity,decimation" />
         <arg name="align_depth" value="true" />
         <arg name="initial_reset" value="$(arg initial_reset)" />
         <arg name="depth_width" value="$(arg width)" />

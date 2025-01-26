@@ -43,7 +43,7 @@
                 <arg name="depth_topic" value="/d455_back/camera/aligned_depth_to_color/image_raw" />
                 <arg name="rgb_topic" value="/d455_back/camera/color/image_rect_color" />
                 <arg name="camera_info_topic" value="/d455_back/camera/color/camera_info" />
-                <arg name="scan_cloud_topic" value="/pointcloud/combined_cloud" />
+                <arg name="scan_cloud_topic" value="/pointcloud/assembled_cloud" />
                 <arg name="subscribe_scan_cloud" value="true" />
                 <arg name="rtabmapviz" value="false" />
                 <arg name="imu_topic" value="/imu" />
@@ -75,6 +75,14 @@
                     filter_limit_negative: False
                 </rosparam>
             </node> -->
+
+            <node ns="pointcloud" pkg="nodelet" type='nodelet' name='point_cloud_assembler'
+                args = "standalone rtabmap_util/point_cloud_assembler">
+                <remap from="cloud" to="combined_cloud"/>
+                <param name="fixed_frame_id" value="base_link" />
+                <param name="circular_buffer" value="true"/>
+                <param name="max_clouds" value="100"/>
+            </node>
 
             <node ns="pointcloud" pkg="nodelet" type='nodelet' name="point_cloud_aggregator"
                 args="standalone rtabmap_util/point_cloud_aggregator">
