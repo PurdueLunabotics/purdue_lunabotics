@@ -45,7 +45,7 @@
       </include>
 
       <node pkg="nodelet" type="nodelet" name="points_xyzrgb_hw_registered"
-            args="load depth_image_proc/point_cloud_xyzrgb realsense2_camera_manager false">
+            args="load depth_image_proc/point_cloud_xyzrgb d455_front/camera/realsense2_camera_manager false">
         <remap from="rgb/image_rect_color"        to="color/image_rect_color" />
         <remap from="rgb/camera_info"             to="color/camera_info" />
         <remap from="depth_registered/image_rect" to="aligned_depth_to_color/image_raw" />
@@ -106,7 +106,7 @@
       </include>
 
       <node pkg="nodelet" type="nodelet" name="points_xyzrgb_hw_registered"
-            args="load depth_image_proc/point_cloud_xyzrgb realsense2_camera_manager false">
+            args="load depth_image_proc/point_cloud_xyzrgb d455_back/camera/realsense2_camera_manager false">
         <remap from="rgb/image_rect_color"        to="color/image_rect_color" />
         <remap from="rgb/camera_info"             to="color/camera_info" />
         <remap from="depth_registered/image_rect" to="aligned_depth_to_color/image_raw" />
