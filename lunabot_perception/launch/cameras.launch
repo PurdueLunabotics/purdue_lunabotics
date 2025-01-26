@@ -9,7 +9,7 @@
   <arg name="fps" default="30" />
   <arg name="front" default="true" />
   <arg name="back" default="true" />
-  <arg name="pointcloud" default="false" />
+  <arg name="pointcloud" default="true" />
   <arg name="decimation" default="8"/>
 
   <group unless="$(arg sim)">
@@ -24,7 +24,7 @@
       <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="serial_no" value="$(arg serial_no_d455_front)" />
         <arg name="tf_prefix" value="d455_front" />
-        <!-- <arg name="filters" value="pointcloud" /> -->
+        <arg name="filters" value="disparity,decimation,pointcloud" />
         <arg name="align_depth" value="true" />
         <arg name="initial_reset" value="$(arg initial_reset)" />
         <arg name="depth_width" value="$(arg width)" />
@@ -54,16 +54,16 @@
         </include>
       </group> -->
 
-      <node pkg="nodelet" type="nodelet" name="point_cloud_xyz" args="standalone rtabmap_util/point_cloud_xyz" output="screen">
+      <!-- <node pkg="nodelet" type="nodelet" name="point_cloud_xyz" args="standalone rtabmap_util/point_cloud_xyz" output="screen">
         <remap from="depth/image" to="camera/depth/image_rect_raw"/>
         <remap from="depth/camera_info" to="camera/depth/camera_info"/>
-        <!-- <param name="roi_ratios" value="0.0 0.0 0.3 0.0"/> -->
+        <param name="roi_ratios" value="0.0 0.0 0.3 0.0"/>
         <param name="decimation" value="$(arg decimation)"/>
         <param name="voxel_size" value="0.05"/>
         <param name="noise_filter_radius" value="0.1"/>
         <param name="max_depth" value="10"/>
         <param name="min_depth" value="0.5"/>
-      </node>
+      </node> -->
 
       <!-- sync rgb/depth images per camera -->
       <!-- <node pkg="nodelet" type="nodelet" name="rgbd_sync" args="standalone rtabmap_sync/rgbd_sync"
@@ -79,7 +79,7 @@
       <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="serial_no" value="$(arg serial_no_d455_back)" />
         <arg name="tf_prefix" value="d455_back" />
-        <!-- <arg name="filters" value="pointcloud" /> -->
+        <arg name="filters" value="disparity,decimation,pointcloud" />
         <arg name="align_depth" value="true" />
         <arg name="initial_reset" value="$(arg initial_reset)" />
         <arg name="depth_width" value="$(arg width)" />
@@ -105,15 +105,15 @@
         </include>
       </group>
 
-      <node pkg="nodelet" type="nodelet" name="point_cloud_xyz" args="standalone rtabmap_util/point_cloud_xyz" output="screen">
+      <!-- <node pkg="nodelet" type="nodelet" name="point_cloud_xyz" args="standalone rtabmap_util/point_cloud_xyz" output="screen">
         <remap from="depth/image" to="camera/depth/image_rect_raw"/>
         <remap from="depth/camera_info" to="camera/depth/camera_info"/>
-        <!-- <param name="roi_ratios" value="0.0 0.0 0.3 0.0"/> -->
+        <param name="roi_ratios" value="0.0 0.0 0.3 0.0"/>
         <param name="decimation" value="$(arg decimation)"/>
         <param name="voxel_size" value="0.05"/>
         <param name="noise_filter_radius" value="0.1"/>
         <param name="max_depth" value="10"/>
-        <param name="min_depth" value="0.5"/>      </node>
+        <param name="min_depth" value="0.5"/>      </node> -->
 
       <!-- sync rgb/depth images per camera -->
       <!-- <node pkg="nodelet" type="nodelet" name="rgbd_sync" args="standalone rtabmap_sync/rgbd_sync"
