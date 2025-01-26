@@ -164,41 +164,54 @@ class PointToPoint:
     # PATH PROCESSING
     # ==================================================================================================================
 
-    def __simplify_path(self, points, difference_threshold=0.88):
-        filtered_points = []
-        marker_points = []
 
+    ### Simplifies a complex path by removing points that are close to colinear with their neighbors
+    ### ensures that gradual changes are still done
+
+    def simplify_path(self,points, difference_threshold=0.97):
+        filtered_points = [points[0]]
+        last_filtered_index = 0
         if len(points) >= 3:
-            for i in range(len(points) - 2):
-                p1 = points[i]
-                p2 = points[i + 1]
-                p3 = points[i + 2]
-
+            for i in range(2,len(points)):
+                p1 = points[last_filtered_index]
+                p2 = points[last_filtered_index+1]
+                p3 = points[i]
                 # find projection of vectors on each other
-                v1 = np.array(p1) - np.array(p2)
+                #vector 1 is from the last filtered point to the next point in the complex path
+                v1 = np.array(p2,'float64') - np.array(p1,'float64')
                 v1 /= np.linalg.norm(v1)  # normalize
-                v2 = np.array(p3) - np.array(p2)
+                #vector 2 is from the last filtered point to the current point in the complex path
+                v2 = np.array(p3,'float64') - np.array(p1,'float64')
                 v2 /= np.linalg.norm(v2)  # normalize
-
+                print(str(v1)+" "+str(v2))
+                
                 # calculate projection size
-                projection_size = np.abs(np.dot(v1, v2))
-
+                projection_size = np.dot(v1, v2)
+                                
                 # if within difference threshold, keep the point
                 if projection_size <= difference_threshold:
-                    if len(filtered_points) != 0:
-                        marker_points.append(
-                            Point(filtered_points[-1][0], filtered_points[-1][1], 0)
-                        )
-                        marker_points.append(Point(p2[0], p2[1], 0))
-
+                    j=0
+                    #check the points between the indicies of p1 and p3 to find the last p2 that isn't within tolerance
+                    for j in range(0,i-last_filtered_index):
+                        p2 = points[last_filtered_index+1+j]
+                        v1 = np.array(p2,'float64') - np.array(p1,'float64')
+                        v1 /= np.linalg.norm(v1)  # normalize
+                        v2 = np.array(p3,'float64') - np.array(p1,'float64')
+                        v2 /= np.linalg.norm(v2)  # normalize
+                        projection_size = np.dot(v1, v2)
+                        if projection_size>difference_threshold:
+                            p2 = points[last_filtered_index+j]
+                            break
+                    
                     filtered_points.append(p2)
+                    last_filtered_index = last_filtered_index+j
+
 
                 # add last point to end up in same location
-                if i == len(points) - 3:
-                    filtered_points.append(p3)
-                    marker_points.append(Point(p2[0], p2[1], 0))
-                    marker_points.append(Point(p3[0], p3[1], 0))
-
+                if i == len(points)-1:
+                    filtered_points.append(points[-1])
+        else: 
+            filtered_points = points
         if len(filtered_points) == 0:
             filtered_points = points
         
@@ -207,6 +220,7 @@ class PointToPoint:
         marker_points.insert(0, marker_points[0])
         marker_points.insert(0, Point(self.robot_pose[0], self.robot_pose[1], 0))
 
+        print("SIMPLIFY PATH: Points: "+str(points)+" ; Simple Points: "+str(filtered_points)) #put the points and filtered points into console
         return filtered_points, marker_points
 
     def __point_list_to_ros_point_list(self, points):
