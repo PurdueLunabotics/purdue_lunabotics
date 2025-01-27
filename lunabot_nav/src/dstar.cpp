@@ -7,7 +7,6 @@ Dstar::Dstar() {};
 
 Dstar::Dstar(real_world_point goal, real_world_point start, std::vector<std::vector<int>> init_map, double resolution, double x_offset, double y_offset, int occupancy_threshold) {
   // TODO - map resize
-  // TODO - why is path not working when obstacle in the middle?
 
   this->km = 0.0; // Accumulation of distance from the last point(of changed map) to the current point
 
@@ -163,15 +162,6 @@ void Dstar::update_point(grid_point point) {
   }
 
   node_queue.remove_if_contains(point);
-
-  int iterations = node_queue.size();
-  for (int i = 0; i < iterations; i++) {
-    node c_node = node_queue.top();
-    node_queue.pop();
-    if (c_node.point != point) {
-      node_queue.push(c_node);
-    }
-  }
 
   // Place it on the queue if not consistent
   node_value node = node_values_list[point.y][point.x];
