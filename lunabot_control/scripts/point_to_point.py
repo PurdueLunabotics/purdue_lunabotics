@@ -115,7 +115,7 @@ class PointToPoint:
         self.robot_pose = (
             msg.pose.pose.position.x,
             msg.pose.pose.position.y,
-            angles[2],
+            angles[2], #-pi to pi
         )
 
         self.odom_dt = rospy.Time.now().to_sec() - self.prev_odom_time
@@ -168,7 +168,7 @@ class PointToPoint:
     ### Simplifies a complex path by removing points that are close to colinear with their neighbors
     ### ensures that gradual changes are still done
 
-    def simplify_path(self,points, difference_threshold=0.97):
+    def __simplify_path(self,points, difference_threshold=0.97):
         filtered_points = [points[0]]
         last_filtered_index = 0
         if len(points) >= 3:
@@ -247,7 +247,7 @@ class PointToPoint:
         current_pose = pose
         # calculate angle to target from x axis
         pose_target_angle = np.arctan2(
-            point[1] - self.robot_pose[1], point[0] - self.robot_pose[0]
+            point[1] - current_pose[1], point[0] - current_pose[0]
         )
         # subtract heading to find angle error
         angle_error = pose_target_angle - current_pose[2]
@@ -257,11 +257,11 @@ class PointToPoint:
             angle_error = 2 * np.pi - angle_error
 
         self.angular_disparity_publisher.publish(angle_error)
-
+        print("P2P: Robot Angle: "+str(current_pose[2])+" Target Angle: "+str(pose_target_angle)+" Angular Error: "+str(angle_error))
         # check if robot heading is within tolerance - if so, terminate turning procedure
         self.at_angle_target = np.abs(angle_error) < self.ANGULAR_TOLERANCE_RAD
 
-        if not self.at_angle_target and not self.at_linear_target:
+        if not self.at_angle_target and not self.at_linear_target: #only turn if not within linear target tolerance
             self.linear_vel = (
                 0  # stop linear translation if angle error becomes too big
             )
@@ -300,12 +300,8 @@ class PointToPoint:
         # check if robot linear position is within tolerance - if so, terminate linear motion
         self.at_linear_target = np.abs(linear_error) < self.LINEAR_TOLERANCE
 
-        if (
-            not self.at_linear_target
-        ) and self.angular_vel == 0:  # only translate if stopped turning
-            self.linear_vel = -self.linear_pid.calculate(
-                state=linear_error, dt=self.pid_dt, setpoint=0
-            )
+        if (not self.at_linear_target) and self.angular_vel == 0:  # only translate if stopped turning
+            self.linear_vel = -self.linear_pid.calculate(state=linear_error, dt=self.pid_dt, setpoint=0)
         else:
             self.linear_vel = 0
 
@@ -415,13 +411,13 @@ class PointToPoint:
 
         while not rospy.is_shutdown():
             # update difference in time
-            self.pid_dt = rospy.Time.now().to_sec() - self.prev_odom_time
+            self.pid_dt = rospy.Time.now().to_sec() - self.prev_pid_time
             self.prev_pid_time = rospy.Time.now().to_sec()  # update previous time
 
-            if self.pid_dt == 0 or self.pid_dt is None:
-                self.pid_dt = 1 / self.FREQUENCY  # ensure no div by 0 errors
+            if self.pid_dt == 0 or self.pid_dt is None: # ensure no div by 0 errors
+                self.pid_dt = 1 / self.FREQUENCY  
 
-            if self.path != [] and self.at_angle_target and self.at_linear_target:
+            if self.path != [] and self.at_linear_target: #go to next target when at linear target
                 # check that target point index will be within bounds and increment
                 if self.target_point_index != len(self.path) - 1:
                     self.target_point_index += 1

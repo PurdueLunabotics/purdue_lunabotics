@@ -12,8 +12,8 @@ screen = pygame.display.set_mode(size)
 ### Simplifies a complex path by removing points that are close to colinear with their neighbors
 ### ensures that gradual changes are still done
 
-def simplify_path(points, difference_threshold=0.97):
-    if len(points==0):
+def simplify_path(points, difference_threshold=0.99):
+    if len(points)==0:
         return points
     print("-------")
     print(points)
