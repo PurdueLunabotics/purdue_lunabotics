@@ -7,6 +7,7 @@ Dstar::Dstar() {};
 
 Dstar::Dstar(real_world_point goal, real_world_point start, std::vector<std::vector<int>> init_map, double resolution, double x_offset, double y_offset, int occupancy_threshold) {
   // TODO - map resize
+  // TODO - why is path not working when obstacle in the middle?
 
   this->km = 0.0; // Accumulation of distance from the last point(of changed map) to the current point
 
@@ -16,10 +17,10 @@ Dstar::Dstar(real_world_point goal, real_world_point start, std::vector<std::vec
   node_values_list = std::vector<std::vector<node_value>>(init_map.size(), std::vector<node_value>(init_map[0].size()));
 
   // 2d Array of nodes that corresponds to the map : each value is[Distance(g), Estimate(rhs)]
-  for (int x = 0; x < node_values_list.size(); x++) {
-    for (int y = 0; y < node_values_list[x].size(); y++) {
-      node_values_list[x][y].distance_g = INT_MAX;
-      node_values_list[x][y].estimate_rhs = INT_MAX;
+  for (int y = 0; y < node_values_list.size(); y++) {
+    for (int x = 0; x < node_values_list[y].size(); x++) {
+      node_values_list[y][x].distance_g = INT_MAX;
+      node_values_list[y][x].estimate_rhs = INT_MAX;
     }
   }
 
@@ -31,7 +32,7 @@ Dstar::Dstar(real_world_point goal, real_world_point start, std::vector<std::vec
   this->y_offset = y_offset;
 
   this->goal = convert_to_grid(goal);
-  this->node_values_list[this->goal.x][this->goal.y].estimate_rhs = 0;
+  this->node_values_list[this->goal.y][this->goal.x].estimate_rhs = 0;
 
   this->current_point = convert_to_grid(start);
   this->prev_point = convert_to_grid(start);
@@ -61,7 +62,7 @@ real_world_point Dstar::convert_to_real(grid_point pt) {
 
 // returns true if point is inside the map boundaries
 bool Dstar::inside_map(grid_point point) {
-  return 0 <= point.x && point.x < current_map.size() && 0 <= point.y && point.y < current_map[0].size();
+  return 0 <= point.y && point.y < current_map.size() && 0 <= point.x && point.x < current_map[0].size();
 }
 
 // returns the lowest priority in the queue
@@ -98,7 +99,7 @@ grid_point Dstar::bfs_non_occupied(grid_point point) {
       continue;
     }
 
-    if (inside_map(pt) && current_map[pt.x][pt.y] < OCCUPANCY_THRESHOLD) {
+    if (inside_map(pt) && current_map[pt.y][pt.x] < OCCUPANCY_THRESHOLD) {
       return pt;
     }
 
@@ -119,7 +120,7 @@ grid_point Dstar::bfs_non_occupied(grid_point point) {
 
 // Calculates the priority of a node based on its g and rhs values
 node_key Dstar::calculate_key(grid_point point) {
-  node_value nv = node_values_list[point.x][point.y];
+  node_value nv = node_values_list[point.y][point.x];
   double min_val = std::min(nv.distance_g, nv.estimate_rhs);
 
   double key1 = min_val + hueristic(point) + km;
@@ -132,7 +133,7 @@ node_key Dstar::calculate_key(grid_point point) {
 // checking each surrounding node, calculating what the distance value should be based on those nodes,
 // and taking the lowest value.
 double Dstar::calculate_RHS(grid_point point) {
-  if (current_map[point.x][point.y] > OCCUPANCY_THRESHOLD) {
+  if (current_map[point.y][point.x] > OCCUPANCY_THRESHOLD) {
     return INT_MAX;
   }
 
@@ -143,9 +144,9 @@ double Dstar::calculate_RHS(grid_point point) {
     grid_point new_point = {point.x + cardinal_directions[i].x, point.y + cardinal_directions[i].y};
 
     // If the node is in bounds, and not an obstacle, add the distance value to the list
-    if (inside_map(new_point) && current_map[new_point.x][new_point.y] < OCCUPANCY_THRESHOLD) {
-      double g_val = node_values_list[new_point.x][new_point.y].distance_g;
-      surrounding_values[i] = g_val + 1; // sqrt(2); TODO - handle non-cardinal directions
+    if (inside_map(new_point) && current_map[new_point.y][new_point.x] < OCCUPANCY_THRESHOLD) {
+      double g_val = node_values_list[new_point.y][new_point.x].distance_g;
+      surrounding_values[i] = g_val + 1; // sqrt(2); TODO - handle non-cardinal directions - this should fix hugging obstacles
     } else {
       surrounding_values[i] = INT_MAX;
     }
@@ -158,7 +159,7 @@ double Dstar::calculate_RHS(grid_point point) {
 // replaces it on the queue if its values are locally inconsistent (if g != RHS)
 void Dstar::update_point(grid_point point) {
   if (point != goal) {
-    node_values_list[point.x][point.y].estimate_rhs = calculate_RHS(point);
+    node_values_list[point.y][point.x].estimate_rhs = calculate_RHS(point);
   }
 
   node_queue.remove_if_contains(point);
@@ -173,7 +174,7 @@ void Dstar::update_point(grid_point point) {
   }
 
   // Place it on the queue if not consistent
-  node_value node = node_values_list[point.x][point.y];
+  node_value node = node_values_list[point.y][point.x];
   if (node.distance_g != node.estimate_rhs) {
     insert(point, calculate_key(point));
   }
@@ -190,17 +191,17 @@ std::vector<real_world_point> Dstar::find_path() {
   std::cout << "Dstar: Finding path" << std::endl;
 
   // If the start is out of the map, or is an obstacle, search for the closest non - occupied node
-  if (!inside_map(current_point) || current_map[current_point.x][current_point.y] > OCCUPANCY_THRESHOLD) {
+  if (!inside_map(current_point) || current_map[current_point.y][current_point.x] > OCCUPANCY_THRESHOLD) {
     current_point = bfs_non_occupied(current_point);
   }
 
   // Loop until current node(start) is locally consistent(g == rhs) and its priority is lowest in the queue
   while (get_top_key() < calculate_key(current_point) ||
-         node_values_list[current_point.x][current_point.y].distance_g != node_values_list[current_point.x][current_point.y].estimate_rhs) {
+         node_values_list[current_point.y][current_point.x].distance_g != node_values_list[current_point.y][current_point.x].estimate_rhs) {
 
     node_key old_key = get_top_key();
     grid_point chosen_point = node_queue.top().point;
-    node_value chosen_value = node_values_list[chosen_point.x][chosen_point.y];
+    node_value chosen_value = node_values_list[chosen_point.y][chosen_point.x];
     node_queue.pop();
 
     // If the priority of the node was incorrect, add back to the queue with the correct priority.
@@ -211,7 +212,7 @@ std::vector<real_world_point> Dstar::find_path() {
     // If g value is greater then rhs
     else if (chosen_value.distance_g > chosen_value.estimate_rhs) {
       // Lower the g value(the estimate is the more recent data)
-      node_values_list[chosen_point.x][chosen_point.y].distance_g = chosen_value.estimate_rhs;
+      node_values_list[chosen_point.y][chosen_point.x].distance_g = chosen_value.estimate_rhs;
 
       // update all surrounding nodes
       for (int i = 0; i < NUM_DIRECTIONS; i++) {
@@ -225,7 +226,7 @@ std::vector<real_world_point> Dstar::find_path() {
     // G is lower then rhs
     else {
       // Set g to infinity(mark it for replanning)
-      node_values_list[chosen_point.x][chosen_point.y].distance_g = INT_MAX;
+      node_values_list[chosen_point.y][chosen_point.x].distance_g = INT_MAX;
 
       // Update this node
       update_point(chosen_point);
@@ -276,13 +277,13 @@ std::vector<real_world_point> Dstar::create_path_list() {
       grid_point new_point = {path_point.x + cardinal_directions[i].x, path_point.y + cardinal_directions[i].y};
 
       // if in bounds, and not an obstacle, add the g value to the list
-      if (inside_map(new_point) && current_map[new_point.x][new_point.y] < OCCUPANCY_THRESHOLD) {
+      if (inside_map(new_point) && current_map[new_point.y][new_point.x] < OCCUPANCY_THRESHOLD) {
 
         // We sort the path to take by two values - first the g value, then the euclidean distance to the goal.
         // This should pick, in event of a tie, the closer node to the goal.
 
         gvals[i].valid = true;
-        gvals[i].g_val = (goal != new_point) ? node_values_list[new_point.x][new_point.y].distance_g + 1 : -1;
+        gvals[i].g_val = (goal != new_point) ? node_values_list[new_point.y][new_point.x].distance_g + 1 : -1;
         gvals[i].heuristic = sqrt(pow(goal.x - new_point.x, 2) + pow(goal.y - new_point.y, 2));
         gvals[i].pt = new_point;
       } else {

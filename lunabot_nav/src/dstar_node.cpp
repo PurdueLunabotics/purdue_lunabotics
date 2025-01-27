@@ -115,11 +115,11 @@ private:
     uint32_t width = data->info.width;
     uint32_t height = data->info.height;
 
-    map = std::vector<std::vector<int>>(width, std::vector<int>(height));
+    map = std::vector<std::vector<int>>(height, std::vector<int>(width));
 
     for (int i = 0; i < height; ++i) {
       for (int j = 0; j < width; ++j) {
-        map[j][i] = data->data[i * width + j];
+        map[i][j] = data->data[i * height + j];
       }
     }
 
@@ -147,7 +147,7 @@ private:
     int index = 0;
     for (int i = data->y; i < data->y + data->height; i++) {
       for (int j = data->x; j < data->x + data->width; j++) {
-        map[j][i] = data->data[index];
+        map[i][j] = data->data[index];
         index++;
       }
     }
