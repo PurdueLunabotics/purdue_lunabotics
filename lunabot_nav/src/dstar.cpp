@@ -13,16 +13,6 @@ Dstar::Dstar(real_world_point goal, real_world_point start, std::vector<std::vec
   // What number on the map corresponds to occupied
   this->OCCUPANCY_THRESHOLD = occupancy_threshold;
 
-  node_values_list = std::vector<std::vector<node_value>>(init_map.size(), std::vector<node_value>(init_map[0].size()));
-
-  // 2d Array of nodes that corresponds to the map : each value is[Distance(g), Estimate(rhs)]
-  for (int y = 0; y < node_values_list.size(); y++) {
-    for (int x = 0; x < node_values_list[y].size(); x++) {
-      node_values_list[y][x].distance_g = INT_MAX;
-      node_values_list[y][x].estimate_rhs = INT_MAX;
-    }
-  }
-
   // 2d array occupancy map : Occupancy probabilities from[0 to 100].Unknown is - 1.
   this->current_map = init_map;
 
@@ -31,6 +21,18 @@ Dstar::Dstar(real_world_point goal, real_world_point start, std::vector<std::vec
   this->y_offset = y_offset;
 
   this->goal = convert_to_grid(goal);
+  buffer_map_for_goal();
+  this->goal = convert_to_grid(goal);
+
+  node_values_list = std::vector<std::vector<node_value>>(current_map.size(), std::vector<node_value>(current_map[0].size()));
+
+  // 2d Array of nodes that corresponds to the map : each value is[Distance(g), Estimate(rhs)]
+  for (int y = 0; y < node_values_list.size(); y++) {
+    for (int x = 0; x < node_values_list[y].size(); x++) {
+      node_values_list[y][x].distance_g = INT_MAX;
+      node_values_list[y][x].estimate_rhs = INT_MAX;
+    }
+  }
   this->node_values_list[this->goal.y][this->goal.x].estimate_rhs = 0;
 
   this->current_point = convert_to_grid(start);
@@ -316,6 +318,35 @@ std::vector<real_world_point> Dstar::create_path_list() {
   return path_list;
 }
 
+// TODO - desc
+void Dstar::buffer_map_for_goal() {
+  int left_buf = std::max((0 - goal.x) + BUF_EXTRA, 0); // returns 0 if goal.x > 0, else -goal.x
+  int right_buf = std::max((goal.x - (int)current_map[0].size()) + BUF_EXTRA, 0);
+  int up_buf = std::max((0 - goal.y) + BUF_EXTRA, 0); // returns 0 if goal.x > 0, else -goal.x
+  int down_buf = std::max((goal.y - (int)current_map.size()) + BUF_EXTRA, 0);
+
+  int original_rows = current_map.size();
+  int original_cols = current_map[0].size();
+
+  // New dimensions for the buffered map
+  int new_rows = original_rows + up_buf + down_buf;
+  int new_cols = original_cols + left_buf + right_buf;
+  buffer_offset_left = left_buf;
+  buffer_offset_up = up_buf;
+
+  // Create a new map filled with -1 (buffer)
+  std::vector<std::vector<int>> buffered_map(new_rows, std::vector<int>(new_cols, -1));
+
+  // Copy the original map into the new buffered map
+  for (int y = 0; y < original_rows; y++) {
+    for (int x = 0; x < original_cols; x++) {
+      buffered_map[y + up_buf][x + left_buf] = current_map[y][x];
+    }
+  }
+
+  // Replace the old map with the buffered map
+  current_map = buffered_map;
+}
+
 // TODO update_replan
-// TODO buffer_map_for_goal
 // TODO update_map

@@ -9,6 +9,7 @@
 #include <set>
 #include "math.h"
 
+#define BUF_EXTRA 3 // add 3 extra -1 squares on each side of map grid when buffering
 #define DBL_EPSILON 2.2204460492503131e-016
 
 struct real_world_point {
@@ -111,6 +112,7 @@ private:
   double calculate_RHS(grid_point point);
   void update_point(grid_point point);
   std::vector<real_world_point> create_path_list();
+  void buffer_map_for_goal();
 
   grid_point goal;
 
