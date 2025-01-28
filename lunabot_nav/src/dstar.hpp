@@ -114,7 +114,8 @@ private:
   void update_point(grid_point point);
   std::vector<real_world_point> create_path_list();
   void buffer_map_for_goal();
-  std::vector<real_world_point> update_replan(std::vector<std::vector<int>> prev_map, int new_map_offset_x, int new_map_offset_y);
+  std::vector<real_world_point> update_replan(std::vector<std::vector<int>> prev_map, int new_map_offset_x, int new_map_offset_y,
+                                              int buf_up, int buf_down, int buf_left, int buf_right);
 
   grid_point goal;
   real_world_point real_goal;

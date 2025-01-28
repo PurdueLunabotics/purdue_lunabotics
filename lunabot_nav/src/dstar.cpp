@@ -128,7 +128,7 @@ double Dstar::calculate_RHS(grid_point point) {
     return INT_MAX;
   }
 
-  double surrounding_values[NUM_DIRECTIONS];
+  double surrounding_values[NUM_DIRECTIONS + 1];
 
   // For each node(all 4 directions)
   for (int i = 0; i < NUM_DIRECTIONS; i++) {
@@ -142,8 +142,9 @@ double Dstar::calculate_RHS(grid_point point) {
       surrounding_values[i] = INT_MAX;
     }
   }
+  surrounding_values[4] = INT_MAX;
 
-  return *std::min_element(surrounding_values, surrounding_values + 4);
+  return *std::min_element(surrounding_values, surrounding_values + NUM_DIRECTIONS + 1);
 }
 
 // Updates a node's values by calculating its RHS (estimate value). It removes the node from the queue (based on old value) and
@@ -349,13 +350,14 @@ void Dstar::buffer_map_for_goal() {
 // and are used to compare the correct parts of the map.
 
 // Finally, it calculates the new path and returns the result
-std::vector<real_world_point> Dstar::update_replan(std::vector<std::vector<int>> prev_map, int new_map_offset_x, int new_map_offset_y) {
+std::vector<real_world_point> Dstar::update_replan(std::vector<std::vector<int>> prev_map, int new_map_offset_x, int new_map_offset_y,
+                                                   int buf_up, int buf_down, int buf_left, int buf_right) {
   // Add to the accumulation value the distance from the last point(of changed map) to the current point
   km += sqrt(pow(prev_point.x - current_point.x, 2) + pow(prev_point.y - current_point.y, 2));
   prev_point = current_point;
 
-  for (int y = buffer_offset_up; y < prev_map.size() - buffer_offset_down; y++) {
-    for (int x = buffer_offset_left; x < prev_map[0].size(); x++) {
+  for (int y = buf_up; y < prev_map.size() - buf_down; y++) {
+    for (int x = buf_left; x < prev_map[0].size() - buf_right; x++) {
       if (current_map[y + new_map_offset_y][x + new_map_offset_x] != prev_map[y][x]) {
         update_point({x + new_map_offset_x, y + new_map_offset_y});
       }
@@ -430,23 +432,24 @@ std::vector<real_world_point> Dstar::update_map(std::vector<std::vector<int>> ne
     }
   }
 
+  int old_buf_up = buffer_offset_up;
+  int old_buf_down = buffer_offset_down;
+  int old_buf_left = buffer_offset_left;
+  int old_buf_right = buffer_offset_right;
+
+  buffer_offset_left = map_buf_cols_left;
+  buffer_offset_right = map_buf_cols_right;
+  buffer_offset_up = map_buf_rows_up;
+  buffer_offset_down = map_buf_rows_down;
   this->x_offset = x_offset;
   this->y_offset = y_offset;
-
-  // change goal - as the size / buffer of the map has changed, the goal should be reconverted
-  goal = convert_to_grid(real_goal);
 
   // Change the value of the current node - these values(new rows / cols of node values) represent how much the physical size of the map has changed
   current_point.x += nv_buf_cols_left;
   current_point.y += nv_buf_rows_up;
 
-  std::vector<real_world_point> path = update_replan(prev_map, map_new_cols_left, map_new_rows_up);
+  // change goal - as the size / buffer of the map has changed, the goal should be reconverted
+  goal = convert_to_grid(real_goal);
 
-  // this has to happen afterwards
-  buffer_offset_left = map_buf_cols_left;
-  buffer_offset_right = map_buf_cols_right;
-  buffer_offset_up = map_buf_rows_up;
-  buffer_offset_down = map_buf_rows_down;
-
-  return path;
+  return update_replan(prev_map, map_new_cols_left, map_new_rows_up, old_buf_up, old_buf_down, old_buf_left, old_buf_right);
 }
