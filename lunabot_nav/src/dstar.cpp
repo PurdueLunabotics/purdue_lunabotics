@@ -358,8 +358,8 @@ std::vector<real_world_point> Dstar::update_replan(std::vector<std::vector<int>>
 
   for (int y = buf_up; y < prev_map.size() - buf_down; y++) {
     for (int x = buf_left; x < prev_map[0].size() - buf_right; x++) {
-      if (current_map[y + new_map_offset_y][x + new_map_offset_x] != prev_map[y][x]) {
-        update_point({x + new_map_offset_x, y + new_map_offset_y});
+      if (current_map[y + new_map_offset_y - buf_up][x + new_map_offset_x - buf_left] != prev_map[y][x]) {
+        update_point({x + new_map_offset_x - buf_left, y + new_map_offset_y - buf_up});
       }
     }
   }

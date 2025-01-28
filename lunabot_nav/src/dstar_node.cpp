@@ -120,7 +120,7 @@ private:
 
     for (int i = 0; i < height; ++i) {
       for (int j = 0; j < width; ++j) {
-        map[i][j] = data->data[i * height + j];
+        map[i][j] = data->data[i * width + j];
       }
     }
 
