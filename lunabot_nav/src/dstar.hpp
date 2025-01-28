@@ -99,6 +99,7 @@ public:
   Dstar(real_world_point goal, real_world_point start, std::vector<std::vector<int>> init_map, double resolution, double x_offset, double y_offset, int occupancy_threshold = 50);
   void update_position(real_world_point new_pt);
   std::vector<real_world_point> find_path();
+  std::vector<real_world_point> update_map(std::vector<std::vector<int>> new_map, double x_offset, double y_offset);
 
 private:
   grid_point convert_to_grid(real_world_point pt);
@@ -113,8 +114,10 @@ private:
   void update_point(grid_point point);
   std::vector<real_world_point> create_path_list();
   void buffer_map_for_goal();
+  std::vector<real_world_point> update_replan(std::vector<std::vector<int>> prev_map, int new_map_offset_x, int new_map_offset_y);
 
   grid_point goal;
+  real_world_point real_goal;
 
   grid_point current_point;
   grid_point prev_point;
@@ -128,6 +131,8 @@ private:
   // The amount of buffer on any side of the map
   int buffer_offset_left = 0;
   int buffer_offset_up = 0;
+  int buffer_offset_right = 0;
+  int buffer_offset_down = 0;
 
   double km;
   double OCCUPANCY_THRESHOLD;

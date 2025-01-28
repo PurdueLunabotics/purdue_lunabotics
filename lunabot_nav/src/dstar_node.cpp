@@ -36,6 +36,7 @@ public:
         dstar_init = true;
         publish_path(dstar.find_path());
         goal_update_needed = false;
+        grid_update_needed = false; // dif from python, don't update map if not strictly needed
         continue;
       }
 
@@ -45,6 +46,7 @@ public:
           dstar = Dstar(goal, pose, map, resolution, x_offset, y_offset, occupancy_threshold);
           publish_path(dstar.find_path());
           goal_update_needed = false;
+          grid_update_needed = false; // dif from python, don't update map if not strictly needed
 
           continue;
         }
@@ -55,8 +57,7 @@ public:
 
           ROS_DEBUG("Dstar grid update");
 
-          // TODO - handle dstar map update
-          // publish_path(dstar.update_map(map, x_offset, y_offset));
+          publish_path(dstar.update_map(map, x_offset, y_offset));
           grid_update_needed = false;
 
           continue;

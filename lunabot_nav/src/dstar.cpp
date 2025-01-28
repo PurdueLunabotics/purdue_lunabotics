@@ -6,8 +6,6 @@ grid_point cardinal_directions[NUM_DIRECTIONS] = {{0, -1}, {0, 1}, {-1, 0}, {1, 
 Dstar::Dstar() {};
 
 Dstar::Dstar(real_world_point goal, real_world_point start, std::vector<std::vector<int>> init_map, double resolution, double x_offset, double y_offset, int occupancy_threshold) {
-  // TODO - map resize
-
   this->km = 0.0; // Accumulation of distance from the last point(of changed map) to the current point
 
   // What number on the map corresponds to occupied
@@ -24,15 +22,7 @@ Dstar::Dstar(real_world_point goal, real_world_point start, std::vector<std::vec
   buffer_map_for_goal();
   this->goal = convert_to_grid(goal);
 
-  node_values_list = std::vector<std::vector<node_value>>(current_map.size(), std::vector<node_value>(current_map[0].size()));
-
-  // 2d Array of nodes that corresponds to the map : each value is[Distance(g), Estimate(rhs)]
-  for (int y = 0; y < node_values_list.size(); y++) {
-    for (int x = 0; x < node_values_list[y].size(); x++) {
-      node_values_list[y][x].distance_g = INT_MAX;
-      node_values_list[y][x].estimate_rhs = INT_MAX;
-    }
-  }
+  node_values_list = std::vector<std::vector<node_value>>(current_map.size(), std::vector<node_value>(current_map[0].size(), {INT_MAX, INT_MAX}));
   this->node_values_list[this->goal.y][this->goal.x].estimate_rhs = 0;
 
   this->current_point = convert_to_grid(start);
@@ -318,7 +308,8 @@ std::vector<real_world_point> Dstar::create_path_list() {
   return path_list;
 }
 
-// TODO - desc
+//  Add a buffer to the map so we can plan to the goal when it is outside the map.
+// Saves the amount of buffer to allow for correct translations between real-world coords and grid coords.
 void Dstar::buffer_map_for_goal() {
   int left_buf = std::max((0 - goal.x) + BUF_EXTRA, 0); // returns 0 if goal.x > 0, else -goal.x
   int right_buf = std::max((goal.x - (int)current_map[0].size()) + BUF_EXTRA, 0);
@@ -332,7 +323,9 @@ void Dstar::buffer_map_for_goal() {
   int new_rows = original_rows + up_buf + down_buf;
   int new_cols = original_cols + left_buf + right_buf;
   buffer_offset_left = left_buf;
+  buffer_offset_right = right_buf;
   buffer_offset_up = up_buf;
+  buffer_offset_down = down_buf;
 
   // Create a new map filled with -1 (buffer)
   std::vector<std::vector<int>> buffered_map(new_rows, std::vector<int>(new_cols, -1));
@@ -348,5 +341,112 @@ void Dstar::buffer_map_for_goal() {
   current_map = buffered_map;
 }
 
-// TODO update_replan
-// TODO update_map
+// Update and replanning: Should trigger whenever there is a new map.
+// Sets affected nodes to update, and calculates new g values (finds new path)
+// This function runs when the map changes.
+
+// Left offset and up offset are the amount of buffer added to the left and up sides of the map
+// and are used to compare the correct parts of the map.
+
+// Finally, it calculates the new path and returns the result
+std::vector<real_world_point> Dstar::update_replan(std::vector<std::vector<int>> prev_map, int new_map_offset_x, int new_map_offset_y) {
+  // Add to the accumulation value the distance from the last point(of changed map) to the current point
+  km += sqrt(pow(prev_point.x - current_point.x, 2) + pow(prev_point.y - current_point.y, 2));
+  prev_point = current_point;
+
+  for (int y = buffer_offset_up; y < prev_map.size() - buffer_offset_down; y++) {
+    for (int x = buffer_offset_left; x < prev_map[0].size(); x++) {
+      if (current_map[y + new_map_offset_y][x + new_map_offset_x] != prev_map[y][x]) {
+        update_point({x + new_map_offset_x, y + new_map_offset_y});
+      }
+    }
+  }
+
+  return find_path();
+}
+
+// Updates the map with new grid whenever map is changed.The node values list is expanded if needed to match the new size of the map.
+// The map is updated with the new given map, and buffer is added so that we never have to shrink the map / node values.
+
+// After the new map is built, we call update / replan, updating the needed node values, which later calculates the path and returns the new path
+std::vector<real_world_point> Dstar::update_map(std::vector<std::vector<int>> new_map, double x_offset, double y_offset) {
+  double prev_x_offset = this->x_offset;
+  double prev_y_offset = this->y_offset;
+
+  // Find the size of the data in the old map
+  std::vector<std::vector<int>> prev_map = current_map;
+  int prev_map_unbuf_width = prev_map[0].size() - buffer_offset_left - buffer_offset_right;
+  int prev_map_unbuf_height = prev_map.size() - buffer_offset_up - buffer_offset_down;
+
+  // Find how many new columns and rows are present (>= 0)
+  int map_new_cols_left = (prev_x_offset - x_offset) / resolution;
+  int map_new_cols_right = new_map[0].size() - prev_map_unbuf_width - map_new_cols_left;
+  int map_new_rows_up = (prev_y_offset - y_offset) / resolution;
+  int map_new_rows_down = new_map.size() - prev_map_unbuf_height - map_new_rows_up;
+
+  // Figure out how much buffer to add to the map, don't need to add buffer if the new map data covers it
+  int map_buf_cols_left = std::max(buffer_offset_left - map_new_cols_left, 0);
+  int map_buf_cols_right = std::max(buffer_offset_right - map_new_cols_right, 0);
+  int map_buf_rows_up = std::max(buffer_offset_up - map_new_rows_up, 0);
+  int map_buf_rows_down = std::max(buffer_offset_down - map_new_rows_down, 0);
+
+  int map_original_rows = new_map.size();
+  int map_original_cols = new_map[0].size();
+
+  // New dimensions for the buffered map
+  int map_new_rows = map_original_rows + map_buf_rows_up + map_buf_rows_down;
+  int map_new_cols = map_original_cols + map_buf_cols_left + map_buf_cols_right;
+
+  // Create a new map filled with -1 (buffer)
+  current_map = std::vector<std::vector<int>>(map_new_rows, std::vector<int>(map_new_cols, -1));
+
+  // Copy the original map into the new buffered map
+  for (int y = 0; y < map_original_rows; y++) {
+    for (int x = 0; x < map_original_cols; x++) {
+      current_map[y + map_buf_rows_up][x + map_buf_cols_left] = new_map[y][x];
+    }
+  }
+
+  // Find how many columns and rows we'll have to append to node values (the number of new columns/rows, unless already present in the buffer)
+  int nv_buf_cols_left = std::max(map_new_cols_left - buffer_offset_left, 0);
+  int nv_buf_cols_right = std::max(map_new_cols_right - buffer_offset_right, 0);
+  int nv_buf_rows_up = std::max(map_new_rows_up - buffer_offset_up, 0);
+  int nv_buf_rows_down = std::max(map_new_rows_down - buffer_offset_down, 0);
+
+  int nv_original_rows = node_values_list.size();
+  int nv_original_cols = node_values_list[0].size();
+
+  // New dimensions for the buffered map
+  int nv_new_rows = nv_original_rows + nv_buf_rows_up + nv_buf_rows_down;
+  int nv_new_cols = nv_original_cols + nv_buf_cols_left + nv_buf_cols_right;
+
+  // Create a new map filled with {INT_MAX, INT_MAX}
+  std::vector<std::vector<node_value>> prev_nv = node_values_list;
+  node_values_list = std::vector<std::vector<node_value>>(nv_new_rows, std::vector<node_value>(nv_new_cols, {INT_MAX, INT_MAX}));
+  // Copy the original node values into the new node_values
+  for (int y = 0; y < nv_original_rows; y++) {
+    for (int x = 0; x < nv_original_cols; x++) {
+      node_values_list[y + nv_buf_rows_up][x + nv_buf_cols_left] = prev_nv[y][x];
+    }
+  }
+
+  this->x_offset = x_offset;
+  this->y_offset = y_offset;
+
+  // change goal - as the size / buffer of the map has changed, the goal should be reconverted
+  goal = convert_to_grid(real_goal);
+
+  // Change the value of the current node - these values(new rows / cols of node values) represent how much the physical size of the map has changed
+  current_point.x += nv_buf_cols_left;
+  current_point.y += nv_buf_rows_up;
+
+  std::vector<real_world_point> path = update_replan(prev_map, map_new_cols_left, map_new_rows_up);
+
+  // this has to happen afterwards
+  buffer_offset_left = map_buf_cols_left;
+  buffer_offset_right = map_buf_cols_right;
+  buffer_offset_up = map_buf_rows_up;
+  buffer_offset_down = map_buf_rows_down;
+
+  return path;
+}
