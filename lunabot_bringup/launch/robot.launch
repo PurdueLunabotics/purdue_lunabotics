@@ -12,10 +12,11 @@
 
     <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node"
         output="screen" />
-
-    <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch" />
-
-    <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch" />
+    <arg name="isTestBot" default="false"/>
+    <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch">
+      <arg name="isTestBot" value="$(arg isTestBot)"/>
+    </include>
+    <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch"/>
     <include if="$(arg record)" file="$(find lunabot_bringup)/launch/record.launch">
         <arg name="exp_name" value="$(arg exp_name)" />
     </include>
