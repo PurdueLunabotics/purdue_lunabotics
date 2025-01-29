@@ -148,8 +148,10 @@ private:
     int index = 0;
     for (int i = data->y; i < data->y + data->height; i++) {
       for (int j = data->x; j < data->x + data->width; j++) {
-        map[i][j] = data->data[index];
-        index++;
+        if (0 <= i && i < map.size() && 0 <= j && j < map[0].size()) { // prevents issue where dstar still processing and new map is loaded in
+          map[i][j] = data->data[index];
+          index++;
+        }
       }
     }
 
