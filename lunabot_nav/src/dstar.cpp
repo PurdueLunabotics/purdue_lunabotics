@@ -1,7 +1,5 @@
 #include "dstar.hpp"
 
-// TODO - search for safe goal
-
 #define NUM_DIRECTIONS 4
 grid_point cardinal_directions[NUM_DIRECTIONS] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
 
@@ -24,6 +22,10 @@ Dstar::Dstar(real_world_point goal, real_world_point start, std::vector<std::vec
   this->goal = convert_to_grid(goal);
   buffer_map_for_goal();
   this->goal = convert_to_grid(goal);
+
+  if (current_map[this->goal.y][this->goal.x] > OCCUPANCY_THRESHOLD) {
+    this->goal = bfs_non_occupied(this->goal);
+  }
 
   node_values_list = std::vector<std::vector<node_value>>(current_map.size(), std::vector<node_value>(current_map[0].size(), {INT_MAX, INT_MAX}));
   this->node_values_list[this->goal.y][this->goal.x].estimate_rhs = 0;
@@ -174,7 +176,7 @@ void Dstar::update_point(grid_point point) {
 //
 // Once finished, returns the calculated path from the start to the goal.
 std::vector<real_world_point> Dstar::find_path() {
-  std::cout << "Dstar: Finding path" << std::endl;
+  // std::cout << "Dstar: Finding path" << std::endl;
 
   // If the start is out of the map, or is an obstacle, search for the closest non - occupied node
   if (!inside_map(current_point) || current_map[current_point.y][current_point.x] > OCCUPANCY_THRESHOLD) {
@@ -238,7 +240,7 @@ std::vector<real_world_point> Dstar::find_path() {
 // Create path: This creates a temporary node at the start, and picks the lowest g value (lowest distance to goal) as the next step on the path, adds it to the list, and
 // repeats until the goal is reached. All of these points in order are the path.
 std::vector<real_world_point> Dstar::create_path_list() {
-  std::cout << "Dstar: Generating path" << std::endl;
+  // std::cout << "Dstar: Generating path" << std::endl;
 
   std::vector<real_world_point> path_list;
 
@@ -290,7 +292,7 @@ std::vector<real_world_point> Dstar::create_path_list() {
     double best_g_val = INT_MAX;
     double best_tie_break = INT_MAX;
     for (int i = 0; i < NUM_DIRECTIONS; i++) {
-      if (gvals[i].valid && gvals[i].g_val <= best_g_val && gvals[i].heuristic < best_tie_break) {
+      if (gvals[i].valid && (gvals[i].g_val < best_g_val || (gvals[i].g_val == best_g_val && gvals[i].heuristic < best_tie_break))) {
         path_point = gvals[i].pt;
         best_g_val = gvals[i].g_val;
         best_tie_break = gvals[i].heuristic;
@@ -428,12 +430,6 @@ std::vector<real_world_point> Dstar::update_map(std::vector<std::vector<int>> ne
   // Create a new map filled with {INT_MAX, INT_MAX}
   std::vector<std::vector<node_value>> prev_nv = node_values_list;
   node_values_list = std::vector<std::vector<node_value>>(nv_new_rows, std::vector<node_value>(nv_new_cols, {INT_MAX, INT_MAX}));
-  // Copy the original node values into the new node_values
-  for (int y = 0; y < nv_original_rows; y++) {
-    for (int x = 0; x < nv_original_cols; x++) {
-      node_values_list[y + nv_buf_rows_up][x + nv_buf_cols_left] = prev_nv[y][x];
-    }
-  }
 
   int old_buf_up = buffer_offset_up;
   int old_buf_down = buffer_offset_down;
@@ -453,6 +449,18 @@ std::vector<real_world_point> Dstar::update_map(std::vector<std::vector<int>> ne
 
   // change goal - as the size / buffer of the map has changed, the goal should be reconverted
   goal = convert_to_grid(real_goal);
+  if (current_map[this->goal.y][this->goal.x] > OCCUPANCY_THRESHOLD) {
+    this->goal = bfs_non_occupied(this->goal);
+    this->node_values_list[this->goal.y][this->goal.x].estimate_rhs = 0;
+    this->insert(this->goal, this->calculate_key(this->goal));
+  } else {
+    // Copy the original node values into the new node_values
+    for (int y = 0; y < nv_original_rows; y++) {
+      for (int x = 0; x < nv_original_cols; x++) {
+        node_values_list[y + nv_buf_rows_up][x + nv_buf_cols_left] = prev_nv[y][x];
+      }
+    }
+  }
 
   return update_replan(prev_map, map_new_cols_left, map_new_rows_up, old_buf_up, old_buf_down, old_buf_left, old_buf_right);
 }
