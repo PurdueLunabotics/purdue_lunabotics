@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <launch>
   <arg name="isTestBot" default="false"/>
-  <arg name="serial_no_d455_back"    			    default="053122251286" unless="$(isTestBot)"/> 		
-  <arg name="serial_no_d455_back"    			    default="141222070808" if="$(isTestBot)"/> 		
-  <arg name="serial_no_d455_front"    			  default="053122251335" unless="$(isTestBot)"/> 	
-  <arg name="serial_no_d455_front"    			  default="939622074382" if="$(isTestBot)"/> 	
+  <arg name="serial_no_d455_back"    			    default="053122251286" unless="$(arg isTestBot)"/> 		
+  <arg name="serial_no_d455_back"    			    default="141222070808" if="$(arg isTestBot)"/> 		
+  <arg name="serial_no_d455_front"    			  default="053122251335" unless="$(arg isTestBot)"/> 	
+  <arg name="serial_no_d455_front"    			  default="939622074382" if="$(arg isTestBot)"/> 	
   
   <arg name="initial_reset"                   default="true"/>
   <arg name="sim"                             default="false"/>
