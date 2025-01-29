@@ -1,5 +1,7 @@
 #include "dstar.hpp"
 
+// TODO - search for safe goal
+
 #define NUM_DIRECTIONS 4
 grid_point cardinal_directions[NUM_DIRECTIONS] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
 
@@ -18,6 +20,7 @@ Dstar::Dstar(real_world_point goal, real_world_point start, std::vector<std::vec
   this->x_offset = x_offset;
   this->y_offset = y_offset;
 
+  this->real_goal = goal;
   this->goal = convert_to_grid(goal);
   buffer_map_for_goal();
   this->goal = convert_to_grid(goal);

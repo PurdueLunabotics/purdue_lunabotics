@@ -203,5 +203,8 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
 add_executable(dstar_node src/dstar_node.cpp src/dstar.cpp)
 target_link_libraries(dstar_node ${catkin_LIBRARIES})
+#target_compile_options(dstar_node PRIVATE -fsanitize=address -O1 -fno-omit-frame-pointer)
+#target_link_options(dstar_node PRIVATE -fsanitize=address -O1 -fno-omit-frame-pointer)
