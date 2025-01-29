@@ -1,13 +1,11 @@
 <?xml version="1.0"?>
 <launch>
   <arg name="isTestBot" default="false"/>
+  <arg name="serial_no_d455_back"    			default="053122251286"/> 		
+  <arg name="serial_no_d455_front"    			  default="053122251335"/> 	
   <group if="$(arg isTestBot)"/>
-    <arg name="serial_no_d455_back"    			default="141222070808"/> 		
-    <arg name="serial_no_d455_front"    			  default="939622074382"/> 	
-  </group>
-  <group unless="$(arg isTestBot)"/>
-    <arg name="serial_no_d455_back"    			default="053122251286"/> 		
-    <arg name="serial_no_d455_front"    			  default="053122251335"/> 	
+    <arg name="serial_no_d455_back"    			value="141222070808"/> 		
+    <arg name="serial_no_d455_front"    			  value="939622074382"/> 	
   </group>
   <arg name="initial_reset"                 default="true"/>
   <arg name="sim"                           default="false"/>
