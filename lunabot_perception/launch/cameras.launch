@@ -32,7 +32,7 @@
         <arg name="tf_prefix" value="d455_front" />
         <arg name="filters" value="disparity,decimation" />
         <arg name="align_depth" value="true" />
-        <arg name="initial_reset" value="$(arg initial_reset)" />
+        <!--<arg name="initial_reset" value="$(arg initial_reset)" />-->
         <arg name="depth_width" value="$(arg width)" />
         <arg name="depth_height" value="$(arg height)" />
         <arg name="depth_fps" value="$(arg fps)" />
@@ -46,7 +46,7 @@
         <arg name="publish_tf" value="true" />
         <arg name="enable_pointcloud" value="$(arg pointcloud)" />
         <arg name="tf_publish_rate" value="0"/>
-
+        <arg name="rgb_processing" value="false"/>
 
       </include>
 
@@ -88,7 +88,7 @@
         <arg name="tf_prefix" value="d455_back" />
         <arg name="filters" value="disparity,decimation" />
         <arg name="align_depth" value="true" />
-        <arg name="initial_reset" value="$(arg initial_reset)" />
+        <!--<arg name="initial_reset" value="$(arg initial_reset)" />-->
         <arg name="depth_width" value="$(arg width)" />
         <arg name="depth_height" value="$(arg height)" />
         <arg name="depth_fps" value="$(arg fps)" />
@@ -101,6 +101,7 @@
         <arg name="publish_tf" value="true" />
         <arg name="enable_pointcloud" value="$(arg pointcloud)" />
         <arg name="tf_publish_rate" value="0"/>
+        <arg name="rgb_processing" value="false"/>
 
       </include>
 
