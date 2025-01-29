@@ -29,7 +29,7 @@ class PointToPoint:
         self.ANGULAR_P = 5.0
         self.ANGULAR_I = 0
         self.ANGULAR_D = 0
-        self.ANGULAR_TOLERANCE_DEG = 5
+        self.ANGULAR_TOLERANCE_DEG = 10
         self.ANGULAR_TOLERANCE_RAD = np.deg2rad(self.ANGULAR_TOLERANCE_DEG)
         self.MAX_ANGULAR_SPEED_DEG_PER_SEC = 90
         self.MAX_ANGULAR_SPEED_RAD_PER_SEC = np.deg2rad(
@@ -330,10 +330,12 @@ class PointToPoint:
         """
 
         if point != [None, None] and self.robot_pose != [None, None, None]:
+            current_pose = self.robot_pose
+
             target = point
 
-            self.__turn_to_point(target, self.robot_pose)
-            self.__translate_to_point(target, self.robot_pose)
+            self.__turn_to_point(target, current_pose)
+            self.__translate_to_point(target, current_pose)
         else:
             self.linear_vel = 0
             self.angular_vel = 0
