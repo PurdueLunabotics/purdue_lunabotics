@@ -13,6 +13,8 @@
   <arg name="fps"                             default="60"/>
   <arg name="front"                           default="false"/>
   <arg name="back"                            default="true"/>
+  <arg name="pointcloud" default="false" />
+  <arg name="decimation" default="8"/>
 
   <group unless="$(arg sim)">
 
