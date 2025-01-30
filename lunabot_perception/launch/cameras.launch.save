@@ -1,19 +1,15 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="isTestBot" default="false"/>
-  <arg name="serial_no_d455_back"    			    default="053122251286" unless="$(arg isTestBot)"/> 		
-  <arg name="serial_no_d455_back"    			    default="141222070808" if="$(arg isTestBot)"/> 		
-  <arg name="serial_no_d455_front"    			  default="053122251335" unless="$(arg isTestBot)"/> 	
-  <arg name="serial_no_d455_front"    			  default="939622074382" if="$(arg isTestBot)"/> 	
-  
-  <arg name="initial_reset"                   default="true"/>
-  <arg name="sim"                             default="false"/>
-  <arg name="width"                           default="848"/>
-  <arg name="height"                          default="480"/>
-  <arg name="fps"                             default="30"/>
-  <arg name="front"                           default="true"/>
-  <arg name="back"                            default="true"/>
-  <arg name="pointcloud" default="false" />
+  <arg name="serial_no_d455_back" default="053122251286" />
+  <arg name="serial_no_d455_front" default="053122251335" />
+  <arg name="initial_reset" default="false" />
+  <arg name="sim" default="false" />
+  <arg name="width" default="848" />
+  <arg name="height" default="480" />
+  <arg name="fps" default="30" />
+  <arg name="front" default="true" />
+  <arg name="back" default="true" />
+  <arg name="pointcloud" default="true" />
   <arg name="decimation" default="8"/>
 
   <group unless="$(arg sim)">
@@ -25,13 +21,12 @@
     </node>
 
     <group ns="d455_front" if="$(arg front)">
-      <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
-        <arg name="manager" value="front_realsense2_camera_manager" />
+      <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="serial_no" value="$(arg serial_no_d455_front)" />
         <arg name="tf_prefix" value="d455_front" />
         <arg name="filters" value="disparity,decimation" />
         <arg name="align_depth" value="true" />
-        <!--<arg name="initial_reset" value="$(arg initial_reset)" />-->
+        <arg name="initial_reset" value="$(arg initial_reset)" />
         <arg name="depth_width" value="$(arg width)" />
         <arg name="depth_height" value="$(arg height)" />
         <arg name="depth_fps" value="$(arg fps)" />
@@ -45,7 +40,7 @@
         <arg name="publish_tf" value="true" />
         <arg name="enable_pointcloud" value="$(arg pointcloud)" />
         <arg name="tf_publish_rate" value="0"/>
-        <arg name="rgb_processing" value="false"/>
+
 
       </include>
 
@@ -78,16 +73,14 @@
         <remap from="rgb/camera_info" to="camera/color/camera_info" />
         <param name="approx_sync" value="false" />
       </node> -->
-    </group>
-
+    </grou
     <group ns="d455_back" if="$(arg back)">
-      <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
-        <arg name="manager" value="back_realsense2_camera_manager" />
+      <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="serial_no" value="$(arg serial_no_d455_back)" />
         <arg name="tf_prefix" value="d455_back" />
-        <arg name="filters" value="disparity,decimation" />
+        <arg name="filters" value="disparity,decimation,pointcloud" />
         <arg name="align_depth" value="true" />
-        <!--<arg name="initial_reset" value="$(arg initial_reset)" />-->
+        <arg name="initial_reset" value="$(arg initial_reset)" />
         <arg name="depth_width" value="$(arg width)" />
         <arg name="depth_height" value="$(arg height)" />
         <arg name="depth_fps" value="$(arg fps)" />
@@ -100,7 +93,6 @@
         <arg name="publish_tf" value="true" />
         <arg name="enable_pointcloud" value="$(arg pointcloud)" />
         <arg name="tf_publish_rate" value="0"/>
-        <arg name="rgb_processing" value="false"/>
 
       </include>
 
