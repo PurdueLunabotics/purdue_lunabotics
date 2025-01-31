@@ -11,7 +11,7 @@
   <arg name="width"                           default="424"/>
   <arg name="height"                          default="240"/>
   <arg name="fps"                             default="60"/>
-  <arg name="front"                           default="false"/>
+  <arg name="front"                           default="true"/>
   <arg name="back"                            default="true"/>
   <arg name="pointcloud" default="false" />
   <arg name="decimation" default="8"/>
@@ -132,6 +132,27 @@
       </node> -->
     </group>
 
+    <node ns="pointcloud" pkg="nodelet" type='nodelet' name='point_cloud_assembler'
+      args = "standalone rtabmap_util/point_cloud_assembler">
+      <remap from="cloud" to="/d455_back/camera/depth_registered/points" unless="$(arg front)"/>
+      <remap from="cloud" to="combined_cloud" if="$(arg front)"/>
+      <param name="fixed_frame_id" value="base_link" />
+      <param name="circular_buffer" value="true"/>
+      <param name="max_clouds" value="100"/>
+  </node>
+
+  <group if="$(arg front)">
+    <node ns="pointcloud" pkg="nodelet" type='nodelet' name="point_cloud_aggregator"
+        args="standalone rtabmap_util/point_cloud_aggregator">
+        <remap from="cloud1" to="/d455_back/camera/depth_registered/points" />
+        <remap from="cloud2" to="/d455_front/camera/depth_registered/points" />
+        <remap from="cloud3" to="/lidar_cloud" />
+        <param name="count" value="2" if="$(arg front)"/>
+        <param name="xyz_output" value="true"/>
+        <param name="fixed_frame_id" value="base_link" />
+
+    </node>
+  </group>
 
   </group>
 

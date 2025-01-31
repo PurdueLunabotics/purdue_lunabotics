@@ -77,25 +77,6 @@
                 </rosparam>
             </node> -->
 
-            <node ns="pointcloud" pkg="nodelet" type='nodelet' name='point_cloud_assembler'
-                args = "standalone rtabmap_util/point_cloud_assembler">
-                <remap from="cloud" to="combined_cloud"/>
-                <param name="fixed_frame_id" value="base_link" />
-                <param name="circular_buffer" value="true"/>
-                <param name="max_clouds" value="100"/>
-            </node>
-
-            <node ns="pointcloud" pkg="nodelet" type='nodelet' name="point_cloud_aggregator"
-                args="standalone rtabmap_util/point_cloud_aggregator">
-                <remap from="cloud1" to="/d455_back/camera/depth/color/points" />
-                <remap from="cloud2" to="/d455_front/camera/depth/color/points" />
-                <remap from="cloud3" to="/lidar_cloud" />
-                <param name="count" value="2"/>
-                <param name="xyz_output" value="true"/>
-                <param name="fixed_frame_id" value="base_link" />
-
-            </node>
-
             <!-- <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" /> -->
             <!-- Run a VoxelGrid filter to clean NaNs and downsample the data -->
             <!-- <node ns="front" pkg="nodelet" type="nodelet" name="voxel_grid"
