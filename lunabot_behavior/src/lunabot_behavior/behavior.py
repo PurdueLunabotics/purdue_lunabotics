@@ -107,8 +107,8 @@ class Behavior:
         # Initialize all of the modules (before the loop)
         linear_actuators = LinearActuatorManager(self.lin_act_publisher)
         alignment_controller = AlignmentController(self.velocity_publisher)
-        exdep_controller = ExdepController(self.excavate_publisher, self.deposition_publisher, 
-                                           self.lin_act_publisher, self.velocity_publisher, 
+        exdep_controller = ExdepController(self.excavate_publisher, self.lin_act_publisher,
+                                           self.velocity_publisher, self.deposition_publisher,
                                            self.traversal_publisher, self.goal_publisher)
         ####################
         # Startup & apriltag
@@ -166,7 +166,7 @@ class Behavior:
         mining_goal.pose.position.x = self.mining_zone.middle[0]
         mining_goal.pose.position.y = self.mining_zone.middle[1]
 
-        offset = zones.calc_offset(-1, 0, self.apriltag_pose_in_odom, self.is_sim)
+        offset = zones.calc_offset(-0.3, 0, self.apriltag_pose_in_odom, self.is_sim)
         mining_goal.pose.position.x += offset[0]
         mining_goal.pose.position.y += offset[1]
         mining_goal.pose.position.z = 0
