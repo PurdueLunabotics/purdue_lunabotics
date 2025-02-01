@@ -5,7 +5,7 @@ import math
 import numpy as np
 
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
-from geometry_msgs.msg import Twist, PoseStamped
+from geometry_msgs.msg import Twist, PoseStamped, PolygonStamped
 from nav_msgs.msg import Path, Odometry
 from lunabot_msgs.msg import RobotSensors, RobotErrors, Behavior
 from std_msgs.msg import Bool, Int8
@@ -37,8 +37,8 @@ class Behavior:
         self.berm_zone: zones.Zone = zones.find_berm_zone(self.apriltag_pose_in_odom, self.is_sim)
 
         # This visualizes the zones as polygons (visible in rviz)
-        self.mining_zone.visualize_zone(self.zone_visual_publisher)
-        self.berm_zone.visualize_zone(self.zone_visual_publisher)
+        self.mining_zone.visualize_zone(self.mining_zone_publisher)
+        self.berm_zone.visualize_zone(self.berm_zone_publisher)
 
     def __init__(self):
 
@@ -56,7 +56,8 @@ class Behavior:
         self.velocity_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
         self.traversal_publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue_size=1, latch=True)
         self.goal_publisher = rospy.Publisher("/goal", PoseStamped, queue_size=1, latch=True)
-        self.zone_visual_publisher = rospy.Publisher("/zone_visual", Path, queue_size=1, latch=True)
+        self.mining_zone_publisher = rospy.Publisher("/mining_zone", PolygonStamped, queue_size=1, latch=True)
+        self.berm_zone_publisher = rospy.Publisher("/berm_zone", PolygonStamped, queue_size=1, latch=True)
 
         self.mining_zone = None
         self.berm_zone = None

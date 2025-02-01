@@ -34,7 +34,6 @@ class ApriltagNode:
         
         self.frequency = 10  # 10hz
         
-        self.found_apriltag = False
         self.apriltag_detections = AprilTagDetectionArray()
         
         

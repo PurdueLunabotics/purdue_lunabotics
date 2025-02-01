@@ -1,6 +1,5 @@
 import rospy
-from geometry_msgs.msg import PoseStamped
-from nav_msgs.msg import Path
+from geometry_msgs.msg import PoseStamped, PolygonStamped, Point32
 from tf.transformations import euler_from_quaternion
 import math
 
@@ -21,46 +20,38 @@ class Zone:
     def visualize_zone(self, publisher: rospy.Publisher):
         """
         Visualizes a given zone (its four corners) as a square in rviz.
-        Publisher should be a rospy publisher that publishes the Path message type. 
+        Publisher should be a rospy publisher that publishes the PolygonStamped message type. 
         (Make sure the publisher's topic is being visualized in rviz)
         """
 
-        # Make a path containing all of the corners of the zone. Make it into a path, and use the self.publisher to publish it.
-        path = Path()
-        path.header.stamp = rospy.Time.now()
-        path.header.frame_id = "odom"
+        # Make a polygon containing all of the corners of the zone and publish it
+        polygon = PolygonStamped()
+        polygon.header.stamp = rospy.Time.now()
+        polygon.header.frame_id = "odom"
 
-        path.poses.append(PoseStamped())
-        path.poses[-1].header.frame_id = "odom"
+        p1 = Point32()
+        p1.x = self.top_left[0]
+        p1.y = self.top_left[1]
+        p1.z = 0
 
-        path.poses[-1].pose.position.x = self.top_left[0]
-        path.poses[-1].pose.position.y = self.top_left[1]
+        p2 = Point32()
+        p2.x = self.top_right[0]
+        p2.y = self.top_right[1]
+        p2.z = 0
 
-        path.poses.append(PoseStamped())
-        path.poses[-1].header.frame_id = "odom"
+        p3 = Point32()
+        p3.x = self.bottom_right[0]
+        p3.y = self.bottom_right[1]
+        p3.z = 0
 
-        path.poses[-1].pose.position.x = self.top_right[0]
-        path.poses[-1].pose.position.y = self.top_right[1]
+        p4 = Point32()
+        p4.x = self.bottom_left[0]
+        p4.y = self.bottom_left[1]
+        p4.z = 0
 
-        path.poses.append(PoseStamped())
-        path.poses[-1].header.frame_id = "odom"
+        polygon.polygon.points = [p1, p2, p3, p4]
 
-        path.poses[-1].pose.position.x = self.bottom_right[0]
-        path.poses[-1].pose.position.y = self.bottom_right[1]
-
-        path.poses.append(PoseStamped())
-        path.poses[-1].header.frame_id = "odom"
-
-        path.poses[-1].pose.position.x = self.bottom_left[0]
-        path.poses[-1].pose.position.y = self.bottom_left[1]
-
-        path.poses.append(PoseStamped())
-        path.poses[-1].header.frame_id = "odom"
-
-        path.poses[-1].pose.position.x = self.top_left[0]
-        path.poses[-1].pose.position.y = self.top_left[1]
-
-        publisher.publish(path)
+        publisher.publish(polygon)
 
 def calc_point_from_apriltag(x: float, y: float, apriltag_pose_in_odom: PoseStamped, is_sim: bool)-> 'tuple[float,float]':
     """
