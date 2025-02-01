@@ -13,8 +13,12 @@
   <arg name="fps"                             default="30"/>
   <arg name="front"                           default="false"/>
   <arg name="back"                            default="true"/>
-  <arg name="pointcloud" default="true" />
+  <arg name="lidar"                           default="true"/>
+  <arg name="pointcloud" default="$(arg front)" />
   <arg name="decimation" default="8"/>
+
+  <include if="$(arg lidar)" file="$(find lunabot_perception)/launch/lidar.launch" />
+
 
   <group unless="$(arg sim)">
 
@@ -129,15 +133,15 @@
         <param name="approx_sync" value="false" />
       </node> -->
     </group>
-
+  <group if="$(arg lidar)">
     <node ns="pointcloud" pkg="nodelet" type='nodelet' name='point_cloud_assembler'
-      args = "standalone rtabmap_util/point_cloud_assembler">
-      <remap from="cloud" to="/d455_back/camera/depth_registered/points" unless="$(arg front)"/>
-      <remap from="cloud" to="combined_cloud" if="$(arg front)"/>
+        args = "standalone rtabmap_util/point_cloud_assembler">
+      <remap from="cloud" to="combined_cloud"/>
       <param name="fixed_frame_id" value="base_link" />
       <param name="circular_buffer" value="true"/>
       <param name="max_clouds" value="100"/>
-  </node>
+    </node>
+  </group>
 
   <group if="$(arg front)">
     <node ns="pointcloud" pkg="nodelet" type='nodelet' name="point_cloud_aggregator"
@@ -145,7 +149,8 @@
         <remap from="cloud1" to="/d455_back/camera/depth/color/points" />
         <remap from="cloud2" to="/d455_front/camera/depth/color/points" />
         <remap from="cloud3" to="/lidar_cloud" />
-        <param name="count" value="2" if="$(arg front)"/>
+        <param name="count" value="2" unless="$(arg lidar)"/>
+        <param name="count" value="3" if="$(arg lidar)"/>
         <param name="xyz_output" value="true"/>
         <param name="fixed_frame_id" value="base_link" />
 

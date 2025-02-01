@@ -17,13 +17,13 @@
     <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch">
       <arg name="isTestBot" value="$(arg isTestBot)"/>
       <arg name="front" value="$(arg front)"/>
+      <arg name="lidar" value="$(arg lidar)"/>
+      
     </include>
     <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch"/>
     <include if="$(arg record)" file="$(find lunabot_bringup)/launch/record.launch">
         <arg name="exp_name" value="$(arg exp_name)" />
     </include>
-
-    <include if="$(arg lidar)" file="$(find lunabot_perception)/launch/lidar.launch" />
 
     <group if="$(arg autonomy)">
 
@@ -46,8 +46,9 @@
                 <arg name="depth_topic" value="/d455_back/camera/aligned_depth_to_color/image_raw" />
                 <arg name="rgb_topic" value="/d455_back/camera/color/image_rect_color" />
                 <arg name="camera_info_topic" value="/d455_back/camera/color/camera_info" />
-                <arg name="scan_cloud_topic" value="/pointcloud/assembled_cloud" />
-                <arg name="subscribe_scan_cloud" value="true" />
+                <arg name="scan_cloud_topic" value="/pointcloud/assembled_cloud" if="$(arg lidar)"/>
+                <arg name="scan_cloud_topic" value="/pointcloud/combined_cloud" unless="$(arg lidar)"/>
+                <arg name="subscribe_scan_cloud" value="$(arg front)" />
                 <arg name="rtabmapviz" value="false" />
                 <arg name="imu_topic" value="/imu" />
                 <arg name="frame_id" value="base_link" />
