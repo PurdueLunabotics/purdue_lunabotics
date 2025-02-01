@@ -59,7 +59,7 @@
       <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
         <arg name="manager" value="front_realsense2_camera_manager" />
         <arg name="serial_no" value="$(arg serial_no_d435_extra)" />
-        <arg name="tf_prefix" value="d455_front" />
+        <arg name="tf_prefix" value="d435_extra" />
         <arg name="filters" value="disparity,decimation" />
         <arg name="align_depth" value="true" />
         <arg name="depth_width" value="$(arg width)" />
@@ -78,6 +78,7 @@
         <arg name="rgb_processing" value="false"/>
 
       </include>
+    </group>
 
     <group ns="d455_back" if="$(arg back)">
       <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
@@ -99,9 +100,7 @@
         <arg name="enable_pointcloud" value="$(arg pointcloud)" />
         <arg name="tf_publish_rate" value="0"/>
         <arg name="rgb_processing" value="false"/>
-
       </include>
-
       <group ns="camera/color">
         <node pkg="image_proc" type="image_proc" name="image_proc"
           args="image:=camera/color/image_raw" />
@@ -109,26 +108,9 @@
           <arg name="camera_frame" value="d455_back_base" />
         </include>
       </group>
-
-      <!-- <node pkg="nodelet" type="nodelet" name="point_cloud_xyz" args="standalone rtabmap_util/point_cloud_xyz" output="screen">
-        <remap from="depth/image" to="camera/depth/image_rect_raw"/>
-        <remap from="depth/camera_info" to="camera/depth/camera_info"/>
-        <param name="roi_ratios" value="0.0 0.0 0.3 0.0"/>
-        <param name="decimation" value="$(arg decimation)"/>
-        <param name="voxel_size" value="0.05"/>
-        <param name="noise_filter_radius" value="0.1"/>
-        <param name="max_depth" value="10"/>
-        <param name="min_depth" value="0.5"/>      </node> -->
-
-      <!-- sync rgb/depth images per camera -->
-      <!-- <node pkg="nodelet" type="nodelet" name="rgbd_sync" args="standalone rtabmap_sync/rgbd_sync"
-        output="screen">
-        <remap from="rgb/image" to="camera/color/image_rect_color" />
-        <remap from="depth/image" to="camera/depth/image_rect_raw" />
-        <remap from="rgb/camera_info" to="camera/color/camera_info" />
-        <param name="approx_sync" value="false" />
-      </node> -->
     </group>
+
+
   <group if="$(arg lidar)">
     <node ns="pointcloud" pkg="nodelet" type='nodelet' name='point_cloud_assembler'
         args = "standalone rtabmap_util/point_cloud_assembler">
@@ -152,8 +134,6 @@
         <param name="fixed_frame_id" value="base_link" />
 
     </node>
-  </group>
-
   </group>
 
   <group if="$(arg sim)">
