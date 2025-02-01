@@ -24,7 +24,6 @@ class ExdepController:
     def apriltag_pose_callback(self, msg: PoseStamped):
         self.apriltag_pose_in_odom = msg
         
-        print("got apriltag")
         # Find the mining/berm zones in the odom frame
         self.mining_zone: zones.Zone = zones.find_mining_zone(self.apriltag_pose_in_odom, self.is_sim)
         self.berm_zone: zones.Zone = zones.find_berm_zone(self.apriltag_pose_in_odom, self.is_sim)
@@ -108,12 +107,10 @@ class ExdepController:
         """
         rospy.sleep(0.1)
 
-        print("wait")
         # wait until we have our apriltag position
         while (self.apriltag_pose_in_odom is None):
             rospy.sleep(0.1)
 
-        print("done")
         while (not rospy.is_shutdown()):
 
             # we start in the mining zone, hopefully at a good mining location
