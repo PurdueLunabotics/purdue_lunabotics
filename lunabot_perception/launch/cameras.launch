@@ -1,11 +1,8 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="isTestBot" default="false"/>
-  <arg name="serial_no_d455_back"    			    default="053122251286" unless="$(arg isTestBot)"/> 		
-  <arg name="serial_no_d455_back"    			    default="141222070808" if="$(arg isTestBot)"/> 		
+  <arg name="serial_no_d455_back"    			    default="053122251286"/> 		
   <arg name="serial_no_d435_left"    			  default="141222070808"/> 	
-  <arg name="serial_no_d455_front"    			  default="053122251335" unless="$(arg isTestBot)"/> 	
-  <arg name="serial_no_d455_front"    			  default="939622074382" if="$(arg isTestBot)"/> 	
+  <arg name="serial_no_d455_front"    			  default="053122251335"/> 	
   <arg name="serial_no_d435_right"    			  default="939622074382"/> 	
   
   <arg name="initial_reset"                   default="true"/>
@@ -15,8 +12,7 @@
   <arg name="fps"                             default="30"/>
   <arg name="front"                           default="false"/>
   <arg name="back"                            default="true"/>
-  <arg name="third"                            default="true"/>
-  <arg name="fourth"                            default="true"/>
+  <arg name="extras"                            default="true"/>
   <arg name="lidar"                           default="true"/>
   <arg name="pointcloud" default="$(arg front)" />
   <arg name="decimation" default="8"/>
@@ -57,7 +53,7 @@
       </include>
     </group>
 
-    <group ns="d435_right" if="$(arg third)">
+    <group ns="d435_right" if="$(arg extras)">
       <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
         <arg name="manager" value="front_realsense2_camera_manager" />
         <arg name="serial_no" value="$(arg serial_no_d435_right)" />
@@ -81,7 +77,7 @@
       </include>
     </group>
 
-    <group ns="d435_left" if="$(arg fourth)">
+    <group ns="d435_left" if="$(arg extras)">
       <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
         <arg name="manager" value="front_realsense2_camera_manager" />
         <arg name="serial_no" value="$(arg serial_no_d435_left)" />
@@ -134,31 +130,36 @@
         </include>
       </group>
     </group>
-
-
-    <group if="$(arg lidar)">
-      <node ns="pointcloud" pkg="nodelet" type='nodelet' name='point_cloud_assembler'
-          args = "standalone rtabmap_util/point_cloud_assembler">
-        <remap from="cloud" to="combined_cloud"/>
-        <param name="fixed_frame_id" value="base_link" />
-        <param name="circular_buffer" value="true"/>
-        <param name="max_clouds" value="100"/>
-      </node>
-    </group>
-
     <group if="$(arg front)">
       <node ns="pointcloud" pkg="nodelet" type='nodelet' name="point_cloud_aggregator"
           args="standalone rtabmap_util/point_cloud_aggregator">
           <remap from="cloud1" to="/d455_back/camera/depth/color/points" />
           <remap from="cloud2" to="/d455_front/camera/depth/color/points" />
-          <remap from="cloud3" to="/d435_right/camera/depth/color/points" />
-          <remap from="cloud4" to="/d435_left/camera/depth/color/points" />
-          <remap from="cloud5" to="/lidar_cloud" />
-          <param name="count" value="4" unless="$(arg lidar)"/>
-          <param name="count" value="5" if="$(arg lidar)"/>
+          <remap from="cloud3" to="/d435_right/camera/depth/color/points" if="$(arg extras)"/>
+          <remap from="cloud4" to="/d435_left/camera/depth/color/points" if="$(arg extras)"/>   
+          <remap from="combined_cloud " to="depth_combined_cloud"/>       
+          <param name="count" value="2" unless="$(arg extras)"/>
+          <param name="count" value="4" if="$(arg extras)"/>
           <param name="xyz_output" value="true"/>
           <param name="fixed_frame_id" value="base_link" />
-
+      </node>
+    </group>
+    <group if="$(arg lidar)">
+      <node ns="pointcloud" pkg="nodelet" type='nodelet' name='point_cloud_assembler'
+          args = "standalone rtabmap_util/point_cloud_assembler">
+        <remap from="cloud" to="lidar_cloud"/>
+        <param name="fixed_frame_id" value="base_link" />
+        <param name="circular_buffer" value="true"/>
+        <param name="max_clouds" value="100"/>
+      </node>
+      <node ns="pointcloud" pkg="nodelet" type='nodelet' name="point_cloud_aggregator"
+          args="standalone rtabmap_util/point_cloud_aggregator">
+          <remap from="combined_cloud" to="depth_lidar_combined_cloud" />   
+          <remap from="cloud1" to="depth_combined_cloud" />
+          <remap from="cloud2" to="/assembled_cloud" />     
+          <param name="count" value="2" />
+          <param name="xyz_output" value="true"/>
+          <param name="fixed_frame_id" value="base_link" />
       </node>
     </group>
   </group>

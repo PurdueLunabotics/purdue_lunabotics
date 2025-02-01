@@ -9,15 +9,15 @@
     <arg name="exp_name" default="exp" />
     <arg name="lidar" default="true" />
     <arg name="front" default="true" />
+    <arg name="extra_cams" default="true" />
 
 
     <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node"
         output="screen" />
-    <arg name="isTestBot" default="false"/>
     <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch">
-      <arg name="isTestBot" value="$(arg isTestBot)"/>
       <arg name="front" value="$(arg front)"/>
       <arg name="lidar" value="$(arg lidar)"/>
+      <arg name="extras" value="$(arg extra_cams)"/>
       
     </include>
     <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch"/>
@@ -46,84 +46,14 @@
                 <arg name="depth_topic" value="/d455_back/camera/aligned_depth_to_color/image_raw" />
                 <arg name="rgb_topic" value="/d455_back/camera/color/image_rect_color" />
                 <arg name="camera_info_topic" value="/d455_back/camera/color/camera_info" />
-                <arg name="scan_cloud_topic" value="/pointcloud/assembled_cloud" if="$(arg lidar)"/>
-                <arg name="scan_cloud_topic" value="/pointcloud/combined_cloud" unless="$(arg lidar)"/>
+                <arg name="scan_cloud_topic" value="/pointcloud/depth_lidar_combined_cloud" if="$(arg lidar)"/>
+                <arg name="scan_cloud_topic" value="/pointcloud/depth_combined_cloud" unless="$(arg lidar)"/>
                 <arg name="subscribe_scan_cloud" value="$(arg front)" />
                 <arg name="rtabmapviz" value="false" />
                 <arg name="imu_topic" value="/imu" />
                 <arg name="frame_id" value="base_link" />
                 <arg name="rviz" value="false" />
             </include>
-
-            <!-- <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager"
-            output="screen" />
-
-            <node ns="front" pkg="nodelet" type="nodelet" name="passthrough"
-                args="load pcl/PassThrough /pcl_manager" output="screen">
-                <remap from="~input" to="/d455_front/camera/depth/color/points" />
-                <rosparam>
-                    filter_field_name: y
-                    filter_limit_min: 0.01
-                    filter_limit_max: 1.5
-                    filter_limit_negative: False
-                </rosparam>
-            </node>
-
-            <node ns="back" pkg="nodelet" type="nodelet" name="passthrough"
-                args="load pcl/PassThrough /pcl_manager" output="screen">
-                <remap from="~input" to="/d455_back/camera/depth/color/points" />
-                <rosparam>
-                    filter_field_name: y
-                    filter_limit_min: 0.01
-                    filter_limit_max: 1.5
-                    filter_limit_negative: False
-                </rosparam>
-            </node> -->
-
-            <!-- <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" /> -->
-            <!-- Run a VoxelGrid filter to clean NaNs and downsample the data -->
-            <!-- <node ns="front" pkg="nodelet" type="nodelet" name="voxel_grid"
-                args="load pcl/VoxelGrid /pcl_manager" output="screen">
-                <remap from="~input" to="/d455_front/camera/depth/color/points" />
-                <rosparam>
-                    filter_field_name: y
-                    filter_limit_min: -1.5
-                    filter_limit_max: 1.5
-                    filter_limit_negative: False
-                    leaf_size: 0.05
-                </rosparam>
-            </node>
-            <node ns="back" pkg="nodelet" type="nodelet" name="voxel_grid"
-                args="load pcl/VoxelGrid /pcl_manager" output="screen">
-                <remap from="~input" to="/d455_back/camera/depth/color/points" />
-                <rosparam> 
-                    filter_field_name: y
-                    filter_limit_min: -2
-                    filter_limit_max: 0.5
-                    filter_limit_negative: False 
-                    leaf_size: 0.05 </rosparam>
-            </node> -->
-
-            <!-- <node pkg="nodelet" type="nodelet" name="obstacles_manager" args="manager" />
-            <node pkg="nodelet" ns="front" type="nodelet" name="obstacles_detection"
-                args="load rtabmap_util/obstacles_detection /obstacles_manager">
-                <remap from="cloud" to="/front/voxel_grid/output" />
-
-                <param name="frame_id" type="string" value="d455_back_link" />
-                <param name="min_cluster_size" type="int" value="20" />
-                <param name="max_obstacles_height" type="double" value="0.0" />
-            </node>
-
-            <node pkg="nodelet" ns="back" type="nodelet" name="obstacles_detection"
-                args="load rtabmap_util/obstacles_detection /obstacles_manager">
-                <remap from="cloud" to="/back/voxel_grid/output" />
-
-                <param name="frame_id" type="string" value="d455_front_link" />
-                <param name="min_cluster_size" type="int" value="20" />
-                <param name="max_obstacles_height" type="double" value="0.0" />
-            </node> -->
-
-
         </group>
 
         <node pkg="lunabot_control" type="effort_factory.py" name="effort_factory" output="screen" />
