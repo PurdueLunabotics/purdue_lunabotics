@@ -8,12 +8,12 @@
   
   <arg name="initial_reset"                   default="true"/>
   <arg name="sim"                             default="false"/>
-  <arg name="width"                           default="848"/>
-  <arg name="height"                          default="480"/>
+  <arg name="width"                           default="424"/>
+  <arg name="height"                          default="240"/>
   <arg name="fps"                             default="30"/>
-  <arg name="front"                           default="true"/>
+  <arg name="front"                           default="false"/>
   <arg name="back"                            default="true"/>
-  <arg name="pointcloud" default="false" />
+  <arg name="pointcloud" default="true" />
   <arg name="decimation" default="8"/>
 
   <group unless="$(arg sim)">
@@ -31,7 +31,6 @@
         <arg name="tf_prefix" value="d455_front" />
         <arg name="filters" value="disparity,decimation" />
         <arg name="align_depth" value="true" />
-        <!--<arg name="initial_reset" value="$(arg initial_reset)" />-->
         <arg name="depth_width" value="$(arg width)" />
         <arg name="depth_height" value="$(arg height)" />
         <arg name="depth_fps" value="$(arg fps)" />
@@ -87,7 +86,6 @@
         <arg name="tf_prefix" value="d455_back" />
         <arg name="filters" value="disparity,decimation" />
         <arg name="align_depth" value="true" />
-        <!--<arg name="initial_reset" value="$(arg initial_reset)" />-->
         <arg name="depth_width" value="$(arg width)" />
         <arg name="depth_height" value="$(arg height)" />
         <arg name="depth_fps" value="$(arg fps)" />
@@ -144,8 +142,8 @@
   <group if="$(arg front)">
     <node ns="pointcloud" pkg="nodelet" type='nodelet' name="point_cloud_aggregator"
         args="standalone rtabmap_util/point_cloud_aggregator">
-        <remap from="cloud1" to="/d455_back/camera/depth_registered/points" />
-        <remap from="cloud2" to="/d455_front/camera/depth_registered/points" />
+        <remap from="cloud1" to="/d455_back/camera/depth/color/points" />
+        <remap from="cloud2" to="/d455_front/camera/depth/color/points" />
         <remap from="cloud3" to="/lidar_cloud" />
         <param name="count" value="2" if="$(arg front)"/>
         <param name="xyz_output" value="true"/>
