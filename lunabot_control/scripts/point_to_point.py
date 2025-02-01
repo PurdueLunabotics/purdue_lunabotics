@@ -282,7 +282,7 @@ class PointToPoint:
                 # if at linear target and not on final trajectory, target point should update
                 self.target_pose_index = self.target_pose_index + 1
                 self.target_pose = self.path[self.target_pose_index]
-                self.__update_state(pose)
+                self.__update_state(current_pose)
 
     # ==================================================================================================================
     # PATH PROCESSING
