@@ -14,8 +14,7 @@ from enum import Enum
 class States(Enum):
     MOVING_TO_ANGULAR_TARGET = 1
     MOVING_TO_LINEAR_TARGET = 2
-    AT_TARGET = 3
-    AT_DESTINATION = 4
+    AT_DESTINATION = 4 #at final path point
 
 
 class PointToPoint:
@@ -197,7 +196,7 @@ class PointToPoint:
     # STATE PROCESSING
     # ==================================================================================================================
 
-    def __update_state(self, pose):
+    def __update_state(self, current_pose):
         """
         Calculates linear and angular error, and updates abstract robot state.
 
@@ -205,19 +204,15 @@ class PointToPoint:
             target (list-like): target 2D pose of format (x, y, theta)
             pose (list-like): current robot 2D pose in format (x, y, theta)
             path (list-like): sequence of target poses in the path, each of which are in format (x, y, theta)
-        """
+        """        
+        
         # store x and y coords of pose in a location variable
-        current_pose = pose
         current_location = np.array(current_pose[:2])
 
         path = self.path
 
         # check if on final trajectory
-        on_final_trajectory = False
-        if len(path) == 0:
-            on_final_trajectory = True
-        elif self.target_pose == path[-1]:
-            on_final_trajectory = True
+        on_final_trajectory = len(path) == 0 or self.target_pose == path[-1]
 
         ## -------------------------------------------------
         ## CALCULATE WHETHER AT LINEAR TARGET -------
@@ -230,10 +225,8 @@ class PointToPoint:
         # check if robot linear position is within tolerance - if so, terminate linear motion
         self.at_linear_target = np.abs(self.linear_error) < self.LINEAR_TOLERANCE
 
-        if (
-            np.abs(self.linear_error) - np.abs(self.prev_linear_error)
-            >= self.LINEAR_TOLERANCE
-        ):
+        #ensure that error is negative if robot overshoots target
+        if (np.abs(self.linear_error) - np.abs(self.prev_linear_error) >= self.LINEAR_TOLERANCE):
             self.linear_error = self.linear_error * -1
 
         # update previous linear error after checking that the magnitude is decreasing
@@ -242,27 +235,28 @@ class PointToPoint:
         ## -------------------------------------------------
         ## CALCULATE WHETHER AT ANGULAR TARGET -------
         ## -------------------------------------------------
-        # store heading for computation - resistant to changes in variable caused by odom callback during loop execution
-        current_pose = pose
 
         # calculate angle to target from x axis
-        pose_target_angle = None
-        if on_final_trajectory and self.at_linear_target:
-            # set target to final path angle if reached linear destination
-            pose_target_angle = self.target_pose[2]
-        else:
-            pose_target_angle = np.arctan2(  # calculate target angle
-                self.target_pose[1] - current_pose[1],
-                self.target_pose[0] - current_pose[0],
-            )
+        # pose_target_angle = None
+        # if on_final_trajectory and self.at_linear_target:
+        #     # set target to final path angle if reached linear destination
+        #     pose_target_angle = self.target_pose[2]
+        # else:
+        pose_target_angle = np.arctan2(  # calculate target angle [-pi,pi]
+            self.target_pose[1] - current_pose[1],
+            self.target_pose[0] - current_pose[0],
+        )
 
         # subtract heading to find angle error
         self.angle_error = pose_target_angle - current_pose[2]
 
         # check if around-the-world distance is smaller than current different
-        if np.abs(2 * np.pi - self.angle_error) < np.abs(self.angle_error):
+        if np.abs(2 * np.pi - np.abs(self.angle_error)) < np.abs(self.angle_error):
             # normalize to make error reflect around-the-world
-            self.angle_error = 2 * np.pi - self.angle_error
+            self.angle_error = 2 * np.pi - np.abs(self.angle_error)
+            #ensure that the direction is correct
+            self.angle_error *= -1 if pose_target_angle - current_pose[2] > 0 else 1
+            
 
         # check if robot heading is within tolerance - if so, terminate turning procedure
         self.at_angle_target = np.abs(self.angle_error) < self.ANGULAR_TOLERANCE_RAD
@@ -270,14 +264,13 @@ class PointToPoint:
         ## -------------------------------------------------
         ## UPDATE STATE -------
         ## -------------------------------------------------
-        print(
-            "PTP ------------------------------- \n"
-            + f"At Linear Target: {self.at_linear_target} \n"
-            + f"At Angular Target: {self.at_angle_target} \n"
-            + f"On Final Trajectory: {on_final_trajectory} \n"
-            + "-------------------------------"
-        )
-
+        print(f'''
+              PTP ------------------------------- \n
+              At Linear Target: {self.at_linear_target} \n
+              At Angular Target: {self.at_angle_target} \n
+              On Final Trajectory: {on_final_trajectory} \n
+              -----------------------------------
+              ''')
         if not self.at_linear_target:
             self.state = States.MOVING_TO_LINEAR_TARGET
             if not self.at_angle_target:
@@ -285,11 +278,11 @@ class PointToPoint:
         else:  # move to angular target if angle target is not met
             if on_final_trajectory:
                 self.state = States.AT_DESTINATION  # update state if at destination
-
             else:
                 # if at linear target and not on final trajectory, target point should update
-                self.state = States.AT_TARGET
                 self.target_pose_index = self.target_pose_index + 1
+                self.target_pose = self.path[self.target_pose_index]
+                self.__update_state(pose)
 
     # ==================================================================================================================
     # PATH PROCESSING
@@ -369,64 +362,6 @@ class PointToPoint:
     # MOTION
     # ==================================================================================================================
 
-    def __turn_to_point(self):
-        """
-        Computes angular velocity required to turn toward target point and updates global angular velocity veriable.
-
-        Args:
-            point (list/array): target point in format [x (m), y (m)]
-            pose (list/array): robot pose in format [x (m), y (m), heading (rad)]
-        """
-
-        # # check if robot heading is within tolerance - if so, terminate turning procedure
-        # self.at_angle_target = np.abs(angle_error) < self.ANGULAR_TOLERANCE_RAD
-
-        # only turn if state is moving to angular target
-        if self.state == States.MOVING_TO_ANGULAR_TARGET:
-            # stop linear translation if angle error becomes too big
-            self.linear_vel = 0
-
-            self.angular_vel = -self.angular_pid.calculate(
-                state=self.angle_error, dt=self.pid_dt, setpoint=0
-            )
-        else:
-            self.angular_vel = 0
-
-    def __translate_to_point(self):
-        """
-        Translates robot toward target when heading is pointed toward target.
-
-        Args:
-            point (list/array): target point in format [x (m), y (m)]
-            pose (list/array): robot pose in format [x (m), y (m), heading (rad)]
-        """
-        # store x and y coords of pose in a location variable
-        # current_pose = pose
-        # current_location = np.array(current_pose[:2])
-        # # calculate distance to target as error
-        # linear_error = np.linalg.norm(np.array(point[:2]) - current_location)
-
-        # switch sign of the error if magnitude is increasing beyond tolerance - robot needs to go in negative direction
-        if (
-            np.abs(self.linear_error) - np.abs(self.prev_linear_error)
-            >= self.LINEAR_TOLERANCE
-        ):
-            self.linear_error = self.linear_error * -1
-
-        # update previous linear error after checking that the magnitude is decreasing
-        self.prev_linear_error = self.linear_error
-
-        # check if robot linear position is within tolerance - if so, terminate linear motion
-        self.at_linear_target = np.abs(self.linear_error) < self.LINEAR_TOLERANCE
-
-        # only translate if state is to move to linear target
-        if self.state == States.MOVING_TO_LINEAR_TARGET:
-            self.linear_vel = -self.linear_pid.calculate(
-                state=self.linear_error, dt=self.pid_dt, setpoint=0
-            )
-        else:
-            self.linear_vel = 0
-
     def __move_to_point(self):
         if self.state == States.MOVING_TO_ANGULAR_TARGET:
             # stop linear translation if angle error becomes too big
@@ -435,7 +370,7 @@ class PointToPoint:
             self.angular_vel = -self.angular_pid.calculate(
                 state=self.angle_error, dt=self.pid_dt, setpoint=0
             )
-
+            
         elif self.state == States.MOVING_TO_LINEAR_TARGET:
             self.angular_vel = 0
 
@@ -446,10 +381,6 @@ class PointToPoint:
         elif self.state == States.AT_DESTINATION:
             self.angular_vel = 0
             self.linear_vel = 0
-
-        elif self.state == States.AT_TARGET:
-            self.target_pose_index = self.target_pose_index + 1
-            self.target_pose = self.path[self.target_pose_index]
 
     # ==================================================================================================================
     # VISUALIZATION
