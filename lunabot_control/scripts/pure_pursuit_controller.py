@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 from matplotlib import animation
 import numpy as np
 from slip_controller import SlipController
+import numpy as np
 
 import rospy
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
@@ -22,7 +23,7 @@ from std_msgs.msg import Bool, Int8, Float32
 # TODO: See whether a node file is necessary
 class PurePursuitController:
     
-    def __init__(self, MAX_VELOCITY, MAX_ACCEL, MAX_VEL_CHANGE, trackwidth, robot_start_pos = (0,0,0)):
+    def __init__(self, MAX_VELOCITY, MAX_ACCEL, MAX_VEL_CHANGE, trackwidth, robot_start_pos = (0,0,0), telemetry = False):
         self.path = [robot_start_pos[:2]]
         self.MAX_VELOCITY = MAX_VELOCITY
         self.MAX_ACCELERATION = MAX_ACCEL
@@ -47,6 +48,8 @@ class PurePursuitController:
         self.STOPPING_THRESHOLD = 0.2
         
         self.last_pos = (0,0,0)
+
+        self.telemetry = telemetry
         
         # make weights updatable without restarting
         # switch between pure pursuit and test wheel nodes in yml file
@@ -89,7 +92,8 @@ class PurePursuitController:
         twist = Twist()
         twist.linear.x = self.clamp(lin_ang_velocities[0], self.lin_lim[0], self.lin_lim[1])
         twist.angular.z = self.clamp(lin_ang_velocities[1], self.ang_lim[0], self.ang_lim[1])
-        print("VELS", [self.clamp(lin_ang_velocities[0], self.lin_lim[0], self.lin_lim[1]), self.clamp(lin_ang_velocities[1], self.ang_lim[0], self.ang_lim[1])])
+        if self.telemetry:
+            print("VELS", [self.clamp(lin_ang_velocities[0], self.lin_lim[0], self.lin_lim[1]), self.clamp(lin_ang_velocities[1], self.ang_lim[0], self.ang_lim[1])])
 
         self.vel_publisher.publish(twist) 
         
@@ -209,43 +213,40 @@ class PurePursuitController:
                 dist = math.dist(self.last_pos, self.path[i])
                 closest_point = self.path[i]"""
                 
-        #return [self.MAX_VELOCITY] * len(self.path) commented out just for now
+        # return [self.MAX_VELOCITY] * len(self.path) # commented out just for now
 
 
-        #EDITED CODE BELOW
-        closest_point = self.lookahead()
-        dist = math.inf
-        #closest_point = (0,0,0)
+        # #EDITED CODE BELOW
+        # closest_point = self.lookahead()
+        # dist = math.inf
+        # #closest_point = (0,0,0)
 
         target_velocities = []
-        for i, waypoint in enumerate(self.path): #
-            # Calculate the lookahead position and direction to it
-            lookahead = self.lookahead()
-            direction_to_lookahead = (lookahead[0] - self.robot_pose[0], lookahead[1] - self.robot_pose[1])
+        # Calculate the lookahead position and direction to it
+        lookahead = self.lookahead()
+        direction_to_lookahead = (lookahead[0] - self.robot_pose[0], lookahead[1] - self.robot_pose[1])
 
-            # Calculate the unit vector in the direction the robot is currently facing
-            #robot_facing_vector = (math.cos(self.robot_pose[2]), math.sin(self.robot_pose[2]))
-            
-            # Determine the dot product between the direction to the lookahead and the robot's facing vector
-            #dot_product = direction_to_lookahead[0] * robot_facing_vector[0] + direction_to_lookahead[1] * robot_facing_vector[1]
+        # Calculate the unit vector in the direction the robot is currently facing
+        #robot_facing_vector = (math.cos(self.robot_pose[2]), math.sin(self.robot_pose[2]))
+        
+        # Determine the dot product between the direction to the lookahead and the robot's facing vector
+        #dot_product = direction_to_lookahead[0] * robot_facing_vector[0] + direction_to_lookahead[1] * robot_facing_vector[1]
 
-            # Calculate the angle between the robot's current heading and the direction to the lookahead
-            angle_to_lookahead = math.atan2(direction_to_lookahead[1], direction_to_lookahead[0]) - self.robot_pose[2]
-            angle_to_lookahead = (angle_to_lookahead + math.pi) % (2 * math.pi) - math.pi  # Normalize to [-pi, pi]
+        # Calculate the angle between the robot's current heading and the direction to the lookahead
+        angle_to_lookahead = self.calc_heading_err(lookahead=lookahead)
+        print("ANGLE TO LOOKAHEAD:" + str(angle_to_lookahead))
 
-            # Determine if the robot should move forward or backward
-            if abs(angle_to_lookahead) > math.pi / 2:  # Robot is facing away from the lookahead
-                # Drive backward if the angle to the lookahead exceeds 90 degrees
-                target_speed = -self.MAX_VELOCITY * (1 - abs(angle_to_lookahead) / math.pi)
-            else:
-                # Drive forward otherwise
-                target_speed = self.MAX_VELOCITY * (1 - abs(angle_to_lookahead) / math.pi)
+        # Determine if the robot should move forward or backward
+        if ((abs(angle_to_lookahead) > 3 * math.pi / 4) and (abs(angle_to_lookahead) < 5 * math.pi/4)):  # Robot is facing away from the lookahead
+            # Drive backward if the angle to the lookahead exceeds 90 degrees
+            target_speed = -self.MAX_VELOCITY
+        else:
+            # Drive forward otherwise
+            target_speed = self.MAX_VELOCITY
 
-            # Clamp target speed to ensure smooth operation
-            target_speed = self.clamp(target_speed, -self.MAX_VELOCITY, self.MAX_VELOCITY)
-            target_velocities.append(target_speed)
+        # Clamp target speed to ensure smooth operation
 
-        return target_velocities
+        return [target_speed] * len(self.path)
 
 
     def curvature_p(self):
@@ -386,7 +387,7 @@ class PurePursuitController:
         # dot = v1[0] * v2[0] + v1[1] * v2[1]
         # mag = magnitude(v1) * magnitude(v2)
         # return math.acos(dot / mag)
-        return math.atan2(v1[0] * v2[1] - v1[1] * v2[0], v1[0] * v2[0] + v1[1] * v2[1])
+        return -math.atan2(v1[0] * v2[1] - v1[1] * v2[0], v1[0] * v2[0] + v1[1] * v2[1])
 
     def curvature(self, lookahead):
         side = np.sign(math.sin(self.robot_pose[2]) * (lookahead[0] - self.robot_pose[0]) - math.cos(
@@ -412,30 +413,36 @@ class PurePursuitController:
     def update_vel(self, wheelbase, dt):
         target_vels = self.target_velocity()
         look = self.lookahead()
-        print("LOOKAHEAD:", look)
+        if self.telemetry:
+            print("LOOKAHEAD:", look)
         close = self.closest()
-        print("CLOSEST:", close)
+        if self.telemetry:
+            print("CLOSEST:", close)
         if (abs(self.robot_pose[0] - self.path[-1][0]) < self.LOOKAHEAD) and (abs(self.robot_pose[1] - self.path[-1][1]) < self.LOOKAHEAD):
                 close = len(self.path) - 1
                 look = self.path[-1]
         curv = self.curvature(look) if self.t_i > close else 0.00001
-        print("CURVATURE:", curv)
+        if self.telemetry:
+            print("CURVATURE:", curv)
         vel = target_vels[close]
         last_wheels = self.wheels
         self.wheels = self.turn(curv, vel, wheelbase)
         
         target_lin_ang_vel = self.combine_wheel_vels(self.wheels[0], self.wheels[1], wheelbase)
-        print("TARGET VEL:", target_lin_ang_vel)
+        if self.telemetry:
+            print("TARGET VEL:", target_lin_ang_vel)
 
         slip = self.calc_slip(self.robot_velocity, target_lin_ang_vel)
         heading_error = self.calc_heading_err(look)
         
-        print("ERROR:", slip, heading_error)
+        if self.telemetry:
+            print("ERROR:", slip, heading_error)
         
         control_loop_vels = self.vel_controller.update_vel(slip, heading_error, dt, target_vel=vel, target_accel=self.MAX_ACCELERATION)
         self.wheels = self.get_wheel_vels(control_loop_vels, wheelbase)
         
-        print("VEL AFTER CONTROLLER:", self.combine_wheel_vels(self.wheels[0], self.wheels[1], wheelbase))
+        if self.telemetry:
+            print("VEL AFTER CONTROLLER:", self.combine_wheel_vels(self.wheels[0], self.wheels[1], wheelbase))
 
         for i, w in enumerate(self.wheels):
             self.wheels[i] = last_wheels[i] + min(float(self.MAX_VEL_CHANGE * dt),
@@ -464,10 +471,12 @@ class PurePursuitController:
             # print("PATH:", self.path)
             self.dt = rospy.get_time() - self.last_time + 1e-99
             self.last_time = rospy.get_time()
-            print("ROBOT POSE:", self.robot_pose)
-            print("ROBOT VEL:", self.robot_velocity)
+            if self.telemetry:
+                print("ROBOT POSE:", self.robot_pose)
+                print("ROBOT VEL:", self.robot_velocity)
             self.update_vel(self.trackwidth, self.dt)
-            print("===================================")
+            if self.telemetry:
+                print("===================================")
             rate.sleep()
         
 
@@ -574,5 +583,5 @@ class PurePursuitController:
 
 
 if __name__ == "__main__":
-    controller = PurePursuitController(0.4, 0.4, 0.4, 0.45, (0, 0, 0))
+    controller = PurePursuitController(0.4, 0.4, 0.4, 0.45, (1, -1.3, 0), True)
     controller.loop()
