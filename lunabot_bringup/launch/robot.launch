@@ -8,6 +8,7 @@
     <arg name="slam" default="true" />
     <arg name="exp_name" default="exp" />
     <arg name="lidar" default="true" />
+    <arg name="front" default="true" />
 
 
     <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node"
@@ -15,6 +16,7 @@
     <arg name="isTestBot" default="false"/>
     <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch">
       <arg name="isTestBot" value="$(arg isTestBot)"/>
+      <arg name="front" value="$(arg front)"/>
     </include>
     <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch"/>
     <include if="$(arg record)" file="$(find lunabot_bringup)/launch/record.launch">
