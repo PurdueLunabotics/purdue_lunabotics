@@ -3,8 +3,8 @@
   <arg name="isTestBot" default="false"/>
   <arg name="serial_no_d455_back"    			    default="053122251286" unless="$(arg isTestBot)"/> 		
   <arg name="serial_no_d455_back"    			    default="141222070808" if="$(arg isTestBot)"/> 		
+  <arg name="serial_no_d435_left"    			  default="141222070808"/> 	
   <arg name="serial_no_d455_front"    			  default="053122251335" unless="$(arg isTestBot)"/> 	
-  <arg name="serial_no_d435_left"    			  default="053122251335"/> 	
   <arg name="serial_no_d455_front"    			  default="939622074382" if="$(arg isTestBot)"/> 	
   <arg name="serial_no_d435_right"    			  default="939622074382"/> 	
   
