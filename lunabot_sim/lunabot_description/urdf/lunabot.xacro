@@ -192,12 +192,21 @@
     <axis xyz="0.0 1.0 0.0" />
   </joint>
 
-  <link name="d435_extra_link" />
+  <link name="d435_right_link" />
 
   <joint name="depth_cam_3_jnt" type="fixed">
     <origin rpy="0 0 1.57079632679489661" xyz="-.1016 0 0" />
     <parent link="base_link" />
-    <child link="d435_extra_link" />
+    <child link="d435_right_link" />
+    <axis xyz="0.0 1.0 0.0" />
+  </joint>
+
+  <link name="d435_left_link" />
+
+  <joint name="depth_cam_4_jnt" type="fixed">
+    <origin rpy="0 0 14.7123889803846" xyz="-.1016 0 0" />
+    <parent link="base_link" />
+    <child link="d435_left_link" />
     <axis xyz="0.0 1.0 0.0" />
   </joint>
 

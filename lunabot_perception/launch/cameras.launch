@@ -4,8 +4,9 @@
   <arg name="serial_no_d455_back"    			    default="053122251286" unless="$(arg isTestBot)"/> 		
   <arg name="serial_no_d455_back"    			    default="141222070808" if="$(arg isTestBot)"/> 		
   <arg name="serial_no_d455_front"    			  default="053122251335" unless="$(arg isTestBot)"/> 	
+  <arg name="serial_no_d435_left"    			  default="053122251335"/> 	
   <arg name="serial_no_d455_front"    			  default="939622074382" if="$(arg isTestBot)"/> 	
-  <arg name="serial_no_d435_extra"    			  default="939622074382"/> 	
+  <arg name="serial_no_d435_right"    			  default="939622074382"/> 	
   
   <arg name="initial_reset"                   default="true"/>
   <arg name="sim"                             default="false"/>
@@ -15,6 +16,7 @@
   <arg name="front"                           default="false"/>
   <arg name="back"                            default="true"/>
   <arg name="third"                            default="true"/>
+  <arg name="fourth"                            default="true"/>
   <arg name="lidar"                           default="true"/>
   <arg name="pointcloud" default="$(arg front)" />
   <arg name="decimation" default="8"/>
@@ -55,11 +57,11 @@
       </include>
     </group>
 
-    <group ns="d435_extra" if="$(arg third)">
+    <group ns="d435_right" if="$(arg third)">
       <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
         <arg name="manager" value="front_realsense2_camera_manager" />
-        <arg name="serial_no" value="$(arg serial_no_d435_extra)" />
-        <arg name="tf_prefix" value="d435_extra" />
+        <arg name="serial_no" value="$(arg serial_no_d435_right)" />
+        <arg name="tf_prefix" value="d435_right" />
         <arg name="filters" value="disparity,decimation" />
         <arg name="align_depth" value="true" />
         <arg name="depth_width" value="$(arg width)" />
@@ -68,7 +70,7 @@
         <arg name="color_width" value="$(arg width)" />
         <arg name="color_height" value="$(arg height)" />
         <arg name="color_fps" value="$(arg fps)" />
-        <arg name="enable_color" value="true"/>
+        <arg name="enable_color" value="false"/>
         <arg name="enable_gyro" value="false" />
         <arg name="enable_accel" value="false" />
         <arg name="enable_sync" value="true" />
@@ -76,7 +78,30 @@
         <arg name="enable_pointcloud" value="$(arg pointcloud)" />
         <arg name="tf_publish_rate" value="0"/>
         <arg name="rgb_processing" value="false"/>
+      </include>
+    </group>
 
+    <group ns="d435_left" if="$(arg fourth)">
+      <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
+        <arg name="manager" value="front_realsense2_camera_manager" />
+        <arg name="serial_no" value="$(arg serial_no_d435_left)" />
+        <arg name="tf_prefix" value="d435_left" />
+        <arg name="filters" value="disparity,decimation" />
+        <arg name="align_depth" value="true" />
+        <arg name="depth_width" value="$(arg width)" />
+        <arg name="depth_height" value="$(arg height)" />
+        <arg name="depth_fps" value="$(arg fps)" />
+        <arg name="color_width" value="$(arg width)" />
+        <arg name="color_height" value="$(arg height)" />
+        <arg name="color_fps" value="$(arg fps)" />
+        <arg name="enable_color" value="false"/>
+        <arg name="enable_gyro" value="false" />
+        <arg name="enable_accel" value="false" />
+        <arg name="enable_sync" value="true" />
+        <arg name="publish_tf" value="true" />
+        <arg name="enable_pointcloud" value="$(arg pointcloud)" />
+        <arg name="tf_publish_rate" value="0"/>
+        <arg name="rgb_processing" value="false"/>
       </include>
     </group>
 
@@ -126,10 +151,11 @@
           args="standalone rtabmap_util/point_cloud_aggregator">
           <remap from="cloud1" to="/d455_back/camera/depth/color/points" />
           <remap from="cloud2" to="/d455_front/camera/depth/color/points" />
-          <remap from="cloud3" to="/d435_extra/camera/depth/color/points" />
-          <remap from="cloud4" to="/lidar_cloud" />
-          <param name="count" value="3" unless="$(arg lidar)"/>
-          <param name="count" value="4" if="$(arg lidar)"/>
+          <remap from="cloud3" to="/d435_right/camera/depth/color/points" />
+          <remap from="cloud4" to="/d435_left/camera/depth/color/points" />
+          <remap from="cloud5" to="/lidar_cloud" />
+          <param name="count" value="4" unless="$(arg lidar)"/>
+          <param name="count" value="5" if="$(arg lidar)"/>
           <param name="xyz_output" value="true"/>
           <param name="fixed_frame_id" value="base_link" />
 
