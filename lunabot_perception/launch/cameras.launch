@@ -5,6 +5,7 @@
   <arg name="serial_no_d455_back"    			    default="141222070808" if="$(arg isTestBot)"/> 		
   <arg name="serial_no_d455_front"    			  default="053122251335" unless="$(arg isTestBot)"/> 	
   <arg name="serial_no_d455_front"    			  default="939622074382" if="$(arg isTestBot)"/> 	
+  <arg name="serial_no_d435_extra"    			  default="939622074382"/> 	
   
   <arg name="initial_reset"                   default="true"/>
   <arg name="sim"                             default="false"/>
@@ -13,6 +14,7 @@
   <arg name="fps"                             default="30"/>
   <arg name="front"                           default="false"/>
   <arg name="back"                            default="true"/>
+  <arg name="third"                            default="true"/>
   <arg name="lidar"                           default="true"/>
   <arg name="pointcloud" default="$(arg front)" />
   <arg name="decimation" default="8"/>
@@ -51,37 +53,31 @@
         <arg name="rgb_processing" value="false"/>
 
       </include>
-
-
-
-      <!-- <group ns="camera/color">
-        <node pkg="image_proc" type="image_proc" name="image_proc"
-          args="image:=camera/color/image_raw" />
-        <include file="$(find lunabot_perception)/launch/apriltag.launch">
-          <arg name="camera_frame" value="d455_front_base" />
-        </include>
-      </group> -->
-
-      <!-- <node pkg="nodelet" type="nodelet" name="point_cloud_xyz" args="standalone rtabmap_util/point_cloud_xyz" output="screen">
-        <remap from="depth/image" to="camera/depth/image_rect_raw"/>
-        <remap from="depth/camera_info" to="camera/depth/camera_info"/>
-        <param name="roi_ratios" value="0.0 0.0 0.3 0.0"/>
-        <param name="decimation" value="$(arg decimation)"/>
-        <param name="voxel_size" value="0.05"/>
-        <param name="noise_filter_radius" value="0.1"/>
-        <param name="max_depth" value="10"/>
-        <param name="min_depth" value="0.5"/>
-      </node> -->
-
-      <!-- sync rgb/depth images per camera -->
-      <!-- <node pkg="nodelet" type="nodelet" name="rgbd_sync" args="standalone rtabmap_sync/rgbd_sync"
-        output="screen">
-        <remap from="rgb/image" to="camera/color/image_rect_color" />
-        <remap from="depth/image" to="camera/depth/image_rect_raw" />
-        <remap from="rgb/camera_info" to="camera/color/camera_info" />
-        <param name="approx_sync" value="false" />
-      </node> -->
     </group>
+
+    <group ns="d435_extra" if="$(arg third)">
+      <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
+        <arg name="manager" value="front_realsense2_camera_manager" />
+        <arg name="serial_no" value="$(arg serial_no_d435_extra)" />
+        <arg name="tf_prefix" value="d455_front" />
+        <arg name="filters" value="disparity,decimation" />
+        <arg name="align_depth" value="true" />
+        <arg name="depth_width" value="$(arg width)" />
+        <arg name="depth_height" value="$(arg height)" />
+        <arg name="depth_fps" value="$(arg fps)" />
+        <arg name="color_width" value="$(arg width)" />
+        <arg name="color_height" value="$(arg height)" />
+        <arg name="color_fps" value="$(arg fps)" />
+        <arg name="enable_color" value="true"/>
+        <arg name="enable_gyro" value="false" />
+        <arg name="enable_accel" value="false" />
+        <arg name="enable_sync" value="true" />
+        <arg name="publish_tf" value="true" />
+        <arg name="enable_pointcloud" value="$(arg pointcloud)" />
+        <arg name="tf_publish_rate" value="0"/>
+        <arg name="rgb_processing" value="false"/>
+
+      </include>
 
     <group ns="d455_back" if="$(arg back)">
       <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
@@ -148,6 +144,7 @@
         args="standalone rtabmap_util/point_cloud_aggregator">
         <remap from="cloud1" to="/d455_back/camera/depth/color/points" />
         <remap from="cloud2" to="/d455_front/camera/depth/color/points" />
+        <remap from="cloud2" to="/d435_extra/camera/depth/color/points" />
         <remap from="cloud3" to="/lidar_cloud" />
         <param name="count" value="2" unless="$(arg lidar)"/>
         <param name="count" value="3" if="$(arg lidar)"/>

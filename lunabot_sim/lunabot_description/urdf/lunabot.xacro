@@ -192,6 +192,14 @@
     <axis xyz="0.0 1.0 0.0" />
   </joint>
 
+  <link name="d435_extra_link" />
+
+  <joint name="depth_cam_3_jnt" type="fixed">
+    <origin rpy="0 0 1.57079632679489661" xyz="-.1016 0 0" />
+    <parent link="base_link" />
+    <child link="d435_extra_link" />
+    <axis xyz="0.0 1.0 0.0" />
+  </joint>
 
   <link name="usb_cam_link" />
 
