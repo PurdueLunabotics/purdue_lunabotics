@@ -114,7 +114,7 @@ class ExdepController:
             rospy.sleep(0.1)
 
         print("done")
-        while (not rospy.is_shutdown):
+        while (not rospy.is_shutdown()):
 
             # we start in the mining zone, hopefully at a good mining location
             self.excavation.excavate()
