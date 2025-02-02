@@ -1,20 +1,28 @@
 #!/usr/bin/env python3
 
 import rospy
-from std_msgs.msg import Float32
+from std_msgs.msg import Float32, String
 from nav_msgs.msg import Path, Odometry
-from geometry_msgs.msg import Twist, Point
+from geometry_msgs.msg import Twist, Point, Pose2D
 from pid_controller import PIDController
 from visualization_msgs.msg import Marker
 from tf.transformations import euler_from_quaternion
 import numpy as np
+from enum import Enum
+
+
+class States(Enum):
+    MOVING_TO_ANGULAR_TARGET = 1
+    MOVING_TO_LINEAR_TARGET = 2
+    AT_TARGET = 3
+    AT_DESTINATION = 4
 
 
 class PointToPoint:
     def __init__(self):
         rospy.init_node("point_to_point_node")
 
-        self.LINEAR_P = 5.0
+        self.LINEAR_P = 3.0
         self.LINEAR_I = 0
         self.LINEAR_D = 0
         self.LINEAR_TOLERANCE = 0.2  # meters
@@ -58,12 +66,18 @@ class PointToPoint:
 
         self.at_angle_target = True
         self.at_linear_target = True
+        self.at_destination = True
+
+        self.angle_error = 0
+        self.linear_error = 0
 
         self.prev_linear_error = float("inf")
 
-        self.target_point_index = 0
-        self.target_point = [None, None]
+        self.target_pose_index = 0
+        self.target_pose = [None, None, None]
         self.path = []
+
+        self.state = States.AT_DESTINATION
 
         # PUBLISHERS ==================================================================================================
         cmd_vel_topic = rospy.get_param("/cmd_vel_topic", "/cmd_vel")
@@ -86,10 +100,20 @@ class PointToPoint:
         self.pid_angular_publisher = rospy.Publisher(
             "/ptp/pid_angular", Float32, queue_size=10
         )
+
         self.path_segment_publisher = rospy.Publisher(
             "/ptp/current_target", Marker, queue_size=10
         )
+
         self.path_publisher = rospy.Publisher("/ptp/line_path", Marker, queue_size=10)
+
+        self.state_publisher = rospy.Publisher(
+            "/ptp/robot_state", String, queue_size=10
+        )
+
+        self.target_publisher = rospy.Publisher(
+            "/ptp/target_pose", Pose2D, queue_size=10
+        )
 
         # SUBSCRIBERS ==================================================================================================
         odom_topic = rospy.get_param("/odom_topic", "/odom")
@@ -145,20 +169,127 @@ class PointToPoint:
         self.last_pose = self.robot_pose
 
     def __path_callback(self, msg: Path):
-        complex_path = []  # create list for storing all d* points
+        complex_path = []  # create list for storing all d* poses
         for pose in msg.poses:
+            angles = euler_from_quaternion(
+                [
+                    pose.pose.orientation.x,
+                    pose.pose.orientation.y,
+                    pose.pose.orientation.z,
+                    pose.pose.orientation.w,
+                ]
+            )
+
             # add all points to complex path
-            complex_path.append((pose.pose.position.x, pose.pose.position.y))
+            complex_path.append([pose.pose.position.x, pose.pose.position.y, angles[2]])
 
         marker_points = []
         self.path, marker_points = self.__simplify_path(complex_path)
 
         # initialize target point
-        self.target_point_index = 0
-        self.target_point = self.path[self.target_point_index]
+        self.target_pose_index = 0
+        self.target_pose = self.path[self.target_pose_index]
 
         # visualize sequence of lines
         self.__visualize_line_path(marker_points)
+
+    # ==================================================================================================================
+    # STATE PROCESSING
+    # ==================================================================================================================
+
+    def __update_state(self, pose):
+        """
+        Calculates linear and angular error, and updates abstract robot state.
+
+        Args:
+            target (list-like): target 2D pose of format (x, y, theta)
+            pose (list-like): current robot 2D pose in format (x, y, theta)
+            path (list-like): sequence of target poses in the path, each of which are in format (x, y, theta)
+        """
+        # store x and y coords of pose in a location variable
+        current_pose = pose
+        current_location = np.array(current_pose[:2])
+
+        path = self.path
+
+        # check if on final trajectory
+        on_final_trajectory = False
+        if len(path) == 0:
+            on_final_trajectory = True
+        elif self.target_pose == path[-1]:
+            on_final_trajectory = True
+
+        ## -------------------------------------------------
+        ## CALCULATE WHETHER AT LINEAR TARGET -------
+        ## -------------------------------------------------
+        # calculate distance to target as error
+        self.linear_error = np.linalg.norm(
+            np.array(self.target_pose[:2]) - current_location
+        )
+
+        # check if robot linear position is within tolerance - if so, terminate linear motion
+        self.at_linear_target = np.abs(self.linear_error) < self.LINEAR_TOLERANCE
+
+        if (
+            np.abs(self.linear_error) - np.abs(self.prev_linear_error)
+            >= self.LINEAR_TOLERANCE
+        ):
+            self.linear_error = self.linear_error * -1
+
+        # update previous linear error after checking that the magnitude is decreasing
+        self.prev_linear_error = self.linear_error
+
+        ## -------------------------------------------------
+        ## CALCULATE WHETHER AT ANGULAR TARGET -------
+        ## -------------------------------------------------
+        # store heading for computation - resistant to changes in variable caused by odom callback during loop execution
+        current_pose = pose
+
+        # calculate angle to target from x axis
+        pose_target_angle = None
+        if on_final_trajectory and self.at_linear_target:
+            # set target to final path angle if reached linear destination
+            pose_target_angle = self.target_pose[2]
+        else:
+            pose_target_angle = np.arctan2(  # calculate target angle
+                self.target_pose[1] - current_pose[1],
+                self.target_pose[0] - current_pose[0],
+            )
+
+        # subtract heading to find angle error
+        self.angle_error = pose_target_angle - current_pose[2]
+
+        # check if around-the-world distance is smaller than current different
+        if np.abs(2 * np.pi - self.angle_error) < np.abs(self.angle_error):
+            # normalize to make error reflect around-the-world
+            self.angle_error = 2 * np.pi - self.angle_error
+
+        # check if robot heading is within tolerance - if so, terminate turning procedure
+        self.at_angle_target = np.abs(self.angle_error) < self.ANGULAR_TOLERANCE_RAD
+
+        ## -------------------------------------------------
+        ## UPDATE STATE -------
+        ## -------------------------------------------------
+        print(
+            "PTP ------------------------------- \n"
+            + f"At Linear Target: {self.at_linear_target} \n"
+            + f"At Angular Target: {self.at_angle_target} \n"
+            + f"On Final Trajectory: {on_final_trajectory} \n"
+            + "-------------------------------"
+        )
+
+        if not self.at_linear_target:
+            self.state = States.MOVING_TO_LINEAR_TARGET
+            if not self.at_angle_target:
+                self.state = States.MOVING_TO_ANGULAR_TARGET
+        else:  # move to angular target if angle target is not met
+            if on_final_trajectory:
+                self.state = States.AT_DESTINATION  # update state if at destination
+
+            else:
+                # if at linear target and not on final trajectory, target point should update
+                self.state = States.AT_TARGET
+                self.target_pose_index = self.target_pose_index + 1
 
     # ==================================================================================================================
     # PATH PROCESSING
@@ -215,7 +346,7 @@ class PointToPoint:
 
         marker_points = self.__point_list_to_ros_point_list(filtered_points)
 
-        marker_points.insert(0, marker_points[0])
+        # marker_points.insert(0, marker_points[0])
         marker_points.insert(0, Point(self.robot_pose[0], self.robot_pose[1], 0))
 
         print(
@@ -238,7 +369,7 @@ class PointToPoint:
     # MOTION
     # ==================================================================================================================
 
-    def __turn_to_point(self, point, pose):
+    def __turn_to_point(self):
         """
         Computes angular velocity required to turn toward target point and updates global angular velocity veriable.
 
@@ -246,46 +377,22 @@ class PointToPoint:
             point (list/array): target point in format [x (m), y (m)]
             pose (list/array): robot pose in format [x (m), y (m), heading (rad)]
         """
-        # store heading for computation - resistant to changes in variable caused by odom callback during loop execution
-        current_pose = pose
-        # calculate angle to target from x axis
-        pose_target_angle = np.arctan2(
-            point[1] - current_pose[1], point[0] - current_pose[0]
-        )
-        # subtract heading to find angle error
-        angle_error = pose_target_angle - current_pose[2]
-        # check if around-the-world distance is smaller than current different
-        if np.abs(2 * np.pi - angle_error) < np.abs(angle_error):
-            # normalize to make error reflect around-the-world
-            angle_error = 2 * np.pi - angle_error
 
-        self.angular_disparity_publisher.publish(angle_error)
-        print(
-            "P2P: Robot Angle: "
-            + str(current_pose[2])
-            + " Target Angle: "
-            + str(pose_target_angle)
-            + " Angular Error: "
-            + str(angle_error)
-        )
-        # check if robot heading is within tolerance - if so, terminate turning procedure
-        self.at_angle_target = np.abs(angle_error) < self.ANGULAR_TOLERANCE_RAD
+        # # check if robot heading is within tolerance - if so, terminate turning procedure
+        # self.at_angle_target = np.abs(angle_error) < self.ANGULAR_TOLERANCE_RAD
 
-        if (
-            not self.at_angle_target and not self.at_linear_target
-        ):  # only turn if not within linear target tolerance
-            self.linear_vel = (
-                0  # stop linear translation if angle error becomes too big
-            )
+        # only turn if state is moving to angular target
+        if self.state == States.MOVING_TO_ANGULAR_TARGET:
+            # stop linear translation if angle error becomes too big
+            self.linear_vel = 0
 
             self.angular_vel = -self.angular_pid.calculate(
-                state=angle_error, dt=self.pid_dt, setpoint=0
+                state=self.angle_error, dt=self.pid_dt, setpoint=0
             )
-            self.pid_angular_publisher.publish(self.angular_vel)
         else:
             self.angular_vel = 0
 
-    def __translate_to_point(self, point, pose):
+    def __translate_to_point(self):
         """
         Translates robot toward target when heading is pointed toward target.
 
@@ -294,65 +401,61 @@ class PointToPoint:
             pose (list/array): robot pose in format [x (m), y (m), heading (rad)]
         """
         # store x and y coords of pose in a location variable
-        current_pose = pose
-        current_location = np.array(current_pose[:2])
-        # calculate distance to target as error
-        linear_error = np.linalg.norm(np.array(point[:2]) - current_location)
+        # current_pose = pose
+        # current_location = np.array(current_pose[:2])
+        # # calculate distance to target as error
+        # linear_error = np.linalg.norm(np.array(point[:2]) - current_location)
 
         # switch sign of the error if magnitude is increasing beyond tolerance - robot needs to go in negative direction
         if (
-            np.abs(linear_error) - np.abs(self.prev_linear_error)
+            np.abs(self.linear_error) - np.abs(self.prev_linear_error)
             >= self.LINEAR_TOLERANCE
         ):
-            linear_error = linear_error * -1
+            self.linear_error = self.linear_error * -1
 
         # update previous linear error after checking that the magnitude is decreasing
-        self.prev_linear_error = linear_error
+        self.prev_linear_error = self.linear_error
 
         # check if robot linear position is within tolerance - if so, terminate linear motion
-        self.at_linear_target = np.abs(linear_error) < self.LINEAR_TOLERANCE
+        self.at_linear_target = np.abs(self.linear_error) < self.LINEAR_TOLERANCE
 
-        if (
-            not self.at_linear_target
-        ) and self.angular_vel == 0:  # only translate if stopped turning
+        # only translate if state is to move to linear target
+        if self.state == States.MOVING_TO_LINEAR_TARGET:
             self.linear_vel = -self.linear_pid.calculate(
-                state=linear_error, dt=self.pid_dt, setpoint=0
+                state=self.linear_error, dt=self.pid_dt, setpoint=0
             )
         else:
             self.linear_vel = 0
 
-    def __move_to_point(self, point):
-        """
-        Turns and translates to target.
-
-        Args:
-            point (list/array): target point in format [x (m), y (m)]
-        """
-
-        if point != [None, None] and self.robot_pose != [None, None, None]:
-            target = point
-
-            self.__turn_to_point(target, self.robot_pose)
-            self.__translate_to_point(target, self.robot_pose)
-        else:
+    def __move_to_point(self):
+        if self.state == States.MOVING_TO_ANGULAR_TARGET:
+            # stop linear translation if angle error becomes too big
             self.linear_vel = 0
+
+            self.angular_vel = -self.angular_pid.calculate(
+                state=self.angle_error, dt=self.pid_dt, setpoint=0
+            )
+
+        elif self.state == States.MOVING_TO_LINEAR_TARGET:
             self.angular_vel = 0
 
-        # publish velocity to cmd_vel
-        vel = Twist()
-        vel.linear.x = self.linear_vel
-        vel.angular.z = self.angular_vel
-        self.cmd_vel_publisher.publish(vel)
+            self.linear_vel = -self.linear_pid.calculate(
+                state=self.linear_error, dt=self.pid_dt, setpoint=0
+            )
 
-        # visualize path to target
-        if self.target_point != [None, None]:
-            self.__visualize_path_to_target(target=point)
+        elif self.state == States.AT_DESTINATION:
+            self.angular_vel = 0
+            self.linear_vel = 0
+
+        elif self.state == States.AT_TARGET:
+            self.target_pose_index = self.target_pose_index + 1
+            self.target_pose = self.path[self.target_pose_index]
 
     # ==================================================================================================================
     # VISUALIZATION
     # ==================================================================================================================
 
-    def __visualize_path_to_target(self, target):
+    def __visualize_path_to_target(self):
         marker = Marker()
         # Set the frame
         marker.header.frame_id = "odom"
@@ -372,7 +475,7 @@ class PointToPoint:
         marker.pose.orientation.w = 1.0
 
         start_point = Point(self.robot_pose[0], self.robot_pose[1], 0)
-        end_point = Point(target[0], target[1], 0)
+        end_point = Point(self.target_pose[0], self.target_pose[1], 0)
 
         marker.points.append(start_point)
         marker.points.append(end_point)
@@ -422,10 +525,32 @@ class PointToPoint:
     # NODE RUNNING
     # ==================================================================================================================
 
+    def publish_telemetry(self):
+        self.state_publisher.publish(str(self.state))
+
+        # publish velocity to cmd_vel
+        vel = Twist()
+        vel.linear.x = self.linear_vel
+        vel.angular.z = self.angular_vel
+        self.cmd_vel_publisher.publish(vel)
+
+        # target pose publishing
+        pose = Pose2D()
+        pose.x = self.target_pose[0]
+        pose.y = self.target_pose[1]
+        pose.theta = self.target_pose[2]
+        self.target_publisher.publish(pose)
+
+        # visualize path to target
+        if self.target_pose != [None, None]:
+            self.__visualize_path_to_target()
+
     def run_node(self):
         rate = rospy.Rate(self.FREQUENCY)
 
         while not rospy.is_shutdown():
+            pose = self.robot_pose
+
             # update difference in time
             self.pid_dt = rospy.Time.now().to_sec() - self.prev_pid_time
             self.prev_pid_time = rospy.Time.now().to_sec()  # update previous time
@@ -433,16 +558,14 @@ class PointToPoint:
             if self.pid_dt == 0 or self.pid_dt is None:  # ensure no div by 0 errors
                 self.pid_dt = 1 / self.FREQUENCY
 
-            if (
-                self.path != [] and self.at_linear_target
-            ):  # go to next target when at linear target
-                # check that target point index will be within bounds and increment
-                if self.target_point_index != len(self.path) - 1:
-                    self.target_point_index += 1
-                    self.target_point = self.path[self.target_point_index]
+            if self.target_pose != [None, None, None] and pose != [None, None, None]:
+                self.__update_state(pose)
+                self.__move_to_point()
+            else:
+                self.linear_vel = 0
+                self.angular_vel = 0
 
-            self.__move_to_point(self.target_point)
-
+            self.publish_telemetry()
             rate.sleep()
 
 
