@@ -66,12 +66,10 @@ mkdir -p luna_ws/src
 ```
 
 Clone the repository in the `src` folder.
-<!-- TODO: Add link -->
 ```
 cd ~/luna_ws/src
-git clone <link> 
-``` 
-<!-- TODO: Link -->
+git clone https://github.com/PurdueLunabotics/purdue_lunabotics.git
+```
 
 Install dependencies at the root of your workspace
 ```
