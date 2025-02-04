@@ -1,0 +1,5 @@
+# See https://docs.ros.org/en/foxy/How-To-Guides/Parameters-YAML-files-migration-guide.html
+
+talker:
+  ros__parameters:
+    epic_name: "Lunabot_Epic"

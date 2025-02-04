@@ -1,0 +1,32 @@
+<launch>
+
+    <!-- See https://docs.ros.org/en/foxy/How-To-Guides/Launch-files-migration-guide.html#node -->
+    <!-- and https://docs.ros.org/en/humble/How-To-Guides/Launch-file-different-formats.html  -->
+
+    <arg name="my_name" default="lunabot" />
+
+    <group>
+
+        <!-- apply a namespace to a whole group. namespace can also be used for individual nodes. -->
+        <push_ros_namespace namespace="comms"/> 
+
+        <!-- launch nodes. Notice 'type' is now 'exec' -->
+        <node pkg="lunabot_embedded" exec="talker" name="talker" />
+        <node pkg="lunabot_embedded" exec="listener" name="listener" />
+
+
+    </group>
+
+    <!-- launch nodes with a parameter, using args is now 'var' -->
+    <node pkg="lunabot_behavior" exec="listener.py" name="listener" output="screen" >
+        <param name="my_name" value="$(var my_name)" />
+    </node>
+
+
+    <!-- launch nodes with a config file -->
+    <node pkg="lunabot_behavior" exec="talker.py" name="talker" output="screen" >
+        <param from="$(find-pkg-share lunabot_config)/config/example.yml" />
+    </node>
+
+
+</launch>
