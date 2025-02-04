@@ -3,9 +3,9 @@
 <package format="3">
   <name>lunabot_bringup</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="isaac@todo.todo">isaac</maintainer>
-  <license>TODO: License declaration</license>
+  <description>Lunabotics launch files</description>
+  <maintainer email="lunabotics@todo.todo">Purdue Lunabotics</maintainer>
+  <license>None</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
