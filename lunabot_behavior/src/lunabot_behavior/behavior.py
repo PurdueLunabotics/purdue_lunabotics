@@ -121,6 +121,11 @@ class Behavior:
         traversal_message.data = False
         self.traversal_publisher.publish(traversal_message)
 
+        # set backwards driving to false
+        backwards_message = Bool()
+        backwards_message.data = False
+        self.traversal_publisher.publish(backwards_message)
+
         # Raise linear actuators
         linear_actuators.raise_linear_actuators()
 
