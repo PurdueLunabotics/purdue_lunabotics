@@ -80,8 +80,9 @@ if __name__ == "__main__":
     effort_factory = EffortFactory()
 
     while not rospy.is_shutdown():
-        if effort_factory.robot_errors.manual_stop == False:
-            effort_factory.publish_effort()
-        else:
-            effort_factory.stop()
+        if rospy.get_param("autonomy"):
+            if effort_factory.robot_errors.manual_stop == False:
+                effort_factory.publish_effort()
+            else:
+                effort_factory.stop()
         effort_factory.rate.sleep()

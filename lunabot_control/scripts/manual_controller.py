@@ -80,7 +80,7 @@ class ManualController:
     """
 
     def __init__(self):
-        self.joy_subscriber = rospy.Subscriber("joy", Joy, self.joy_callback)
+        self.joy_subscriber = rospy.Subscriber("joy0", Joy, self.joy_callback)
         self.effort_publisher = rospy.Publisher("effort", RobotEffort, queue_size=1, latch=True)
         self.effort_msg = RobotEffort()
 
@@ -240,5 +240,6 @@ if __name__ == "__main__":
     rate = rospy.Rate(20)
 
     while not rospy.is_shutdown():
-        man_ctrl.loop()
+        if not rospy.get_param("autonomy"):
+            man_ctrl.loop()
         rate.sleep()

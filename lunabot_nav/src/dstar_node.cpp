@@ -174,10 +174,6 @@ private:
   // Publish the calculated path using the class's path publisher.
   // Reduces the size / complexity of the path using the path sampling rate
   void publish_path(const std::vector<real_world_point> &path_data) {
-    if (path_data.empty()) {
-      return;
-    }
-
     ROS_DEBUG("Publishing path");
 
     nav_msgs::Path path;
