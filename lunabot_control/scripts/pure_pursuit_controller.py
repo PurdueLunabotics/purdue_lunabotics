@@ -50,6 +50,8 @@ class PurePursuitController:
         self.last_pos = (0,0,0)
 
         self.telemetry = telemetry
+
+        self.drive_backwards = False
         
         # make weights updatable without restarting
         # switch between pure pursuit and test wheel nodes in yml file
@@ -82,11 +84,21 @@ class PurePursuitController:
     def odom_callback(self, msg: Odometry):
         # self.robot_velocity = [msg.twist.twist.linear, msg.twist.twist.angular]
         angles = euler_from_quaternion([msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w])
-        self.robot_pose = (msg.pose.pose.position.x, msg.pose.pose.position.y, angles[2])
+
+        if self.drive_backwards:
+            self.robot_pose = (msg.pose.pose.position.x, msg.pose.pose.position.y, angles[2] + math.pi)
+        else:
+            self.robot_pose = (msg.pose.pose.position.x, msg.pose.pose.position.y, angles[2])
+
         self.robot_velocity = [math.sqrt((self.robot_pose[0] - self.last_pos[0]) ** 2 + (self.robot_pose[1] - self.last_pos[1]) ** 2)
                                / (self.dt), ((self.robot_pose[2] - self.last_pos[2])/(self.dt))]
+                
         self.last_pos = self.robot_pose
-        
+
+
+    def backwards_callback(self, msg: Bool):
+        self.drive_backwards = msg.data
+
         
     def publish_velocity(self, lin_ang_velocities):
         twist = Twist()
@@ -213,7 +225,11 @@ class PurePursuitController:
                 dist = math.dist(self.last_pos, self.path[i])
                 closest_point = self.path[i]"""
                 
-        # return [self.MAX_VELOCITY] * len(self.path) # commented out just for now
+        if self.drive_backwards:
+            return [-self.MAX_VELOCITY] * len(self.path) # commented out just for now
+        else:
+            return [self.MAX_VELOCITY] * len(self.path) # commented out just for now
+
 
 
         # #EDITED CODE BELOW
@@ -221,32 +237,32 @@ class PurePursuitController:
         # dist = math.inf
         # #closest_point = (0,0,0)
 
-        target_velocities = []
-        # Calculate the lookahead position and direction to it
-        lookahead = self.lookahead()
-        direction_to_lookahead = (lookahead[0] - self.robot_pose[0], lookahead[1] - self.robot_pose[1])
+        # target_velocities = []
+        # # Calculate the lookahead position and direction to it
+        # lookahead = self.lookahead()
+        # direction_to_lookahead = (lookahead[0] - self.robot_pose[0], lookahead[1] - self.robot_pose[1])
 
-        # Calculate the unit vector in the direction the robot is currently facing
-        #robot_facing_vector = (math.cos(self.robot_pose[2]), math.sin(self.robot_pose[2]))
+        # # Calculate the unit vector in the direction the robot is currently facing
+        # #robot_facing_vector = (math.cos(self.robot_pose[2]), math.sin(self.robot_pose[2]))
         
-        # Determine the dot product between the direction to the lookahead and the robot's facing vector
-        #dot_product = direction_to_lookahead[0] * robot_facing_vector[0] + direction_to_lookahead[1] * robot_facing_vector[1]
+        # # Determine the dot product between the direction to the lookahead and the robot's facing vector
+        # #dot_product = direction_to_lookahead[0] * robot_facing_vector[0] + direction_to_lookahead[1] * robot_facing_vector[1]
 
-        # Calculate the angle between the robot's current heading and the direction to the lookahead
-        angle_to_lookahead = self.calc_heading_err(lookahead=lookahead)
-        print("ANGLE TO LOOKAHEAD:" + str(angle_to_lookahead))
+        # # Calculate the angle between the robot's current heading and the direction to the lookahead
+        # angle_to_lookahead = self.calc_heading_err(lookahead=lookahead)
+        # print("ANGLE TO LOOKAHEAD:" + str(angle_to_lookahead))
 
-        # Determine if the robot should move forward or backward
-        if ((abs(angle_to_lookahead) > 3 * math.pi / 4) and (abs(angle_to_lookahead) < 5 * math.pi/4)):  # Robot is facing away from the lookahead
-            # Drive backward if the angle to the lookahead exceeds 90 degrees
-            target_speed = -self.MAX_VELOCITY
-        else:
-            # Drive forward otherwise
-            target_speed = self.MAX_VELOCITY
+        # # Determine if the robot should move forward or backward
+        # if ((abs(angle_to_lookahead) > 3 * math.pi / 4) and (abs(angle_to_lookahead) < 5 * math.pi/4)):  # Robot is facing away from the lookahead
+        #     # Drive backward if the angle to the lookahead exceeds 90 degrees
+        #     target_speed = -self.MAX_VELOCITY
+        # else:
+        #     # Drive forward otherwise
+        #     target_speed = self.MAX_VELOCITY
 
-        # Clamp target speed to ensure smooth operation
+        # # Clamp target speed to ensure smooth operation
 
-        return [target_speed] * len(self.path)
+        # return [target_speed] * len(self.path)
 
 
     def curvature_p(self):
@@ -387,7 +403,7 @@ class PurePursuitController:
         # dot = v1[0] * v2[0] + v1[1] * v2[1]
         # mag = magnitude(v1) * magnitude(v2)
         # return math.acos(dot / mag)
-        return -math.atan2(v1[0] * v2[1] - v1[1] * v2[0], v1[0] * v2[0] + v1[1] * v2[1])
+        return math.atan2(v1[0] * v2[1] - v1[1] * v2[0], v1[0] * v2[0] + v1[1] * v2[1])
 
     def curvature(self, lookahead):
         side = np.sign(math.sin(self.robot_pose[2]) * (lookahead[0] - self.robot_pose[0]) - math.cos(
@@ -463,6 +479,9 @@ class PurePursuitController:
         
         odom_topic = rospy.get_param("/odom_topic")
         rospy.Subscriber(odom_topic, Odometry, self.odom_callback)
+
+        backwards_topic = rospy.get_param("traversal/backwards")
+        rospy.Subscriber(backwards_topic, Bool, self.backwards_callback)
         
         rate = rospy.Rate(self.frequency)
         
@@ -583,5 +602,5 @@ class PurePursuitController:
 
 
 if __name__ == "__main__":
-    controller = PurePursuitController(0.4, 0.4, 0.4, 0.45, (1, -1.3, 0), True)
+    controller = PurePursuitController(0.4, 0.4, 0.4, 0.45, (1, -1.3, 0), True, True)
     controller.loop()
