@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import rospy
-from std_msgs.msg import Float32, String
+from std_msgs.msg import Bool, Float32, String
 from nav_msgs.msg import Path, Odometry
 from geometry_msgs.msg import Twist, Point, Pose2D
 from pid_controller import PIDController
@@ -77,6 +77,8 @@ class PointToPoint:
         self.path = []
 
         self.state = States.AT_DESTINATION
+        self.is_moving_backwards = False
+        
 
         # PUBLISHERS ==================================================================================================
         cmd_vel_topic = rospy.get_param("/cmd_vel_topic", "/cmd_vel")
@@ -120,10 +122,16 @@ class PointToPoint:
 
         path_topic = rospy.get_param("/nav/global_path_topic", "/nav/global_path")
         rospy.Subscriber(path_topic, Path, self.__path_callback)
+        
+        backwards_topic = rospy.get_param("/traversal/backwards_topic", "/traversal/backwards")
+        rospy.Subscriber(backwards_topic, Bool, self.__backwards_callback)
 
     # ==================================================================================================================
     # CALLBACKS
     # ==================================================================================================================
+
+    def __backwards_callback(self, msg: Bool):
+        self.is_moving_backwards = msg.data
 
     def __odom_callback(self, msg: Odometry):
         # self.robot_velocity = [msg.twist.twist.linear, msg.twist.twist.angular]
@@ -138,7 +146,7 @@ class PointToPoint:
         self.robot_pose = (
             msg.pose.pose.position.x,
             msg.pose.pose.position.y,
-            angles[2],  # -pi to pi
+            angles[2] * -1 if self.is_moving_backwards else 1,  # -pi to pi
         )
 
         self.odom_dt = rospy.Time.now().to_sec() - self.prev_odom_time
@@ -463,6 +471,9 @@ class PointToPoint:
         vel = Twist()
         vel.linear.x = self.linear_vel
         vel.angular.z = self.angular_vel
+        
+        vel.linear.x *= -1 if self.is_moving_backwards else 1
+        vel.linear.z *= -1 if self.is_moving_backwards else 1
         self.cmd_vel_publisher.publish(vel)
 
         # target pose publishing
