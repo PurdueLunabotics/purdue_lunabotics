@@ -59,6 +59,8 @@ class Behavior:
         self.mining_zone_publisher = rospy.Publisher("/mining_zone", PolygonStamped, queue_size=1, latch=True)
         self.berm_zone_publisher = rospy.Publisher("/berm_zone", PolygonStamped, queue_size=1, latch=True)
 
+        self.backwards_publisher = rospy.Publisher("/traversal/backwards", Bool, queue_size=1, latch=True)
+
         self.mining_zone = None
         self.berm_zone = None
 
