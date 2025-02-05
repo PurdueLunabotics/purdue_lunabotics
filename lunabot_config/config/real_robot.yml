@@ -32,7 +32,7 @@ nav:
 differential_drive_controller:
     max_speed_percentage: 0.8
     hz: 20
-    max_speed: 4.3 # rad/s of wheels
+    max_speed: 3000 #
     p: 3.9
     i: 0.015
     d: 0.0
