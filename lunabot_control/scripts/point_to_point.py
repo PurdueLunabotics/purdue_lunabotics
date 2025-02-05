@@ -77,7 +77,7 @@ class PointToPoint:
         self.path = []
 
         self.state = States.AT_DESTINATION
-        self.is_moving_backwards = False
+        self.is_moving_backwards = True
         
 
         # PUBLISHERS ==================================================================================================
@@ -146,7 +146,7 @@ class PointToPoint:
         self.robot_pose = (
             msg.pose.pose.position.x,
             msg.pose.pose.position.y,
-            angles[2] * -1 if self.is_moving_backwards else angles[2],  # -pi to pi
+            (angles[2]-np.pi) %np.pi - np.pi  if self.is_moving_backwards else angles[2],  # -pi to pi
         )
 
         self.odom_dt = rospy.Time.now().to_sec() - self.prev_odom_time
