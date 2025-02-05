@@ -98,7 +98,7 @@ class ManualController:
 
         self.driving_mode = "Forwards"
         
-        self._max_speed = rospy.get_param("~max_speed", 2.0) * 60 / 2 / np.pi # In rad/s converted to RPM
+        self._max_speed = rospy.get_param("~max_speed", 3000) # in rpm
         self.drive_speed_modifier = 1
         self.slow_drive_speed = 0.5
         self.fast_drive_speed = 1
