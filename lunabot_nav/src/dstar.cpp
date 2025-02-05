@@ -74,6 +74,7 @@ node_key Dstar::get_top_key() {
 void Dstar::insert(grid_point point, node_key key) {
   node newNode = {key, point};
   node_queue.push(newNode);
+  // std::cout << "nqs: " << node_queue.size() << std::endl;
 }
 
 // Calculates the hueristic used for the priority of a node based on its distance to the goal
@@ -181,6 +182,11 @@ std::vector<real_world_point> Dstar::find_path() {
   // If the start is out of the map, or is an obstacle, search for the closest non - occupied node
   if (!inside_map(current_point) || current_map[current_point.y][current_point.x] > OCCUPANCY_THRESHOLD) {
     current_point = bfs_non_occupied(current_point);
+  }
+
+  if (node_queue.size() == 0) {
+    std::cout << "Dstar: No path found (map processing failed)" << std::endl;
+    return create_path_list();
   }
 
   // Loop until current node(start) is locally consistent(g == rhs) and its priority is lowest in the queue
