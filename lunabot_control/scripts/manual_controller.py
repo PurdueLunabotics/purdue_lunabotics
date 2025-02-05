@@ -196,9 +196,9 @@ class ManualController:
 
                 # Take priority for right trigger. If it is nearly zero, use the left trigger instead
                 if (right_trigger_axis_normalized <= 0.01):
-                    effort_msg.excavate = -1 * constrain_RPM(left_trigger_axis_normalized, 1000)
+                    effort_msg.excavate = -1 * constrain_RPM(left_trigger_axis_normalized, 5000)
                 else:
-                    effort_msg.excavate = constrain_RPM(right_trigger_axis_normalized, 1000)
+                    effort_msg.excavate = constrain_RPM(right_trigger_axis_normalized, 5000)
 
             # Y button: latch excavation speed. This keeps excavation at the same speed until the latch is released
             if joy.buttons[Buttons.Y.value] == 1 and self.last_joy.buttons[Buttons.Y.value] == 0:  
