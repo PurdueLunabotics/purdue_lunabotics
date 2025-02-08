@@ -137,7 +137,7 @@
           <remap from="cloud2" to="/d455_front/camera/depth/color/points" />
           <remap from="cloud3" to="/d435_right/camera/depth/color/points" if="$(arg extras)"/>
           <remap from="cloud4" to="/d435_left/camera/depth/color/points" if="$(arg extras)"/>   
-          <remap from="combined_cloud " to="depth_combined_cloud"/>       
+          <remap from="combined_cloud" to="depth_combined_cloud"/>       
           <param name="count" value="2" unless="$(arg extras)"/>
           <param name="count" value="4" if="$(arg extras)"/>
           <param name="xyz_output" value="true"/>
