@@ -15,7 +15,11 @@
   <arg name="extras"                            default="true"/>
   <arg name="lidar"                           default="true"/>
   <arg name="pointcloud" default="$(arg front)" />
+  
   <arg name="decimation" default="8"/>
+  <arg name="voxel_size" default="0.1"/> <!--meters-->
+  <arg name="noise_filter_radius" default="0.1"/> <!--meters radius-->
+  <arg name="max_depth" default="5"/> <!--meters-->
 
   <include if="$(arg lidar)" file="$(find lunabot_perception)/launch/lidar.launch" />
 
@@ -28,30 +32,152 @@
       <param name="topic_name" type="string" value="/imu" />
     </node>
 
-    <group ns="d455_front" if="$(arg front)">
-      <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
-        <arg name="manager" value="front_realsense2_camera_manager" />
-        <arg name="serial_no" value="$(arg serial_no_d455_front)" />
-        <arg name="tf_prefix" value="d455_front" />
-        <arg name="filters" value="disparity,decimation" />
-        <arg name="align_depth" value="true" />
-        <arg name="depth_width" value="$(arg width)" />
-        <arg name="depth_height" value="$(arg height)" />
-        <arg name="depth_fps" value="$(arg fps)" />
-        <arg name="color_width" value="$(arg width)" />
-        <arg name="color_height" value="$(arg height)" />
-        <arg name="color_fps" value="$(arg fps)" />
-        <arg name="enable_color" value="true"/>
-        <arg name="enable_gyro" value="false" />
-        <arg name="enable_accel" value="false" />
-        <arg name="enable_sync" value="true" />
-        <arg name="publish_tf" value="true" />
-        <arg name="enable_pointcloud" value="$(arg pointcloud)" />
-        <arg name="tf_publish_rate" value="0"/>
-        <arg name="rgb_processing" value="false"/>
 
+
+    <!-- Front Camera -->
+    <group ns="d455_front/camera" if="$(arg front)">
+
+      <!-- Launch the camera device nodelet-->
+      <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
+        <arg name="external_manager"         value="false"/>
+        <arg name="manager"                  value="front_realsense2_camera_manager"/>
+        <arg name="tf_prefix"                value="d455_front"/>
+        <arg name="serial_no"                value="$(arg serial_no_d455_front)"/>
+
+        <arg name="enable_pointcloud"        value="false"/>
+        <arg name="enable_sync"              value="true"/>
+        <arg name="align_depth"              value="true"/>
+
+        <arg name="depth_width"              value="$(arg width)"/>
+        <arg name="depth_height"             value="$(arg height)"/>
+        <arg name="enable_depth"             value="true"/>
+
+        <arg name="color_width"              value="$(arg width)"/>
+        <arg name="color_height"             value="$(arg color_height)"/>
+        <arg name="enable_color"             value="true"/>
+
+        <arg name="depth_fps"                value="$(arg fps)"/>
+        <arg name="color_fps"                value="$(arg fps)"/>
+        <arg name="filters"                  value="disparity,decimation"/>
+
+        <arg name="publish_tf"               value="true"/>
+        <arg name="tf_publish_rate"          value="0"/>
+
+        <arg name="clip_distance"            value="$(arg max_depth)"/>
       </include>
+
+      <!-- RGB processing -->
+      <!-- Color rectified image -->
+      <node pkg="nodelet" type="nodelet" name="color_rectify_color"
+            args="load image_proc/rectify front_realsense2_camera_manager false"
+            respawn="false">
+        <param name="queue_size" value="5" />
+        <remap from="image_mono" to="color/image_raw" />
+        <remap from="image_rect" to="color/image_rect_color" />
+      </node>
+
+      <!-- Publish registered XYZ only point cloud using RTabMap's formula -->
+      <node if="$(arg pointcloud)" pkg="nodelet" type="nodelet" name="points_xyz_rtabmap"
+            args="load rtabmap_util/point_cloud_xyz front_realsense2_camera_manager false" respawn="false">
+        <remap from="depth/camera_info"             to="depth/camera_info" />
+        <remap from="depth/image" to="depth/image_raw" />
+        <remap from="cloud"     to="points" /> <!-- output-->
+
+        <!-- reduce pointcloud size -->
+        <param name="decimation" type="int" value="$(arg decimation)"/>
+        <param name="voxel_size" type="double" value="$(arg voxel_size)"/>
+        <param name="noise_filter_radius" type="double" value="$(arg noise_filter_radius)"/>
+
+
+      </node>
+
+      <!-- Publish registered XYZRGB point cloud with hardware registered input (ROS Realsense depth alignment) -->
+      <!-- <node pkg="nodelet" type="nodelet" name="points_xyzrgb_hw_registered"
+            args="load depth_image_proc/point_cloud_xyzrgb front_realsense2_camera_manager false" respawn="false">
+        <remap from="rgb/image_rect_color"        to="color/image_rect_color" />
+        <remap from="rgb/camera_info"             to="color/camera_info" />
+        <remap from="depth_registered/image_rect" to="aligned_depth_to_color/image_raw" />
+        <remap from="depth_registered/points"     to="aligned_depth_to_color/points" />
+      </node> -->
+
     </group>
+
+    <!-- Back Camera -->
+    <group ns="d455_back/camera" if="$(arg front)">
+
+      <!-- Launch the camera device nodelet-->
+      <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
+        <arg name="external_manager"         value="false"/>
+        <arg name="manager"                  value="back_realsense2_camera_manager"/>
+        <arg name="tf_prefix"                value="d455_back"/>
+        <arg name="serial_no"                value="$(arg serial_no_d455_back)"/>
+
+        <arg name="enable_pointcloud"        value="false"/>
+        <arg name="enable_sync"              value="true"/>
+        <arg name="align_depth"              value="true"/>
+
+        <arg name="depth_width"              value="$(arg width)"/>
+        <arg name="depth_height"             value="$(arg height)"/>
+        <arg name="enable_depth"             value="true"/>
+
+        <arg name="color_width"              value="$(arg width)"/>
+        <arg name="color_height"             value="$(arg color_height)"/>
+        <arg name="enable_color"             value="true"/>
+
+        <arg name="depth_fps"                value="$(arg fps)"/>
+        <arg name="color_fps"                value="$(arg fps)"/>
+        <arg name="filters"                  value="disparity,decimation"/>
+
+        <arg name="publish_tf"               value="true"/>
+        <arg name="tf_publish_rate"          value="0"/>
+
+        <arg name="clip_distance"            value="$(arg max_depth)"/>
+      </include>
+
+      <!-- RGB processing -->
+      <!-- Color rectified image -->
+      <node pkg="nodelet" type="nodelet" name="color_rectify_color"
+            args="load image_proc/rectify back_realsense2_camera_manager false"
+            respawn="false">
+        <param name="queue_size" value="5" />
+        <remap from="image_mono" to="color/image_raw" />
+        <remap from="image_rect" to="color/image_rect_color" />
+      </node>
+
+      <!-- Publish registered XYZ only point cloud using RTabMap's formula -->
+      <node if="$(arg pointcloud)" pkg="nodelet" type="nodelet" name="points_xyz_rtabmap"
+            args="load rtabmap_util/point_cloud_xyz back_realsense2_camera_manager false" respawn="false">
+        <remap from="depth/camera_info"             to="depth/camera_info" />
+        <remap from="depth/image" to="depth/image_raw" />
+        <remap from="cloud"     to="points" /> <!-- output-->
+
+        <!-- reduce pointcloud size -->
+        <param name="decimation" type="int" value="$(arg decimation)"/>
+        <param name="voxel_size" type="double" value="$(arg voxel_size)"/>
+        <param name="noise_filter_radius" type="double" value="$(arg noise_filter_radius)"/>
+
+
+      </node>
+
+      <!-- Publish registered XYZRGB point cloud with hardware registered input (ROS Realsense depth alignment) -->
+      <!-- <node pkg="nodelet" type="nodelet" name="points_xyzrgb_hw_registered"
+            args="load depth_image_proc/point_cloud_xyzrgb front_realsense2_camera_manager false" respawn="false">
+        <remap from="rgb/image_rect_color"        to="color/image_rect_color" />
+        <remap from="rgb/camera_info"             to="color/camera_info" />
+        <remap from="depth_registered/image_rect" to="aligned_depth_to_color/image_raw" />
+        <remap from="depth_registered/points"     to="aligned_depth_to_color/points" />
+      </node> -->
+
+      <group ns="color">
+        <node pkg="image_proc" type="image_proc" name="image_proc"
+          args="image:=camera/color/image_raw" />
+        <include file="$(find lunabot_perception)/launch/apriltag.launch">
+          <arg name="camera_frame" value="d455_back_base" />
+        </include>
+      </group>
+
+    </group>
+
 
     <group ns="d435_right" if="$(arg extras)">
       <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
@@ -101,50 +227,27 @@
       </include>
     </group>
 
-    <group ns="d455_back" if="$(arg back)">
-      <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
-        <arg name="manager" value="back_realsense2_camera_manager" />
-        <arg name="serial_no" value="$(arg serial_no_d455_back)" />
-        <arg name="tf_prefix" value="d455_back" />
-        <arg name="filters" value="disparity,decimation" />
-        <arg name="align_depth" value="true" />
-        <arg name="depth_width" value="$(arg width)" />
-        <arg name="depth_height" value="$(arg height)" />
-        <arg name="depth_fps" value="$(arg fps)" />
-        <arg name="color_width" value="$(arg width)" />
-        <arg name="color_height" value="$(arg height)" />
-        <arg name="color_fps" value="$(arg fps)" />
-        <arg name="enable_gyro" value="false" />
-        <arg name="enable_accel" value="false" />
-        <arg name="enable_sync" value="true" />
-        <arg name="publish_tf" value="true" />
-        <arg name="enable_pointcloud" value="$(arg pointcloud)" />
-        <arg name="tf_publish_rate" value="0"/>
-        <arg name="rgb_processing" value="false"/>
-      </include>
-      <group ns="camera/color">
-        <node pkg="image_proc" type="image_proc" name="image_proc"
-          args="image:=camera/color/image_raw" />
-        <include file="$(find lunabot_perception)/launch/apriltag.launch">
-          <arg name="camera_frame" value="d455_back_base" />
-        </include>
-      </group>
-    </group>
+
+
+    <!-- Aggregate pointclouds from each camera (if using multiple cameras)-->
     <group if="$(arg front)">
       <node ns="pointcloud" pkg="nodelet" type='nodelet' name="point_cloud_aggregator"
           args="standalone rtabmap_util/point_cloud_aggregator">
-          <remap from="cloud1" to="/d455_back/camera/depth/color/points" />
-          <remap from="cloud2" to="/d455_front/camera/depth/color/points" />
-          <remap from="cloud3" to="/d435_right/camera/depth/color/points" if="$(arg extras)"/>
-          <remap from="cloud4" to="/d435_left/camera/depth/color/points" if="$(arg extras)"/>   
+          <remap from="cloud1" to="/d455_back/camera/aligned_depth_to_color/points" />
+          <remap from="cloud2" to="/d455_front/camera/aligned_depth_to_color/points" />
+          <remap from="cloud3" to="/d435_right/camera/aligned_depth_to_color/points" if="$(arg extras)"/>
+          <remap from="cloud4" to="/d435_left/camera/aligned_depth_to_color/points" if="$(arg extras)"/>   
           <remap from="combined_cloud" to="depth_combined_cloud"/>       
           <param name="count" value="2" unless="$(arg extras)"/>
           <param name="count" value="4" if="$(arg extras)"/>
           <param name="xyz_output" value="true"/>
           <param name="fixed_frame_id" value="base_link" />
+          <param name="approx_sync" value="true"/>
       </node>
     </group>
+
     <group if="$(arg lidar)">
+      <!-- Assemble lidar pointcloud over time -->
       <node ns="pointcloud" pkg="nodelet" type='nodelet' name='point_cloud_assembler'
           args = "standalone rtabmap_util/point_cloud_assembler">
         <remap from="cloud" to="lidar_cloud"/>
@@ -152,6 +255,8 @@
         <param name="circular_buffer" value="true"/>
         <param name="max_clouds" value="100"/>
       </node>
+
+      <!-- Aggregate that with camera output-->
       <node ns="pointcloud" pkg="nodelet" type='nodelet' name="point_cloud_aggregator"
           args="standalone rtabmap_util/point_cloud_aggregator">
           <remap from="combined_cloud" to="depth_lidar_combined_cloud" />   
