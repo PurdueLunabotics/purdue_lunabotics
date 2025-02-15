@@ -20,9 +20,6 @@
   <arg name="noise_filter_radius" default="0.1"/> <!--meters radius-->
   <arg name="max_depth" default="3"/> <!--meters-->
 
-  <include if="$(arg lidar)" file="$(find lunabot_perception)/launch/lidar.launch" />
-
-
   <group unless="$(arg sim)">
 
     <!-- IMU -->
