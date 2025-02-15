@@ -9,13 +9,13 @@
   <arg name="sim"                             default="false"/>
   <arg name="width"                           default="424"/>
   <arg name="height"                          default="240"/>
-  <arg name="fps"                             default="30"/>
+  <arg name="fps"                             default="5"/>
   <arg name="front"                           default="false"/>
   <arg name="back"                            default="true"/>
   <arg name="extras"                            default="true"/>
   <arg name="pointcloud" default="$(arg front)" />
   
-  <arg name="decimation" default="2"/>
+  <arg name="decimation" default="4"/>
   <arg name="voxel_size" default="0.01"/> <!--meters-->
   <arg name="noise_filter_radius" default="0.1"/> <!--meters radius-->
   <arg name="max_depth" default="3"/> <!--meters-->
@@ -164,12 +164,12 @@
     </group>
 
 
-    <group ns="d435_right/camera">
+    <group ns="d435_right/camera" if="$(arg extras)">
 
       <!-- Launch the camera device nodelet-->
       <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
         <arg name="external_manager"         value="false"/>
-        <arg name="manager"                  value="back_realsense2_camera_manager"/>
+        <arg name="manager"                  value="right_realsense2_camera_manager"/>
         <arg name="tf_prefix"                value="d435_right"/>
         <arg name="serial_no"                value="$(arg serial_no_d435_right)"/>
 
@@ -179,8 +179,8 @@
 
         <arg name="enable_depth"             value="false"/>
 
-        <arg name="color_width"              value="$(arg width)"/>
-        <arg name="color_height"             value="$(arg height)"/>
+        <arg name="color_width"              value="320"/>
+        <arg name="color_height"             value="180"/>
         <arg name="enable_color"             value="true"/>
 
         <arg name="color_fps"                value="$(arg fps)"/>
@@ -198,11 +198,11 @@
       </group>
     </group>
 
-    <group ns="d435_left/camera">
+    <group ns="d435_left/camera" if="$(arg extras)">
       <!-- Launch the camera device nodelet-->
       <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
         <arg name="external_manager"         value="false"/>
-        <arg name="manager"                  value="back_realsense2_camera_manager"/>
+        <arg name="manager"                  value="left_realsense2_camera_manager"/>
         <arg name="tf_prefix"                value="d435_left"/>
         <arg name="serial_no"                value="$(arg serial_no_d435_left)"/>
 
@@ -212,8 +212,8 @@
 
         <arg name="enable_depth"             value="false"/>
 
-        <arg name="color_width"              value="$(arg width)"/>
-        <arg name="color_height"             value="$(arg height)"/>
+        <arg name="color_width"              value="320"/>
+        <arg name="color_height"             value="180"/>
         <arg name="enable_color"             value="true"/>
 
         <arg name="color_fps"                value="$(arg fps)"/>
