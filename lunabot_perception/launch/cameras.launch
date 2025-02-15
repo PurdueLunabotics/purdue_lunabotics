@@ -16,10 +16,10 @@
   <arg name="lidar"                           default="true"/>
   <arg name="pointcloud" default="$(arg front)" />
   
-  <arg name="decimation" default="8"/>
-  <arg name="voxel_size" default="0.1"/> <!--meters-->
+  <arg name="decimation" default="2"/>
+  <arg name="voxel_size" default="0.01"/> <!--meters-->
   <arg name="noise_filter_radius" default="0.1"/> <!--meters radius-->
-  <arg name="max_depth" default="5"/> <!--meters-->
+  <arg name="max_depth" default="3"/> <!--meters-->
 
   <include if="$(arg lidar)" file="$(find lunabot_perception)/launch/lidar.launch" />
 
@@ -53,7 +53,7 @@
         <arg name="enable_depth"             value="true"/>
 
         <arg name="color_width"              value="$(arg width)"/>
-        <arg name="color_height"             value="$(arg color_height)"/>
+        <arg name="color_height"             value="$(arg height)"/>
         <arg name="enable_color"             value="true"/>
 
         <arg name="depth_fps"                value="$(arg fps)"/>
@@ -63,7 +63,7 @@
         <arg name="publish_tf"               value="true"/>
         <arg name="tf_publish_rate"          value="0"/>
 
-        <arg name="clip_distance"            value="$(arg max_depth)"/>
+        <arg name="clip_distance"            value="-1"/>
       </include>
 
       <!-- RGB processing -->
@@ -78,15 +78,16 @@
 
       <!-- Publish registered XYZ only point cloud using RTabMap's formula -->
       <node if="$(arg pointcloud)" pkg="nodelet" type="nodelet" name="points_xyz_rtabmap"
-            args="load rtabmap_util/point_cloud_xyz front_realsense2_camera_manager false" respawn="false">
+            args="standalone rtabmap_util/point_cloud_xyz" respawn="false">
         <remap from="depth/camera_info"             to="depth/camera_info" />
-        <remap from="depth/image" to="depth/image_raw" />
+        <remap from="depth/image" to="depth/image_rect_raw" />
         <remap from="cloud"     to="points" /> <!-- output-->
 
         <!-- reduce pointcloud size -->
         <param name="decimation" type="int" value="$(arg decimation)"/>
         <param name="voxel_size" type="double" value="$(arg voxel_size)"/>
         <param name="noise_filter_radius" type="double" value="$(arg noise_filter_radius)"/>
+        <param name="max_depth" type="double" value="$(arg max_depth)"/>
 
 
       </node>
@@ -103,7 +104,7 @@
     </group>
 
     <!-- Back Camera -->
-    <group ns="d455_back/camera" if="$(arg front)">
+    <group ns="d455_back/camera">
 
       <!-- Launch the camera device nodelet-->
       <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
@@ -121,7 +122,7 @@
         <arg name="enable_depth"             value="true"/>
 
         <arg name="color_width"              value="$(arg width)"/>
-        <arg name="color_height"             value="$(arg color_height)"/>
+        <arg name="color_height"             value="$(arg height)"/>
         <arg name="enable_color"             value="true"/>
 
         <arg name="depth_fps"                value="$(arg fps)"/>
@@ -131,7 +132,7 @@
         <arg name="publish_tf"               value="true"/>
         <arg name="tf_publish_rate"          value="0"/>
 
-        <arg name="clip_distance"            value="$(arg max_depth)"/>
+        <arg name="clip_distance"            value="-1"/>
       </include>
 
       <!-- RGB processing -->
@@ -145,17 +146,18 @@
       </node>
 
       <!-- Publish registered XYZ only point cloud using RTabMap's formula -->
-      <node if="$(arg pointcloud)" pkg="nodelet" type="nodelet" name="points_xyz_rtabmap"
-            args="load rtabmap_util/point_cloud_xyz back_realsense2_camera_manager false" respawn="false">
+      <node if="$(arg pointcloud)" pkg="nodelet" type="nodelet" name="point_cloud_xyz"
+            args="standalone rtabmap_util/point_cloud_xyz" respawn="false">
         <remap from="depth/camera_info"             to="depth/camera_info" />
-        <remap from="depth/image" to="depth/image_raw" />
+        <remap from="depth/image" to="depth/image_rect_raw" />
         <remap from="cloud"     to="points" /> <!-- output-->
 
         <!-- reduce pointcloud size -->
         <param name="decimation" type="int" value="$(arg decimation)"/>
         <param name="voxel_size" type="double" value="$(arg voxel_size)"/>
         <param name="noise_filter_radius" type="double" value="$(arg noise_filter_radius)"/>
-
+        <param name="max_depth" type="double" value="$(arg max_depth)"/>
+        <param name="roi_ratios" type="string" value="0.0 0.0 0.0 0.25"/>
 
       </node>
 
@@ -233,10 +235,10 @@
     <group if="$(arg front)">
       <node ns="pointcloud" pkg="nodelet" type='nodelet' name="point_cloud_aggregator"
           args="standalone rtabmap_util/point_cloud_aggregator">
-          <remap from="cloud1" to="/d455_back/camera/aligned_depth_to_color/points" />
-          <remap from="cloud2" to="/d455_front/camera/aligned_depth_to_color/points" />
-          <remap from="cloud3" to="/d435_right/camera/aligned_depth_to_color/points" if="$(arg extras)"/>
-          <remap from="cloud4" to="/d435_left/camera/aligned_depth_to_color/points" if="$(arg extras)"/>   
+          <remap from="cloud1" to="/d455_back/camera/points" />
+          <remap from="cloud2" to="/d455_front/camera/points" />
+          <remap from="cloud3" to="/d435_right/camera/points" if="$(arg extras)"/>
+          <remap from="cloud4" to="/d435_left/camera/points" if="$(arg extras)"/>   
           <remap from="combined_cloud" to="depth_combined_cloud"/>       
           <param name="count" value="2" unless="$(arg extras)"/>
           <param name="count" value="4" if="$(arg extras)"/>
@@ -257,7 +259,7 @@
       </node>
 
       <!-- Aggregate that with camera output-->
-      <node ns="pointcloud" pkg="nodelet" type='nodelet' name="point_cloud_aggregator"
+      <node ns="pointcloud" pkg="nodelet" type='nodelet' name="point_cloud_aggregator2"
           args="standalone rtabmap_util/point_cloud_aggregator">
           <remap from="combined_cloud" to="depth_lidar_combined_cloud" />   
           <remap from="cloud1" to="depth_combined_cloud" />

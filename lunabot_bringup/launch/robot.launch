@@ -14,12 +14,12 @@
 
     <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node"
         output="screen" />
-    <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch">
+    <!-- <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch">
       <arg name="front" value="$(arg front)"/>
       <arg name="lidar" value="$(arg lidar)"/>
       <arg name="extras" value="$(arg extra_cams)"/>
       
-    </include>
+    </include> -->
     <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch"/>
     <include if="$(arg record)" file="$(find lunabot_bringup)/launch/record.launch">
         <arg name="exp_name" value="$(arg exp_name)" />
@@ -41,8 +41,9 @@
         <group>
             <include if="$(arg slam)" file="$(find rtabmap_ros)/launch/rtabmap.launch">
                 <arg name="rtabmap_args" value="--delete_db_on_start" />
-                <arg name="rgbd_sync" value="true" />
+                <arg name="rgbd_sync" value="false" />
                 <arg name="subscribe_rgbd" value="false" />
+                <arg name="depth" value="true" />
                 <arg name="depth_topic" value="/d455_back/camera/aligned_depth_to_color/image_raw" />
                 <arg name="rgb_topic" value="/d455_back/camera/color/image_rect_color" />
                 <arg name="camera_info_topic" value="/d455_back/camera/color/camera_info" />
