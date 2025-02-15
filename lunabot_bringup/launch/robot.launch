@@ -7,19 +7,17 @@
     <arg name="overhead" default="true" />
     <arg name="slam" default="true" />
     <arg name="exp_name" default="exp" />
-    <arg name="lidar" default="true" />
     <arg name="front" default="true" />
     <arg name="extra_cams" default="true" />
 
 
     <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node"
         output="screen" />
-    <!-- <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch">
+    <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch">
       <arg name="front" value="$(arg front)"/>
-      <arg name="lidar" value="$(arg lidar)"/>
       <arg name="extras" value="$(arg extra_cams)"/>
       
-    </include> -->
+    </include>
     <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch"/>
     <include if="$(arg record)" file="$(find lunabot_bringup)/launch/record.launch">
         <arg name="exp_name" value="$(arg exp_name)" />
@@ -47,8 +45,7 @@
                 <arg name="depth_topic" value="/d455_back/camera/aligned_depth_to_color/image_raw" />
                 <arg name="rgb_topic" value="/d455_back/camera/color/image_rect_color" />
                 <arg name="camera_info_topic" value="/d455_back/camera/color/camera_info" />
-                <arg name="scan_cloud_topic" value="/pointcloud/depth_lidar_combined_cloud" if="$(arg lidar)"/>
-                <arg name="scan_cloud_topic" value="/pointcloud/depth_combined_cloud" unless="$(arg lidar)"/>
+                <arg name="scan_cloud_topic" value="/pointcloud/depth_combined_cloud"/>
                 <arg name="subscribe_scan_cloud" value="$(arg front)" />
                 <arg name="rtabmapviz" value="false" />
                 <arg name="imu_topic" value="/imu" />
