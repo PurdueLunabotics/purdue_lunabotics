@@ -24,18 +24,6 @@
     </include>
 
     <group if="$(arg autonomy)">
-
-        <arg name="strategy" default="1" />
-        <arg name="feature" default="6" />
-        <arg name="nn" default="3" />
-        <arg name="max_depth" default="4.0" />
-        <arg name="min_inliers" default="20" />
-        <arg name="inlier_distance" default="0.02" />
-        <arg name="local_map" default="1000" />
-        <arg name="odom_info_data" default="true" />
-        <arg name="wait_for_transform" default="true" />
-
-
         <group>
             <include if="$(arg slam)" file="$(find rtabmap_ros)/launch/rtabmap.launch">
                 <arg name="rtabmap_args" value="--delete_db_on_start" />
