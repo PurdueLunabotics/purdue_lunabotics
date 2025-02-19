@@ -127,7 +127,7 @@ class PointToPoint:
         backwards_topic = rospy.get_param("/traversal/backwards_topic", "/traversal/backwards")
         rospy.Subscriber(backwards_topic, Bool, self.__backwards_callback)
         
-        traversal_topic = rospy.get_param("/behavior/traversal_enabled")
+        traversal_topic = rospy.get_param("/behavior/traversal_enabled_topic", "/behavior/traversal_enabled")
         rospy.Subscriber(traversal_topic, Bool, self.__traversal_callback)
 
     # ==================================================================================================================
@@ -157,7 +157,6 @@ class PointToPoint:
             msg.pose.pose.position.y,
             (angles[2]) %(2*np.pi) - np.pi  if self.is_moving_backwards else angles[2],  # -pi to pi
         )
-        print(self.robot_pose[2])
 
         self.odom_dt = rospy.Time.now().to_sec() - self.prev_odom_time
         self.prev_odom_time = rospy.Time.now().to_sec()
