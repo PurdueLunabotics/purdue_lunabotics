@@ -77,7 +77,8 @@ class PointToPoint:
         self.path = []
 
         self.state = States.AT_DESTINATION
-        self.is_moving_backwards = True
+        self.is_moving_backwards = False
+        self.is_enabled = True
         
 
         # PUBLISHERS ==================================================================================================
@@ -125,6 +126,9 @@ class PointToPoint:
         
         backwards_topic = rospy.get_param("/traversal/backwards_topic", "/traversal/backwards")
         rospy.Subscriber(backwards_topic, Bool, self.__backwards_callback)
+        
+        traversal_topic = rospy.get_param("/behavior/traversal_enabled")
+        rospy.Subscriber(traversal_topic, Bool, self.__traversal_callback)
 
     # ==================================================================================================================
     # CALLBACKS
@@ -132,6 +136,11 @@ class PointToPoint:
 
     def __backwards_callback(self, msg: Bool):
         self.is_moving_backwards = msg.data
+        
+    def __traversal_callback(self, msg: Bool):
+        self.is_enabled = msg.data
+        if(not self.is_enabled):
+            self.cmd_vel_publisher.publish(Twist())
 
     def __odom_callback(self, msg: Odometry):
         # self.robot_velocity = [msg.twist.twist.linear, msg.twist.twist.angular]
@@ -474,7 +483,6 @@ class PointToPoint:
         vel.angular.z = self.angular_vel
         
         vel.linear.x *= -1 if self.is_moving_backwards else 1
-        vel.linear.z *= -1 if self.is_moving_backwards else 1
         self.cmd_vel_publisher.publish(vel)
 
         # target pose publishing
@@ -492,23 +500,24 @@ class PointToPoint:
         rate = rospy.Rate(self.FREQUENCY)
 
         while not rospy.is_shutdown():
-            pose = self.robot_pose
+            if (self.is_enabled):
+                pose = self.robot_pose
 
-            # update difference in time
-            self.pid_dt = rospy.Time.now().to_sec() - self.prev_pid_time
-            self.prev_pid_time = rospy.Time.now().to_sec()  # update previous time
+                # update difference in time
+                self.pid_dt = rospy.Time.now().to_sec() - self.prev_pid_time
+                self.prev_pid_time = rospy.Time.now().to_sec()  # update previous time
 
-            if self.pid_dt == 0 or self.pid_dt is None:  # ensure no div by 0 errors
-                self.pid_dt = 1 / self.FREQUENCY
+                if self.pid_dt == 0 or self.pid_dt is None:  # ensure no div by 0 errors
+                    self.pid_dt = 1 / self.FREQUENCY
 
-            if self.target_pose != [None, None, None] and pose != [None, None, None]:
-                self.__update_state(pose)
-                self.__move_to_point()
-            else:
-                self.linear_vel = 0
-                self.angular_vel = 0
+                if self.target_pose != [None, None, None] and pose != [None, None, None]:
+                    self.__update_state(pose)
+                    self.__move_to_point()
+                else:
+                    self.linear_vel = 0
+                    self.angular_vel = 0
 
-            self.publish_telemetry()
+                self.publish_telemetry()
             rate.sleep()
 
 
