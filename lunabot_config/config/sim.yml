@@ -33,4 +33,18 @@ nav:
             linear: [-0.5, 0.5]
             angular: [-0.785, 0.785]
 
+    pure_pursuit:
+        slip_k1: 0.3
+        heading_k2: 0.15
+        kp: 0.05
+        ki: 0
+        kd: 0
+        kv: 0.8
+        ka: 0.0002
+        frequency_p: 15
+        lookahead: 0.5
+        velocity_limits_p:
+            linear: [-0.5, 0.5]
+            angular: [-0.785, 0.785]
+
 is_sim: true

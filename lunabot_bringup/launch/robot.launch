@@ -30,10 +30,16 @@
 
     <node pkg="lunabot_control" type="differential_drive_controller.py" name="differential_drive_controller" output="screen"/>
 
+
     <group ns="nav">
       <!-- <node pkg="lunabot_control" type="mpc_node" name="mpc_node" output="screen"/> -->
+
+      <!-- TODO: Comment one of these so the robot doesn't get confused -->
+
       <node pkg="lunabot_control" type="point_to_point.py" name="point_to_point_node" output="screen" respawn="true" />
+      <node name="pure_pursuit_node" pkg="lunabot_control" type="pure_pursuit_controller.py" output="screen" respawn="true"/>
       <node name="global_planner_node" pkg="lunabot_nav" type="dstar_node" output="screen" respawn="true">
+
         <!-- <rosparam file="$(find lunabot_config)/config/rrtstar.yml" command="load"/> -->
       </node>
     </group>
