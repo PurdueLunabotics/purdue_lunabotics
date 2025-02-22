@@ -24,7 +24,7 @@ from std_msgs.msg import Bool, Int8, Float32
 class PurePursuitController:
     
     def __init__(self, MAX_VELOCITY, MAX_ACCEL, MAX_VEL_CHANGE, trackwidth, robot_start_pos = (0,0,0), telemetry = False):
-        self.path = [robot_start_pos[:2]]
+        self.path = []
         self.MAX_VELOCITY = MAX_VELOCITY
         self.MAX_ACCELERATION = MAX_ACCEL
         self.MAX_VEL_CHANGE = MAX_VEL_CHANGE
@@ -76,7 +76,7 @@ class PurePursuitController:
 
         
     def path_callback(self, msg: Path):
-        self.path = [self.robot_pose[:2]]
+        self.path = []
         for point in msg.poses:
             self.path.append(tuple((point.pose.position.x, point.pose.position.y)))
 
@@ -493,7 +493,12 @@ class PurePursuitController:
             if self.telemetry:
                 print("ROBOT POSE:", self.robot_pose)
                 print("ROBOT VEL:", self.robot_velocity)
-            self.update_vel(self.trackwidth, self.dt)
+                
+            if not (self.path == []):
+                self.update_vel(self.trackwidth, self.dt)
+            else:
+                self.publish_velocity([0,0])
+                
             if self.telemetry:
                 print("===================================")
             rate.sleep()
@@ -602,5 +607,5 @@ class PurePursuitController:
 
 
 if __name__ == "__main__":
-    controller = PurePursuitController(0.4, 0.4, 0.4, 0.45, (1, -1.3, 0), True, True)
+    controller = PurePursuitController(0.4, 0.4, 0.4, 0.45, (0, 0, 0), True)
     controller.loop()
