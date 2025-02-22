@@ -480,7 +480,7 @@ class PurePursuitController:
         odom_topic = rospy.get_param("/odom_topic")
         rospy.Subscriber(odom_topic, Odometry, self.odom_callback)
 
-        backwards_topic = rospy.get_param("traversal/backwards")
+        backwards_topic = rospy.get_param("/traversal/backwards_topic", "/traversal/backwards")
         rospy.Subscriber(backwards_topic, Bool, self.backwards_callback)
         
         rate = rospy.Rate(self.frequency)
