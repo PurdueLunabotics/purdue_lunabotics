@@ -164,14 +164,21 @@
   <axis xyz="0.0 1.0 0.0"/>
 </joint>
 
-<link name="d455_back_link"/>
+  <joint name="depth_cam_back_jnt" type="fixed">
+    <origin rpy="3.14159265359 0 3.14159265359" xyz="-0.3302 0 0.508" />
+    <parent link="base_link" />
+    <child link="d455_back_link" />
+    <axis xyz="0.0 1.0 0.0" />
+  </joint>
 
-<joint name="depth_cam_jnt" type="fixed">
-    <origin rpy="0 0 0" xyz="0.405 -0.10 0.45"/>
-  <parent link="base_link"/>
-  <child link="d455_back_link"/>
-  <axis xyz="0.0 1.0 0.0"/>
-</joint>
+  <link name="d455_front_link" />
+
+  <joint name="depth_cam_front_jnt" type="fixed">
+    <origin rpy="0 0 0" xyz="0.5842 -0.2032 0.381" />
+    <parent link="base_link" />
+    <child link="d455_front_link" />
+    <axis xyz="0.0 1.0 0.0" />
+  </joint>
 
 <link name="usb_cam_link"/>
 
