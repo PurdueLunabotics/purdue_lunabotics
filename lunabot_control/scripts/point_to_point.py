@@ -297,7 +297,7 @@ class PointToPoint:
                 self.state = States.AT_DESTINATION  # update state if at destination
             else:
                 # if at linear target and not on final trajectory, target point should update
-                self.target_pose_index = self.target_pose_index + 1
+                self.target_pose_index += 1
                 self.target_pose = self.path[self.target_pose_index]
                 self.__update_state(current_pose)
 
@@ -308,7 +308,7 @@ class PointToPoint:
     ### Simplifies a complex path by removing points that are close to colinear with their neighbors
     ### ensures that gradual changes are still done
 
-    def __simplify_path(self, points, difference_threshold=0.97):
+    def __simplify_path(self, points, difference_threshold=0.99):
         filtered_points = [points[0]]
         last_filtered_index = 0
         if len(points) >= 3:
@@ -342,9 +342,9 @@ class PointToPoint:
                         if projection_size > difference_threshold:
                             p2 = points[last_filtered_index + j]
                             break
-
-                    filtered_points.append(p2)
-                    last_filtered_index = last_filtered_index + j
+                    if (((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5) > 0.3:
+                        filtered_points.append(p2)
+                        last_filtered_index += j
 
                 # add last point to end up in same location
                 if i == len(points) - 1:
