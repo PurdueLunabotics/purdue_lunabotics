@@ -2,7 +2,8 @@
 
 import rospy
 from std_msgs.msg import Bool, Float32, String
-from nav_msgs.msg import Path, Odometry
+from nav_msgs.msg import Path, Odometry, OccupancyGrid
+from map_msgs.msg import OccupancyGridUpdate
 from geometry_msgs.msg import Twist, Point, Pose2D
 from pid_controller import PIDController
 from visualization_msgs.msg import Marker
@@ -79,6 +80,11 @@ class PointToPoint:
         self.state = States.AT_DESTINATION
         self.is_moving_backwards = False
         self.is_enabled = True
+
+        self.map: np.ndarray = None
+        self.map_resolution: float = 0
+        self.map_x_offset: int = -1
+        self.map_y_offset: int = -1
         
 
         # PUBLISHERS ==================================================================================================
@@ -129,6 +135,12 @@ class PointToPoint:
         
         traversal_topic = rospy.get_param("/behavior/traversal_enabled_topic", "/behavior/traversal_enabled")
         rospy.Subscriber(traversal_topic, Bool, self.__traversal_callback)
+
+        map_topic = rospy.get_param("/nav/map_topic", "/maps/costmap_node/global_costmap/costmap")
+        rospy.Subscriber(map_topic, OccupancyGrid, self.__map_callback)
+
+        map_update_topic = rospy.get_param("/nav/map_update_topic", "/maps/costmap_node/global_costmap/costmap_updates")
+        rospy.Subscriber(map_update_topic, OccupancyGridUpdate, self.__map_update_callback)
 
     # ==================================================================================================================
     # CALLBACKS
@@ -208,6 +220,40 @@ class PointToPoint:
 
         # visualize sequence of lines
         self.__visualize_line_path(marker_points)
+
+    def __map_callback(self, msg: OccupancyGrid):
+        data_arr = np.array(msg.data)
+
+        if (np.all(data_arr == 0)): # ignore blank maps
+            return
+
+        width = msg.info.width
+        height = msg.info.height
+        self.map = np.reshape(data_arr, (height, width))
+
+        self.map_resolution = msg.info.resolution
+        self.map_x_offset = msg.info.origin.position.x
+        self.map_y_offset = msg.info.origin.position.y
+
+    def __map_update_callback(self, msg: OccupancyGridUpdate):
+        data_arr = np.array(msg.data)
+
+        if (self.map is None):
+            return
+
+        if (np.all(data_arr == 0)):
+            return
+
+        temp_map = self.map.copy()
+
+        index = 0
+        for i in range(msg.y, msg.y + msg.height):
+            for j in range(msg.x, msg.x + msg.width):
+                temp_map[i][j] = data_arr[index]
+                index += 1
+
+        self.map = temp_map.copy()
+
 
     # ==================================================================================================================
     # STATE PROCESSING
@@ -304,6 +350,48 @@ class PointToPoint:
     # ==================================================================================================================
     # PATH PROCESSING
     # ==================================================================================================================
+    
+    def __convert_to_grid(self, position: 'list[float]') -> 'list[int]':
+        """
+        Convert a real world (x y) position to grid coordinates. Grid offset should be in the same frame as position, the grid is row-major.
+        """
+
+        shifted_pos = [position[0] - self.map_x_offset, position[1] - self.map_y_offset]
+        coord = [
+            int(shifted_pos[1] / self.map_resolution + 0.5),
+            int(shifted_pos[0] / self.map_resolution + 0.5)
+        ]
+
+        return coord
+    
+
+    def __line_intersects_obstacle(self, p1: list, p2: list):
+        """
+        Check if a line between two points intersects an obstacle in the map.
+        """
+
+        # find the number of points along the path to check using the resolution of the map
+        length = ((p2[1] - p1[1]) ** 2 + (p2[0] - p1[0]) ** 2)**0.5
+        increments = int(length / self.map_resolution)
+
+        # check each point along the path
+        for i in range(increments):
+            pt_x = p1[0] + (p2[0] - p1[0]) * (i / increments)
+            pt_y = p1[1] + (p2[1] - p1[1]) * (i / increments)
+            pt = [pt_x, pt_y]
+
+            grid_pt = self.__convert_to_grid(pt)
+
+            # if out of bounds, the map is unknown, and treated as a free space
+            if (grid_pt[0] < 0 or grid_pt[0] >= len(self.map) or grid_pt[1] < 0 or grid_pt[1] >= len(self.map[0])):
+                continue
+
+            # if the map's occupancy probability is over 50, it's an obstacle
+            if (self.map[grid_pt[0]][grid_pt[1]] > 50):
+                return True
+            
+        return False
+
 
     ### Simplifies a complex path by removing points that are close to colinear with their neighbors
     ### ensures that gradual changes are still done
@@ -317,10 +405,10 @@ class PointToPoint:
                 p2 = points[last_filtered_index + 1]
                 p3 = points[i]
                 # find projection of vectors on each other
-                # vector 1 is from the last filtered point to the next point in the complex path
+                # vector 1 is from the last filtered point to its next point in the complex path
                 v1 = np.array(p2, "float64") - np.array(p1, "float64")
                 v1 /= np.linalg.norm(v1)  # normalize
-                # vector 2 is from the last filtered point to the current point in the complex path
+                # vector 2 is from the last filtered point to the current point being examined in the complex path
                 v2 = np.array(p3, "float64") - np.array(p1, "float64")
                 v2 /= np.linalg.norm(v2)  # normalize
                 print(str(v1) + " " + str(v2))
@@ -328,8 +416,13 @@ class PointToPoint:
                 # calculate projection size
                 projection_size = np.dot(v1, v2)
 
-                # if within difference threshold, keep the point
-                if projection_size <= difference_threshold:
+                # if line p1 to p3 goes through an obstacle, add point [p3 - 1] to the filtered points
+                if (self.__line_intersects_obstacle(p1, p3)):
+                    filtered_points.append(points[i - 1])
+                    last_filtered_index = i - 1
+
+                # if less than difference threshold (vectors are different enough angles), find the next point to keep
+                elif projection_size <= difference_threshold: 
                     j = 0
                     # check the points between the indicies of p1 and p3 to find the last p2 that isn't within tolerance
                     for j in range(0, i - last_filtered_index):
@@ -358,7 +451,7 @@ class PointToPoint:
         marker_points = self.__point_list_to_ros_point_list(filtered_points)
 
         # marker_points.insert(0, marker_points[0])
-        marker_points.insert(0, Point(self.robot_pose[0], self.robot_pose[1], 0))
+        # marker_points.insert(0, Point(self.robot_pose[0], self.robot_pose[1], 0))
 
         print(
             "SIMPLIFY PATH: Points: "
@@ -463,9 +556,9 @@ class PointToPoint:
 
         # Set line properties
         marker.scale.x = 0.01
-        marker.color.r = 0.0
-        marker.color.g = 0.0
-        marker.color.b = 1.0
+        marker.color.r = 1
+        marker.color.g = 0.05
+        marker.color.b = 1
         marker.color.a = 1.0  # Alpha (transparency)
 
         self.path_publisher.publish(marker)
