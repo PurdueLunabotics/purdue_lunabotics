@@ -124,6 +124,9 @@ class PointToPoint:
         self.target_publisher = rospy.Publisher(
             "/ptp/target_pose", Pose2D, queue_size=10
         )
+        self.log_publisher = rospy.Publisher(
+            "/ptp/log", String, queue_size=10
+        )
 
         # SUBSCRIBERS ==================================================================================================
         odom_topic = rospy.get_param("/odom_topic", "/odom")
@@ -338,6 +341,13 @@ class PointToPoint:
                    On Final Trajectory: {on_final_trajectory} \n
                    -----------------------------------
                    ''')
+        self.log_publisher.publish(f'''
+                   PTP ------------------------------- \n
+                   At Linear Target: {self.at_linear_target} \n
+                   At Angular Target: {self.at_angle_target} \n
+                   On Final Trajectory: {on_final_trajectory} \n
+                   -----------------------------------
+                   ''')
         if not self.at_linear_target:
             self.state = States.MOVING_TO_LINEAR_TARGET
             if not self.at_angle_target:
@@ -418,6 +428,7 @@ class PointToPoint:
 
                 if (self.print_debug_info):
                     print(str(v1) + " " + str(v2))
+                self.log_publisher.publish(str(v1) + " " + str(v2))
 
                 # calculate projection size
                 projection_size = np.dot(v1, v2)
@@ -466,6 +477,12 @@ class PointToPoint:
                 + " ; Simple Points: "
                 + str(filtered_points)
             )  # put the points and filtered points into console
+        self.log_publisher.publish(
+            "SIMPLIFY PATH: Points: "
+            + str(points)
+            + " ; Simple Points: "
+            + str(filtered_points)
+        )
         return filtered_points, marker_points
 
     def __point_list_to_ros_point_list(self, points):
