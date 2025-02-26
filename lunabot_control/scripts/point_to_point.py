@@ -85,6 +85,8 @@ class PointToPoint:
         self.map_resolution: float = 0
         self.map_x_offset: int = -1
         self.map_y_offset: int = -1
+
+        self.print_debug_info: bool = False
         
 
         # PUBLISHERS ==================================================================================================
@@ -327,13 +329,15 @@ class PointToPoint:
         ## -------------------------------------------------
         ## UPDATE STATE -------
         ## -------------------------------------------------
-        print(f'''
-              PTP ------------------------------- \n
-              At Linear Target: {self.at_linear_target} \n
-              At Angular Target: {self.at_angle_target} \n
-              On Final Trajectory: {on_final_trajectory} \n
-              -----------------------------------
-              ''')
+
+        if (self.print_debug_info):
+            print(f'''
+                   PTP ------------------------------- \n
+                   At Linear Target: {self.at_linear_target} \n
+                   At Angular Target: {self.at_angle_target} \n
+                   On Final Trajectory: {on_final_trajectory} \n
+                   -----------------------------------
+                   ''')
         if not self.at_linear_target:
             self.state = States.MOVING_TO_LINEAR_TARGET
             if not self.at_angle_target:
@@ -411,7 +415,9 @@ class PointToPoint:
                 # vector 2 is from the last filtered point to the current point being examined in the complex path
                 v2 = np.array(p3, "float64") - np.array(p1, "float64")
                 v2 /= np.linalg.norm(v2)  # normalize
-                print(str(v1) + " " + str(v2))
+
+                if (self.print_debug_info):
+                    print(str(v1) + " " + str(v2))
 
                 # calculate projection size
                 projection_size = np.dot(v1, v2)
@@ -453,12 +459,13 @@ class PointToPoint:
         # marker_points.insert(0, marker_points[0])
         # marker_points.insert(0, Point(self.robot_pose[0], self.robot_pose[1], 0))
 
-        print(
-            "SIMPLIFY PATH: Points: "
-            + str(points)
-            + " ; Simple Points: "
-            + str(filtered_points)
-        )  # put the points and filtered points into console
+        if (self.print_debug_info):
+            print(
+                "SIMPLIFY PATH: Points: "
+                + str(points)
+                + " ; Simple Points: "
+                + str(filtered_points)
+            )  # put the points and filtered points into console
         return filtered_points, marker_points
 
     def __point_list_to_ros_point_list(self, points):
