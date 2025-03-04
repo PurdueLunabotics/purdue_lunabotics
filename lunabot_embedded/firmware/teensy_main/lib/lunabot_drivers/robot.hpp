@@ -5,7 +5,7 @@
 #include <Arduino.h>
 #include <Stepper.h>
 
-#define ST_SERIAL Serial1
+#define ST_SERIAL Serial4
 #define ST_BAUD_RATE 9600
 
 // MCs

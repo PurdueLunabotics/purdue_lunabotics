@@ -13,7 +13,7 @@
 #include <StepperLib.hpp>
 #include "robot.hpp"
 
-#define UWBSerial Serial4
+#define UWBSerial Serial8
 
 enum MotorDir { CW = HIGH,
                 CCW = LOW };
