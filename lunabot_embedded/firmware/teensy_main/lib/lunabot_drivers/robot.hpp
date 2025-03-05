@@ -27,7 +27,7 @@ void update(float &);
 namespace drivetrain {
 void begin();
 void cb(int32_t, int32_t);
-void update(float &, float &, float &, float &);
+void update(float &, float &, float &, float &, float &, float &);
 float update_curr_left();
 float update_curr_right();
 } // namespace drivetrain
@@ -46,7 +46,7 @@ float update_curr();
 namespace excavation {
 void begin();
 void cb(int32_t);
-void update(float &, float &);
+void update(float &, float &, float &);
 float update_curr();
 } // namespace excavation
 #endif
