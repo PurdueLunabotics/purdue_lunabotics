@@ -73,17 +73,27 @@
       </node>
 
       <!-- Publish registered XYZ only point cloud using RTabMap's formula -->
-      <node if="$(arg pointcloud)" pkg="nodelet" type="nodelet" name="points_xyz_rtabmap"
+      <!-- <node if="$(arg pointcloud)" pkg="nodelet" type="nodelet" name="points_xyz_rtabmap"
             args="standalone rtabmap_util/point_cloud_xyz" respawn="false">
         <remap from="depth/camera_info"             to="depth/camera_info" />
         <remap from="depth/image" to="depth/image_rect_raw" />
-        <remap from="cloud"     to="points" /> <!-- output-->
+        <remap from="cloud"     to="points" /> COMMENT output
 
-        <!-- reduce pointcloud size -->
+        COMMENT reduce pointcloud size
         <param name="decimation" type="int" value="$(arg decimation)"/>
         <param name="voxel_size" type="double" value="$(arg voxel_size)"/>
         <param name="noise_filter_radius" type="double" value="$(arg noise_filter_radius)"/>
         <param name="max_depth" type="double" value="$(arg max_depth)"/>
+      </node> -->
+
+      <!-- custom local pointcloud generation node -->
+      <node if="$(arg pointcloud)" pkg="lunabot_perception" type="pc_generation_node.py" name="slam_pc_publisher">
+        <remap from="/pc" to="points" />
+        <remap from="/depth/image_rect_raw" to="depth/image_rect_raw" />
+        <remap from="/depth/camera_info" to="depth/camera_info" />
+
+        <param name="voxelize" type="bool" value="true" />
+        <param name="voxel_size" type="double" value="$(arg voxel_size)" />
       </node>
 
       <group ns="color">
