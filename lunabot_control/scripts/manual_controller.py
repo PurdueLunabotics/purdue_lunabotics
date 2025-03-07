@@ -99,15 +99,16 @@ class ManualController:
         self.driving_mode = "Forwards"
         
         self._max_speed = rospy.get_param("~max_speed", 3000) # in rpm
-        self.drive_speed_modifier = 1
-        self.slow_drive_speed = 0.5
-        self.fast_drive_speed = 1
+        self.slow_drive_speed = 0.25
+        self.fast_drive_speed = 0.5
+        self.drive_speed_modifier = self.fast_drive_speed
 
         self.latched_excavation_speed = 0
         self.excavation_is_latched = False
 
-        self.DEPOSITION_SPEED = 3000 #TODO RJN - this speed
+        self.DEPOSITION_SPEED = 1000 #TODO RJN - this speed
         self.ACTUATE_SPEED = 0.8 # percentage of max power
+        self.EXCAVATION_SPEED = 2000 
 
         self.publish = True
 
@@ -164,10 +165,10 @@ class ManualController:
 
             # Set the drive effort to the left and right stick vertical axes (Tank Drive)
             if self.driving_mode == "Forwards":
-                effort_msg.left_drive = constrain_RPM(joy.axes[Axes.L_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
+                effort_msg.left_drive = -1 * constrain_RPM(joy.axes[Axes.L_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
                 effort_msg.right_drive = constrain_RPM(joy.axes[Axes.R_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
             else:
-                effort_msg.left_drive = -1 * constrain_RPM(joy.axes[Axes.R_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
+                effort_msg.left_drive = constrain_RPM(joy.axes[Axes.R_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
                 effort_msg.right_drive = -1 * constrain_RPM(joy.axes[Axes.L_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
 
             effort_msg.left_drive = int(effort_msg.left_drive)
@@ -196,9 +197,9 @@ class ManualController:
 
                 # Take priority for right trigger. If it is nearly zero, use the left trigger instead
                 if (right_trigger_axis_normalized <= 0.01):
-                    effort_msg.excavate = -1 * constrain_RPM(left_trigger_axis_normalized, 5000)
+                    effort_msg.excavate = -1 * constrain_RPM(left_trigger_axis_normalized, self.EXCAVATION_SPEED)
                 else:
-                    effort_msg.excavate = constrain_RPM(right_trigger_axis_normalized, 5000)
+                    effort_msg.excavate = constrain_RPM(right_trigger_axis_normalized, self.EXCAVATION_SPEED)
 
             # Y button: latch excavation speed. This keeps excavation at the same speed until the latch is released
             if joy.buttons[Buttons.Y.value] == 1 and self.last_joy.buttons[Buttons.Y.value] == 0:  
