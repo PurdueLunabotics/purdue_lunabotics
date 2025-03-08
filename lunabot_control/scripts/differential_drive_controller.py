@@ -46,7 +46,8 @@ class DifferentialDriveController:
         rospy.on_shutdown(self.shutdown_hook)
 
         while not rospy.is_shutdown():
-            self._loop()
+            if (rospy.get_param("autonomy")):
+                self._loop()
             rate.sleep()
 
     def _vel_cb(self, vel_msg):
