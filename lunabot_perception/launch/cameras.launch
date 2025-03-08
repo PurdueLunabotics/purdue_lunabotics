@@ -9,8 +9,8 @@
   <arg name="sim"                             default="false"/>
   <arg name="width"                           default="424"/>
   <arg name="height"                          default="240"/>
-  <arg name="fps"                             default="5"/>
-  <arg name="front"                           default="false"/>
+  <arg name="fps"                             default="15"/>
+  <arg name="front"                           default="true"/>
   <arg name="back"                            default="true"/>
   <arg name="extras"                            default="true"/>
   <arg name="pointcloud" default="$(arg front)" />
@@ -39,6 +39,8 @@
         <arg name="manager"                  value="front_realsense2_camera_manager"/>
         <arg name="tf_prefix"                value="d455_front"/>
         <arg name="serial_no"                value="$(arg serial_no_d455_front)"/>
+
+        <arg name="initial_reset"            value="true"/>
 
         <arg name="enable_pointcloud"        value="false"/>
         <arg name="enable_sync"              value="true"/>
@@ -75,8 +77,8 @@
       <!-- Publish registered XYZ only point cloud using RTabMap's formula -->
       <node if="$(arg pointcloud)" pkg="nodelet" type="nodelet" name="points_xyz_rtabmap"
             args="standalone rtabmap_util/point_cloud_xyz" respawn="false">
-        <remap from="depth/camera_info"             to="depth/camera_info" />
-        <remap from="depth/image" to="depth/image_rect_raw" />
+        <remap from="depth/camera_info"             to="aligned_depth_to_color/camera_info" />
+        <remap from="depth/image" to="aligned_depth_to_color/image_raw" />
         <remap from="cloud"     to="points" /> <!-- output-->
 
         <!-- reduce pointcloud size -->
@@ -105,6 +107,8 @@
         <arg name="manager"                  value="back_realsense2_camera_manager"/>
         <arg name="tf_prefix"                value="d455_back"/>
         <arg name="serial_no"                value="$(arg serial_no_d455_back)"/>
+
+        <arg name="initial_reset"            value="true"/>
 
         <arg name="enable_pointcloud"        value="false"/>
         <arg name="enable_sync"              value="true"/>
@@ -141,8 +145,8 @@
       <!-- Publish registered XYZ only point cloud using RTabMap's formula -->
       <node if="$(arg pointcloud)" pkg="nodelet" type="nodelet" name="point_cloud_xyz"
             args="standalone rtabmap_util/point_cloud_xyz" respawn="false">
-        <remap from="depth/camera_info"             to="depth/camera_info" />
-        <remap from="depth/image" to="depth/image_rect_raw" />
+        <remap from="depth/camera_info"             to="aligned_depth_to_color/camera_info" />
+        <remap from="depth/image" to="aligned_depth_to_color/image_raw" />
         <remap from="cloud"     to="points" /> <!-- output-->
 
         <!-- reduce pointcloud size -->
@@ -150,7 +154,7 @@
         <param name="voxel_size" type="double" value="$(arg voxel_size)"/>
         <param name="noise_filter_radius" type="double" value="$(arg noise_filter_radius)"/>
         <param name="max_depth" type="double" value="$(arg max_depth)"/>
-        <param name="roi_ratios" type="string" value="0.0 0.0 0.0 0.25"/> <!--Remove top 25%-->
+        <param name="roi_ratios" type="string" value="0.0 0.0 0.0 0.0"/> <!--Remove top 25%-->
       </node>
 
       <group ns="color">
@@ -179,8 +183,8 @@
 
         <arg name="enable_depth"             value="false"/>
 
-        <arg name="color_width"              value="320"/>
-        <arg name="color_height"             value="180"/>
+        <arg name="color_width"              value="$(arg width)"/>
+        <arg name="color_height"             value="$(arg height)"/>
         <arg name="enable_color"             value="true"/>
 
         <arg name="color_fps"                value="$(arg fps)"/>
@@ -212,8 +216,8 @@
 
         <arg name="enable_depth"             value="false"/>
 
-        <arg name="color_width"              value="320"/>
-        <arg name="color_height"             value="180"/>
+        <arg name="color_width"              value="$(arg width)"/>
+        <arg name="color_height"             value="$(arg height)"/>
         <arg name="enable_color"             value="true"/>
 
         <arg name="color_fps"                value="$(arg fps)"/>
