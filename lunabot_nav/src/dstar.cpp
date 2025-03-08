@@ -186,7 +186,7 @@ std::vector<real_world_point> Dstar::find_path() {
 
   if (node_queue.size() == 0) {
     std::cout << "Dstar: No path found (map processing failed)" << std::endl;
-    return create_path_list();
+    return std::vector<real_world_point>();
   }
 
   // Loop until current node(start) is locally consistent(g == rhs) and its priority is lowest in the queue
