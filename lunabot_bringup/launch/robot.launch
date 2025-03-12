@@ -16,7 +16,7 @@
       <arg name="front" value="$(arg front)"/>
       <arg name="extras" value="$(arg extra_cams)"/> -->
       
-    </include>
+    <!-- </include> -->
     <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch"/>
     <include if="$(arg record)" file="$(find lunabot_bringup)/launch/record.launch">
         <arg name="exp_name" value="$(arg exp_name)" />
@@ -52,8 +52,7 @@
         <group ns="nav">
             <node pkg="lunabot_control" type="mpc_node" name="mpc_node" output="screen" />
 
-            <node name="global_planner_node" pkg="lunabot_nav" type="dstar_node.py" output="screen"
-                respawn="true">
+            <node name="dstar_node" pkg="lunabot_nav" type="dstar_node.py" output="screen" respawn="true">
                 <!-- <rosparam file="$(find lunabot_config)/config/rrtstar.yml" command="load"/> -->
             </node>
         </group>

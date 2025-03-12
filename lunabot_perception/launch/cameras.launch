@@ -177,6 +177,8 @@
         <arg name="tf_prefix"                value="d435_right"/>
         <arg name="serial_no"                value="$(arg serial_no_d435_right)"/>
 
+        <arg name="initial_reset"            value="true"/>
+
         <arg name="enable_pointcloud"        value="false"/>
         <arg name="enable_sync"              value="false"/>
         <arg name="align_depth"              value="false"/>
@@ -209,6 +211,9 @@
         <arg name="manager"                  value="left_realsense2_camera_manager"/>
         <arg name="tf_prefix"                value="d435_left"/>
         <arg name="serial_no"                value="$(arg serial_no_d435_left)"/>
+
+        <arg name="initial_reset"            value="true"/>
+
 
         <arg name="enable_pointcloud"        value="false"/>
         <arg name="enable_sync"              value="false"/>
