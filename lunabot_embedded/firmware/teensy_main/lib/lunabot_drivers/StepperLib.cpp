@@ -69,6 +69,10 @@ StepperMotor::StepperMotor(uint8_t MotorID, uint16_t def_speed, uint16_t def_acc
 void StepperMotor::begin() {
   modbus_begin();
   write_register(Addrs.InternalEnable, ControlCmds.ENABLE);
+
+  write_register(Addrs.PathMode, ControlCmds.VelocityMode);
+  write_register(Addrs.Acceleration, def_acceleration);
+  write_register(Addrs.Deceleration, def_deceleration);
 }
 
 // emergency stops motor
@@ -79,51 +83,8 @@ void StepperMotor::write_estop() {
 // move the motor at constant velocity, using default values for acceleration and deceleration unless specified
 // speed in rpm
 // acceleration and deceleration in ms/1000 rpm
-void StepperMotor::move_at_speed(uint16_t speed, uint16_t acceleration, uint16_t deceleration) {
-  if (acceleration == USE_DEFAULT) {
-    acceleration = def_acceleration;
-  }
-  if (deceleration == USE_DEFAULT) {
-    deceleration = def_deceleration;
-  }
-
-  write_register(Addrs.PathMode, ControlCmds.VelocityMode);
+void StepperMotor::move_at_speed(uint16_t speed) {
   write_register(Addrs.Speed, speed);
-  write_register(Addrs.Acceleration, acceleration);
-  write_register(Addrs.Deceleration, deceleration);
-  trigger_motion();
-}
-
-// move the motor to a position, using default values for speed, acceleration, and deceleration unless specified
-// position in encoder pulses
-// absolute (TRUE = absolute, FALSE = relative)
-// speed in rpm
-// acceleration and deceleration in ms/1000 rpm
-void StepperMotor::move_to_pos(uint32_t position, bool absolute, uint16_t speed, uint16_t acceleration, uint16_t deceleration) {
-  if (speed == USE_DEFAULT) {
-    speed = def_speed;
-  }
-  if (acceleration == USE_DEFAULT) {
-    acceleration = def_acceleration;
-  }
-  if (deceleration == USE_DEFAULT) {
-    deceleration = def_deceleration;
-  }
-
-  if (absolute) {
-    write_register(Addrs.PathMode, ControlCmds.AbsolutePosMode);
-  } else {
-    write_register(Addrs.PathMode, ControlCmds.RelativePosMode);
-  }
-
-  uint16_t pos_high = (uint16_t)(position >> 16);
-  uint16_t pos_low = (uint16_t)(position & 0xFFFF);
-
-  write_register(Addrs.Pos, pos_high);
-  write_register(Addrs.Pos + 1, pos_low);
-  write_register(Addrs.Speed, speed);
-  write_register(Addrs.Acceleration, acceleration);
-  write_register(Addrs.Deceleration, deceleration);
   trigger_motion();
 }
 
