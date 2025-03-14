@@ -13,6 +13,7 @@ public:
 
   void begin();
   void write_estop();
+  void clear_errors();
   void move_at_speed(uint16_t speed);
 
   int read_raw_velocity();

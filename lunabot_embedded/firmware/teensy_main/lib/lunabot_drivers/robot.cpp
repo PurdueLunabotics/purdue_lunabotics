@@ -55,10 +55,15 @@ float update_curr_right() {
   return right_drive_mtr.read_current();
 }
 
-void cb(int32_t left_drive_rpm, int32_t right_drive_rpm) { // TODO RJN - ensure this entire message chain is int32 RPM
+void cb(int32_t left_drive_rpm, int32_t right_drive_rpm, bool should_reset) {
   // Tank drive steering
-  left_drive_mtr.move_at_speed(left_drive_rpm);
-  right_drive_mtr.move_at_speed(right_drive_rpm);
+  if (should_reset) {
+    left_drive_mtr.clear_errors();
+    right_drive_mtr.clear_errors();
+  } else {
+    left_drive_mtr.move_at_speed(left_drive_rpm);
+    right_drive_mtr.move_at_speed(right_drive_rpm);
+  }
 }
 
 } // namespace drivetrain
@@ -88,8 +93,12 @@ float update_curr() {
   return exc_mtr.read_current();
 }
 
-void cb(int32_t speed_rpm) {
-  exc_mtr.move_at_speed(speed_rpm);
+void cb(int32_t speed_rpm, bool should_reset) {
+  if (should_reset) {
+    exc_mtr.clear_errors();
+  } else {
+    exc_mtr.move_at_speed(speed_rpm);
+  }
 }
 } // namespace excavation
 
@@ -108,8 +117,12 @@ float update_curr() {
   return dep_mtr.read_current();
 }
 
-void cb(int32_t speed_rpm) {
-  dep_mtr.move_at_speed(-speed_rpm);
+void cb(int32_t speed_rpm, bool should_reset) {
+  if (should_reset) {
+    dep_mtr.clear_errors();
+  } else {
+    dep_mtr.move_at_speed(-speed_rpm);
+  }
 }
 
 } // namespace deposition

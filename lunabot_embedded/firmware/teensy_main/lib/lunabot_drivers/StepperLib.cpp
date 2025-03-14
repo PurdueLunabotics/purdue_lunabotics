@@ -54,6 +54,10 @@ struct ControlCmds {
   uint16_t VelocityMode = 0x0002;
 } ControlCmds;
 
+struct ResetCmds {
+  uint16_t ResetAlarm = 0x1111;
+} ResetCmds;
+
 // Create a StepperMotor object
 // MotorID and baudrate are required
 // Optional default values for speed, acceleration, deceleration
@@ -78,6 +82,11 @@ void StepperMotor::begin() {
 // emergency stops motor
 void StepperMotor::write_estop() {
   write_register(Addrs.ControlReg, ControlCmds.ESTOP);
+}
+
+// emergency stops motor
+void StepperMotor::clear_errors() {
+  write_register(Addrs.Reset, ResetCmds.ResetAlarm);
 }
 
 // move the motor at constant velocity, using default values for acceleration and deceleration unless specified

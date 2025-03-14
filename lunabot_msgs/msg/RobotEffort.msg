@@ -8,3 +8,4 @@ int32 right_drive
 int32 excavate
 # Deposition
 int32 deposit
+bool should_reset

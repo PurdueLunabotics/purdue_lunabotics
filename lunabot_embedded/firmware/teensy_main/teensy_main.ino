@@ -21,9 +21,9 @@ uint8_t flags = 0;
 
 void ctrl() {
   actuation::cb(effort.lin_act);
-  drivetrain::cb(effort.left_drive, effort.right_drive);
-  deposition::cb(effort.deposit);
-  excavation::cb(effort.excavate);
+  drivetrain::cb(effort.left_drive, effort.right_drive, effort.should_reset);
+  deposition::cb(effort.deposit, effort.should_reset);
+  excavation::cb(effort.excavate, effort.should_reset);
 }
 
 void send() {
