@@ -29,7 +29,7 @@ void modbus_begin() {
     serial_has_started = true;
     pinMode(RS485_TX_CONTROL, OUTPUT);
     digitalWrite(RS485_TX_CONTROL, RS485Receive); // Init Transceiver
-    RS485Serial.begin(19200, SERIAL_8N1);
+    RS485Serial.begin(57600, SERIAL_8N1);
   }
 }
 
@@ -47,11 +47,11 @@ void print_hex_buffer(uint8_t *buf, int len) {
 // returns size of data read
 int modbus_send_rcv(uint8_t *buf_to_send, int len_to_send, uint8_t *buf_to_recv) {
   digitalWrite(RS485_TX_CONTROL, RS485Transmit); // Enable RS485 Transmit
-  delay(10);                                     // Wait for transmit aquired
+  delayMicroseconds(2000);                                     // Wait for transmit aquired
   RS485Serial.write(buf_to_send, len_to_send);   // Send data
   RS485Serial.flush();                           // Wait for data to send
   digitalWrite(RS485_TX_CONTROL, RS485Receive);  // Disable RS485 Transmit
-  delay(10);                                     // Wait for data to come back in
+  delayMicroseconds(2000);                                     // Wait for data to come back in
 
   int recv_size = 0;
   while (RS485Serial.available()) {
