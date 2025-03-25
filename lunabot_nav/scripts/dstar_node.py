@@ -7,6 +7,9 @@ from map_msgs.msg import OccupancyGridUpdate
 from nav_msgs.msg import OccupancyGrid, Odometry, Path
 from tf.transformations import quaternion_from_euler
 
+from threading import Thread
+from threading import Lock
+
 from lunabot_nav.dstar import Dstar
 
 class DstarNode:
@@ -26,6 +29,8 @@ class DstarNode:
 
         self.dstar: Dstar = None
 
+        self.map_lock = Lock()
+
         self.path_sampling_rate = rospy.get_param("/nav/dstar_node/path_sampling_rate") # Take every <n-th> point from the path
 
         path_topic = rospy.get_param("/nav/global_path_topic")
@@ -40,13 +45,56 @@ class DstarNode:
         Update the map given a new occupancy grid. Update the flag such that dstar will update the map.
         """
 
-        data_arr = np.array(data.data)
+        self.map_lock.acquire()
 
-        if (np.all(data_arr == 0)): # ignore blank maps
-            return
+        rospy.loginfo("[Dstar node]: Got map")
+
+        data_arr = np.array(data.data)
 
         width = data.info.width
         height = data.info.height
+
+        if (np.all(data_arr == 0)): # ignore blank maps, still fix the height/width
+
+            prev_x_offset = self.x_offset
+            prev_y_offset = self.y_offset
+    
+            self.x_offset = data.info.origin.position.x
+            self.y_offset = data.info.origin.position.y
+
+            x_diff = data.info.origin.position.x - prev_x_offset
+            y_diff = data.info.origin.position.y - prev_y_offset
+
+            # if we get a blank map of a different side, keep the old map in place and pad it with -1 (unknown)
+            # if the offset gets more negative, it means the map has expanded on the [left/top], otherwise on the [right/bottom]
+            row_diff = data.info.height - self.map.shape[0]
+            column_diff = data.info.width - self.map.shape[1]
+
+            new_map = self.map
+
+            if (row_diff != 0):
+                new_rows = -1 * np.ones((row_diff, new_map.shape[1]))
+
+                if (y_diff < 0):
+                    # pad the top
+                    new_map = np.concatenate((new_rows, new_map), axis=0)
+                else:
+                    # pad the bottom
+                    new_map = np.concatenate((new_map, new_rows), axis=0)
+            
+            if (column_diff != 0):
+                new_columns = -1 * np.ones((new_map.shape[0], column_diff))
+                if (x_diff < 0):
+                    # pad the left
+                    new_map = np.concatenate((new_columns, new_map), axis=1)
+                else:
+                    # pad the right
+                    new_map = np.concatenate((new_map, new_columns), axis=1)
+
+            self.map = new_map
+            self.map_lock.release()
+            return
+
         self.map = np.reshape(data_arr, (height, width))
 
         self.resolution = data.info.resolution
@@ -54,15 +102,26 @@ class DstarNode:
         self.y_offset = data.info.origin.position.y
         self.grid_update_needed = True
 
+        self.map_lock.release()
+
 
     def grid_update_callback(self, data: OccupancyGridUpdate):
         """
         Update the grid given the occupancy grid update (applied on top of the current grid). Also update the flag for dstar to update the map.
         """
 
+        self.map_lock.acquire()
+        rospy.loginfo("[Dstar node]: Got map update")
+
+        # print("\tgot an update")
         data_arr = np.array(data.data)
 
         if (np.all(data_arr == 0)):
+            self.map_lock.release()
+            return
+
+        if (data_arr.shape[0] == 0) or (self.map.shape[0] == 0):
+            self.map_lock.release()
             return
 
         temp_map = self.map.copy()
@@ -75,6 +134,8 @@ class DstarNode:
 
         self.map = temp_map.copy()
         self.grid_update_needed = True
+
+        self.map_lock.release()
 
 
     def position_callback(self, data: Odometry):

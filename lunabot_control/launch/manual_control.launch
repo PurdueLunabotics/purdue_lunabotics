@@ -1,13 +1,22 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="autonomy" default="false" />
+  <node pkg="lunabot_control" type="manual_controller.py" name="manual_control" output="screen"/>
 
-  <node unless="$(arg autonomy)" pkg="lunabot_control" type="manual_controller.py" name="manual_control" output="screen"/>
-  <node if="$(arg autonomy)" pkg="lunabot_control" type="manual_controller_autonomy.py" name="manual_control_autonomy" output="screen"/>
+ <!-- joystick nodes -->
+  <group >
+    <remap from="joy" to="joy0"/>
+    <node respawn="true" pkg="joy" type="joy_node" name="joy0" output="screen">
+      <param name="dev" type="string" value="/dev/input/js0" />
+      <param name="default_trig_val" type="bool" value="true" />
+    </node>
+  </group>
 
- <!-- joy node -->
-  <node respawn="true" pkg="joy" type="joy_node" name="joy" output="screen">
-    <param name="dev" type="string" value="/dev/input/js0" />
-  </node>
+    <group >
+    <remap from="joy" to="joy1"/>
+    <node respawn="true" pkg="joy" type="joy_node" name="joy1" output="screen">
+      <param name="dev" type="string" value="/dev/input/js1" />
+      <param name="default_trig_val" type="bool" value="true" />
+    </node>
+  </group>
 
 </launch>

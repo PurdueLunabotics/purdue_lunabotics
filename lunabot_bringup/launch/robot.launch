@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="autonomy" default="false" />
     <arg name="record" default="true" />
     <arg name="teensy" default="true" />
     <arg name="cameras" default="true" />
@@ -15,13 +14,16 @@
         output="screen" />
     <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch">
       <arg name="front" value="$(arg front)"/>
-      <arg name="extras" value="$(arg extra_cams)"/>
+      <arg name="extras" value="$(arg extra_cams)"/> -->
       
     </include>
     <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch"/>
     <include if="$(arg record)" file="$(find lunabot_bringup)/launch/record.launch">
         <arg name="exp_name" value="$(arg exp_name)" />
     </include>
+
+    <rosparam file="$(find lunabot_config)/config/real_robot.yml" command="load" />
+    <rosparam param="autonomy" subst_value="True">$(arg autonomy)</rosparam>
 
     <group if="$(arg autonomy)">
         <group>
@@ -50,8 +52,7 @@
         <group ns="nav">
             <node pkg="lunabot_control" type="mpc_node" name="mpc_node" output="screen" />
 
-            <node name="global_planner_node" pkg="lunabot_nav" type="dstar_node.py" output="screen"
-                respawn="true">
+            <node name="dstar_node" pkg="lunabot_nav" type="dstar_node.py" output="screen" respawn="true">
                 <!-- <rosparam file="$(find lunabot_config)/config/rrtstar.yml" command="load"/> -->
             </node>
         </group>
@@ -62,6 +63,6 @@
                     ns="global_costmap" />
             </node>
         </group>
-
     </group>
+
 </launch>
