@@ -9,7 +9,7 @@ public:
   uint16_t def_acceleration;
   uint16_t def_deceleration;
 
-  StepperMotor(uint8_t MotorID, uint16_t def_speed = 500, uint16_t def_acceleration = 250, uint16_t def_deceleration = 250);
+  StepperMotor(uint8_t MotorID, uint16_t def_acceleration = 250, uint16_t def_deceleration = 250);
 
   void begin();
   void write_estop();
@@ -31,7 +31,6 @@ public:
 
 private:
   uint8_t MotorID;
-  void trigger_motion();
   void write_register(uint16_t address, uint16_t value);
   int read_register(uint16_t address, uint16_t num_to_read = 1);
 };

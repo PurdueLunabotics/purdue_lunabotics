@@ -10,8 +10,9 @@
 
 // TODO RJN - deal with alarms and error codes
 
-struct Addrs {             // addrs of various motor params
-  uint16_t Reset = 0x0033; // reset alarms or the entire motor
+struct Addrs {                   // addrs of various motor params
+  uint16_t ControlMode = 0x0003; // position or velocity control
+  uint16_t Reset = 0x0033;       // reset alarms or the entire motor
   // there is a bunch of PID stuff here - probably easier to tune with motionstudio
   uint16_t InternalEnable = 0x0405; // use to enable servo (must set before sending movement commands)
   uint16_t RS485_Mode = 0x053B;     // *SET TO 4* to enable Serial_8N1 (see manual page 42)
@@ -33,39 +34,31 @@ struct Addrs {             // addrs of various motor params
   uint16_t Read_RegenLoadRatio = 0x0B10; // %
   // digital input stuff
   // motor position stuff
-  uint16_t Read_MotorPosition = 0x602c; // unit: pulses - 32 bit! (low is +1)
+  uint16_t Read_MotorPosition = 0x602C; // unit: pulses - 32 bit! (low is +1)
 
-  uint16_t ControlReg = 0x6002;
-
-  uint16_t PathMode = 0x6200;
-  uint16_t Pos = 0x6201; // high - 32 bit! (low is +1)
-  uint16_t Speed = 0x6203;
-  uint16_t Acceleration = 0x6204;
-  uint16_t Deceleration = 0x6205;
+  uint16_t SpeedMode = 0x0301;
+  uint16_t Speed = 0x0309;
+  uint16_t Acceleration = 0x0319;
+  uint16_t Deceleration = 0x031B;
 
 } Addrs;
 
 struct ControlCmds {
-  uint8_t TRIG_PATH = 0x10;
   uint8_t ESTOP = 0x40;
   uint8_t ENABLE = 0x83;
-  uint16_t AbsolutePosMode = 0x0001;
-  uint16_t RelativePosMode = 0x0041;
-  uint16_t VelocityMode = 0x0002;
-} ControlCmds;
+  uint16_t VelocityMode = 0x0001;
+  uint16_t DigitalSpeedMode = 0x0001;
 
-struct ResetCmds {
   uint16_t ResetAlarm = 0x1111;
-} ResetCmds;
+} ControlCmds;
 
 // Create a StepperMotor object
 // MotorID and baudrate are required
 // Optional default values for speed, acceleration, deceleration
 // speed in rpm
 // acceleration and deceleration in ms/1000 rpm
-StepperMotor::StepperMotor(uint8_t MotorID, uint16_t def_speed, uint16_t def_acceleration, uint16_t def_deceleration) {
+StepperMotor::StepperMotor(uint8_t MotorID, uint16_t def_acceleration, uint16_t def_deceleration) {
   this->MotorID = MotorID;
-  this->def_speed = def_speed;
   this->def_acceleration = def_acceleration;
   this->def_deceleration = def_deceleration;
 }
@@ -74,19 +67,20 @@ void StepperMotor::begin() {
   modbus_begin();
   write_register(Addrs.InternalEnable, ControlCmds.ENABLE);
 
-  write_register(Addrs.PathMode, ControlCmds.VelocityMode);
+  write_register(Addrs.ControlMode, ControlCmds.VelocityMode);
+  write_register(Addrs.SpeedMode, ControlCmds.DigitalSpeedMode);
   write_register(Addrs.Acceleration, def_acceleration);
   write_register(Addrs.Deceleration, def_deceleration);
 }
 
 // emergency stops motor
 void StepperMotor::write_estop() {
-  write_register(Addrs.ControlReg, ControlCmds.ESTOP);
+  move_at_speed(0);
 }
 
 // emergency stops motor
 void StepperMotor::clear_errors() {
-  write_register(Addrs.Reset, ResetCmds.ResetAlarm);
+  write_register(Addrs.Reset, ControlCmds.ResetAlarm);
 }
 
 // move the motor at constant velocity, using default values for acceleration and deceleration unless specified
@@ -94,12 +88,6 @@ void StepperMotor::clear_errors() {
 // acceleration and deceleration in ms/1000 rpm
 void StepperMotor::move_at_speed(uint16_t speed) {
   write_register(Addrs.Speed, speed);
-  trigger_motion();
-}
-
-// internal function to start motion path (see motor docs for more info)
-void StepperMotor::trigger_motion() {
-  write_register(Addrs.ControlReg, ControlCmds.TRIG_PATH);
 }
 
 void StepperMotor::write_register(uint16_t addr, uint16_t data) {
