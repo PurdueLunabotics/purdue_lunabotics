@@ -44,7 +44,7 @@ void update(float &left_curr, float &right_curr, float &left_angle, float &right
   left_angle = left_drive_mtr.read_motor_position_radians();
   right_angle = -right_drive_mtr.read_motor_position_radians();
   left_vel = left_drive_mtr.read_velocity();
-  right_vel = left_drive_mtr.read_velocity();
+  right_vel = right_drive_mtr.read_velocity();
 }
 
 float update_curr_left() {
