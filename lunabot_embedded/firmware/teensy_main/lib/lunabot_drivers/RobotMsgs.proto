@@ -8,9 +8,9 @@ message RobotSensors {
   float drive_left_curr = 5;
   float drive_right_curr = 6;
 
-  float drive_left_ang = 7;
-  float drive_right_ang = 8;
-  float exc_ang = 9;
+  float drive_left_torque = 7;
+  float drive_right_torque = 8;
+  float exc_torque = 9;
 
   float dep_weight = 10;
   float uwb_dist_0 = 11;

@@ -38,7 +38,7 @@ void begin() {
   right_drive_mtr.begin();
 }
 
-void update(float &left_curr, float &right_curr, float &left_angle, float &right_angle, float &left_vel, float &right_vel) {
+void update(float &left_curr, float &right_curr, float &left_torque, float &right_torque, float &left_vel, float &right_vel) {
   left_curr = left_drive_mtr.read_current();
   right_curr = right_drive_mtr.read_current();
   left_angle = left_drive_mtr.read_torque(); // -100; // left_drive_mtr.read_motor_position_radians();
@@ -83,7 +83,7 @@ void begin() {
   exc_mtr.begin();
 }
 
-void update(float &exc_curr, float &exc_angle, float &exc_vel) {
+void update(float &exc_curr, float &exc_torque, float &exc_vel) {
   exc_curr = exc_mtr.read_current();
   exc_angle = exc_mtr.read_torque(); // exc_mtr.read_motor_position_radians();
   exc_vel = exc_mtr.read_velocity();

@@ -17,9 +17,9 @@ typedef struct _RobotSensors {
     float exc_curr;
     float drive_left_curr;
     float drive_right_curr;
-    float drive_left_ang;
-    float drive_right_ang;
-    float exc_ang;
+    float drive_left_torque;
+    float drive_right_torque;
+    float exc_torque;
     float dep_weight;
     float uwb_dist_0;
     float uwb_dist_1;
@@ -56,9 +56,9 @@ extern "C" {
 #define RobotSensors_exc_curr_tag                4
 #define RobotSensors_drive_left_curr_tag         5
 #define RobotSensors_drive_right_curr_tag        6
-#define RobotSensors_drive_left_ang_tag          7
-#define RobotSensors_drive_right_ang_tag         8
-#define RobotSensors_exc_ang_tag                 9
+#define RobotSensors_drive_left_torque_tag       7
+#define RobotSensors_drive_right_torque_tag      8
+#define RobotSensors_exc_torque_tag              9
 #define RobotSensors_dep_weight_tag              10
 #define RobotSensors_uwb_dist_0_tag              11
 #define RobotSensors_uwb_dist_1_tag              12
@@ -81,9 +81,9 @@ X(a, STATIC,   SINGULAR, FLOAT,    dep_curr,          3) \
 X(a, STATIC,   SINGULAR, FLOAT,    exc_curr,          4) \
 X(a, STATIC,   SINGULAR, FLOAT,    drive_left_curr,   5) \
 X(a, STATIC,   SINGULAR, FLOAT,    drive_right_curr,   6) \
-X(a, STATIC,   SINGULAR, FLOAT,    drive_left_ang,    7) \
-X(a, STATIC,   SINGULAR, FLOAT,    drive_right_ang,   8) \
-X(a, STATIC,   SINGULAR, FLOAT,    exc_ang,           9) \
+X(a, STATIC,   SINGULAR, FLOAT,    drive_left_torque,   7) \
+X(a, STATIC,   SINGULAR, FLOAT,    drive_right_torque,   8) \
+X(a, STATIC,   SINGULAR, FLOAT,    exc_torque,        9) \
 X(a, STATIC,   SINGULAR, FLOAT,    dep_weight,       10) \
 X(a, STATIC,   SINGULAR, FLOAT,    uwb_dist_0,       11) \
 X(a, STATIC,   SINGULAR, FLOAT,    uwb_dist_1,       12) \

@@ -45,11 +45,11 @@ void recv(ros::Publisher &pub) {
   state_msg.drive_left_curr = state.drive_left_curr;
   state_msg.dep_curr = state.dep_curr;
   state_msg.exc_curr = state.exc_curr;
-  state_msg.drive_left_ang = state.drive_left_ang;
-  state_msg.drive_right_ang = state.drive_right_ang;
+  state_msg.drive_left_torque = state.drive_left_torque;
+  state_msg.drive_right_torque = state.drive_right_torque;
   state_msg.drive_left_vel = state.drive_left_vel;
   state_msg.drive_right_vel = state.drive_right_vel;
-  state_msg.exc_ang = state.exc_ang;
+  state_msg.exc_torque = state.exc_torque;
   state_msg.exc_vel = state.exc_vel;
   state_msg.uwb_dists.push_back(state.uwb_dist_0);
   state_msg.uwb_dists.push_back(state.uwb_dist_1);
