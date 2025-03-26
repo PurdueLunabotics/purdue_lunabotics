@@ -88,7 +88,6 @@ void StepperMotor::clear_errors() {
 
 // move the motor at constant velocity, using default values for acceleration and deceleration unless specified
 // speed in rpm
-// acceleration and deceleration in ms/1000 rpm
 void StepperMotor::move_at_speed(uint16_t speed) {
   write_register(Addrs.Speed, speed);
 }
@@ -118,7 +117,11 @@ int StepperMotor::read_torque() {
 
 // amps
 float StepperMotor::read_current() {
-  return read_register(Addrs.Read_Current) * 0.01;
+  int x = read_register(Addrs.Read_Current);
+  if (x == -1) {
+    return -1;
+  }
+  return x * 0.01;
 }
 
 // volts
@@ -148,7 +151,11 @@ int StepperMotor::read_motor_position_raw() {
 
 // radians
 float StepperMotor::read_motor_position_radians() {
-  return read_motor_position_raw() / 10000.0 * 2 * PI; // 2500 pulses per rotation, * 2 * PI
+  int x = read_motor_position_raw();
+  if (x == -1) {
+    return -1;
+  }
+  return x * / 10000.0 * 2 * PI; // 2500 pulses per rotation, * 2 * PI
 }
 
 // print the motor state from the state register
