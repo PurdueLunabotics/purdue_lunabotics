@@ -117,7 +117,7 @@ int StepperMotor::read_torque() {
 
 // amps
 float StepperMotor::read_current() {
-  int x = read_register(Addrs.Read_Current);
+  int x = (int16_t)read_register(Addrs.Read_Current);
   if (x == -1) {
     return -1;
   }
