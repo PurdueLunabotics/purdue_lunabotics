@@ -27,7 +27,7 @@ void ctrl() {
 }
 
 void send() {
-  actuation::update(state.act_right_curr);
+  // actuation::update(state.act_right_curr);
   drivetrain::update(state.drive_left_curr, state.drive_right_curr, state.drive_left_ang,
                      state.drive_right_ang, state.drive_left_vel, state.drive_right_vel);
   deposition::update(state.dep_curr);
@@ -94,14 +94,14 @@ void loop() {
   }
 
   if (ms_until_ctrl > CTRL_PERIOD) {
-    ms_until_ctrl -= CTRL_PERIOD;
+    ms_until_ctrl = 0;
     // TODO, add timer if robot effort not changing for too long, exit?
     // KillSwitchRelay::logic(effort);
     ctrl();
   }
 
   if (ms_until_send > TX_PERIOD) {
-    ms_until_send -= TX_PERIOD;
+    ms_until_send = 0;
     send();
     n = RawHID.send(buffer, 0);
   }
