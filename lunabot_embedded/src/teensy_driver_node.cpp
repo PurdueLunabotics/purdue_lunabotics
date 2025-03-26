@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
   while (ros::ok()) {
     // check if any Raw HID packet has arrived
     ros::spinOnce();
-    num = rawhid_recv(0, buf, BUF_SIZE, 0);
+    num = rawhid_recv(0, buf, BUF_SIZE, 10);
     if (num < 0) {
       printf("error reading. Retrying connection\n");
       num_read_fails += 1;
