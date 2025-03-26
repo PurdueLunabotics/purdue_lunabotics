@@ -51,7 +51,7 @@ int modbus_send_rcv(uint8_t *buf_to_send, int len_to_send, uint8_t *buf_to_recv)
   RS485Serial.write(buf_to_send, len_to_send);   // Send data
   RS485Serial.flush();                           // Wait for data to send
   digitalWrite(RS485_TX_CONTROL, RS485Receive);  // Disable RS485 Transmit
-  delayMicroseconds(2000);                                     // Wait for data to come back in
+  delayMicroseconds(5000);                       // Wait for data to come back in
 
   int recv_size = 0;
   while (RS485Serial.available()) {
