@@ -112,7 +112,7 @@ int StepperMotor::read_velocity() {
 
 // % of rated
 int StepperMotor::read_torque() {
-  return read_register(Addrs.Read_Torque);
+  return (int16_t)read_register(Addrs.Read_Torque);
 }
 
 // amps
