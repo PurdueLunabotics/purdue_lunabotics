@@ -48,7 +48,7 @@ struct ControlCmds {
   uint8_t ENABLE = 0x83;
   uint16_t VelocityMode = 0x0001;
   uint16_t DigitalSpeedMode = 0x0001;
-
+  uint16_t Save = 0x2211;
   uint16_t ResetAlarm = 0x1111;
 } ControlCmds;
 
@@ -69,8 +69,11 @@ void StepperMotor::begin() {
 
   write_register(Addrs.ControlMode, ControlCmds.VelocityMode);
   write_register(Addrs.SpeedMode, ControlCmds.DigitalSpeedMode);
+  write_register(Addrs.Reset, ControlCmds.Save);
+
   write_register(Addrs.Acceleration, def_acceleration);
   write_register(Addrs.Deceleration, def_deceleration);
+  write_register(Addrs.Speed, 0);
 }
 
 // emergency stops motor
