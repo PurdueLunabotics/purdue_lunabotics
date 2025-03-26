@@ -155,7 +155,7 @@ float StepperMotor::read_motor_position_radians() {
   if (x == -1) {
     return -1;
   }
-  return x * / 10000.0 * 2 * PI; // 2500 pulses per rotation, * 2 * PI
+  return x / 10000.0 * 2 * PI; // 2500 pulses per rotation, * 2 * PI
 }
 
 // print the motor state from the state register
