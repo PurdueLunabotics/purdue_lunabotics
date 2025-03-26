@@ -179,4 +179,4 @@ cython_debug/
 /.vs
 /.vscode
 
-lunabot_sim/mining_arena_gazebo
+lunabot_sim/mining_arena_gazebo/
