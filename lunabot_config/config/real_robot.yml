@@ -14,19 +14,32 @@ nav:
     dstar_node:
         path_sampling_rate: 5 # Take every <n-th> point from the path
 
-    mpc_node:
-        rollout_count: 50
-        top_rollouts: 15
-        iterations: 10
-        w_linear: 1.0
-        w_angular: 5.0
-        w_waypoint: 20.0
-        w_occupied: 0.0
-        horizon_length: 10
-        frequency: 30
-        min_distance_threshold: 0.5
-        velocity_limits:
-            linear: [-0.20, 0.20]
+    pure_pursuit:
+        slip_k1: 0.12
+        heading_k2: 0.05
+        kp: 0.001
+        ki: 0
+        kd: 0
+        kv: 0.8
+        ka: 0.0002
+        frequency_p: 15
+        lookahead: 0.5
+        velocity_limits_p:
+            linear: [-0.2, 0.2]
+            angular: [-0.785, 0.785]
+
+    pure_pursuit_test_wheels:
+        slip_k1: 0.02
+        heading_k2: 0.02
+        kp: 0.001
+        ki: 0
+        kd: 0
+        kv: 0.8
+        ka: 0.0002
+        frequency_p: 15
+        lookahead: 0.5
+        velocity_limits_p:
+            linear: [-0.2, 0.2]
             angular: [-0.785, 0.785]
 
 differential_drive_controller:

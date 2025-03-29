@@ -27,6 +27,11 @@
   /usb_cam/tag_detections /usb_cam/image_color 
 
   /zone_visual /apriltag_visual 
+  
+  /ptp/log /ptp/target_pose /ptp/current_target /ptp/robot_state 
+  /ptp/line_path /ptp/angular_disparity /ptp/linear_disparity /ptp/heading /ptp/angle_target /ptp/pid_linear /ptp/pid_angular
+
+  /purePursuit/controller_vel /purePursuit/target_vel /purePursuit/slip_vec /purePursuit/final_vel /purePursuit/heading_err
   "
     output="screen" />
 </launch>
