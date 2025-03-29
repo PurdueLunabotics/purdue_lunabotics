@@ -7,6 +7,9 @@
     <arg name="slam" default="true" />
     <arg name="exp_name" default="exp" />
 
+    <!-- Should we use Point To Point or Pure pursuit -->
+    <arg name="ptp" default="true"/>
+
     <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node" output="screen"/>
 
     <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch"/>
@@ -32,16 +35,11 @@
 
 
     <group ns="nav">
-      <!-- <node pkg="lunabot_control" type="mpc_node" name="mpc_node" output="screen"/> -->
+      <node name="global_planner_node" pkg="lunabot_nav" type="dstar_node" output="screen" respawn="true"/>
 
-      <!-- TODO: Comment one of these so the robot doesn't get confused -->
-
-      <node pkg="lunabot_control" type="point_to_point.py" name="point_to_point_node" output="screen" respawn="true" />
-      <node name="pure_pursuit_node" pkg="lunabot_control" type="pure_pursuit_controller.py" output="screen" respawn="true"/>
-      <node name="global_planner_node" pkg="lunabot_nav" type="dstar_node" output="screen" respawn="true">
-
-        <!-- <rosparam file="$(find lunabot_config)/config/rrtstar.yml" command="load"/> -->
-      </node>
+      <!-- Path followers- Point to point or Pure pursuit -->
+      <node name="point_to_point_node" if="$(arg ptp)" pkg="lunabot_control" type="point_to_point.py" output="screen" respawn="true" />
+      <node name="pure_pursuit_node" unless="$(arg ptp)" pkg="lunabot_control" type="pure_pursuit_controller.py" output="screen" respawn="true"/>
     </group>
 
     <group ns="maps">
