@@ -97,9 +97,6 @@ void recv(ros::Publisher &pub) {
   state_msg.drive_right_vel = DEG2RAD(right_vel);
   state_msg.exc_ang = DEG2RAD(state.exc_ang);
   state_msg.exc_vel = DEG2RAD(exc_vel);
-  state_msg.uwb_dists.push_back(state.uwb_dist_0);
-  state_msg.uwb_dists.push_back(state.uwb_dist_1);
-  state_msg.uwb_dists.push_back(state.uwb_dist_2);
 
   pub.publish(state_msg);
 }
