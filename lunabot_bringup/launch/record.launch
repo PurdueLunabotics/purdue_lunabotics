@@ -4,10 +4,26 @@
   <node name="recorder" pkg="rosbag" type="record"
     args="-o $(find lunabot_bringup)/bags/$(arg exp_name) 
   /imu /goal /cmd_vel /maps/costmap_node/global_costmap/costmap /nav/global_path /rtabmap/odom 
-  /tf /d455_back/camera/color/image_rect_color /d455_back/camera/color/tag_detections /effort 
+  /tf /effort 
+  /d455_back/camera/color/image_rect_color /d455_back/camera/color/tag_detections 
   /d455_back/camera/aligned_depth_to_color/image_raw /d455_back/camera/aligned_depth_to_color/camera_info 
-  /d455_back/camera/color/camera_info /usb_cam/tag_detections /sensors /zone_visual /errors /apriltag_visual 
+  /d455_back/camera/color/camera_info /d455_back/camera/points 
+
+  /d455_front/camera/color/image_rect_color /d455_front/camera/color/tag_detections
+  /d455_front/camera/aligned_depth_to_color/image_raw /d455_front/camera/aligned_depth_to_color/camera_info 
+  /d455_front/camera/color/camera_info /d455_front/camera/points 
+
+  /d435_left/camera/color/image_rect_color /d435_left/camera/color/tag_detections
+  /d435_left/camera/aligned_depth_to_color/image_raw /d435_left/camera/aligned_depth_to_color/camera_info 
+  /d435_left/camera/color/camera_info
+
+  /d435_right/camera/color/image_rect_color /d435_right/camera/color/tag_detections
+  /d435_right/camera/aligned_depth_to_color/image_raw /d435_right/camera/aligned_depth_to_color/camera_info 
+  /d435_right/camera/color/camera_info
+  
+  /pointcloud/depth_combined_cloud
+  /usb_cam/tag_detections /sensors /zone_visual /errors /apriltag_visual 
   /usb_cam/image_color 
-  /d455_back/rgbd_image"
+  "
     output="screen" />
 </launch>

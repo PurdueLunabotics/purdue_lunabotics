@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <arg name="record" default="true" />
+    <arg name="autonomy" default="false" />
     <arg name="teensy" default="true" />
     <arg name="cameras" default="true" />
     <arg name="overhead" default="true" />

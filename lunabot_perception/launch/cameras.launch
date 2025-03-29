@@ -10,9 +10,12 @@
   <arg name="width"                           default="424"/>
   <arg name="height"                          default="240"/>
   <arg name="fps"                             default="15"/>
+  <!-- Front and Back are mapping cams, extras are just vision. -->
+  <!-- If only one of the mapping cams is enabled it will use RGB and Depth to map and odom -->
   <arg name="front"                           default="true"/>
   <arg name="back"                            default="true"/>
   <arg name="extras"                          default="true"/>
+  <!-- If both it will generate pointclouds on each and combine them and then use that for mapping -->
   <arg name="pointcloud" default="$(eval arg('front') and arg('back'))" />
   
   <arg name="decimation" default="4"/>
@@ -38,7 +41,7 @@
         <arg name="tf_prefix"                value="d455_front"/>
         <arg name="serial_no"                value="$(arg serial_no_d455_front)"/>
 
-        <arg name="initial_reset"            value="true"/>
+        <arg name="initial_reset"            value="$(arg initial_reset)"/>
 
         <arg name="enable_pointcloud"        value="false"/>
         <arg name="enable_sync"              value="true"/>
@@ -106,7 +109,7 @@
         <arg name="tf_prefix"                value="d455_back"/>
         <arg name="serial_no"                value="$(arg serial_no_d455_back)"/>
 
-        <arg name="initial_reset"            value="true"/>
+        <arg name="initial_reset"            value="$(arg initial_reset)"/>
 
         <arg name="enable_pointcloud"        value="false"/>
         <arg name="enable_sync"              value="true"/>
@@ -165,7 +168,7 @@
 
     </group>
 
-
+    <!-- Right Camera -->
     <group ns="d435_right/camera" if="$(arg extras)">
 
       <!-- Launch the camera device nodelet-->
@@ -175,7 +178,7 @@
         <arg name="tf_prefix"                value="d435_right"/>
         <arg name="serial_no"                value="$(arg serial_no_d435_right)"/>
 
-        <arg name="initial_reset"            value="true"/>
+        <arg name="initial_reset"            value="$(arg initial_reset)"/>
 
         <arg name="enable_pointcloud"        value="false"/>
         <arg name="enable_sync"              value="false"/>
@@ -202,6 +205,7 @@
       </group>
     </group>
 
+    <!-- Left Camera -->
     <group ns="d435_left/camera" if="$(arg extras)">
       <!-- Launch the camera device nodelet-->
       <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
@@ -210,7 +214,7 @@
         <arg name="tf_prefix"                value="d435_left"/>
         <arg name="serial_no"                value="$(arg serial_no_d435_left)"/>
 
-        <arg name="initial_reset"            value="true"/>
+        <arg name="initial_reset"            value="$(arg initial_reset)"/>
 
 
         <arg name="enable_pointcloud"        value="false"/>
