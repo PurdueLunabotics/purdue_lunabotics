@@ -7,6 +7,9 @@ from map_msgs.msg import OccupancyGridUpdate
 from nav_msgs.msg import OccupancyGrid, Odometry, Path
 from tf.transformations import quaternion_from_euler
 
+from threading import Thread
+from threading import Lock
+
 from lunabot_nav.dstar import Dstar
 
 class DstarNode:
@@ -26,6 +29,8 @@ class DstarNode:
 
         self.dstar: Dstar = None
 
+        self.map_lock = Lock()
+
         self.path_sampling_rate = rospy.get_param("/nav/dstar_node/path_sampling_rate") # Take every <n-th> point from the path
 
         path_topic = rospy.get_param("/nav/global_path_topic")
@@ -40,19 +45,29 @@ class DstarNode:
         Update the map given a new occupancy grid. Update the flag such that dstar will update the map.
         """
 
-        data_arr = np.array(data.data)
+        self.map_lock.acquire()
 
-        if (np.all(data_arr == 0)): # ignore blank maps
-            return
+        rospy.loginfo("[Dstar node]: Got map")
+
+        data_arr = np.array(data.data)
 
         width = data.info.width
         height = data.info.height
+
         self.map = np.reshape(data_arr, (height, width))
 
         self.resolution = data.info.resolution
         self.x_offset = data.info.origin.position.x
         self.y_offset = data.info.origin.position.y
+
+        if (np.all(data_arr == 0)): # if the map is all zeroes, don't update dstar with it.
+
+            self.map_lock.release()
+            return
+
         self.grid_update_needed = True
+
+        self.map_lock.release()
 
 
     def grid_update_callback(self, data: OccupancyGridUpdate):
@@ -60,9 +75,18 @@ class DstarNode:
         Update the grid given the occupancy grid update (applied on top of the current grid). Also update the flag for dstar to update the map.
         """
 
+        self.map_lock.acquire()
+        rospy.loginfo("[Dstar node]: Got map update")
+
+        # print("\tgot an update")
         data_arr = np.array(data.data)
 
         if (np.all(data_arr == 0)):
+            self.map_lock.release()
+            return
+
+        if (data_arr.shape[0] == 0) or (self.map.shape[0] == 0):
+            self.map_lock.release()
             return
 
         temp_map = self.map.copy()
@@ -75,6 +99,8 @@ class DstarNode:
 
         self.map = temp_map.copy()
         self.grid_update_needed = True
+
+        self.map_lock.release()
 
 
     def position_callback(self, data: Odometry):

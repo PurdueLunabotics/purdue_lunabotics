@@ -245,7 +245,6 @@ if __name__ == "__main__":
 
     man_ctrl = ManualController()
     rate = rospy.Rate(20)
-
     while not rospy.is_shutdown():
         if not rospy.get_param("autonomy"):
             man_ctrl.loop()

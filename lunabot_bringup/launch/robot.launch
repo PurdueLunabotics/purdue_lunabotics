@@ -1,41 +1,91 @@
 <?xml version="1.0"?>
 <launch>
+    <arg name="autonomy" default="true" />
     <arg name="record" default="true" />
+    <arg name="autonomy" default="false" />
     <arg name="teensy" default="true" />
     <arg name="cameras" default="true" />
     <arg name="overhead" default="true" />
     <arg name="slam" default="true" />
     <arg name="exp_name" default="exp" />
+    <arg name="front" default="true" />
+    <arg name="back" default="true" />
+    <arg name="extra_cams" default="true" />
 
-    <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node" output="screen"/>
+    <!-- Launch Teensy Driver -->
+    <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node"
+          output="screen" />
 
-    <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch"/>
+    <!-- Launch Realsense Cameras -->
+    <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch">
+        <arg name="front" value="$(arg front)"/>
+        <arg name="back" value ="$(arg back)"/>
+        <arg name="extras" value="$(arg extra_cams)"/>
+    </include>
+
     <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch"/>
+
+    <!-- Launch rosbag recorder -->
     <include if="$(arg record)" file="$(find lunabot_bringup)/launch/record.launch">
-        <arg name="exp_name" value="$(arg exp_name)"/>
+        <arg name="exp_name" value="$(arg exp_name)" />
     </include>
 
+    <!-- Load config file, and set the autonomy parameter based on user input -->
+    <rosparam file="$(find lunabot_config)/config/real_robot.yml" command="load" />
+    <rosparam param="autonomy" subst_value="True">$(arg autonomy)</rosparam>
 
-    <include if="$(arg slam)" file="$(find rtabmap_ros)/launch/rtabmap.launch" >
-      <arg name="rtabmap_args" value="--delete_db_on_start"/>
-      <arg name="depth_topic" value="/d455_back/camera/aligned_depth_to_color/image_raw"/>
-      <arg name="rgb_topic" value="/d455_back/camera/color/image_rect_color"/>
-      <arg name="camera_info_topic" value="/d455_back/camera/color/camera_info"/>
-      <arg name="rtabmapviz" value="false" />
-      <arg name="imu_topic" value="/imu" />
-      <arg name="frame_id" value="base_link" />
-    </include>
+    <!-- If autonomy is enabled, launch RTABMap Slam, navigation, and other required nodes -->
+    <group if="$(arg autonomy)">
 
-    <node pkg="lunabot_control" type="effort_factory.py" name="effort_factory" output="screen"/>
+        <group>
+            <include if="$(arg slam)" file="$(find rtabmap_ros)/launch/rtabmap.launch">
+                <arg name="rtabmap_args" value="--delete_db_on_start" />
+                <arg name="rgbd_sync" value="false" />
+                <arg name="subscribe_rgbd" value="false" />
+                <arg name="depth" value="true" />
 
-    <node pkg="lunabot_control" type="differential_drive_controller.py" name="differential_drive_controller" output="screen"/>
+                <!-- If using the back camera, default the topics to it -->
+                <arg name="depth_topic" value="/d455_back/camera/aligned_depth_to_color/image_raw" if="$(arg back)"/>
+                <arg name="rgb_topic" value="/d455_back/camera/color/image_rect_color" if="$(arg back)"/>
+                <arg name="camera_info_topic" value="/d455_back/camera/color/camera_info" if="$(arg back)"/>
 
-    <group ns="nav">
-      <node pkg="lunabot_control" type="mpc_node" name="mpc_node" output="screen"/>
-      <node name="global_planner_node" pkg="lunabot_nav" type="dstar_node.py" output="screen" respawn="true">
-        <!-- <rosparam file="$(find lunabot_config)/config/rrtstar.yml" command="load"/> -->
-      </node>
-    </group>
+                <!-- Otherwise, if using the front camera -->
+                <arg name="depth_topic" value="/d455_front/camera/aligned_depth_to_color/image_raw" unless="$(arg back)"/>
+                <arg name="rgb_topic" value="/d455_front/camera/color/image_rect_color" unless="$(arg back)"/>
+                <arg name="camera_info_topic" value="/d455_front/camera/color/camera_info" unless="$(arg back)"/>
+
+                <!-- If using both front/back for mapping, using the combined pointcloud -->
+                <arg name="scan_cloud_topic" value="/pointcloud/depth_combined_cloud"/>
+                <arg name="subscribe_scan_cloud" value="$(eval arg('front') and arg('back'))" />
+
+                <arg name="rtabmapviz" value="false" />
+                <arg name="imu_topic" value="/imu" />
+                <arg name="frame_id" value="base_link" />
+                <arg name="rviz" value="false" />
+            </include>
+        </group>
+
+        <!-- Launch effort factory -->
+        <node pkg="lunabot_control" type="effort_factory.py" name="effort_factory" output="screen" />
+
+        <!-- Launch diff drive controller -->
+        <node pkg="lunabot_control" type="differential_drive_controller.py"
+              name="differential_drive_controller" output="screen" />
+
+        <!-- Launch path following and path planning (navigation) -->
+        <group ns="nav">
+            <node pkg="lunabot_control" type="mpc_node" name="mpc_node" output="screen" />
+
+            <node name="dstar_node" pkg="lunabot_nav" type="dstar_node.py" output="screen" respawn="true"/>
+        </group>
+
+        <!-- Launch the costmap node -->
+        <group ns="maps">
+            <node name="costmap_node" pkg="lunabot_perception" type="costmap_node" output="screen">
+                <rosparam file="$(find lunabot_config)/config/global_costmap.yml" command="load"
+                          ns="global_costmap" />
+            </node>
+        </group>
 
     <group ns="maps">
       <node name="costmap_node" pkg="lunabot_perception" type="costmap_node" output="screen">
