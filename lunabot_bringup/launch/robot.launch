@@ -2,7 +2,6 @@
 <launch>
     <arg name="autonomy" default="true" />
     <arg name="record" default="true" />
-    <arg name="autonomy" default="false" />
     <arg name="teensy" default="true" />
     <arg name="cameras" default="true" />
     <arg name="overhead" default="true" />
@@ -86,11 +85,7 @@
                           ns="global_costmap" />
             </node>
         </group>
-
-    <group ns="maps">
-      <node name="costmap_node" pkg="lunabot_perception" type="costmap_node" output="screen">
-        <rosparam file="$(find lunabot_config)/config/global_costmap.yml" command="load" ns="global_costmap" />
-      </node>
+    
     </group>
 
 </launch>
