@@ -54,52 +54,17 @@ class DstarNode:
         width = data.info.width
         height = data.info.height
 
-        if (np.all(data_arr == 0)): # ignore blank maps, still fix the height/width
-
-            prev_x_offset = self.x_offset
-            prev_y_offset = self.y_offset
-    
-            self.x_offset = data.info.origin.position.x
-            self.y_offset = data.info.origin.position.y
-
-            x_diff = data.info.origin.position.x - prev_x_offset
-            y_diff = data.info.origin.position.y - prev_y_offset
-
-            # if we get a blank map of a different side, keep the old map in place and pad it with -1 (unknown)
-            # if the offset gets more negative, it means the map has expanded on the [left/top], otherwise on the [right/bottom]
-            row_diff = data.info.height - self.map.shape[0]
-            column_diff = data.info.width - self.map.shape[1]
-
-            new_map = self.map
-
-            if (row_diff != 0):
-                new_rows = -1 * np.ones((row_diff, new_map.shape[1]))
-
-                if (y_diff < 0):
-                    # pad the top
-                    new_map = np.concatenate((new_rows, new_map), axis=0)
-                else:
-                    # pad the bottom
-                    new_map = np.concatenate((new_map, new_rows), axis=0)
-            
-            if (column_diff != 0):
-                new_columns = -1 * np.ones((new_map.shape[0], column_diff))
-                if (x_diff < 0):
-                    # pad the left
-                    new_map = np.concatenate((new_columns, new_map), axis=1)
-                else:
-                    # pad the right
-                    new_map = np.concatenate((new_map, new_columns), axis=1)
-
-            self.map = new_map
-            self.map_lock.release()
-            return
-
         self.map = np.reshape(data_arr, (height, width))
 
         self.resolution = data.info.resolution
         self.x_offset = data.info.origin.position.x
         self.y_offset = data.info.origin.position.y
+
+        if (np.all(data_arr == 0)): # if the map is all zeroes, don't update dstar with it.
+
+            self.map_lock.release()
+            return
+
         self.grid_update_needed = True
 
         self.map_lock.release()
