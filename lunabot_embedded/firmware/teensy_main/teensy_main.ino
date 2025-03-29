@@ -6,7 +6,7 @@
 #include "robot.hpp"
 #include "interfaces.hpp"
 
-#define TX_PERIOD 10               // ms
+#define TX_PERIOD 300               // ms
 #define CTRL_PERIOD 2              // ms
 #define UWB_TRANSFER_PERIOD 10'000 // microsec
 #define CURR_UPDATE_PERIOD 8       // ms
