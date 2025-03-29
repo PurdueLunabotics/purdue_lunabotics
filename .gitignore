@@ -178,3 +178,5 @@ cython_debug/
 #.idea/
 /.vs
 /.vscode
+
+lunabot_sim/mining_arena_gazebo/
