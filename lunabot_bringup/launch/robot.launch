@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <launch>
+    <arg name="autonomy" default="true" />
     <arg name="record" default="true" />
     <arg name="autonomy" default="false" />
     <arg name="teensy" default="true" />
@@ -35,7 +36,7 @@
 
     <!-- If autonomy is enabled, launch RTABMap Slam, navigation, and other required nodes -->
     <group if="$(arg autonomy)">
-    
+
         <group>
             <include if="$(arg slam)" file="$(find rtabmap_ros)/launch/rtabmap.launch">
                 <arg name="rtabmap_args" value="--delete_db_on_start" />
