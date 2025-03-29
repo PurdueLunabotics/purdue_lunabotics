@@ -607,5 +607,5 @@ class PurePursuitController:
 
 
 if __name__ == "__main__":
-    controller = PurePursuitController(0.4, 0.4, 0.4, 0.45, (0, 0, 0), True)
+    controller = PurePursuitController(0.4, 0.4, 0.4, 0.45, (0, 0, 0), False)
     controller.loop()
