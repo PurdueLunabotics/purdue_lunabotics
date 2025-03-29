@@ -2,7 +2,7 @@
 <launch>
   <node pkg="lunabot_control" type="manual_controller.py" name="manual_control" output="screen"/>
 
- <!-- joystick nodes -->
+  <!-- joystick nodes -->
   <group >
     <remap from="joy" to="joy0"/>
     <node respawn="true" pkg="joy" type="joy_node" name="joy0" output="screen">
@@ -11,7 +11,7 @@
     </node>
   </group>
 
-    <group >
+  <group >
     <remap from="joy" to="joy1"/>
     <node respawn="true" pkg="joy" type="joy_node" name="joy1" output="screen">
       <param name="dev" type="string" value="/dev/input/js1" />

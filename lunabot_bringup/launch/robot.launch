@@ -12,13 +12,13 @@
 
 
     <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node"
-        output="screen" />
+          output="screen" />
     <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch">
-      <arg name="front" value="$(arg front)"/>
-      <arg name="back" value ="$(arg back)"/>
-      <arg name="extras" value="$(arg extra_cams)"/>
-      
+        <arg name="front" value="$(arg front)"/>
+        <arg name="back" value ="$(arg back)"/>
+        <arg name="extras" value="$(arg extra_cams)"/>
     </include>
+
     <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch"/>
     <include if="$(arg record)" file="$(find lunabot_bringup)/launch/record.launch">
         <arg name="exp_name" value="$(arg exp_name)" />
@@ -52,20 +52,18 @@
         <node pkg="lunabot_control" type="effort_factory.py" name="effort_factory" output="screen" />
 
         <node pkg="lunabot_control" type="differential_drive_controller.py"
-            name="differential_drive_controller" output="screen" />
+              name="differential_drive_controller" output="screen" />
 
         <group ns="nav">
             <node pkg="lunabot_control" type="mpc_node" name="mpc_node" output="screen" />
 
-            <node name="dstar_node" pkg="lunabot_nav" type="dstar_node.py" output="screen" respawn="true">
-                <!-- <rosparam file="$(find lunabot_config)/config/rrtstar.yml" command="load"/> -->
-            </node>
+            <node name="dstar_node" pkg="lunabot_nav" type="dstar_node.py" output="screen" respawn="true"/>
         </group>
 
         <group ns="maps">
             <node name="costmap_node" pkg="lunabot_perception" type="costmap_node" output="screen">
                 <rosparam file="$(find lunabot_config)/config/global_costmap.yml" command="load"
-                    ns="global_costmap" />
+                          ns="global_costmap" />
             </node>
         </group>
     </group>
