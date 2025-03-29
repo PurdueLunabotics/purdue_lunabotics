@@ -7,6 +7,7 @@
     <remap from="joy" to="joy0"/>
     <node respawn="true" pkg="joy" type="joy_node" name="joy0" output="screen">
       <param name="dev" type="string" value="/dev/input/js0" />
+      <param name="dev_ff" type="string" value="/dev/input/event23" />
       <param name="default_trig_val" type="bool" value="true" />
     </node>
   </group>
