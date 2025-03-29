@@ -54,6 +54,7 @@ catkin_package(
   tf2_ros
   geometry_msgs
   costmap_2d
+  nodelet
 )
 
 include_directories(
