@@ -6,6 +6,7 @@
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/Path.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <thread>
 
 class DstarNode {
 public:
@@ -20,6 +21,7 @@ public:
     ros::param::get("/nav/dstar_node/path_sampling_rate", path_sampling_rate); // Take every<n-th> point from the path
     ros::param::get("/nav/global_path_topic", path_topic);
     ros::param::get("/nav/occ_threshold", occupancy_threshold);
+
 
     int frequency = 10; // hz
 
@@ -85,6 +87,8 @@ private:
   bool grid_update_needed = false;
   bool goal_update_needed = false;
 
+  std::mutex map_lock;  // NOTE: this mutex was needed in python, might not be needed in C++ because roscpp callbacks are single threaded
+
   ros::NodeHandle nh;
   ros::Subscriber map_sub;
   ros::Subscriber map_update_sub;
@@ -102,15 +106,15 @@ private:
 
   // Updates the map given a new occupancy grid.Update the flag such that dstar will update the map.
   void grid_callback(const nav_msgs::OccupancyGrid::ConstPtr &data) {
+
+    map_lock.lock();
+
     bool map_ok = false;
     for (int i = 0; i < data->info.width * data->info.height; i++) {
       if (data->data[i] != 0) {
         map_ok = true;
         break;
       }
-    }
-    if (!map_ok) {
-      return;
     }
 
     uint32_t width = data->info.width;
@@ -129,11 +133,22 @@ private:
     resolution = data->info.resolution;
     x_offset = data->info.origin.position.x;
     y_offset = data->info.origin.position.y;
+
+    if (!map_ok) { // if the map is all zeroes, dont't update dstar with it
+      map_lock.unlock();
+      return;
+    }
+
     grid_update_needed = true;
+
+    map_lock.unlock();
   }
 
   // Update the grid given the occupancy grid update (applied on top of the current grid). Also update the flag for dstar to update the map.
   void grid_update_callback(const map_msgs::OccupancyGridUpdate::ConstPtr &data) {
+
+    map_lock.lock();
+
     bool map_ok = false;
     for (int i = 0; i < data->width * data->height; i++) {
       if (data->data[i] != 0) {
@@ -142,6 +157,7 @@ private:
       }
     }
     if (!map_ok) {
+      map_lock.unlock();
       return;
     }
 
@@ -156,6 +172,8 @@ private:
     }
 
     grid_update_needed = true;
+
+    map_lock.unlock();
   }
 
   void position_callback(const nav_msgs::Odometry::ConstPtr &data) {
@@ -207,7 +225,7 @@ private:
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "dstar_node");
-  DstarNode dstar_node = DstarNode();
+  DstarNode dstar_node; 
   dstar_node.dstar_loop();
   return 0;
 }
