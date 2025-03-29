@@ -11,7 +11,7 @@
     </node>
   </group>
 
-    <group >
+  <group >
     <remap from="joy" to="joy1"/>
     <node respawn="true" pkg="joy" type="joy_node" name="joy1" output="screen">
       <param name="dev" type="string" value="/dev/input/js1" />
