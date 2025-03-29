@@ -8,14 +8,18 @@ message RobotSensors {
   float drive_left_curr = 5;
   float drive_right_curr = 6;
 
-  float drive_left_ang = 7;
-  float drive_right_ang = 8;
-  float exc_ang = 9;
+  float drive_left_torque = 7;
+  float drive_right_torque = 8;
+  float exc_torque = 9;
 
   float dep_weight = 10;
   float uwb_dist_0 = 11;
   float uwb_dist_1 = 12;
   float uwb_dist_2 = 13;
+
+  float drive_left_vel = 14;
+  float drive_right_vel = 15;
+  float exc_vel = 16;
 }
 
 message RobotEffort {
@@ -24,4 +28,5 @@ message RobotEffort {
   sint32 right_drive = 3;
   sint32 excavate = 4;
   sint32 deposit = 5;
+  bool should_reset = 6;
 }
