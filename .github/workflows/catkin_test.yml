@@ -32,7 +32,6 @@ jobs:
         mkdir -p ~/catkin_ws/src
         ln -s $GITHUB_WORKSPACE ~/catkin_ws/src/purdue_lunabotics
         cd ~/catkin_ws
-        sudo rosdep install
         sudo ./src/purdue_lunabotics/install-non-ros-deps.sh
         catkin build 
         catkin test 
