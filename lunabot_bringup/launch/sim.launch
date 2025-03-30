@@ -20,6 +20,9 @@
   <arg name="paused" default="false"/>
   <arg name="point_cloud_topic" default="/point_cloud"/>
 
+  <!-- Should we use Point To Point or Pure pursuit -->
+  <arg name="ptp" default="true"/>
+
   <!-- sim config -->
   <rosparam file="$(find lunabot_config)/config/sim.yml" command="load" />
 
@@ -59,10 +62,11 @@
 
   <!-- navigation -->
   <group ns="nav">
-      <node pkg="lunabot_control" type="mpc_node" name="mpc_node" output="screen"/>
-      <node name="global_planner_node" pkg="lunabot_nav" type="dstar_node.py" output="screen" respawn="true">
-          <!-- <rosparam file="$(find lunabot_config)/config/rrtstar.yml" command="load"/> -->
-      </node>
+      <node name="global_planner_node" pkg="lunabot_nav" type="dstar_node" output="screen" respawn="true"/>
+
+      <!-- Path followers- Point to point or Pure pursuit -->
+      <node name="point_to_point_node" if="$(arg ptp)" pkg="lunabot_control" type="point_to_point.py" output="screen" respawn="true" />
+      <node name="pure_pursuit_node" unless="$(arg ptp)" pkg="lunabot_control" type="pure_pursuit_controller.py" output="screen" respawn="true"/>
   </group>
 
   <!-- mapping -->

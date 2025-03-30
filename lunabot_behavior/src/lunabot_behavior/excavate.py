@@ -180,7 +180,7 @@ class ExcavationController:
             time.sleep(3)
             return
 
-        excavation_message = Int8()
+        excavation_message = Int32()
         cmd_vel_message = Twist()
 
         start_time = rospy.get_time()

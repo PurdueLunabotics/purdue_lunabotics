@@ -12,6 +12,10 @@ Panels:
         - /Goal1
         - /Path1
         - /Pose1
+        - /Marker1
+        - /Marker2
+        - /Marker3
+        - /Marker4
       Splitter Ratio: 0.5
     Tree Height: 514
   - Class: rviz/Selection
@@ -272,18 +276,7 @@ Visualization Manager:
                 d435_backward_depth_frame:
                   d435_backward_color_frame:
                     d435_backward_color_optical_frame:
-                      berm:
-                        {}
-                      sieve-marker:
-                        {}
-                      tag_0:
-                        {}
-                      tag_1:
-                        {}
-                      tag_2:
-                        {}
-                      tag_3:
-                        {}
+                      {}
                   d435_backward_depth_optical_frame:
                     {}
                   d435_backward_left_ir_frame:
@@ -297,7 +290,18 @@ Visualization Manager:
                 d435_forward_depth_frame:
                   d435_forward_color_frame:
                     d435_forward_color_optical_frame:
-                      {}
+                      berm:
+                        {}
+                      sieve-marker:
+                        {}
+                      tag_0:
+                        {}
+                      tag_1:
+                        {}
+                      tag_2:
+                        {}
+                      tag_3:
+                        {}
                   d435_forward_depth_optical_frame:
                     {}
                   d435_forward_left_ir_frame:
@@ -426,6 +430,22 @@ Visualization Manager:
         zones: true
       Queue Size: 100
       Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /ptp/current_target
+      Name: Marker
+      Namespaces:
+        target: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /ptp/line_path
+      Name: Marker
+      Namespaces:
+        target_paths: true
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -462,17 +482,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 3.402787923812866
-        Y: 1.677540898323059
-        Z: -1.7614977359771729
+        X: 2.7297310829162598
+        Y: 1.414658784866333
+        Z: -1.6359457969665527
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.9097966551780701
+      Pitch: 0.8047966361045837
       Target Frame: <Fixed Frame>
-      Yaw: 4.641844749450684
+      Yaw: 4.721843242645264
     Saved: ~
 Window Geometry:
   Displays:
@@ -490,5 +510,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1276
-  X: 4
+  X: -31
   Y: -31
