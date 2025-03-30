@@ -12,8 +12,6 @@ Panels:
         - /Goal1
         - /Path1
         - /Pose1
-        - /Polygon1
-        - /Polygon2
       Splitter Ratio: 0.5
     Tree Height: 514
   - Class: rviz/Selection
@@ -198,6 +196,8 @@ Visualization Manager:
         All Enabled: true
         base_link:
           Value: true
+        berm:
+          Value: true
         d435_backward_bottom_screw_frame:
           Value: true
         d435_backward_color_frame:
@@ -248,6 +248,16 @@ Visualization Manager:
           Value: true
         right_front:
           Value: true
+        sieve-marker:
+          Value: true
+        tag_0:
+          Value: true
+        tag_1:
+          Value: true
+        tag_2:
+          Value: true
+        tag_3:
+          Value: true
       Marker Alpha: 1
       Marker Scale: 0.5
       Name: TF
@@ -262,7 +272,18 @@ Visualization Manager:
                 d435_backward_depth_frame:
                   d435_backward_color_frame:
                     d435_backward_color_optical_frame:
-                      {}
+                      berm:
+                        {}
+                      sieve-marker:
+                        {}
+                      tag_0:
+                        {}
+                      tag_1:
+                        {}
+                      tag_2:
+                        {}
+                      tag_3:
+                        {}
                   d435_backward_depth_optical_frame:
                     {}
                   d435_backward_left_ir_frame:
@@ -389,23 +410,21 @@ Visualization Manager:
       Topic: /apriltag_visual
       Unreliable: false
       Value: true
-    - Alpha: 0.8999999761581421
-      Class: rviz/Polygon
-      Color: 0; 100; 200
+    - Class: rviz/Marker
       Enabled: true
-      Name: Polygon
-      Queue Size: 10
-      Topic: /mining_zone
-      Unreliable: false
+      Marker Topic: /berm_zone
+      Name: Marker
+      Namespaces:
+        zones: true
+      Queue Size: 100
       Value: true
-    - Alpha: 0.8999999761581421
-      Class: rviz/Polygon
-      Color: 150; 20; 0
+    - Class: rviz/Marker
       Enabled: true
-      Name: Polygon
-      Queue Size: 10
-      Topic: /berm_zone
-      Unreliable: false
+      Marker Topic: /mining_zone
+      Name: Marker
+      Namespaces:
+        zones: true
+      Queue Size: 100
       Value: true
   Enabled: true
   Global Options:
@@ -435,7 +454,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 11.43298053741455
+      Distance: 13.03377628326416
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -443,17 +462,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 3.1058027744293213
-        Y: 1.7574255466461182
-        Z: -1.2626042366027832
+        X: 3.402787923812866
+        Y: 1.677540898323059
+        Z: -1.7614977359771729
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.8097966909408569
+      Pitch: 0.9097966551780701
       Target Frame: <Fixed Frame>
-      Yaw: 4.791844367980957
+      Yaw: 4.641844749450684
     Saved: ~
 Window Geometry:
   Displays:
@@ -471,5 +490,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1276
-  X: 3
-  Y: -16
+  X: 4
+  Y: -31

@@ -1,5 +1,6 @@
 import rospy
-from geometry_msgs.msg import PoseStamped, PolygonStamped, Point32
+from geometry_msgs.msg import PoseStamped, Point
+from visualization_msgs.msg import Marker
 from tf.transformations import euler_from_quaternion
 import math
 
@@ -17,41 +18,71 @@ class Zone:
 
         self.middle = ((bottom_left[0] + top_right[0]) / 2, (bottom_left[1] + top_right[1]) / 2)
 
-    def visualize_zone(self, publisher: rospy.Publisher):
+    def visualize_zone(self, publisher: rospy.Publisher, id=0, color=(1,0,0,1)):
         """
         Visualizes a given zone (its four corners) as a square in rviz.
-        Publisher should be a rospy publisher that publishes the PolygonStamped message type. 
+        Publisher should be a rospy publisher that publishes the Marker message type. 
         (Make sure the publisher's topic is being visualized in rviz)
+        id should be unique for each marker.
+        Color is optional, given in (r,g,b,a) between 0 and 1.
         """
 
         # Make a polygon containing all of the corners of the zone and publish it
-        polygon = PolygonStamped()
-        polygon.header.stamp = rospy.Time.now()
-        polygon.header.frame_id = "odom"
+        zone = Marker()
+        zone.header.stamp = rospy.Time.now()
+        zone.header.frame_id = "odom"
 
-        p1 = Point32()
+        zone.ns = "zones"
+        zone.id = id
+        zone.type = Marker.LINE_STRIP
+        zone.action = Marker.ADD
+
+        zone.scale.x = 0.05
+        zone.pose.position.x = 0
+        zone.pose.position.y = 0
+        zone.pose.position.z = 0
+
+        zone.pose.orientation.x = 0
+        zone.pose.orientation.y = 0
+        zone.pose.orientation.z = 0
+        zone.pose.orientation.w = 1
+
+        zone.color.r = color[0]
+        zone.color.g = color[1]
+        zone.color.b = color[2]
+        zone.color.a = color[3]
+        
+        zone.lifetime = rospy.Duration(0, 0)  #  duration of 0 = infinite
+
+
+        p1 = Point()
         p1.x = self.top_left[0]
         p1.y = self.top_left[1]
         p1.z = 0
 
-        p2 = Point32()
+        p2 = Point()
         p2.x = self.top_right[0]
         p2.y = self.top_right[1]
         p2.z = 0
 
-        p3 = Point32()
+        p3 = Point()
         p3.x = self.bottom_right[0]
         p3.y = self.bottom_right[1]
         p3.z = 0
 
-        p4 = Point32()
+        p4 = Point()
         p4.x = self.bottom_left[0]
         p4.y = self.bottom_left[1]
         p4.z = 0
 
-        polygon.polygon.points = [p1, p2, p3, p4]
+        p5 = Point()
+        p5.x = self.top_left[0]
+        p5.y = self.top_left[1]
+        p5.z = 0
 
-        publisher.publish(polygon)
+        zone.points = [p1, p2, p3, p4, p5]
+
+        publisher.publish(zone)
 
 def calc_point_from_apriltag(x: float, y: float, apriltag_pose_in_odom: PoseStamped, is_sim: bool)-> 'tuple[float,float]':
     """

@@ -36,10 +36,6 @@ class Behavior:
         self.mining_zone: zones.Zone = zones.find_mining_zone(self.apriltag_pose_in_odom, self.is_sim)
         self.berm_zone: zones.Zone = zones.find_berm_zone(self.apriltag_pose_in_odom, self.is_sim)
 
-        # This visualizes the zones as polygons (visible in rviz)
-        self.mining_zone.visualize_zone(self.mining_zone_publisher)
-        self.berm_zone.visualize_zone(self.berm_zone_publisher)
-
     def __init__(self):
 
         rospy.init_node('behavior_node')
@@ -56,8 +52,6 @@ class Behavior:
         self.velocity_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
         self.traversal_publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue_size=1, latch=True)
         self.goal_publisher = rospy.Publisher("/goal", PoseStamped, queue_size=1, latch=True)
-        self.mining_zone_publisher = rospy.Publisher("/mining_zone", PolygonStamped, queue_size=1, latch=True)
-        self.berm_zone_publisher = rospy.Publisher("/berm_zone", PolygonStamped, queue_size=1, latch=True)
 
         self.backwards_publisher = rospy.Publisher("/traversal/backwards", Bool, queue_size=1, latch=True)
 

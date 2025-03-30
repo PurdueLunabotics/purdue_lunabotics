@@ -3,50 +3,69 @@
 import rospy
 from geometry_msgs.msg import Twist, PoseStamped
 from apriltag_ros.msg import AprilTagDetectionArray, AprilTagDetection
+from visualization_msgs.msg import Marker
 import tf2_ros
 import tf2_geometry_msgs
+
+from lunabot_behavior.zones import Zone, find_mining_zone, find_berm_zone
 
 class ApriltagNode:
     
     def apriltag_callback(self, msg: AprilTagDetectionArray):
-        self.apriltag_detections = msg;
         if len(msg.detections) > 0:
+            # Todo- identify the apriltag bundle we want
             detection = msg.detections[0]
-            frameid = detection.pose.header.frame_id
+            frame_id = msg.header.frame_id
 
-            if (not self.is_sim and frameid != "d455_back_color_optical_frame"): # only use front camera
-                print("wrong camera")
-                #return
+            self.apriltag_pose_in_odom = self.convert_to_odom_frame(detection, frame_id)
 
-            self.apriltag_publisher.publish(self.convert_to_odom_frame(detection))        
+            mining_zone: Zone = find_mining_zone(self.apriltag_pose_in_odom, self.is_sim)
+            berm_zone: Zone = find_berm_zone(self.apriltag_pose_in_odom, self.is_sim)
+
+            mining_zone.visualize_zone(self.mining_zone_visual_publisher, id=1, color=(1,0,0,1))
+            berm_zone.visualize_zone(self.berm_zone_visual_publisher, id=2, color=(0,1,1,1))
+
+            self.apriltag_update_needed = True
     
-    def __init__(self):        
+    def __init__(self):
+
+        rospy.init_node("apriltag_node")
+
+        self.apriltag_pose_in_odom: PoseStamped = None
+
         self.apriltag_publisher = rospy.Publisher("/apriltag_pose", PoseStamped, queue_size=10, latch=True)
+        self.mining_zone_visual_publisher = rospy.Publisher("/mining_zone", Marker, queue_size=10, latch=True)
+        self.berm_zone_visual_publisher = rospy.Publisher("/berm_zone", Marker, queue_size=10, latch=True)
         
         self.is_sim = rospy.get_param("/is_sim")
         
         if self.is_sim:
-            cam_topic = "/d435_backward/color/tag_detections"
+            cam_topics = ["/d435_backward/color/tag_detections", "/d435_forward/color/tag_detections"]
         else:
-            cam_topic = "/d455_back/camera/color/tag_detections"
+            cam_topics = ["/d455_back/camera/color/tag_detections", "/d455_front/camera/color/tag_detections",
+                         "/d435_left/camera/color/tag_detections", "/d435_right/camera/color/tag_detections"]
         
-        rospy.Subscriber(cam_topic, AprilTagDetectionArray, self.apriltag_callback)   
+        subscribers = []
+        for topic in cam_topics:
+            subscriber = rospy.Subscriber(topic, AprilTagDetectionArray, self.apriltag_callback)
+            subscribers.append(subscriber)
         
-        self.frequency = 10  # 10hz
-        
-        self.apriltag_detections = AprilTagDetectionArray()
-        
+        self.frequency = 15  
+
+        self.apriltag_update_needed: bool = False
+                
         
     def loop(self):
-        rospy.init_node("apriltag_node") 
         
         rate = rospy.Rate(self.frequency)
         
         while not rospy.is_shutdown():
+            if (self.apriltag_pose_in_odom is not None and self.apriltag_update_needed):
+                self.apriltag_publisher.publish(self.apriltag_pose_in_odom)
             rate.sleep()    
             
         
-    def convert_to_odom_frame(self, apriltag_detection: AprilTagDetection):
+    def convert_to_odom_frame(self, apriltag_detection: AprilTagDetection, frame_id: str):
         """
         Convert the first apriltag detection to the odom frame
         """
@@ -54,11 +73,11 @@ class ApriltagNode:
         tf_buffer = tf2_ros.Buffer()
         tf_listener = tf2_ros.TransformListener(tf_buffer)
 
-        source_frame = self.apriltag_detections.header.frame_id
+        source_frame = frame_id
         target_frame = "odom"
 
         pose = tf2_geometry_msgs.PoseStamped()
-        pose.header = self.apriltag_detections.header
+        pose.header = apriltag_detection.pose.header
         pose.pose = apriltag_detection.pose.pose.pose
 
         # Set the time to 0 to get the latest available transform
