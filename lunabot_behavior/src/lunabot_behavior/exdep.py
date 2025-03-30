@@ -12,7 +12,7 @@ from lunabot_behavior.linear_actuators import LinearActuatorManager
 from lunabot_behavior.alignment import AlignmentController
 import lunabot_behavior.zones as zones
 
-from std_msgs.msg import Int8, Bool
+from std_msgs.msg import Int8, Bool, Int32
 import sys
 import math
 
@@ -46,9 +46,9 @@ class ExdepController:
            traversal_publisher is None or goal_publisher is None):
             rospy.init_node('exdep_node')
 
-            self.excavation_publisher: rospy.Publisher = rospy.Publisher("/excavate", Int8, queue_size=1, latch=True)
-            self.lin_act_publisher: rospy.Publisher = rospy.Publisher("/lin_act", Int8, queue_size=1, latch=True)
-            self.deposition_publisher: rospy.Publisher = rospy.Publisher("/deposition", Int8, queue_size=1, latch=True)
+            self.excavation_publisher: rospy.Publisher = rospy.Publisher("/excavate", Int32, queue_size=1, latch=True)
+            self.lin_act_publisher: rospy.Publisher = rospy.Publisher("/lin_act", Int32, queue_size=1, latch=True)
+            self.deposition_publisher: rospy.Publisher = rospy.Publisher("/deposition", Int32, queue_size=1, latch=True)
             self.cmd_vel_publisher: rospy.Publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
             self.traversal_publisher: rospy.Publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue_size=1, latch=True)
             self.goal_publisher: rospy.Publisher = rospy.Publisher("/goal", PoseStamped, queue_size=1, latch=True)

@@ -9,7 +9,7 @@ from lunabot_control.pid_controller import VelocityPIDController
 from lunabot_control.clamp_output import clamp_output
 from lunabot_behavior.linear_actuators import LinearActuatorManager
 
-from std_msgs.msg import Int8
+from std_msgs.msg import Int8, Int32
 
 
 class ExcavationController:
@@ -33,8 +33,8 @@ class ExcavationController:
         """
 
         if excavation_publisher is None or lin_act_publisher is None or cmd_vel_publisher is None:
-            self.excavation_publisher: rospy.Publisher = rospy.Publisher("/excavate", Int8, queue_size=1, latch=True)
-            self.lin_act_publisher: rospy.Publisher = rospy.Publisher("/lin_act", Int8, queue_size=1, latch=True)
+            self.excavation_publisher: rospy.Publisher = rospy.Publisher("/excavate", Int32, queue_size=1, latch=True)
+            self.lin_act_publisher: rospy.Publisher = rospy.Publisher("/lin_act", Int32, queue_size=1, latch=True)
             self.cmd_vel_publisher: rospy.Publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
             rospy.init_node("excavation_node")
         else:
@@ -48,12 +48,7 @@ class ExcavationController:
 
         self.rate = rospy.Rate(10)
 
-        # 90 percent of max speed
-        TARGET_EXCAVATION_VELOCITY = 8 * 0.9   # TODO find max speed, and what unit it's in
-
-        self.excavation_pid_controller = VelocityPIDController(TARGET_EXCAVATION_VELOCITY, 1, 0, 0, 127)  # TODO pick feed-forward value from new control space
-
-        # Constants (in meters)
+        # Constants (in meters)  TODO: update these 
         self.TARGET_DEPTH_OF_CUT = 0.005  # (.5 cm)
         self.BUCKET_RADIUS = 0.0948
         self.BUCKET_SPACING = 0.0853
@@ -64,6 +59,9 @@ class ExcavationController:
         self.LOAD_CELL_WEIGHT_THRESHOLD = 1  # In kg, TODO find value
         self.MAX_LIN_ACT_VEL = 0.00688405797  # In meters/s, the speed of the linear actuators at the max power (from experiment - 19 cm / 27.6 seconds)
         self.LIN_ACT_MAX_POWER = 110
+
+        # TODO: find speed in RPM, we aimed for 90 of max speed last year
+        self.EXCAVATION_SPEED = 200
 
         self.LIN_ACT_CURR_THRESHOLD = 10  # Amps; TODO find value
 
@@ -91,25 +89,17 @@ class ExcavationController:
             time.sleep(3)
             return
 
-        excavation_message = Int8()
-        lin_act_message = Int8()
+        excavation_message = Int32()
+        lin_act_message = Int32()
 
         start_time = rospy.get_time()
-        current_time = start_time
 
         # Until the linear actuators reach the end (based on time), keep moving them down
         while rospy.get_time() - start_time < self.LOWERING_TIME:
 
-            new_time = rospy.get_time()
+            excavation_message.data = self.EXCAVATION_SPEED
 
-            dt = new_time - current_time
-
-            # Set excavation based on the PID controller
             excavation_velocity = self.robot_sensors.exc_vel
-        
-
-            excavation_control = self.excavation_pid_controller.update(excavation_velocity, dt)
-            excavation_message.data = excavation_control  #TODO clip this to a maximum
 
             # Set the target linear actuator velocity to target the depth of cut
             target_actuator_velocity = (
@@ -119,7 +109,8 @@ class ExcavationController:
                 / self.BUCKET_SPACING
             )
 
-            lin_act_message.data = clamp_output(-target_actuator_velocity / self.MAX_LIN_ACT_VEL * self.LIN_ACT_MAX_POWER)  # No encoders on actuators so cannot do PID
+            # No encoders on actuators so cannot do PID. Find the power based on the ratio of goal velocity to max velocity. Negative = go down
+            lin_act_message.data = clamp_output(-target_actuator_velocity / self.MAX_LIN_ACT_VEL * self.LIN_ACT_MAX_POWER)
 
             self.lin_act_publisher.publish(lin_act_message)
             self.excavation_publisher.publish(excavation_message)
@@ -131,8 +122,6 @@ class ExcavationController:
 
             if (self.exc_failure_counter >= 7):
                 break
-
-            current_time = new_time
 
             self.rate.sleep()
 
@@ -153,17 +142,16 @@ class ExcavationController:
             time.sleep(3)
             return
 
-        excavation_message = Int8()
-        lin_act_message = Int8()
+        excavation_message = Int32()
+        lin_act_message = Int32()
 
         start_time = rospy.get_time()
-        current_time = start_time
 
         # Until the linear actuators reach the end (based on time), keep moving them down
         while rospy.get_time() - start_time < self.LOWERING_TIME:
 
             lin_act_message.data = self.LIN_ACT_MAX_POWER
-            excavation_message.data = 1  # TODO find max exc speed
+            excavation_message.data = self.EXCAVATION_SPEED
 
             self.lin_act_publisher.publish(lin_act_message)
             self.excavation_publisher.publish(excavation_message)
@@ -195,8 +183,7 @@ class ExcavationController:
         excavation_message = Int8()
         cmd_vel_message = Twist()
 
-        current_time = rospy.get_time()
-        start_time = current_time
+        start_time = rospy.get_time()
 
         load_cell_weight = self.robot_sensors.load_cell_weights[0] + self.robot_sensors.load_cell_weights[1]
 
@@ -205,16 +192,9 @@ class ExcavationController:
         # Until the set amount of time and while the robot is not yet full, keep moving the robot forward and spinning excavation
         while rospy.get_time() - start_time < self.TRENCHING_TIME and load_cell_weight < self.LOAD_CELL_WEIGHT_THRESHOLD:
 
-            new_time = rospy.get_time()
-            new_excavation_ang = self.robot_sensors.exc_ang
-
-            dt = new_time - current_time
-
             excavation_velocity = self.robot_sensors.exc_vel
 
-            excavation_control = self.excavation_pid_controller.update(excavation_velocity, dt)
-
-            excavation_message.data = excavation_control # TODO clip this to a maximum
+            excavation_message.data = self.EXCAVATION_SPEED
 
             self.excavation_publisher.publish(excavation_message)
 
@@ -237,8 +217,6 @@ class ExcavationController:
 
             if (self.exc_failure_counter >= 7):
                 break
-
-            current_time = new_time
 
             load_cell_weight = (
                self.robot_sensors.load_cell_weights[0]
@@ -269,16 +247,13 @@ class ExcavationController:
 
         print("Excavation: spinning backwards (", self.exc_failure_counter, ")")
 
-        # 90% of max speed, backwards
-        EXCAVATION_SPEED = int(-127 * 0.9)  #TODO find max speed
 
-        excavation_message = Int8()
+        excavation_message = Int32()
         excavation_message.data = 0
         self.excavation_publisher.publish(excavation_message)
         rospy.sleep(1)
 
-
-        excavation_message.data = EXCAVATION_SPEED
+        excavation_message.data = self.EXCAVATION_SPEED * -1
 
         self.excavation_publisher.publish(excavation_message)
 

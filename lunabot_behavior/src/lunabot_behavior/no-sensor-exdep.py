@@ -2,14 +2,12 @@ import rospy
 import time
 
 from geometry_msgs.msg import Twist
-#from lunabot_control.scripts.pid_controller import VelocityPIDController
-#from lunabot_control.scripts.clamp_output import clamp_output
 
 from lunabot_behavior.excavate import ExcavationController
 from lunabot_behavior.deposition import DepositionManager
 from lunabot_behavior.linear_actuators import LinearActuatorManager
 
-from std_msgs.msg import Int8
+from std_msgs.msg import Int8, Int32
 import sys
 
 class NoSensorExdepManager:
@@ -21,9 +19,9 @@ class NoSensorExdepManager:
         if excavation_publisher is None or linear_actuator_publisher is None or cmd_vel_publisher is None or deposition_publisher is None:
             rospy.init_node('no_sensor_exdep_node')
 
-            self.excavation_publisher: rospy.Publisher = rospy.Publisher("/excavate", Int8, queue_size=1, latch=True)
-            self.lin_act_publisher: rospy.Publisher = rospy.Publisher("/lin_act", Int8, queue_size=1, latch=True)
-            self.deposition_publisher: rospy.Publisher = rospy.Publisher("/deposition", Int8, queue_size=1, latch=True)
+            self.excavation_publisher: rospy.Publisher = rospy.Publisher("/excavate", Int32, queue_size=1, latch=True)
+            self.lin_act_publisher: rospy.Publisher = rospy.Publisher("/lin_act", Int32, queue_size=1, latch=True)
+            self.deposition_publisher: rospy.Publisher = rospy.Publisher("/deposition", Int32, queue_size=1, latch=True)
             self.cmd_vel_publisher: rospy.Publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
         else:
             self.excavation_publisher = excavation_publisher
@@ -58,7 +56,7 @@ if __name__ == "__main__":
 
     time.sleep(0.1)
     # Drive for <drive_time> seconds
-    while rospy.get_time() - start_time < managerDRIVE_TIME:
+    while rospy.get_time() - start_time < exdepController.DRIVE_TIME:
         exdepController.cmd_vel_publisher.publish(cmd_vel)
 
     # When at the berm (by time), stop

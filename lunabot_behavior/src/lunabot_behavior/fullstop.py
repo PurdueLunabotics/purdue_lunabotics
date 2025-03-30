@@ -4,7 +4,7 @@ import rospy
 
 from geometry_msgs.msg import Twist, PoseStamped
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Int8, Bool
+from std_msgs.msg import Bool
 from lunabot_msgs.msg import RobotSensors, RobotEffort
 
 rospy.init_node("stop_node")

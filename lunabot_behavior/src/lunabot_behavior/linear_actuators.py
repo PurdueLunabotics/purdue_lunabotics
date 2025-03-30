@@ -1,7 +1,7 @@
 import rospy
 
 from lunabot_msgs.msg import RobotSensors
-from std_msgs.msg import Int8
+from std_msgs.msg import Int8, Int32
 
 import time
 
@@ -20,7 +20,7 @@ class LinearActuatorManager:
 		"""
 
 		if lin_act_publisher is None:
-			self.lin_act_publisher = rospy.Publisher("/lin_act", Int8, queue_size=1, latch=True)
+			self.lin_act_publisher = rospy.Publisher("/lin_act", Int32, queue_size=1, latch=True)
 			rospy.init_node('lin_act_node')
 		else:
 			self.lin_act_publisher = lin_act_publisher
@@ -52,7 +52,7 @@ class LinearActuatorManager:
 
 		time.sleep(0.1)
 
-		lin_act_msg = Int8()
+		lin_act_msg = Int32()
 		lin_act_msg.data = self.LIN_ACT_POWER
 
 		start_time = rospy.get_time()
