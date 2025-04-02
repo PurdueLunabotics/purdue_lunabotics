@@ -239,10 +239,6 @@ class PointToPoint:
 
         data_arr = np.array(msg.data)
 
-        if (np.all(data_arr == 0)): # ignore blank maps
-            self.map_lock.release()
-            return
-
         width = msg.info.width
         height = msg.info.height
         self.map = np.reshape(data_arr, (height, width))
@@ -250,6 +246,10 @@ class PointToPoint:
         self.map_resolution = msg.info.resolution
         self.map_x_offset = msg.info.origin.position.x
         self.map_y_offset = msg.info.origin.position.y
+
+        if (np.all(data_arr == 0)): # If we get a blank map, we still use it as it will be followed by an update
+            self.map_lock.release()
+            return
 
         self.map_lock.release()
 
