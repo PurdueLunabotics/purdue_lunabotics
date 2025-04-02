@@ -10,6 +10,7 @@ from visualization_msgs.msg import Marker
 from tf.transformations import euler_from_quaternion
 import numpy as np
 from enum import Enum
+import threading
 
 
 class States(Enum):
@@ -85,6 +86,7 @@ class PointToPoint:
         self.map_resolution: float = 0
         self.map_x_offset: int = -1
         self.map_y_offset: int = -1
+        self.map_lock: threading.Lock = threading.Lock()
 
         self.print_debug_info: bool = False
         
@@ -233,9 +235,12 @@ class PointToPoint:
         self.__visualize_line_path(marker_points)
 
     def __map_callback(self, msg: OccupancyGrid):
+        self.map_lock.acquire()
+
         data_arr = np.array(msg.data)
 
         if (np.all(data_arr == 0)): # ignore blank maps
+            self.map_lock.release()
             return
 
         width = msg.info.width
@@ -246,13 +251,20 @@ class PointToPoint:
         self.map_x_offset = msg.info.origin.position.x
         self.map_y_offset = msg.info.origin.position.y
 
+        self.map_lock.release()
+
     def __map_update_callback(self, msg: OccupancyGridUpdate):
+
+        self.map_lock.acquire()
+
         data_arr = np.array(msg.data)
 
         if (self.map is None):
+            self.map_lock.release()
             return
 
         if (np.all(data_arr == 0)):
+            self.map_lock.release()
             return
 
         temp_map = self.map.copy()
@@ -264,6 +276,8 @@ class PointToPoint:
                 index += 1
 
         self.map = temp_map.copy()
+
+        self.map_lock.release()
 
 
     # ==================================================================================================================
