@@ -4,6 +4,5 @@
 
     <include if="$(arg foxglove)" file="$(find foxglove_bridge)/launch/foxglove_bridge.launch" />
     <include file="$(find lunabot_control)/launch/manual_control.launch"/>
-    <include file="$(find lunabot_description)/launch/display.launch"/>
 
 </launch>

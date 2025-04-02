@@ -17,6 +17,9 @@
     <!-- Launch Teensy Driver -->
     <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node" output="screen" />
 
+    <!-- Launch robot, joint state/robot state publishers -->
+    <include file="$(find lunabot_description)/launch/display.launch"/>
+
     <!-- Launch Realsense Cameras -->
     <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch">
         <arg name="front" value="$(arg front)"/>
