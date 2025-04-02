@@ -5,4 +5,8 @@
     <include if="$(arg foxglove)" file="$(find foxglove_bridge)/launch/foxglove_bridge.launch" />
     <include file="$(find lunabot_control)/launch/manual_control.launch"/>
 
+    <!-- Launch rviz -->
+    <arg default="$(find lunabot_description)/launch/urdf.rviz" name="rvizconfig"/>
+    <node args="-d $(arg rvizconfig)" name="rviz" pkg="rviz" required="true" type="rviz"/>
+
 </launch>
