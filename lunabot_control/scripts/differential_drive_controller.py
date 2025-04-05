@@ -28,7 +28,8 @@ class DifferentialDriveController:
 
         self._left_vel = 0
         self._right_vel = 0
-        self._wheel_diameter = 0.1397 # converts rad /s to m / s
+        self._wheel_diameter = 0.3429 # converts rad /s to m / s
+        self._gearbox_ratio = 50 
         self._left_prev_error = 0
         self._right_prev_error = 0
 
@@ -58,7 +59,7 @@ class DifferentialDriveController:
         left_drive_msg = Int32()
         right_drive_msg = Int32()
 
-        WEIGHT = 0.9
+        WEIGHT = 1
 
         self.lin *= WEIGHT
         self.ang *= 1/WEIGHT
@@ -91,7 +92,7 @@ class DifferentialDriveController:
         rospy.loginfo("Differential Drive Controller: Stopping")
         
     def meters_per_sec_to_rpm(self, vel):
-        return vel * 60 / np.pi / self._wheel_diameter
+        return vel * 60 / np.pi / self._wheel_diameter * self._gearbox_ratio
 
 
 if __name__ == "__main__":
