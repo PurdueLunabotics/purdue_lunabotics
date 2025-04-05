@@ -23,16 +23,13 @@ void Sabertooth_MotorCtrl::write(int8_t power) {
 
 ADS1119Configuration ADS1119_Current_Bus::configurations[BUSES][MUXES] = {};
 ADS1119 ADS1119_Current_Bus::ads1 = ADS1119(ads1_addr);
-ADS1119 ADS1119_Current_Bus::ads2 = ADS1119(ads2_addr);
 
 void ADS1119_Current_Bus::init_ads1119() {
   // init all channels to same general config, but with different mux config.
   // different configs for both chips for futureproofing, not because they're any different
   for (int i = 0; i < BUSES; ++i) {
-    configurations[i][0].mux = ADS1119MuxConfiguration::positiveAIN0negativeAGND;
-    configurations[i][1].mux = ADS1119MuxConfiguration::positiveAIN1negativeAGND;
-    configurations[i][2].mux = ADS1119MuxConfiguration::positiveAIN2negativeAGND;
-    configurations[i][3].mux = ADS1119MuxConfiguration::positiveAIN3negativeAGND;
+    configurations[i][0].mux = ADS1119MuxConfiguration::positiveAIN1negativeAGND;
+    configurations[i][1].mux = ADS1119MuxConfiguration::positiveAIN0negativeAGND;
 
     for (int j = 0; j < MUXES; ++j) {
       configurations[i][j].gain = ADS1119Configuration::Gain::one;
@@ -45,19 +42,14 @@ void ADS1119_Current_Bus::init_ads1119() {
 
   ads1.begin();
   ads1.reset();
-
-  ads2.begin();
-  ads2.reset();
 }
 
 float ADS1119_Current_Bus::read(uint8_t bus, uint8_t mux) {
   switch (bus) {
   case 0:
     return ADS1119_Current_Bus::adc_to_current_31A(ads1.readVoltage(configurations[0][mux]));
-  case 1:
-    return ADS1119_Current_Bus::adc_to_current_31A(ads2.readVoltage(configurations[1][mux]));
   default:
-    // we only have two muxes
+    // we only have one mux
     return 69.420;
   }
 }
