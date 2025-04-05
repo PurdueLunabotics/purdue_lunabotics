@@ -100,15 +100,15 @@ class ManualController:
         
         self._max_speed = rospy.get_param("~max_speed", 3000) # in rpm
         self.slow_drive_speed = 0.25
-        self.fast_drive_speed = 1
+        self.fast_drive_speed = 0.5
         self.drive_speed_modifier = self.fast_drive_speed
 
         self.latched_excavation_speed = 0
         self.excavation_is_latched = False
 
-        self.DEPOSITION_SPEED = 3000 #TODO RJN - this speed
+        self.DEPOSITION_SPEED = 1000 #TODO RJN - this speed
         self.ACTUATE_SPEED = 0.8 # percentage of max power
-        self.EXCAVATION_SPEED = 3000 
+        self.EXCAVATION_SPEED = 2000 
 
         self.publish = True
 
@@ -165,10 +165,10 @@ class ManualController:
 
             # Set the drive effort to the left and right stick vertical axes (Tank Drive)
             if self.driving_mode == "Forwards":
-                effort_msg.left_drive = constrain_RPM(joy.axes[Axes.L_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
+                effort_msg.left_drive = -1 * constrain_RPM(joy.axes[Axes.L_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
                 effort_msg.right_drive = constrain_RPM(joy.axes[Axes.R_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
             else:
-                effort_msg.left_drive = -1 * constrain_RPM(joy.axes[Axes.R_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
+                effort_msg.left_drive = constrain_RPM(joy.axes[Axes.R_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
                 effort_msg.right_drive = -1 * constrain_RPM(joy.axes[Axes.L_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
 
             effort_msg.left_drive = int(effort_msg.left_drive)
