@@ -27,7 +27,7 @@ void ctrl() {
 }
 
 void send() {
-  // actuation::update(state.act_right_curr);
+  actuation::update(state.act_right_curr);
   drivetrain::update(state.drive_left_curr, state.drive_right_curr, state.drive_left_torque,
                      state.drive_right_torque, state.drive_left_vel, state.drive_right_vel);
   deposition::update(state.dep_curr);

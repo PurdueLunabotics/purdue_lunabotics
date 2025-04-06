@@ -13,9 +13,9 @@ Sabertooth_MotorCtrl act_right_mtr{&MC1, STMotor::M1};
 Sabertooth_MotorCtrl act_left_mtr{&MC1, STMotor::M2};
 
 constexpr uint8_t ACT_RIGHT_CURR_ADC = 0;
-constexpr uint8_t ACT_RIGHT_CURR_MUX = 1; // U6 curr_sense_board
+constexpr uint8_t ACT_RIGHT_CURR_MUX = 0; // U6 curr_sense_board
 
-constexpr uint8_t ACT_LEFT_CURR_ADC = 1;
+constexpr uint8_t ACT_LEFT_CURR_ADC = 0;
 constexpr uint8_t ACT_LEFT_CURR_MUX = 1; // U4 curr_sense_board
 
 void update(float &act_right_curr) {
@@ -23,7 +23,7 @@ void update(float &act_right_curr) {
 }
 
 void cb(int8_t lin_act_volt) {
-  act_left_mtr.write(lin_act_volt);
+  act_left_mtr.write(-lin_act_volt);
   act_right_mtr.write(lin_act_volt);
 }
 
@@ -39,10 +39,10 @@ void begin() {
 }
 
 void update(float &left_curr, float &right_curr, float &left_torque, float &right_torque, float &left_vel, float &right_vel) {
-  left_curr = left_drive_mtr.read_current();
+  left_curr = -1 * left_drive_mtr.read_current();
   right_curr = right_drive_mtr.read_current();
-  left_angle = left_drive_mtr.read_torque(); // -100; // left_drive_mtr.read_motor_position_radians();
-  right_angle = right_drive_mtr.read_torque(); // ; // right_drive_mtr.read_motor_position_radians();
+  left_torque = -1 * left_drive_mtr.read_torque(); // -100; // left_drive_mtr.read_motor_position_radians();
+  right_torque = right_drive_mtr.read_torque(); // ; // right_drive_mtr.read_motor_position_radians();
   left_vel = left_drive_mtr.read_velocity();
   right_vel = right_drive_mtr.read_velocity();
 }
@@ -61,7 +61,7 @@ void cb(int32_t left_drive_rpm, int32_t right_drive_rpm, bool should_reset) {
     left_drive_mtr.clear_errors();
     right_drive_mtr.clear_errors();
   } else {
-    left_drive_mtr.move_at_speed(left_drive_rpm);
+    left_drive_mtr.move_at_speed(-1 * left_drive_rpm);
     right_drive_mtr.move_at_speed(right_drive_rpm);
   }
 }
@@ -85,7 +85,7 @@ void begin() {
 
 void update(float &exc_curr, float &exc_torque, float &exc_vel) {
   exc_curr = exc_mtr.read_current();
-  exc_angle = exc_mtr.read_torque(); // exc_mtr.read_motor_position_radians();
+  exc_torque = exc_mtr.read_torque(); // exc_mtr.read_motor_position_radians();
   exc_vel = exc_mtr.read_velocity();
 }
 

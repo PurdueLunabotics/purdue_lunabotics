@@ -17,6 +17,12 @@
     <!-- Launch Teensy Driver -->
     <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node" output="screen" />
 
+    <!-- Launch robot, joint state/robot state publishers, previously in display.launch -->
+    <arg name="model" default="$(find lunabot_description)/urdf/lunabot.xacro"/>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    <param command="$(find xacro)/xacro $(arg model)" name="robot_description"/>
+
     <!-- Launch Realsense Cameras -->
     <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch">
         <arg name="front" value="$(arg front)"/>
