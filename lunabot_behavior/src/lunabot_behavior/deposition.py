@@ -34,11 +34,11 @@ class DepositionManager:
 
         self.rate = rospy.Rate(10)  # 10hz
 
-        self.DEPOSITION_SPEED = 200 # In RPM, TODO pick a value
+        self.DEPOSITION_SPEED = 2000 # In RPM, TODO pick a value
 
         self.WEIGHT_THRESHOLD = 1 # in kilograms, TODO choose value / verify WHEN LOAD CELLS EXIST
 
-        self.DEPOSITION_TIME = 45.00
+        self.DEPOSITION_TIME = 20.00
 
         self.is_sim = rospy.get_param("is_sim")
 

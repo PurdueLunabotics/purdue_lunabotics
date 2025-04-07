@@ -63,7 +63,7 @@ class ExcavationController:
         self.LIN_ACT_MAX_POWER = 110
 
         # TODO: find speed in RPM, we aimed for 90 of max speed last year
-        self.EXCAVATION_SPEED = 200
+        self.EXCAVATION_SPEED = 2500
 
         self.LIN_ACT_CURR_THRESHOLD = 10  # Amps; TODO find value
 
