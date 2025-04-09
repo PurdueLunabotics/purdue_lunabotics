@@ -38,6 +38,8 @@ class ExcavationController:
             self.excavation_publisher: rospy.Publisher = rospy.Publisher("/excavate", Int32, queue_size=1, latch=True)
             self.lin_act_publisher: rospy.Publisher = rospy.Publisher("/lin_act", Int32, queue_size=1, latch=True)
             self.cmd_vel_publisher: rospy.Publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
+            # testing trenching
+            self.deposition_publisher = rospy.Publisher("/deposition", Int32, queue_size=1, latch=True)
             rospy.init_node("excavation_node")
         else:
             self.excavation_publisher: rospy.Publisher = excavation_publisher
@@ -56,14 +58,14 @@ class ExcavationController:
         self.BUCKET_SPACING = 0.0853
 
         self.LOWERING_TIME = 30  # seconds
-        self.TRENCHING_TIME = 5  # seconds
+        self.TRENCHING_TIME = 30  # seconds
 
         self.LOAD_CELL_WEIGHT_THRESHOLD = 1  # In kg, TODO find value
         self.MAX_LIN_ACT_VEL = 0.00688405797  # In meters/s, the speed of the linear actuators at the max power (from experiment - 19 cm / 27.6 seconds)
         self.LIN_ACT_MAX_POWER = 110
 
         # TODO: find speed in RPM, we aimed for 90 of max speed last year
-        self.EXCAVATION_SPEED = 2500
+        self.EXCAVATION_SPEED = 1500
 
         self.LIN_ACT_CURR_THRESHOLD = 10  # Amps; TODO find value
 
@@ -112,7 +114,7 @@ class ExcavationController:
             )
 
             # No encoders on actuators so cannot do PID. Find the power based on the ratio of goal velocity to max velocity. Negative = go down
-            lin_act_message.data = clamp_output(-target_actuator_velocity / self.MAX_LIN_ACT_VEL * self.LIN_ACT_MAX_POWER)
+            lin_act_message.data = -1 * clamp_output(target_actuator_velocity / self.MAX_LIN_ACT_VEL * self.LIN_ACT_MAX_POWER)
 
             self.lin_act_publisher.publish(lin_act_message)
             self.excavation_publisher.publish(excavation_message)
@@ -152,7 +154,7 @@ class ExcavationController:
         # Until the linear actuators reach the end (based on time), keep moving them down
         while rospy.get_time() - start_time < self.LOWERING_TIME:
 
-            lin_act_message.data = self.LIN_ACT_MAX_POWER
+            lin_act_message.data = -1 * self.LIN_ACT_MAX_POWER
             excavation_message.data = self.EXCAVATION_SPEED
 
             self.lin_act_publisher.publish(lin_act_message)
@@ -187,8 +189,8 @@ class ExcavationController:
 
         start_time = rospy.get_time()
 
-        load_cell_weight = self.robot_sensors.load_cell_weights[0] + self.robot_sensors.load_cell_weights[1]
-
+        #load_cell_weight = self.robot_sensors.load_cell_weights[0] + self.robot_sensors.load_cell_weights[1]
+        load_cell_weight = 0;
         # maybe TODO add logic for stopping if obstacles exist (both rocks and craters)
 
         # Until the set amount of time and while the robot is not yet full, keep moving the robot forward and spinning excavation
@@ -200,6 +202,11 @@ class ExcavationController:
 
             self.excavation_publisher.publish(excavation_message)
 
+            # testing trench - remove later
+            deposition_msg = Int32()
+            deposition_msg.data = 1000
+            self.deposition_publisher.publish(deposition_msg)
+
             target_linear_vel = (
                 self.TARGET_DEPTH_OF_CUT
                 * excavation_velocity
@@ -207,7 +214,8 @@ class ExcavationController:
                 / self.BUCKET_SPACING
             )
 
-            cmd_vel_message.linear.x = target_linear_vel
+            # cmd_vel_message.linear.x = target_linear_vel * 10
+            cmd_vel_message.linear.x = 0.01 # lil slow - exc stalled at 0.02, try 0.015 next
             cmd_vel_message.angular.z = 0
 
             self.cmd_vel_publisher.publish(cmd_vel_message)
@@ -220,18 +228,22 @@ class ExcavationController:
             if (self.exc_failure_counter >= 7):
                 break
 
-            load_cell_weight = (
-               self.robot_sensors.load_cell_weights[0]
-               + self.robot_sensors.load_cell_weights[1]
-            )
+            # load_cell_weight = (
+            #    self.robot_sensors.load_cell_weights[0]
+            #    + self.robot_sensors.load_cell_weights[1]
+            # )
+
+            load_cell_weight = 0;
 
             self.rate.sleep()
 
         excavation_message.data = 0
         cmd_vel_message.linear.x = 0
         cmd_vel_message.angular.z = 0
+        deposition_msg.data = 0
 
         self.excavation_publisher.publish(excavation_message)
+        self.deposition_publisher.publish(deposition_msg)
         
         self.cmd_vel_publisher.publish(cmd_vel_message)
 

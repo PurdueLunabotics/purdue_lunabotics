@@ -21,7 +21,7 @@ class LinearActuatorManager:
 
 		if lin_act_publisher is None:
 			self.lin_act_publisher = rospy.Publisher("/lin_act", Int32, queue_size=1, latch=True)
-			rospy.init_node('lin_act_node')
+			#rospy.init_node('lin_act_node')
 		else:
 			self.lin_act_publisher = lin_act_publisher
 

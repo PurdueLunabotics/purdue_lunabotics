@@ -21,7 +21,7 @@ class DifferentialDriveController:
         self.max_speed_percentage = rospy.get_param("~max_speed_percentage", 0.8)
         self.hz = rospy.get_param("~hz", 20)
 
-        self._max_speed = rospy.get_param("~max_speed", 3000) # In rad/s converted to RPM
+        self._max_speed = rospy.get_param("~max_speed", 500) # In rad/s converted to RPM
         
         self.lin = 0
         self.ang = 0
