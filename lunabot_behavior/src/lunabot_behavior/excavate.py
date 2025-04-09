@@ -231,7 +231,7 @@ class ExcavationController:
             # Check for excavation getting stuck (high current)
             if self.robot_sensors.exc_curr > self.EXCAVATION_CURR_THRESHOLD:
                 self.exc_failure_counter += 1
-                self.spin_excavation_backwards()
+                cmd_vel_message.linear.x *= 0.5
                 
             # Check if excavation motor stopped due to stalling
             if self.robot_sensors.exc_curr < 0.01:
