@@ -28,6 +28,7 @@ class ExcavationController:
         excavation_publisher: rospy.Publisher = None,
         lin_act_publisher: rospy.Publisher = None,
         cmd_vel_publisher: rospy.Publisher = None,
+        deposition_publisher: rospy.Publisher = None,
     ):
         """
         If passed a publisher, then it is assumed a node is already running, and the publisher is shared.
@@ -45,6 +46,7 @@ class ExcavationController:
             self.excavation_publisher: rospy.Publisher = excavation_publisher
             self.lin_act_publisher: rospy.Publisher = lin_act_publisher
             self.cmd_vel_publisher: rospy.Publisher = cmd_vel_publisher
+            self.deposition_publisher: rospy.Publisher = deposition_publisher
 
         self.robot_sensors = RobotSensors()
 
@@ -64,8 +66,14 @@ class ExcavationController:
         self.MAX_LIN_ACT_VEL = 0.00688405797  # In meters/s, the speed of the linear actuators at the max power (from experiment - 19 cm / 27.6 seconds)
         self.LIN_ACT_MAX_POWER = 110
 
-        # TODO: find speed in RPM, we aimed for 90 of max speed last year
+        # TODO: tune further, 1500 is a bit slow for trenching, but higher values kick up a ton of dust
         self.EXCAVATION_SPEED = 1500
+        
+        # speed to run deposition during trenching (rpm)
+        self.DEPOSITION_SPEED = 1000
+        
+        # speed to run drivetrain during trenching (m/s)
+        self.TRENCHING_SPEED = 0.01 # lil slow - exc stalled at 0.02, try 0.015 next
 
         self.LIN_ACT_CURR_THRESHOLD = 10  # Amps; TODO find value
 
@@ -98,8 +106,8 @@ class ExcavationController:
 
         start_time = rospy.get_time()
 
-        # Until the linear actuators reach the end (based on time), keep moving them down
-        while rospy.get_time() - start_time < self.LOWERING_TIME:
+        # Until the linear actuators reach the end (based on time), keep moving them down or the actuators reach the limit and stop
+        while rospy.get_time() - start_time < self.LOWERING_TIME and self.robot_sensors.act_right_curr < self.LIN_ACT_CURR_THRESHOLD:
 
             excavation_message.data = self.EXCAVATION_SPEED
 
@@ -190,7 +198,7 @@ class ExcavationController:
         start_time = rospy.get_time()
 
         #load_cell_weight = self.robot_sensors.load_cell_weights[0] + self.robot_sensors.load_cell_weights[1]
-        load_cell_weight = 0;
+        load_cell_weight = 0
         # maybe TODO add logic for stopping if obstacles exist (both rocks and craters)
 
         # Until the set amount of time and while the robot is not yet full, keep moving the robot forward and spinning excavation
@@ -204,7 +212,7 @@ class ExcavationController:
 
             # testing trench - remove later
             deposition_msg = Int32()
-            deposition_msg.data = 1000
+            deposition_msg.data = self.DEPOSITION_SPEED
             self.deposition_publisher.publish(deposition_msg)
 
             target_linear_vel = (
@@ -212,10 +220,10 @@ class ExcavationController:
                 * excavation_velocity
                 * self.BUCKET_RADIUS
                 / self.BUCKET_SPACING
-            )
+            ) #TODO: fix? it is very wrong
 
             # cmd_vel_message.linear.x = target_linear_vel * 10
-            cmd_vel_message.linear.x = 0.01 # lil slow - exc stalled at 0.02, try 0.015 next
+            cmd_vel_message.linear.x = self.TRENCHING_SPEED 
             cmd_vel_message.angular.z = 0
 
             self.cmd_vel_publisher.publish(cmd_vel_message)
@@ -224,6 +232,13 @@ class ExcavationController:
             if self.robot_sensors.exc_curr > self.EXCAVATION_CURR_THRESHOLD:
                 self.exc_failure_counter += 1
                 self.spin_excavation_backwards()
+                
+            # Check if excavation motor stopped due to stalling
+            if self.robot_sensors.exc_curr < 0.01:
+                #TODO: clear stall
+                self.exc_failure_counter += 1
+                self.spin_excavation_backwards()
+                
 
             if (self.exc_failure_counter >= 7):
                 break
@@ -233,7 +248,7 @@ class ExcavationController:
             #    + self.robot_sensors.load_cell_weights[1]
             # )
 
-            load_cell_weight = 0;
+            load_cell_weight = 0
 
             self.rate.sleep()
 
@@ -285,6 +300,6 @@ if __name__ == "__main__":
     else:
         excavate_module.excavate()
 
-    linear_actuators = LinearActuatorManager()
+    linear_actuators = LinearActuatorManager(excavate_module.lin_act_publisher)
     print("Exc: Raising")
     linear_actuators.raise_linear_actuators()

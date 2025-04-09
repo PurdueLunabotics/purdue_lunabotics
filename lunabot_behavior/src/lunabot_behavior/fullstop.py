@@ -19,7 +19,7 @@ right_publisher = rospy.Publisher("/right_drive", Int32, queue_size=1)
 linact_publisher = rospy.Publisher("/lin_act", Int32, queue_size=1)
 
 zero = Int32()
-zero.data = 0;
+zero.data = 0
 
 effort = RobotEffort()
 effort.excavate = 0
@@ -41,9 +41,9 @@ for i in range(10):
     traversal_publisher.publish(disable_msg)
     cmd_vel_publisher.publish(cmd_vel)
     effort_publisher.publish(effort)
-    excavate_publisher.publish(zero);
-    linact_publisher.publish(zero);
-    left_publisher.publish(zero);
-    right_publisher.publish(zero);
+    excavate_publisher.publish(zero)
+    linact_publisher.publish(zero)
+    left_publisher.publish(zero)
+    right_publisher.publish(zero)
     rospy.sleep(0.1)
 

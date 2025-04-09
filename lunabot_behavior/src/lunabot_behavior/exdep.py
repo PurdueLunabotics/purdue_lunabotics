@@ -62,7 +62,7 @@ class ExdepController:
             self.traversal_publisher = traversal_publisher
             self.goal_publisher = goal_publisher
 
-        self.excavation = ExcavationController(self.excavation_publisher, self.lin_act_publisher, self.cmd_vel_publisher)
+        self.excavation = ExcavationController(self.excavation_publisher, self.lin_act_publisher, self.cmd_vel_publisher, self.deposition_publisher)
         self.deposition = DepositionManager(self.deposition_publisher)
         self.linear_actuators = LinearActuatorManager(self.lin_act_publisher)
         self.alignment = AlignmentController(self.cmd_vel_publisher)

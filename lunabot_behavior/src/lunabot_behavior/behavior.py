@@ -66,8 +66,8 @@ class Behavior:
         apriltag_topic = rospy.get_param("/apriltag_topic")
         rospy.Subscriber(apriltag_topic, PoseStamped, self.apriltag_pose_callback)
 
-        self.SPIN_SPEED = 0.5  # rad/s
-        self.SPIN_TIME = 5.0  # seconds, how long to spin at the beginning for 360 degree mapping
+        self.SPIN_SPEED = math.radians(20)  # rad/s
+        self.SPIN_TIME = (math.pi / 2) / self.SPIN_SPEED  # seconds, how long to spin at the beginning for 360 degree mapping (only spins 90 degrees)
 
         self.MAX_APRILTAG_SEARCH_TIME = 30.0  # seconds, how long to search for an apriltag before giving up
 

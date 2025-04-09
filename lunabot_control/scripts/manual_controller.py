@@ -101,7 +101,8 @@ class ManualController:
         self._max_speed = rospy.get_param("~max_speed", 3000) # in rpm
         self.slow_drive_speed = 0.25
         self.fast_drive_speed = 1
-        self.drive_speed_modifier = self.fast_drive_speed
+        self.drive_speed_modifier = self.slow_drive_speed
+        rospy.loginfo(f"Driving Speed: {self.drive_speed_modifier}")
 
         self.latched_excavation_speed = 0
         self.excavation_is_latched = False
@@ -149,7 +150,7 @@ class ManualController:
         else:
             self.publish = True
 
-        # Start button: Stop the robot (Pause)
+        # Start button: Stop the robot (Pause) and turns autonomy off (must be restarted manually)
         if joy.buttons[Buttons.START.value] == 1:
             self.stop()
             self.publish_manual_stop()
@@ -238,6 +239,7 @@ class ManualController:
         self._exc_latch = True
 
         self.effort_publisher.publish(self.effort_msg)
+        rospy.set_param("autonomy", False)
 
 
 if __name__ == "__main__":
