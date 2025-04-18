@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
   <arg name="exp_name" default="exp" />
-  <node name="recorder" pkg="rosbag" type="record"
+  <node name="recorder-small" pkg="rosbag" type="record"
     args="-o $(find lunabot_bringup)/bags/simple-$(arg exp_name) 
 
   /goal /maps/costmap_node/global_costmap/costmap /nav/global_path 
