@@ -27,7 +27,7 @@ class PointToPoint:
         self.LINEAR_I = 0
         self.LINEAR_D = 0
         self.LINEAR_TOLERANCE = 0.2  # meters
-        self.MAX_LINEAR_SPEED = 0.1  # m/s
+        self.MAX_LINEAR_SPEED = 0.3  # m/s
         self.linear_pid = PIDController(
             self.LINEAR_P,
             self.LINEAR_I,
@@ -40,7 +40,7 @@ class PointToPoint:
         self.ANGULAR_D = 0
         self.ANGULAR_TOLERANCE_DEG = 10
         self.ANGULAR_TOLERANCE_RAD = np.deg2rad(self.ANGULAR_TOLERANCE_DEG)
-        self.MAX_ANGULAR_SPEED_DEG_PER_SEC = 30
+        self.MAX_ANGULAR_SPEED_DEG_PER_SEC = 60
         self.MAX_ANGULAR_SPEED_RAD_PER_SEC = np.deg2rad(
             self.MAX_ANGULAR_SPEED_DEG_PER_SEC
         )
