@@ -43,6 +43,9 @@ class ApriltagNode:
         self.berm_zone_visual_publisher = rospy.Publisher("/berm_zone", Marker, queue_size=10, latch=True)
         
         self.is_sim = rospy.get_param("/is_sim")
+
+        self.tf_buffer = tf2_ros.Buffer()
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
         
         if self.is_sim:
             cam_topics = ["/d435_backward/color/tag_detections", "/d435_forward/color/tag_detections"]
@@ -75,8 +78,8 @@ class ApriltagNode:
         Convert the first apriltag detection to the odom frame
         """
 
-        tf_buffer = tf2_ros.Buffer()
-        tf_listener = tf2_ros.TransformListener(tf_buffer)
+        # tf_buffer = tf2_ros.Buffer()
+        # tf_listener = tf2_ros.TransformListener(tf_buffer)
 
         target_frame = "odom"
 
@@ -87,7 +90,7 @@ class ApriltagNode:
         # Set the time to 0 to get the latest available transform
         pose.header.stamp = rospy.Time(0)
 
-        pose_in_odom = tf_buffer.transform(pose, target_frame, rospy.Duration(5.0))
+        pose_in_odom = self.tf_buffer.transform(pose, target_frame, rospy.Duration(5.0))
 
         return pose_in_odom
 
