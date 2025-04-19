@@ -70,7 +70,7 @@ class ExcavationController:
         self.EXCAVATION_SPEED = 1500
         
         # speed to run deposition during trenching (rpm)
-        self.DEPOSITION_SPEED = 1000
+        self.DEPOSITION_SPEED = 200
         
         # speed to run drivetrain during trenching (m/s)
         self.TRENCHING_SPEED = 0.01 # lil slow - exc stalled at 0.02, try 0.015 next
