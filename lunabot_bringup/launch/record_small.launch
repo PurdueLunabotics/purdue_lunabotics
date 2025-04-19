@@ -2,11 +2,11 @@
 <launch>
   <arg name="exp_name" default="exp" />
   <node name="recorder-small" pkg="rosbag" type="record"
-    args="-o $(find lunabot_bringup)/bags/simple-$(arg exp_name) 
+    args="--repeat-latched -o $(find lunabot_bringup)/bags/simple-$(arg exp_name) 
 
   /goal /maps/costmap_node/global_costmap/costmap /nav/global_path 
   
-  /cmd_vel /rtabmap/odom /tf /effort /sensors /errors /imu 
+  /cmd_vel /rtabmap/odom /tf /tf_static /effort /sensors /errors /imu 
 
   /mining_zone /apriltag_visual /berm_zone
   
