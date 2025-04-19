@@ -6,6 +6,7 @@ from apriltag_ros.msg import AprilTagDetectionArray, AprilTagDetection
 from visualization_msgs.msg import Marker
 import tf2_ros
 import tf2_geometry_msgs
+from tf.transformations import euler_from_quaternion
 
 import timeit
 
@@ -18,11 +19,11 @@ class ApriltagNode:
             # Todo- identify the apriltag bundle we want
             detection = msg.detections[0]
             
-            print(timeit.default_timer())
-
             self.apriltag_pose_in_odom = self.convert_to_odom_frame(detection)
 
-            print(timeit.default_timer())
+            roll, pitch, yaw  = euler_from_quaternion([self.apriltag_pose_in_odom.pose.orientation.x, self.apriltag_pose_in_odom.pose.orientation.y, self.apriltag_pose_in_odom.pose.orientation.z, self.apriltag_pose_in_odom.pose.orientation.w])
+            print(f"R {roll:.2f} P {pitch:.2f} Y {yaw:.2f}")
+
 
             mining_zone: Zone = find_mining_zone(self.apriltag_pose_in_odom, self.is_sim)
             berm_zone: Zone = find_berm_zone(self.apriltag_pose_in_odom, self.is_sim)
