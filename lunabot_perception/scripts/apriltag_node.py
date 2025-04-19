@@ -7,6 +7,8 @@ from visualization_msgs.msg import Marker
 import tf2_ros
 import tf2_geometry_msgs
 
+import timeit
+
 from lunabot_behavior.zones import Zone, find_mining_zone, find_berm_zone
 
 class ApriltagNode:
@@ -15,9 +17,12 @@ class ApriltagNode:
         if len(msg.detections) > 0:
             # Todo- identify the apriltag bundle we want
             detection = msg.detections[0]
-            frame_id = msg.header.frame_id
+            
+            print(timeit.default_timer())
 
-            self.apriltag_pose_in_odom = self.convert_to_odom_frame(detection, frame_id)
+            self.apriltag_pose_in_odom = self.convert_to_odom_frame(detection)
+
+            print(timeit.default_timer())
 
             mining_zone: Zone = find_mining_zone(self.apriltag_pose_in_odom, self.is_sim)
             berm_zone: Zone = find_berm_zone(self.apriltag_pose_in_odom, self.is_sim)
@@ -65,7 +70,7 @@ class ApriltagNode:
             rate.sleep()    
             
         
-    def convert_to_odom_frame(self, apriltag_detection: AprilTagDetection, frame_id: str):
+    def convert_to_odom_frame(self, apriltag_detection: AprilTagDetection):
         """
         Convert the first apriltag detection to the odom frame
         """
@@ -73,7 +78,6 @@ class ApriltagNode:
         tf_buffer = tf2_ros.Buffer()
         tf_listener = tf2_ros.TransformListener(tf_buffer)
 
-        source_frame = frame_id
         target_frame = "odom"
 
         pose = tf2_geometry_msgs.PoseStamped()
