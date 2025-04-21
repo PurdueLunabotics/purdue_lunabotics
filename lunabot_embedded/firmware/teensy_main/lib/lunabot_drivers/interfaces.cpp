@@ -209,8 +209,42 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
 
     if (disable_counter[i] >= kill_thresh) {
       disable_counter[i] = 0;
-      // TODO, send "all fucked" signal back to teensy
       kill();
     }
   }
+}
+
+void Led_Strip::init() { 
+  FastLED.addLeds<WS2811, 3, GRB>(leds, NUM_LEDS);
+  FastLED.setBrightness(BRIGHTNESS);
+}
+
+void Led_Strip::set_color(int color) { 
+  CRGB color_choice;
+
+  switch (color) { 
+  case 0:
+    color_choice = CRGB::Black;
+    break;
+  case 1:
+    color_choice = CRGB::Red;
+    break;
+  case 2:
+    color_choice = CRGB::Green;
+    break;
+  case 3:
+    color_choice = CRGB::Blue;
+    break;
+  case 4:
+    color_choice = CRGB::White;
+    break;
+  default:
+    color_choice = CRGB::Black;
+    break;
+  }
+
+  for (int i = 0; i < NUM_LEDS; ++i) {
+    leds[i] = color_choice;
+  }
+  FastLED.show();
 }
