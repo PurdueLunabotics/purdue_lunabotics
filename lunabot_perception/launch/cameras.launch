@@ -10,6 +10,10 @@
   <arg name="width"                           default="424"/>
   <arg name="height"                          default="240"/>
   <arg name="fps"                             default="15"/>
+
+  <arg name="extra_width"                     default="424"/>
+  <arg name="extra_height"                    default="240"/>
+  <arg name="extra_fps"                       default="5"/>
   <!-- Launch with any combination of front, back, and extra_cams. Front and Back are mapping cams, extra_cams are just vision. -->
   <!-- If only one of the mapping cams is enabled it will use RGB and Depth to map and odom -->
   <arg name="front"                           default="true"/>
@@ -32,7 +36,7 @@
     </node>
 
     <!-- Front Camera -->
-    <group ns="d455_front/camera" if="$(arg front)">
+    <group ns="d455_front/camera" if="$(arg front)"> 
 
       <!-- Launch the camera device nodelet-->
       <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
@@ -155,7 +159,7 @@
         <param name="voxel_size" type="double" value="$(arg voxel_size)"/>
         <param name="noise_filter_radius" type="double" value="$(arg noise_filter_radius)"/>
         <param name="max_depth" type="double" value="$(arg max_depth)"/>
-        <param name="roi_ratios" type="string" value="0.0 0.0 0.0 0.0"/> <!--Remove top 25%-->
+        <param name="roi_ratios" type="string" value="0.0 0.0 0.0 0.0"/> 
       </node>
 
       <group ns="color">
@@ -190,7 +194,7 @@
         <arg name="color_height"             value="$(arg height)"/>
         <arg name="enable_color"             value="true"/>
 
-        <arg name="color_fps"                value="$(arg fps)"/>
+        <arg name="color_fps"                value="$(arg extra_fps)"/>
         <arg name="filters"                  value=""/>
 
         <arg name="publish_tf"               value="true"/>
@@ -220,7 +224,7 @@
         <arg name="color_height"             value="$(arg height)"/>
         <arg name="enable_color"             value="true"/>
 
-        <arg name="color_fps"                value="$(arg fps)"/>
+        <arg name="color_fps"                value="$(arg extra_fps)"/>
         <arg name="filters"                  value=""/>
 
         <arg name="publish_tf"               value="true"/>
