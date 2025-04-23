@@ -32,6 +32,12 @@ class ExdepController:
 
     def odom_callback(self, msg: Odometry):
         self.robot_odom = msg
+        
+    def cmd_vel_callback(self, msg: Twist):
+        self.cmd_vel = msg
+        
+    def is_stopped(self) -> bool:
+        return self.cmd_vel != None and (self.cmd_vel.angular.z == 0 or self.cmd_vel.linear.x == 0)
 
     def __init__(self, excavation_publisher: rospy.Publisher = None, 
                        linear_actuator_publisher: rospy.Publisher = None, 
@@ -80,6 +86,9 @@ class ExdepController:
         self.robot_odom = Odometry()
         odom_topic = rospy.get_param("/odom_topic")
         rospy.Subscriber(odom_topic, Odometry, self.odom_callback)
+        
+        self.velocity_subscriber = rospy.Subscriber("/cmd_vel", Twist, self.cmd_vel_callback)
+
 
         self.rate = rospy.Rate(10) #hz
 
@@ -141,6 +150,8 @@ class ExdepController:
             self.traversal_publisher.publish(traversal_message)
 
             while not self.is_close_to_goal(berm_goal):
+                if (self.is_stopped()):
+                    self.goal_publisher.publish(mining_goal)
                 self.rate.sleep()
 
             traversal_message.data = False

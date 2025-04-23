@@ -13,6 +13,7 @@ from std_msgs.msg import Bool, Int8, Int32
 from lunabot_behavior.linear_actuators import LinearActuatorManager
 from lunabot_behavior.alignment import AlignmentController
 from lunabot_behavior.exdep import ExdepController
+from geometry_msgs.msg import Twist
 
 import zones
 import excavate
@@ -28,6 +29,12 @@ class Behavior:
 
     def odom_callback(self, msg: Odometry):
         self.robot_odom = msg
+    
+    def cmd_vel_callback(self, msg: Twist):
+        self.cmd_vel = msg
+        
+    def is_stopped(self) -> bool:
+        return self.cmd_vel != None and (self.cmd_vel.angular.z == 0 or self.cmd_vel.linear.x == 0)
 
     def apriltag_pose_callback(self, msg: PoseStamped):
         self.apriltag_pose_in_odom = msg
@@ -48,6 +55,7 @@ class Behavior:
         self.deposition_publisher = rospy.Publisher("/deposition", Int32, queue_size=1, latch=True)
 
         self.velocity_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
+        self.velocity_subscriber = rospy.Subscriber("/cmd_vel", Twist, self.cmd_vel_callback)
         self.traversal_publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue_size=1, latch=True)
         self.goal_publisher = rospy.Publisher("/goal", PoseStamped, queue_size=1, latch=True)
 
@@ -90,6 +98,10 @@ class Behavior:
         rospy.logdebug("Behavior: Distance to goal: " + str(distance))
 
         return distance < THRESHOLD
+    
+    
+        
+        
 
 
     def behavior_loop(self):
@@ -187,6 +199,8 @@ class Behavior:
 
         # wait until we get close to the goal
         while (not self.is_close_to_goal(mining_goal)):
+            if (self.is_stopped()):
+                self.goal_publisher.publish(mining_goal)
             self.rate.sleep()
 
         traversal_message.data = False
