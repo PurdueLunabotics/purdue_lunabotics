@@ -8,35 +8,21 @@ import tf2_ros
 import tf2_geometry_msgs
 from tf.transformations import euler_from_quaternion
 
-import timeit
-
 from lunabot_behavior.zones import Zone, find_mining_zone, find_berm_zone
 
 class ApriltagNode:
     
     def apriltag_callback(self, msg: AprilTagDetectionArray):
         if len(msg.detections) > 0:
-            # Todo- identify the apriltag bundle we want
-            detection = msg.detections[0]
-            
-            self.apriltag_pose_in_odom = self.convert_to_odom_frame(detection)
 
-            roll, pitch, yaw  = euler_from_quaternion([self.apriltag_pose_in_odom.pose.orientation.x, self.apriltag_pose_in_odom.pose.orientation.y, self.apriltag_pose_in_odom.pose.orientation.z, self.apriltag_pose_in_odom.pose.orientation.w])
-            print(f"R {roll:.2f} P {pitch:.2f} Y {yaw:.2f}")
+            self.apriltag_detection_array = msg
 
-
-            mining_zone: Zone = find_mining_zone(self.apriltag_pose_in_odom, self.is_sim)
-            berm_zone: Zone = find_berm_zone(self.apriltag_pose_in_odom, self.is_sim)
-
-            mining_zone.visualize_zone(self.mining_zone_visual_publisher, id=1, color=(1,0,0,1))
-            berm_zone.visualize_zone(self.berm_zone_visual_publisher, id=2, color=(0,1,1,1))
-
-            self.apriltag_update_needed = True
     
     def __init__(self):
 
         rospy.init_node("apriltag_node")
 
+        self.apriltag_detection_array: AprilTagDetectionArray = None
         self.apriltag_pose_in_odom: PoseStamped = None
 
         self.apriltag_publisher = rospy.Publisher("/apriltag_pose", PoseStamped, queue_size=10, latch=True)
@@ -59,7 +45,7 @@ class ApriltagNode:
             subscriber = rospy.Subscriber(topic, AprilTagDetectionArray, self.apriltag_callback)
             subscribers.append(subscriber)
         
-        self.frequency = 15  
+        self.frequency = 10
 
         self.apriltag_update_needed: bool = False
                 
@@ -69,9 +55,21 @@ class ApriltagNode:
         rate = rospy.Rate(self.frequency)
         
         while not rospy.is_shutdown():
-            if (self.apriltag_pose_in_odom is not None and self.apriltag_update_needed):
-                self.apriltag_publisher.publish(self.apriltag_pose_in_odom)
-            rate.sleep()    
+            if (self.apriltag_detection_array is not None):
+                self.translate_and_publish_apriltag()
+            rate.sleep()   
+
+    def translate_and_publish_apriltag(self):
+        # Todo- identify the apriltag bundle we want
+        detection = self.apriltag_detection_array.detections[0]
+        
+        self.apriltag_pose_in_odom = self.convert_to_odom_frame(detection)
+
+        mining_zone: Zone = find_mining_zone(self.apriltag_pose_in_odom, self.is_sim)
+        berm_zone: Zone = find_berm_zone(self.apriltag_pose_in_odom, self.is_sim)
+
+        mining_zone.visualize_zone(self.mining_zone_visual_publisher, id=1, color=(1,0,0,1))
+        berm_zone.visualize_zone(self.berm_zone_visual_publisher, id=2, color=(0,1,1,1))
             
         
     def convert_to_odom_frame(self, apriltag_detection: AprilTagDetection):
@@ -89,7 +87,7 @@ class ApriltagNode:
         pose.pose = apriltag_detection.pose.pose.pose
 
         # Set the time to 0 to get the latest available transform
-        pose.header.stamp = rospy.Time(0)
+        # pose.header.stamp = rospy.Time(0)
 
         pose_in_odom = self.tf_buffer.transform(pose, target_frame, rospy.Duration(5.0))
 
