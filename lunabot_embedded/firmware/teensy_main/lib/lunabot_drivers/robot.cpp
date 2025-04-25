@@ -76,6 +76,12 @@ void update(float &d0, float &d1, float &d2) {
 }
 } // namespace uwb
 
+namespace LEDs {
+  void update(int color) {
+    Led_Strip::set_color(color);
+  }
+}
+
 namespace excavation {
 StepperMotor exc_mtr(EXC_MOTOR_ID);
 

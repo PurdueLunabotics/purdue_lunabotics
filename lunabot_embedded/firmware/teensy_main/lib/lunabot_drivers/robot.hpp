@@ -36,6 +36,10 @@ namespace uwb {
 void update(float &d0, float &d1, float &d2);
 } // namespace uwb
 
+namespace LEDs {
+void cb(int32_t);
+}
+
 namespace deposition {
 void begin();
 void cb(int32_t, bool);

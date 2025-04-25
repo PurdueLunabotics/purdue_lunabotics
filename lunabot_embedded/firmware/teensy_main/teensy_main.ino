@@ -24,6 +24,7 @@ void ctrl() {
   drivetrain::cb(effort.left_drive, effort.right_drive, effort.should_reset);
   deposition::cb(effort.deposit, effort.should_reset);
   excavation::cb(effort.excavate, effort.should_reset);
+  LEDs::cb(effort.led_color);
 }
 
 void send() {
@@ -55,6 +56,7 @@ void setup() {
 
   M5Stack_UWB_Trncvr::init();
   KillSwitchRelay::init();
+  Led_Strip::init();
 
   ADS1119_Current_Bus::init_ads1119();
 
