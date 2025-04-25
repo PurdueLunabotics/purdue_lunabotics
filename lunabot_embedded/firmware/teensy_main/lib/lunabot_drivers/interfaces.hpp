@@ -3,6 +3,7 @@
 
 #include <ADS1119.h>
 
+#include "robot.hpp"
 #include <Arduino.h>
 #include <SPI.h>
 #include <Sabertooth.h>
@@ -11,7 +12,6 @@
 #include <HX711.h>
 #include <RobotMsgs.pb.h>
 #include <StepperLib.hpp>
-#include "robot.hpp"
 
 #define UWBSerial Serial8
 
@@ -105,6 +105,22 @@ private:
   volatile static int cutoff_buffer[4];
   volatile static int disable_counter[4];
   volatile static bool is_disable[4];
+};
+
+class HX711_Bus {
+public:
+  HX711_Bus() {};
+  static void init();
+  static float read_scale(uint8_t id);
+
+private:
+  static constexpr int NUM_SENSORS = 2;
+  static constexpr int PIN_LIST[NUM_SENSORS * 2] = {27, 26, 29, 28};
+  static constexpr float ZERO_POINT[NUM_SENSORS] = {8143500.0f, 8143500.0f};
+  static constexpr float SCALE_CALIBRATION[NUM_SENSORS] = {-24.111f,
+                                                           -24.111f}; // TODO, calibrate these
+
+  static HX711 encs[NUM_SENSORS];
 };
 
 #endif
