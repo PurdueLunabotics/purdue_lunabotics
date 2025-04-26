@@ -34,7 +34,7 @@ class Behavior:
         self.cmd_vel = msg
         
     def is_stopped(self) -> bool:
-        return self.cmd_vel != None and (self.cmd_vel.angular.z == 0 or self.cmd_vel.linear.x == 0)
+        return self.cmd_vel != None and (self.cmd_vel.angular.z == 0 and self.cmd_vel.linear.x == 0)
 
     def apriltag_pose_callback(self, msg: PoseStamped):
         self.apriltag_pose_in_odom = msg
