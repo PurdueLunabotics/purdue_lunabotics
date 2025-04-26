@@ -214,15 +214,17 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
   }
 }
 
+CRGB Led_Strip::all_led[Led_Strip::NUM_LEDS];
+
 void Led_Strip::init() { 
-  FastLED.addLeds<WS2811, 3, GRB>(leds, NUM_LEDS);
-  FastLED.setBrightness(BRIGHTNESS);
+  FastLED.addLeds<WS2811, 3, GRB>(Led_Strip::all_led, Led_Strip::NUM_LEDS);
+  FastLED.setBrightness(Led_Strip::BRIGHTNESS);
 }
 
-void Led_Strip::set_color(int color) { 
+void Led_Strip::set_color(int32_t color_in) { 
   CRGB color_choice;
 
-  switch (color) { 
+  switch (color_in) { 
   case 0:
     color_choice = CRGB::Black;
     break;
@@ -244,7 +246,7 @@ void Led_Strip::set_color(int color) {
   }
 
   for (int i = 0; i < NUM_LEDS; ++i) {
-    leds[i] = color_choice;
+    Led_Strip::all_led[i] = color_choice;
   }
   FastLED.show();
 }

@@ -68,12 +68,12 @@ class Led_Strip {
 public:
   Led_Strip() {};
   static void init();
-  static void set_color(int color);
+  static void set_color(int32_t);
 
 private:
   static constexpr int NUM_LEDS = 90;
   static constexpr int BRIGHTNESS = 100; // 0 -> 255
-  static CRGB leds[NUM_LEDS];
+  static CRGB all_led[NUM_LEDS];
 };
 
 class KillSwitchRelay {
