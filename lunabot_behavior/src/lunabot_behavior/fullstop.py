@@ -45,5 +45,6 @@ for i in range(10):
     linact_publisher.publish(zero)
     left_publisher.publish(zero)
     right_publisher.publish(zero)
+    deposit_publisher.publish(zero)
     rospy.sleep(0.1)
 
