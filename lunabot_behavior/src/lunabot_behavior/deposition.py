@@ -65,7 +65,7 @@ class DepositionManager:
             if rospy.get_time() - start_time > self.DEPOSITION_TIME:
                 break
 
-            weight = self.robot_sensors.load_cell_weights[0] + self.robot_sensors.load_cell_weights[1]
+            weight = self.robot_sensors.load_cell_weight
 
             if weight < self.WEIGHT_THRESHOLD:
                 break

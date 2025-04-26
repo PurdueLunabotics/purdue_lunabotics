@@ -197,8 +197,7 @@ class ExcavationController:
 
         start_time = rospy.get_time()
 
-        #load_cell_weight = self.robot_sensors.load_cell_weights[0] + self.robot_sensors.load_cell_weights[1]
-        load_cell_weight = 0
+        load_cell_weight = self.robot_sensors.load_cell_weight
         # maybe TODO add logic for stopping if obstacles exist (both rocks and craters)
 
         # Until the set amount of time and while the robot is not yet full, keep moving the robot forward and spinning excavation

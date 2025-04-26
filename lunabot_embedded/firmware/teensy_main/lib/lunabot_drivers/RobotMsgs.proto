@@ -20,6 +20,7 @@ message RobotSensors {
   float drive_left_vel = 14;
   float drive_right_vel = 15;
   float exc_vel = 16;
+  float load_cell_weight = 17;
 }
 
 message RobotEffort {
