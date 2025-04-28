@@ -123,9 +123,9 @@ class Behavior:
         quat_w_sum = 0.0
 
         for pose in pose_list:
-            pt_x_sum = pt_x_sum + pose.pose.point.x
-            pt_y_sum = pt_y_sum + pose.pose.point.y
-            pt_z_sum = pt_z_sum + pose.pose.point.z
+            pt_x_sum = pt_x_sum + pose.pose.position.x
+            pt_y_sum = pt_y_sum + pose.pose.position.y
+            pt_z_sum = pt_z_sum + pose.pose.position.z
 
             quat_x_sum = quat_x_sum + pose.pose.orientation.x
             quat_y_sum = quat_y_sum + pose.pose.orientation.y
@@ -133,9 +133,9 @@ class Behavior:
             quat_w_sum = quat_w_sum + pose.pose.orientation.w
 
         # update pose point
-        avg_pose.pose.point.x = pt_x_sum / len(pose_list)
-        avg_pose.pose.point.y = pt_y_sum / len(pose_list)
-        avg_pose.pose.point.z = pt_z_sum / len(pose_list)
+        avg_pose.pose.position.x = pt_x_sum / len(pose_list)
+        avg_pose.pose.position.y = pt_y_sum / len(pose_list)
+        avg_pose.pose.position.z = pt_z_sum / len(pose_list)
 
         # update pose orientation
         avg_pose.pose.orientation.x = quat_x_sum / len(pose_list)
@@ -178,6 +178,7 @@ class Behavior:
         self.traversal_publisher.publish(backwards_message)
 
         # Raise linear actuators
+        rospy.loginfo("Behavior: Raising linear actuator")
         linear_actuators.raise_linear_actuators()
 
         # Spin for one loop to map environment
@@ -233,7 +234,7 @@ class Behavior:
         # diable apriltag node and wait to make sure it's been disabled and does not publish any more
         rospy.loginfo("Behavior: Avg April Tag Pose determined. Disabling April Tag node")
         avg_apriltag_pose = self.get_pose_average(apriltag_pose_list)
-        self.apriltag_avg_flag_publisher.publish(False)
+        self.apriltag_enabled_publisher.publish(False)
 
         rospy.sleep(5)
 
