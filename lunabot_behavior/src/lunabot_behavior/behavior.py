@@ -157,6 +157,8 @@ class Behavior:
         then goes in a loop of mining/deposition.
         """
 
+        self.apriltag_enabled_publisher.publish(True) # enable apriltag detection
+
         # Initialize all of the modules (before the loop)
         linear_actuators = LinearActuatorManager(self.lin_act_publisher)
         alignment_controller = AlignmentController(self.velocity_publisher)
@@ -206,6 +208,8 @@ class Behavior:
             velocity_message.linear.x = 0
             velocity_message.angular.z = self.SPIN_SPEED
             self.velocity_publisher.publish(velocity_message)
+
+        rospy.sleep(1)
 
         velocity_message.linear.x = 0
         velocity_message.angular.z = 0
@@ -271,8 +275,8 @@ class Behavior:
 
         # wait until we get close to the goal
         while (not self.is_close_to_goal(mining_goal)):
-            if (self.is_stopped()):
-                self.goal_publisher.publish(mining_goal)
+            # if (self.is_stopped()):
+                # self.goal_publisher.publish(mining_goal)
             self.rate.sleep()
 
         traversal_message.data = False
