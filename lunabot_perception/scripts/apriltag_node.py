@@ -64,6 +64,7 @@ class ApriltagNode:
         detection = self.apriltag_detection_array.detections[0]
         
         self.apriltag_pose_in_odom = self.convert_to_odom_frame(detection)
+        self.apriltag_publisher.publish(self.apriltag_pose_in_odom)
 
         mining_zone: Zone = find_mining_zone(self.apriltag_pose_in_odom, self.is_sim)
         berm_zone: Zone = find_berm_zone(self.apriltag_pose_in_odom, self.is_sim)
