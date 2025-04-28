@@ -61,6 +61,9 @@ class Behavior:
 
         self.backwards_publisher = rospy.Publisher("/traversal/backwards", Bool, queue_size=1, latch=True)
 
+        self.apriltag_enabled_publisher = rospy.Publisher("/apriltag/enabled", Bool, queue_size=1, latch=True)
+        self.apriltag_pose_publisher = rospy.Publisher("/apriltag_pose", PoseStamped, queue_size=1, latch=True)
+
         self.mining_zone = None
         self.berm_zone = None
 
@@ -78,6 +81,8 @@ class Behavior:
         self.SPIN_TIME = (math.pi / 2) / self.SPIN_SPEED  # seconds, how long to spin at the beginning for 360 degree mapping (only spins 90 degrees)
 
         self.MAX_APRILTAG_SEARCH_TIME = 30.0  # seconds, how long to search for an apriltag before giving up
+
+        self.APRILTAG_AVERAGING_TIME = 5.0 # seconds, how long the robot will take average apriltag pose for
 
 
     def is_close_to_goal(self, goal: PoseStamped) -> bool:
@@ -98,6 +103,48 @@ class Behavior:
         rospy.logdebug("Behavior: Distance to goal: " + str(distance))
 
         return distance < THRESHOLD
+    
+
+    def get_pose_average(self, pose_list) -> PoseStamped:
+        avg_pose = pose_list[0]
+
+        if (len(pose_list) == 1):
+            return avg_pose
+
+        # pose point averages
+        pt_x_sum = 0.0
+        pt_y_sum = 0.0
+        pt_z_sum = 0.0
+
+        # pose quaternion averages
+        quat_x_sum = 0.0
+        quat_y_sum = 0.0
+        quat_z_sum = 0.0
+        quat_w_sum = 0.0
+
+        for pose in pose_list:
+            pt_x_sum = pt_x_sum + pose.pose.point.x
+            pt_y_sum = pt_y_sum + pose.pose.point.y
+            pt_z_sum = pt_z_sum + pose.pose.point.z
+
+            quat_x_sum = quat_x_sum + pose.pose.orientation.x
+            quat_y_sum = quat_y_sum + pose.pose.orientation.y
+            quat_z_sum = quat_z_sum + pose.pose.orientation.z
+            quat_w_sum = quat_w_sum + pose.pose.orientation.w
+
+        # update pose point
+        avg_pose.pose.point.x = pt_x_sum / len(pose_list)
+        avg_pose.pose.point.y = pt_y_sum / len(pose_list)
+        avg_pose.pose.point.z = pt_z_sum / len(pose_list)
+
+        # update pose orientation
+        avg_pose.pose.orientation.x = quat_x_sum / len(pose_list)
+        avg_pose.pose.orientation.y = quat_y_sum / len(pose_list)
+        avg_pose.pose.orientation.z = quat_z_sum / len(pose_list)
+        avg_pose.pose.orientation.w = quat_w_sum / len(pose_list)
+
+        return avg_pose
+
     
     
         
@@ -167,6 +214,30 @@ class Behavior:
         if self.apriltag_pose_in_odom == None:
             rospy.logerr("Behavior: Could not find apriltag")
             return
+
+        # collect april tag average pose over apriltag averaging time period
+        rospy.loginfo("Behavior: April Tag Detected")
+        rospy.loginfo("Behavior: Collecting average april tag pose")
+
+        last_apriltag_pose = self.apriltag_pose_in_odom
+        apriltag_pose_list = []
+        apriltag_pose_list.append(last_apriltag_pose) # make sure list is not empty
+
+        start_time_s = rospy.get_rostime().secs
+        while rospy.get_rostime().secs - start_time_s < self.APRILTAG_AVERAGING_TIME:
+            # add april tag pose to list of poses to average
+            if self.apriltag_pose_in_odom != last_apriltag_pose:
+                apriltag_pose_list.append(self.apriltag_pose_in_odom)
+                last_apriltag_pose = self.apriltag_pose_in_odom
+
+        # diable apriltag node and wait to make sure it's been disabled and does not publish any more
+        rospy.loginfo("Behavior: Avg April Tag Pose determined. Disabling April Tag node")
+        avg_apriltag_pose = self.get_pose_average(apriltag_pose_list)
+        self.apriltag_avg_flag_publisher.publish(False)
+
+        rospy.sleep(5)
+
+        self.apriltag_pose_publisher.publish(avg_apriltag_pose)
         
         ####################
         # Traversal
