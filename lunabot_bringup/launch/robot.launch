@@ -27,7 +27,7 @@
     <include if="$(arg cameras)" file="$(find lunabot_perception)/launch/cameras.launch">
         <arg name="front" value="$(arg front)"/>
         <arg name="back" value ="$(arg back)"/>
-        <arg name="extras" value="$(arg extra_cams)"/>
+        <arg name="extra_cams" value="$(arg extra_cams)"/>
     </include>
 
     <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch"/>
