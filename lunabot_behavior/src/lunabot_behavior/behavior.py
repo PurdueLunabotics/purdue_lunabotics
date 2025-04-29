@@ -145,12 +145,6 @@ class Behavior:
 
         return avg_pose
 
-    
-    
-        
-        
-
-
     def behavior_loop(self):
         """
         The main method of the class: enables autonomous behavior. Starts up with a few states,
@@ -209,7 +203,7 @@ class Behavior:
             velocity_message.angular.z = self.SPIN_SPEED
             self.velocity_publisher.publish(velocity_message)
 
-        rospy.sleep(1)
+        rospy.sleep(1) # sleep for a second so we end slightly more centered
 
         velocity_message.linear.x = 0
         velocity_message.angular.z = 0

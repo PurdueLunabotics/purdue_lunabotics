@@ -164,8 +164,6 @@ class ExdepController:
             mining_goal.pose.position.y += offset[1]
 
             while not self.is_close_to_goal(berm_goal):
-            #     if (self.is_stopped()):
-            #         self.goal_publisher.publish(mining_goal)
                 self.rate.sleep()
 
             traversal_message.data = False
