@@ -10,7 +10,6 @@
     <arg name="front" default="true" />
     <arg name="back" default="true" />
     <arg name="extra_cams" default="false" />
-    <arg name="rtabmap_viz" default="false" />
 
     <!-- Should we use Point To Point or Pure pursuit -->
     <arg name="ptp" default="true"/>
@@ -53,20 +52,20 @@
                 <arg name="depth" value="true" />
 
                 <!-- If using the back camera, default the topics to it -->
-                <arg name="depth_topic" value="/d455_back/camera/aligned_depth_to_color/image_raw" unless="$(arg front)"/>
-                <arg name="rgb_topic" value="/d455_back/camera/color/image_rect_color" unless="$(arg front)"/>
-                <arg name="camera_info_topic" value="/d455_back/camera/color/camera_info" unless="$(arg front)"/>
+                <arg name="depth_topic" value="/d455_back/camera/aligned_depth_to_color/image_raw" if="$(arg back)"/>
+                <arg name="rgb_topic" value="/d455_back/camera/color/image_rect_color" if="$(arg back)"/>
+                <arg name="camera_info_topic" value="/d455_back/camera/color/camera_info" if="$(arg back)"/>
 
                 <!-- Otherwise, if using the front camera -->
-                <arg name="depth_topic" value="/d455_front/camera/aligned_depth_to_color/image_raw" if="$(arg front)"/>
-                <arg name="rgb_topic" value="/d455_front/camera/color/image_rect_color" if="$(arg front)"/>
-                <arg name="camera_info_topic" value="/d455_front/camera/color/camera_info" if="$(arg front)"/>
+                <arg name="depth_topic" value="/d455_front/camera/aligned_depth_to_color/image_raw" unless="$(arg back)"/>
+                <arg name="rgb_topic" value="/d455_front/camera/color/image_rect_color" unless="$(arg back)"/>
+                <arg name="camera_info_topic" value="/d455_front/camera/color/camera_info" unless="$(arg back)"/>
 
                 <!-- If using both front/back for mapping, using the combined pointcloud -->
                 <arg name="scan_cloud_topic" value="/pointcloud/depth_combined_cloud"/>
                 <arg name="subscribe_scan_cloud" value="$(eval arg('front') and arg('back'))" />
 
-                <arg name="rtabmapviz" value="$(arg rtabmap_viz)" />
+                <arg name="rtabmapviz" value="false" />
                 <arg name="imu_topic" value="/imu" />
                 <arg name="frame_id" value="base_link" />
                 <arg name="rviz" value="false" />

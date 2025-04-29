@@ -24,8 +24,6 @@
   
   /pointcloud/depth_combined_cloud
   /cloud_map
-  /cloud_obstacles
-  /cloud_groud
 
   /usb_cam/tag_detections /usb_cam/image_color 
 
