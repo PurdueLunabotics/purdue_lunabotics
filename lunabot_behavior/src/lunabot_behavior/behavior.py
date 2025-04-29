@@ -145,11 +145,6 @@ class Behavior:
 
         return avg_pose
 
-    
-    
-        
-        
-
 
     def behavior_loop(self):
         """
