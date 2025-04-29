@@ -77,7 +77,7 @@ class DepositionManager:
 
     def no_sensor_deposit(self):
         """
-        Spin the auger for a set amount of time
+        Spin the belt for a set amount of time
         """
 
         if (self.is_sim):

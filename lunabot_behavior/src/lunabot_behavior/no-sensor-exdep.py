@@ -42,29 +42,50 @@ if __name__ == "__main__":
 
     exdepController = NoSensorExdepManager()
 
-    # Excavate in place
-    exdepController.excavation.no_sensor_excavate()
+    for i in range(3):
+        # Excavate in place
+        exdepController.excavation.no_sensor_excavate()
 
-    # Raise linear actuators out of the way
-    exdepController.linear_actuators.raise_linear_actuators(use_current=False)
+        # Raise linear actuators out of the way
+        exdepController.linear_actuators.raise_linear_actuators(use_current=False)
 
-    # Drive to the berm area
-    start_time = rospy.get_time()
+        time.sleep(0.1)
 
-    cmd_vel = Twist()
-    cmd_vel.linear.x = exdepController.DRIVE_SPEED
-    cmd_vel.angular.z = 0
-    exdepController.cmd_vel_publisher.publish(cmd_vel)
+        # Drive to the berm area
+        start_time = rospy.get_time()
 
-    time.sleep(0.1)
-    # Drive for <drive_time> seconds
-    while rospy.get_time() - start_time < exdepController.DRIVE_TIME:
+        cmd_vel = Twist()
+        cmd_vel.linear.x = exdepController.DRIVE_SPEED
+        cmd_vel.angular.z = 0
         exdepController.cmd_vel_publisher.publish(cmd_vel)
 
-    # When at the berm (by time), stop
-    cmd_vel.linear.x = 0
-    exdepController.cmd_vel_publisher.publish(cmd_vel)
-    time.sleep(0.1)
-    
-    # Now at berm, deposit
-    exdepController.deposition.no_sensor_deposit()
+        # Drive for <drive_time> seconds
+        while rospy.get_time() - start_time < exdepController.DRIVE_TIME:
+            exdepController.cmd_vel_publisher.publish(cmd_vel)
+
+        # When at the berm (by time), stop
+        cmd_vel.linear.x = 0
+        exdepController.cmd_vel_publisher.publish(cmd_vel)
+        time.sleep(0.1)
+        
+        # Now at berm, deposit
+        exdepController.deposition.no_sensor_deposit()
+
+        time.sleep(0.1)
+
+        # Drive to the exc area
+        start_time = rospy.get_time()
+
+        cmd_vel = Twist()
+        cmd_vel.linear.x = -1 * exdepController.DRIVE_SPEED
+        cmd_vel.angular.z = 0
+        exdepController.cmd_vel_publisher.publish(cmd_vel)
+
+        # Drive for <drive_time> seconds
+        while rospy.get_time() - start_time < exdepController.DRIVE_TIME:
+            exdepController.cmd_vel_publisher.publish(cmd_vel)
+
+        # When at the berm (by time), stop
+        cmd_vel.linear.x = 0
+        exdepController.cmd_vel_publisher.publish(cmd_vel)
+        time.sleep(0.1)
