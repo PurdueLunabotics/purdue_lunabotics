@@ -65,6 +65,8 @@
                 <arg name="scan_cloud_topic" value="/pointcloud/depth_combined_cloud"/>
                 <arg name="subscribe_scan_cloud" value="$(eval arg('front') and arg('back'))" />
 
+                 <arg name="rtabmap_args" value="--Odom/ResetCountdown 1"/>
+
                 <arg name="rtabmapviz" value="false" />
                 <arg name="imu_topic" value="/imu" />
                 <arg name="frame_id" value="base_link" />
