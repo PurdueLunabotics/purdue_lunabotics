@@ -3,7 +3,7 @@
 
 #include "interfaces.hpp"
 #include <Arduino.h>
-#include <Stepper.h>
+#include <Sabertooth.h>
 
 #define ST_SERIAL Serial4
 #define ST_BAUD_RATE 9600
@@ -39,6 +39,10 @@ void update(float &d0, float &d1, float &d2);
 namespace LEDs {
 void cb(int32_t);
 }
+
+namespace load_cell {
+void update(float &);
+} // namespace load_cell
 
 namespace deposition {
 void begin();

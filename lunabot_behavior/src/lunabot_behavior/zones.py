@@ -97,7 +97,7 @@ def calc_point_from_apriltag(x: float, y: float, apriltag_pose_in_odom: PoseStam
     if (is_sim):
         yaw += math.pi / 2
     else:
-        yaw -= math.pi / 2 
+        yaw += math.pi / 2 
 
     x0 = apriltag_pose_in_odom.pose.position.x
     y0 = apriltag_pose_in_odom.pose.position.y
@@ -120,7 +120,7 @@ def calc_offset(x: float, y: float, apriltag_pose_in_odom: PoseStamped, is_sim: 
     if (is_sim):
         yaw += math.pi / 2
     else:
-        yaw -= math.pi / 2 
+        yaw += math.pi / 2 
 
     x0 = 0
     y0 = 0

@@ -56,6 +56,7 @@ void recv(ros::Publisher &pub) {
   state_msg.uwb_dists.push_back(state.uwb_dist_0);
   state_msg.uwb_dists.push_back(state.uwb_dist_1);
   state_msg.uwb_dists.push_back(state.uwb_dist_2);
+  state_msg.load_cell_weight = state.load_cell_weight;
 
   pub.publish(state_msg);
 }

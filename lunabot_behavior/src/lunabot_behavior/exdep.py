@@ -32,13 +32,20 @@ class ExdepController:
 
     def odom_callback(self, msg: Odometry):
         self.robot_odom = msg
+        
+    def cmd_vel_callback(self, msg: Twist):
+        self.cmd_vel = msg
+        
+    def is_stopped(self) -> bool:
+        return self.cmd_vel != None and (self.cmd_vel.angular.z == 0 or self.cmd_vel.linear.x == 0)
 
     def __init__(self, excavation_publisher: rospy.Publisher = None, 
                        linear_actuator_publisher: rospy.Publisher = None, 
                        cmd_vel_publisher: rospy.Publisher = None, 
                        deposition_publisher: rospy.Publisher = None,
                        traversal_publisher: rospy.Publisher = None,
-                       goal_publisher: rospy.Publisher = None):
+                       goal_publisher: rospy.Publisher = None,
+                       backwards_publisher: rospy.Publisher = None):
         """
         If passed a publisher, then it is assumed a node is already running, and the publisher is shared.
         Else, initialize this node to run on its own.
@@ -54,6 +61,7 @@ class ExdepController:
             self.cmd_vel_publisher: rospy.Publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
             self.traversal_publisher: rospy.Publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue_size=1, latch=True)
             self.goal_publisher: rospy.Publisher = rospy.Publisher("/goal", PoseStamped, queue_size=1, latch=True)
+            self.backwards_publisher: rospy.Publisher = rospy.Publisher("/traversal/backwards", Bool, queue_size=1, latch=True) 
         else:
             self.excavation_publisher = excavation_publisher
             self.lin_act_publisher = linear_actuator_publisher
@@ -61,6 +69,7 @@ class ExdepController:
             self.cmd_vel_publisher = cmd_vel_publisher
             self.traversal_publisher = traversal_publisher
             self.goal_publisher = goal_publisher
+            self.backwards_publisher = backwards_publisher
 
         self.excavation = ExcavationController(self.excavation_publisher, self.lin_act_publisher, self.cmd_vel_publisher, self.deposition_publisher)
         self.deposition = DepositionManager(self.deposition_publisher)
@@ -80,6 +89,9 @@ class ExdepController:
         self.robot_odom = Odometry()
         odom_topic = rospy.get_param("/odom_topic")
         rospy.Subscriber(odom_topic, Odometry, self.odom_callback)
+        
+        self.velocity_subscriber = rospy.Subscriber("/cmd_vel", Twist, self.cmd_vel_callback)
+
 
         self.rate = rospy.Rate(10) #hz
 
@@ -132,32 +144,14 @@ class ExdepController:
             berm_goal.pose.position.x += offset[0]
             berm_goal.pose.position.y += offset[1]
 
-            self.goal_publisher.publish(berm_goal)
-
             # move to the berm area
             rospy.loginfo("Behavior: Moving to berm area")
+            self.backwards_publisher.publish(True)
+            self.goal_publisher.publish(berm_goal)
+
             traversal_message = Bool()
             traversal_message.data = True
             self.traversal_publisher.publish(traversal_message)
-
-            while not self.is_close_to_goal(berm_goal):
-                self.rate.sleep()
-
-            traversal_message.data = False
-            self.traversal_publisher.publish(traversal_message)
-
-            # once we've arrived, stop.
-            cmd_vel = Twist()
-            cmd_vel.linear.x = 0
-            cmd_vel.angular.z = 0
-            self.cmd_vel_publisher.publish(cmd_vel)
-
-            # align to the berm
-            self.alignment.align_to_angle(math.pi / 2)
-
-            # Todo: maybe add some kind of approach logic?
-
-            self.deposition.deposit()
 
             mining_goal = PoseStamped()
             mining_goal.pose.position.x = self.mining_zone.middle[0]
@@ -169,9 +163,50 @@ class ExdepController:
             mining_goal.pose.position.x += offset[0]
             mining_goal.pose.position.y += offset[1]
 
-            self.goal_publisher.publish(mining_goal)
+            while not self.is_close_to_goal(berm_goal):
+                self.rate.sleep()
+
+            traversal_message.data = False
+            self.backwards_publisher.publish(False)
+            self.traversal_publisher.publish(traversal_message)
+
+            # once we've arrived, stop.
+            cmd_vel = Twist()
+            cmd_vel.linear.x = 0
+            cmd_vel.angular.z = 0
+            self.cmd_vel_publisher.publish(cmd_vel)
+
+            # align to the berm
+            self.alignment.align_to_angle(math.pi / 2)
+
+            # approach backwards for 2 sec
+            cmd_vel.linear.x = -0.3
+            cmd_vel.angular.z = 0
+            self.cmd_vel_publisher.publish(cmd_vel)
+
+            rospy.sleep(2)
+
+            # stop
+            cmd_vel.linear.x = 0
+            cmd_vel.angular.z = 0
+            self.cmd_vel_publisher.publish(cmd_vel)
+
+            self.deposition.deposit()
+
+            # get out of mining area for 2 sec
+            cmd_vel.linear.x = 0.3
+            cmd_vel.angular.z = 0
+            self.cmd_vel_publisher.publish(cmd_vel)
+
+            rospy.sleep(2)
+
+            # stop
+            cmd_vel.linear.x = 0
+            cmd_vel.angular.z = 0
+            self.cmd_vel_publisher.publish(cmd_vel)
 
             # move to the mining area
+            self.goal_publisher.publish(mining_goal)
             rospy.loginfo("Behavior: Moving to mining area")
             traversal_message.data = True
             self.traversal_publisher.publish(traversal_message)

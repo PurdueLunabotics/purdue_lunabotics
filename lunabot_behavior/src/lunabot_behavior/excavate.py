@@ -70,7 +70,7 @@ class ExcavationController:
         self.EXCAVATION_SPEED = 1500
         
         # speed to run deposition during trenching (rpm)
-        self.DEPOSITION_SPEED = 1000
+        self.DEPOSITION_SPEED = 200
         
         # speed to run drivetrain during trenching (m/s)
         self.TRENCHING_SPEED = 0.01 # lil slow - exc stalled at 0.02, try 0.015 next
@@ -197,12 +197,13 @@ class ExcavationController:
 
         start_time = rospy.get_time()
 
-        #load_cell_weight = self.robot_sensors.load_cell_weights[0] + self.robot_sensors.load_cell_weights[1]
-        load_cell_weight = 0
+        load_cell_weight = self.robot_sensors.load_cell_weight
+
+        deposition_msg = Int32()
         # maybe TODO add logic for stopping if obstacles exist (both rocks and craters)
 
         # Until the set amount of time and while the robot is not yet full, keep moving the robot forward and spinning excavation
-        while rospy.get_time() - start_time < self.TRENCHING_TIME and load_cell_weight < self.LOAD_CELL_WEIGHT_THRESHOLD:
+        while rospy.get_time() - start_time < self.TRENCHING_TIME: #and load_cell_weight < self.LOAD_CELL_WEIGHT_THRESHOLD:
 
             excavation_velocity = self.robot_sensors.exc_vel
 
@@ -211,7 +212,6 @@ class ExcavationController:
             self.excavation_publisher.publish(excavation_message)
 
             # testing trench - remove later
-            deposition_msg = Int32()
             deposition_msg.data = self.DEPOSITION_SPEED
             self.deposition_publisher.publish(deposition_msg)
 

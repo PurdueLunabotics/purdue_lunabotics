@@ -6,17 +6,4 @@
       <rosparam command="load" file="$(find lunabot_config)/config/overhead.yml"/>
   </node>
 
-  <group ns="usb_cam" >
-    <node pkg="image_proc" type="image_proc" name="image_proc" args="image:=image_raw"/>
-    <include file="$(find lunabot_perception)/launch/apriltag.launch">
-      <arg name="camera_frame" value="usb_cam_link" />
-    </include>
-  </group>
-
-  <node if="$(arg image_view)" name="image_view" pkg="image_view" type="image_view"
-        respawn="false" output="screen">
-    <remap from="image" to="/usb_cam/tag_detections_image"/>
-    <param name="autosize" value="true" />
-  </node>
-
 </launch>

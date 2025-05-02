@@ -37,6 +37,8 @@ void send() {
 
   uwb::update(state.uwb_dist_0, state.uwb_dist_1, state.uwb_dist_2);
 
+  load_cell::update(state.load_cell_weight);
+
   /*
   Serial.print("Raw: ");
   Serial.print(state.act_right_curr);
@@ -57,6 +59,7 @@ void setup() {
   M5Stack_UWB_Trncvr::init();
   KillSwitchRelay::init();
   Led_Strip::init();
+  HX711_Bus::init();
 
   ADS1119_Current_Bus::init_ads1119();
 

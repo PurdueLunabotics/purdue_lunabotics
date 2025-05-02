@@ -1,21 +1,21 @@
 <?xml version="1.0"?>
 <launch>
     <arg name="autonomy" default="true" />
-    <arg name="record" default="true" />
-    <arg name="teensy" default="true" />
+    <arg name="record" default="false" />
+    <arg name="teensy" default="false" />
     <arg name="cameras" default="true" />
-    <arg name="overhead" default="true" />
+    <arg name="overhead" default="false" />
     <arg name="slam" default="true" />
     <arg name="exp_name" default="exp" />
     <arg name="front" default="true" />
-    <arg name="back" default="true" />
+    <arg name="back" default="false" />
     <arg name="extra_cams" default="false" />
 
     <!-- Should we use Point To Point or Pure pursuit -->
     <arg name="ptp" default="true"/>
 
     <!-- Launch Teensy Driver -->
-    <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node" output="screen" />
+    <!-- <node if="$(arg teensy)" name="teensy_driver" pkg="lunabot_embedded" type="teensy_driver_node" output="screen" /> -->
 
     <!-- Launch robot, joint state/robot state publishers, previously in display.launch -->
     <arg name="model" default="$(find lunabot_description)/urdf/lunabot.xacro"/>
@@ -28,14 +28,16 @@
         <arg name="front" value="$(arg front)"/>
         <arg name="back" value ="$(arg back)"/>
         <arg name="extra_cams" value="$(arg extra_cams)"/>
+
+        <arg name="pointcloud" value="true" />
     </include>
 
-    <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch"/>
+    <!-- <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch"/> -->
 
     <!-- Launch rosbag recorder -->
-    <include if="$(arg record)" file="$(find lunabot_bringup)/launch/record.launch">
+    <!-- <include if="$(arg record)" file="$(find lunabot_bringup)/launch/record.launch">
         <arg name="exp_name" value="$(arg exp_name)" />
-    </include>
+    </include> -->
 
     <!-- Load config file, and set the autonomy parameter based on user input -->
     <rosparam file="$(find lunabot_config)/config/real_robot.yml" command="load" />
@@ -46,49 +48,47 @@
 
         <group>
             <include if="$(arg slam)" file="$(find rtabmap_ros)/launch/rtabmap.launch">
-                <arg name="rtabmap_args" value="--delete_db_on_start" />
+                <arg name="rtabmap_args" value="--delete_db_on_start --Odom/ResetCountdown 1" />
                 <arg name="rgbd_sync" value="false" />
                 <arg name="subscribe_rgbd" value="false" />
                 <arg name="depth" value="true" />
 
                 <!-- If using the back camera, default the topics to it -->
-                <arg name="depth_topic" value="/d455_back/camera/aligned_depth_to_color/image_raw" if="$(arg back)"/>
-                <arg name="rgb_topic" value="/d455_back/camera/color/image_rect_color" if="$(arg back)"/>
-                <arg name="camera_info_topic" value="/d455_back/camera/color/camera_info" if="$(arg back)"/>
+                <!-- <arg name="depth_topic" value="/d455_front/camera/aligned_depth_to_color/image_raw"/> -->
+                <!-- <arg name="rgb_topic" value="/d455_front/camera/color/image_rect_color"/> -->
+                <!-- <arg name="camera_info_topic" value="/d455_front/camera/color/camera_info"/> -->
 
                 <!-- Otherwise, if using the front camera -->
-                <arg name="depth_topic" value="/d455_front/camera/aligned_depth_to_color/image_raw" unless="$(arg back)"/>
-                <arg name="rgb_topic" value="/d455_front/camera/color/image_rect_color" unless="$(arg back)"/>
-                <arg name="camera_info_topic" value="/d455_front/camera/color/camera_info" unless="$(arg back)"/>
+                <arg name="depth_topic" value="/d455_front/camera/aligned_depth_to_color/image_raw"/>
+                <arg name="rgb_topic" value="/d455_front/camera/color/image_rect_color"/>
+                <arg name="camera_info_topic" value="/d455_front/camera/color/camera_info"/>
 
                 <!-- If using both front/back for mapping, using the combined pointcloud -->
-                <arg name="scan_cloud_topic" value="/pointcloud/depth_combined_cloud"/>
-                <arg name="subscribe_scan_cloud" value="$(eval arg('front') and arg('back'))" />
+                <arg name="scan_cloud_topic" value="/d455_front/camera/points"/>
+                <arg name="subscribe_scan_cloud" value="true" />
 
-                 <arg name="rtabmap_args" value="--Odom/ResetCountdown 1"/>
-
-                <arg name="rtabmapviz" value="false" />
-                <arg name="imu_topic" value="/imu" />
+                <arg name="rtabmapviz" value="true" />
+                <!-- <arg name="imu_topic" value="/imu" /> -->
                 <arg name="frame_id" value="base_link" />
                 <arg name="rviz" value="false" />
             </include>
         </group>
 
         <!-- Launch effort factory -->
-        <node pkg="lunabot_control" type="effort_factory.py" name="effort_factory" output="screen" />
+        <!-- <node pkg="lunabot_control" type="effort_factory.py" name="effort_factory" output="screen" /> -->
 
         <!-- Launch diff drive controller -->
-        <node pkg="lunabot_control" type="differential_drive_controller.py"
-              name="differential_drive_controller" output="screen" />
+        <!-- <node pkg="lunabot_control" type="differential_drive_controller.py" -->
+              <!-- name="differential_drive_controller" output="screen" /> -->
 
         <!-- Launch path following and path planning (navigation) -->
-        <group ns="nav">
-            <node name="global_planner_node" pkg="lunabot_nav" type="dstar_node" output="screen" respawn="true"/>
+        <!-- <group ns="nav"> -->
+            <!-- <node name="global_planner_node" pkg="lunabot_nav" type="dstar_node" output="screen" respawn="true"/> -->
 
             <!-- Path followers- Point to point or Pure pursuit -->
-            <node name="point_to_point_node" if="$(arg ptp)" pkg="lunabot_control" type="point_to_point.py" output="screen" respawn="true" />
-            <node name="pure_pursuit_node" unless="$(arg ptp)" pkg="lunabot_control" type="pure_pursuit_controller.py" output="screen" respawn="true"/>
-        </group>
+            <!-- <node name="point_to_point_node" if="$(arg ptp)" pkg="lunabot_control" type="point_to_point.py" output="screen" respawn="true" /> -->
+            <!-- <node name="pure_pursuit_node" unless="$(arg ptp)" pkg="lunabot_control" type="pure_pursuit_controller.py" output="screen" respawn="true"/> -->
+        <!-- </group> --> -->
 
         <!-- Launch the costmap node -->
         <group ns="maps">
@@ -100,6 +100,6 @@
     
     </group>
       
-    <node name="apriltag_node" pkg="lunabot_perception" type="apriltag_node.py" output="screen" respawn="true"></node>
+    <!-- <node name="apriltag_node" pkg="lunabot_perception" type="apriltag_node.py" output="screen" respawn="true"></node> -->
 
 </launch>

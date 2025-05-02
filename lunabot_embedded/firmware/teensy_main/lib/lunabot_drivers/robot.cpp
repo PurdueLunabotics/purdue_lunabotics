@@ -12,14 +12,11 @@ namespace actuation {
 Sabertooth_MotorCtrl act_right_mtr{&MC1, STMotor::M1};
 Sabertooth_MotorCtrl act_left_mtr{&MC1, STMotor::M2};
 
-constexpr uint8_t ACT_RIGHT_CURR_ADC = 0;
-constexpr uint8_t ACT_RIGHT_CURR_MUX = 0; // U6 curr_sense_board
-
-constexpr uint8_t ACT_LEFT_CURR_ADC = 0;
-constexpr uint8_t ACT_LEFT_CURR_MUX = 1; // U4 curr_sense_board
+constexpr uint8_t ACT_RIGHT_CURR_MUX = 0;
+constexpr uint8_t ACT_LEFT_CURR_MUX = 2;
 
 void update(float &act_right_curr) {
-  act_right_curr = ADS1119_Current_Bus::read(ACT_RIGHT_CURR_ADC, ACT_RIGHT_CURR_MUX);
+  act_right_curr = ADS1119_Current_Bus::read(ACT_RIGHT_CURR_MUX);
 }
 
 void cb(int8_t lin_act_volt) {
@@ -75,6 +72,20 @@ void update(float &d0, float &d1, float &d2) {
   d2 = M5Stack_UWB_Trncvr::read_uwb(2);
 }
 } // namespace uwb
+
+namespace load_cell {
+void update(float &d0) {
+  float val1 = HX711_Bus::read_scale(0);
+  float val2 = HX711_Bus::read_scale(1);
+  if (val1 != -1 && val2 != -1) {
+    d0 = val1 + val2;
+  } else if (val1 != -1) {
+    d0 = val1;
+  } else if (val2 != -1) {
+    d0 = val2;
+  }
+}
+} // namespace load_cell
 
 namespace LEDs {
   void cb(int32_t color) {

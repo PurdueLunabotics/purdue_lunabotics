@@ -27,6 +27,7 @@ typedef struct _RobotSensors {
     float drive_left_vel;
     float drive_right_vel;
     float exc_vel;
+    float load_cell_weight;
 } RobotSensors;
 
 typedef struct _RobotEffort {
@@ -45,9 +46,9 @@ extern "C" {
 #endif
 
 /* Initializer values for message structs */
-#define RobotSensors_init_default                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define RobotSensors_init_default                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 #define RobotEffort_init_default                 {0, 0, 0, 0, 0, 0, 0}
-#define RobotSensors_init_zero                   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define RobotSensors_init_zero                   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 #define RobotEffort_init_zero                    {0, 0, 0, 0, 0, 0, 0}
 
 /* Field tags (for use in manual encoding/decoding) */
@@ -67,6 +68,7 @@ extern "C" {
 #define RobotSensors_drive_left_vel_tag          14
 #define RobotSensors_drive_right_vel_tag         15
 #define RobotSensors_exc_vel_tag                 16
+#define RobotSensors_load_cell_weight_tag        17
 #define RobotEffort_lin_act_tag                  1
 #define RobotEffort_left_drive_tag               2
 #define RobotEffort_right_drive_tag              3
@@ -92,7 +94,8 @@ X(a, STATIC,   SINGULAR, FLOAT,    uwb_dist_1,       12) \
 X(a, STATIC,   SINGULAR, FLOAT,    uwb_dist_2,       13) \
 X(a, STATIC,   SINGULAR, FLOAT,    drive_left_vel,   14) \
 X(a, STATIC,   SINGULAR, FLOAT,    drive_right_vel,  15) \
-X(a, STATIC,   SINGULAR, FLOAT,    exc_vel,          16)
+X(a, STATIC,   SINGULAR, FLOAT,    exc_vel,          16) \
+X(a, STATIC,   SINGULAR, FLOAT,    load_cell_weight,  17)
 #define RobotSensors_CALLBACK NULL
 #define RobotSensors_DEFAULT NULL
 
@@ -117,7 +120,7 @@ extern const pb_msgdesc_t RobotEffort_msg;
 /* Maximum encoded size of messages (where known) */
 #define ROBOTMSGS_PB_H_MAX_SIZE                  RobotSensors_size
 #define RobotEffort_size                         38
-#define RobotSensors_size                        81
+#define RobotSensors_size                        87
 
 #ifdef __cplusplus
 } /* extern "C" */

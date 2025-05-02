@@ -21,7 +21,7 @@ class DifferentialDriveController:
         self.max_speed_percentage = rospy.get_param("~max_speed_percentage", 0.8)
         self.hz = rospy.get_param("~hz", 20)
 
-        self._max_speed = rospy.get_param("~max_speed", 500) # In rad/s converted to RPM
+        self._max_speed = rospy.get_param("~max_speed", 1000) # In rad/s converted to RPM
         
         self.lin = 0
         self.ang = 0
@@ -29,7 +29,7 @@ class DifferentialDriveController:
         self._left_vel = 0
         self._right_vel = 0
         self._wheel_diameter = 0.3429 # converts rad /s to m / s
-        self._gearbox_ratio = 50 
+        self._gearbox_ratio = 100
         self._left_prev_error = 0
         self._right_prev_error = 0
 
