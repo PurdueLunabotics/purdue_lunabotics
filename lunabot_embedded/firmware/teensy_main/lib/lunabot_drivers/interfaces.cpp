@@ -32,20 +32,20 @@ void ADS1119_Current_Bus::init_ads1119() {
   configuration.voltageReference = ADS1119Configuration::VoltageReferenceSource::external;
   configuration.externalReferenceVoltage = 5.0;
 
-    ads1.begin(&configuration);
+  ads1.begin(&configuration);
   /* Config ADS1119 Amux Input as Single Ended*/
   ads1.configADCSingleEnded();
   /* Select ADS1119 Channel
   Single Ended: 4 CHANNELS => AN0, AN1, AN2, AN3
   Differential: 3 CHANNELS => AN0-AN1, AN2-AN3, AN1-AN2,
   */
-  ads1.selectChannel(0); // select AN0 (single ended input mode)
+  ads1.selectChannel(2); // select AN0 (single ended input mode)
   ads1.reset();
 }
 
 float ADS1119_Current_Bus::read(uint8_t mux) {
   //ports are zero and 
-  ads1.selectChannel(mux);
+  //ads1.selectChannel(mux);
   return ADS1119_Current_Bus::adc_to_current_31A(ads1.readVoltage());
 }
 
