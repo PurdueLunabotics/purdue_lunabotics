@@ -1,4 +1,5 @@
 #include <robot.hpp>
+#include <Wire>
 
 // sensor wire documentation 2022-2023:
 // https://docs.google.com/spreadsheets/d/1eX79YtawJqBA8VePFFtKJT6RR21gvK4qH1DKJX_vJE0/edit#gid=0
@@ -16,7 +17,10 @@ constexpr uint8_t ACT_RIGHT_CURR_MUX = 0;
 constexpr uint8_t ACT_LEFT_CURR_MUX = 2;
 
 void update(float &act_right_curr) {
-  act_right_curr = ADS1119_Current_Bus::read(ACT_LEFT_CURR_MUX);
+  act_right_curr = 0.42;// ADS1119_Current_Bus::read(ACT_LEFT_CURR_MUX);
+  Wire.beginTransmission(0x40);
+  Wire.write("Whiauwhdawudhiauwhduawhdiauwhduihawidhuawhdiahwduiawhduahwdiuhawidhawudhaiwhdauwdhihauwdhiauwhdiuahwdiuahwdiuahwdiuhawdiuhawiudhawihdiauwhdiawhdiuawhdiu");
+  Wire.endTransmission();
 }
 
 void cb(int8_t lin_act_volt) {
