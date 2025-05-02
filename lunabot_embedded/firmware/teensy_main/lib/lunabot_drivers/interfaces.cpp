@@ -21,37 +21,32 @@ void Sabertooth_MotorCtrl::write(int8_t power) {
 
 // Current Sensor
 
-ADS1119Configuration ADS1119_Current_Bus::configurations[BUSES][MUXES] = {};
+ADS1119Configuration ADS1119_Current_Bus::configuration = {};
 ADS1119 ADS1119_Current_Bus::ads1 = ADS1119(ads1_addr);
 
 void ADS1119_Current_Bus::init_ads1119() {
-  // init all channels to same general config, but with different mux config.
-  // different configs for both chips for futureproofing, not because they're any different
-  for (int i = 0; i < BUSES; ++i) {
-    configurations[i][0].mux = ADS1119MuxConfiguration::positiveAIN1negativeAGND;
-    configurations[i][1].mux = ADS1119MuxConfiguration::positiveAIN0negativeAGND;
+  configuration.mux = ADS1119MuxConfiguration::positiveAIN0negativeAIN1;
+  configuration.gain = ADS1119Configuration::Gain::one;
+  configuration.dataRate = ADS1119Configuration::DataRate::sps20;
+  configuration.conversionMode = ADS1119Configuration::ConversionMode::continuous;
+  configuration.voltageReference = ADS1119Configuration::VoltageReferenceSource::external;
+  configuration.externalReferenceVoltage = 3.305;
 
-    for (int j = 0; j < MUXES; ++j) {
-      configurations[i][j].gain = ADS1119Configuration::Gain::one;
-      configurations[i][j].dataRate = ADS1119Configuration::DataRate::sps330;
-      configurations[i][j].conversionMode = ADS1119Configuration::ConversionMode::continuous;
-      configurations[i][j].voltageReference = ADS1119Configuration::VoltageReferenceSource::external;
-      configurations[i][j].externalReferenceVoltage = 3.3;
-    }
-  }
-
-  ads1.begin();
+    ads1.begin(&configuration);
+  /* Config ADS1119 Amux Input as Single Ended*/
+  ads1.configADCSingleEnded();
+  /* Select ADS1119 Channel
+  Single Ended: 4 CHANNELS => AN0, AN1, AN2, AN3
+  Differential: 3 CHANNELS => AN0-AN1, AN2-AN3, AN1-AN2,
+  */
+  ads1.selectChannel(0); // select AN0 (single ended input mode)
   ads1.reset();
 }
 
-float ADS1119_Current_Bus::read(uint8_t bus, uint8_t mux) {
-  switch (bus) {
-  case 0:
-    return ADS1119_Current_Bus::adc_to_current_31A(ads1.readVoltage(configurations[0][mux]));
-  default:
-    // we only have one mux
-    return 69.420;
-  }
+float ADS1119_Current_Bus::read(uint8_t mux) {
+  //ports are zero and 
+  ads1.selectChannel(mux);
+  return ADS1119_Current_Bus::adc_to_current_31A(ads1.readVoltage());
 }
 
 float ADS1119_Current_Bus::adc_to_current_31A(float adc_value, float adc_fsr, float vcc) {

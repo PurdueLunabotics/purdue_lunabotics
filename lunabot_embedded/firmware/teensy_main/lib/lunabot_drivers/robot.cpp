@@ -12,14 +12,11 @@ namespace actuation {
 Sabertooth_MotorCtrl act_right_mtr{&MC1, STMotor::M1};
 Sabertooth_MotorCtrl act_left_mtr{&MC1, STMotor::M2};
 
-constexpr uint8_t ACT_RIGHT_CURR_ADC = 0;
-constexpr uint8_t ACT_RIGHT_CURR_MUX = 0; // U6 curr_sense_board
-
-constexpr uint8_t ACT_LEFT_CURR_ADC = 0;
-constexpr uint8_t ACT_LEFT_CURR_MUX = 1; // U4 curr_sense_board
+constexpr uint8_t ACT_RIGHT_CURR_MUX = 0;
+constexpr uint8_t ACT_LEFT_CURR_MUX = 2;
 
 void update(float &act_right_curr) {
-  act_right_curr = ADS1119_Current_Bus::read(ACT_RIGHT_CURR_ADC, ACT_RIGHT_CURR_MUX);
+  act_right_curr = ADS1119_Current_Bus::read(ACT_RIGHT_CURR_MUX);
 }
 
 void cb(int8_t lin_act_volt) {
