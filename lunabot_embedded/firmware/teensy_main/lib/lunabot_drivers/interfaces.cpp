@@ -30,7 +30,7 @@ void ADS1119_Current_Bus::init_ads1119() {
   configuration.dataRate = ADS1119Configuration::DataRate::sps20;
   configuration.conversionMode = ADS1119Configuration::ConversionMode::continuous;
   configuration.voltageReference = ADS1119Configuration::VoltageReferenceSource::external;
-  configuration.externalReferenceVoltage = 5.0;
+  configuration.externalReferenceVoltage = 3.305;
 
     ads1.begin(&configuration);
   /* Config ADS1119 Amux Input as Single Ended*/
