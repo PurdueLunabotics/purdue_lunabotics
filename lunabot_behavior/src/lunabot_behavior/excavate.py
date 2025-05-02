@@ -75,7 +75,7 @@ class ExcavationController:
         # speed to run drivetrain during trenching (m/s)
         self.TRENCHING_SPEED = 0.01 # lil slow - exc stalled at 0.02, try 0.015 next
 
-        self.LIN_ACT_CURR_THRESHOLD = 1  # Amps; TODO find value
+        self.LIN_ACT_CURR_THRESHOLD = 0.1  # Amps; TODO find value
 
         self.EXCAVATION_CURR_THRESHOLD = 25  # Amps; TODO find/confirm value
 
