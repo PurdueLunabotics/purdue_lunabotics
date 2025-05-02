@@ -75,7 +75,7 @@ class ExcavationController:
         # speed to run drivetrain during trenching (m/s)
         self.TRENCHING_SPEED = 0.01 # lil slow - exc stalled at 0.02, try 0.015 next
 
-        self.LIN_ACT_CURR_THRESHOLD = 10  # Amps; TODO find value
+        self.LIN_ACT_CURR_THRESHOLD = 1  # Amps; TODO find value
 
         self.EXCAVATION_CURR_THRESHOLD = 25  # Amps; TODO find/confirm value
 
@@ -94,7 +94,7 @@ class ExcavationController:
 
         time.sleep(0.1)  
 
-        print("Excavation: Plunging")
+        rospy.loginfo("Excavation: Plunging")
 
         if self.is_sim:
             rospy.loginfo("Plunge: would plunge")
@@ -107,7 +107,7 @@ class ExcavationController:
         start_time = rospy.get_time()
 
         # Until the linear actuators reach the end (based on time), keep moving them down or the actuators reach the limit and stop
-        while rospy.get_time() - start_time < self.LOWERING_TIME and self.robot_sensors.act_right_curr < self.LIN_ACT_CURR_THRESHOLD:
+        while rospy.get_time() - start_time < self.LOWERING_TIME and abs(self.robot_sensors.act_right_curr) < self.LIN_ACT_CURR_THRESHOLD:
 
             excavation_message.data = self.EXCAVATION_SPEED
 
@@ -147,7 +147,7 @@ class ExcavationController:
 
         time.sleep(0.1)  
 
-        print("Excavation: Plunging")
+        rospy.loginfo("Excavation: Plunging")
 
         if self.is_sim:
             rospy.loginfo("Plunge: would plunge")
@@ -185,7 +185,7 @@ class ExcavationController:
 
         time.sleep(0.1)
 
-        print("Excavation: Trenching")
+        rospy.loginfo("Excavation: Trenching")
 
         if self.is_sim:
             rospy.loginfo("Trenching: would trench")
