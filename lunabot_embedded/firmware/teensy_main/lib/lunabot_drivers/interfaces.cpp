@@ -217,7 +217,7 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
 CRGB Led_Strip::all_led[Led_Strip::NUM_LEDS];
 
 void Led_Strip::init() { 
-  FastLED.addLeds<WS2811, 3, GRB>(Led_Strip::all_led, Led_Strip::NUM_LEDS);
+  FastLED.addLeds<WS2811, 6, GRB>(Led_Strip::all_led, Led_Strip::NUM_LEDS);
   FastLED.setBrightness(Led_Strip::BRIGHTNESS);
 }
 
