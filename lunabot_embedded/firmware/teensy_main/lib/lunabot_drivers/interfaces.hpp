@@ -37,17 +37,14 @@ class ADS1119_Current_Bus {
 public:
   ADS1119_Current_Bus() {};
   static void init_ads1119();
-  static float read(uint8_t bus, uint8_t mux);
+  static float read(uint8_t mux);
 
   static float adc_to_current_31A(float adc_value, float adc_fsr = 4.096, float vcc = 3.3);
 
 private:
-  static constexpr int BUSES = 1;
-  static constexpr int MUXES = 2;
-
   static constexpr uint8_t ads1_addr = 0x40;
 
-  static ADS1119Configuration configurations[BUSES][MUXES];
+  static ADS1119Configuration configuration;
   static ADS1119 ads1;
 };
 
