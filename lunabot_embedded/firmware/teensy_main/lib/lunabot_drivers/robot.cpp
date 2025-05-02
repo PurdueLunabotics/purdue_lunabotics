@@ -16,7 +16,7 @@ constexpr uint8_t ACT_RIGHT_CURR_MUX = 0;
 constexpr uint8_t ACT_LEFT_CURR_MUX = 2;
 
 void update(float &act_right_curr) {
-  act_right_curr = ADS1119_Current_Bus::read(ACT_RIGHT_CURR_MUX);
+  act_right_curr = ADS1119_Current_Bus::read(ACT_LEFT_CURR_MUX);
 }
 
 void cb(int8_t lin_act_volt) {
