@@ -71,8 +71,8 @@ public:
   static void set_color(int32_t);
 
 private:
-  static constexpr int NUM_LEDS = 90;
-  static constexpr int BRIGHTNESS = 100; // 0 -> 255
+  static constexpr int NUM_LEDS = 60;
+  static constexpr int BRIGHTNESS = 200; // 0 -> 255
   static CRGB all_led[NUM_LEDS];
 };
 
