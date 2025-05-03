@@ -125,10 +125,16 @@ class ExdepController:
         while (self.apriltag_pose_in_odom is None):
             rospy.sleep(0.1)
 
+        self.counter = 0
         while (not rospy.is_shutdown()):
 
             # we start in the mining zone, hopefully at a good mining location
-            self.excavation.excavate()
+            # only plunge first two cycles to ensure full autonomy points
+            if self.counter < 2:
+                self.excavation.plunge()
+                self.counter += 1
+            else:
+                self.excavation.excavate()
 
             # raise the linear actuators out of the way
             self.linear_actuators.raise_linear_actuators(True) 
