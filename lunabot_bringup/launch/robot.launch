@@ -1,5 +1,4 @@
-<?xml version="1.0"?>
-<launch>
+<?xml version="1.0"?> <launch>
     <arg name="autonomy" default="true" />
     <arg name="record" default="true" />
     <arg name="teensy" default="true" />
@@ -46,7 +45,7 @@
 
         <group>
             <include if="$(arg slam)" file="$(find rtabmap_ros)/launch/rtabmap.launch">
-                <arg name="rtabmap_args" value="--delete_db_on_start" />
+                <arg name="rtabmap_args" value="--delete_db_on_start --Odom/ResetCountdown 1" />
                 <arg name="rgbd_sync" value="false" />
                 <arg name="subscribe_rgbd" value="false" />
                 <arg name="depth" value="true" />
@@ -64,8 +63,6 @@
                 <!-- If using both front/back for mapping, using the combined pointcloud -->
                 <arg name="scan_cloud_topic" value="/pointcloud/depth_combined_cloud"/>
                 <arg name="subscribe_scan_cloud" value="$(eval arg('front') and arg('back'))" />
-
-                 <arg name="rtabmap_args" value="--Odom/ResetCountdown 1"/>
 
                 <arg name="rtabmapviz" value="false" />
                 <arg name="imu_topic" value="/imu" />
