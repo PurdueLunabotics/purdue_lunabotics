@@ -125,10 +125,16 @@ class ExdepController:
         while (self.apriltag_pose_in_odom is None):
             rospy.sleep(0.1)
 
+        self.counter = 0
         while (not rospy.is_shutdown()):
 
             # we start in the mining zone, hopefully at a good mining location
-            self.excavation.excavate()
+            # only plunge first two cycles to ensure full autonomy points
+            if self.counter < 2:
+                self.excavation.plunge()
+                self.counter += 1
+            else:
+                self.excavation.excavate()
 
             # raise the linear actuators out of the way
             self.linear_actuators.raise_linear_actuators(True) 
@@ -154,8 +160,9 @@ class ExdepController:
             self.traversal_publisher.publish(traversal_message)
 
             mining_goal = PoseStamped()
-            mining_goal.pose.position.x = self.mining_zone.middle[0]
-            mining_goal.pose.position.y = self.mining_zone.middle[1]
+            random_goal = self.mining_zone.randomPoint()
+            mining_goal.pose.position.x = random_goal[0]
+            mining_goal.pose.position.y = random_goal[1]
             mining_goal.header.stamp = rospy.Time.now()
             mining_goal.header.frame_id = "odom"
 
