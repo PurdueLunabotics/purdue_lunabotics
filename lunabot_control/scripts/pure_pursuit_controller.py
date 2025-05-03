@@ -52,6 +52,7 @@ class PurePursuitController:
         self.telemetry = telemetry
 
         self.drive_backwards = False
+        self.traversal_enabled = True
         
         # make weights updatable without restarting
         # switch between pure pursuit and test wheel nodes in yml file
@@ -98,6 +99,12 @@ class PurePursuitController:
 
     def backwards_callback(self, msg: Bool):
         self.drive_backwards = msg.data
+
+    def traversal_enabled_callback(self, msg: Bool):
+        self.traversal_enabled = msg.data
+
+        if (msg.data == False):
+            self.vel_publisher.publish(Twist())
 
         
     def publish_velocity(self, lin_ang_velocities):
@@ -482,17 +489,24 @@ class PurePursuitController:
 
         backwards_topic = rospy.get_param("/traversal/backwards_topic", "/traversal/backwards")
         rospy.Subscriber(backwards_topic, Bool, self.backwards_callback)
+
+        traversal_enabled_topic = rospy.get_param("/behavior/traversal_enabled_topic", "/behavior/traversal_enabled")
+        rospy.Subscriber(traversal_enabled_topic, Bool, self.traversal_enabled_callback)
         
         rate = rospy.Rate(self.frequency)
         
         while not rospy.is_shutdown():
             # print("WHAT IS THE TIME", rospy.get_time())
             # print("PATH:", self.path)
+
             self.dt = rospy.get_time() - self.last_time + 1e-99
             self.last_time = rospy.get_time()
             if self.telemetry:
                 print("ROBOT POSE:", self.robot_pose)
                 print("ROBOT VEL:", self.robot_velocity)
+
+            if not self.traversal_enabled:
+                continue
                 
             if not (self.path == []):
                 self.update_vel(self.trackwidth, self.dt)

@@ -25,7 +25,7 @@ class EffortFactory:
             "/effort", RobotEffort, queue_size=5, latch=True
         )
 
-        self.lin_act_subscriber = rospy.Subscriber("/lin_act", Int8, self.set_lin_act)
+        self.lin_act_subscriber = rospy.Subscriber("/lin_act", Int32, self.set_lin_act)
         self.left_drive_subscriber = rospy.Subscriber("/left_drive", Int32, self.set_left_drive)
         self.right_drive_subscriber = rospy.Subscriber("/right_drive", Int32, self.set_right_drive)
         self.excavate_subscriber = rospy.Subscriber("/excavate", Int32, self.set_excavate)

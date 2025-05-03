@@ -88,4 +88,7 @@
       <remap to="/pc_topic" from="~output_topic" />
   </node>
 
+  <node name="apriltag_node" pkg="lunabot_perception" type="apriltag_node.py" output="screen" respawn="true"></node>
+
+
 </launch>

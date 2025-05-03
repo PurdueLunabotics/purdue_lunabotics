@@ -1,6 +1,7 @@
 odom_topic: "/rtabmap/odom"
 cmd_vel_topic: "/cmd_vel"
 nav_goal_topic: "/goal"
+apriltag_topic: "/apriltag_pose"
 
 
 nav:
@@ -25,7 +26,7 @@ nav:
         frequency_p: 15
         lookahead: 0.5
         velocity_limits_p:
-            linear: [-0.2, 0.2]
+            linear: [-0.3, 0.3]
             angular: [-0.785, 0.785]
 
     pure_pursuit_test_wheels:

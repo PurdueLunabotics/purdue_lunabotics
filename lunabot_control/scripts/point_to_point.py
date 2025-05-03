@@ -5,7 +5,7 @@ from std_msgs.msg import Bool, Float32, String
 from nav_msgs.msg import Path, Odometry, OccupancyGrid
 from map_msgs.msg import OccupancyGridUpdate
 from geometry_msgs.msg import Twist, Point, Pose2D
-from pid_controller import PIDController
+from lunabot_control.pid_controller import PIDController
 from visualization_msgs.msg import Marker
 from tf.transformations import euler_from_quaternion
 import numpy as np
@@ -27,7 +27,7 @@ class PointToPoint:
         self.LINEAR_I = 0
         self.LINEAR_D = 0
         self.LINEAR_TOLERANCE = 0.2  # meters
-        self.MAX_LINEAR_SPEED = 0.5  # m/s
+        self.MAX_LINEAR_SPEED = 0.3  # m/s
         self.linear_pid = PIDController(
             self.LINEAR_P,
             self.LINEAR_I,
@@ -40,7 +40,7 @@ class PointToPoint:
         self.ANGULAR_D = 0
         self.ANGULAR_TOLERANCE_DEG = 10
         self.ANGULAR_TOLERANCE_RAD = np.deg2rad(self.ANGULAR_TOLERANCE_DEG)
-        self.MAX_ANGULAR_SPEED_DEG_PER_SEC = 90
+        self.MAX_ANGULAR_SPEED_DEG_PER_SEC = 60
         self.MAX_ANGULAR_SPEED_RAD_PER_SEC = np.deg2rad(
             self.MAX_ANGULAR_SPEED_DEG_PER_SEC
         )
@@ -622,12 +622,15 @@ class PointToPoint:
         vel.linear.x *= -1 if self.is_moving_backwards else 1
         self.cmd_vel_publisher.publish(vel)
 
-        # target pose publishing
-        pose = Pose2D()
-        pose.x = self.target_pose[0]
-        pose.y = self.target_pose[1]
-        pose.theta = self.target_pose[2]
-        self.target_publisher.publish(pose)
+        try:
+            # target pose publishing
+            pose = Pose2D()
+            pose.x = self.target_pose[0]
+            pose.y = self.target_pose[1]
+            pose.theta = self.target_pose[2]
+            self.target_publisher.publish(pose)
+        except:
+            pass
 
         # visualize path to target
         if self.target_pose != [None, None]:

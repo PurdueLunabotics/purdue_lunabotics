@@ -11,7 +11,7 @@ traversal_publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue
 enabled_msg = Bool()
 enabled_msg.data = True
 
-print("Turning on mpc")
+print("Turning on traversal")
 
 for i in range(10):
     traversal_publisher.publish(enabled_msg)

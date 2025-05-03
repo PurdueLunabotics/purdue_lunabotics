@@ -10,4 +10,4 @@ float32 drive_right_vel
 float32 exc_torque
 float32 exc_vel
 float32[] uwb_dists
-float32[] load_cell_weights
+float32 load_cell_weight
