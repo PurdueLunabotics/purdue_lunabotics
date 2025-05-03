@@ -31,7 +31,7 @@ class LinearActuatorManager:
 
 		self.rate = rospy.Rate(10)  # 10hz
 
-		self.ACTUATOR_CURRENT_THRESHOLD = 0.01 #TODO find best value or remove
+		self.ACTUATOR_CURRENT_THRESHOLD = 0.1 #TODO find best value or remove
 
 		self.RAISING_TIME = 30
 
@@ -39,7 +39,7 @@ class LinearActuatorManager:
 
 		self.is_sim = rospy.get_param("is_sim")
 
-	def raise_linear_actuators(self, use_current: bool = False):
+	def raise_linear_actuators(self, use_current: bool = False):	
 		"""
 		Raise linear actuators to the max. height by turning them on until the current received is 0.
 		"""

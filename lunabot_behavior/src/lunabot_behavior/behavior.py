@@ -182,7 +182,7 @@ class Behavior:
 
         # Raise linear actuators
         rospy.loginfo("Behavior: Raising linear actuator")
-        linear_actuators.raise_linear_actuators()
+        linear_actuators.raise_linear_actuators(True)
 
         # Spin for one loop to map environment
         rospy.loginfo("Behavior: Mapping")

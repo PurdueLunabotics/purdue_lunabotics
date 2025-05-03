@@ -133,14 +133,20 @@ class ExdepController:
         while (self.apriltag_pose_in_odom is None):
             rospy.sleep(0.1)
 
+        self.counter = 0
         while (not rospy.is_shutdown()):
             self.set_color(6) # Aqua for excavation
 
             # we start in the mining zone, hopefully at a good mining location
-            self.excavation.excavate()
+            # only plunge first two cycles to ensure full autonomy points
+            if self.counter < 2:
+                self.excavation.plunge()
+                self.counter += 1
+            else:
+                self.excavation.excavate()
 
             # raise the linear actuators out of the way
-            self.linear_actuators.raise_linear_actuators()
+            self.linear_actuators.raise_linear_actuators(True) 
 
             # pick berm area goal
             berm_goal = PoseStamped()
@@ -165,8 +171,9 @@ class ExdepController:
             self.traversal_publisher.publish(traversal_message)
 
             mining_goal = PoseStamped()
-            mining_goal.pose.position.x = self.mining_zone.middle[0]
-            mining_goal.pose.position.y = self.mining_zone.middle[1]
+            random_goal = self.mining_zone.randomPoint()
+            mining_goal.pose.position.x = random_goal[0]
+            mining_goal.pose.position.y = random_goal[1]
             mining_goal.header.stamp = rospy.Time.now()
             mining_goal.header.frame_id = "odom"
 
@@ -188,10 +195,12 @@ class ExdepController:
             self.cmd_vel_publisher.publish(cmd_vel)
 
             self.set_color(7) # Purple for deposition autonomy
+            rospy.loginfo("Behavior: Aligning to Berm Zone")
 
             # align to the berm
             self.alignment.align_to_angle(math.pi / 2)
 
+            rospy.loginfo("Behavior: Moving Backwards to Berm")
             # approach backwards for 2 sec
             cmd_vel.linear.x = -0.3
             cmd_vel.angular.z = 0
@@ -204,6 +213,7 @@ class ExdepController:
             cmd_vel.angular.z = 0
             self.cmd_vel_publisher.publish(cmd_vel)
 
+            rospy.loginfo("Behavior: Depositing")
             self.deposition.deposit()
 
             # get out of mining area for 2 sec
