@@ -235,6 +235,15 @@ void Led_Strip::set_color(int32_t color_in) {
   case 4:
     color_choice = CRGB::White;
     break;
+  case 5:
+    color_choice = CRGB::Yellow;
+    break;
+  case 6:
+    color_choice = CRGB::Aqua;
+    break;
+  case 7:
+    color_choice = CRGB::Magenta;
+    break;
   default:
     color_choice = CRGB::Black;
     break;
