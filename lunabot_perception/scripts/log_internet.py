@@ -10,7 +10,7 @@ def log_internet(link_quality_publisher: rospy.Publisher, signal_level_publisher
     try:
         # run iwconfig in subshell
         output = os.popen("iwconfig 2>/dev/null | grep \"Link Quality\"").read()
-        output.strip()
+        output = output.strip().replace("  "," ")
 
         # Expected Output: Link Quality=xx/100 Signal level=xx/100 Noise level=xx/100
 
