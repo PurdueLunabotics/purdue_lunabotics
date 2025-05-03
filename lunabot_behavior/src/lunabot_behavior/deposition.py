@@ -68,7 +68,8 @@ class DepositionManager:
             weight = self.robot_sensors.load_cell_weight
 
             if weight < self.WEIGHT_THRESHOLD:
-                break
+                #break
+                pass
 
             self.rate.sleep()
 
