@@ -154,8 +154,9 @@ class ExdepController:
             self.traversal_publisher.publish(traversal_message)
 
             mining_goal = PoseStamped()
-            mining_goal.pose.position.x = self.mining_zone.middle[0]
-            mining_goal.pose.position.y = self.mining_zone.middle[1]
+            random_goal = self.mining_zone.randomPoint()
+            mining_goal.pose.position.x = random_goal[0]
+            mining_goal.pose.position.y = random_goal[1]
             mining_goal.header.stamp = rospy.Time.now()
             mining_goal.header.frame_id = "odom"
 

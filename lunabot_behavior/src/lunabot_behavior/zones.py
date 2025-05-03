@@ -3,6 +3,7 @@ from geometry_msgs.msg import PoseStamped, Point
 from visualization_msgs.msg import Marker
 from tf.transformations import euler_from_quaternion
 import math
+import random
 
 class Zone:
     def __init__(self, top_left: 'tuple[float]', top_right: 'tuple[float]', bottom_left: 'tuple[float]', bottom_right: 'tuple[float]'):
@@ -17,6 +18,11 @@ class Zone:
         self.bottom_right = bottom_right
 
         self.middle = ((bottom_left[0] + top_right[0]) / 2, (bottom_left[1] + top_right[1]) / 2)
+    
+    def randomPoint(self) -> 'tuple[float]':
+        x = random.randrange(self.top_left[0], self.top_right[0])
+        y = random.randrange(self.top_left[1], self.bottom_left[1])
+        return (x,y)
 
     def visualize_zone(self, publisher: rospy.Publisher, id=0, color=(1,0,0,1)):
         """
