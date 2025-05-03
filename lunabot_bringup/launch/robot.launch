@@ -9,6 +9,7 @@
     <arg name="front" default="true" />
     <arg name="back" default="true" />
     <arg name="extra_cams" default="false" />
+    <arg name="loginternet" default="false" />
 
     <!-- Should we use Point To Point or Pure pursuit -->
     <arg name="ptp" default="true"/>
@@ -99,4 +100,6 @@
       
     <node name="apriltag_node" pkg="lunabot_perception" type="apriltag_node.py" output="screen" respawn="true"></node>
 
+
+    <node if="$(arg loginternet)" pkg="lunabot_perception" type="log_internet.py" name="loginternet" output="screen"/>
 </launch>
