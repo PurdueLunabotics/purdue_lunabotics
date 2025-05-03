@@ -380,7 +380,6 @@ std::vector<real_world_point> Dstar::update_replan(std::vector<std::vector<int>>
 
 // Updates the map with new grid whenever map is changed.The node values list is expanded if needed to match the new size of the map.
 // The map is updated with the new given map, and buffer is added so that we never have to shrink the map / node values.
-
 // After the new map is built, we call update / replan, updating the needed node values, which later calculates the path and returns the new path
 std::vector<real_world_point> Dstar::update_map(std::vector<std::vector<int>> new_map, double x_offset, double y_offset) {
   double prev_x_offset = this->x_offset;
