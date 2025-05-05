@@ -88,8 +88,11 @@ class ExdepController:
 
             # we start in the mining zone, hopefully at a good mining location
             # only plunge first two cycles to ensure full autonomy points
+
+            # Note- this is changed back to normal until plunging can be stopped correctly
             if self.counter < 2:
-                self.excavation.plunge()
+                self.excavation.excavate()
+
                 self.counter += 1
             else:
                 self.excavation.excavate()
@@ -110,34 +113,7 @@ class ExdepController:
 
             # move to the berm area
             rospy.loginfo("Behavior: Moving to berm area")
-<<<<<<< HEAD
             self.traversal_manager.traverse_to_goal(berm_goal, drive_backwards=True)
-=======
-            self.backwards_publisher.publish(True)
-            self.goal_publisher.publish(berm_goal)
-
-            traversal_message = Bool()
-            traversal_message.data = True
-            self.traversal_publisher.publish(traversal_message)
-
-            mining_goal = PoseStamped()
-            random_goal = self.mining_zone.randomPoint()
-            mining_goal.pose.position.x = random_goal[0]
-            mining_goal.pose.position.y = random_goal[1]
-            mining_goal.header.stamp = rospy.Time.now()
-            mining_goal.header.frame_id = "odom"
-
-            offset = zones.calc_offset(0, 0, self.apriltag_pose_in_odom, self.is_sim)  # TODO: maybe shift mining location each time
-            mining_goal.pose.position.x += offset[0]
-            mining_goal.pose.position.y += offset[1]
-
-            while not self.is_close_to_goal(berm_goal):
-                self.rate.sleep()
-
-            traversal_message.data = False
-            self.backwards_publisher.publish(False)
-            self.traversal_publisher.publish(traversal_message)
->>>>>>> feature/behavior
 
             # once we've arrived, stop.
             cmd_vel = Twist()
