@@ -46,5 +46,8 @@ for i in range(10):
     left_publisher.publish(zero)
     right_publisher.publish(zero)
     deposit_publisher.publish(zero)
+
+    rospy.set_param("autonomy", False)
+
     rospy.sleep(0.1)
 
