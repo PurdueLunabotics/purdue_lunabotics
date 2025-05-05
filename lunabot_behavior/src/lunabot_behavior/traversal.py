@@ -3,7 +3,7 @@ import threading
 from queue import Queue
 import math
 import numpy as np
-from nav_msgs.msg import OccupancyGrid, Odometry
+from nav_msgs.msg import OccupancyGrid, Odometry, Path
 from map_msgs.msg import OccupancyGridUpdate
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Bool
@@ -33,13 +33,14 @@ class TraversalManager:
 
         self.frequency = 10  # Hz
 
-        map_topic = rospy.get_param("/nav/map_topic")
-        map_update_topic = rospy.get_param("/nav/map_update_topic")
+        map_topic = rospy.get_param("/nav/map_topic", "/maps/costmap_node/global_costmap/costmap")
+        map_update_topic = rospy.get_param("/nav/map_update_topic", "/maps/costmap_node/global_costmap/costmap_updates")
         odom_topic = rospy.get_param("/odom_topic")
 
         rospy.Subscriber(map_topic, OccupancyGrid, self.map_callback)
         rospy.Subscriber(map_update_topic, OccupancyGridUpdate, self.map_update_callback)
         rospy.Subscriber(odom_topic, Odometry, self.odom_callback)
+        rospy.Subscriber("/nav/global_path", Path, self.path_callback)
 
         self.goal_publisher = rospy.Publisher("/goal", PoseStamped, queue_size=1, latch=True)
         self.traversal_publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue_size=1, latch=True)
@@ -199,6 +200,19 @@ class TraversalManager:
         position = [position[0] + self.map_x_offset, position[1] + self.map_y_offset]
         return position
 
+    def path_callback(self, msg: Path):
+        if (len(msg.poses) == 0):
+            if (self.current_goal is not None):
+                self.check_and_replace_goal()
+
+                goal = PoseStamped()
+                goal.header.frame_id = "odom"
+                goal.header.stamp = rospy.Time.now()
+                goal.pose.position.x = self.current_goal[0]
+                goal.pose.position.y = self.current_goal[1]
+                goal.pose.position.z = 0
+        
+                self.goal_publisher.publish(goal)
 
     def odom_callback(self, msg: Odometry):
         self.robot_odom = msg
@@ -240,6 +254,10 @@ class TraversalManager:
             return
 
         temp_map = self.map.copy()
+
+        if (msg.y + msg.height >= len(temp_map) or msg.x + msg.width >= len(temp_map[0])):
+            self.map_lock.release()
+            return
 
         index = 0
         for i in range(msg.y, msg.y + msg.height):
