@@ -121,6 +121,7 @@ class ManualController:
     def publish_manual_stop(self):
         self.error_msg.manual_stop = True
         self.error_pub.publish(self.error_msg)
+        self.effort_msg.should_reset = True
 
     def unpublish_manual_stop(self):
         self.error_msg.manual_stop = False
@@ -152,8 +153,8 @@ class ManualController:
 
         # Start button: Stop the robot (Pause) and turns autonomy off (must be restarted manually)
         if joy.buttons[Buttons.START.value] == 1:
-            self.stop()
             self.publish_manual_stop()
+            self.stop()
             rospy.loginfo("Manual Control: Stopped")
         else:
             self.unpublish_manual_stop()
@@ -163,6 +164,7 @@ class ManualController:
             effort_msg.right_drive = 0
 
             effort_msg.excavate = 0
+            effort_msg.should_reset = False
 
             # Set the drive effort to the left and right stick vertical axes (Tank Drive)
             if self.driving_mode == "Forwards":
