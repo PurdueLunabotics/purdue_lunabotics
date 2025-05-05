@@ -454,16 +454,10 @@ std::vector<real_world_point> Dstar::update_map(std::vector<std::vector<int>> ne
 
   // change goal - as the size / buffer of the map has changed, the goal should be reconverted
   goal = convert_to_grid(real_goal);
-  if (current_map[this->goal.y][this->goal.x] > OCCUPANCY_THRESHOLD) {
-    this->goal = bfs_non_occupied(this->goal);
-    this->node_values_list[this->goal.y][this->goal.x].estimate_rhs = 0;
-    this->insert(this->goal, this->calculate_key(this->goal));
-  } else {
-    // Copy the original node values into the new node_values
-    for (int y = 0; y < nv_original_rows; y++) {
-      for (int x = 0; x < nv_original_cols; x++) {
-        node_values_list[y + nv_buf_rows_up][x + nv_buf_cols_left] = prev_nv[y][x];
-      }
+  // Copy the original node values into the new node_values
+  for (int y = 0; y < nv_original_rows; y++) {
+    for (int x = 0; x < nv_original_cols; x++) {
+      node_values_list[y + nv_buf_rows_up][x + nv_buf_cols_left] = prev_nv[y][x];
     }
   }
 

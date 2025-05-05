@@ -13,6 +13,7 @@ from std_msgs.msg import Bool, Int8, Int32
 from lunabot_behavior.linear_actuators import LinearActuatorManager
 from lunabot_behavior.alignment import AlignmentController
 from lunabot_behavior.exdep import ExdepController
+from lunabot_behavior.traversal import TraversalManager
 from geometry_msgs.msg import Twist
 
 import zones
@@ -29,12 +30,6 @@ class Behavior:
 
     def odom_callback(self, msg: Odometry):
         self.robot_odom = msg
-    
-    def cmd_vel_callback(self, msg: Twist):
-        self.cmd_vel = msg
-        
-    def is_stopped(self) -> bool:
-        return self.cmd_vel != None and (self.cmd_vel.angular.z == 0 and self.cmd_vel.linear.x == 0)
 
     def apriltag_pose_callback(self, msg: PoseStamped):
         self.apriltag_pose_in_odom = msg
@@ -55,11 +50,6 @@ class Behavior:
         self.deposition_publisher = rospy.Publisher("/deposition", Int32, queue_size=1, latch=True)
 
         self.velocity_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
-        self.velocity_subscriber = rospy.Subscriber("/cmd_vel", Twist, self.cmd_vel_callback)
-        self.traversal_publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue_size=1, latch=True)
-        self.goal_publisher = rospy.Publisher("/goal", PoseStamped, queue_size=1, latch=True)
-
-        self.backwards_publisher = rospy.Publisher("/traversal/backwards", Bool, queue_size=1, latch=True)
 
         self.apriltag_enabled_publisher = rospy.Publisher("/apriltag/enabled", Bool, queue_size=1, latch=True)
         self.apriltag_pose_publisher = rospy.Publisher("/apriltag_pose", PoseStamped, queue_size=1, latch=True)
@@ -83,27 +73,6 @@ class Behavior:
         self.MAX_APRILTAG_SEARCH_TIME = 30.0  # seconds, how long to search for an apriltag before giving up
 
         self.APRILTAG_AVERAGING_TIME = 5.0 # seconds, how long the robot will take average apriltag pose for
-
-
-    def is_close_to_goal(self, goal: PoseStamped) -> bool:
-        """
-        Checks if the robot is close to a given goal
-        """
-
-        THRESHOLD = 0.6 # meters
-
-        x = self.robot_odom.pose.pose.position.x
-        y = self.robot_odom.pose.pose.position.y
-
-        goal_x = goal.pose.position.x
-        goal_y = goal.pose.position.y
-
-        distance = math.sqrt((x - goal_x)**2 + (y - goal_y)**2)
-
-        rospy.logdebug("Behavior: Distance to goal: " + str(distance))
-
-        return distance < THRESHOLD
-    
 
     def get_pose_average(self, pose_list) -> PoseStamped:
         avg_pose = pose_list[0]
@@ -157,21 +126,15 @@ class Behavior:
         linear_actuators = LinearActuatorManager(self.lin_act_publisher)
         alignment_controller = AlignmentController(self.velocity_publisher)
         exdep_controller = ExdepController(self.excavate_publisher, self.lin_act_publisher,
-                                           self.velocity_publisher, self.deposition_publisher,
-                                           self.traversal_publisher, self.goal_publisher)
+                                           self.velocity_publisher, self.deposition_publisher)
+        
+        traversal_manager = TraversalManager()
         ####################
         # Startup & apriltag
         ####################
 
         # disable traversal to begin
-        traversal_message = Bool()
-        traversal_message.data = False
-        self.traversal_publisher.publish(traversal_message)
-
-        # set backwards driving to false
-        backwards_message = Bool()
-        backwards_message.data = False
-        self.traversal_publisher.publish(backwards_message)
+        traversal_manager.stop_traversal()
 
         # Raise linear actuators
         rospy.loginfo("Behavior: Raising linear actuator")
@@ -258,23 +221,8 @@ class Behavior:
         # align to facing 'north' to make traversal easier
         alignment_controller.align_to_angle(np.pi / 2)
 
-        # publish goal
-        self.goal_publisher.publish(mining_goal)
-
-        # traverse to goal by enabling traversal
-        rospy.loginfo("Behavior: Moving to goal")
-
-        traversal_message.data = True
-        self.traversal_publisher.publish(traversal_message)
-
-        # wait until we get close to the goal
-        while (not self.is_close_to_goal(mining_goal)):
-            # if (self.is_stopped()):
-                # self.goal_publisher.publish(mining_goal)
-            self.rate.sleep()
-
-        traversal_message.data = False
-        self.traversal_publisher.publish(traversal_message)
+        rospy.loginfo("Behavior: Moving to mining area")
+        traversal_manager.traverse_to_goal(mining_goal, drive_backwards=False)
 
         ####################
         # Excavation-Deposition cycle
