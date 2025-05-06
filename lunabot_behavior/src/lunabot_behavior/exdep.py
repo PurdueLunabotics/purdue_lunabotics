@@ -35,7 +35,8 @@ class ExdepController:
     def __init__(self, excavation_publisher: rospy.Publisher = None, 
                        linear_actuator_publisher: rospy.Publisher = None, 
                        cmd_vel_publisher: rospy.Publisher = None, 
-                       deposition_publisher: rospy.Publisher = None):
+                       deposition_publisher: rospy.Publisher = None,
+                       traversal_manager: TraversalManager = None):
         """
         If passed a publisher, then it is assumed a node is already running, and the publisher is shared.
         Else, initialize this node to run on its own.
@@ -48,11 +49,13 @@ class ExdepController:
             self.lin_act_publisher: rospy.Publisher = rospy.Publisher("/lin_act", Int32, queue_size=1, latch=True)
             self.deposition_publisher: rospy.Publisher = rospy.Publisher("/deposition", Int32, queue_size=1, latch=True)
             self.cmd_vel_publisher: rospy.Publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
+            self.traversal_manager = TraversalManager()
         else:
             self.excavation_publisher = excavation_publisher
             self.lin_act_publisher = linear_actuator_publisher
             self.deposition_publisher = deposition_publisher
             self.cmd_vel_publisher = cmd_vel_publisher
+            self.traversal_manager = traversal_manager
 
         self.excavation = ExcavationController(self.excavation_publisher, self.lin_act_publisher, self.cmd_vel_publisher, self.deposition_publisher)
         self.deposition = DepositionManager(self.deposition_publisher)
@@ -71,7 +74,6 @@ class ExdepController:
 
         self.rate = rospy.Rate(10) #hz
 
-        self.traversal_manager = TraversalManager()
 
     def exdep_loop(self):
         """

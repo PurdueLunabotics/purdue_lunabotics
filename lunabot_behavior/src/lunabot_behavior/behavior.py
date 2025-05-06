@@ -125,10 +125,11 @@ class Behavior:
         # Initialize all of the modules (before the loop)
         linear_actuators = LinearActuatorManager(self.lin_act_publisher)
         alignment_controller = AlignmentController(self.velocity_publisher)
-        exdep_controller = ExdepController(self.excavate_publisher, self.lin_act_publisher,
-                                           self.velocity_publisher, self.deposition_publisher)
-        
         traversal_manager = TraversalManager()
+        exdep_controller = ExdepController(self.excavate_publisher, self.lin_act_publisher,
+                                           self.velocity_publisher, self.deposition_publisher,
+                                           traversal_manager)
+        
         ####################
         # Startup & apriltag
         ####################

@@ -49,10 +49,10 @@ class TraversalManager:
         rospy.Subscriber(odom_topic, Odometry, self.odom_callback)
         rospy.Subscriber("/nav/global_path", Path, self.path_callback)
 
-        self.goal_publisher = rospy.Publisher("/goal", PoseStamped, queue_size=1, latch=True)
-        self.traversal_publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue_size=1, latch=True)
-        self.backwards_publisher = rospy.Publisher("/traversal/backwards", Bool, queue_size=1, latch=True)
-        self.planing_enabled_publisher = rospy.Publisher("/nav/planning_enabled", Bool, queue_size=1, latch=True)
+        self.goal_publisher = rospy.Publisher("/goal", PoseStamped, queue_size=5, latch=True)
+        self.traversal_publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue_size=5, latch=True)
+        self.backwards_publisher = rospy.Publisher("/traversal/backwards", Bool, queue_size=5, latch=True)
+        self.planing_enabled_publisher = rospy.Publisher("/nav/planning_enabled", Bool, queue_size=5, latch=True)
 
 
 
@@ -73,29 +73,35 @@ class TraversalManager:
 
         traversal_message = Bool()
         traversal_message.data = True
-        self.traversal_publisher.publish(traversal_message)
 
         planning_message = Bool()
         planning_message.data = True
-        self.planing_enabled_publisher.publish(planning_message)
 
         direction_message = Bool()
         direction_message.data = drive_backwards
-        self.backwards_publisher.publish(direction_message)
+
+        for i in range(5):
+            self.traversal_publisher.publish(traversal_message)
+            self.planing_enabled_publisher.publish(planning_message)
+            self.backwards_publisher.publish(direction_message)
+
 
         # Wait until the robot is close to the goal
         while not rospy.is_shutdown() and not self.is_close_to_goal():
             rospy.sleep(0.5)
             self.evaluate_odom()
+            self.check_and_replace_goal()
 
         traversal_message.data = False
-        self.traversal_publisher.publish(traversal_message)
+        for i in range(5):
+            self.traversal_publisher.publish(traversal_message)
 
     def stop_traversal(self):
         """
         Tells robot to stop traversing
         """
 
+        rospy.loginfo("Traversal: Stopping")
         traversal_message = Bool()
         traversal_message.data = False
         self.traversal_publisher.publish(traversal_message)
@@ -134,7 +140,7 @@ class TraversalManager:
 
 
 
-    def check_and_replace_goal(self):
+    def check_and_replace_goal(self, need_new_point: bool = False):
         """
         Check if the goal is an obstacle given the current map/goal. If so, search for the closest non-occupied node, and republish it, so path planning will continue.
         """
@@ -147,6 +153,10 @@ class TraversalManager:
         if (self.map is None):
             return
         
+        # if we need a new point, mark the map as an obstacle so we have to BFS
+        if (need_new_point):
+            self.map[grid_coords[0]][grid_coords[1]] = 100
+
         # Check out-of-bounds
         if (grid_coords[0] < 0 or grid_coords[1] < 0 or grid_coords[0] >= len(self.map) or grid_coords[1] >= len(self.map[0])):
             return
@@ -271,7 +281,7 @@ class TraversalManager:
     def path_callback(self, msg: Path):
         if (len(msg.poses) == 0):
             if (self.current_goal is not None):
-                self.check_and_replace_goal()
+                self.check_and_replace_goal(need_new_point=True)
 
                 goal = PoseStamped()
                 goal.header.frame_id = "odom"
@@ -289,7 +299,6 @@ class TraversalManager:
             self.odom_buffer.pop(0)
 
         self.odom_buffer.append(msg)
-        # print(len(self.odom_buffer))
 
     def map_callback(self, msg: OccupancyGrid):
         self.map_lock.acquire()
