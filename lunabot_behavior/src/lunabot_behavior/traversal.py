@@ -27,6 +27,9 @@ class TraversalManager:
 
         self.robot_odom: Odometry = None
 
+        self.odom_buffer = []
+        self.ODOM_WINDOW = 60
+
         self.current_goal: list[float] = None  # Goal in real-world coordinates
 
         self.OCCUPANCY_THRESHOLD: int = 50  # What value (greater than or equal to) is considered occupied
@@ -46,6 +49,7 @@ class TraversalManager:
         self.goal_publisher = rospy.Publisher("/goal", PoseStamped, queue_size=1, latch=True)
         self.traversal_publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue_size=1, latch=True)
         self.backwards_publisher = rospy.Publisher("/traversal/backwards", Bool, queue_size=1, latch=True)
+        self.planing_enabled_publisher = rospy.Publisher("/nav/planning_enabled", Bool, queue_size=1, latch=True)
 
 
 
@@ -74,7 +78,8 @@ class TraversalManager:
 
         # Wait until the robot is close to the goal
         while not rospy.is_shutdown() and not self.is_close_to_goal():
-            rospy.sleep(0.1)
+            self.evaluate_odom()
+            rospy.sleep(0.5)
 
         traversal_message.data = False
         self.traversal_publisher.publish(traversal_message)
@@ -89,6 +94,29 @@ class TraversalManager:
         self.traversal_publisher.publish(traversal_message)
 
         self.current_goal = None
+
+    def evaluate_odom(self):
+        """
+        Check if we have moved a considerable distance within the buffer. If not disable new paths
+        """
+        
+        oldest_pos: Odometry = self.odom_buffer[0]
+        newest_pos: Odometry = self.odom_buffer[len(self.odom_buffer) - 1]
+
+        dist = math.sqrt((oldest_pos.pose.pose.position.x - newest_pos.pose.pose.position.x)**2 +
+        (oldest_pos.pose.pose.position.y - newest_pos.pose.pose.position.y)**2)
+
+        message = Bool()
+        if (dist < 0.1):
+            message.data = False
+
+        else:
+            message.data = True
+
+        self.planing_enabled_publisher.publish(message)
+
+
+
 
     def check_and_replace_goal(self):
         """
@@ -120,7 +148,7 @@ class TraversalManager:
         
         new_goal = self.convert_to_real(new_goal_coords)
 
-        # if the new goal is the same as the old one, change it
+        # if the new goal is the same as the old one, change it (prevent infinte loop)
         if (new_goal[0] == self.current_goal[0] and new_goal[1] == self.current_goal[1]):
 
             # loop until you find new coords that are both: -not an obstacle -different from the original
@@ -236,6 +264,12 @@ class TraversalManager:
 
     def odom_callback(self, msg: Odometry):
         self.robot_odom = msg
+
+        if (len(self.odom_buffer) == self.ODOM_WINDOW):
+            self.odom_buffer.pop(0)
+
+        self.odom_buffer.append(msg)
+        print(len(self.odom_buffer))
 
     def map_callback(self, msg: OccupancyGrid):
         self.map_lock.acquire()

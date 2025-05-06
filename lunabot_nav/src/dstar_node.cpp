@@ -1,6 +1,7 @@
 #include "dstar.hpp"
 #include "ros/ros.h"
 #include <std_msgs/String.h>
+#include <std_msgs/Bool.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <map_msgs/OccupancyGridUpdate.h>
 #include <nav_msgs/Odometry.h>
@@ -22,14 +23,14 @@ public:
     ros::param::get("/nav/global_path_topic", path_topic);
     ros::param::get("/nav/occ_threshold", occupancy_threshold);
 
-
-    int frequency = 10; // hz
+    int frequency = 3; // hz
 
     map_sub = nh.subscribe(map_topic, 1, &DstarNode::grid_callback, this);
     map_update_sub = nh.subscribe(map_update_topic, 1, &DstarNode::grid_update_callback, this);
     odom_sub = nh.subscribe(odom_topic, 1, &DstarNode::position_callback, this);
     goal_sub = nh.subscribe(goal_topic, 1, &DstarNode::goal_callback, this);
     path_pub = nh.advertise<nav_msgs::Path>(path_topic, 10, true);
+    planning_enabled_subscriber = nh.subscribe("/nav/planning_enabled", 1, &DstarNode::enable_callback, this);
 
     ros::Rate rate(frequency);
     while (ros::ok()) {
@@ -94,6 +95,7 @@ private:
   ros::Subscriber map_update_sub;
   ros::Subscriber odom_sub;
   ros::Subscriber goal_sub;
+  ros::Subscriber planning_enabled_subscriber;
   ros::Publisher path_pub;
 
   std::string odom_topic;
@@ -103,6 +105,12 @@ private:
   std::string path_topic;
   int path_sampling_rate;
   float occupancy_threshold;
+
+  bool planning_enabled = true;
+
+  void enable_callback(const std_msgs::Bool::ConstPtr &msg) {
+    this->planning_enabled = msg->data;
+  }
 
   // Updates the map given a new occupancy grid.Update the flag such that dstar will update the map.
   void grid_callback(const nav_msgs::OccupancyGrid::ConstPtr &data) {
@@ -219,7 +227,9 @@ private:
       }
     }
 
-    path_pub.publish(path);
+    if (this->planning_enabled) {
+      path_pub.publish(path);
+    }
   }
 };
 

@@ -1,7 +1,9 @@
 #include "dstar.hpp"
 
 #define NUM_DIRECTIONS 4
+// grid_point cardinal_directions[NUM_DIRECTIONS] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}, {1, -1}, {1, 1}, {-1, 1}, {-1, -1}};
 grid_point cardinal_directions[NUM_DIRECTIONS] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+
 
 Dstar::Dstar() {};
 
@@ -144,7 +146,13 @@ double Dstar::calculate_RHS(grid_point point) {
     // If the node is in bounds, and not an obstacle, add the distance value to the list
     if (inside_map(new_point) && current_map[new_point.y][new_point.x] < OCCUPANCY_THRESHOLD) {
       double g_val = node_values_list[new_point.y][new_point.x].distance_g;
-      surrounding_values[i] = g_val + 1; // sqrt(2); TODO - handle non-cardinal directions - this should fix hugging obstacles
+
+      float addition = 1;
+      if (abs(cardinal_directions[i].x) == 1 && abs(cardinal_directions[i].y) == 1) {
+        addition = sqrt(2);
+      }
+
+      surrounding_values[i] = g_val + 1; // sqrt(2); TODO - handle non-cardinal directions - this should fix hugging obstacle
     } else {
       surrounding_values[i] = INT_MAX;
     }
