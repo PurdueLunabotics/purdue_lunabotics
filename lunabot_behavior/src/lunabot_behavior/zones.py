@@ -143,17 +143,21 @@ def find_mining_zone(apriltag_pose_in_odom: PoseStamped, is_sim: bool)->Zone:
     Assume the start apriltag is in the starting zone, 0.5 m +y and 0.1 m +x (0.1 m off of left wall, 0.5 m up)
     """
 
-    DIST_X = 3.78 # In meters, the distance from the leftmost wall to the left border of the mining zone
+    DIST_X = 5.44 # In meters, the distance from the leftmost wall to the left border of the mining zone
     # KSC = 3.78
+    # UCF 'top' = 5.44
 
-    LENGTH_X = 3 # In meters, the length of the mining zone (left to right)
+    LENGTH_X = 2.6 # In meters, the length of the mining zone (left to right)
     # KSC = 3
+    # UCF 'top' = 2.6
 
-    DIST_Y = 1.5 # In meters, the distance from the bottom-most wall to the bottom border of the mining zone
+    DIST_Y = 0.5 # In meters, the distance from the bottom-most wall to the bottom border of the mining zone
     # KSC = 1.5
+    # UCF 'top' = 0.5
 
-    LENGTH_Y = 3 # In meters, the length of the mining zone (bottom to top)
+    LENGTH_Y = -2.57 # In meters, the length of the mining zone (bottom to top)
     # KSC = 3
+    # UCF 'top' = -2.57
 
     top_left = calc_point_from_apriltag(DIST_X, DIST_Y + LENGTH_Y, apriltag_pose_in_odom, is_sim)
     top_right = calc_point_from_apriltag(DIST_X + LENGTH_X, DIST_Y + LENGTH_Y, apriltag_pose_in_odom, is_sim)
@@ -164,17 +168,21 @@ def find_mining_zone(apriltag_pose_in_odom: PoseStamped, is_sim: bool)->Zone:
 
 def find_berm_zone(apriltag_pose_in_odom: PoseStamped, is_sim: bool)->Zone:
 
-    DIST_X = 4.45
-    # KSC = ~4.45
+    DIST_X = 5.94
+    # KSC = ~ 4.45
+    # UCF 'top' = ~ 5.94
 
-    LENGTH_X = 2
+    LENGTH_X = 1.5
     # KSC = ~2
+    # UCF 'top' = ~ 1.5
 
-    DIST_Y = 0.45
-    # KSC = ~0.45
+    DIST_Y = -2.57
+    # KSC = ~ 0.45
+    # UCF 'top' = ~ -2.57
 
-    LENGTH_Y = -0.7
-    # KSC = ~-0.7  (negative, because I'm defining the start as the top, and going down)
+    LENGTH_Y = -0.9
+    # KSC = ~ -0.7  (negative, because I'm defining the start as the top, and going down)
+    # UCF 'top' = ~ -0.9
 
     top_left = calc_point_from_apriltag(DIST_X, DIST_Y + LENGTH_Y, apriltag_pose_in_odom, is_sim)
     top_right = calc_point_from_apriltag(DIST_X + LENGTH_X, DIST_Y + LENGTH_Y, apriltag_pose_in_odom, is_sim)
