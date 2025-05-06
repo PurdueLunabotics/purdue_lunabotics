@@ -87,6 +87,7 @@ private:
   bool dstar_init = false;
   bool grid_update_needed = false;
   bool goal_update_needed = false;
+  bool just_published_empty_path = false;
 
   std::mutex map_lock;  // NOTE: this mutex was needed in python, might not be needed in C++ because roscpp callbacks are single threaded
 
@@ -205,6 +206,19 @@ private:
     nav_msgs::Path path;
     path.header.stamp = ros::Time::now();
     path.header.frame_id = "odom"; // Set the frame of reference
+
+    if (path_data.size() == 0) {
+      if (!just_published_empty_path) {
+        just_published_empty_path = true;
+        // and continue on, publish it
+      }
+      else {
+        return; // Don't publish empty path if already published
+      }
+    }
+    else {
+      just_published_empty_path = false;
+    }
 
     for (size_t index = 0; index < path_data.size(); ++index) {
       if (index % path_sampling_rate == 0 || index == path_data.size() - 1) {

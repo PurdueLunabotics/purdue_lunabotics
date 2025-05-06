@@ -163,6 +163,7 @@ class TraversalManager:
 
         # Check if not occupied
         if (self.map[grid_coords[0]][grid_coords[1]] < self.OCCUPANCY_THRESHOLD):
+            print("all good...")
             return
         
         # If the goal is an obstacle, find a new one
@@ -274,7 +275,7 @@ class TraversalManager:
         Convert a grid position to real world (x y) coordinates. Grid offset should be in the same frame as position, the grid is row-major.
         """
 
-        position = [(coord[1] + 0.5) * self.map_resolution, (coord[0] + 0.5) * self.map_resolution]
+        position = [(coord[1] + 0.1) * self.map_resolution, (coord[0] + 0.1) * self.map_resolution]
         position = [position[0] + self.map_x_offset, position[1] + self.map_y_offset]
         return position
 
@@ -308,6 +309,7 @@ class TraversalManager:
         width = msg.info.width
         height = msg.info.height
         self.map = np.reshape(data_arr, (height, width))
+        print(f"got map of size {height} x {width}")
 
         self.map_resolution = msg.info.resolution
         self.map_x_offset = msg.info.origin.position.x
@@ -338,13 +340,14 @@ class TraversalManager:
 
         temp_map = self.map.copy()
 
-        if (msg.y + msg.height >= len(temp_map) or msg.x + msg.width >= len(temp_map[0])):
+        if (msg.y + msg.height - 1>= len(temp_map) or msg.x + msg.width - 1 >= len(temp_map[0])):
             self.map_lock.release()
+            print(f"ignored an update... {msg.y + msg.height} >= {len(temp_map)} or {msg.x + msg.width} >= {len(temp_map[0])}")
             return
 
         index = 0
-        for i in range(msg.y, msg.y + msg.height):
-            for j in range(msg.x, msg.x + msg.width):
+        for i in range(msg.y - 1, msg.y + msg.height - 1):
+            for j in range(msg.x - 1, msg.x + msg.width - 1):
                 temp_map[i][j] = data_arr[index]
                 index += 1
 
