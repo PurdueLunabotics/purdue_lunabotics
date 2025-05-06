@@ -24,6 +24,7 @@ Dstar::Dstar(real_world_point goal, real_world_point start, std::vector<std::vec
   this->goal = convert_to_grid(goal);
 
   if (current_map[this->goal.y][this->goal.x] > OCCUPANCY_THRESHOLD) {
+    std::cout << "DSTAR: found new goal\n";
     this->goal = bfs_non_occupied(this->goal);
   }
 
@@ -181,6 +182,7 @@ std::vector<real_world_point> Dstar::find_path() {
 
   // If the start is out of the map, or is an obstacle, search for the closest non - occupied node
   if (!inside_map(current_point) || current_map[current_point.y][current_point.x] > OCCUPANCY_THRESHOLD) {
+    std::cout << "DSTAR: found new current pt\n";
     current_point = bfs_non_occupied(current_point);
   }
 
@@ -453,7 +455,9 @@ std::vector<real_world_point> Dstar::update_map(std::vector<std::vector<int>> ne
   current_point.y += nv_buf_rows_up;
 
   // change goal - as the size / buffer of the map has changed, the goal should be reconverted
-  goal = convert_to_grid(real_goal);
+  goal.x += nv_buf_cols_left;
+  goal.y += nv_buf_rows_up;
+  
   // Copy the original node values into the new node_values
   for (int y = 0; y < nv_original_rows; y++) {
     for (int x = 0; x < nv_original_cols; x++) {
