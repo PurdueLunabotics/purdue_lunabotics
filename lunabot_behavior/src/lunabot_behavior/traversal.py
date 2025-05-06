@@ -163,7 +163,6 @@ class TraversalManager:
 
         # Check if not occupied
         if (self.map[grid_coords[0]][grid_coords[1]] < self.OCCUPANCY_THRESHOLD):
-            print("all good...")
             return
         
         # If the goal is an obstacle, find a new one
@@ -309,7 +308,6 @@ class TraversalManager:
         width = msg.info.width
         height = msg.info.height
         self.map = np.reshape(data_arr, (height, width))
-        print(f"got map of size {height} x {width}")
 
         self.map_resolution = msg.info.resolution
         self.map_x_offset = msg.info.origin.position.x
@@ -342,7 +340,6 @@ class TraversalManager:
 
         if (msg.y + msg.height - 1>= len(temp_map) or msg.x + msg.width - 1 >= len(temp_map[0])):
             self.map_lock.release()
-            print(f"ignored an update... {msg.y + msg.height} >= {len(temp_map)} or {msg.x + msg.width} >= {len(temp_map[0])}")
             return
 
         index = 0
