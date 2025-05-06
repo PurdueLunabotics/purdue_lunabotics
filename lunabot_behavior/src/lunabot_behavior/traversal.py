@@ -119,7 +119,6 @@ class TraversalManager:
         else:
             self.unmoving_counter = 0
 
-        print(self.unmoving_counter)
 
         planning_msg = Bool()
         # If we have not moved for a while, stop planning. However, if it has been a very Long time, enable planning again
