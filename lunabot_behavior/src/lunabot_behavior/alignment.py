@@ -67,7 +67,7 @@ class AlignmentController:
 
         euler_angles = euler_from_quaternion([self.apriltag_pose_in_odom.pose.orientation.x, self.apriltag_pose_in_odom.pose.orientation.y, self.apriltag_pose_in_odom.pose.orientation.z, self.apriltag_pose_in_odom.pose.orientation.w])
         if (self.is_sim):
-            apriltag_yaw = euler_angles[2] - np.pi / 2
+            apriltag_yaw = euler_angles[2] + np.pi / 2
         else:
             apriltag_yaw = euler_angles[2] + np.pi / 2
 
