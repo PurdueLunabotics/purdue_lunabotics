@@ -23,10 +23,10 @@ Dstar::Dstar(real_world_point goal, real_world_point start, std::vector<std::vec
   buffer_map_for_goal();
   this->goal = convert_to_grid(goal);
 
-  if (current_map[this->goal.y][this->goal.x] > OCCUPANCY_THRESHOLD) {
-    std::cout << "DSTAR: found new goal\n";
-    this->goal = bfs_non_occupied(this->goal);
-  }
+  // if (current_map[this->goal.y][this->goal.x] > OCCUPANCY_THRESHOLD) {
+  //   std::cout << "DSTAR: found new goal\n";
+  //   this->goal = bfs_non_occupied(this->goal);
+  // }
 
   node_values_list = std::vector<std::vector<node_value>>(current_map.size(), std::vector<node_value>(current_map[0].size(), {INT_MAX, INT_MAX}));
   this->node_values_list[this->goal.y][this->goal.x].estimate_rhs = 0;

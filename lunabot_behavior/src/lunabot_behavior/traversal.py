@@ -2,6 +2,7 @@ import rospy
 import threading
 from queue import Queue
 import math
+import random
 import numpy as np
 from nav_msgs.msg import OccupancyGrid, Odometry, Path
 from map_msgs.msg import OccupancyGridUpdate
@@ -52,6 +53,10 @@ class TraversalManager:
         """
         Traverses to a given goal- blocks until the robot is within the threshold of the goal.
         """
+
+        # wait for map
+        while (self.map is None):
+            rospy.sleep(0.1)
 
         self.current_goal = [goal.pose.position.x, goal.pose.position.y]
 
@@ -114,6 +119,21 @@ class TraversalManager:
             return
         
         new_goal = self.convert_to_real(new_goal_coords)
+
+        # if the new goal is the same as the old one, change it
+        if (new_goal[0] == self.current_goal[0] and new_goal[1] == self.current_goal[1]):
+
+            # loop until you find new coords that are both: -not an obstacle -different from the original
+            while (self.map[new_goal_coords[0]][new_goal_coords[1]] > self.OCCUPANCY_THRESHOLD or
+                   (new_goal[0] == self.current_goal[0] and new_goal[1] == self.current_goal[1])):
+                
+                # change randomly idk
+                new_goal_coords[0] += random.randint(-1, 1)
+                new_goal_coords[1] += random.randint(-1, 1)
+
+                new_goal = self.convert_to_real(new_goal_coords)
+
+
 
         goal = PoseStamped()
         goal.header.frame_id = "odom"
