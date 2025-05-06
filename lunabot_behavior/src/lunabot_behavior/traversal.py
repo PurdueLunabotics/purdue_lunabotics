@@ -28,7 +28,10 @@ class TraversalManager:
         self.robot_odom: Odometry = None
 
         self.odom_buffer = []
-        self.ODOM_WINDOW = 60
+        self.ODOM_WINDOW = 100
+        self.MOVEMENT_THRESHOLD = 0.2  # meters
+        self.unmoving_counter = 0
+        self.UNMOVING_THRESHOLD = 15
 
         self.current_goal: list[float] = None  # Goal in real-world coordinates
 
@@ -72,14 +75,18 @@ class TraversalManager:
         traversal_message.data = True
         self.traversal_publisher.publish(traversal_message)
 
+        planning_message = Bool()
+        planning_message.data = True
+        self.planing_enabled_publisher.publish(planning_message)
+
         direction_message = Bool()
         direction_message.data = drive_backwards
         self.backwards_publisher.publish(direction_message)
 
         # Wait until the robot is close to the goal
         while not rospy.is_shutdown() and not self.is_close_to_goal():
-            self.evaluate_odom()
             rospy.sleep(0.5)
+            self.evaluate_odom()
 
         traversal_message.data = False
         self.traversal_publisher.publish(traversal_message)
@@ -97,7 +104,7 @@ class TraversalManager:
 
     def evaluate_odom(self):
         """
-        Check if we have moved a considerable distance within the buffer. If not disable new paths
+        Check if we have moved a considerable distance within the buffer. If not disable new paths for a few seconds
         """
         
         oldest_pos: Odometry = self.odom_buffer[0]
@@ -106,15 +113,25 @@ class TraversalManager:
         dist = math.sqrt((oldest_pos.pose.pose.position.x - newest_pos.pose.pose.position.x)**2 +
         (oldest_pos.pose.pose.position.y - newest_pos.pose.pose.position.y)**2)
 
-        message = Bool()
-        if (dist < 0.1):
-            message.data = False
+        if (dist < self.MOVEMENT_THRESHOLD):
+            self.unmoving_counter += 1
 
         else:
-            message.data = True
+            self.unmoving_counter = 0
 
-        self.planing_enabled_publisher.publish(message)
+        print(self.unmoving_counter)
 
+        planning_msg = Bool()
+        # If we have not moved for a while, stop planning. However, if it has been a very Long time, enable planning again
+        if (60 > self.unmoving_counter >= 10):
+            planning_msg.data = False
+
+            if (self.unmoving_counter == 10):
+                print("Traversal: stopping planning temporarily")
+        else:
+            planning_msg.data = True
+
+        self.planing_enabled_publisher.publish(planning_msg)
 
 
 
@@ -169,6 +186,10 @@ class TraversalManager:
         goal.pose.position.x = new_goal[0]
         goal.pose.position.y = new_goal[1]
         goal.pose.position.z = 0
+
+        planning_message = Bool()
+        planning_message.data = True
+        self.planing_enabled_publisher.publish(planning_message)
 
         self.goal_publisher.publish(goal)
         rospy.loginfo("Traversal: Goal is an obstacle, new goal is: " + str(new_goal))
@@ -269,7 +290,7 @@ class TraversalManager:
             self.odom_buffer.pop(0)
 
         self.odom_buffer.append(msg)
-        print(len(self.odom_buffer))
+        # print(len(self.odom_buffer))
 
     def map_callback(self, msg: OccupancyGrid):
         self.map_lock.acquire()
