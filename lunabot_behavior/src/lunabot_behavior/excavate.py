@@ -61,6 +61,7 @@ class ExcavationController:
 
         self.LOWERING_TIME = 30  # seconds
         self.TRENCHING_TIME = 30  # seconds
+        self.WAITING_TIME = 5 # s
 
         self.LOAD_CELL_WEIGHT_THRESHOLD = 1  # In kg, TODO find value
         self.MAX_LIN_ACT_VEL = 0.00688405797  # In meters/s, the speed of the linear actuators at the max power (from experiment - 19 cm / 27.6 seconds)
@@ -78,6 +79,7 @@ class ExcavationController:
         self.LIN_ACT_CURR_THRESHOLD = 0.1  # Amps; TODO find value
 
         self.EXCAVATION_CURR_THRESHOLD = 25  # Amps; TODO find/confirm value
+        self.EXCAVATION_STALL_CURRENT = 0
 
         self.is_sim = rospy.get_param("is_sim")
 
@@ -107,7 +109,8 @@ class ExcavationController:
         start_time = rospy.get_time()
 
         # Until the linear actuators reach the end (based on time), keep moving them down or the actuators reach the limit and stop
-        while rospy.get_time() - start_time < self.LOWERING_TIME and abs(self.robot_sensors.act_right_curr) < self.LIN_ACT_CURR_THRESHOLD:
+        while (rospy.get_time() - start_time < self.LOWERING_TIME and 
+              (rospy.get_time() - start_time < self.WAITING_TIME or abs(self.robot_sensors.act_right_curr) > self.LIN_ACT_CURR_THRESHOLD)):
 
             excavation_message.data = self.EXCAVATION_SPEED
 
@@ -128,7 +131,7 @@ class ExcavationController:
             self.excavation_publisher.publish(excavation_message)
 
             # Check for excavation getting stuck (high current)
-            if self.robot_sensors.exc_curr > self.EXCAVATION_CURR_THRESHOLD:
+            if self.robot_sensors.exc_curr == self.EXCAVATION_STALL_CURRENT and (rospy.get_time()-start_time > self.WAITING_TIME):
                 self.exc_failure_counter += 1
                 self.spin_excavation_backwards()
 
@@ -211,7 +214,7 @@ class ExcavationController:
 
             self.excavation_publisher.publish(excavation_message)
 
-            # testing trench - remove later
+            # move deposition slightly
             deposition_msg.data = self.DEPOSITION_SPEED
             self.deposition_publisher.publish(deposition_msg)
 
@@ -220,7 +223,7 @@ class ExcavationController:
                 * excavation_velocity
                 * self.BUCKET_RADIUS
                 / self.BUCKET_SPACING
-            ) #TODO: fix? it is very wrong
+            ) 
 
             # cmd_vel_message.linear.x = target_linear_vel * 10
             cmd_vel_message.linear.x = self.TRENCHING_SPEED 
@@ -228,14 +231,8 @@ class ExcavationController:
 
             self.cmd_vel_publisher.publish(cmd_vel_message)
 
-            # Check for excavation getting stuck (high current)
-            if self.robot_sensors.exc_curr > self.EXCAVATION_CURR_THRESHOLD:
-                self.exc_failure_counter += 1
-                cmd_vel_message.linear.x *= 0.5
-                
             # Check if excavation motor stopped due to stalling
-            if self.robot_sensors.exc_curr < 0.01:
-                #TODO: clear stall
+            if self.robot_sensors.exc_curr == self.EXCAVATION_STALL_CURRENT:
                 self.exc_failure_counter += 1
                 self.spin_excavation_backwards()
                 

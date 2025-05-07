@@ -80,11 +80,12 @@ class Behavior:
         rospy.Subscriber(apriltag_topic, PoseStamped, self.apriltag_pose_callback)
 
         self.SPIN_SPEED = math.radians(20)  # rad/s
-        self.SPIN_TIME = (math.pi / 2) / self.SPIN_SPEED  # seconds, how long to spin at the beginning for 360 degree mapping (only spins 90 degrees)
+        self.SPIN_TIME = 20 # seconds, how long to spin at the beginning for 360 degree mapping
 
         self.MAX_APRILTAG_SEARCH_TIME = 30.0  # seconds, how long to search for an apriltag before giving up
 
         self.APRILTAG_AVERAGING_TIME = 5.0 # seconds, how long the robot will take average apriltag pose for
+        
 
     def set_color(self, new_color: Int32):
         self.led_publisher.publish(new_color);
@@ -184,24 +185,8 @@ class Behavior:
         rospy.loginfo("Behavior: Raising linear actuator")
         linear_actuators.raise_linear_actuators(True)
 
-        # Spin for one loop to map environment
-        rospy.loginfo("Behavior: Mapping")
-
         # Yellow for mapping/finding apriltag
         self.set_color(5)
-
-        velocity_message = Twist()
-        velocity_message.linear.x = 0
-        velocity_message.angular.z = self.SPIN_SPEED
-        self.velocity_publisher.publish(velocity_message)
-
-        start_time = rospy.get_time()
-        while rospy.get_time() - start_time < self.SPIN_TIME:
-            self.rate.sleep()
-
-        velocity_message.linear.x = 0
-        velocity_message.angular.z = 0
-        self.velocity_publisher.publish(velocity_message)
 
         # if don't have an apriltag yet, spin until you find an apriltag (limit by time)
         rospy.loginfo("Behavior: Find apriltag")
@@ -248,6 +233,23 @@ class Behavior:
         rospy.sleep(5)
 
         self.apriltag_pose_publisher.publish(avg_apriltag_pose)
+        
+        # Spin for one loop to map environment
+        rospy.loginfo("Behavior: Mapping")
+
+        velocity_message = Twist()
+        velocity_message.linear.x = 0
+        velocity_message.angular.z = self.SPIN_SPEED
+        self.velocity_publisher.publish(velocity_message)
+
+        start_time = rospy.get_time()
+        while rospy.get_time() - start_time < self.SPIN_TIME:
+            self.rate.sleep()
+
+        velocity_message.linear.x = 0
+        velocity_message.angular.z = 0
+        self.velocity_publisher.publish(velocity_message)
+        
         
         ####################
         # Traversal

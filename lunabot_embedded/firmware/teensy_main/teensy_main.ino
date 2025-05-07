@@ -25,6 +25,8 @@ void ctrl() {
   deposition::cb(effort.deposit, effort.should_reset);
   excavation::cb(effort.excavate, effort.should_reset);
   LEDs::cb(effort.led_color);
+  if (effort.should_reset) digitalWrite(9, HIGH); // RELAY ALWAYS ON
+  else digitalWrite(9, HIGH); // RELAY ALWAYS ON
 }
 
 void send() {
@@ -75,6 +77,7 @@ void setup() {
   MC1.setRamping(1);
 
   last_effort = millis();
+  pinMode(9, OUTPUT);  //For the big relay
 }
 
 elapsedMillis ms_until_send;

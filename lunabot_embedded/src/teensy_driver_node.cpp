@@ -67,6 +67,7 @@ void effort_cb(const lunabot_msgs::RobotEffort &msg) {
   effort.right_drive = msg.right_drive;
   effort.excavate = msg.excavate;
   effort.deposit = msg.deposit;
+  effort.should_reset = msg.should_reset;
 }
 
 void color_cb(const std_msgs::Int32 &msg) { effort.led_color = msg.data; }

@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="serial_no_d455_back"           default="053122251286"/> 		
-  <arg name="serial_no_d435_left"           default="141222070808"/> 	
-  <arg name="serial_no_d455_front"          default="053122251335"/> 	
-  <arg name="serial_no_d435_right"          default="939622074382"/> 	
+  <arg name="serial_no_d435_right"           default="053122251286"/>  <!-- note stupid swap right back -->
+  <arg name="serial_no_d435_left"           default="141222070808"/>
+  <arg name="serial_no_d455_front"          default="053122251335"/>
+  <arg name="serial_no_d455_back"          default="939622074382"/>
   
   <arg name="initial_reset"                   default="true"/>
   <arg name="sim"                             default="false"/>
@@ -13,12 +13,12 @@
 
   <arg name="extra_width"                     default="424"/>
   <arg name="extra_height"                    default="240"/>
-  <arg name="extra_fps"                       default="5"/>
+  <arg name="extra_fps"                       default="15"/>
   <!-- Launch with any combination of front, back, and extra_cams. Front and Back are mapping cams, extra_cams are just vision. -->
   <!-- If only one of the mapping cams is enabled it will use RGB and Depth to map and odom -->
   <arg name="front"                           default="true"/>
   <arg name="back"                            default="true"/>
-  <arg name="extra_cams"                          default="false"/>
+  <arg name="extra_cams"                      default="false"/>
   <!-- If both it will generate pointclouds on each and combine them and then use that for mapping -->
   <arg name="pointcloud" default="$(eval arg('front') and arg('back'))" />
   
