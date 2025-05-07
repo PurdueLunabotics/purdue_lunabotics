@@ -1,7 +1,9 @@
 #include "dstar.hpp"
 
 #define NUM_DIRECTIONS 4
+// grid_point cardinal_directions[NUM_DIRECTIONS] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}, {1, -1}, {1, 1}, {-1, 1}, {-1, -1}};
 grid_point cardinal_directions[NUM_DIRECTIONS] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+
 
 Dstar::Dstar() {};
 
@@ -23,9 +25,10 @@ Dstar::Dstar(real_world_point goal, real_world_point start, std::vector<std::vec
   buffer_map_for_goal();
   this->goal = convert_to_grid(goal);
 
-  if (current_map[this->goal.y][this->goal.x] > OCCUPANCY_THRESHOLD) {
-    this->goal = bfs_non_occupied(this->goal);
-  }
+  // if (current_map[this->goal.y][this->goal.x] > OCCUPANCY_THRESHOLD) {
+  //   std::cout << "DSTAR: found new goal\n";
+  //   this->goal = bfs_non_occupied(this->goal);
+  // }
 
   node_values_list = std::vector<std::vector<node_value>>(current_map.size(), std::vector<node_value>(current_map[0].size(), {INT_MAX, INT_MAX}));
   this->node_values_list[this->goal.y][this->goal.x].estimate_rhs = 0;
@@ -143,7 +146,13 @@ double Dstar::calculate_RHS(grid_point point) {
     // If the node is in bounds, and not an obstacle, add the distance value to the list
     if (inside_map(new_point) && current_map[new_point.y][new_point.x] < OCCUPANCY_THRESHOLD) {
       double g_val = node_values_list[new_point.y][new_point.x].distance_g;
-      surrounding_values[i] = g_val + 1; // sqrt(2); TODO - handle non-cardinal directions - this should fix hugging obstacles
+
+      float addition = 1;
+      if (abs(cardinal_directions[i].x) == 1 && abs(cardinal_directions[i].y) == 1) {
+        addition = sqrt(2);
+      }
+
+      surrounding_values[i] = g_val + 1; // sqrt(2); TODO - handle non-cardinal directions - this should fix hugging obstacle
     } else {
       surrounding_values[i] = INT_MAX;
     }
@@ -181,6 +190,7 @@ std::vector<real_world_point> Dstar::find_path() {
 
   // If the start is out of the map, or is an obstacle, search for the closest non - occupied node
   if (!inside_map(current_point) || current_map[current_point.y][current_point.x] > OCCUPANCY_THRESHOLD) {
+    std::cout << "DSTAR: found new current pt\n";
     current_point = bfs_non_occupied(current_point);
   }
 
@@ -380,7 +390,6 @@ std::vector<real_world_point> Dstar::update_replan(std::vector<std::vector<int>>
 
 // Updates the map with new grid whenever map is changed.The node values list is expanded if needed to match the new size of the map.
 // The map is updated with the new given map, and buffer is added so that we never have to shrink the map / node values.
-
 // After the new map is built, we call update / replan, updating the needed node values, which later calculates the path and returns the new path
 std::vector<real_world_point> Dstar::update_map(std::vector<std::vector<int>> new_map, double x_offset, double y_offset) {
   double prev_x_offset = this->x_offset;
@@ -454,17 +463,13 @@ std::vector<real_world_point> Dstar::update_map(std::vector<std::vector<int>> ne
   current_point.y += nv_buf_rows_up;
 
   // change goal - as the size / buffer of the map has changed, the goal should be reconverted
-  goal = convert_to_grid(real_goal);
-  if (current_map[this->goal.y][this->goal.x] > OCCUPANCY_THRESHOLD) {
-    this->goal = bfs_non_occupied(this->goal);
-    this->node_values_list[this->goal.y][this->goal.x].estimate_rhs = 0;
-    this->insert(this->goal, this->calculate_key(this->goal));
-  } else {
-    // Copy the original node values into the new node_values
-    for (int y = 0; y < nv_original_rows; y++) {
-      for (int x = 0; x < nv_original_cols; x++) {
-        node_values_list[y + nv_buf_rows_up][x + nv_buf_cols_left] = prev_nv[y][x];
-      }
+  goal.x += nv_buf_cols_left;
+  goal.y += nv_buf_rows_up;
+  
+  // Copy the original node values into the new node_values
+  for (int y = 0; y < nv_original_rows; y++) {
+    for (int x = 0; x < nv_original_cols; x++) {
+      node_values_list[y + nv_buf_rows_up][x + nv_buf_cols_left] = prev_nv[y][x];
     }
   }
 

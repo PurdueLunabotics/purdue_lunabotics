@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import numpy as np
+import math
 
 import rospy
 from geometry_msgs.msg import Pose, Twist, PoseStamped
@@ -67,7 +68,7 @@ class AlignmentController:
 
         euler_angles = euler_from_quaternion([self.apriltag_pose_in_odom.pose.orientation.x, self.apriltag_pose_in_odom.pose.orientation.y, self.apriltag_pose_in_odom.pose.orientation.z, self.apriltag_pose_in_odom.pose.orientation.w])
         if (self.is_sim):
-            apriltag_yaw = euler_angles[2] - np.pi / 2
+            apriltag_yaw = euler_angles[2] + np.pi / 2
         else:
             apriltag_yaw = euler_angles[2] + np.pi / 2
 
@@ -112,6 +113,30 @@ class AlignmentController:
 
             self.rate.sleep()
 
+    def back_to_berm(self, berm_zone: 'tuple[float]'):
+        bermx = berm_zone[0]
+        bermy = berm_zone[1]
+
+        dist = math.sqrt((self.odom.pose.pose.position.x - bermx)**2 + (self.odom.pose.pose.position.y - bermy))
+
+        cmd_vel = Twist()
+
+        start_time = rospy.get_time()
+        while (dist > 0.35):
+            cmd_vel.linear.x = -0.2
+            cmd_vel.angular.z = 0
+            self.cmd_vel_publisher.publish(cmd_vel)
+
+            dist = math.sqrt((self.odom.pose.pose.position.x - bermx)**2 + (self.odom.pose.pose.position.y - bermy))
+            print(dist)
+
+            if (rospy.get_time() - start_time > 10.0):
+                break
+
+        cmd_vel.linear.x = 0
+        self.cmd_vel_publisher.publish(cmd_vel)
+
+            
 
     def stop(self):
         cmd_vel = Twist()
