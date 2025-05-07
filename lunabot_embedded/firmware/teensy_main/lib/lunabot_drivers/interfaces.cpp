@@ -204,10 +204,55 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
 
     if (disable_counter[i] >= kill_thresh) {
       disable_counter[i] = 0;
-      // TODO, send "all fucked" signal back to teensy
       kill();
     }
   }
+}
+
+CRGB Led_Strip::all_led[Led_Strip::NUM_LEDS];
+
+void Led_Strip::init() { 
+  FastLED.addLeds<WS2812B, 6, GRB>(Led_Strip::all_led, Led_Strip::NUM_LEDS);
+  FastLED.setBrightness(Led_Strip::BRIGHTNESS); 
+}
+
+void Led_Strip::set_color(int32_t color_in) { 
+  CRGB color_choice;
+
+  switch (color_in) { 
+  case 0:
+    color_choice = CRGB::Black;
+    break;
+  case 1:
+    color_choice = CRGB::Red;
+    break;
+  case 2:
+    color_choice = CRGB::Green;
+    break;
+  case 3:
+    color_choice = CRGB::Blue;
+    break;
+  case 4:
+    color_choice = CRGB::White;
+    break;
+  case 5:
+    color_choice = CRGB::Yellow;
+    break;
+  case 6:
+    color_choice = CRGB::Aqua;
+    break;
+  case 7:
+    color_choice = CRGB::Magenta;
+    break;
+  default:
+    color_choice = CRGB::Black;
+    break;
+  }
+
+  for (int i = 0; i < NUM_LEDS; ++i) {
+    Led_Strip::all_led[i] = color_choice;
+  }
+  FastLED.show();
 }
 
 
@@ -246,4 +291,5 @@ float HX711_Bus::read_scale(uint8_t id) {
   } else {
     return -1;
   }
+  FastLED.show();
 }

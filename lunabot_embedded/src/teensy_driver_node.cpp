@@ -7,6 +7,8 @@
 #include <sys/ioctl.h>
 #include <termios.h>
 
+#include <std_msgs/Int32.h>
+
 #include <lunabot_embedded/sensor_proc.h>
 #include <lunabot_msgs/RobotEffort.h>
 #include <lunabot_msgs/RobotSensors.h>
@@ -68,6 +70,8 @@ void effort_cb(const lunabot_msgs::RobotEffort &msg) {
   effort.should_reset = msg.should_reset;
 }
 
+void color_cb(const std_msgs::Int32 &msg) { effort.led_color = msg.data; }
+
 void publish(const ros::TimerEvent &) {
   memset(buf, 0, sizeof(buf));
   pb_ostream_t stream = pb_ostream_from_buffer(buf, sizeof(buf));
@@ -90,7 +94,9 @@ int main(int argc, char **argv) {
   ros::NodeHandle nh;
 
   ros::Subscriber effort_sub = nh.subscribe("/effort", 10, &effort_cb);
+  ros::Subscriber color_sub = nh.subscribe("/led_color", 10, &color_cb);
   ros::Publisher state_pub = nh.advertise<lunabot_msgs::RobotSensors>("/sensors", 10);
+
 
   ros::Rate rate(100);
 

@@ -12,6 +12,8 @@
 #include <HX711.h>
 #include <RobotMsgs.pb.h>
 #include <StepperLib.hpp>
+#include <FastLED.h>
+#include "robot.hpp"
 
 #define UWBSerial Serial8
 
@@ -58,6 +60,18 @@ public:
 private:
   static constexpr int NUM_UWB_TAGS = 3;
   volatile static float recv_buffer_[NUM_UWB_TAGS];
+};
+
+class Led_Strip {
+public:
+  Led_Strip() {};
+  static void init();
+  static void set_color(int32_t);
+
+private:
+  static constexpr int NUM_LEDS = 60;
+  static constexpr int BRIGHTNESS = 200; // 0 -> 255
+  static CRGB all_led[NUM_LEDS];
 };
 
 class KillSwitchRelay {

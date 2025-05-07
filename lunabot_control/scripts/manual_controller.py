@@ -4,6 +4,8 @@ import rospy
 from sensor_msgs.msg import Joy
 from lunabot_msgs.msg import RobotEffort, RobotErrors
 
+from std_msgs.msg import Int32
+
 from enum import Enum
 import numpy as np
 
@@ -96,6 +98,8 @@ class ManualController:
         self.last_joy = Joy()
         self.last_joy.buttons = [0,0,0,0,0,0,0,0,0,0,0]
 
+        self.led_publisher = rospy.Publisher("/led_color", Int32, queue_size=1, latch=True);
+
         self.driving_mode = "Forwards"
         
         self._max_speed = rospy.get_param("~max_speed", 3000) # in rpm
@@ -114,6 +118,9 @@ class ManualController:
         self.publish = True
 
         self.stop()
+
+    def set_color(self, new_color: Int32):
+        self.led_publisher.publish(new_color);
 
     def error_callback(self, error_msg: RobotErrors):
         self.error_msg = error_msg
@@ -228,6 +235,7 @@ class ManualController:
 
     def loop(self):
         if self.publish:
+            self.set_color(3) # Blue for manual control
             self.effort_publisher.publish(self.effort_msg)
 
     def stop(self):

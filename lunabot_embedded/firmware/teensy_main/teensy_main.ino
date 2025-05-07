@@ -27,6 +27,7 @@ void ctrl() {
   
   if (effort.should_reset) digitalWrite(9, HIGH); // RELAY ALWAYS ON
   else digitalWrite(9, HIGH); // RELAY ALWAYS ON
+  LEDs::cb(effort.led_color);
 }
 
 void send() {
@@ -60,6 +61,7 @@ void setup() {
 
   M5Stack_UWB_Trncvr::init();
   KillSwitchRelay::init();
+  Led_Strip::init();
   HX711_Bus::init();
 
   ADS1119_Current_Bus::init_ads1119();

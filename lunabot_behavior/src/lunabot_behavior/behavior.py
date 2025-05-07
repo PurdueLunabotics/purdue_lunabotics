@@ -45,6 +45,8 @@ class Behavior:
         self.robot_odom: Odometry = Odometry()
         self.apriltag_pose_in_odom: PoseStamped = None
 
+        self.led_publisher = rospy.Publisher("/led_color", Int32, queue_size=1, latch=True);
+
         self.lin_act_publisher = rospy.Publisher("/lin_act", Int32, queue_size=1, latch=True)
         self.excavate_publisher = rospy.Publisher("/excavate", Int32, queue_size=1, latch=True)
         self.deposition_publisher = rospy.Publisher("/deposition", Int32, queue_size=1, latch=True)
@@ -73,6 +75,10 @@ class Behavior:
         self.MAX_APRILTAG_SEARCH_TIME = 30.0  # seconds, how long to search for an apriltag before giving up
 
         self.APRILTAG_AVERAGING_TIME = 5.0 # seconds, how long the robot will take average apriltag pose for
+
+    def set_color(self, new_color: Int32):
+        self.led_publisher.publish(new_color);
+    
 
     def get_pose_average(self, pose_list) -> PoseStamped:
         avg_pose = pose_list[0]
@@ -134,6 +140,9 @@ class Behavior:
         # Startup & apriltag
         ####################
 
+        # Green for general autonomy
+        self.set_color(2)
+
         # disable traversal to begin
         traversal_manager.stop_traversal()
 
@@ -143,6 +152,9 @@ class Behavior:
 
         # Spin for one loop to map environment
         rospy.loginfo("Behavior: Mapping")
+
+        # Yellow for mapping/finding apriltag
+        self.set_color(5)
 
         velocity_message = Twist()
         velocity_message.linear.x = 0
@@ -175,6 +187,7 @@ class Behavior:
 
         # if we still don't have an apriltag, something is wrong, exit
         if self.apriltag_pose_in_odom == None:
+            self.set_color(1) # Red for error
             rospy.logerr("Behavior: Could not find apriltag")
             return
 
@@ -205,6 +218,8 @@ class Behavior:
         ####################
         # Traversal
         ####################
+
+        self.set_color(2) # Green for traversal
 
         # Set an initial goal in the mining zone and publish it
         mining_goal = PoseStamped()

@@ -36,13 +36,15 @@ class ExdepController:
                        linear_actuator_publisher: rospy.Publisher = None, 
                        cmd_vel_publisher: rospy.Publisher = None, 
                        deposition_publisher: rospy.Publisher = None,
-                       traversal_manager: TraversalManager = None):
+                       traversal_manager: TraversalManager = None,
+                       led_publisher: rospy.Publisher = None):
         """
         If passed a publisher, then it is assumed a node is already running, and the publisher is shared.
         Else, initialize this node to run on its own.
         """
         if (excavation_publisher is None or linear_actuator_publisher is None or
-           cmd_vel_publisher is None or deposition_publisher is None):
+           cmd_vel_publisher is None or deposition_publisher is None or 
+           led_publisher is None):
             rospy.init_node('exdep_node')
 
             self.excavation_publisher: rospy.Publisher = rospy.Publisher("/excavate", Int32, queue_size=1, latch=True)
@@ -50,12 +52,16 @@ class ExdepController:
             self.deposition_publisher: rospy.Publisher = rospy.Publisher("/deposition", Int32, queue_size=1, latch=True)
             self.cmd_vel_publisher: rospy.Publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
             self.traversal_manager = TraversalManager()
+            self.led_publisher = rospy.Publisher("/led_color", Int32, queue_size=1, latch=True);
+
         else:
             self.excavation_publisher = excavation_publisher
             self.lin_act_publisher = linear_actuator_publisher
             self.deposition_publisher = deposition_publisher
             self.cmd_vel_publisher = cmd_vel_publisher
             self.traversal_manager = traversal_manager
+            self.led_publisher = led_publisher
+
 
         self.excavation = ExcavationController(self.excavation_publisher, self.lin_act_publisher, self.cmd_vel_publisher, self.deposition_publisher)
         self.deposition = DepositionManager(self.deposition_publisher)
@@ -74,6 +80,9 @@ class ExdepController:
 
         self.rate = rospy.Rate(10) #hz
 
+    def set_color(self, new_color: Int32):
+        self.led_publisher.publish(new_color);
+
 
     def exdep_loop(self):
         """
@@ -87,6 +96,7 @@ class ExdepController:
 
         self.counter = 0
         while (not rospy.is_shutdown()):
+            self.set_color(6) # Aqua for excavation
 
             # we start in the mining zone, hopefully at a good mining location
             # only plunge first two cycles to ensure full autonomy points
@@ -115,6 +125,7 @@ class ExdepController:
 
             # move to the berm area
             rospy.loginfo("Behavior: Moving to berm area")
+            self.set_color(2) # Green for traversal
             self.traversal_manager.traverse_to_goal(berm_goal, drive_backwards=True)
 
             # once we've arrived, stop.
@@ -123,7 +134,9 @@ class ExdepController:
             cmd_vel.angular.z = 0
             self.cmd_vel_publisher.publish(cmd_vel)
 
+            self.set_color(7) # Purple for deposition autonomy
             rospy.loginfo("Behavior: Aligning to Berm Zone")
+
             # align to the berm
             self.alignment.align_to_angle(math.pi / 2)
 
@@ -167,7 +180,7 @@ class ExdepController:
 
             # move to the mining area
             rospy.loginfo("Behavior: Moving to mining area")
-
+            self.set_color(2) # Green for traversal
             self.traversal_manager.traverse_to_goal(mining_goal, drive_backwards=False)
 
             # once we've arrived, stop.
