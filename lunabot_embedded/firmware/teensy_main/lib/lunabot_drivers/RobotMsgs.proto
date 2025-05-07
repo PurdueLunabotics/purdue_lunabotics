@@ -30,4 +30,5 @@ message RobotEffort {
   sint32 excavate = 4;
   sint32 deposit = 5;
   bool should_reset = 6;
+  sint32 led_color = 7;
 }

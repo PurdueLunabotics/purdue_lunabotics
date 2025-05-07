@@ -87,6 +87,12 @@ void update(float &d0) {
 }
 } // namespace load_cell
 
+namespace LEDs {
+  void cb(int32_t color) {
+    Led_Strip::set_color(color);
+  }
+}
+
 namespace excavation {
 StepperMotor exc_mtr(EXC_MOTOR_ID);
 

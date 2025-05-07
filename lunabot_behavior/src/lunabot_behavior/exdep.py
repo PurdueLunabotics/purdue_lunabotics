@@ -45,7 +45,8 @@ class ExdepController:
                        deposition_publisher: rospy.Publisher = None,
                        traversal_publisher: rospy.Publisher = None,
                        goal_publisher: rospy.Publisher = None,
-                       backwards_publisher: rospy.Publisher = None):
+                       backwards_publisher: rospy.Publisher = None,
+                       led_publisher: rospy.Publisher = None):
         """
         If passed a publisher, then it is assumed a node is already running, and the publisher is shared.
         Else, initialize this node to run on its own.
@@ -62,6 +63,8 @@ class ExdepController:
             self.traversal_publisher: rospy.Publisher = rospy.Publisher("/behavior/traversal_enabled", Bool, queue_size=1, latch=True)
             self.goal_publisher: rospy.Publisher = rospy.Publisher("/goal", PoseStamped, queue_size=1, latch=True)
             self.backwards_publisher: rospy.Publisher = rospy.Publisher("/traversal/backwards", Bool, queue_size=1, latch=True) 
+            self.led_publisher = rospy.Publisher("/led_color", Int32, queue_size=1, latch=True);
+
         else:
             self.excavation_publisher = excavation_publisher
             self.lin_act_publisher = linear_actuator_publisher
@@ -70,6 +73,9 @@ class ExdepController:
             self.traversal_publisher = traversal_publisher
             self.goal_publisher = goal_publisher
             self.backwards_publisher = backwards_publisher
+            self.led_publisher = led_publisher
+
+
 
         self.excavation = ExcavationController(self.excavation_publisher, self.lin_act_publisher, self.cmd_vel_publisher, self.deposition_publisher)
         self.deposition = DepositionManager(self.deposition_publisher)
@@ -95,7 +101,9 @@ class ExdepController:
 
         self.rate = rospy.Rate(10) #hz
 
-        
+    def set_color(self, new_color: Int32):
+        self.led_publisher.publish(new_color);
+
     def is_close_to_goal(self, goal: PoseStamped) -> bool:
         """
         Checks if the robot is close to a given goal
@@ -127,6 +135,7 @@ class ExdepController:
 
         self.counter = 0
         while (not rospy.is_shutdown()):
+            self.set_color(6) # Aqua for excavation
 
             # we start in the mining zone, hopefully at a good mining location
             # only plunge first two cycles to ensure full autonomy points
@@ -154,6 +163,8 @@ class ExdepController:
             rospy.loginfo("Behavior: Moving to berm area")
             self.backwards_publisher.publish(True)
             self.goal_publisher.publish(berm_goal)
+
+            self.set_color(2) # Green for traversal
 
             traversal_message = Bool()
             traversal_message.data = True
@@ -183,7 +194,9 @@ class ExdepController:
             cmd_vel.angular.z = 0
             self.cmd_vel_publisher.publish(cmd_vel)
 
+            self.set_color(7) # Purple for deposition autonomy
             rospy.loginfo("Behavior: Aligning to Berm Zone")
+
             # align to the berm
             self.alignment.align_to_angle(math.pi / 2)
 
@@ -214,6 +227,8 @@ class ExdepController:
             cmd_vel.linear.x = 0
             cmd_vel.angular.z = 0
             self.cmd_vel_publisher.publish(cmd_vel)
+
+            self.set_color(2) # Green for traversal
 
             # move to the mining area
             self.goal_publisher.publish(mining_goal)

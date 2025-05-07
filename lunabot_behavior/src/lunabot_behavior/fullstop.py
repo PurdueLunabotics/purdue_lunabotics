@@ -17,6 +17,8 @@ deposit_publisher = rospy.Publisher("/deposition", Int32, queue_size=1)
 left_publisher = rospy.Publisher("/left_drive", Int32, queue_size=1)
 right_publisher = rospy.Publisher("/right_drive", Int32, queue_size=1)
 linact_publisher = rospy.Publisher("/lin_act", Int32, queue_size=1)
+led_publisher = rospy.Publisher("/led_color", Int32, queue_size=1, latch=True)
+
 
 zero = Int32()
 zero.data = 0
@@ -46,8 +48,6 @@ for i in range(10):
     left_publisher.publish(zero)
     right_publisher.publish(zero)
     deposit_publisher.publish(zero)
-
+    led_publisher.publish(zero)
     rospy.set_param("autonomy", False)
-
     rospy.sleep(0.1)
-

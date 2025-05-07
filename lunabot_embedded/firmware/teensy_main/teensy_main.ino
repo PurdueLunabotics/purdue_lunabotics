@@ -24,7 +24,7 @@ void ctrl() {
   drivetrain::cb(effort.left_drive, effort.right_drive, effort.should_reset);
   deposition::cb(effort.deposit, effort.should_reset);
   excavation::cb(effort.excavate, effort.should_reset);
-  
+  LEDs::cb(effort.led_color);
   if (effort.should_reset) digitalWrite(9, HIGH); // RELAY ALWAYS ON
   else digitalWrite(9, HIGH); // RELAY ALWAYS ON
 }
@@ -60,6 +60,7 @@ void setup() {
 
   M5Stack_UWB_Trncvr::init();
   KillSwitchRelay::init();
+  Led_Strip::init();
   HX711_Bus::init();
 
   ADS1119_Current_Bus::init_ads1119();
