@@ -28,7 +28,7 @@ class TraversalManager:
         self.robot_odom: Odometry = None
 
         self.odom_buffer = []
-        self.ODOM_WINDOW = 100
+        self.ODOM_WINDOW = 60  # 100 in sim
         self.MOVEMENT_THRESHOLD = 0.2  # meters
         self.unmoving_counter = 0
         self.UNMOVING_THRESHOLD = 15
