@@ -32,6 +32,9 @@ class Behavior:
         self.robot_odom = msg
 
     def apriltag_pose_callback(self, msg: PoseStamped):
+        if (not self.apriltag_enabled):
+            return
+
         self.apriltag_pose_in_odom = msg
         
         # Find the mining/berm zones in the odom frame
@@ -54,6 +57,7 @@ class Behavior:
         self.velocity_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
 
         self.apriltag_enabled_publisher = rospy.Publisher("/apriltag/enabled", Bool, queue_size=1, latch=True)
+        self.apriltag_enabled = False
         self.apriltag_pose_publisher = rospy.Publisher("/apriltag_pose", PoseStamped, queue_size=1, latch=True)
 
         self.mining_zone = None
@@ -70,9 +74,9 @@ class Behavior:
         rospy.Subscriber(apriltag_topic, PoseStamped, self.apriltag_pose_callback)
 
         self.SPIN_SPEED = math.radians(20)  # rad/s
-        self.SPIN_TIME = (math.pi) / self.SPIN_SPEED  # seconds, how long to spin at the beginning for 360 degree mapping (only spins 90 degrees)
+        self.SPIN_TIME = (math.pi / 2) / self.SPIN_SPEED  # seconds, how long to spin at the beginning for 360 degree mapping (only spins 90 degrees)
 
-        self.MAX_APRILTAG_SEARCH_TIME = 30.0  # seconds, how long to search for an apriltag before giving up
+        self.MAX_APRILTAG_SEARCH_TIME = 45.0  # seconds, how long to search for an apriltag before giving up
 
         self.APRILTAG_AVERAGING_TIME = 5.0 # seconds, how long the robot will take average apriltag pose for
 
@@ -126,7 +130,8 @@ class Behavior:
         then goes in a loop of mining/deposition.
         """
 
-        self.apriltag_enabled_publisher.publish(True) # enable apriltag detection
+        self.apriltag_enabled_publisher.publish(False) # turn off apriltag
+        self.apriltag_enabled = False
 
         # Initialize all of the modules (before the loop)
         linear_actuators = LinearActuatorManager(self.lin_act_publisher)
@@ -134,7 +139,7 @@ class Behavior:
         traversal_manager = TraversalManager()
         exdep_controller = ExdepController(self.excavate_publisher, self.lin_act_publisher,
                                            self.velocity_publisher, self.deposition_publisher,
-                                           traversal_manager)
+                                           traversal_manager, self.led_publisher)
         
         ####################
         # Startup & apriltag
@@ -172,6 +177,9 @@ class Behavior:
         # if don't have an apriltag yet, spin until you find an apriltag (limit by time)
         rospy.loginfo("Behavior: Find apriltag")
 
+        self.apriltag_enabled_publisher.publish(True)
+        self.apriltag_enabled = True
+
         start_time = rospy.get_time()
         while self.apriltag_pose_in_odom == None and rospy.get_time() - start_time < self.MAX_APRILTAG_SEARCH_TIME:
             velocity_message = Twist()
@@ -179,7 +187,7 @@ class Behavior:
             velocity_message.angular.z = self.SPIN_SPEED
             self.velocity_publisher.publish(velocity_message)
 
-        rospy.sleep(1) # sleep for a second so we end slightly more centered
+        rospy.sleep(1.5) # sleep for a second so we end slightly more centered
 
         velocity_message.linear.x = 0
         velocity_message.angular.z = 0
@@ -210,6 +218,7 @@ class Behavior:
         rospy.loginfo("Behavior: Avg April Tag Pose determined. Disabling April Tag node")
         avg_apriltag_pose = self.get_pose_average(apriltag_pose_list)
         self.apriltag_enabled_publisher.publish(False)
+        self.apriltag_enabled = False
 
         rospy.sleep(5)
 

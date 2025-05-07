@@ -22,7 +22,7 @@ class ApriltagNode:
 
         rospy.init_node("apriltag_node")
 
-        self.enabled: bool = True
+        self.enabled: bool = False
 
         self.apriltag_detection_array: AprilTagDetectionArray = None
         self.apriltag_pose_in_odom: PoseStamped = None
