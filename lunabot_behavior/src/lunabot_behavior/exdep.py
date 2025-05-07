@@ -154,7 +154,7 @@ class ExdepController:
             rospy.loginfo("Behavior: Moving Backwards to Berm")
 
             # approach backwards to berm
-            self.alignment.back_to_berm(self.berm_zone.middle)
+            self.alignment.back_to_berm(self.berm_zone)
 
             # stop
             cmd_vel.linear.x = 0

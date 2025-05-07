@@ -8,6 +8,8 @@ from geometry_msgs.msg import Pose, Twist, PoseStamped
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
 
+from lunabot_behavior.zones import Zone
+
 class AlignmentController:
     """
     This class aligns the robot angles based on our known position in the field
@@ -113,11 +115,21 @@ class AlignmentController:
 
             self.rate.sleep()
 
-    def back_to_berm(self, berm_zone: 'tuple[float]'):
-        bermx = berm_zone[0]
-        bermy = berm_zone[1]
+    def back_to_berm(self, berm_zone: Zone):
+     
+        middle_left = [
+            (berm_zone.top_left[0] + berm_zone.bottom_left[0])/2,
+            (berm_zone.top_left[1] + berm_zone.bottom_left[1])/2,
+        ]
 
-        dist = math.sqrt((self.odom.pose.pose.position.x - bermx)**2 + (self.odom.pose.pose.position.y - bermy))
+        middle_right = [
+            (berm_zone.top_right[0] + berm_zone.bottom_right[0])/2,
+            (berm_zone.top_right[1] + berm_zone.bottom_right[1])/2,
+        ]
+
+        # pt to line distance formulat (given line defined by two points)
+        dist = (abs(((middle_right[0]-middle_left[0]) * (middle_left[1] - self.odom.pose.pose.position.y)) - ((middle_left[0]-self.odom.pose.pose.position.x) * (middle_right[1]-middle_left[1]))) /
+                (math.sqrt((middle_right[0]-middle_left[0])**2 + (middle_right[1]-middle_right[1])**2)))
 
         cmd_vel = Twist()
 
@@ -127,10 +139,11 @@ class AlignmentController:
             cmd_vel.angular.z = 0
             self.cmd_vel_publisher.publish(cmd_vel)
 
-            dist = math.sqrt((self.odom.pose.pose.position.x - bermx)**2 + (self.odom.pose.pose.position.y - bermy))
+            dist = (abs(((middle_right[0]-middle_left[0]) * (middle_left[1] - self.odom.pose.pose.position.y)) - ((middle_left[0]-self.odom.pose.pose.position.x) * (middle_right[1]-middle_left[1]))) /
+                    (math.sqrt((middle_right[0]-middle_left[0])**2 + (middle_right[1]-middle_right[1])**2)))
             print(dist)
 
-            if (rospy.get_time() - start_time > 10.0):
+            if (rospy.get_time() - start_time > 5.0):
                 break
 
         cmd_vel.linear.x = 0
