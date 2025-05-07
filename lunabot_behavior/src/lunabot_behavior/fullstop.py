@@ -48,11 +48,8 @@ for i in range(10):
     left_publisher.publish(zero)
     right_publisher.publish(zero)
     deposit_publisher.publish(zero)
-<<<<<<< HEAD
 
     rospy.set_param("autonomy", False)
 
-=======
     led_publisher.publish(zero)
->>>>>>> feature/led2
     rospy.sleep(0.1)
