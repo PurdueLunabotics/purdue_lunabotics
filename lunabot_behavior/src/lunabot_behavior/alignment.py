@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import numpy as np
+import math
 
 import rospy
 from geometry_msgs.msg import Pose, Twist, PoseStamped
@@ -112,6 +113,30 @@ class AlignmentController:
 
             self.rate.sleep()
 
+    def back_to_berm(self, berm_zone: 'tuple[float]'):
+        bermx = berm_zone[0]
+        bermy = berm_zone[1]
+
+        dist = math.sqrt((self.odom.pose.pose.position.x - bermx)**2 + (self.odom.pose.pose.position.y - bermy))
+
+        cmd_vel = Twist()
+
+        start_time = rospy.get_time()
+        while (dist > 0.35):
+            cmd_vel.linear.x = -0.2
+            cmd_vel.angular.z = 0
+            self.cmd_vel_publisher.publish(cmd_vel)
+
+            dist = math.sqrt((self.odom.pose.pose.position.x - bermx)**2 + (self.odom.pose.pose.position.y - bermy))
+            print(dist)
+
+            if (rospy.get_time() - start_time > 10.0):
+                break
+
+        cmd_vel.linear.x = 0
+        self.cmd_vel_publisher.publish(cmd_vel)
+
+            
 
     def stop(self):
         cmd_vel = Twist()

@@ -43,8 +43,7 @@ class ExdepController:
         Else, initialize this node to run on its own.
         """
         if (excavation_publisher is None or linear_actuator_publisher is None or
-           cmd_vel_publisher is None or deposition_publisher is None or 
-           led_publisher is None):
+           cmd_vel_publisher is None or deposition_publisher is None):
             rospy.init_node('exdep_node')
 
             self.excavation_publisher: rospy.Publisher = rospy.Publisher("/excavate", Int32, queue_size=1, latch=True)
@@ -109,8 +108,18 @@ class ExdepController:
             else:
                 self.excavation.excavate()
 
+            # spin excavation while raising
+            exc_msg = Int32()
+            exc_msg.data = 1500
+            self.excavation_publisher.publish(exc_msg)
+
             # raise the linear actuators out of the way
             self.linear_actuators.raise_linear_actuators(True) 
+
+            # stop spinning excavation
+            exc_msg = Int32()
+            exc_msg.data = 0
+            self.excavation_publisher.publish(exc_msg)
 
             # pick berm area goal
             berm_goal = PoseStamped()
@@ -140,28 +149,29 @@ class ExdepController:
             # align to the berm
             self.alignment.align_to_angle(math.pi / 2)
 
-            rospy.loginfo("Behavior: Moving Backwards to Berm")
-            # approach backwards for 2 sec
-            cmd_vel.linear.x = -0.3
-            cmd_vel.angular.z = 0
-            self.cmd_vel_publisher.publish(cmd_vel)
+            rospy.sleep(0.5)
 
-            rospy.sleep(2)
+            rospy.loginfo("Behavior: Moving Backwards to Berm")
+
+            # approach backwards to berm
+            self.alignment.back_to_berm(self.berm_zone.middle)
 
             # stop
             cmd_vel.linear.x = 0
             cmd_vel.angular.z = 0
             self.cmd_vel_publisher.publish(cmd_vel)
 
+            rospy.sleep(3.5)
+
             rospy.loginfo("Behavior: Depositing")
             self.deposition.deposit()
 
-            # get out of mining area for 2 sec
+            # get out of mining area for 3 sec
             cmd_vel.linear.x = 0.3
             cmd_vel.angular.z = 0
             self.cmd_vel_publisher.publish(cmd_vel)
 
-            rospy.sleep(2)
+            rospy.sleep(3)
 
             # stop
             cmd_vel.linear.x = 0
@@ -169,6 +179,9 @@ class ExdepController:
             self.cmd_vel_publisher.publish(cmd_vel)
 
             mining_goal = PoseStamped()
+            # random_zone = self.mining_zone.randomPoint()
+            # mining_goal.pose.position.x = random_zone[0]
+            # mining_goal.pose.position.y = random_zone[1]
             mining_goal.pose.position.x = self.mining_zone.middle[0]
             mining_goal.pose.position.y = self.mining_zone.middle[1]
             mining_goal.header.stamp = rospy.Time.now()
