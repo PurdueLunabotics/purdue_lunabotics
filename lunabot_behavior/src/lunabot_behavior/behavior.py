@@ -75,7 +75,7 @@ class Behavior:
 
         self.SPIN_SPEED = math.radians(20)  # rad/s
         self.SPIN_TIME = 20 # seconds, how long to spin at the beginning for mapping
-        self.MAPPING_TIME = 30 # seconds, how long to spin in excavation zone for mapping
+        self.MAPPING_TIME = 20 # seconds, how long to spin in excavation zone for mapping
 
         self.MAX_APRILTAG_SEARCH_TIME = 45.0  # seconds, how long to search for an apriltag before giving up
 
@@ -219,6 +219,7 @@ class Behavior:
         rospy.sleep(5)
 
         self.apriltag_pose_publisher.publish(avg_apriltag_pose)
+        self.apriltag_pose_in_odom = avg_apriltag_pose
 
         ####################
         # Mapping
@@ -285,9 +286,12 @@ class Behavior:
         start_time = rospy.get_time()
         while rospy.get_time() - start_time < self.MAPPING_TIME:
             self.rate.sleep()
+
+        velocity_message.angular.z = 0
+        self.velocity_publisher.publish(velocity_message)
         
         rospy.loginfo("Behavior: Stopping Costmap")
-        rospy.set_param("costmapEnabled", False)
+        rospy.set_param("/costmap_enabled", False)
 
         ####################
         # Excavation-Deposition cycle

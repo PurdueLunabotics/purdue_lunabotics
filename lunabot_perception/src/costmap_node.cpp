@@ -12,14 +12,16 @@ int main(int argc, char **argv) {
 
   costmap_2d::Costmap2DROS costmap("global_costmap", tf_buff);
   bool isRunning = true;
-  while (isRunning) {
+  while (true) {
     ros::spinOnce();
     bool prevRunning = isRunning;
-    ros::param::get("costmapEnabled", isRunning)
+    ros::param::get("/costmap_enabled", isRunning);
     if (!isRunning && prevRunning) {
-      costmap::pause();
+      ROS_INFO("costmap paused\n");
+      costmap.pause();
     } else if(isRunning && !prevRunning) {
-      costmap::resume();
+      ROS_INFO("costmap resumed\n");
+      costmap.resume();
     }
   }
   return 0;
