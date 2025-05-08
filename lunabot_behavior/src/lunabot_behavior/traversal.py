@@ -121,8 +121,10 @@ class TraversalManager:
 
         if (dist < self.MOVEMENT_THRESHOLD):
             self.unmoving_counter += 1
-
         else:
+            if (self.unmoving_counter > 10):
+                rospy.loginfo("Traversal: Moved, resuming planning")
+
             self.unmoving_counter = 0
 
 
@@ -132,13 +134,14 @@ class TraversalManager:
             planning_msg.data = False
 
             if (self.unmoving_counter == 10):
-                print("Traversal: stopping planning temporarily")
+                rospy.loginfo("Traversal: stopping planning temporarily")
         else:
             planning_msg.data = True
+            if (self.unmoving_counter == 60):
+                rospy.loginfo("Traversal: Timeout, resuming planning")
+
 
         self.planing_enabled_publisher.publish(planning_msg)
-
-
 
     def check_and_replace_goal(self, need_new_point: bool = False):
         """

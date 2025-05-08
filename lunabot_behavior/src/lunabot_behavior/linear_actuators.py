@@ -53,6 +53,8 @@ class LinearActuatorManager:
 
         time.sleep(0.1)
 
+        rospy.loginfo("Behavior: raising actuators")
+
         lin_act_msg = Int32()
         lin_act_msg.data = self.LIN_ACT_POWER
 
