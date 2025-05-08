@@ -89,24 +89,35 @@ class ExdepController:
         """
         rospy.sleep(0.1)
 
+        UCF_BOTTOM = False # are we on the bottom UCF map?
+
         # wait until we have our apriltag position
         while (self.apriltag_pose_in_odom is None):
             rospy.sleep(0.1)
 
-        self.counter = 0
+        self.cycle_count = 0
         while (not rospy.is_shutdown()):
+
+            ####################
+            # Excavation
+            ####################
+            
             self.set_color(6) # Aqua for excavation
 
             # we start in the mining zone, hopefully at a good mining location
             # only plunge first two cycles to ensure full autonomy points
 
             # Note- this is changed back to normal until plunging can be stopped correctly
-            if self.counter < 2:
+            if self.cycle_count < 2:
                 self.excavation.excavate()
-
-                self.counter += 1
             else:
                 self.excavation.excavate()
+
+            self.cycle_count += 1
+
+            ####################
+            # Raise Linear Actuators
+            ####################
 
             # spin excavation while raising
             exc_msg = Int32()
@@ -121,6 +132,10 @@ class ExdepController:
             exc_msg.data = 0
             self.excavation_publisher.publish(exc_msg)
 
+            ####################
+            # Traversal to Berm
+            ####################
+
             # pick berm area goal
             berm_goal = PoseStamped()
             berm_goal.pose.position.x = self.berm_zone.middle[0]
@@ -128,7 +143,12 @@ class ExdepController:
             berm_goal.header.stamp = rospy.Time.now()
             berm_goal.header.frame_id = "odom"
 
-            offset = zones.calc_offset(0, 1, self.apriltag_pose_in_odom, self.is_sim)  # TODO; maybe shift deposit location each time
+            # aim for one meter above the berm (reversed for UCF bottom map)
+            if UCF_BOTTOM:
+                offset = zones.calc_offset(0, -1, self.apriltag_pose_in_odom, self.is_sim) 
+            else:
+                offset = zones.calc_offset(0, 1, self.apriltag_pose_in_odom, self.is_sim)
+
             berm_goal.pose.position.x += offset[0]
             berm_goal.pose.position.y += offset[1]
 
@@ -143,11 +163,18 @@ class ExdepController:
             cmd_vel.angular.z = 0
             self.cmd_vel_publisher.publish(cmd_vel)
 
+            ####################
+            # Alignment 
+            ####################
+
             self.set_color(7) # Purple for deposition autonomy
             rospy.loginfo("Behavior: Aligning to Berm Zone")
 
-            # align to the berm
-            self.alignment.align_to_angle(math.pi / 2)
+            # align to the berm (north, unless on the reversed UCF bottom map)
+            if UCF_BOTTOM:
+                self.alignment.align_to_angle(3 * math.pi / 2)
+            else:
+                self.alignment.align_to_angle(math.pi / 2)
 
             rospy.sleep(0.5)
 
@@ -163,6 +190,10 @@ class ExdepController:
 
             rospy.sleep(1)
 
+            ####################
+            # Deposition
+            ####################
+
             rospy.loginfo("Behavior: Depositing")
             self.deposition.deposit()
 
@@ -177,6 +208,10 @@ class ExdepController:
             cmd_vel.linear.x = 0
             cmd_vel.angular.z = 0
             self.cmd_vel_publisher.publish(cmd_vel)
+
+            ####################
+            # Traversal to Mining Zone
+            ####################
 
             mining_goal = PoseStamped()
             # random_zone = self.mining_zone.randomPoint()

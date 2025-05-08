@@ -131,6 +131,10 @@ class Behavior:
         then goes in a loop of mining/deposition.
         """
 
+        ####################
+        # Initialization
+        ####################
+
         self.apriltag_enabled_publisher.publish(False) # turn off apriltag
         self.apriltag_enabled = False
 
@@ -142,19 +146,23 @@ class Behavior:
                                            self.velocity_publisher, self.deposition_publisher,
                                            traversal_manager, self.led_publisher)
         
-        ####################
-        # Startup & apriltag
-        ####################
-
         # Green for general autonomy
         self.set_color(2)
 
         # disable traversal to begin
         traversal_manager.stop_traversal()
 
+        ####################
+        # Raise linear actuators
+        ####################
+
         # Raise linear actuators
         rospy.loginfo("Behavior: Raising linear actuator")
         linear_actuators.raise_linear_actuators(True)
+
+        ####################
+        # Finding apriltag
+        ####################
 
         # Yellow for mapping/finding apriltag
         self.set_color(5)
@@ -208,6 +216,10 @@ class Behavior:
         rospy.sleep(5)
 
         self.apriltag_pose_publisher.publish(avg_apriltag_pose)
+
+        ####################
+        # Mapping
+        ####################
         
         # Spin for one loop to map environment
         rospy.loginfo("Behavior: Mapping")
@@ -245,8 +257,13 @@ class Behavior:
         mining_goal.header.stamp = rospy.Time.now()
         mining_goal.header.frame_id = "odom"
 
-        # align to facing 'north' to make traversal easier
-        alignment_controller.align_to_angle(np.pi / 2)
+        IN_UCF = True  # are we on the UCF map
+
+        # align to facing 'north' to make traversal easier (east for the UCF)
+        if (IN_UCF):
+            alignment_controller.align_to_angle(0)
+        else:
+            alignment_controller.align_to_angle(np.pi / 2)
 
         rospy.loginfo("Behavior: Moving to mining area")
         traversal_manager.traverse_to_goal(mining_goal, drive_backwards=False)
