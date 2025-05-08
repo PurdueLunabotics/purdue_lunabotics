@@ -19,11 +19,20 @@ class Zone:
 
         self.middle = ((bottom_left[0] + top_right[0]) / 2, (bottom_left[1] + top_right[1]) / 2)
     
-    def randomPoint(self) -> 'tuple[float]':
-        # TODO: this doesn't work
-        # x = random.random() * (self.top_right[0] - self.top_left[0]) + self.top_left[0]
-        # y = random.random() * (self.top_left[1] - self.bottom_left[1]) + self.bottom_left[1]
-        return None
+    def random_offset(self) -> 'tuple[float]':
+        """
+        Generate a random offset that will lie within the zone.
+        """
+
+        BUFFER = 0.1 # In meters, offset will not lie within this distance of edges
+
+        x_length = self.top_right[0] - self.top_left[0]
+        y_length = self.top_left[1] - self.bottom_left[1]
+
+        x_offset = random.uniform(-x_length / 2 + BUFFER, x_length / 2 - BUFFER)
+        y_offset = random.uniform(-y_length / 2 + BUFFER, y_length / 2 - BUFFER)
+
+        return (x_offset, y_offset)
 
     def visualize_zone(self, publisher: rospy.Publisher, id=0, color=(1,0,0,1)):
         """

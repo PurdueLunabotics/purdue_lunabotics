@@ -209,20 +209,20 @@ class ExdepController:
             cmd_vel.angular.z = 0
             self.cmd_vel_publisher.publish(cmd_vel)
 
+            rospy.sleep(0.3)
+
             ####################
             # Traversal to Mining Zone
             ####################
 
             mining_goal = PoseStamped()
-            # random_zone = self.mining_zone.randomPoint()
-            # mining_goal.pose.position.x = random_zone[0]
-            # mining_goal.pose.position.y = random_zone[1]
             mining_goal.pose.position.x = self.mining_zone.middle[0]
             mining_goal.pose.position.y = self.mining_zone.middle[1]
             mining_goal.header.stamp = rospy.Time.now()
             mining_goal.header.frame_id = "odom"
 
-            offset = zones.calc_offset(0, 0, self.apriltag_pose_in_odom, self.is_sim)  # TODO: maybe shift mining location each time
+            random_offset = self.mining_zone.random_offset()
+            offset = zones.calc_offset(random_offset[0], random_offset[1], self.apriltag_pose_in_odom, self.is_sim)  # TODO: maybe shift mining location each time
             mining_goal.pose.position.x += offset[0]
             mining_goal.pose.position.y += offset[1]
 
