@@ -87,7 +87,7 @@ private:
   bool dstar_init = false;
   bool grid_update_needed = false;
   bool goal_update_needed = false;
-  bool just_published_empty_path = false;
+  int empty_paths = 0; // how many empty paths in a row have been published
 
   std::mutex map_lock;  // NOTE: this mutex was needed in python, might not be needed in C++ because roscpp callbacks are single threaded
 
@@ -208,16 +208,16 @@ private:
     path.header.frame_id = "odom"; // Set the frame of reference
 
     if (path_data.size() == 0) {
-      if (!just_published_empty_path) {
-        just_published_empty_path = true;
-        // and continue on, publish it
+      // Only publish some empty paths, avoid overwhelming traversal.
+      if (empty_paths % 20 != 0) {
+        return;
       }
-      else {
-        return; // Don't publish empty path if already published
-      }
+
+      empty_paths++;
     }
     else {
-      just_published_empty_path = false;
+      // when it's not empty, restart this counter.
+      empty_paths = 0;
     }
 
     for (size_t index = 0; index < path_data.size(); ++index) {
