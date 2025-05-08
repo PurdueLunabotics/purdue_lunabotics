@@ -11,6 +11,16 @@ int main(int argc, char **argv) {
   tf2_ros::TransformListener tf(tf_buff);
 
   costmap_2d::Costmap2DROS costmap("global_costmap", tf_buff);
-  ros::spin();
+  bool isRunning = true;
+  while (isRunning) {
+    ros::spinOnce();
+    bool prevRunning = isRunning;
+    ros::param::get("costmapEnabled", isRunning)
+    if (!isRunning && prevRunning) {
+      costmap::pause();
+    } else if(isRunning && !prevRunning) {
+      costmap::resume();
+    }
+  }
   return 0;
 }

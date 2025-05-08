@@ -70,6 +70,7 @@
   </group>
 
   <!-- mapping -->
+  <rosparam param="costmapEnabled" subst_value="True">True</rosparam>
   <group ns="maps">
       <node name="costmap_node" pkg="lunabot_perception" type="costmap_node" output="screen">
           <rosparam file="$(find lunabot_config)/config/global_costmap_sim.yml" command="load" ns="global_costmap" />

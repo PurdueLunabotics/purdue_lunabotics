@@ -74,7 +74,8 @@ class Behavior:
         rospy.Subscriber(apriltag_topic, PoseStamped, self.apriltag_pose_callback)
 
         self.SPIN_SPEED = math.radians(20)  # rad/s
-        self.SPIN_TIME = 20 # seconds, how long to spin at the beginning for 360 degree mapping
+        self.SPIN_TIME = 20 # seconds, how long to spin at the beginning for mapping
+        self.MAPPING_TIME = 30 # seconds, how long to spin in excavation zone for mapping
 
         self.MAX_APRILTAG_SEARCH_TIME = 45.0  # seconds, how long to search for an apriltag before giving up
 
@@ -137,6 +138,8 @@ class Behavior:
 
         self.apriltag_enabled_publisher.publish(False) # turn off apriltag
         self.apriltag_enabled = False
+        rospy.set_param("costmapEnabled", True)
+
 
         # Initialize all of the modules (before the loop)
         linear_actuators = LinearActuatorManager(self.lin_act_publisher)
@@ -267,6 +270,24 @@ class Behavior:
 
         rospy.loginfo("Behavior: Moving to mining area")
         traversal_manager.traverse_to_goal(mining_goal, drive_backwards=False)
+        
+        # Once we get to the Excavation Zone, map the area and then turn off mapping
+        
+        # Spin for one loop to map environment
+        self.set_color(5)
+        rospy.loginfo("Behavior: Mapping")
+
+        velocity_message = Twist()
+        velocity_message.linear.x = 0
+        velocity_message.angular.z = self.SPIN_SPEED
+        self.velocity_publisher.publish(velocity_message)
+
+        start_time = rospy.get_time()
+        while rospy.get_time() - start_time < self.MAPPING_TIME:
+            self.rate.sleep()
+        
+        rospy.loginfo("Behavior: Stopping Costmap")
+        rospy.set_param("costmapEnabled", False)
 
         ####################
         # Excavation-Deposition cycle

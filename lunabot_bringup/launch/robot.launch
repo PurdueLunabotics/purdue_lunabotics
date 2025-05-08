@@ -89,12 +89,7 @@
         </group>
 
         <!-- Launch the costmap node -->
-        <group ns="maps">
-            <node name="costmap_node" pkg="lunabot_perception" type="costmap_node" output="screen">
-                <rosparam file="$(find lunabot_config)/config/global_costmap.yml" command="load"
-                          ns="global_costmap" />
-            </node>
-        </group>
+        <include file="$(find lunabot_bringup)/launch/costmap.launch" />
     
     </group>
       
