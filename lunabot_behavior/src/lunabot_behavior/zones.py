@@ -26,11 +26,11 @@ class Zone:
 
         BUFFER = 0.1 # In meters, offset will not lie within this distance of edges
 
-        x_length = self.top_right[0] - self.top_left[0]
-        y_length = self.top_left[1] - self.bottom_left[1]
+        x_length = abs(self.top_right[0] - self.top_left[0])
+        y_length = abs(self.top_left[1] - self.bottom_left[1])
 
-        x_offset = random.uniform(-x_length / 2 + BUFFER, x_length / 2 - BUFFER)
-        y_offset = random.uniform(-y_length / 2 + BUFFER, y_length / 2 - BUFFER)
+        x_offset = random.uniform(-x_length / 3 + BUFFER, x_length / 3 - BUFFER)
+        y_offset = random.uniform(-y_length / 3 + BUFFER, y_length / 3 - BUFFER)
 
         return (x_offset, y_offset)
 
