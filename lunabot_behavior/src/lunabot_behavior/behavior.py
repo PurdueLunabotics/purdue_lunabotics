@@ -61,7 +61,7 @@ class Behavior:
         self.apriltag_pose_publisher = rospy.Publisher("/apriltag_pose", PoseStamped, queue_size=1, latch=True)
 
         self.mining_zone = None
-        self.berm_zone = None
+        self.berm_zone = None\
 
         self.rate = rospy.Rate(1) #hz
 
@@ -138,7 +138,7 @@ class Behavior:
 
         self.apriltag_enabled_publisher.publish(False) # turn off apriltag
         self.apriltag_enabled = False
-        rospy.set_param("costmapEnabled", True)
+        rospy.set_param("/costmap_enabled", True)
 
 
         # Initialize all of the modules (before the loop)
@@ -176,18 +176,25 @@ class Behavior:
         self.apriltag_enabled_publisher.publish(True)
         self.apriltag_enabled = True
 
-        start_time = rospy.get_time()
-        while self.apriltag_pose_in_odom == None and rospy.get_time() - start_time < self.MAX_APRILTAG_SEARCH_TIME:
-            velocity_message = Twist()
+        # Wait a bit for apriltag node to start
+        rospy.sleep(0.5)
+
+        # if we are already looking at the apriltag, don't spin, just continue
+        if (self.apriltag_pose_in_odom != None):
+
+            # otherwise spin for the apriltag
+            start_time = rospy.get_time()
+            while self.apriltag_pose_in_odom == None and rospy.get_time() - start_time < self.MAX_APRILTAG_SEARCH_TIME:
+                velocity_message = Twist()
+                velocity_message.linear.x = 0
+                velocity_message.angular.z = self.SPIN_SPEED
+                self.velocity_publisher.publish(velocity_message)
+
+            rospy.sleep(1.5) # sleep for a second so we end slightly more centered
+
             velocity_message.linear.x = 0
-            velocity_message.angular.z = self.SPIN_SPEED
+            velocity_message.angular.z = 0
             self.velocity_publisher.publish(velocity_message)
-
-        rospy.sleep(1.5) # sleep for a second so we end slightly more centered
-
-        velocity_message.linear.x = 0
-        velocity_message.angular.z = 0
-        self.velocity_publisher.publish(velocity_message)
 
         # if we still don't have an apriltag, something is wrong, exit
         if self.apriltag_pose_in_odom == None:
