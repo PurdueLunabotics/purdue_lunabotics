@@ -179,13 +179,14 @@ class Behavior:
         # Wait a bit for apriltag node to start
         rospy.sleep(0.5)
 
+        velocity_message = Twist()
+
         # if we are already looking at the apriltag, don't spin, just continue
-        if (self.apriltag_pose_in_odom != None):
+        if (self.apriltag_pose_in_odom == None):
 
             # otherwise spin for the apriltag
             start_time = rospy.get_time()
             while self.apriltag_pose_in_odom == None and rospy.get_time() - start_time < self.MAX_APRILTAG_SEARCH_TIME:
-                velocity_message = Twist()
                 velocity_message.linear.x = 0
                 velocity_message.angular.z = self.SPIN_SPEED
                 self.velocity_publisher.publish(velocity_message)
@@ -280,25 +281,26 @@ class Behavior:
         traversal_manager.traverse_to_goal(mining_goal, drive_backwards=False)
         
         # Once we get to the Excavation Zone, map the area and then turn off mapping
+        # Note: Disabled for now. doesn't work
         
-        # Spin for one loop to map environment
-        self.set_color(5)
-        rospy.loginfo("Behavior: Mapping")
+        # # Spin for one loop to map environment
+        # self.set_color(5)
+        # rospy.loginfo("Behavior: Mapping")
 
-        velocity_message = Twist()
-        velocity_message.linear.x = 0
-        velocity_message.angular.z = self.SPIN_SPEED
-        self.velocity_publisher.publish(velocity_message)
+        # velocity_message = Twist()
+        # velocity_message.linear.x = 0
+        # velocity_message.angular.z = self.SPIN_SPEED
+        # self.velocity_publisher.publish(velocity_message)
 
-        start_time = rospy.get_time()
-        while rospy.get_time() - start_time < self.MAPPING_TIME:
-            self.rate.sleep()
+        # start_time = rospy.get_time()
+        # while rospy.get_time() - start_time < self.MAPPING_TIME:
+        #     self.rate.sleep()
 
-        velocity_message.angular.z = 0
-        self.velocity_publisher.publish(velocity_message)
+        # velocity_message.angular.z = 0
+        # self.velocity_publisher.publish(velocity_message)
         
-        rospy.loginfo("Behavior: Stopping Costmap")
-        rospy.set_param("/costmap_enabled", False)
+        # rospy.loginfo("Behavior: Stopping Costmap")
+        # rospy.set_param("/costmap_enabled", False)
 
         ####################
         # Excavation-Deposition cycle
