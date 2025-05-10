@@ -135,8 +135,6 @@ Visualization Manager:
         All Enabled: true
         base_link:
           Value: true
-        berm:
-          Value: true
         chassis:
           Value: true
         d435_left_link:
@@ -181,10 +179,6 @@ Visualization Manager:
           Value: true
         right_front:
           Value: true
-        tag_2:
-          Value: true
-        tag_6:
-          Value: true
         usb_cam_link:
           Value: true
       Marker Alpha: 1
@@ -213,12 +207,7 @@ Visualization Manager:
               d455_back_link:
                 d455_back_aligned_depth_to_color_frame:
                   d455_back_color_optical_frame:
-                    berm:
-                      {}
-                    tag_2:
-                      {}
-                    tag_6:
-                      {}
+                    {}
                 d455_back_color_frame:
                   {}
                 d455_back_depth_frame:
@@ -357,7 +346,7 @@ Visualization Manager:
       Marker Topic: /berm_zone
       Name: Marker
       Namespaces:
-        zones: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -365,7 +354,7 @@ Visualization Manager:
       Marker Topic: /mining_zone
       Name: Marker
       Namespaces:
-        zones: true
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -420,17 +409,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: -1.1846058368682861
-        Y: 3.0968337059020996
-        Z: -0.40902215242385864
+        X: 1.4134737253189087
+        Y: -1.692491054534912
+        Z: -0.2512388825416565
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.519796371459961
+      Pitch: 1.2647966146469116
       Target Frame: <Fixed Frame>
-      Yaw: 0.2786618769168854
+      Yaw: 3.546847105026245
     Saved: ~
 Window Geometry:
   Displays:
