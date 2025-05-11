@@ -29,7 +29,7 @@ class DifferentialDriveController:
         self._left_vel = 0
         self._right_vel = 0
         self._wheel_diameter = 0.3429 # converts rad /s to m / s
-        self._gearbox_ratio = 100
+        self._gearbox_ratio = 50
         self._left_prev_error = 0
         self._right_prev_error = 0
 
