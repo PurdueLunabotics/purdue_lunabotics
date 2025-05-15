@@ -141,10 +141,10 @@ class AlignmentController:
 
             dist = (abs(((middle_right[0]-middle_left[0]) * (middle_left[1] - self.odom.pose.pose.position.y)) - ((middle_left[0]-self.odom.pose.pose.position.x) * (middle_right[1]-middle_left[1]))) /
                     (math.sqrt((middle_right[0]-middle_left[0])**2 + (middle_right[1]-middle_right[1])**2)))
-            print(dist)
+            # print(dist)
 
-            if (rospy.get_time() - start_time > 5.0):
-                break
+            # if (rospy.get_time() - start_time > 5.0):
+            #     break
 
         cmd_vel.linear.x = 0
         self.cmd_vel_publisher.publish(cmd_vel)

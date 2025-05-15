@@ -24,7 +24,7 @@ class Zone:
         Generate a random offset that will lie within the zone.
         """
 
-        BUFFER = 0.3 # In meters, offset will not lie within this distance of edges
+        BUFFER = 0.5 # In meters, offset will not lie within this distance of edges
 
         x_length = abs(self.top_right[0] - self.top_left[0])
         y_length = abs(self.top_left[1] - self.bottom_left[1])
