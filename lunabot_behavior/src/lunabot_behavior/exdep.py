@@ -102,7 +102,7 @@ class ExdepController:
             # Excavation
             ####################
             
-            self.set_color(6) # Aqua for excavation
+            self.set_color(4) # White for excavation
 
             # we start in the mining zone, hopefully at a good mining location
             # only plunge first two cycles to ensure full autonomy points
