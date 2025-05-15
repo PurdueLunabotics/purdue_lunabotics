@@ -228,6 +228,10 @@ class Behavior:
 
         self.apriltag_pose_publisher.publish(avg_apriltag_pose)
         self.apriltag_pose_in_odom = avg_apriltag_pose
+        
+        # Find the mining/berm zones in the odom frame
+        self.mining_zone: zones.Zone = zones.find_mining_zone(self.apriltag_pose_in_odom, self.is_sim)
+        self.berm_zone: zones.Zone = zones.find_berm_zone(self.apriltag_pose_in_odom, self.is_sim)
 
         ####################
         # Mapping
