@@ -27,7 +27,7 @@
 
   /usb_cam/tag_detections /usb_cam/image_color 
 
-  /mining_zone /apriltag_visual /berm_zone
+  /mining_zone /apriltag_visual /berm_zone /apriltag_pose
   
   /ptp/log /ptp/target_pose /ptp/current_target /ptp/robot_state 
   /ptp/line_path /ptp/angular_disparity /ptp/linear_disparity /ptp/heading /ptp/angle_target /ptp/pid_linear /ptp/pid_angular
