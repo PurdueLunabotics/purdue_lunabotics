@@ -104,14 +104,14 @@ class HomingController:
         quat_w_sum = 0.0
 
         for pose in pose_list:
-            pt_x_sum = pt_x_sum + pose.pose.position.x
-            pt_y_sum = pt_y_sum + pose.pose.position.y
-            pt_z_sum = pt_z_sum + pose.pose.position.z
+            pt_x_sum = pt_x_sum + pose.position.x
+            pt_y_sum = pt_y_sum + pose.position.y
+            pt_z_sum = pt_z_sum + pose.position.z
 
-            quat_x_sum = quat_x_sum + pose.pose.orientation.x
-            quat_y_sum = quat_y_sum + pose.pose.orientation.y
-            quat_z_sum = quat_z_sum + pose.pose.orientation.z
-            quat_w_sum = quat_w_sum + pose.pose.orientation.w
+            quat_x_sum = quat_x_sum + pose.orientation.x
+            quat_y_sum = quat_y_sum + pose.orientation.y
+            quat_z_sum = quat_z_sum + pose.orientation.z
+            quat_w_sum = quat_w_sum + pose.orientation.w
 
         # update pose point
         avg_pose.pose.position.x = pt_x_sum / len(pose_list)
