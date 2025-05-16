@@ -61,7 +61,7 @@ class Behavior:
         self.apriltag_pose_publisher = rospy.Publisher("/apriltag_pose", PoseStamped, queue_size=1, latch=True)
 
         self.mining_zone = None
-        self.berm_zone = None\
+        self.berm_zone = None
 
         self.rate = rospy.Rate(1) #hz
 
@@ -147,7 +147,8 @@ class Behavior:
         traversal_manager = TraversalManager()
         exdep_controller = ExdepController(self.excavate_publisher, self.lin_act_publisher,
                                            self.velocity_publisher, self.deposition_publisher,
-                                           traversal_manager, self.led_publisher)
+                                           traversal_manager, self.led_publisher,
+                                           self.apriltag_enabled_publisher)
         
         # Green for general autonomy
         self.set_color(2)

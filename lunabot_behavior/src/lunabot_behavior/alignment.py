@@ -149,8 +149,6 @@ class AlignmentController:
         cmd_vel.linear.x = 0
         self.cmd_vel_publisher.publish(cmd_vel)
 
-            
-
     def stop(self):
         cmd_vel = Twist()
         cmd_vel.linear.x = 0

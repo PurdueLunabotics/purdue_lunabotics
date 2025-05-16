@@ -14,6 +14,7 @@ from lunabot_behavior.linear_actuators import LinearActuatorManager
 from lunabot_behavior.alignment import AlignmentController
 from lunabot_behavior.traversal import TraversalManager
 import lunabot_behavior.zones as zones
+from lunabot_behavior.homing import HomingController
 
 from std_msgs.msg import Int8, Bool, Int32
 import sys
@@ -37,7 +38,8 @@ class ExdepController:
                        cmd_vel_publisher: rospy.Publisher = None, 
                        deposition_publisher: rospy.Publisher = None,
                        traversal_manager: TraversalManager = None,
-                       led_publisher: rospy.Publisher = None):
+                       led_publisher: rospy.Publisher = None,
+                       apriltag_enabled_publisher: rospy.Publisher = None):
         """
         If passed a publisher, then it is assumed a node is already running, and the publisher is shared.
         Else, initialize this node to run on its own.
@@ -51,7 +53,8 @@ class ExdepController:
             self.deposition_publisher: rospy.Publisher = rospy.Publisher("/deposition", Int32, queue_size=1, latch=True)
             self.cmd_vel_publisher: rospy.Publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
             self.traversal_manager = TraversalManager()
-            self.led_publisher = rospy.Publisher("/led_color", Int32, queue_size=1, latch=True);
+            self.led_publisher = rospy.Publisher("/led_color", Int32, queue_size=1, latch=True)
+            self.apriltag_enabled_publisher = rospy.Publisher("/apriltag/enabled", Bool, queue_size=1, latch=True)
 
         else:
             self.excavation_publisher = excavation_publisher
@@ -60,13 +63,14 @@ class ExdepController:
             self.cmd_vel_publisher = cmd_vel_publisher
             self.traversal_manager = traversal_manager
             self.led_publisher = led_publisher
+            self.apriltag_enabled_publisher = apriltag_enabled_publisher
 
 
         self.excavation = ExcavationController(self.excavation_publisher, self.lin_act_publisher, self.cmd_vel_publisher, self.deposition_publisher)
         self.deposition = DepositionManager(self.deposition_publisher)
         self.linear_actuators = LinearActuatorManager(self.lin_act_publisher)
         self.alignment = AlignmentController(self.cmd_vel_publisher)
-
+        self.homing = HomingController(self.cmd_vel_publisher)
         self.is_sim = rospy.get_param("/is_sim")
 
         self.apriltag_pose_in_odom = None
@@ -80,7 +84,7 @@ class ExdepController:
         self.rate = rospy.Rate(10) #hz
 
     def set_color(self, new_color: Int32):
-        self.led_publisher.publish(new_color);
+        self.led_publisher.publish(new_color)
 
 
     def exdep_loop(self):
@@ -168,25 +172,12 @@ class ExdepController:
             ####################
 
             self.set_color(7) # Purple for deposition autonomy
-            rospy.loginfo("Behavior: Aligning to Berm Zone")
-
-            # align to the berm (north, unless on the reversed UCF bottom map)
-            if UCF_BOTTOM:
-                self.alignment.align_to_angle(3 * math.pi / 2)
-            else:
-                self.alignment.align_to_angle(math.pi / 2)
-
-            rospy.sleep(0.5)
-
-            rospy.loginfo("Behavior: Moving Backwards to Berm")
-
-            # approach backwards to berm
-            self.alignment.back_to_berm(self.berm_zone)
-
-            # stop
-            cmd_vel.linear.x = 0
-            cmd_vel.angular.z = 0
-            self.cmd_vel_publisher.publish(cmd_vel)
+            
+            rospy.loginfo("Homing: Aligning to Berm Apriltag")
+            self.homing.home()
+            
+            rospy.loginfo("Homing: Moving to Berm Apriltag")
+            self.homing.approach()
 
             rospy.sleep(1)
 
