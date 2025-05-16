@@ -28,25 +28,25 @@ class Behavior:
     publishes a boolean state that enables or disables traversal
     '''
 
-    # def odom_callback(self, msg: Odometry):
-    #     self.robot_odom = msg
+    def odom_callback(self, msg: Odometry):
+        self.robot_odom = msg
 
     def apriltag_pose_callback(self, msg: PoseStamped):
         if (not self.apriltag_enabled):
             return
 
-        self.apriltag_pose_in_map = msg
+        self.apriltag_pose_in_odom = msg
         
         # Find the mining/berm zones in the odom frame
-        self.mining_zone: zones.Zone = zones.find_mining_zone(self.apriltag_pose_in_map, self.is_sim)
-        self.berm_zone: zones.Zone = zones.find_berm_zone(self.apriltag_pose_in_map, self.is_sim)
+        self.mining_zone: zones.Zone = zones.find_mining_zone(self.apriltag_pose_in_odom, self.is_sim)
+        self.berm_zone: zones.Zone = zones.find_berm_zone(self.apriltag_pose_in_odom, self.is_sim)
 
     def __init__(self):
 
         rospy.init_node('behavior_node')
 
-        # self.robot_odom: Odometry = Odometry()
-        self.apriltag_pose_in_map: PoseStamped = None
+        self.robot_odom: Odometry = Odometry()
+        self.apriltag_pose_in_odom: PoseStamped = None
 
         self.led_publisher = rospy.Publisher("/led_color", Int32, queue_size=1, latch=True);
 
@@ -61,14 +61,14 @@ class Behavior:
         self.apriltag_pose_publisher = rospy.Publisher("/apriltag_pose", PoseStamped, queue_size=1, latch=True)
 
         self.mining_zone = None
-        self.berm_zone = None
+        self.berm_zone = None\
 
         self.rate = rospy.Rate(1) #hz
 
         self.is_sim = rospy.get_param("/is_sim")
 
-        # odom_topic = rospy.get_param("/odom_topic")
-        # rospy.Subscriber(odom_topic, Odometry, self.odom_callback)
+        odom_topic = rospy.get_param("/odom_topic")
+        rospy.Subscriber(odom_topic, Odometry, self.odom_callback)
 
         apriltag_topic = rospy.get_param("/apriltag_topic")
         rospy.Subscriber(apriltag_topic, PoseStamped, self.apriltag_pose_callback)
@@ -182,11 +182,11 @@ class Behavior:
         velocity_message = Twist()
 
         # if we are already looking at the apriltag, don't spin, just continue
-        if (self.apriltag_pose_in_map == None):
+        if (self.apriltag_pose_in_odom == None):
 
             # otherwise spin for the apriltag
             start_time = rospy.get_time()
-            while self.apriltag_pose_in_map == None and rospy.get_time() - start_time < self.MAX_APRILTAG_SEARCH_TIME:
+            while self.apriltag_pose_in_odom == None and rospy.get_time() - start_time < self.MAX_APRILTAG_SEARCH_TIME:
                 velocity_message.linear.x = 0
                 velocity_message.angular.z = self.SPIN_SPEED
                 self.velocity_publisher.publish(velocity_message)
@@ -198,7 +198,7 @@ class Behavior:
             self.velocity_publisher.publish(velocity_message)
 
         # if we still don't have an apriltag, something is wrong, exit
-        if self.apriltag_pose_in_map == None:
+        if self.apriltag_pose_in_odom == None:
             self.set_color(1) # Red for error
             rospy.logerr("Behavior: Could not find apriltag")
             return
@@ -207,16 +207,16 @@ class Behavior:
         rospy.loginfo("Behavior: April Tag Detected")
         rospy.loginfo("Behavior: Collecting average april tag pose")
 
-        last_apriltag_pose = self.apriltag_pose_in_map
+        last_apriltag_pose = self.apriltag_pose_in_odom
         apriltag_pose_list = []
         apriltag_pose_list.append(last_apriltag_pose) # make sure list is not empty
 
         start_time_s = rospy.get_rostime().secs
         while rospy.get_rostime().secs - start_time_s < self.APRILTAG_AVERAGING_TIME:
             # add april tag pose to list of poses to average
-            if self.apriltag_pose_in_map != last_apriltag_pose:
-                apriltag_pose_list.append(self.apriltag_pose_in_map)
-                last_apriltag_pose = self.apriltag_pose_in_map
+            if self.apriltag_pose_in_odom != last_apriltag_pose:
+                apriltag_pose_list.append(self.apriltag_pose_in_odom)
+                last_apriltag_pose = self.apriltag_pose_in_odom
 
         # diable apriltag node and wait to make sure it's been disabled and does not publish any more
         rospy.loginfo("Behavior: Avg April Tag Pose determined. Disabling April Tag node")
@@ -227,7 +227,7 @@ class Behavior:
         rospy.sleep(5)
 
         self.apriltag_pose_publisher.publish(avg_apriltag_pose)
-        self.apriltag_pose_in_map = avg_apriltag_pose
+        self.apriltag_pose_in_odom = avg_apriltag_pose
 
         ####################
         # Mapping
@@ -261,13 +261,13 @@ class Behavior:
         mining_goal.pose.position.x = self.mining_zone.middle[0]
         mining_goal.pose.position.y = self.mining_zone.middle[1]
 
-        offset = zones.calc_offset(-0.3, 0, self.apriltag_pose_in_map, self.is_sim)
+        offset = zones.calc_offset(-0.3, 0, self.apriltag_pose_in_odom, self.is_sim)
         mining_goal.pose.position.x += offset[0]
         mining_goal.pose.position.y += offset[1]
         mining_goal.pose.position.z = 0
 
         mining_goal.header.stamp = rospy.Time.now()
-        mining_goal.header.frame_id = "map"
+        mining_goal.header.frame_id = "odom"
 
         IN_UCF = True  # are we on the UCF map
 

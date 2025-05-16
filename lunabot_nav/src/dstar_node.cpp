@@ -7,9 +7,6 @@
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/Path.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <geometry_msgs/PointStamped.h>
-#include <tf/transform_listener.h>
-#include <string>
 #include <thread>
 
 class DstarNode {
@@ -101,7 +98,6 @@ private:
   ros::Subscriber goal_sub;
   ros::Subscriber planning_enabled_subscriber;
   ros::Publisher path_pub;
-  tf::TransformListener listener;
 
   std::string odom_topic;
   std::string goal_topic;
@@ -190,23 +186,9 @@ private:
   }
 
   void position_callback(const nav_msgs::Odometry::ConstPtr &data) {
-    geometry_msgs::PointStamped point_in, point_out;
-
-    // define source frame id (odom) and record point
-    point_in.header = data->header;
-    point_in.point = data->pose.pose.position;
-
-    // convert to target frame id (map)
-    try {
-      listener.transformPoint("map", point_in, point_out);
-
-      pose.x = point_out.point.x;
-      pose.y = point_out.point.y;
-      pose_init = true;
-    }
-    catch (tf::TransformException &ex) {
-      ROS_ERROR("%s", ex.what());
-    }
+    pose.x = data->pose.pose.position.x;
+    pose.y = data->pose.pose.position.y;
+    pose_init = true;
   }
 
   void goal_callback(const geometry_msgs::PoseStamped::ConstPtr &data) {
@@ -223,7 +205,7 @@ private:
 
     nav_msgs::Path path;
     path.header.stamp = ros::Time::now();
-    path.header.frame_id = "map"; // Set the frame of reference
+    path.header.frame_id = "odom"; // Set the frame of reference
 
     if (path_data.size() == 0) {
       // Only publish some empty paths, avoid overwhelming traversal.
@@ -243,7 +225,7 @@ private:
         // Sample every <path_sampling_rate_> points (+ the last one)
         geometry_msgs::PoseStamped path_pose;
         path_pose.header.stamp = ros::Time::now();
-        path_pose.header.frame_id = "map";
+        path_pose.header.frame_id = "odom";
 
         path_pose.pose.position.x = path_data[index].x;
         path_pose.pose.position.y = path_data[index].y;

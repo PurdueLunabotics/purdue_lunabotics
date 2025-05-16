@@ -81,11 +81,11 @@ class ApriltagNode:
         # Todo- identify the apriltag bundle we want
         detection = self.apriltag_detection_array.detections[0]
         
-        self.apriltag_pose_in_odom = self.convert_to_map_frame(detection)
+        self.apriltag_pose_in_odom = self.convert_to_odom_frame(detection)
         self.apriltag_publisher.publish(self.apriltag_pose_in_odom)
             
         
-    def convert_to_map_frame(self, apriltag_detection: AprilTagDetection):
+    def convert_to_odom_frame(self, apriltag_detection: AprilTagDetection):
         """
         Convert the first apriltag detection to the odom frame
         """
@@ -93,7 +93,7 @@ class ApriltagNode:
         # tf_buffer = tf2_ros.Buffer()
         # tf_listener = tf2_ros.TransformListener(tf_buffer)
 
-        target_frame = "map"
+        target_frame = "odom"
 
         pose = tf2_geometry_msgs.PoseStamped()
         pose.header = apriltag_detection.pose.header
