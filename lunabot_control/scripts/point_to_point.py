@@ -8,6 +8,7 @@ from geometry_msgs.msg import Twist, Point, Pose2D
 from lunabot_control.pid_controller import PIDController
 from visualization_msgs.msg import Marker
 from tf.transformations import euler_from_quaternion
+import tf2_ros
 import numpy as np
 from enum import Enum
 import threading
@@ -89,7 +90,9 @@ class PointToPoint:
         self.map_lock: threading.Lock = threading.Lock()
 
         self.print_debug_info: bool = False
-        
+
+        self.tf_buffer = tf2_ros.Buffer()
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
 
         # PUBLISHERS ==================================================================================================
         cmd_vel_topic = rospy.get_param("/cmd_vel_topic", "/cmd_vel")
@@ -211,18 +214,22 @@ class PointToPoint:
 
 
         complex_path = []  # create list for storing all d* poses
-        for pose in msg.poses:
-            angles = euler_from_quaternion(
-                [
-                    pose.pose.orientation.x,
-                    pose.pose.orientation.y,
-                    pose.pose.orientation.z,
-                    pose.pose.orientation.w,
-                ]
-            )
+        try:
+            for pose in msg.poses:
+                pose_in_odom = self.tf_buffer.transform(pose, "odom", rospy.Duration(5.0))
+                angles = euler_from_quaternion(
+                    [
+                        pose_in_odom.pose.orientation.x,
+                        pose_in_odom.pose.orientation.y,
+                        pose_in_odom.pose.orientation.z,
+                        pose_in_odom.pose.orientation.w,
+                    ]
+                )
 
-            # add all points to complex path
-            complex_path.append([pose.pose.position.x, pose.pose.position.y, angles[2]])
+                # add all points to complex path
+                complex_path.append([pose_in_odom.pose.position.x, pose_in_odom.pose.position.y, angles[2]])
+        except Exception as e:
+            rospy.logwarn(f"Transform failed: {str(e)}")
 
         marker_points = []
         self.path, marker_points = self.__simplify_path(complex_path)
