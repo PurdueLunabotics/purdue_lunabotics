@@ -232,6 +232,34 @@ class HomingController:
             self.cmd_vel_publisher.publish(self.cmd_vel)
 
             self.rate.sleep()
+    
+    def average_apriltag_pose(self):
+        last_apriltag_pose = self.apriltag_pose_in_odom
+        apriltag_pose_list = []
+        apriltag_pose_list.append(last_apriltag_pose) # make sure list is not empty
+
+        start_time_s = rospy.get_rostime().secs
+        while rospy.get_rostime().secs - start_time_s < self.APRILTAG_AVERAGING_TIME:
+            # add april tag pose to list of poses to average
+            if self.apriltag_pose_in_odom != last_apriltag_pose:
+                apriltag_pose_list.append(self.apriltag_pose_in_odom)
+                last_apriltag_pose = self.apriltag_pose_in_odom
+
+        # diable apriltag node and wait to make sure it's been disabled and does not publish any more
+        rospy.loginfo("Behavior: Avg April Tag Pose determined. Disabling April Tag node")
+        avg_apriltag_pose = self.get_pose_average(apriltag_pose_list)
+        tf_buffer = tf2_ros.Buffer()
+        tf_listener = tf2_ros.TransformListener(tf_buffer)
+
+        target_frame = "odom"
+
+        # Set the time to 0 to get the latest available transform
+        avg_apriltag_pose.header.stamp = rospy.Time(0)
+        try:
+            pose_in_odom = tf_buffer.transform(avg_apriltag_pose, target_frame, rospy.Duration(1.0))
+            return [pose_in_odom.pose.position.x, pose_in_odom.pose.position.y]
+        except AttributeError:
+            pass
 
     def stop(self):
         self.cmd_vel.linear.x = 0

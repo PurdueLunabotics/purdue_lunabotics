@@ -169,6 +169,21 @@ class ExdepController:
             rospy.loginfo("Homing: Aligning to Berm Apriltag")
             self.homing.home()
             
+            if self.cycle_count == 1:
+                rospy.loginfo("Behavior: Stopping Costmap")
+                rospy.set_param("/costmap_enabled", False)
+                
+                rospy.loginfo("Behavior: Averaging Apriltags")
+                pose = self.homing.average_apriltag_pose()
+                
+                berm_goal = PoseStamped()
+                berm_goal.pose.position.x = pose[0]
+                berm_goal.pose.position.x = pose[1] + 2 if UCF_BOTTOM else pose[1]-2
+                
+                rospy.loginfo("Behavior: Moving to mining area")
+                self.traversal_manager.traverse_to_goal(berm_goal, drive_backwards=False)   
+                self.homing.home() 
+            
             rospy.loginfo("Homing: Moving to Berm Apriltag")
             self.homing.approach()
 
@@ -240,7 +255,7 @@ class ExdepController:
             cmd_vel.angular.z = 0
             self.cmd_vel_publisher.publish(cmd_vel)
 
-            rospy.sleep(3)
+            rospy.sleep(5)
 
             # stop
             cmd_vel.linear.x = 0
