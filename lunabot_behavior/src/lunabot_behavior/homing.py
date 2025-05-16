@@ -22,14 +22,16 @@ class HomingController:
     angular_setpoint = 0
 
     alignment_threshold = 0.1 # in rad, how close to align before stopping
+    
+    BERM_TAG_IDS = [0,1,2,3]
 
     # Linear, Angular
-    KP = np.array([0.0, 5.0])
+    KP = np.array([0.0, 2.0])
     KI = np.array([0.0, 0.0])
     KD = np.array([0.0, 0.0])
 
     linear_limits = np.array([-0.25, 0.25]) #m/s
-    angular_limits = np.array([-1.0, 1.0]) #rad/s
+    angular_limits = np.array([-0.2, 0.2]) #rad/s
 
     def __init__(self, cmd_vel_publisher: rospy.Publisher = None):
         """
@@ -78,16 +80,22 @@ class HomingController:
 
         self.rate = rospy.Rate(20)
 
+    def initalize(self):
+        self.berm_apriltag_position: Pose = None
+        self.berm_apriltag_header: Header = None
+
     def apritag_callback(self, msg: AprilTagDetectionArray):
         if len(msg.detections) != 0:
-            self.berm_apriltag_position = msg.detections[0].pose.pose.pose
-            self.berm_apriltag_header = msg.detections[0].pose.header
+            if (msg.detections[0].id[0] in self.BERM_TAG_IDS):
+                self.berm_apriltag_position = msg.detections[0].pose.pose.pose
+                self.berm_apriltag_header = msg.detections[0].pose.header
 
-            tag_pose_stamped = PoseStamped()
-            tag_pose_stamped.header = self.berm_apriltag_header
-            tag_pose_stamped.pose = self.berm_apriltag_position
-            self.apriltag_publisher.publish(tag_pose_stamped)
-
+                tag_pose_stamped = PoseStamped()
+                tag_pose_stamped.header = self.berm_apriltag_header
+                tag_pose_stamped.pose = self.berm_apriltag_position
+                self.apriltag_publisher.publish(tag_pose_stamped)
+            else:
+                rospy.logerr("wrong tag: " + str(msg.detections[0].id[0]))
         else:
             self.berm_apriltag_position = None
 
@@ -96,18 +104,16 @@ class HomingController:
 
     def spin_until_apriltag(self):
 
-        # TODO look for the right apriltag bundle
-        self.apriltag_enabled_publisher.publish(True)
-
-
-        self.cmd_vel.angular.z = 0.785398 # around 45 degrees per second
+        self.cmd_vel.angular.z = 0.2 # around 45 degrees per second
 
         if self.cam_mode == "sim":
-            self.cmd_vel.angular.z = 0.392699 # around 22.5 degrees per second this needs to be slower
-
-        while self.berm_apriltag_position is None:
-            self.cmd_vel_publisher.publish(self.cmd_vel)
-            rospy.sleep(0.1)
+            self.cmd_vel.angular.z = 0.2 # around 22.5 degrees per second this needs to be slower
+        
+        if self.berm_apriltag_position is None: #if there is an apriltag don't turn
+            while self.berm_apriltag_position is None:
+                self.cmd_vel_publisher.publish(self.cmd_vel)
+                self.rate.sleep()
+            rospy.sleep(0.5) #end more centered
 
         self.stop()
 
@@ -115,8 +121,9 @@ class HomingController:
         """
         Align the robot to the apriltag
         """
-        
+
         self.spin_until_apriltag()
+        rospy.sleep(1)
 
         while (True):
 
@@ -140,14 +147,14 @@ class HomingController:
             if (self.cam_mode == "back"):
                 apriltag_yaw = euler_angles[2] + np.pi / 2
             elif (self.cam_mode == "sim"):
-                apriltag_yaw = euler_angles[2] + np.pi / 2 # In sim, adjust the apriltag to point 'out' of the apriltag, by 90 deg
+                apriltag_yaw = euler_angles[2] - np.pi / 2 # In sim, adjust the apriltag to point 'out' of the apriltag, by 90 deg
 
             robot_yaw = euler_from_quaternion([self.odom.pose.pose.orientation.x, self.odom.pose.pose.orientation.y, self.odom.pose.pose.orientation.z, self.odom.pose.pose.orientation.w])[2]
 
             angular_error = apriltag_yaw - robot_yaw
             angular_error = (angular_error + np.pi) % (2 * np.pi) - np.pi
 
-            print(angular_error)
+            print(str(apriltag_yaw) + "  " + str(robot_yaw))
             
             # Stopping point
             if abs(angular_error) < self.alignment_threshold:
@@ -171,15 +178,17 @@ class HomingController:
             self.cmd_vel_publisher.publish(cmd_vel_message)
 
             self.rate.sleep()
-
+        rospy.sleep(5) #remove later
         return True
-    
     def approach(self):
         """
         Approach the apriltag. After you have homed/ are facing the apriltag, drive in straight line
         """
 
-        DIST_THRESHOLD = 0.9 # meters, how close to the apriltag to stop
+        if self.is_sim:
+            DIST_THRESHOLD = 1.3 # meters, how close to the apriltag to stop
+        else:
+            DIST_THRESHOLD = 0.8 # real robot camera is on the back edge of robot, so stop closer
         APPROACH_SPEED = -0.2 # m/s
 
         last_apriltag_position = self.berm_apriltag_position
@@ -200,7 +209,7 @@ class HomingController:
                     rospy.loginfo("Homing: Early end")
                     return True
 
-            print("apriltag", self.berm_apriltag_position.position.z)
+            print("apriltag", self.berm_apriltag_position.position)
             
             #print(distance_notsquared)
             if (self.berm_apriltag_position.position.z < DIST_THRESHOLD):
