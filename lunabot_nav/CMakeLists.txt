@@ -10,6 +10,9 @@ project(lunabot_nav)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
