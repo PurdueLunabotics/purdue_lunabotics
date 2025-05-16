@@ -93,7 +93,7 @@ class ExdepController:
         """
         rospy.sleep(0.1)
 
-        UCF_BOTTOM = True # are we on the bottom UCF map?
+        UCF_BOTTOM = False # are we on the bottom UCF map?
 
         # wait until we have our apriltag position
         while (self.apriltag_pose_in_odom is None):

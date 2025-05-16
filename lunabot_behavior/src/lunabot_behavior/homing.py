@@ -1,7 +1,7 @@
-
 #!/usr/bin/env python3
 
 import numpy as np
+import math
 
 import rospy
 from apriltag_ros.msg import AprilTagDetectionArray
@@ -23,7 +23,7 @@ class HomingController:
 
     alignment_threshold = 0.1 # in rad, how close to align before stopping
     
-    BERM_TAG_IDS = [0,1,2,3]
+    BERM_TAG_IDS = [2,6]
 
     # Linear, Angular
     KP = np.array([0.0, 2.0])
@@ -95,7 +95,8 @@ class HomingController:
                 tag_pose_stamped.pose = self.berm_apriltag_position
                 self.apriltag_publisher.publish(tag_pose_stamped)
             else:
-                rospy.logerr("wrong tag: " + str(msg.detections[0].id[0]))
+                pass
+                #rospy.logerr("wrong tag: " + str(msg.detections[0].id[0]))
         else:
             self.berm_apriltag_position = None
 
@@ -149,12 +150,18 @@ class HomingController:
             elif (self.cam_mode == "sim"):
                 apriltag_yaw = euler_angles[2] - np.pi / 2 # In sim, adjust the apriltag to point 'out' of the apriltag, by 90 deg
 
-            robot_yaw = euler_from_quaternion([self.odom.pose.pose.orientation.x, self.odom.pose.pose.orientation.y, self.odom.pose.pose.orientation.z, self.odom.pose.pose.orientation.w])[2]
+            target_yaw = math.atan2((pose_in_odom.pose.position.y - self.odom.pose.pose.position.y), (pose_in_odom.pose.position.x - self.odom.pose.pose.position.x))
+            
 
-            angular_error = apriltag_yaw - robot_yaw
+            robot_yaw = euler_from_quaternion([self.odom.pose.pose.orientation.x, self.odom.pose.pose.orientation.y, self.odom.pose.pose.orientation.z, self.odom.pose.pose.orientation.w])[2]
+            robot_yaw = robot_yaw + np.pi
+
+            angular_error = target_yaw - robot_yaw
             angular_error = (angular_error + np.pi) % (2 * np.pi) - np.pi
 
-            print(str(apriltag_yaw) + "  " + str(robot_yaw))
+            # print(str(target_yaw) + "  " + str(robot_yaw))
+            print("Error:", angular_error)
+            
             
             # Stopping point
             if abs(angular_error) < self.alignment_threshold:

@@ -77,7 +77,7 @@ class Behavior:
         self.SPIN_TIME = 20 # seconds, how long to spin at the beginning for mapping
         self.MAPPING_TIME = 20 # seconds, how long to spin in excavation zone for mapping
 
-        self.MAX_APRILTAG_SEARCH_TIME = 45.0  # seconds, how long to search for an apriltag before giving up
+        self.MAX_APRILTAG_SEARCH_TIME = 120.0  # seconds, how long to search for an apriltag before giving up
 
         self.APRILTAG_AVERAGING_TIME = 5.0 # seconds, how long the robot will take average apriltag pose for
         
