@@ -79,6 +79,8 @@ class HomingController:
         self.error_total = np.zeros(2)
 
         self.rate = rospy.Rate(20)
+        
+        self.APRILTAG_AVERAGING_TIME = 5 #s
 
     def initalize(self):
         self.berm_apriltag_position: Pose = None
@@ -234,16 +236,16 @@ class HomingController:
             self.rate.sleep()
     
     def average_apriltag_pose(self):
-        last_apriltag_pose = self.apriltag_pose_in_odom
+        last_apriltag_pose = self.berm_apriltag_position
         apriltag_pose_list = []
         apriltag_pose_list.append(last_apriltag_pose) # make sure list is not empty
 
         start_time_s = rospy.get_rostime().secs
         while rospy.get_rostime().secs - start_time_s < self.APRILTAG_AVERAGING_TIME:
             # add april tag pose to list of poses to average
-            if self.apriltag_pose_in_odom != last_apriltag_pose:
-                apriltag_pose_list.append(self.apriltag_pose_in_odom)
-                last_apriltag_pose = self.apriltag_pose_in_odom
+            if self.berm_apriltag_position != last_apriltag_pose:
+                apriltag_pose_list.append(self.berm_apriltag_position)
+                last_apriltag_pose = self.berm_apriltag_position
 
         # diable apriltag node and wait to make sure it's been disabled and does not publish any more
         rospy.loginfo("Behavior: Avg April Tag Pose determined. Disabling April Tag node")
