@@ -185,7 +185,7 @@ class HomingController:
             self.cmd_vel_publisher.publish(cmd_vel_message)
 
             self.rate.sleep()
-        rospy.sleep(5) #remove later
+        rospy.sleep(2) #remove later
         return True
     def approach(self):
         """
@@ -195,7 +195,7 @@ class HomingController:
         if self.is_sim:
             DIST_THRESHOLD = 1.3 # meters, how close to the apriltag to stop
         else:
-            DIST_THRESHOLD = 0.8 # real robot camera is on the back edge of robot, so stop closer
+            DIST_THRESHOLD = 1.0 # real robot camera is on the back edge of robot, so stop closer
         APPROACH_SPEED = -0.2 # m/s
 
         last_apriltag_position = self.berm_apriltag_position
@@ -211,7 +211,7 @@ class HomingController:
                 self.berm_apriltag_position = last_apriltag_position
                 missed_apriltag_counter += 1
 
-                if (missed_apriltag_counter >= 6):
+                if (missed_apriltag_counter >= 7):
                     self.stop()
                     rospy.loginfo("Homing: Early end")
                     return True
@@ -219,9 +219,12 @@ class HomingController:
             print("apriltag", self.berm_apriltag_position.position)
             
             #print(distance_notsquared)
-            if (self.berm_apriltag_position.position.z < DIST_THRESHOLD):
+            if (self.berm_apriltag_position is not None and self.berm_apriltag_position.position.z < DIST_THRESHOLD):
                 self.stop()
                 return True
+            elif (self.berm_apriltag_position is None):
+                missed_apriltag_counter += 1
+                continue
 
             self.cmd_vel.linear.x = APPROACH_SPEED
             self.cmd_vel.angular.z = 0

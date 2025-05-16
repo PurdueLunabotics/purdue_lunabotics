@@ -192,7 +192,7 @@ class Behavior:
                 velocity_message.angular.z = self.SPIN_SPEED
                 self.velocity_publisher.publish(velocity_message)
 
-            rospy.sleep(1.5) # sleep for a second so we end slightly more centered
+            rospy.sleep(1.0) # sleep for a second so we end slightly more centered
 
             velocity_message.linear.x = 0
             velocity_message.angular.z = 0
