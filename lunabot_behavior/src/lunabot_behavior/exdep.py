@@ -140,26 +140,17 @@ class ExdepController:
             # Traversal to Berm
             ####################
 
-            # pick berm area goal
-            berm_goal = PoseStamped()
-            berm_goal.pose.position.x = self.berm_zone.middle[0]
-            berm_goal.pose.position.y = self.berm_zone.middle[1]
-            berm_goal.header.stamp = rospy.Time.now()
-            berm_goal.header.frame_id = "odom"
-
-            # aim for one meter above the berm (reversed for UCF bottom map)
-            if UCF_BOTTOM:
-                offset = zones.calc_offset(0, -1, self.apriltag_pose_in_odom, self.is_sim) 
-            else:
-                offset = zones.calc_offset(0, 1, self.apriltag_pose_in_odom, self.is_sim)
-
-            berm_goal.pose.position.x += offset[0]
-            berm_goal.pose.position.y += offset[1]
-
             # move to the berm area
             rospy.loginfo("Behavior: Moving to berm area")
             self.set_color(2) # Green for traversal
-            self.traversal_manager.traverse_to_goal(berm_goal, drive_backwards=True)
+            
+            if (self.cycle_count > 1):
+                #move backwards back to berm area
+                cmd_vel.linear.x = -0.3
+                cmd_vel.angular.z = 0
+                self.cmd_vel_publisher.publish(cmd_vel)
+
+                rospy.sleep(3)
 
             # once we've arrived, stop.
             cmd_vel = Twist()
@@ -208,21 +199,55 @@ class ExdepController:
             # Traversal to Mining Zone
             ####################
 
-            mining_goal = PoseStamped()
-            mining_goal.pose.position.x = self.mining_zone.middle[0]
-            mining_goal.pose.position.y = self.mining_zone.middle[1]
-            mining_goal.header.stamp = rospy.Time.now()
-            mining_goal.header.frame_id = "odom"
-
-            random_offset = self.mining_zone.random_offset()
-            offset = zones.calc_offset(random_offset[0], random_offset[1], self.apriltag_pose_in_odom, self.is_sim)  # TODO: maybe shift mining location each time
-            mining_goal.pose.position.x += offset[0]
-            mining_goal.pose.position.y += offset[1]
-
             # move to the mining area
             rospy.loginfo("Behavior: Moving to mining area")
             self.set_color(2) # Green for traversal
-            self.traversal_manager.traverse_to_goal(mining_goal, drive_backwards=False)
+            
+            if self.cycle_count % 3 == 0 :
+                #left
+                cmd_vel.linear.x = 0
+                cmd_vel.angular.z = 0.2
+                self.cmd_vel_publisher.publish(cmd_vel)
+
+                rospy.sleep(3)
+
+                # stop
+                cmd_vel.linear.x = 0
+                cmd_vel.angular.z = 0
+                self.cmd_vel_publisher.publish(cmd_vel)
+
+                rospy.sleep(0.3)
+            elif self.cycle_count % 3 == 1:
+                #center
+                pass
+            else:
+                #right
+                cmd_vel.linear.x = 0
+                cmd_vel.angular.z = 0.2
+                self.cmd_vel_publisher.publish(cmd_vel)
+
+                rospy.sleep(3)
+
+                # stop
+                cmd_vel.linear.x = 0
+                cmd_vel.angular.z = 0
+                self.cmd_vel_publisher.publish(cmd_vel)
+
+                rospy.sleep(0.3)
+            
+            #move forwards to new excavation spot
+            cmd_vel.linear.x = 0.3
+            cmd_vel.angular.z = 0
+            self.cmd_vel_publisher.publish(cmd_vel)
+
+            rospy.sleep(3)
+
+            # stop
+            cmd_vel.linear.x = 0
+            cmd_vel.angular.z = 0
+            self.cmd_vel_publisher.publish(cmd_vel)
+
+            rospy.sleep(0.3)
 
             # once we've arrived, stop.
             cmd_vel = Twist()

@@ -27,8 +27,14 @@ class TraversalManager:
 
         self.robot_odom: Odometry = None
 
+        self.is_sim = rospy.get_param("/is_sim")
+
+
         self.odom_buffer = []
-        self.ODOM_WINDOW = 120  # 100 in sim
+        if (self.is_sim):
+            self.ODOM_WINDOW = 120  # 100 in sim
+        else:
+            self.ODOM_WINDOW = 60  # 100 in sim
         self.MOVEMENT_THRESHOLD = 0.2  # meters
         self.unmoving_counter = 0
         self.UNMOVING_THRESHOLD = 15
