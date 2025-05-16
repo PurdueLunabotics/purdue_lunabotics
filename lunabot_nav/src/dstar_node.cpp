@@ -8,7 +8,8 @@
 #include <nav_msgs/Path.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PointStamped.h>
-#include <tf/transform_listener.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/buffer.h>
 #include <string>
 #include <thread>
 
@@ -101,7 +102,9 @@ private:
   ros::Subscriber goal_sub;
   ros::Subscriber planning_enabled_subscriber;
   ros::Publisher path_pub;
-  tf::TransformListener listener;
+
+  tf2_ros::Buffer tf_buffer;
+  tf2_ros::TransformListener tf_listener(tf_buffer);
 
   std::string odom_topic;
   std::string goal_topic;
@@ -198,7 +201,7 @@ private:
 
     // convert to target frame id (map)
     try {
-      listener.transformPoint("map", point_in, point_out);
+      point_out = tf_buffer.transform(point_in, "map");
 
       pose.x = point_out.point.x;
       pose.y = point_out.point.y;
