@@ -47,7 +47,7 @@ if __name__ == "__main__":
         exdepController.excavation.no_sensor_excavate()
 
         # Raise linear actuators out of the way
-        exdepController.linear_actuators.raise_linear_actuators(use_current=False)
+        exdepController.linear_actuators.raise_linear_actuators(use_current=True)
 
         time.sleep(0.1)
 
