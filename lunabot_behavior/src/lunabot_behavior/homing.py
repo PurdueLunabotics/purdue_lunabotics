@@ -85,6 +85,46 @@ class HomingController:
     def initalize(self):
         self.berm_apriltag_position: Pose = None
         self.berm_apriltag_header: Header = None
+        
+    def get_pose_average(self, pose_list) -> PoseStamped:
+        avg_pose = pose_list[0]
+
+        if (len(pose_list) == 1):
+            return avg_pose
+
+        # pose point averages
+        pt_x_sum = 0.0
+        pt_y_sum = 0.0
+        pt_z_sum = 0.0
+
+        # pose quaternion averages
+        quat_x_sum = 0.0
+        quat_y_sum = 0.0
+        quat_z_sum = 0.0
+        quat_w_sum = 0.0
+
+        for pose in pose_list:
+            pt_x_sum = pt_x_sum + pose.pose.position.x
+            pt_y_sum = pt_y_sum + pose.pose.position.y
+            pt_z_sum = pt_z_sum + pose.pose.position.z
+
+            quat_x_sum = quat_x_sum + pose.pose.orientation.x
+            quat_y_sum = quat_y_sum + pose.pose.orientation.y
+            quat_z_sum = quat_z_sum + pose.pose.orientation.z
+            quat_w_sum = quat_w_sum + pose.pose.orientation.w
+
+        # update pose point
+        avg_pose.pose.position.x = pt_x_sum / len(pose_list)
+        avg_pose.pose.position.y = pt_y_sum / len(pose_list)
+        avg_pose.pose.position.z = pt_z_sum / len(pose_list)
+
+        # update pose orientation
+        avg_pose.pose.orientation.x = quat_x_sum / len(pose_list)
+        avg_pose.pose.orientation.y = quat_y_sum / len(pose_list)
+        avg_pose.pose.orientation.z = quat_z_sum / len(pose_list)
+        avg_pose.pose.orientation.w = quat_w_sum / len(pose_list)
+
+        return avg_pose
 
     def apritag_callback(self, msg: AprilTagDetectionArray):
         if len(msg.detections) != 0:
