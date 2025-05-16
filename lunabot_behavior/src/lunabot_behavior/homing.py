@@ -48,7 +48,7 @@ class HomingController:
 
         self.is_sim = rospy.get_param("/is_sim")
 
-        self.cam_mode = "back"  # front, back, or sim
+        self.cam_mode = "back"  # back or sim
 
         # Decide on which camera to use
         if self.is_sim:
@@ -107,10 +107,10 @@ class HomingController:
 
     def spin_until_apriltag(self):
 
-        self.cmd_vel.angular.z = 0.2 # around 45 degrees per second
+        self.cmd_vel.angular.z = 0.2 # around 11 degrees per second
 
         if self.cam_mode == "sim":
-            self.cmd_vel.angular.z = 0.2 # around 22.5 degrees per second this needs to be slower
+            self.cmd_vel.angular.z = 0.2 # optional- change speed in sim
         
         if self.berm_apriltag_position is None: #if there is an apriltag don't turn
             while self.berm_apriltag_position is None:
@@ -125,13 +125,15 @@ class HomingController:
         Align the robot to the apriltag
         """
 
+        print("Behavior: Homing")
+
         self.spin_until_apriltag()
         rospy.sleep(1)
 
-        while (True):
+        tf_buffer = tf2_ros.Buffer()
+        tf_listener = tf2_ros.TransformListener(tf_buffer)
 
-            tf_buffer = tf2_ros.Buffer()
-            tf_listener = tf2_ros.TransformListener(tf_buffer)
+        while (True):
 
             target_frame = "odom"
 
@@ -164,7 +166,6 @@ class HomingController:
             # print(str(target_yaw) + "  " + str(robot_yaw))
             print("Error:", angular_error)
             
-            
             # Stopping point
             if abs(angular_error) < self.alignment_threshold:
                 self.stop()
@@ -189,6 +190,8 @@ class HomingController:
             self.rate.sleep()
         rospy.sleep(2) #remove later
         return True
+    
+
     def approach(self):
         """
         Approach the apriltag. After you have homed/ are facing the apriltag, drive in straight line
@@ -206,7 +209,7 @@ class HomingController:
 
         while (True):
             
-            if (last_apriltag_position != self.berm_apriltag_position and self.berm_apriltag_position is not None):
+            if (self.berm_apriltag_position is not None and last_apriltag_position != self.berm_apriltag_position):
                 last_apriltag_position = self.berm_apriltag_position
             
             if (self.berm_apriltag_position is None):
@@ -218,9 +221,8 @@ class HomingController:
                     rospy.loginfo("Homing: Early end")
                     return True
 
-            print("apriltag", self.berm_apriltag_position.position)
+            print("Apriltag Z", self.berm_apriltag_position.position.z)
             
-            #print(distance_notsquared)
             if (self.berm_apriltag_position is not None and self.berm_apriltag_position.position.z < DIST_THRESHOLD):
                 self.stop()
                 return True
@@ -271,3 +273,4 @@ class HomingController:
 if __name__ == "__main__":
     homing_controller = HomingController()
     homing_controller.home()
+    homing_controller.approach()

@@ -32,9 +32,10 @@ class TraversalManager:
 
         self.odom_buffer = []
         if (self.is_sim):
-            self.ODOM_WINDOW = 120  # 100 in sim
+            self.ODOM_WINDOW = 120  # 120 in sim
         else:
-            self.ODOM_WINDOW = 60  # 100 in sim
+            self.ODOM_WINDOW = 60  # 60 for real robot
+
         self.MOVEMENT_THRESHOLD = 0.2  # meters
         self.unmoving_counter = 0
         self.UNMOVING_THRESHOLD = 15
