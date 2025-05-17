@@ -178,11 +178,13 @@ class ExdepController:
                 
                 berm_goal = PoseStamped()
                 berm_goal.pose.position.x = pose[0]
-                berm_goal.pose.position.x = pose[1] + 2 if UCF_BOTTOM else pose[1]-2
+                berm_goal.pose.position.y = pose[1] + 2 if UCF_BOTTOM else pose[1]-2
                 
-                rospy.loginfo("Behavior: Moving to mining area")
+                rospy.loginfo("Behavior: Moving to berm area")
                 self.traversal_manager.traverse_to_goal(berm_goal, drive_backwards=False)   
-                self.homing.home() 
+
+                rospy.loginfo("Homing: Aligning to Berm Apriltag")
+                self.homing.home()
             
             rospy.loginfo("Homing: Moving to Berm Apriltag")
             self.homing.approach()

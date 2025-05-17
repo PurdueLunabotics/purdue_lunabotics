@@ -22,8 +22,6 @@ class HomingController:
     angular_setpoint = 0
 
     alignment_threshold = 0.1 # in rad, how close to align before stopping
-    
-    BERM_TAG_IDS = [2,6]
 
     # Linear, Angular
     KP = np.array([0.0, 2.0])
@@ -55,10 +53,14 @@ class HomingController:
             cam_topic = "/d435_backward/color/tag_detections"
             self.cam_mode = "sim"
             rospy.loginfo("Homing Controller: Sim")
+            self.BERM_TAG_IDS = [2,3]
+            self.camera_tf = "d435_backward_link"
         else:
             cam_topic = "/d455_back/camera/color/tag_detections"
             self.cam_mode = "back"
             rospy.loginfo("Homing Controller: Using back cam")
+            self.BERM_TAG_IDS = [2,6]
+            self.camera_tf = "d455_back_link"
 
         self.apriltag_subscriber = rospy.Subscriber(cam_topic,  AprilTagDetectionArray, self.apritag_callback)
 
@@ -79,14 +81,14 @@ class HomingController:
         self.error_total = np.zeros(2)
 
         self.rate = rospy.Rate(20)
-        
+
         self.APRILTAG_AVERAGING_TIME = 5 #s
 
     def initalize(self):
         self.berm_apriltag_position: Pose = None
         self.berm_apriltag_header: Header = None
-        
-    def get_pose_average(self, pose_list) -> PoseStamped:
+
+    def get_pose_average(self, pose_list) -> Pose:
         avg_pose = pose_list[0]
 
         if (len(pose_list) == 1):
@@ -114,15 +116,15 @@ class HomingController:
             quat_w_sum = quat_w_sum + pose.orientation.w
 
         # update pose point
-        avg_pose.pose.position.x = pt_x_sum / len(pose_list)
-        avg_pose.pose.position.y = pt_y_sum / len(pose_list)
-        avg_pose.pose.position.z = pt_z_sum / len(pose_list)
+        avg_pose.position.x = pt_x_sum / len(pose_list)
+        avg_pose.position.y = pt_y_sum / len(pose_list)
+        avg_pose.position.z = pt_z_sum / len(pose_list)
 
         # update pose orientation
-        avg_pose.pose.orientation.x = quat_x_sum / len(pose_list)
-        avg_pose.pose.orientation.y = quat_y_sum / len(pose_list)
-        avg_pose.pose.orientation.z = quat_z_sum / len(pose_list)
-        avg_pose.pose.orientation.w = quat_w_sum / len(pose_list)
+        avg_pose.orientation.x = quat_x_sum / len(pose_list)
+        avg_pose.orientation.y = quat_y_sum / len(pose_list)
+        avg_pose.orientation.z = quat_z_sum / len(pose_list)
+        avg_pose.orientation.w = quat_w_sum / len(pose_list)
 
         return avg_pose
 
@@ -298,9 +300,12 @@ class HomingController:
         target_frame = "odom"
 
         # Set the time to 0 to get the latest available transform
-        avg_apriltag_pose.header.stamp = rospy.Time(0)
+        avg_apriltag_pose_stamped = PoseStamped()
+        avg_apriltag_pose_stamped.header.stamp = rospy.Time(0)
+        avg_apriltag_pose_stamped.header.frame_id = self.camera_tf
+        avg_apriltag_pose_stamped.pose = avg_apriltag_pose
         try:
-            pose_in_odom = tf_buffer.transform(avg_apriltag_pose, target_frame, rospy.Duration(1.0))
+            pose_in_odom = tf_buffer.transform(avg_apriltag_pose_stamped, target_frame, rospy.Duration(1.0))
             return [pose_in_odom.pose.position.x, pose_in_odom.pose.position.y]
         except AttributeError:
             pass
