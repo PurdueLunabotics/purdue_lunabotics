@@ -63,7 +63,7 @@ class TraversalManager:
 
 
 
-    def traverse_to_goal(self, goal: PoseStamped, drive_backwards: bool = False):
+    def traverse_to_goal(self, goal: PoseStamped, drive_backwards: bool = False, threshold = 0.6):
         """
         Traverses to a given goal- blocks until the robot is within the threshold of the goal.
         """
@@ -94,7 +94,7 @@ class TraversalManager:
 
 
         # Wait until the robot is close to the goal
-        while not rospy.is_shutdown() and not self.is_close_to_goal():
+        while not rospy.is_shutdown() and not self.is_close_to_goal(THRESHOLD=threshold):
             rospy.sleep(0.5)
             self.evaluate_odom()
             self.check_and_replace_goal()
@@ -214,13 +214,11 @@ class TraversalManager:
         rospy.loginfo("Traversal: Goal is an obstacle, new goal is: " + str(new_goal))
         self.current_goal = new_goal
 
-    def is_close_to_goal(self) -> bool:
+    def is_close_to_goal(self, THRESHOLD = 0.6) -> bool:
         """
         Checks if the robot is close to the current goal
         """
-
-        THRESHOLD = 0.6 # meters
-
+        
         x = self.robot_odom.pose.pose.position.x
         y = self.robot_odom.pose.pose.position.y
 
