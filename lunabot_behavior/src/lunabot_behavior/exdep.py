@@ -16,6 +16,8 @@ from lunabot_behavior.traversal import TraversalManager
 import lunabot_behavior.zones as zones
 from lunabot_behavior.homing import HomingController
 
+from tf.transformations import euler_from_quaternion
+
 from std_msgs.msg import Int8, Bool, Int32
 import sys
 import math
@@ -83,6 +85,8 @@ class ExdepController:
 
         self.rate = rospy.Rate(10) #hz
 
+        self.BERM_TAG_OFFSET = 2 # meters. +2 for UCF_BOTTOM, -2 for UCF_TOP
+
     def set_color(self, new_color: Int32):
         self.led_publisher.publish(new_color)
 
@@ -94,10 +98,6 @@ class ExdepController:
         rospy.sleep(0.1)
 
         UCF_BOTTOM = False # are we on the bottom UCF map?
-
-        # wait until we have our apriltag position
-        while (self.apriltag_pose_in_odom is None):
-            rospy.sleep(0.1)
 
         self.cycle_count = 0
         while (not rospy.is_shutdown()):
@@ -175,13 +175,22 @@ class ExdepController:
                 
                 rospy.loginfo("Behavior: Averaging Apriltags")
                 pose = self.homing.average_apriltag_pose()
+
+                # p = PoseStamped()
+                # p.pose.position.x = pose[0]
+                # p.pose.position.y = pose[1]
+                # p.header.frame_id = "odom"
+                # p.header.stamp = rospy.Time.now()
+                # self.homing.apriltag_publisher.publish(p)
                 
                 berm_goal = PoseStamped()
-                berm_goal.pose.position.x = pose[0]
-                berm_goal.pose.position.y = pose[1] + 2 if UCF_BOTTOM else pose[1]-2
+                berm_angles = euler_from_quaternion([pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z, pose.pose.orientation.w])
+                yaw = berm_angles[2] + math.pi / 2
+                berm_goal.pose.position.x = pose.pose.position.x + self.BERM_TAG_OFFSET * math.cos(yaw)
+                berm_goal.pose.position.y = pose.pose.position.y + self.BERM_TAG_OFFSET * math.sin(yaw) #+ 2 if UCF_BOTTOM else pose[1]-2
                 
                 rospy.loginfo("Behavior: Moving to berm area")
-                self.traversal_manager.traverse_to_goal(berm_goal, drive_backwards=False)   
+                self.traversal_manager.traverse_to_goal(berm_goal, drive_backwards=True)   
 
                 rospy.loginfo("Homing: Aligning to Berm Apriltag")
                 self.homing.home()
@@ -203,7 +212,7 @@ class ExdepController:
             cmd_vel.angular.z = 0
             self.cmd_vel_publisher.publish(cmd_vel)
 
-            rospy.sleep(3)
+            rospy.sleep(5)
 
             # stop
             cmd_vel.linear.x = 0
@@ -221,12 +230,15 @@ class ExdepController:
             self.set_color(2) # Green for traversal
             
             if self.cycle_count % 3 == 0 :
+                #center
+                pass
+            elif self.cycle_count % 3 == 1:
                 #left
                 cmd_vel.linear.x = 0
                 cmd_vel.angular.z = 0.2
                 self.cmd_vel_publisher.publish(cmd_vel)
 
-                rospy.sleep(3)
+                rospy.sleep(4)
 
                 # stop
                 cmd_vel.linear.x = 0
@@ -234,16 +246,13 @@ class ExdepController:
                 self.cmd_vel_publisher.publish(cmd_vel)
 
                 rospy.sleep(0.3)
-            elif self.cycle_count % 3 == 1:
-                #center
-                pass
             else:
                 #right
                 cmd_vel.linear.x = 0
-                cmd_vel.angular.z = 0.2
+                cmd_vel.angular.z = -0.2
                 self.cmd_vel_publisher.publish(cmd_vel)
 
-                rospy.sleep(3)
+                rospy.sleep(4)
 
                 # stop
                 cmd_vel.linear.x = 0
@@ -257,7 +266,7 @@ class ExdepController:
             cmd_vel.angular.z = 0
             self.cmd_vel_publisher.publish(cmd_vel)
 
-            rospy.sleep(5)
+            rospy.sleep(0.5)
 
             # stop
             cmd_vel.linear.x = 0

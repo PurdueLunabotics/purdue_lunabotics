@@ -263,7 +263,10 @@ class HomingController:
                     rospy.loginfo("Homing: Early end")
                     return True
 
-            print("Apriltag Z", self.berm_apriltag_position.position.z)
+            try:
+                print("Apriltag Z", self.berm_apriltag_position.position.z)
+            except:
+                pass
             
             if (self.berm_apriltag_position is not None and self.berm_apriltag_position.position.z < DIST_THRESHOLD):
                 self.stop()
@@ -287,12 +290,12 @@ class HomingController:
         start_time_s = rospy.get_rostime().secs
         while rospy.get_rostime().secs - start_time_s < self.APRILTAG_AVERAGING_TIME:
             # add april tag pose to list of poses to average
-            if self.berm_apriltag_position != last_apriltag_pose:
+            if self.berm_apriltag_position != None and self.berm_apriltag_position != last_apriltag_pose:
                 apriltag_pose_list.append(self.berm_apriltag_position)
                 last_apriltag_pose = self.berm_apriltag_position
 
-        # diable apriltag node and wait to make sure it's been disabled and does not publish any more
-        rospy.loginfo("Behavior: Avg April Tag Pose determined. Disabling April Tag node")
+
+        rospy.loginfo("Homing: Avg April Tag Pose determined.")
         avg_apriltag_pose = self.get_pose_average(apriltag_pose_list)
         tf_buffer = tf2_ros.Buffer()
         tf_listener = tf2_ros.TransformListener(tf_buffer)
@@ -301,12 +304,13 @@ class HomingController:
 
         # Set the time to 0 to get the latest available transform
         avg_apriltag_pose_stamped = PoseStamped()
-        avg_apriltag_pose_stamped.header.stamp = rospy.Time(0)
-        avg_apriltag_pose_stamped.header.frame_id = self.camera_tf
+        avg_apriltag_pose_stamped.header = self.berm_apriltag_header
+        avg_apriltag_pose_stamped.header.stamp = rospy.Time.now()
         avg_apriltag_pose_stamped.pose = avg_apriltag_pose
         try:
             pose_in_odom = tf_buffer.transform(avg_apriltag_pose_stamped, target_frame, rospy.Duration(1.0))
-            return [pose_in_odom.pose.position.x, pose_in_odom.pose.position.y]
+            # return [pose_in_odom.pose.position.x, pose_in_odom.pose.position.y]
+            return pose_in_odom
         except AttributeError:
             pass
 
