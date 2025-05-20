@@ -207,12 +207,21 @@ class ExdepController:
             rospy.loginfo("Behavior: Depositing")
             self.deposition.deposit()
 
-            # get out of mining area for 3 sec
+            ####################
+            # Traversal to Mining Zone
+            ####################
+
+            # go straight to mining zone
             cmd_vel.linear.x = 0.3
             cmd_vel.angular.z = 0
             self.cmd_vel_publisher.publish(cmd_vel)
 
-            rospy.sleep(3.5)
+            if (self.cycle_count <= 3):
+                travel_time = (self.cycle_count - 1) * 0.5 + 3.5
+            else:
+                travel_time = (((self.cycle_count-3) // 3) * 1) + 3.5
+
+            rospy.sleep(travel_time)
 
             # stop
             cmd_vel.linear.x = 0
@@ -221,15 +230,11 @@ class ExdepController:
 
             rospy.sleep(0.3)
 
-            ####################
-            # Traversal to Mining Zone
-            ####################
-
             # move to the mining area
             rospy.loginfo("Behavior: Moving to mining area")
             self.set_color(2) # Green for traversal
             
-            if self.cycle_count % 3 == 0 :
+            if self.cycle_count <= 3 or self.cycle_count % 3 == 0 :
                 #center
                 pass
             elif self.cycle_count % 3 == 1:
@@ -266,7 +271,6 @@ class ExdepController:
             cmd_vel.angular.z = 0
             self.cmd_vel_publisher.publish(cmd_vel)
 
-            # travel_time = (self.cycle_count + 1 // 3) * 0.5
             rospy.sleep(0.5)
 
             # stop

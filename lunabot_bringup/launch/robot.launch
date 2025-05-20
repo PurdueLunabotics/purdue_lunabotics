@@ -92,6 +92,9 @@
         <include file="$(find lunabot_bringup)/launch/costmap.launch" />
     
     </group>
+
+    <!-- launch stall detector -->
+    <!-- <node name="stall_detector" pkg="lunabot_control" type="stall_detector.py" output="screen" /> -->
       
     <node name="apriltag_node" pkg="lunabot_perception" type="apriltag_node.py" output="screen" respawn="true"></node>
 

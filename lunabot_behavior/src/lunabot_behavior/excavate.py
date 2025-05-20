@@ -229,12 +229,14 @@ class ExcavationController:
             cmd_vel_message.linear.x = self.TRENCHING_SPEED 
             cmd_vel_message.angular.z = 0
 
-            self.cmd_vel_publisher.publish(cmd_vel_message)
-
             # Check if excavation motor stopped due to stalling
             if self.robot_sensors.exc_curr == self.EXCAVATION_STALL_CURRENT:
                 self.exc_failure_counter += 1
+                cmd_vel_message.linear = 0
+                cmd_vel_message.angular = 0
                 self.spin_excavation_backwards()
+
+            self.cmd_vel_publisher.publish(cmd_vel_message)
                 
 
             if (self.exc_failure_counter >= 7):
@@ -275,9 +277,9 @@ class ExcavationController:
 
 
         excavation_message = Int32()
-        excavation_message.data = 0
-        self.excavation_publisher.publish(excavation_message)
-        rospy.sleep(1)
+        # excavation_message.data = 0
+        # self.excavation_publisher.publish(excavation_message)
+        # rospy.sleep(1)
 
         excavation_message.data = self.EXCAVATION_SPEED * -1
 
@@ -285,8 +287,8 @@ class ExcavationController:
 
         rospy.sleep(2)
 
-        excavation_message.data = 0
-        self.excavation_publisher.publish(excavation_message)
+        # excavation_message.data = 0
+        # self.excavation_publisher.publish(excavation_message)
 
 
 if __name__ == "__main__":

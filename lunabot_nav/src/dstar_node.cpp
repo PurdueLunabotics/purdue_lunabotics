@@ -31,6 +31,7 @@ public:
     goal_sub = nh.subscribe(goal_topic, 1, &DstarNode::goal_callback, this);
     path_pub = nh.advertise<nav_msgs::Path>(path_topic, 10, true);
     planning_enabled_subscriber = nh.subscribe("/nav/planning_enabled", 1, &DstarNode::enable_callback, this);
+    costmap_enabled_subscriber = nh.subscribe("/costmap_enabled", 1, &DstarNode::costmap_enabled_callback, this);
 
     ros::Rate rate(frequency);
     while (ros::ok()) {
@@ -97,6 +98,7 @@ private:
   ros::Subscriber odom_sub;
   ros::Subscriber goal_sub;
   ros::Subscriber planning_enabled_subscriber;
+  ros::Subscriber costmap_enabled_subscriber;
   ros::Publisher path_pub;
 
   std::string odom_topic;
@@ -108,9 +110,14 @@ private:
   float occupancy_threshold;
 
   bool planning_enabled = true;
+  bool costmap_enabled = true;
 
   void enable_callback(const std_msgs::Bool::ConstPtr &msg) {
     this->planning_enabled = msg->data;
+  }
+
+  void costmap_enabled_callback(const std_msgs::Bool::ConstPtr &msg) {
+    this->costmap_enabled = msg->data;
   }
 
   // Updates the map given a new occupancy grid.Update the flag such that dstar will update the map.
@@ -239,6 +246,20 @@ private:
 
         path.poses.push_back(path_pose);
       }
+    }
+
+    bool mapAllZero = true;
+    for (int i = 0; i < this->map.size(); i++) {
+      for (int j = 0; j < this->map[i].size(); j++) {
+        if (this->map[i][j] != 0) {
+          mapAllZero = false;
+        }
+      }
+    }
+
+    // if the map is all zeroes, and the costmap is still on, don't publish paths
+    if (mapAllZero && this->costmap_enabled) {
+      return;
     }
 
     if (this->planning_enabled) {
