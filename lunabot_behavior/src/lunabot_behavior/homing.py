@@ -149,6 +149,8 @@ class HomingController:
 
     def spin_until_apriltag(self):
 
+        self.initalize()
+
         self.cmd_vel.angular.z = 0.2 # around 11 degrees per second
 
         if self.cam_mode == "sim":
@@ -166,10 +168,12 @@ class HomingController:
         """
         Align the robot to the apriltag
         """
+        print("Behavior: Spinning")
+
+        self.spin_until_apriltag()
 
         print("Behavior: Homing")
 
-        self.spin_until_apriltag()
         rospy.sleep(1)
 
         tf_buffer = tf2_ros.Buffer()

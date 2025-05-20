@@ -24,7 +24,7 @@ class Zone:
         Generate a random offset that will lie within the zone.
         """
 
-        BUFFER = 0.3 # In meters, offset will not lie within this distance of edges
+        BUFFER = 0.5 # In meters, offset will not lie within this distance of edges
 
         x_length = abs(self.top_right[0] - self.top_left[0])
         y_length = abs(self.top_left[1] - self.bottom_left[1])
@@ -164,7 +164,7 @@ def find_mining_zone(apriltag_pose_in_odom: PoseStamped, is_sim: bool)->Zone:
     # UCF TOP
     DIST_X = 5.44
     LENGTH_X = 2.6
-    DIST_Y = 0.5
+    DIST_Y = 0.8
     LENGTH_Y = -2.57
 
     # UCF BOTTOM
@@ -194,7 +194,7 @@ def find_berm_zone(apriltag_pose_in_odom: PoseStamped, is_sim: bool)->Zone:
     # UCF TOP
     DIST_X = 5.94
     LENGTH_X = 1.5
-    DIST_Y = -2.57
+    DIST_Y = -2.27
     LENGTH_Y = -0.9
 
     # UCF BOTTOM

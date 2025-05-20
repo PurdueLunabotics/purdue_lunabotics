@@ -150,7 +150,7 @@ class ExdepController:
                 cmd_vel.angular.z = 0
                 self.cmd_vel_publisher.publish(cmd_vel)
 
-                rospy.sleep(3)
+                rospy.sleep(2.5)
 
             # once we've arrived, stop.
             cmd_vel = Twist()
@@ -212,7 +212,7 @@ class ExdepController:
             cmd_vel.angular.z = 0
             self.cmd_vel_publisher.publish(cmd_vel)
 
-            rospy.sleep(5)
+            rospy.sleep(3.5)
 
             # stop
             cmd_vel.linear.x = 0
