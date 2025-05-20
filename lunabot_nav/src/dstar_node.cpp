@@ -253,6 +253,7 @@ private:
       for (int j = 0; j < this->map[i].size(); j++) {
         if (this->map[i][j] != 0) {
           mapAllZero = false;
+          break;
         }
       }
     }
