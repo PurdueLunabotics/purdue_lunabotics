@@ -270,7 +270,7 @@ class Behavior:
         mining_goal.header.stamp = rospy.Time.now()
         mining_goal.header.frame_id = "odom"
 
-        IN_UCF = True  # are we on the UCF map
+        IN_UCF = False  # are we on the UCF map
 
         # align to facing 'north' to make traversal easier (east for the UCF)
         if (IN_UCF):

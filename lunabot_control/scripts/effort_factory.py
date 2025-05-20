@@ -85,6 +85,8 @@ class EffortFactory:
         self.effort_publisher.publish(self.effort)
     
     def fix_stall(self):
+        rospy.logwarn("Fixing Stall")
+
         self.effort.lin_act = 0
         self.effort.left_drive = 0
         self.effort.right_drive = 0

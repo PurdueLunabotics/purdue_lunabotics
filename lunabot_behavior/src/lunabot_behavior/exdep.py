@@ -266,6 +266,7 @@ class ExdepController:
             cmd_vel.angular.z = 0
             self.cmd_vel_publisher.publish(cmd_vel)
 
+            # travel_time = (self.cycle_count + 1 // 3) * 0.5
             rospy.sleep(0.5)
 
             # stop
