@@ -246,7 +246,7 @@ class HomingController:
         if self.is_sim:
             DIST_THRESHOLD = 1.3 # meters, how close to the apriltag to stop
         else:
-            DIST_THRESHOLD = 0.9 # real robot camera is on the back edge of robot, so stop closer
+            DIST_THRESHOLD = 0.8 # real robot camera is on the back edge of robot, so stop closer
         APPROACH_SPEED = -0.2 # m/s
 
         last_apriltag_position = self.berm_apriltag_position
