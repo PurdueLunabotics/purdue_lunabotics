@@ -18,6 +18,7 @@ class EffortFactory:
         self.right_drive = 0
         self.excavate = 0
         self.deposition = 0
+        self.should_reset = False
 
         self.robot_errors = RobotErrors()
 
@@ -69,6 +70,7 @@ class EffortFactory:
         self.effort.right_drive = self.right_drive
         self.effort.excavate = self.excavate
         self.effort.deposit = self.deposition
+        self.effort.should_reset = self.should_reset
 
         self.effort_publisher.publish(self.effort)
 
@@ -99,9 +101,11 @@ class EffortFactory:
         # self.effort.right_drive = 0
         # self.effort.excavate = 0
         # self.effort.deposit = 0
-        self.effort.should_reset = False
+        # self.effort.should_reset = False
+        self.stalled = False
+        self.should_reset = False
         
-        self.effort_publisher.publish(self.effort)
+        # self.effort_publisher.publish(self.effort)
         self.stall_publisher.publish(False)
         
         # self.cleared_stall = True
@@ -114,7 +118,7 @@ if __name__ == "__main__":
 
     while not rospy.is_shutdown():
         if rospy.get_param("autonomy"):
-            if effort_factory.stalled == True: #if stalled, don't publish effort
+            if effort_factory.stalled == True: # if stalled, don't publish effort
                 effort_factory.fix_stall()
             elif effort_factory.robot_errors.manual_stop == False:
                 effort_factory.publish_effort()
