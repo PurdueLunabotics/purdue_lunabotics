@@ -1,0 +1,10 @@
+robot,lunabot_bringup,robot.launch,TRUE
+computer,lunabot_bringup,computer.launch,FALSE
+cameras,lunabot_perception,cameras.launch,TRUE
+overhead,lunabot_bringup,overhead.launch,TRUE
+record,lunabot_bringup,record.launch,TRUE
+record_small,lunabot_bringup,record_small.launch,FALSE
+left,lunabot_perception,left.launch,TRUE
+right,lunabot_perception,right.launch,TRUE
+back,lunabot_perception,back.launch,TRUE
+front,lunabot_perception,front.launch,TRUE
