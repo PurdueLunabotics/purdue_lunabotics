@@ -22,6 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
   geometry_msgs
   costmap_2d
+  nodelet
 )
 
 catkin_python_setup()
@@ -53,6 +54,7 @@ catkin_package(
   tf2_ros
   geometry_msgs
   costmap_2d
+  nodelet
 )
 
 include_directories(

@@ -1,0 +1,292 @@
+#!/usr/bin/env python3
+
+import rospy
+import time
+
+from geometry_msgs.msg import Twist, PoseStamped
+from nav_msgs.msg import Odometry
+#from lunabot_control.scripts.pid_controller import VelocityPIDController
+#from lunabot_control.scripts.clamp_output import clamp_output
+
+from lunabot_behavior.excavate import ExcavationController
+from lunabot_behavior.deposition import DepositionManager
+from lunabot_behavior.linear_actuators import LinearActuatorManager
+from lunabot_behavior.alignment import AlignmentController
+from lunabot_behavior.traversal import TraversalManager
+import lunabot_behavior.zones as zones
+from lunabot_behavior.homing import HomingController
+
+from tf.transformations import euler_from_quaternion
+
+from std_msgs.msg import Int8, Bool, Int32
+import sys
+import math
+
+class ExdepController:
+    """
+    Controls the excavation-deposition autonomous cycle.
+    """
+
+    def apriltag_pose_callback(self, msg: PoseStamped):
+        self.apriltag_pose_in_odom = msg
+        
+        # Find the mining/berm zones in the odom frame
+        self.mining_zone: zones.Zone = zones.find_mining_zone(self.apriltag_pose_in_odom, self.is_sim)
+        self.berm_zone: zones.Zone = zones.find_berm_zone(self.apriltag_pose_in_odom, self.is_sim)
+
+
+    def __init__(self, excavation_publisher: rospy.Publisher = None, 
+                       linear_actuator_publisher: rospy.Publisher = None, 
+                       cmd_vel_publisher: rospy.Publisher = None, 
+                       deposition_publisher: rospy.Publisher = None,
+                       traversal_manager: TraversalManager = None,
+                       led_publisher: rospy.Publisher = None,
+                       apriltag_enabled_publisher: rospy.Publisher = None):
+        """
+        If passed a publisher, then it is assumed a node is already running, and the publisher is shared.
+        Else, initialize this node to run on its own.
+        """
+        if (excavation_publisher is None or linear_actuator_publisher is None or
+           cmd_vel_publisher is None or deposition_publisher is None):
+            rospy.init_node('exdep_node')
+
+            self.excavation_publisher: rospy.Publisher = rospy.Publisher("/excavate", Int32, queue_size=1, latch=True)
+            self.lin_act_publisher: rospy.Publisher = rospy.Publisher("/lin_act", Int32, queue_size=1, latch=True)
+            self.deposition_publisher: rospy.Publisher = rospy.Publisher("/deposition", Int32, queue_size=1, latch=True)
+            self.cmd_vel_publisher: rospy.Publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=True)
+            self.traversal_manager = TraversalManager()
+            self.led_publisher = rospy.Publisher("/led_color", Int32, queue_size=1, latch=True)
+            self.apriltag_enabled_publisher = rospy.Publisher("/apriltag/enabled", Bool, queue_size=1, latch=True)
+
+        else:
+            self.excavation_publisher = excavation_publisher
+            self.lin_act_publisher = linear_actuator_publisher
+            self.deposition_publisher = deposition_publisher
+            self.cmd_vel_publisher = cmd_vel_publisher
+            self.traversal_manager = traversal_manager
+            self.led_publisher = led_publisher
+            self.apriltag_enabled_publisher = apriltag_enabled_publisher
+
+
+        self.excavation = ExcavationController(self.excavation_publisher, self.lin_act_publisher, self.cmd_vel_publisher, self.deposition_publisher)
+        self.deposition = DepositionManager(self.deposition_publisher)
+        self.linear_actuators = LinearActuatorManager(self.lin_act_publisher)
+        self.alignment = AlignmentController(self.cmd_vel_publisher)
+        self.homing = HomingController(self.cmd_vel_publisher)
+        self.is_sim = rospy.get_param("/is_sim")
+
+        self.apriltag_pose_in_odom = None
+        self.mining_zone: zones.Zone = None
+        self.berm_zone: zones.Zone = None
+
+        apriltag_topic = rospy.get_param("/apriltag_topic")
+    
+        rospy.Subscriber(apriltag_topic, PoseStamped, self.apriltag_pose_callback)
+
+        self.rate = rospy.Rate(10) #hz
+
+        self.BERM_TAG_OFFSET = 2 # meters. +2 for UCF_BOTTOM, -2 for UCF_TOP
+
+    def set_color(self, new_color: Int32):
+        self.led_publisher.publish(new_color)
+
+
+    def exdep_loop(self):
+        """
+        The main loop for the excavation-deposition cycle. Assumes it starts at the mining zone, ready to dig.
+        """
+        rospy.sleep(0.1)
+
+        UCF_BOTTOM = False # are we on the bottom UCF map?
+
+        self.cycle_count = 0
+        while (not rospy.is_shutdown()):
+
+            ####################
+            # Excavation
+            ####################
+            
+            self.set_color(4) # White for excavation
+
+            # we start in the mining zone, hopefully at a good mining location
+            # only plunge first two cycles to ensure full autonomy points
+
+            # Note- this is changed back to normal until plunging can be stopped correctly
+            if self.cycle_count < 2:
+                self.excavation.excavate()
+            else:
+                self.excavation.excavate()
+
+            self.cycle_count += 1
+
+            ####################
+            # Raise Linear Actuators
+            ####################
+
+            # spin excavation while raising
+            exc_msg = Int32()
+            exc_msg.data = 1500
+            self.excavation_publisher.publish(exc_msg)
+
+            # raise the linear actuators out of the way
+            self.linear_actuators.raise_linear_actuators(True) 
+
+            # stop spinning excavation
+            exc_msg = Int32()
+            exc_msg.data = 0
+            self.excavation_publisher.publish(exc_msg)
+
+            ####################
+            # Traversal to Berm
+            ####################
+
+            # move to the berm area
+            rospy.loginfo("Behavior: Moving to berm area")
+            self.set_color(2) # Green for traversal
+            
+            if (self.cycle_count > 1):
+                #move backwards back to berm area
+                cmd_vel.linear.x = -0.3
+                cmd_vel.angular.z = 0
+                self.cmd_vel_publisher.publish(cmd_vel)
+
+                rospy.sleep(2.5)
+
+            # once we've arrived, stop.
+            cmd_vel = Twist()
+            cmd_vel.linear.x = 0
+            cmd_vel.angular.z = 0
+            self.cmd_vel_publisher.publish(cmd_vel)
+
+            ####################
+            # Alignment 
+            ####################
+
+            self.set_color(7) # Purple for deposition autonomy
+            
+            self.homing.initalize()
+
+            rospy.loginfo("Homing: Aligning to Berm Apriltag")
+            self.homing.home()
+            
+            if self.cycle_count == 1:
+                rospy.loginfo("Behavior: Stopping Costmap")
+                rospy.set_param("/costmap_enabled", False)
+                
+                rospy.loginfo("Behavior: Averaging Apriltags")
+                pose = self.homing.average_apriltag_pose()
+
+                # p = PoseStamped()
+                # p.pose.position.x = pose[0]
+                # p.pose.position.y = pose[1]
+                # p.header.frame_id = "odom"
+                # p.header.stamp = rospy.Time.now()
+                # self.homing.apriltag_publisher.publish(p)
+                
+                berm_goal = PoseStamped()
+                berm_angles = euler_from_quaternion([pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z, pose.pose.orientation.w])
+                yaw = berm_angles[2] + math.pi / 2
+                berm_goal.pose.position.x = pose.pose.position.x + self.BERM_TAG_OFFSET * math.cos(yaw)
+                berm_goal.pose.position.y = pose.pose.position.y + self.BERM_TAG_OFFSET * math.sin(yaw) #+ 2 if UCF_BOTTOM else pose[1]-2
+                
+                rospy.loginfo("Behavior: Moving to berm area")
+                self.traversal_manager.traverse_to_goal(berm_goal, drive_backwards=True)   
+
+                rospy.loginfo("Homing: Aligning to Berm Apriltag")
+                self.homing.home()
+            
+            rospy.loginfo("Homing: Moving to Berm Apriltag")
+            self.homing.approach()
+
+            rospy.sleep(1)
+
+            ####################
+            # Deposition
+            ####################
+
+            rospy.loginfo("Behavior: Depositing")
+            self.deposition.deposit()
+
+            ####################
+            # Traversal to Mining Zone
+            ####################
+
+            # go straight to mining zone
+            cmd_vel.linear.x = 0.3
+            cmd_vel.angular.z = 0
+            self.cmd_vel_publisher.publish(cmd_vel)
+
+            if (self.cycle_count <= 3):
+                travel_time = (self.cycle_count - 1) * 0.5 + 3.5
+            else:
+                travel_time = (((self.cycle_count-3) // 3) * 1) + 3.5
+
+            rospy.sleep(travel_time)
+
+            # stop
+            cmd_vel.linear.x = 0
+            cmd_vel.angular.z = 0
+            self.cmd_vel_publisher.publish(cmd_vel)
+
+            rospy.sleep(0.3)
+
+            # move to the mining area
+            rospy.loginfo("Behavior: Moving to mining area")
+            self.set_color(2) # Green for traversal
+            
+            if self.cycle_count <= 3 or self.cycle_count % 3 == 0 :
+                #center
+                pass
+            elif self.cycle_count % 3 == 1:
+                #left
+                cmd_vel.linear.x = 0
+                cmd_vel.angular.z = 0.2
+                self.cmd_vel_publisher.publish(cmd_vel)
+
+                rospy.sleep(4)
+
+                # stop
+                cmd_vel.linear.x = 0
+                cmd_vel.angular.z = 0
+                self.cmd_vel_publisher.publish(cmd_vel)
+
+                rospy.sleep(0.3)
+            else:
+                #right
+                cmd_vel.linear.x = 0
+                cmd_vel.angular.z = -0.2
+                self.cmd_vel_publisher.publish(cmd_vel)
+
+                rospy.sleep(4)
+
+                # stop
+                cmd_vel.linear.x = 0
+                cmd_vel.angular.z = 0
+                self.cmd_vel_publisher.publish(cmd_vel)
+
+                rospy.sleep(0.3)
+            
+            #move forwards to new excavation spot
+            cmd_vel.linear.x = 0.3
+            cmd_vel.angular.z = 0
+            self.cmd_vel_publisher.publish(cmd_vel)
+
+            rospy.sleep(0.5)
+
+            # stop
+            cmd_vel.linear.x = 0
+            cmd_vel.angular.z = 0
+            self.cmd_vel_publisher.publish(cmd_vel)
+
+            rospy.sleep(0.3)
+
+            # once we've arrived, stop.
+            cmd_vel = Twist()
+            cmd_vel.linear.x = 0
+            cmd_vel.angular.z = 0
+            self.cmd_vel_publisher.publish(cmd_vel)
+
+if __name__ == "__main__":
+    exdep_controller = ExdepController()
+    exdep_controller.exdep_loop()
+    rospy.spin()

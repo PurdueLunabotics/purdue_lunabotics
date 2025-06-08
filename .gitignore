@@ -1,3 +1,5 @@
+vcpkg
+
 teensy_loader_cli
 # datasets
 data/
@@ -176,3 +178,6 @@ cython_debug/
 #.idea/
 /.vs
 /.vscode
+
+# jetbrains
+.idea/

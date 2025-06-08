@@ -4,9 +4,10 @@ plugins:
 publish_frequency: 30.0
 global_frame: "odom"
 robot_base_frame: "base_link"
-footprint: "[ [0.54615446154,0.295590],[0.546154,-0.295590],[-0.546154,-0.295590],[-0.546154,0.295590] ]"
+# footprint: "[ [0.54615446154,0.295590],[0.546154,-0.295590],[-0.546154,-0.295590],[-0.546154,0.295590] ]"
+robot_radius: 0.5
 map_topic: "/projected_map"
 inflation: {
-  inflation_radius: 0.6,
+  inflation_radius: 0.45,
   cost_scaling_factor: 3,
 }

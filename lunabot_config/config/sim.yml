@@ -6,6 +6,7 @@ pc_topic: "/point_cloud"
 odom_topic: "/odom"
 nav_goal_topic: "/goal"
 cmd_vel_topic: "/cmd_vel"
+apriltag_topic: "/apriltag_pose"
 
 nav:
     map_topic: "/maps/costmap_node/global_costmap/costmap"
@@ -18,18 +19,17 @@ nav:
     dstar_node:
         path_sampling_rate: 5 # Take every <n-th> point from the path
 
-    mpc_node:
-        rollout_count: 50
-        top_rollouts: 15
-        iterations: 10
-        w_linear: 0.0
-        w_angular: 0.0
-        w_waypoint: 20.0
-        w_occupied: 0.0
-        horizon_length: 10
-        frequency: 30
-        min_distance_threshold: 0.5
-        velocity_limits:
+    pure_pursuit:
+        slip_k1: 0.3
+        heading_k2: 0.15
+        kp: 0.05
+        ki: 0
+        kd: 0
+        kv: 0.8
+        ka: 0.0002
+        frequency_p: 15
+        lookahead: 0.5
+        velocity_limits_p:
             linear: [-0.5, 0.5]
             angular: [-0.785, 0.785]
 

@@ -1,16 +1,18 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="autonomy" default="false" />
-    <arg name="overhead" default="false" />
     <arg name="foxglove" default="false"  />
-
-    <rosparam file="$(find lunabot_config)/config/real_robot.yml" command="load" />
+    <arg name="exp_name" default="" />
 
     <include if="$(arg foxglove)" file="$(find foxglove_bridge)/launch/foxglove_bridge.launch" />
-    <include if="$(arg overhead)" file="$(find lunabot_bringup)/launch/overhead.launch" />
-    <include file="$(find lunabot_control)/launch/manual_control.launch">
-        <arg name="autonomy" value="$(arg autonomy)"/>
+    <include file="$(find lunabot_control)/launch/manual_control.launch"/>
+
+    <!-- Launch rviz -->
+    <arg default="$(find lunabot_description)/launch/urdf.rviz" name="rvizconfig"/>
+    <node args="-d $(arg rvizconfig)" name="rviz" pkg="rviz" required="true" type="rviz"/>
+    
+    <!-- Launch small rosbag recorder-->
+    <include file="$(find lunabot_bringup)/launch/record_small.launch">
+        <arg name="exp_name" value="$(arg exp_name)" />
     </include>
-    <include file="$(find lunabot_description)/launch/display.launch"/>
 
 </launch>

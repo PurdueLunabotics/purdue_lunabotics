@@ -6,8 +6,8 @@
 #include "robot.hpp"
 #include "interfaces.hpp"
 
-#define TX_PERIOD 10               // ms
-#define CTRL_PERIOD 2                // ms
+#define TX_PERIOD 300               // ms
+#define CTRL_PERIOD 2              // ms
 #define UWB_TRANSFER_PERIOD 10'000 // microsec
 #define CURR_UPDATE_PERIOD 8       // ms
 #define STALE_EFFORT_PERIOD 1000   // ms
@@ -21,20 +21,25 @@ uint8_t flags = 0;
 
 void ctrl() {
   actuation::cb(effort.lin_act);
-  drivetrain::cb(effort.left_drive, effort.right_drive);
-  deposition::cb(effort.deposit);
-  excavation::cb(effort.excavate);
+  drivetrain::cb(effort.left_drive, effort.right_drive, effort.should_reset);
+  deposition::cb(effort.deposit, effort.should_reset);
+  excavation::cb(effort.excavate, effort.should_reset);
+  LEDs::cb(effort.led_color);
+  if (effort.should_reset) digitalWrite(9, HIGH); // RELAY ALWAYS ON
+  else digitalWrite(9, HIGH); // RELAY ALWAYS ON
 }
 
 void send() {
   actuation::update(state.act_right_curr);
-  drivetrain::update(state.drive_left_curr, state.drive_right_curr, state.drive_left_ang,
-                     state.drive_right_ang);
+  drivetrain::update(state.drive_left_curr, state.drive_right_curr, state.drive_left_torque,
+                     state.drive_right_torque, state.drive_left_vel, state.drive_right_vel);
   deposition::update(state.dep_curr);
 
-  excavation::update(state.exc_curr, state.exc_ang);
+  excavation::update(state.exc_curr, state.exc_torque, state.exc_vel);
 
   uwb::update(state.uwb_dist_0, state.uwb_dist_1, state.uwb_dist_2);
+
+  load_cell::update(state.load_cell_weight);
 
   /*
   Serial.print("Raw: ");
@@ -50,30 +55,29 @@ IntervalTimer uwb_timer;
 float last_effort;
 
 void setup() {
-  //Serial.begin(115200);
+  // Serial.begin(115200);
   Sabertooth_MotorCtrl::init_serial(ST_SERIAL, ST_BAUD_RATE);
-  
+
   M5Stack_UWB_Trncvr::init();
   KillSwitchRelay::init();
+  Led_Strip::init();
+  HX711_Bus::init();
 
-  #ifdef OLD_CURRENT_SENSOR
-  ACS711_Current_Bus::init_ads1115();
-  #else 
   ADS1119_Current_Bus::init_ads1119();
-  #endif
 
   uwb_timer.begin(M5Stack_UWB_Trncvr::transfer, UWB_TRANSFER_PERIOD);
 
+  drivetrain::begin();
+  excavation::begin();
+  deposition::begin();
+
   // disable timeout
   MC1.setTimeout(0);
-  MC2.setTimeout(0);
-  MC3.setTimeout(0);
-
   // set to fast ramp (1-10 - fast, 11-20 slow, 20-80 intermed)
   MC1.setRamping(1);
-  MC2.setRamping(1);
-  MC3.setRamping(1);
+
   last_effort = millis();
+  pinMode(9, OUTPUT);  //For the big relay
 }
 
 elapsedMillis ms_until_send;
@@ -81,7 +85,7 @@ elapsedMillis ms_until_ctrl;
 elapsedMillis ms_curr_update;
 
 void loop() {
-  
+
   int n;
   n = RawHID.recv(buffer, 0); // 0 timeout = do not wait
   if (n > 0) {
@@ -92,28 +96,21 @@ void loop() {
     pb_decode(&stream, RobotEffort_fields, &effort);
     last_effort = millis();
   }
-  
+
   if (millis() - last_effort > STALE_EFFORT_PERIOD) {
     effort = RobotEffort_init_zero;
   }
 
   if (ms_until_ctrl > CTRL_PERIOD) {
-    ms_until_ctrl -= CTRL_PERIOD;
+    ms_until_ctrl = 0;
     // TODO, add timer if robot effort not changing for too long, exit?
-    //KillSwitchRelay::logic(effort);
+    // KillSwitchRelay::logic(effort);
     ctrl();
   }
 
   if (ms_until_send > TX_PERIOD) {
-    ms_until_send -= TX_PERIOD;
+    ms_until_send = 0;
     send();
     n = RawHID.send(buffer, 0);
   }
-
-  #ifdef OLD_CURRENT_SENSOR
-  if (ms_curr_update > CURR_UPDATE_PERIOD) {
-    ms_curr_update -= CURR_UPDATE_PERIOD;
-    ACS711_Current_Bus::transfer();
-  }
-  #endif
 }

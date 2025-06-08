@@ -3,7 +3,7 @@
 import rospy
 
 from lunabot_msgs.msg import RobotEffort, RobotErrors
-from std_msgs.msg import Int8
+from std_msgs.msg import Int8, Int32, Bool
 
 
 class EffortFactory:
@@ -18,6 +18,7 @@ class EffortFactory:
         self.right_drive = 0
         self.excavate = 0
         self.deposition = 0
+        self.should_reset = False
 
         self.robot_errors = RobotErrors()
 
@@ -25,13 +26,18 @@ class EffortFactory:
             "/effort", RobotEffort, queue_size=5, latch=True
         )
 
-        self.lin_act_subscriber = rospy.Subscriber("/lin_act", Int8, self.set_lin_act)
-        self.left_drive_subscriber = rospy.Subscriber("/left_drive", Int8, self.set_left_drive)
-        self.right_drive_subscriber = rospy.Subscriber("/right_drive", Int8, self.set_right_drive)
-        self.excavate_subscriber = rospy.Subscriber("/excavate", Int8, self.set_excavate)
-        self.deposition_subscriber = rospy.Subscriber("/deposition", Int8, self.set_deposition)
+        self.lin_act_subscriber = rospy.Subscriber("/lin_act", Int32, self.set_lin_act)
+        self.left_drive_subscriber = rospy.Subscriber("/left_drive", Int32, self.set_left_drive)
+        self.right_drive_subscriber = rospy.Subscriber("/right_drive", Int32, self.set_right_drive)
+        self.excavate_subscriber = rospy.Subscriber("/excavate", Int32, self.set_excavate)
+        self.deposition_subscriber = rospy.Subscriber("/deposition", Int32, self.set_deposition)
 
         self.error_subscriber = rospy.Subscriber("/errors", RobotErrors, self.error_callback)
+        self.stall_subscriber = rospy.Subscriber("/stalled", Bool, self.stall_callback)
+        self.stall_publisher = rospy.Publisher("/stalled", Bool, queue_size=5, latch=True)
+        self.stalled = False
+        self.cleared_stall = False
+
 
         self.rate = rospy.Rate(50)
 
@@ -53,6 +59,10 @@ class EffortFactory:
     def error_callback(self, msg: RobotErrors):
         self.robot_errors = msg
 
+    def stall_callback(self, msg: Bool):
+        self.stalled = msg.data
+        self.cleared_stall = False
+
     def publish_effort(self):
         #print("published effort")
         self.effort.lin_act = self.lin_act
@@ -60,6 +70,7 @@ class EffortFactory:
         self.effort.right_drive = self.right_drive
         self.effort.excavate = self.excavate
         self.effort.deposit = self.deposition
+        self.effort.should_reset = self.should_reset
 
         self.effort_publisher.publish(self.effort)
 
@@ -72,6 +83,34 @@ class EffortFactory:
         self.effort.deposit = 0
 
         self.effort_publisher.publish(self.effort)
+    
+    def fix_stall(self):
+        rospy.logerr("Fixing Stall")
+
+        self.effort.lin_act = 0
+        self.effort.left_drive = 0
+        self.effort.right_drive = 0
+        self.effort.excavate = 0
+        self.effort.deposit = 0
+        self.effort.should_reset = True
+        
+        self.effort_publisher.publish(self.effort)
+
+        rospy.sleep(0.5);
+
+        # self.effort.lin_act = 100
+        # self.effort.left_drive = 0
+        # self.effort.right_drive = 0
+        # self.effort.excavate = 0
+        # self.effort.deposit = 0
+        # self.effort.should_reset = False
+        self.stalled = False
+        self.should_reset = False
+        
+        # self.effort_publisher.publish(self.effort)
+        self.stall_publisher.publish(False)
+        
+        # self.cleared_stall = True
 
 
 if __name__ == "__main__":
@@ -80,8 +119,11 @@ if __name__ == "__main__":
     effort_factory = EffortFactory()
 
     while not rospy.is_shutdown():
-        if effort_factory.robot_errors.manual_stop == False:
-            effort_factory.publish_effort()
-        else:
-            effort_factory.stop()
+        if rospy.get_param("autonomy"):
+            if effort_factory.stalled == True: # if stalled, don't publish effort
+                effort_factory.fix_stall()
+            elif effort_factory.robot_errors.manual_stop == False:
+                effort_factory.publish_effort()
+            else:
+                effort_factory.stop()
         effort_factory.rate.sleep()

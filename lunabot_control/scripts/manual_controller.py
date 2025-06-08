@@ -4,6 +4,8 @@ import rospy
 from sensor_msgs.msg import Joy
 from lunabot_msgs.msg import RobotEffort, RobotErrors
 
+from std_msgs.msg import Int32
+
 from enum import Enum
 import numpy as np
 
@@ -35,6 +37,11 @@ import numpy as np
 # Take an input from -1 to 1, and convert it to an 8 bit int from -127 to 127
 def constrain(joy_in: float):
     return np.int8(np.clip(joy_in, -1, 1) * 127)
+
+
+# Take an input from -1 to 1, and convert it to an 32 bit int from -5000 to 5000
+def constrain_RPM(joy_in: float, max_speed):
+    return np.int32(np.clip(joy_in, -1, 1) * max_speed)
 
 class Buttons(Enum):
     A = 0
@@ -80,7 +87,7 @@ class ManualController:
     """
 
     def __init__(self):
-        self.joy_subscriber = rospy.Subscriber("joy", Joy, self.joy_callback)
+        self.joy_subscriber = rospy.Subscriber("joy0", Joy, self.joy_callback)
         self.effort_publisher = rospy.Publisher("effort", RobotEffort, queue_size=1, latch=True)
         self.effort_msg = RobotEffort()
 
@@ -91,21 +98,29 @@ class ManualController:
         self.last_joy = Joy()
         self.last_joy.buttons = [0,0,0,0,0,0,0,0,0,0,0]
 
+        self.led_publisher = rospy.Publisher("/led_color", Int32, queue_size=1, latch=True);
+
         self.driving_mode = "Forwards"
         
-        self.drive_speed_modifier = 1
-        self.slow_drive_speed = 0.5
+        self._max_speed = rospy.get_param("~max_speed", 3000) # in rpm
+        self.slow_drive_speed = 0.25
         self.fast_drive_speed = 1
+        self.drive_speed_modifier = self.slow_drive_speed
+        rospy.loginfo(f"Driving Speed: {self.drive_speed_modifier}")
 
         self.latched_excavation_speed = 0
         self.excavation_is_latched = False
 
-        self.DEPOSITION_SPEED = 127
+        self.DEPOSITION_SPEED = 3000 #TODO RJN - this speed
         self.ACTUATE_SPEED = 0.8 # percentage of max power
+        self.EXCAVATION_SPEED = 3000 
 
         self.publish = True
 
         self.stop()
+
+    def set_color(self, new_color: Int32):
+        self.led_publisher.publish(new_color);
 
     def error_callback(self, error_msg: RobotErrors):
         self.error_msg = error_msg
@@ -113,6 +128,7 @@ class ManualController:
     def publish_manual_stop(self):
         self.error_msg.manual_stop = True
         self.error_pub.publish(self.error_msg)
+        self.effort_msg.should_reset = True
 
     def unpublish_manual_stop(self):
         self.error_msg.manual_stop = False
@@ -142,10 +158,10 @@ class ManualController:
         else:
             self.publish = True
 
-        # Start button: Stop the robot (Pause)
+        # Start button: Stop the robot (Pause) and turns autonomy off (must be restarted manually)
         if joy.buttons[Buttons.START.value] == 1:
-            self.stop()
             self.publish_manual_stop()
+            self.stop()
             rospy.loginfo("Manual Control: Stopped")
         else:
             self.unpublish_manual_stop()
@@ -155,14 +171,15 @@ class ManualController:
             effort_msg.right_drive = 0
 
             effort_msg.excavate = 0
+            effort_msg.should_reset = False
 
             # Set the drive effort to the left and right stick vertical axes (Tank Drive)
             if self.driving_mode == "Forwards":
-                effort_msg.left_drive = constrain(joy.axes[Axes.L_STICK_VERTICAL.value]) * self.drive_speed_modifier
-                effort_msg.right_drive = constrain(joy.axes[Axes.R_STICK_VERTICAL.value]) * self.drive_speed_modifier
+                effort_msg.left_drive = constrain_RPM(joy.axes[Axes.L_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
+                effort_msg.right_drive = constrain_RPM(joy.axes[Axes.R_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
             else:
-                effort_msg.left_drive = -1 * constrain(joy.axes[Axes.R_STICK_VERTICAL.value]) * self.drive_speed_modifier
-                effort_msg.right_drive = -1 * constrain(joy.axes[Axes.L_STICK_VERTICAL.value]) * self.drive_speed_modifier
+                effort_msg.left_drive = -1 * constrain_RPM(joy.axes[Axes.R_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
+                effort_msg.right_drive = -1 * constrain_RPM(joy.axes[Axes.L_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
 
             effort_msg.left_drive = int(effort_msg.left_drive)
             effort_msg.right_drive = int(effort_msg.right_drive)
@@ -190,9 +207,9 @@ class ManualController:
 
                 # Take priority for right trigger. If it is nearly zero, use the left trigger instead
                 if (right_trigger_axis_normalized <= 0.01):
-                    effort_msg.excavate = -1 * constrain(left_trigger_axis_normalized)
+                    effort_msg.excavate = -1 * constrain_RPM(left_trigger_axis_normalized, self.EXCAVATION_SPEED)
                 else:
-                    effort_msg.excavate = constrain(right_trigger_axis_normalized)
+                    effort_msg.excavate = constrain_RPM(right_trigger_axis_normalized, self.EXCAVATION_SPEED)
 
             # Y button: latch excavation speed. This keeps excavation at the same speed until the latch is released
             if joy.buttons[Buttons.Y.value] == 1 and self.last_joy.buttons[Buttons.Y.value] == 0:  
@@ -218,6 +235,7 @@ class ManualController:
 
     def loop(self):
         if self.publish:
+            self.set_color(3) # Blue for manual control
             self.effort_publisher.publish(self.effort_msg)
 
     def stop(self):
@@ -231,6 +249,7 @@ class ManualController:
         self._exc_latch = True
 
         self.effort_publisher.publish(self.effort_msg)
+        rospy.set_param("autonomy", False)
 
 
 if __name__ == "__main__":
@@ -238,7 +257,7 @@ if __name__ == "__main__":
 
     man_ctrl = ManualController()
     rate = rospy.Rate(20)
-
     while not rospy.is_shutdown():
-        man_ctrl.loop()
+        if not rospy.get_param("autonomy"):
+            man_ctrl.loop()
         rate.sleep()
