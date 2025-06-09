@@ -1,0 +1,35 @@
+<launch>
+  <!-- Set GAZEBO_MODEL_PATH -->
+  <set_env name="GAZEBO_MODEL_PATH"
+           value="$(find-pkg-share mining_arena_gazebo)/models"/>
+
+  <!-- Declare arguments -->
+  <arg name="world_name" default="empty_world"/>
+  <arg name="gazebo_gui" default="true"/>
+  <arg name="verbose" default="false"/>
+  <arg name="debug" default="false"/>
+  <arg name="paused" default="false"/>
+  <arg name="initial_pose" default="-x 1.0 -y 0 -z 0"/>
+  <arg name="model" default="$(find-pkg-share lunabot_description)/urdf/dummy_bot.xacro"/>
+
+  <!-- spawn gazebo model -->
+  <arg name="world_sdf_file" default="empty.sdf" />
+  <arg name="world_sdf_string" default="" />
+  <arg name="container_name" default="ros_gz_container" />
+  <arg name="create_own_container" default="False" />
+  <arg name="use_composition" default="False" />
+  <gz_server 
+    world_sdf_file="$(var world_sdf_file)"
+    world_sdf_string="$(var world_sdf_string)"
+    container_name="$(var container_name)"
+    create_own_container="$(var create_own_container)"
+    use_composition="$(var use_composition)">
+  </gz_server>
+
+  <!-- Spawn the robot into Gazebo -->
+  <!-- <node pkg="gazebo_ros" -->
+        <!-- exec="spawn_entity.py" -->
+        <!-- name="spawn_gazebo_model" -->
+        <!-- output="screen" -->
+        <!-- args="-entity robot -param robot_description -x 1.0 -y 0 -z 0"/> -->
+</launch>
