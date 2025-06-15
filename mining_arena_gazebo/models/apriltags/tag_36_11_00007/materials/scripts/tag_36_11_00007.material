@@ -1,0 +1,16 @@
+material tag_36_11_00007
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture tag_36_11_00007.png
+        filtering none none none
+        scale 1.0 1.0
+      }
+    }
+  }
+}
+

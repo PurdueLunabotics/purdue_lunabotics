@@ -14,7 +14,7 @@ find_package(ament_cmake REQUIRED)
 # Install launch files
 install(DIRECTORY
         launch
-        model
+        models
         worlds
         realsense_ros_gazebo
         DESTINATION share/${PROJECT_NAME}/)

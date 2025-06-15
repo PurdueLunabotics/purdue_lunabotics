@@ -1,13 +1,19 @@
+from socket import PACKET_HOST
+
+from matplotlib.pyplot import get
+from ament_index_python import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, TimerAction, ExecuteProcess
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import PathJoinSubstitution, FindExecutable, Command
 from launch_ros.substitutions import FindPackageShare
 import os
 
+import xacro
+
 def generate_launch_description():
-    # os.environ['GAZEBO_MODEL_PATH'] = f'$GAZEBO_MODEL_PATH:{FindPackageShare('mining_arena_gazebo').describe()}/model/'
+    os.environ['GAZEBO_MODEL_PATH'] = f"$GAZEBO_MODEL_PATH:{get_package_share_directory('mining_arena_gazebo')}/models/"
 
     gazebo_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
@@ -17,40 +23,50 @@ def generate_launch_description():
                 'gazebo.launch.py'
             ])
         ]),
-        # launch_arguments={
-        #     'gui': 'false'
-        # }.items()
+        launch_arguments={
+            'world': PathJoinSubstitution([
+                FindPackageShare('mining_arena_gazebo'),
+                'worlds',
+                'arena_nasa.world'
+
+                # DUPAGE LOW RES WORLD LOCATION
+                # 'low_resolution',
+                # 'artemis',
+                # 'artemis_arena.world'
+            ])
+        }.items()
     )
 
-    robot_description = Command([
-        FindExecutable(name='xacro'),
-        ' ',
-        PathJoinSubstitution([
-            FindPackageShare('lunabot_description'),
-            'urdf',
-            'dummy_bot.xacro'
+    robot_desc_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            PathJoinSubstitution([
+                FindPackageShare('lunabot_description'),
+                'launch',
+                'robot_description.launch.py'
+            ])
         ])
-    ])
-
-    robot_state_publisher = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        parameters=[{'robot_description': robot_description}],
-        output="screen"
     )
 
+    # spawns a ghost apparently idk
     robot_spawn_node = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
         arguments=[
             '-topic', 'robot_description',
-            '-entity', 'robot'
+            '-entity', 'robot',
+            '-x', '1.0', '-y', '1.0', '-z', '10',
+            "--ros-args"
         ],
         output='screen'
     )
 
+    spawn_with_delay = TimerAction(
+        period=10.0, # wait 10 sec before spawning to ensure that gazebo does in fact exist and the robot doesn't fall into the abyss
+        actions=[robot_spawn_node]
+    )
+
     return LaunchDescription([
         gazebo_launch,
-        robot_state_publisher,
-        robot_spawn_node
+        robot_desc_launch,
+        spawn_with_delay
     ])
