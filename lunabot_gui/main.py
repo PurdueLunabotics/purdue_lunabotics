@@ -1,9 +1,11 @@
 import dearpygui.dearpygui as dpg
 import launch_manager
+import behavior_manager
 import csv
 import ast
 
 lmgr = launch_manager.LaunchManager()
+bmgr = behavior_manager.BehaviorManager()
 
 class LaunchBox:
     def __init__(self, name, default_value):
@@ -18,13 +20,15 @@ class LaunchBox:
         dpg.set_value(self.button_id, new_state)
 
 def main():
+    # get information about launch files. Pull from lmgr?
     launch_list = []
-
     with open('launch_file_list.csv', newline='') as csvfile:
         launchcsv = csv.reader(csvfile, delimiter=',')
         for row in launchcsv:
             launch_list.append(LaunchBox(row[0], ast.literal_eval(row[4].capitalize())))
     
+    # get list of behavior files
+    behavior_list = bmgr.get_list()
 
     
     dpg.create_context()
@@ -37,11 +41,16 @@ def main():
             dpg.add_table_column()
             dpg.add_table_column()
             dpg.add_table_column()
+            
+            rows_needed = max(
+                len(launch_list) + 2,
+                len(behavior_list)
+            )
 
             # add_table_next_column will jump to the next row
             # once it reaches the end of the columns
             # table next column use slot 1
-            for i in range(0, len(launch_list) + 2): # Rows
+            for i in range(0, rows_needed): # Rows
                 with dpg.table_row():
                     for j in range(0, 3): # Cols
                         if j == 0: # FIRST COLUMN: LAUNCH SCRIPTS
@@ -66,7 +75,8 @@ def main():
                         elif j == 1: # SECOND COLUMN
                             pass
                         else: #THIRD COLUMN
-                            pass
+                            if (i == 0):
+                                dpg.add_radio_button(behavior_list, callback=behavior_callback)
 
     dpg.create_viewport(title='LunaGUI', width=1000, height=500)
     dpg.setup_dearpygui()
@@ -91,7 +101,9 @@ def launch_callback(sender, app_data, user_data):
         lmgr.launch_file(user_data)
     else:
         lmgr.stop_file(user_data)
-    
+        
+def behavior_callback(sender, app_data, user_data):
+    bmgr.launch(bmgr.get_list().index(app_data))
     
 if __name__ == "__main__":
     main()
