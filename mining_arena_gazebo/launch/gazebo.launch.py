@@ -27,12 +27,14 @@ def generate_launch_description():
             'world': PathJoinSubstitution([
                 FindPackageShare('mining_arena_gazebo'),
                 'worlds',
-                'arena_nasa.world'
 
-                # DUPAGE LOW RES WORLD LOCATION
-                # 'low_resolution',
-                # 'artemis',
-                # 'artemis_arena.world'
+                # OUR WORLD DIR
+                # 'arena_nasa.world'
+
+                # DUPAGE LOW RES WORLD DIR
+                'low_resolution',
+                'artemis',
+                'artemis_arena.world'
             ])
         }.items()
     )
@@ -47,26 +49,26 @@ def generate_launch_description():
         ])
     )
 
-    # spawns a ghost apparently idk
     robot_spawn_node = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
         arguments=[
             '-topic', 'robot_description',
             '-entity', 'robot',
-            '-x', '1.0', '-y', '1.0', '-z', '10',
+            '-x', '2.5', '-y', '1.75', '-z', '1.0',
             "--ros-args"
         ],
         output='screen'
     )
 
-    spawn_with_delay = TimerAction(
-        period=10.0, # wait 10 sec before spawning to ensure that gazebo does in fact exist and the robot doesn't fall into the abyss
-        actions=[robot_spawn_node]
-    )
+    # spawn_with_delay = TimerAction(
+    #     period=10.0, # wait 10 sec before spawning to ensure that gazebo does in fact exist and the robot doesn't fall into the abyss
+    #     actions=[robot_spawn_node]
+    # )
 
     return LaunchDescription([
         gazebo_launch,
         robot_desc_launch,
-        spawn_with_delay
+        # spawn_with_delay,
+        robot_spawn_node
     ])
