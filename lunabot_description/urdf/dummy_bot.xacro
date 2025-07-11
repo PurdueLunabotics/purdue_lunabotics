@@ -6,11 +6,11 @@
 <xacro:property name="chassisHeight" value="0.1"/>
 <xacro:property name="chassisLength" value="0.9"/>
 <xacro:property name="chassisWidth" value="0.5"/>
-<xacro:property name="chassisMass" value="50"/>
+<xacro:property name="chassisMass" value="50.0"/>
 
 <xacro:property name="wheelWidth" value="0.125"/>
 <xacro:property name="wheelRadius" value="0.2"/>
-<xacro:property name="wheelMass" value="5"/>
+<xacro:property name="wheelMass" value="5.0"/>
 
 <xacro:macro name="box_inertia" params="m x y z">
   <inertia  ixx="${m*(y*y+z*z)/12}" ixy = "0" ixz = "0"
@@ -140,36 +140,10 @@
   </transmission>
 </xacro:macro>
 
-<xacro:transmission joint_name="left_front_rev"/>
-<xacro:transmission joint_name="left_back_rev"/>
-<xacro:transmission joint_name="right_front_rev"/>
-<xacro:transmission joint_name="right_back_rev"/>
-
-<!-- diff drive controller in gazebo -->
-<gazebo reference="base_link">
-  <plugin name="diff_drive_controller" filename="libgazebo_ros_diff_drive.so">
-    <updateRate>60</updateRate>
-    <leftJoint>left_front_rev left_back_rev</leftJoint>
-    <rightJoint>right_front_rev right_back_rev</rightJoint>
-    <wheelSeparation>0.64</wheelSeparation>
-    <wheelDiameter>0.4</wheelDiameter>
-    <wheelAcceleration>12.0</wheelAcceleration>
-    <commandTopic>cmd_vel</commandTopic>
-    <odometryTopic>odom</odometryTopic>
-    <odometryFrame>odom</odometryFrame>
-    <robotBaseFrame>base_link</robotBaseFrame>
-    <odometrySource>1</odometrySource>
-
-    <!-- Set to true to publish transforms for the wheel links, defaults to false -->
-    <publishWheelTF>true</publishWheelTF>
-
-    <!-- Maximum torque which the wheels can produce, in Nm, defaults to 5 Nm -->
-    <wheelTorque>20</wheelTorque>
-
-    <!-- Set to true to swap right and left wheels, defaults to true -->
-    <legacyMode>false</legacyMode>
-  </plugin>
-</gazebo>
+<!-- <xacro:transmission joint_name="left_front_rev"/> -->
+<!-- <xacro:transmission joint_name="left_back_rev"/> -->
+<!-- <xacro:transmission joint_name="right_front_rev"/> -->
+<!-- <xacro:transmission joint_name="right_back_rev"/> -->
 
 <!-- friction -->
 <xacro:macro name="wheel_friction" params="name">
@@ -180,14 +154,15 @@
   </gazebo>
 </xacro:macro>
 
-<xacro:wheel_friction name="left_front"/>
-<xacro:wheel_friction name="left_back"/>
-<xacro:wheel_friction name="right_front"/>
-<xacro:wheel_friction name="right_back"/>
+<!-- <xacro:wheel_friction name="left_front"/> -->
+<!-- <xacro:wheel_friction name="left_back"/> -->
+<!-- <xacro:wheel_friction name="right_front"/> -->
+<!-- <xacro:wheel_friction name="right_back"/> -->
 
-<!-- tell ros to use the ros2 gazebo control package globally - placement shouldn't matter in file -->
 <gazebo>
-  <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so" />
+  <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+    <parameters>$(find mining_arena_gazebo)/config/diff_drive_controller.yaml</parameters>
+  </plugin>
 </gazebo>
 
 </robot>

@@ -7,6 +7,8 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(xacro REQUIRED)
+
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -17,6 +19,12 @@ install(DIRECTORY
   urdf
   meshes
   DESTINATION share/${PROJECT_NAME}/)
+
+# Generate URDF from XACRO at build time
+xacro_add_files(
+  urdf/dummy_bot.xacro
+  DESTINATION share/${PROJECT_NAME}/urdf/
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
