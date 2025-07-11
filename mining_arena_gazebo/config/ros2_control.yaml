@@ -1,0 +1,11 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100
+
+GazeboSystem:
+  ros__parameters:
+    joints:
+      - left_front_rev
+      - left_back_rev
+      - right_front_rev
+      - right_back_rev

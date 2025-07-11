@@ -1,0 +1,15 @@
+diff_drive_controller:
+  type: diff_drive_controller/DiffDriveController
+  ros__parameters:
+    left_wheel_names: ["left_front_rev", "left_back_rev"]
+    right_wheel_names: ["right_front_rev", "right_back_rev"]
+
+    wheel_separation: 0.64
+    wheel_radius: 0.2
+
+    use_stamped_vel: false
+    base_frame_id: base_link
+    cmd_vel_timeout: 0.25
+
+    publish_rate: 50.0
+    velocity_rolling_window_size: 10

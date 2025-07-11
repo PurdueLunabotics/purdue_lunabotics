@@ -1,6 +1,7 @@
 from socket import PACKET_HOST
 
 from matplotlib.pyplot import get
+from pytest import param
 from ament_index_python import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
@@ -29,12 +30,12 @@ def generate_launch_description():
                 'worlds',
 
                 # OUR WORLD DIR
-                # 'arena_nasa.world'
+                'arena_nasa.world'
 
                 # DUPAGE LOW RES WORLD DIR
-                'low_resolution',
-                'artemis',
-                'artemis_arena.world'
+                # 'low_resolution',
+                # 'artemis',
+                # 'artemis_arena.world'
             ])
         }.items()
     )
@@ -61,6 +62,17 @@ def generate_launch_description():
         output='screen'
     )
 
+    ros2_control = Node(
+        package="controller_manager",
+        executable="ros2_control_node",
+        parameters=[os.path.join(
+            get_package_share_directory("mining_arena_gazebo"),
+            "config",
+            "ros2_control.yaml"
+        )],
+        output="screen"
+    )
+
     # spawn_with_delay = TimerAction(
     #     period=10.0, # wait 10 sec before spawning to ensure that gazebo does in fact exist and the robot doesn't fall into the abyss
     #     actions=[robot_spawn_node]
@@ -70,5 +82,6 @@ def generate_launch_description():
         gazebo_launch,
         robot_desc_launch,
         # spawn_with_delay,
-        robot_spawn_node
+        robot_spawn_node,
+        ros2_control,
     ])

@@ -17,6 +17,7 @@ install(DIRECTORY
         models
         worlds
         realsense_ros_gazebo
+        config
         DESTINATION share/${PROJECT_NAME}/)
 
 if(BUILD_TESTING)
