@@ -127,18 +127,18 @@
 </ros2_control>
 
 <!-- Transmissions -->
-<xacro:macro name="transmission" params="joint_name">
-  <transmission name="${joint_name}_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="${joint_name}">
-      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="${joint_name}_motor">
-      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-      <mechanicalReduction>1.0</mechanicalReduction>
-    </actuator>
-  </transmission>
-</xacro:macro>
+<!-- <xacro:macro name="transmission" params="joint_name"> -->
+  <!-- <transmission name="${joint_name}_trans"> -->
+    <!-- <type>transmission_interface/SimpleTransmission</type> -->
+    <!-- <joint name="${joint_name}"> -->
+      <!-- <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface> -->
+    <!-- </joint> -->
+    <!-- <actuator name="${joint_name}_motor"> -->
+      <!-- <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface> -->
+      <!-- <mechanicalReduction>1.0</mechanicalReduction> -->
+    <!-- </actuator> -->
+  <!-- </transmission> -->
+<!-- </xacro:macro> -->
 
 <!-- <xacro:transmission joint_name="left_front_rev"/> -->
 <!-- <xacro:transmission joint_name="left_back_rev"/> -->
@@ -146,13 +146,13 @@
 <!-- <xacro:transmission joint_name="right_back_rev"/> -->
 
 <!-- friction -->
-<xacro:macro name="wheel_friction" params="name">
-  <gazebo reference="${name}">
-    <mu1>1.0</mu1>
-    <mu2>1.0</mu2>
-    <joint><provideFeedback>true</provideFeedback></joint>
-  </gazebo>
-</xacro:macro>
+<!-- <xacro:macro name="wheel_friction" params="name"> -->
+  <!-- <gazebo reference="${name}"> -->
+    <!-- <mu1>1.0</mu1> -->
+    <!-- <mu2>1.0</mu2> -->
+    <!-- <joint><provideFeedback>true</provideFeedback></joint> -->
+  <!-- </gazebo> -->
+<!-- </xacro:macro> -->
 
 <!-- <xacro:wheel_friction name="left_front"/> -->
 <!-- <xacro:wheel_friction name="left_back"/> -->

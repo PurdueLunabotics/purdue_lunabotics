@@ -1,0 +1,235 @@
+<?xml version="1.0"?>
+<robot name="dummy_bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <link name="base_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="50.0"/>
+      <inertia  ixx="3.416666667" ixy = "0" ixz = "0"
+        iyy="3.416666667" iyz = "0"
+        izz="3.416666667"
+      />
+    </inertial>
+
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.9 0.5 0.1"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.9 0.5 0.1"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- left front -->
+  <link name="left_front">
+    <inertial>
+      <origin xyz="0 0 0"/>
+      <mass value="5.0"/>
+      <inertia  ixx="0.056510417" ixy = "0" ixz = "0"
+        iyy="0.056510417" iyz = "0"
+        izz="0.1"
+      />
+    </inertial>
+
+    <visual>
+      <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+      <geometry><cylinder radius="0.2" length="0.05"/></geometry>
+      <material name="silver"/>
+    </visual>
+
+    <collision>
+      <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+      <geometry><cylinder radius="0.2" length="0.05"/></geometry>
+      <!-- <surface> -->
+        <!-- <friction> -->
+          <!-- <ode> -->
+            <!-- <mu>0.01</mu> -->
+            <!-- <mu2>0.01</mu2> -->
+          <!-- </ode> -->
+        <!-- </friction> -->
+      <!-- </surface> -->
+    </collision>
+  </link>
+
+  <joint name="left_front_rev" type="continuous">
+    <origin rpy="0 0 0" xyz="0.25 0.32 0"/>
+    <parent link="base_link"/>
+    <child link="left_front"/>
+    <axis xyz="0 1 0"/>
+    <!-- <limit effort="10.0" velocity="100.0"/> -->
+  </joint>
+
+  <!-- left back -->
+  <link name="left_back">
+    <inertial>
+      <origin xyz="0 0 0"/>
+      <mass value="5.0"/>
+      <inertia  ixx="0.056510417" ixy = "0" ixz = "0"
+        iyy="0.056510417" iyz = "0"
+        izz="0.1"
+      />
+    </inertial>
+
+    <visual>
+      <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+      <geometry><cylinder radius="0.2" length="0.05"/></geometry>
+      <material name="silver"/>
+    </visual>
+
+    <collision>
+      <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+      <geometry><cylinder radius="0.2" length="0.05"/></geometry>
+      <!-- <surface> -->
+        <!-- <friction> -->
+          <!-- <ode> -->
+            <!-- <mu>0.01</mu> -->
+            <!-- <mu2>0.01</mu2> -->
+          <!-- </ode> -->
+        <!-- </friction> -->
+      <!-- </surface> -->
+    </collision>
+  </link>
+
+  <joint name="left_back_rev" type="continuous">
+    <origin rpy="0 0 0" xyz="-0.25 0.32 0"/>
+    <parent link="base_link"/>
+    <child link="left_back"/>
+    <axis xyz="0 1 0"/>
+    <!-- <limit effort="10.0" velocity="100.0"/> -->
+  </joint>
+
+  <!-- right front -->
+  <link name="right_front">
+    <inertial>
+      <origin xyz="0 0 0"/>
+      <mass value="5.0"/>
+      <inertia  ixx="0.056510417" ixy = "0" ixz = "0"
+        iyy="0.056510417" iyz = "0"
+        izz="0.1"
+      />
+    </inertial>
+
+    <visual>
+      <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+      <geometry><cylinder radius="0.2" length="0.05"/></geometry>
+      <material name="silver"/>
+    </visual>
+
+    <collision>
+      <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+      <geometry><cylinder radius="0.2" length="0.05"/></geometry>
+      <!-- <surface> -->
+        <!-- <friction> -->
+          <!-- <ode> -->
+            <!-- <mu>0.01</mu> -->
+            <!-- <mu2>0.01</mu2> -->
+          <!-- </ode> -->
+        <!-- </friction> -->
+      <!-- </surface> -->
+    </collision>
+  </link>
+
+  <joint name="right_front_rev" type="continuous">
+    <origin rpy="0 0 0" xyz="0.25 -0.32 0"/>
+    <parent link="base_link"/>
+    <child link="right_front"/>
+    <axis xyz="0 1 0"/>
+    <!-- <limit effort="10.0" velocity="100.0"/> -->
+  </joint>
+
+  <!-- right back -->
+  <link name="right_back">
+    <inertial>
+      <origin xyz="0 0 0"/>
+      <mass value="5.0"/>
+      <inertia  ixx="0.056510417" ixy = "0" ixz = "0"
+        iyy="0.056510417" iyz = "0"
+        izz="0.1"
+      />
+    </inertial>
+
+    <visual>
+      <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+      <geometry><cylinder radius="0.2" length="0.05"/></geometry>
+      <material name="silver"/>
+    </visual>
+
+    <collision>
+      <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+      <geometry><cylinder radius="0.2" length="0.05"/></geometry>
+      <!-- <surface> -->
+        <!-- <friction> -->
+          <!-- <ode> -->
+            <!-- <mu>0.01</mu> -->
+            <!-- <mu2>0.01</mu2> -->
+          <!-- </ode> -->
+        <!-- </friction> -->
+      <!-- </surface> -->
+    </collision>
+  </link>
+
+  <joint name="right_back_rev" type="continuous">
+    <origin rpy="0 0 0" xyz="-0.25 -0.32 0"/>
+    <parent link="base_link"/>
+    <child link="right_back"/>
+    <axis xyz="0 1 0"/>
+    <!-- <limit effort="10.0" velocity="100.0"/> -->
+  </joint>
+
+  <xacro:include filename="$(find lunabot_description)/urdf/dummy_bot.trans" />
+
+  <ros2_control name="GazeboSystem" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+    <joint name="right_front_rev">
+      <command_interface name="velocity">
+        <param name="min">-1</param>
+        <param name="max">1</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="left_front_rev">
+      <command_interface name="velocity">
+        <param name="min">-1</param>
+        <param name="max">1</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="right_back_rev">
+      <command_interface name="velocity">
+        <param name="min">-1</param>
+        <param name="max">1</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="left_back_rev">
+      <command_interface name="velocity">
+        <param name="min">-1</param>
+        <param name="max">1</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+  </ros2_control>
+
+  <gazebo>
+    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+      <parameters>$(find mining_arena_gazebo)/config/diff_drive_controller.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+</robot>

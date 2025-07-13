@@ -20,12 +20,6 @@ install(DIRECTORY
   meshes
   DESTINATION share/${PROJECT_NAME}/)
 
-# Generate URDF from XACRO at build time
-xacro_add_files(
-  urdf/dummy_bot.xacro
-  DESTINATION share/${PROJECT_NAME}/urdf/
-)
-
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
