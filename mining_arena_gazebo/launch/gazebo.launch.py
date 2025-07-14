@@ -2,15 +2,12 @@ from posixpath import join
 from ament_index_python import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import IncludeLaunchDescription, ExecuteProcess, RegisterEventHandler
+from launch.actions import IncludeLaunchDescription, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import PathJoinSubstitution, FindExecutable, Command
+from launch.substitutions import PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
-from launch_ros.parameter_descriptions import ParameterValue
 import os
-
-import xacro
 
 def generate_launch_description():
     robot_desc_launch = IncludeLaunchDescription(
@@ -26,6 +23,7 @@ def generate_launch_description():
     # ====================================
     # GAZEBO STUFF =======================
 
+    # add model directory to env variable so it knows where to look
     os.environ['GAZEBO_MODEL_PATH'] = f"$GAZEBO_MODEL_PATH:{get_package_share_directory('mining_arena_gazebo')}/models/"
 
     gazebo_launch = IncludeLaunchDescription(

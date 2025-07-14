@@ -8,33 +8,7 @@ from launch_ros.parameter_descriptions import ParameterValue
 import xacro
 
 def generate_launch_description():
-    # path = os.path.join(get_package_share_directory('lunabot_description'))
-    # xacro_file = os.path.join(path, 'urdf', 'dummy_bot.xacro')
-    # doc = xacro.parse(open(xacro_file))
-    # xacro.process_doc(doc)
-    # robot_description = doc.toxml()
-
-    # robot_description = ParameterValue(
-    #     Command([
-    #         FindExecutable(name='xacro'),
-    #         ' ',
-    #         PathJoinSubstitution([
-    #             FindPackageShare('lunabot_description'),
-    #             'urdf',
-    #             'dummy_bot.xacro'
-    #         ])
-    #     ]),
-    #     value_type=str
-    # )
-
-    # urdf_path = os.path.join(get_package_share_directory("lunabot_description"), "urdf", "dummy_bot.urdf")
-    # with open(urdf_path, "r") as urdf:
-    #     robot_description = urdf.read()
-
     xacro_file = os.path.join(get_package_share_directory("lunabot_description"), "urdf", "bot.xacro.urdf")
-    # xacro_file = os.path.join(get_package_share_directory("gazebo_ros2_control_demos"),
-    #                           'urdf',
-    #                           'test_diff_drive.xacro.urdf')
     doc = xacro.parse(open(xacro_file))
     xacro.process_doc(doc)
     robot_description = doc.toxml()
