@@ -226,6 +226,14 @@
     </joint>
   </ros2_control>
 
+  <xacro:include filename="$(find realsense_ros_gazebo)/xacro/depthcam.xacro"/>
+  <xacro:realsense_d435 sensor_name="d455_front" parent_link="base_link" rate="10">
+    <origin xyz="0.000 0.229 0.482" rpy="0 0 0" />
+  </xacro:realsense_d435>
+  <xacro:realsense_d435 sensor_name="d455_back" parent_link="base_link" rate="10">
+    <origin xyz="0.000 0.20 0.482" rpy="0 0 3.1415" />
+  </xacro:realsense_d435>
+
   <gazebo>
     <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
       <parameters>$(find mining_arena_gazebo)/config/diff_drive_controller.yaml</parameters>

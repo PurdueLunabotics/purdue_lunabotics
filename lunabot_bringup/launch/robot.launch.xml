@@ -1,0 +1,79 @@
+<!-- TODO: Finish pls -->
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <arg name="autonomy" default="true" />
+    <arg name="record" default="true" />
+    <arg name="teensy" default="true" />
+    <arg name="cameras" default="true" />
+    <arg name="overhead" default="true" />
+    <arg name="slam" default="true" />
+    <arg name="exp_name" default="exp" />
+    <arg name="front" default="true" />
+    <arg name="back" default="true" />
+    <arg name="extra_cams" default="false" />
+    <arg name="loginternet" default="false" />
+
+    <!-- Should we use Point To Point or Pure pursuit -->
+    <arg name="ptp" default="true"/>
+
+    <!-- Launch Teensy Driver -->
+    <node if="$(var teensy)" name="teensy_driver" pkg="lunabot_embedded" exec="teensy_driver_node" output="screen" />
+
+    <!-- Launch robot, joint state/robot state publishers, previously in display.launch -->
+    <arg name="model" default="$(find lunabot_description)/urdf/lunabot.xacro"/>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" exec="joint_state_publisher"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" exec="robot_state_publisher"/>
+    <!-- TODO: Figure out where to put the xacro param-->
+
+    <include if="$(var record)" file="$(find lunabot_bringup)/launch/record.launch">
+        <arg name="exp_name" value="$(var exp_name)" />
+    </include>
+
+    <!-- If autonomy is enabled, launch RTABMap Slam, navigation, and other required nodes -->
+    <group if="$(arg autonomy)">
+        <include if="$(arg slam)" file="$(find rtabmap_ros)/launch/rtabmap.launch">
+            <arg name="rtabmap_args" value="--delete_db_on_start --Odom/ResetCountdown 1" />
+            <arg name="rgbd_sync" value="false" />
+            <arg name="subscribe_rgbd" value="false" />
+            <arg name="depth" value="true" />
+
+            <!-- If using the back camera, default the topics to it -->
+            <arg name="depth_topic" value="/d455_back/camera/aligned_depth_to_color/image_raw" if="$(arg back)"/>
+            <arg name="rgb_topic" value="/d455_back/camera/color/image_rect_color" if="$(arg back)"/>
+            <arg name="camera_info_topic" value="/d455_back/camera/color/camera_info" if="$(arg back)"/>
+
+            <!-- Otherwise, if using the front camera -->
+            <arg name="depth_topic" value="/d455_front/camera/aligned_depth_to_color/image_raw" unless="$(arg back)"/>
+            <arg name="rgb_topic" value="/d455_front/camera/color/image_rect_color" unless="$(arg back)"/>
+            <arg name="camera_info_topic" value="/d455_front/camera/color/camera_info" unless="$(arg back)"/>
+
+            <!-- If using both front/back for mapping, using the combined pointcloud -->
+            <arg name="scan_cloud_topic" value="/pointcloud/depth_combined_cloud"/>
+            <arg name="subscribe_scan_cloud" value="$(eval arg('front') and arg('back'))" />
+
+            <arg name="rtabmapviz" value="false" />
+            <arg name="imu_topic" value="/imu" />
+            <arg name="frame_id" value="base_link" />
+            <arg name="rviz" value="false" />
+        </include>
+
+         <!-- Launch effort factory -->
+        <node pkg="lunabot_control" exec="effort_factory.py" name="effort_factory" output="screen" />
+
+        <!-- Launch diff drive controller -->
+        <node pkg="lunabot_control" exec="differential_drive_controller.py"
+              name="differential_drive_controller" output="screen" />
+
+        <!-- Launch path following and path planning (navigation) -->
+        <group>
+            <push_ros_namespace namespace="nav"/>
+
+            <node name="global_planner_node" pkg="lunabot_nav" exec="dstar_node" output="screen" respawn="true"/>
+
+            <!-- Path followers- Point to point or Pure pursuit -->
+            <node name="point_to_point_node" if="$(var ptp)" pkg="lunabot_control" exec="point_to_point.py" output="screen" respawn="true" />
+            <node name="pure_pursuit_node" unless="$(var ptp)" pkg="lunabot_control" exec="pure_pursuit_controller.py" output="screen" respawn="true"/>
+        </group>
+
+        <!-- Launch the costmap node -->
+        <include file="$(find lunabot_bringup)/launch/costmap.launch" />

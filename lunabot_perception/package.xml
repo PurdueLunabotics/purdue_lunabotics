@@ -4,15 +4,17 @@
   <name>lunabot_perception</name>
   <version>0.0.0</version>
   <description>Perception and sensing for lunabotics</description>
-  <maintainer email="lunabotics@todo.todo">Purude Lunabotics</maintainer>
+  <maintainer email="purduelunaboticsteam@gmail.com">Purude Lunabotics</maintainer>
   <license>None</license>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>image_proc</depend>
+  <depend>realsense2_camera</depend>
+  <depend>apriltag_ros</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
   <export>
-    <build_type>ament_cmake</build_type>
+    <build_type>ament_python</build_type>
   </export>
 </package>

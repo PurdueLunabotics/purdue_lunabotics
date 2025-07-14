@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+  <!-- Set the arena to either KSC or UCF arena based on the boolean argument. -->
+  <arg name="KSC_arena" default="true"/>
+
+  <!-- Should we use Point To Point or Pure pursuit -->
+  <arg name="ptp" default="true"/>
+
+  <!-- Values for arena world (Nasa is KSC, UCF is not.) The above boolean argument changes 
+  what arg is passed to the launch file below (therefore, there are two duplicate launch files)
+  $(find mining_arena_gazebo)/worlds/arena_nasa.world
+  $(find mining_arena_gazebo)/worlds/arena_ucf.world -->
+
+  <arg name="initial_pose" default="-x 1.0 -y -1.3 -z 0"/>
+  <arg name="model" default="$(find dummy_bot_description)/urdf/dummy_bot.xacro"/>
+
+  <!-- TODO: ADD GAZEBO + RVIZ LAUNCH STUFF HERE -->
+
+  <!-- cameras -->
+  <include file="$(find lunabot_perception)/launch/sim_cameras.launch.xml"/>
+
+  <!-- navigation -->
+  <group>
+    <push_ros_namespace namespace="nav"/>
+    <node name="global_planner_node" pkg="lunabot_nav" exec="dstar_node.py" output="screen" respawn="true"/>
+
+    <!-- Path followers- Point to point or Pure pursuit -->
+    <node name="point_to_point_node" if="$(arg ptp)" pkg="lunabot_control" exec="point_to_point.py" output="screen" respawn="true" />
+    <node name="pure_pursuit_node" unless="$(arg ptp)" pkg="lunabot_control" exec="pure_pursuit_controller.py" output="screen" respawn="true"/>
+  </group>
+
+  <!-- mapping -->
+  <group>
+    <push_ros_namespace namespace="maps"/>
+    <node name="costmap_node" pkg="lunabot_perception" exec="costmap_node" output="screen">
+      <param from="$(find lunabot_config)/config/global_costmap_sim.yml"/>
+    </node>
+  </group>
+
+  <node pkg="octomap_server" exec="octomap_server_node" name="octomap_server">
+      <param from="$(find lunabot_config)/config/octomap.yml"/>
+      <!-- data source to integrate (PointCloud2) -->
+      <remap from="cloud_in" to="/pointcloud/depth_combined_cloud" />
+  </node>
+</launch>
