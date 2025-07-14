@@ -2,30 +2,29 @@
 <launch>
   <arg name="front"                           default="true"/>
   <arg name="back"                           default="true"/>
-  <arg name="pointcloud" default="$(eval arg('front') and arg('back'))" />
+  <arg name="pointcloud" default="true" />
 
-  <group if="$(arg front)">
+  <group if="$(var front)">
     <push_ros_namespace namespace="d455_front/color"/>
     <node pkg="image_proc" exec="image_proc" name="image_proc"/>
-    <include file="$(find lunabot_perception)/launch/apriltag.launch">
+    <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
       <arg name="camera_frame" value="d455_front_link" />
     </include>
   </group>
 
-  <group if="$(arg back)">
+  <group if="$(var back)">
     <push_ros_namespace namespace="d455_back/color"/>
     <node pkg="image_proc" exec="image_proc" name="image_proc"/>
-    <include file="$(find lunabot_perception)/launch/apriltag.launch.xml">
+    <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
       <arg name="camera_frame" value="d455_back_link" />
     </include>
   </group>
 
-  <group if="$(arg pointcloud)">
+  <group if="$(var pointcloud)">
     <push_ros_namespace namespace="pointcloud"/>
     
     <!-- Aggregate pointclouds from each camera (if using multiple cameras)-->
-    <node pkg="nodelet" type='nodelet' name="point_cloud_aggregator"
-          args="standalone rtabmap_util/point_cloud_aggregator">
+    <node pkg="rtabmap_util" exec='point_cloud_aggregator' name="point_cloud_aggregator">
       <remap from="cloud1" to="/d455_back/camera/points" />
       <remap from="cloud2" to="/d455_front/camera/points" />
       <remap from="combined_cloud" to="depth_combined_cloud"/>       

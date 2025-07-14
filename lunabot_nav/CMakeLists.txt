@@ -11,6 +11,15 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
+# Install files
+install(DIRECTORY
+        src
+        DESTINATION share/${PROJECT_NAME}/)
+
+install(PROGRAMS
+        src/dstar_node.cpp
+        DESTINATION lib/${PROJECT_NAME})
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights

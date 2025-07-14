@@ -184,55 +184,247 @@
 
   <xacro:include filename="$(find lunabot_description)/urdf/dummy_bot.trans" />
 
-  <ros2_control name="GazeboSystem" type="system">
-    <hardware>
-      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
-    </hardware>
-    <joint name="right_front_rev">
-      <command_interface name="velocity">
-        <param name="min">-1</param>
-        <param name="max">1</param>
-      </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
-    </joint>
-    <joint name="left_front_rev">
-      <command_interface name="velocity">
-        <param name="min">-1</param>
-        <param name="max">1</param>
-      </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
-    </joint>
-    <joint name="right_back_rev">
-      <command_interface name="velocity">
-        <param name="min">-1</param>
-        <param name="max">1</param>
-      </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
-    </joint>
-    <joint name="left_back_rev">
-      <command_interface name="velocity">
-        <param name="min">-1</param>
-        <param name="max">1</param>
-      </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
-    </joint>
-  </ros2_control>
+  <link name="realsense_link">
+      <pose>0.4 0 0.25 0 0 0</pose>
+      <visual name="realsense_link_visual">
+        <pose>0 0 0 -1.57 0 -1.57</pose>
+        <geometry>
+          <mesh>
+            <uri>model://chiconybot/meshes/d435.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="realsense_link_collision">
+        <pose>0 0 0 -1.57 0 -1.57</pose>
+        <geometry>
+          <box>
+            <size>0.02505 0.090 0.025</size>
+          </box>
+        </geometry>
+      </collision>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0.000</ixy>
+          <ixz>0.000</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0.000</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <mass>0.564</mass>
+      </inertial>
 
-  <xacro:include filename="$(find realsense_ros_gazebo)/xacro/depthcam.xacro"/>
-  <xacro:realsense_d435 sensor_name="d455_front" parent_link="base_link" rate="10">
-    <origin xyz="0.000 0.229 0.482" rpy="0 0 0" />
-  </xacro:realsense_d435>
-  <xacro:realsense_d435 sensor_name="d455_back" parent_link="base_link" rate="10">
-    <origin xyz="0.000 0.20 0.482" rpy="0 0 3.1415" />
-  </xacro:realsense_d435>
+      <sensor name="cameradepth" type="depth">
+        <camera name="d455_back">
+          <horizontal_fov>1.57</horizontal_fov>
+          <image>
+            <width>1280</width>
+            <height>720</height>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>100</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.100</stddev>
+          </noise>
+        </camera>
+        <always_on>1</always_on>
+        <update_rate>30</update_rate>
+        <visualize>0</visualize>
+      </sensor>
+      <sensor name="cameracolor" type="camera">
+        <camera name="d455_back">
+          <horizontal_fov>1.57</horizontal_fov>
+          <image>
+            <width>1280</width>
+            <height>720</height>
+            <format>RGB_INT8</format>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>100</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.007</stddev>
+          </noise>
+        </camera>
+        <always_on>1</always_on>
+        <update_rate>30</update_rate>
+        <visualize>1</visualize>
+      </sensor>
+      <sensor name="cameraired1" type="camera">
+        <camera name="d455_back">
+          <horizontal_fov>1.57</horizontal_fov>
+          <image>
+            <width>1280</width>
+            <height>720</height>
+            <format>L_INT8</format>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>100</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.05</stddev>
+          </noise>
+        </camera>
+        <always_on>1</always_on>
+        <update_rate>1</update_rate>
+        <visualize>0</visualize>
+      </sensor>
+      <sensor name="cameraired2" type="camera">
+        <camera name="d455_back">
+          <horizontal_fov>1.57</horizontal_fov>
+          <image>
+            <width>1280</width>
+            <height>720</height>
+            <format>L_INT8</format>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>100</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.05</stddev>
+          </noise>
+        </camera>
+        <always_on>1</always_on>
+        <update_rate>1</update_rate>
+        <visualize>0</visualize>
+      </sensor>
+    </link>
+
+    <joint name="realsense_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>realsense_link</child>
+      <pose>0.4 0 0.4 0 0 0</pose>
+    </joint>
+
+    <plugin name="d455_back" filename="librealsense_gazebo_plugin.so">
+      <prefix>d455_back</prefix>
+      <depthUpdateRate>30.0</depthUpdateRate>
+      <colorUpdateRate>30.0</colorUpdateRate>
+      <infraredUpdateRate>1.0</infraredUpdateRate>
+      <depthTopicName>aligned_depth_to_color/image_raw</depthTopicName>
+      <depthCameraInfoTopicName>depth/camera_info</depthCameraInfoTopicName>
+      <colorTopicName>color/image_raw</colorTopicName>
+      <colorCameraInfoTopicName>color/camera_info</colorCameraInfoTopicName>
+      <infrared1TopicName>infra1/image_raw</infrared1TopicName>
+      <infrared1CameraInfoTopicName>infra1/camera_info</infrared1CameraInfoTopicName>
+      <infrared2TopicName>infra2/image_raw</infrared2TopicName>
+      <infrared2CameraInfoTopicName>infra2/camera_info</infrared2CameraInfoTopicName>
+      <colorOpticalframeName>camera_color_optical_frame</colorOpticalframeName>
+      <depthOpticalframeName>camera_depth_optical_frame</depthOpticalframeName>
+      <infrared1OpticalframeName>camera_left_ir_optical_frame</infrared1OpticalframeName>
+      <infrared2OpticalframeName>camera_right_ir_optical_frame</infrared2OpticalframeName>
+      <rangeMinDepth>0.3</rangeMinDepth>
+      <rangeMaxDepth>3.0</rangeMaxDepth>
+      <pointCloud>true</pointCloud>
+      <pointCloudTopicName>depth/color/points</pointCloudTopicName>
+      <pointCloudCutoff>0.3</pointCloudCutoff>
+    </plugin>
+
+  <link name="d455_back_bottom_screw_frame">
+    <visual>
+      <geometry>
+        <mesh filename="package://chiconybot_description/meshes/sensors/d435.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://chiconybot_description/meshes/sensors/d435.dae" />
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="d455_back_link"></link>
+
+  <link name="d455_back_depth_frame"></link>
+
+  <link name="d455_back_depth_optical_frame"></link>
+
+  <link name="d455_back_color_frame"></link>
+
+  <link name="d455_back_color_optical_frame"></link>
+
+  <link name="d455_back_left_ir_frame"></link>
+
+  <link name="d455_back_left_ir_optical_frame"></link>
+
+  <link name="d455_back_right_ir_frame"></link>
+
+  <link name="d455_back_right_ir_optical_frame"></link>
+
+
+   <joint name="d455_back_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="d455_back_bottom_screw_frame" />
+    <pose xyz="0.4 0 0.25" rpy="0 0 0" />
+  </joint>
+
+  <joint name="d455_back_link_joint" type="fixed">
+    <parent link="d455_back_bottom_screw_frame" />
+    <child link="d455_back_link" />
+    <pose xyz="0 0.0175 0.0125 " rpy="0 0 0" />
+  </joint>
+
+  <joint name="d455_back_depth_joint" type="fixed">
+    <parent link="d455_back_link" />
+    <child link="d455_back_depth_frame" />
+    <pose xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+
+  <joint name="d455_back_depth_optical_joint" type="fixed">
+    <parent link="d455_back_depth_frame" />
+    <child link="d455_back_depth_optical_frame" />
+    <pose xyz="0 0 0 " rpy="-1.57 0 -1.57" />
+  </joint>
+
+  <joint name="d455_back_color_joint" type="fixed">
+    <parent link="d455_back_depth_frame" />
+    <child link="d455_back_color_frame" />
+    <pose xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+
+  <joint name="d455_back_color_optical_joint" type="fixed">
+    <parent link="d455_back_color_frame" />
+    <child link="d455_back_color_optical_frame" />
+    <pose xyz="0 0 0 " rpy="-1.57 0 -1.57" />
+  </joint>
+
+  <joint name="d455_back_left_ir_joint" type="fixed">
+    <parent link="d455_back_depth_frame" />
+    <child link="d455_back_left_ir_frame" />
+    <pose xyz="0 0 0 " rpy="0 0 0 " />
+  </joint>
+
+  <joint name="d455_back_left_ir_optical_joint" type="fixed">
+    <parent link="d455_back_left_ir_frame" />
+    <child link="d455_back_left_ir_optical_frame" />
+    <pose xyz="0 0 0 " rpy="-1.57 0 -1.57" />
+  </joint>
+
+  <joint name="d455_back_right_ir_joint" type="fixed">
+    <parent link="d455_back_depth_frame" />
+    <child link="d455_back_right_ir_frame" />
+    <pose xyz="0 -0.050 0 " rpy="0 0 0" />
+  </joint>
+
+  <joint name="d455_back_right_ir_optical_joint" type="fixed">
+    <parent link="d455_back_right_ir_frame" />
+    <child link="d455_back_right_ir_optical_frame" />
+    <pose xyz="0 0 0 " rpy="-1.57 0 -1.57" />
+  </joint>
 
   <gazebo>
     <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">

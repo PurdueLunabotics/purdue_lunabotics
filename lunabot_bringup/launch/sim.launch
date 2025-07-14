@@ -13,33 +13,36 @@
   $(find mining_arena_gazebo)/worlds/arena_ucf.world -->
 
   <arg name="initial_pose" default="-x 1.0 -y -1.3 -z 0"/>
-  <arg name="model" default="$(find dummy_bot_description)/urdf/dummy_bot.xacro"/>
+  <!-- <arg name="model" default="$(find dummy_bot_description)/urdf/dummy_bot.xacro"/> -->
 
   <!-- TODO: ADD GAZEBO + RVIZ LAUNCH STUFF HERE -->
+  <include file="$(find-pkg-share mining_arena_gazebo)/launch/gazebo.launch.py">
+    <!-- TODO: args -->
+  </include>
 
   <!-- cameras -->
-  <include file="$(find lunabot_perception)/launch/sim_cameras.launch.xml"/>
+  <include file="$(find-pkg-share lunabot_perception)/launch/sim_cameras.launch"/>
 
   <!-- navigation -->
   <group>
     <push_ros_namespace namespace="nav"/>
-    <node name="global_planner_node" pkg="lunabot_nav" exec="dstar_node.py" output="screen" respawn="true"/>
+    <node name="global_planner_node" pkg="lunabot_nav" exec="dstar_node.cpp" output="screen" respawn="true"/>
 
     <!-- Path followers- Point to point or Pure pursuit -->
-    <node name="point_to_point_node" if="$(arg ptp)" pkg="lunabot_control" exec="point_to_point.py" output="screen" respawn="true" />
-    <node name="pure_pursuit_node" unless="$(arg ptp)" pkg="lunabot_control" exec="pure_pursuit_controller.py" output="screen" respawn="true"/>
+    <node name="point_to_point_node" if="$(var ptp)" pkg="lunabot_control" exec="point_to_point.py" output="screen" respawn="true" />
+    <node name="pure_pursuit_node" unless="$(var ptp)" pkg="lunabot_control" exec="pure_pursuit_controller.py" output="screen" respawn="true"/>
   </group>
 
   <!-- mapping -->
   <group>
     <push_ros_namespace namespace="maps"/>
     <node name="costmap_node" pkg="lunabot_perception" exec="costmap_node" output="screen">
-      <param from="$(find lunabot_config)/config/global_costmap_sim.yml"/>
+      <param from="$(find-pkg-share lunabot_config)/config/global_costmap_sim.yml"/>
     </node>
   </group>
 
   <node pkg="octomap_server" exec="octomap_server_node" name="octomap_server">
-      <param from="$(find lunabot_config)/config/octomap.yml"/>
+      <param from="$(find-pkg-share lunabot_config)/config/octomap.yml"/>
       <!-- data source to integrate (PointCloud2) -->
       <remap from="cloud_in" to="/pointcloud/depth_combined_cloud" />
   </node>

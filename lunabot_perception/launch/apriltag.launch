@@ -1,0 +1,7 @@
+<launch>
+  <arg name="camera_frame" />
+  <node pkg="apriltag_ros" exec="apriltag_node" name="apriltag" output="screen">
+    <param from="$(find-pkg-share lunabot_config)/config/apriltags/apriltags.yml" />
+
+  </node>
+</launch>

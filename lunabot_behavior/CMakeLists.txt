@@ -15,7 +15,7 @@ find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
 
 # 'install' the python package, so that files can be imported
-ament_python_install_package(${PROJECT_NAME})
+# ament_python_install_package(${PROJECT_NAME})
 
 # 'install' nodes, so that they can be run using "ros2 run <package> <node>"
 install(PROGRAMS

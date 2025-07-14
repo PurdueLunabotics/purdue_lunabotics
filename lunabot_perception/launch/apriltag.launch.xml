@@ -1,9 +1,0 @@
-<launch>
-  <arg name="camera_frame" />
-  <node pkg="apriltag_ros" exec="apriltag_ros_continuous_node" name="apriltag" output="screen">
-    <param name="publish_tag_detections_image" value="true" />
-    <param name="camera_frame" value="$(arg camera_frame)" />
-    <param from="$(find lunabot_config)/config/apriltags/settings.yaml" />
-    <param from="$(find lunabot_config)/config/apriltags/tags.yaml" />
-  </node>
-</launch>
