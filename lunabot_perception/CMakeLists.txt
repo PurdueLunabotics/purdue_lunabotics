@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.14.4)
 project(lunabot_perception)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -12,11 +12,23 @@ find_package(ament_cmake REQUIRED)
 # find_package(<dependency> REQUIRED)
 find_package(image_proc REQUIRED)
 find_package(rtabmap_util REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(nav2_costmap_2d REQUIRED)
+find_package(rclcpp REQUIRED)
+
+add_executable(costmap_node src/costmap_node.cpp)
+ament_target_dependencies(costmap_node rclcpp nav2_costmap_2d tf2_ros)
 
 # Install launch files
 install(DIRECTORY
         launch
         DESTINATION share/${PROJECT_NAME}/)
+
+# Install C++ files
+install(TARGETS
+  costmap_node
+  DESTINATION lib/${PROJECT_NAME})
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

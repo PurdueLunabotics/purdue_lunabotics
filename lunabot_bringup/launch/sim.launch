@@ -26,18 +26,17 @@
   <!-- navigation -->
   <group>
     <push_ros_namespace namespace="nav"/>
-    <node name="global_planner_node" pkg="lunabot_nav" exec="dstar_node.cpp" output="screen" respawn="true"/>
+    <node name="global_planner_node" pkg="lunabot_nav" exec="dstar_node" output="screen" respawn="true"/>
 
     <!-- Path followers- Point to point or Pure pursuit -->
-    <node name="point_to_point_node" if="$(var ptp)" pkg="lunabot_control" exec="point_to_point.py" output="screen" respawn="true" />
-    <node name="pure_pursuit_node" unless="$(var ptp)" pkg="lunabot_control" exec="pure_pursuit_controller.py" output="screen" respawn="true"/>
+    <node name="point_to_point_node" if="$(var ptp)" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="true" />
   </group>
 
   <!-- mapping -->
   <group>
     <push_ros_namespace namespace="maps"/>
     <node name="costmap_node" pkg="lunabot_perception" exec="costmap_node" output="screen">
-      <param from="$(find-pkg-share lunabot_config)/config/global_costmap_sim.yml"/>
+      <param from="$(find-pkg-share lunabot_config)/config/global_costmap.yml"/>
     </node>
   </group>
 

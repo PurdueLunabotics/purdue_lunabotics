@@ -27,11 +27,6 @@ add_executable(dstar_node src/dstar_node.cpp src/dstar.cpp)
 ament_target_dependencies(dstar_node rclcpp std_msgs nav_msgs map_msgs)
 
 # Install files
-install(DIRECTORY include/ DESTINATION include/${PROJECT_NAME})
-
-target_include_directories(dstar_node PUBLIC
-   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
 
 # Link Libraries
 
