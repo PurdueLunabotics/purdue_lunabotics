@@ -1,14 +1,23 @@
-plugins: 
-  - {name: static,  type: "costmap_2d::StaticLayer"} 
-  - {name: inflation,  type: "costmap_2d::InflationLayer"} 
-publish_frequency: 30.0
-global_frame: "odom"
-robot_base_frame: "base_link"
-# footprint: "[ [0.54615446154,0.295590],[0.546154,-0.295590],[-0.546154,-0.295590],[-0.546154,0.295590] ]"
-robot_radius: 0.5
-map_topic: "/rtabmap/octomap_grid"
-
-inflation: 
-  inflation_radius: 0.45,
-  cost_scaling_factor: 4
-    
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      publish_frequency: 30.0
+      global_frame: "odom"
+      robot_base_frame: "base_link"
+      robot_radius: 0.5
+      plugins: ["static_layer", "inflation_layer"]
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        enabled: true
+        map_subscribe_transient_local: True
+        subscribe_to_updates: true
+        transform_tolerance: 0.1
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        map_topic: "/rtabmap/octomap_grid"
+        enabled: true
+        inflation_radius: 0.45
+        cost_scaling_factor: 4.0
+        inflate_unknown: false
+        inflate_around_unknown: true
+      always_send_full_costmap: True

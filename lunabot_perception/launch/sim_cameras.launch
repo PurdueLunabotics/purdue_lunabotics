@@ -6,7 +6,7 @@
 
   <group if="$(var front)">
     <push_ros_namespace namespace="d455_front/color"/>
-    <node pkg="image_proc" exec="image_proc" name="image_proc"/>
+    <node pkg="image_proc" exec="image_proc" name="image_proc_front"/>
     <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
       <arg name="camera_frame" value="d455_front_link" />
     </include>
@@ -14,7 +14,7 @@
 
   <group if="$(var back)">
     <push_ros_namespace namespace="d455_back/color"/>
-    <node pkg="image_proc" exec="image_proc" name="image_proc"/>
+    <node pkg="image_proc" exec="image_proc" name="image_proc_back"/>
     <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
       <arg name="camera_frame" value="d455_back_link" />
     </include>

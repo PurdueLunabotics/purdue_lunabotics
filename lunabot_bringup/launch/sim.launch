@@ -21,15 +21,20 @@
   </include>
 
   <!-- cameras -->
+  <ros_gz_bridge
+    bridge_name="ros_gz_bridge"
+    config_file="$(find-pkg-share ros_gz_sim_demos)/config/rgbd_camera_bridge.yaml"
+    use_composition="True" />
+  <node pkg="tf2_ros" exec="static_transform_publisher" args="--frame-id rgbd_camera --child-frame-id rgbd_camera/link/rgbd_camera" />
   <include file="$(find-pkg-share lunabot_perception)/launch/sim_cameras.launch"/>
 
   <!-- navigation -->
   <group>
     <push_ros_namespace namespace="nav"/>
-    <node name="global_planner_node" pkg="lunabot_nav" exec="dstar_node" output="screen" respawn="true"/>
+    <node name="global_planner_node" pkg="lunabot_nav" exec="dstar_node" output="screen" respawn="false"/>
 
     <!-- Path followers- Point to point or Pure pursuit -->
-    <node name="point_to_point_node" if="$(var ptp)" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="true" />
+    <node name="point_to_point_node" if="$(var ptp)" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="false" />
   </group>
 
   <!-- mapping -->

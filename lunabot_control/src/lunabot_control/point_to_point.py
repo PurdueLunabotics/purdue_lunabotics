@@ -8,7 +8,7 @@ from map_msgs.msg import OccupancyGridUpdate
 from geometry_msgs.msg import Twist, Point, Pose2D
 from lunabot_control.pid_controller import PIDController
 from visualization_msgs.msg import Marker
-from tf.transformations import euler_from_quaternion
+from tf_transformations import euler_from_quaternion
 import numpy as np
 from enum import Enum
 import threading
@@ -22,7 +22,7 @@ class States(Enum):
 
 class PointToPoint(Node):
     def __init__(self, **kwargs):
-        super.__init__('point_to_point_node', **kwargs)
+        super().__init__('point_to_point_node', **kwargs)
 
         self.LINEAR_P = 3.0
         self.LINEAR_I = 0
@@ -94,61 +94,61 @@ class PointToPoint(Node):
 
         # PUBLISHERS ==================================================================================================
         cmd_vel_topic = "/cmd_vel"
-        self.cmd_vel_publisher = self.create_publisher(cmd_vel_topic, Twist, queue_size=10)
+        self.cmd_vel_publisher = self.create_publisher(Twist, cmd_vel_topic, 10)
 
         # TODO: debugging
         self.angular_disparity_publisher = self.create_publisher(
-            "/ptp/angular_disparity", Float32, queue_size=10
+            Float32, "/ptp/angular_disparity", 10
         )
         self.linear_disparity_publisher = self.create_publisher(
-            "/ptp/linear_disparity", Float32, queue_size=10
+            Float32, "/ptp/linear_disparity", 10
         )
-        self.heading_publisher = self.create_publisher("/ptp/heading", Float32, queue_size=10)
+        self.heading_publisher = self.create_publisher(Float32, "/ptp/heading", 10)
         self.angle_target_publisher = self.create_publisher(
-            "/ptp/angle_target", Float32, queue_size=10
+            Float32, "/ptp/angle_target", 10
         )
         self.pid_linear_publisher = self.create_publisher(
-            "/ptp/pid_linear", Float32, queue_size=10
+            Float32, "/ptp/pid_linear", 10
         )
         self.pid_angular_publisher = self.create_publisher(
-            "/ptp/pid_angular", Float32, queue_size=10
+            Float32, "/ptp/pid_angular", 10
         )
 
         self.path_segment_publisher = self.create_publisher(
-            "/ptp/current_target", Marker, queue_size=10
+            Marker, "/ptp/current_target", 10
         )
 
-        self.path_publisher = self.create_publisher("/ptp/line_path", Marker, queue_size=10)
+        self.path_publisher = self.create_publisher(Marker, "/ptp/line_path", 10)
 
         self.state_publisher = self.create_publisher(
-            "/ptp/robot_state", String, queue_size=10
+            String, "/ptp/robot_state", 10
         )
 
         self.target_publisher = self.create_publisher(
-            "/ptp/target_pose", Pose2D, queue_size=10
+            Pose2D, "/ptp/target_pose", 10
         )
         self.log_publisher = self.create_publisher(
-            "/ptp/log", String, queue_size=10
+            String, "/ptp/log", 10
         )
 
         # SUBSCRIBERS ==================================================================================================
         odom_topic = "/odom"
-        self.create_subscription(odom_topic, Odometry, self.__odom_callback, 1)
+        self.create_subscription(Odometry, odom_topic, self.__odom_callback, 1)
 
         path_topic = "/nav/global_path"
-        self.create_subscription(path_topic, Path, self.__path_callback, 1)
+        self.create_subscription(Path, path_topic, self.__path_callback, 1)
         
         backwards_topic = "/traversal/backwards"
-        self.create_subscription(backwards_topic, Bool, self.__backwards_callback, 1)
+        self.create_subscription(Bool, backwards_topic, self.__backwards_callback, 1)
         
         traversal_topic = "/behavior/traversal_enabled"
-        self.create_subscription(traversal_topic, Bool, self.__traversal_callback, 1)
+        self.create_subscription(Bool, traversal_topic, self.__traversal_callback, 1)
 
         map_topic = "/maps/costmap_node/global_costmap/costmap"
-        self.create_subscription(map_topic, OccupancyGrid, self.__map_callback, 1)
+        self.create_subscription(OccupancyGrid, map_topic, self.__map_callback, 1)
 
         map_update_topic = "/maps/costmap_node/global_costmap/costmap_updates"
-        self.create_subscription(map_update_topic, OccupancyGridUpdate, self.__map_update_callback, 1)
+        self.create_subscription(OccupancyGridUpdate, map_update_topic, self.__map_update_callback, 1)
 
     # ==================================================================================================================
     # CALLBACKS
@@ -178,8 +178,8 @@ class PointToPoint(Node):
             (angles[2]) %(2*np.pi) - np.pi  if self.is_moving_backwards else angles[2],  # -pi to pi
         )
 
-        self.odom_dt = rclpy.Time.now().to_sec() - self.prev_odom_time
-        self.prev_odom_time = rclpy.Time.now().to_sec()
+        self.odom_dt = self.get_clock().now().seconds_nanoseconds()[0] - self.prev_odom_time
+        self.prev_odom_time = self.get_clock().now().seconds_nanoseconds()[0]
 
         if (
             self.robot_pose != [None, None, None]
@@ -546,7 +546,7 @@ class PointToPoint(Node):
         marker = Marker()
         # Set the frame
         marker.header.frame_id = "odom"
-        marker.header.stamp = rclpy.Time.now()
+        marker.header.stamp = self.get_clock().now()
         marker.ns = "target"
         marker.id = 0
         marker.type = Marker.LINE_STRIP
@@ -581,7 +581,7 @@ class PointToPoint(Node):
 
         # Set the frame
         marker.header.frame_id = "odom"
-        marker.header.stamp = rclpy.Time.now()
+        marker.header.stamp = self.get_clock().now()
         marker.ns = "target_paths"
         marker.id = 0
         marker.type = Marker.LINE_LIST
@@ -613,12 +613,14 @@ class PointToPoint(Node):
     # ==================================================================================================================
 
     def publish_telemetry(self):
-        self.state_publisher.publish(str(self.state))
+        msg = String()
+        msg.data = str(self.state)
+        self.state_publisher.publish(msg)
 
         # publish velocity to cmd_vel
         vel = Twist()
-        vel.linear.x = self.linear_vel
-        vel.angular.z = self.angular_vel
+        vel.linear.x = float(self.linear_vel)
+        vel.angular.z = float(self.angular_vel)
         
         vel.linear.x *= -1 if self.is_moving_backwards else 1
         self.cmd_vel_publisher.publish(vel)
@@ -645,8 +647,8 @@ class PointToPoint(Node):
                 pose = self.robot_pose
 
                 # update difference in time
-                self.pid_dt = rclpy.Time.now().to_sec() - self.prev_pid_time
-                self.prev_pid_time = rclpy.Time.now().to_sec()  # update previous time
+                self.pid_dt = self.get_clock().now().seconds_nanoseconds()[0] - self.prev_pid_time
+                self.prev_pid_time = self.get_clock().now().seconds_nanoseconds()[0]  # update previous time
 
                 if self.pid_dt == 0 or self.pid_dt is None:  # ensure no div by 0 errors
                     self.pid_dt = 1 / self.FREQUENCY

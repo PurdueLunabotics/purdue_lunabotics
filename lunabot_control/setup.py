@@ -21,7 +21,7 @@ setup(
 ],
   entry_points={
     'console_scripts': [
-        'point_to_point_node = point_to_point:main',
+        'point_to_point_node = lunabot_control.point_to_point:main',
     ],
 },
 )
