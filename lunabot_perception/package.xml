@@ -12,6 +12,8 @@
   <depend>rclcpp</depend>
   <depend>tf2_ros</depend>
   <depend>nav2_costmap_2d</depend>
+  <depend>image_proc</depend>
+  <depend>rtabmap_util</depend>
 
   <!-- Used for launch files -->
   <exec_depend>ros2launch</exec_depend> 

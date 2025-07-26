@@ -9,8 +9,8 @@ int main(int argc, char **argv) {
     // tf2_ros::Buffer tf_buff(rclcpp::Duration(5,0));
     // tf2_ros::TransformListener tf(tf_buff);
 
-  bool enabled = true;
-  bool isRunning = true;
+  // bool enabled = true;
+  // bool isRunning = true;
 
   std::string node_name = "global_costmap";
   std::string parent_ns = "maps";
