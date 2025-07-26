@@ -12,12 +12,9 @@
   <depend>rclpy</depend>
   <depend>tf2_ros</depend>
   <depend>geometry_msgs</depend>
-  <depend>costmap_2d</depend>
-  <depend>ros_numpy</depend>
   <depend>plotjuggler</depend>
   <depend>plotjuggler_ros</depend>
   <depend>nav_msgs</depend>
-  <depend>swri_profiler</depend>
   <depend>joy</depend>
 
   <test_depend>ament_lint_auto</test_depend>
