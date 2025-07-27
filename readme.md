@@ -89,13 +89,18 @@ sudo apt-get update
 sudo apt-get install gz-harmonic
 ```
 
-Build + source 
+Build + Source Manually
 ```
 cd ~/luna_ws
 colcon build
 source ~/luna_ws/install/setup.bash # or .zsh if you use a zsh terminal
 ```
-> Note: Build + source every time you add new packages or modify a package such that it needs to re-compile. Source every time you open a fresh terminal, or add the line to your ~/.bashrc (or .zshrc) so it sources automatically
+OR use script
+```
+cd ~/luna_ws/src/purdue_lunabotics
+source build.sh
+```
+> Note: Build + source every time you change anything or open a new terminal. If building manually, make sure to do it within the correct folder
 
 ## Testing your setup
 
@@ -106,8 +111,6 @@ ros2 launch lunabot_bringup sim.launch
 ```
 > you should see two new windows pop up: once called gazebo and one called rviz
 <!-- TODO: fix this if this changes. remove the not working yet when it does. -->
-
-> NOTE: to remove the TF_REPEATED lines run:`{ roslaunch lunabot_bringup sim.launch verbose:=true 2>&1 | grep -Ev 'TF_REPEATED_DATA|buffer_core|at line|^$'; } 2>&1`
 
 2. Set goal waypoint in rviz and watch the robot navigate
 ![mpc_fix_gazebo_skid_steer](https://github.com/PurdueLunabotics/purdue_lunabotics/assets/41026849/a5cdaf41-f482-4b47-bd7b-bc8b7cb88880)

@@ -20,8 +20,9 @@
       </camera>
     </gui>
 
+
     <light name='sun' type='directional'>
-      <cast_shadows>1</cast_shadows>
+      <cast_shadows>0</cast_shadows>
       <pose>0 0 10 0 0 0</pose>
       <diffuse>0.4 0.4 0.4 1</diffuse>
       <specular>0.1 0.1 0.1 1</specular>
@@ -58,6 +59,17 @@
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
+          <material>
+            <pbr>
+              <metal>
+                <albedo_map>model://lunar_surface/lunar_texture.png</albedo_map>
+              </metal>
+            </pbr>
+            <ambient>1.0 1.0 1.0 1</ambient>
+            <diffuse>1.0 1.0 1.0 1</diffuse>
+            <specular>1.0 1.0 1.0 1</specular>
+          </material>
+          <cast_shadows>false</cast_shadows>
         </visual>
         <collision name='lunar_surface_collision'>
           <pose>0 0 -0.1 0 0 0</pose>
@@ -76,13 +88,6 @@
           </surface>
         </collision>
       </link>
-      <material>
-        <pbr>
-          <metal>
-            <albedo_map>model://lunar_surface/lunar_texture.png</albedo_map>
-          </metal>
-        </pbr>
-      </material>
     </model>
 
     <model name='arena_wall_long'>
@@ -95,6 +100,11 @@
               <size>7.42 0.1 1.5</size>
             </box>
           </geometry>
+          <material>
+            <ambient>0.25 0.25 0.25 1.0</ambient>
+            <diffuse>0.25 0.25 0.25 1.0</diffuse>
+            <specular>0.25 0.25 0.25 1.0</specular>
+          </material>
         </visual>
         <collision name='arena_wall_long_collision'>
           <geometry>
@@ -124,6 +134,11 @@
               <size>7.42 0.1 1.5</size>
             </box>
           </geometry>
+          <material>
+            <ambient>0.25 0.25 0.25 1.0</ambient>
+            <diffuse>0.25 0.25 0.25 1.0</diffuse>
+            <specular>0.25 0.25 0.25 1.0</specular>
+          </material>
         </visual>
         <collision name='arena_wall_long_2_collision'>
           <geometry>
@@ -153,6 +168,11 @@
               <size>0.1 5.26 1.5</size>
             </box>
           </geometry>
+          <material>
+            <ambient>0.25 0.25 0.25 1.0</ambient>
+            <diffuse>0.25 0.25 0.25 1.0</diffuse>
+            <specular>0.25 0.25 0.25 1.0</specular>
+          </material>
         </visual>
         <collision name='arena_wall_short_collision'>
           <geometry>
@@ -182,6 +202,11 @@
               <size>0.1 5.26 1.5</size>
             </box>
           </geometry>
+          <material>
+            <ambient>0.25 0.25 0.25 1.0</ambient>
+            <diffuse>0.25 0.25 0.25 1.0</diffuse>
+            <specular>0.25 0.25 0.25 1.0</specular>
+          </material>
         </visual>
         <collision name='arena_wall_short_2_collision'>
           <geometry>
@@ -212,10 +237,9 @@
             </box>
           </geometry>
           <material>
-            <script>
-              <name>Gazebo/GreyTransparent</name>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-            </script>
+            <ambient>0 0 0 0.5</ambient>
+            <diffuse>0 0 0 0.5</diffuse>
+            <specular>0 0 0 0.5</specular>
           </material>
         </visual>
         <collision name='arena_glass_short_collision'>
@@ -247,10 +271,9 @@
             </box>
           </geometry>
           <material>
-            <script>
-              <name>Gazebo/GreyTransparent</name>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-            </script>
+            <ambient>0 0 0 0.5</ambient>
+            <diffuse>0 0 0 0.5</diffuse>
+            <specular>0 0 0 0.5</specular>
           </material>
         </visual>
         <collision name='arena_glass_short_2_collision'>
@@ -282,10 +305,9 @@
             </box>
           </geometry>
           <material>
-            <script>
-              <name>Gazebo/GreyTransparent</name>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-            </script>
+            <ambient>0 0 0 0.5</ambient>
+            <diffuse>0 0 0 0.5</diffuse>
+            <specular>0 0 0 0.5</specular>
           </material>
         </visual>
         <collision name='arena_glass_long_collision'>
@@ -317,10 +339,9 @@
             </box>
           </geometry>
           <material>
-            <script>
-              <name>Gazebo/GreyTransparent</name>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-            </script>
+            <ambient>0 0 0 0.5</ambient>
+            <diffuse>0 0 0 0.5</diffuse>
+            <specular>0 0 0 0.5</specular>
           </material>
         </visual>
         <collision name='arena_wall_short_2_collision'>
@@ -352,6 +373,12 @@
               <scale>2.5 2.5 2.5</scale>
             </mesh>
           </geometry>
+          <material>
+            <ambient>0.75 0.75 0.75 1.0</ambient>
+            <diffuse>0.75 0.75 0.75 1.0</diffuse>
+            <specular>0.75 0.75 0.75 1.0</specular>
+            <emissive>0 0 0 0</emissive>
+          </material>
         </visual>
         <collision name='column_collision'>
           <geometry>
@@ -396,6 +423,12 @@
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
+          <material>
+            <ambient>0.65 0.65 0.65 1</ambient>
+            <diffuse>0.65 0.65 0.65 1</diffuse>
+            <specular>0.65 0.65 0.65 1</specular>
+            <emissive>0 0 0 0</emissive>
+          </material>
         </visual>
         <collision name='rock_rough_collision'>
           <geometry>
@@ -440,6 +473,12 @@
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
+          <material>
+            <ambient>0.65 0.65 0.65 1</ambient>
+            <diffuse>0.65 0.65 0.65 1</diffuse>
+            <specular>0.65 0.65 0.65 1</specular>
+            <emissive>0 0 0 0</emissive>
+          </material>
         </visual>
         <collision name='rock_rough_2_collision'>
           <geometry>
@@ -476,6 +515,12 @@
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
+          <material>
+            <ambient>0.65 0.65 0.65 1</ambient>
+            <diffuse>0.65 0.65 0.65 1</diffuse>
+            <specular>0.65 0.65 0.65 1</specular>
+            <emissive>0 0 0 0</emissive>
+          </material>
         </visual>
         <collision name='rock_round_collision'>
           <geometry>
@@ -512,6 +557,12 @@
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
+          <material>
+            <ambient>0.65 0.65 0.65 1</ambient>
+            <diffuse>0.65 0.65 0.65 1</diffuse>
+            <specular>0.65 0.65 0.65 1</specular>
+            <emissive>0 0 0 0</emissive>
+          </material>
         </visual>
         <collision name='rock_round_2_collision'>
           <geometry>
@@ -548,6 +599,12 @@
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
+          <material>
+            <ambient>0.65 0.65 0.65 1</ambient>
+            <diffuse>0.65 0.65 0.65 1</diffuse>
+            <specular>0.65 0.65 0.65 1</specular>
+            <emissive>0 0 0 0</emissive>
+          </material>
         </visual>
         <collision name='rock_round_3_collision'>
           <geometry>
@@ -571,11 +628,15 @@
             </box>
           </geometry>
           <material>
-            <script>
-              <uri>model://apriltags/tag_36_11_00007/materials/scripts</uri>
-              <uri>model://apriltags/tag_36_11_00007/materials/textures</uri>
-              <name>tag_36_11_00007</name>
-            </script>
+            <pbr>
+              <metal>
+                <albedo_map>model://apriltags/tag_36_11_00007/materials/textures/tag_36_11_00007.png</albedo_map>
+              </metal>
+            </pbr>
+            <ambient>1.0 1.0 1.0 1.0</ambient>
+            <diffuse>1.0 1.0 1.0 1.0</diffuse>
+            <specular>1.0 1.0 1.0 1.0</specular>
+            <emissive>0 0 0 1.0</emissive>
           </material>
         </visual>
         <collision name='tag_36_11_00007_collision'>
@@ -599,11 +660,15 @@
             </box>
           </geometry>
           <material>
-            <script>
-              <uri>model://apriltags/tag_36_11_00011/materials/scripts</uri>
-              <uri>model://apriltags/tag_36_11_00011/materials/textures</uri>
-              <name>tag_36_11_00011</name>
-            </script>
+            <pbr>
+              <metal>
+                <albedo_map>model://apriltags/tag_36_11_00011/materials/textures/tag_36_11_00011.png</albedo_map>
+              </metal>
+            </pbr>
+            <ambient>1.0 1.0 1.0 1.0</ambient>
+            <diffuse>1.0 1.0 1.0 1.0</diffuse>
+            <specular>1.0 1.0 1.0 1.0</specular>
+            <emissive>0 0 0 1.0</emissive>
           </material>
         </visual>
         <collision name='tag_36_11_00011_collision'>
