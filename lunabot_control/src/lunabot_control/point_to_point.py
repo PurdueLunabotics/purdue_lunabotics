@@ -509,8 +509,8 @@ class PointToPoint(Node):
     def __point_list_to_ros_point_list(self, points):
         results = []
         for i in range(len(points) - 1):
-            results.append(Point(points[i][0], points[i][1], 0))
-            results.append(Point(points[i + 1][0], points[i + 1][1], 0))
+            results.append(Point(x=float(points[i][0]), y=float(points[i][1]), z=0.0))
+            results.append(Point(x=float(points[i + 1][0]), y=float(points[i + 1][1]), z=0.0))
 
         return results
 
@@ -546,7 +546,7 @@ class PointToPoint(Node):
         marker = Marker()
         # Set the frame
         marker.header.frame_id = "odom"
-        marker.header.stamp = self.get_clock().now()
+        marker.header.stamp = self.get_clock().now().to_msg()
         marker.ns = "target"
         marker.id = 0
         marker.type = Marker.LINE_STRIP
@@ -561,8 +561,10 @@ class PointToPoint(Node):
         marker.pose.orientation.z = 0.0
         marker.pose.orientation.w = 1.0
 
-        start_point = Point(self.robot_pose[0], self.robot_pose[1], 0)
-        end_point = Point(self.target_pose[0], self.target_pose[1], 0)
+        if self.robot_pose[0]==None:
+           return 
+        start_point = Point(x=float(self.robot_pose[0]), y=float(self.robot_pose[1]), z=0)
+        end_point = Point(x=float(self.target_pose[0]), y=float(self.target_pose[1]), z=0)
 
         marker.points.append(start_point)
         marker.points.append(end_point)
@@ -581,7 +583,7 @@ class PointToPoint(Node):
 
         # Set the frame
         marker.header.frame_id = "odom"
-        marker.header.stamp = self.get_clock().now()
+        marker.header.stamp = self.get_clock().now().to_msg()
         marker.ns = "target_paths"
         marker.id = 0
         marker.type = Marker.LINE_LIST

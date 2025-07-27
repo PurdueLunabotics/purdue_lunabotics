@@ -76,6 +76,13 @@
           </surface>
         </collision>
       </link>
+      <material>
+        <pbr>
+          <metal>
+            <albedo_map>model://lunar_surface/lunar_texture.png</albedo_map>
+          </metal>
+        </pbr>
+      </material>
     </model>
 
     <model name='arena_wall_long'>
