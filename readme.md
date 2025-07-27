@@ -77,6 +77,17 @@ cd ~/luna_ws
 rosdep install -i --from-path src --rosdistro humble -y
 ```
 <!-- TODO: Non-ros deps -->
+Install other dependencies
+```
+sudo apt install ros-humble-gz-ros2-control ros-humble-joint-state-publisher ros-humble-ros-gzharmonic
+```
+Install Gazebo Harmonic
+```
+sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+sudo apt-get update
+sudo apt-get install gz-harmonic
+```
 
 Build + source 
 ```
@@ -91,7 +102,7 @@ source ~/luna_ws/install/setup.bash # or .zsh if you use a zsh terminal
 1. Run the sim (Not working yet.)
 
 ```
-roslaunch lunabot_bringup sim.launch
+ros2 launch lunabot_bringup sim.launch
 ```
 > you should see two new windows pop up: once called gazebo and one called rviz
 <!-- TODO: fix this if this changes. remove the not working yet when it does. -->

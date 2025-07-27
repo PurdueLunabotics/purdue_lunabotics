@@ -98,7 +98,7 @@
 
 <ros2_control name="GazeboSystem" type="system">
   <hardware>
-    <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    <plugin>gz_ros2_control/GazeboSimSystem</plugin>
   </hardware>
   <joint name="right_front_rev">
     <command_interface name="velocity"/>
@@ -160,8 +160,30 @@
 <!-- <xacro:wheel_friction name="right_back"/> -->
 
 <gazebo>
-  <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-    <parameters>$(find mining_arena_gazebo)/config/diff_drive_controller.yaml</parameters>
+  <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
+    <left_joint>left_front_rev</left_joint>
+    <left_joint>left_back_rev</left_joint>
+    <right_joint>right_front_rev</right_joint>
+    <right_joint>right_back_rev</right_joint>
+
+    <wheel_separation>0.64</wheel_separation>
+    <wheel_radius>0.2</wheel_radius>
+
+    <odom_publish_frequency>50.0</odom_publish_frequency>
+
+    <topic>/cmd_vel</topic>
+
+    <odom_topic>odom</odom_topic>
+
+    <frame_id>base_link</frame_id>
+
+    <min_velocity>-1.0</min_velocity>
+    <max_velocity>1.0</max_velocity>
+    <min_acceleration>-1.0</min_acceleration>
+    <max_acceleration>1.0</max_acceleration>
+    <min_jerk>0.0</min_jerk>
+    <max_jerk>0.0</max_jerk>
+
   </plugin>
 </gazebo>
 

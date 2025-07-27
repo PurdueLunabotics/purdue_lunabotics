@@ -1,5 +1,17 @@
 <sdf version='1.7'>
   <world name='default'>
+    <plugin
+      filename="gz-sim-physics-system"
+      name="gz::sim::systems::Physics">
+    </plugin>
+    <plugin
+      filename="gz-sim-user-commands-system"
+      name="gz::sim::systems::UserCommands">
+    </plugin>
+    <plugin
+      filename="gz-sim-scene-broadcaster-system"
+      name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
 
     <gui fullscreen='0'>
       <camera name='user_camera'>
@@ -24,7 +36,6 @@
 
     <scene>
       <ambient>0.4 0.4 0.4 1</ambient>
-      <background>0 0 0 255</background>
       <shadows>1</shadows>
     </scene>
 

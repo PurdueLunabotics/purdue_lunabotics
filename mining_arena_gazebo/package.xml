@@ -3,11 +3,20 @@
 <package format="3">
   <name>mining_arena_gazebo</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="pchitive@purdue.edu">root</maintainer>
-  <license>TODO: License declaration</license>
+  <description>Runs the Gazebo sim for the lunabot</description>
+  <maintainer email="lunabot@purdue.edu">Purdue Lunabotics</maintainer>
+  <license>None</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>rclcpp</depend>
+  <depend>ros_gz_bridge</depend>
+  <depend>ros_gz_image</depend>
+  <depend>ros_gz_sim</depend>
+  <depend>sensor_msgs</depend>
+  <depend>tf2</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

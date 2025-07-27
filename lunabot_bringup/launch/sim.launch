@@ -21,10 +21,10 @@
   </include>
 
   <!-- cameras -->
-  <ros_gz_bridge
+  <!-- <ros_gz_bridge
     bridge_name="ros_gz_bridge"
     config_file="$(find-pkg-share ros_gz_sim_demos)/config/rgbd_camera_bridge.yaml"
-    use_composition="True" />
+    use_composition="True" /> -->
   <node pkg="tf2_ros" exec="static_transform_publisher" args="--frame-id rgbd_camera --child-frame-id rgbd_camera/link/rgbd_camera" />
   <include file="$(find-pkg-share lunabot_perception)/launch/sim_cameras.launch"/>
 
