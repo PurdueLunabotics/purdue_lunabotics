@@ -55,8 +55,10 @@ public:
     {
       if (!dstar_init && map_init && goal_init && pose_init)
       {
+        RCLCPP_DEBUG(node->get_logger(), "INIT DSTAR");
         dstar = Dstar(goal, pose, map, resolution, x_offset, y_offset, occupancy_threshold);
         dstar_init = true;
+        RCLCPP_DEBUG(node->get_logger(), "Found Path");
         publish_path(dstar.find_path());
         goal_update_needed = false;
         grid_update_needed = false; // dif from python, don't update map if not strictly needed
@@ -67,8 +69,10 @@ public:
       {
         if (goal_update_needed)
         {
+          RCLCPP_DEBUG(node->get_logger(), "Goal Updating");
           // If we've gotten a new goal, reset the dstar data and find a new path
           dstar = Dstar(goal, pose, map, resolution, x_offset, y_offset, occupancy_threshold);
+          RCLCPP_DEBUG(node->get_logger(), "Found Path");
           publish_path(dstar.find_path());
           goal_update_needed = false;
           grid_update_needed = false; // dif from python, don't update map if not strictly needed
@@ -89,8 +93,7 @@ public:
           continue;
         }
       }
-
-      rclcpp::spin(node);
+      rclcpp::spin_some(node);
       rate.sleep();
     }
   }
@@ -129,34 +132,34 @@ private:
   bool planning_enabled = true;
   bool costmap_enabled = true;
 
-  void enable_callback(const std_msgs::msg::Bool::ConstPtr &msg)
+  void enable_callback(const std_msgs::msg::Bool &msg)
   {
-    this->planning_enabled = msg->data;
+    this->planning_enabled = msg.data;
   }
 
-  void costmap_enabled_callback(const std_msgs::msg::Bool::ConstPtr &msg)
+  void costmap_enabled_callback(const std_msgs::msg::Bool &msg)
   {
-    this->costmap_enabled = msg->data;
+    this->costmap_enabled = msg.data;
   }
 
   // Updates the map given a new occupancy grid.Update the flag such that dstar will update the map.
-  void grid_callback(const nav_msgs::msg::OccupancyGrid::ConstPtr &data)
+  void grid_callback(const nav_msgs::msg::OccupancyGrid &data)
   {
-
+    // RCLCPP_INFO(node->get_logger(), "Got Grid");
     map_lock.lock();
 
     bool map_ok = false;
-    for (int i = 0; i < data->info.width * data->info.height; i++)
+    for (int i = 0; i < data.info.width * data.info.height; i++)
     {
-      if (data->data[i] != 0)
+      if (data.data[i] != 0)
       {
         map_ok = true;
         break;
       }
     }
 
-    uint32_t width = data->info.width;
-    uint32_t height = data->info.height;
+    uint32_t width = data.info.width;
+    uint32_t height = data.info.height;
 
     map = std::vector<std::vector<int>>(height, std::vector<int>(width));
 
@@ -164,15 +167,15 @@ private:
     {
       for (int j = 0; j < width; ++j)
       {
-        map[i][j] = data->data[i * width + j];
+        map[i][j] = data.data[i * width + j];
       }
     }
 
     map_init = true;
 
-    resolution = data->info.resolution;
-    x_offset = data->info.origin.position.x;
-    y_offset = data->info.origin.position.y;
+    resolution = data.info.resolution;
+    x_offset = data.info.origin.position.x;
+    y_offset = data.info.origin.position.y;
 
     if (!map_ok)
     { // if the map is all zeroes, dont't update dstar with it
@@ -186,15 +189,15 @@ private:
   }
 
   // Update the grid given the occupancy grid update (applied on top of the current grid). Also update the flag for dstar to update the map.
-  void grid_update_callback(const map_msgs::msg::OccupancyGridUpdate::ConstPtr &data)
+  void grid_update_callback(const map_msgs::msg::OccupancyGridUpdate &data)
   {
-
+    // RCLCPP_INFO(node->get_logger(), "Got Grid Update");
     map_lock.lock();
 
     bool map_ok = false;
-    for (int i = 0; i < data->width * data->height; i++)
+    for (int i = 0; i < data.width * data.height; i++)
     {
-      if (data->data[i] != 0)
+      if (data.data[i] != 0)
       {
         map_ok = true;
         break;
@@ -207,34 +210,37 @@ private:
     }
 
     int index = 0;
-    for (int i = data->y; i < data->y + data->height; i++)
+    for (int i = data.y; i < data.y + data.height; i++)
     {
-      for (int j = data->x; j < data->x + data->width; j++)
+      for (int j = data.x; j < data.x + data.width; j++)
       {
         if (0 <= i && i < map.size() && 0 <= j && j < map[0].size())
         { // prevents issue where dstar still processing and new map is loaded in
-          map[i][j] = data->data[index];
+          map[i][j] = data.data[index];
           index++;
         }
       }
     }
 
+    map_init = true;
     grid_update_needed = true;
 
     map_lock.unlock();
   }
 
-  void position_callback(const nav_msgs::msg::Odometry::ConstPtr &data)
+  void position_callback(const nav_msgs::msg::Odometry &data)
   {
-    pose.x = data->pose.pose.position.x;
-    pose.y = data->pose.pose.position.y;
+    // RCLCPP_INFO(node->get_logger(), "Got Pose");
+    pose.x = data.pose.pose.position.x;
+    pose.y = data.pose.pose.position.y;
     pose_init = true;
   }
 
-  void goal_callback(const geometry_msgs::msg::PoseStamped::ConstPtr &data)
+  void goal_callback(const geometry_msgs::msg::PoseStamped &data)
   {
-    goal.x = data->pose.position.x;
-    goal.y = data->pose.position.y;
+    RCLCPP_DEBUG(node->get_logger(), "Got Goal");
+    goal.x = data.pose.position.x;
+    goal.y = data.pose.position.y;
     goal_update_needed = true;
     goal_init = true;
   }

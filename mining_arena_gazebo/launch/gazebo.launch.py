@@ -53,7 +53,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             os.path.join(ros_gz_sim, 'launch', 'gz_sim.launch.py')
         ),
-        launch_arguments={'gz_args': '-g -v4 '}.items()
+        launch_arguments={'gz_args': '-g -v4 ', 'on_exit_shutdown': 'true'}.items()
     )
 
     robot_spawn_node = Node(
@@ -106,12 +106,31 @@ def generate_launch_description():
         output='screen',
     )
     
-    start_gazebo_ros_image_bridge_cmd = Node(
+    start_gazebo_ros_rgb_back_image_bridge_cmd = Node(
         package='ros_gz_image',
         executable='image_bridge',
-        arguments=['/camera/image_raw'],
+        arguments=['/d455_back/color/image_raw'],
         output='screen',
     )
+    start_gazebo_ros_depth_back_image_bridge_cmd = Node(
+        package='ros_gz_image',
+        executable='image_bridge',
+        arguments=['/d455_back/depth/image_raw'],
+        output='screen',
+    )
+    start_gazebo_ros_rgb_front_image_bridge_cmd = Node(
+        package='ros_gz_image',
+        executable='image_bridge',
+        arguments=['/d455_front/color/image_raw'],
+        output='screen',
+    )
+    start_gazebo_ros_depth_front_image_bridge_cmd = Node(
+        package='ros_gz_image',
+        executable='image_bridge',
+        arguments=['/d455_front/depth/image_raw'],
+        output='screen',
+    )
+    
     ld = LaunchDescription([
         AppendEnvironmentVariable('GZ_SIM_RESOURCE_PATH',
         os.path.join(get_package_share_directory('mining_arena_gazebo'),
@@ -134,6 +153,9 @@ def generate_launch_description():
         robot_desc_launch,
         robot_spawn_node,
         start_gazebo_ros_bridge_cmd,
-        start_gazebo_ros_image_bridge_cmd
+        start_gazebo_ros_rgb_back_image_bridge_cmd,
+        start_gazebo_ros_depth_back_image_bridge_cmd,
+        start_gazebo_ros_rgb_front_image_bridge_cmd,
+        start_gazebo_ros_depth_front_image_bridge_cmd
     ])
     return ld

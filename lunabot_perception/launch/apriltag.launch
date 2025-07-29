@@ -1,7 +1,8 @@
 <launch>
   <arg name="camera_frame" />
+  <arg name="camera_topic" />
   <node pkg="apriltag_ros" exec="apriltag_node" name="apriltag" output="screen">
     <param from="$(find-pkg-share lunabot_config)/config/apriltags/apriltags.yml" />
-
+    <remap from="image_rect" to="$(var camera_topic)"/>
   </node>
 </launch>

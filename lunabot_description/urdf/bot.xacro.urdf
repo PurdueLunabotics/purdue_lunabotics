@@ -16,7 +16,7 @@
       <origin rpy="3.14 0 3.14" xyz="0 0 0"/>
       <geometry>
         <!-- <box size="0.9 0.5 0.1"/> -->
-        <mesh filename="model://realistic_robot/realistic_robot.stl"/>
+      <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/realistic_robot.stl"/>
       </geometry>
       <material name="silver"/>
     </visual>
@@ -24,7 +24,7 @@
     <collision>
       <origin rpy="3.14 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="model://realistic_robot/realistic_robot.stl"/>
+      <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/realistic_robot.stl"/>
       </geometry>
     </collision>
   </link>
@@ -42,13 +42,13 @@
 
     <visual>
       <origin rpy="0 0 1.57080" xyz="0 0 0"/>
-      <geometry><mesh filename="model://realistic_robot/robot_wheel.stl"/></geometry>
+      <geometry><mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/></geometry>
       <material name="silver"/>
     </visual>
 
     <collision>
       <origin rpy="0 0 1.5708" xyz="0 0 0"/>
-      <geometry><mesh filename="model://realistic_robot/robot_wheel.stl"/></geometry>
+      <geometry><mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/></geometry>
       <!-- <surface> -->
         <!-- <friction> -->
           <!-- <ode> -->
@@ -81,13 +81,13 @@
 
     <visual>
       <origin rpy="3.1415 0 1.5708" xyz="0 0 0"/>
-      <geometry><mesh filename="model://realistic_robot/robot_wheel.stl"/></geometry>
+      <geometry><mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/></geometry>
       <material name="silver"/>
     </visual>
 
     <collision>
       <origin rpy="3.1415 0 1.5708" xyz="0 0 0"/>
-      <geometry><mesh filename="model://realistic_robot/robot_wheel.stl"/></geometry>
+      <geometry><mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/></geometry>
       <!-- <surface> -->
         <!-- <friction> -->
           <!-- <ode> -->
@@ -120,13 +120,13 @@
 
     <visual>
       <origin rpy="0 0 1.5708" xyz="0 0 0"/>
-      <geometry><mesh filename="model://realistic_robot/robot_wheel.stl"/></geometry>
+      <geometry><mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/></geometry>
       <material name="silver"/>
     </visual>
 
     <collision>
       <origin rpy="0 0 1.5708" xyz="0 0 0"/>
-      <geometry><mesh filename="model://realistic_robot/robot_wheel.stl"/></geometry>
+      <geometry><mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/></geometry>
       <!-- <surface> -->
         <!-- <friction> -->
           <!-- <ode> -->
@@ -159,13 +159,13 @@
 
     <visual>
       <origin rpy="0 0 1.5708" xyz="0 0 0"/>
-      <geometry><mesh filename="model://realistic_robot/robot_wheel.stl"/></geometry>
+      <geometry><mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/></geometry>
       <material name="silver"/>
     </visual>
 
     <collision>
       <origin rpy="0 0 1.5708" xyz="0 0 0"/>
-      <geometry><mesh filename="model://realistic_robot/robot_wheel.stl"/></geometry>
+      <geometry><mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/></geometry>
       <!-- <surface> -->
         <!-- <friction> -->
           <!-- <ode> -->
@@ -185,6 +185,256 @@
     <!-- <limit effort="10.0" velocity="100.0"/> -->
   </joint>
 
+
+  <!-- Back Camera -->
+  <link name="d455_back_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia 
+        ixx="0.001" 
+        ixy="0.000" 
+        ixz="0.000"
+        iyy="0.001"
+        iyz="0.000"
+        izz="0.001"
+      />
+      <mass value="0.035"/>
+    </inertial>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.03 0.1 0.03" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.03 0.1 0.03" />
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="d455_back_rgb_link">
+  </link>
+  <link name="d455_back_depth_link">
+  </link>  
+
+  <joint name="d455_back_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0.39 -0.05 0.215"/>
+    <parent link="base_link"/>
+    <child link="d455_back_link"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <joint name="d455_back_rgb_joint" type="fixed">
+    <!-- these values have to be these values otherwise the gazebo camera
+        image won't be aligned properly with the frame it is supposedly
+        originating from -->
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    <parent link="d455_back_link"/>
+    <child link="d455_back_rgb_link"/>
+  </joint>
+
+  <joint name="d455_back_depth_joint" type="fixed">
+    <!-- these values have to be these values otherwise the gazebo camera
+        image won't be aligned properly with the frame it is supposedly
+        originating from -->
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    <parent link="d455_back_link"/>
+    <child link="d455_back_depth_link"/>
+  </joint>
+
+  <gazebo reference="d455_back_link">
+    <sensor name="d455_back_rgb" type="camera">
+      <always_on>1</always_on>
+      <visualize>false</visualize>
+      <update_rate>15</update_rate>
+      <topic>d455_back/color/image_raw</topic>
+      <gz_frame_id>d455_back_rgb_link</gz_frame_id>
+      <camera name="d455_back_rgb">
+        <camera_info_topic>d455_back/color/camera_info</camera_info_topic>
+        <horizontal_fov>1.02974</horizontal_fov>
+        <image>
+          <width>848</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>10</far>
+        </clip>
+      </camera>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="d455_back_link">
+    <sensor name="d455_back_depth" type="depth_camera">
+      <always_on>1</always_on>
+      <visualize>false</visualize>
+      <update_rate>15</update_rate>
+      <topic>d455_back/depth/image_raw</topic>
+      <gz_frame_id>d455_back_depth_link</gz_frame_id>
+      <camera name="d455_back_depth">
+        <camera_info_topic>d455_back/depth/camera_info</camera_info_topic>
+        <horizontal_fov>1.02974</horizontal_fov>
+        <image>
+          <width>848</width>
+          <height>480</height>
+          <format>R_FLOAT32</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>10</far>
+        </clip>
+      </camera>
+    </sensor>
+  </gazebo>
+
+  <!-- Front Camera -->
+
+
+  <link name="d455_front_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia 
+        ixx="0.001" 
+        ixy="0.000" 
+        ixz="0.000"
+        iyy="0.001"
+        iyz="0.000"
+        izz="0.001"
+      />
+      <mass value="0.035"/>
+    </inertial>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.03 0.1 0.03" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.03 0.1 0.03" />
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="d455_front_rgb_link">
+  </link>
+  <link name="d455_front_depth_link">
+  </link>  
+
+  <joint name="d455_front_joint" type="fixed">
+    <origin rpy="0 0 3.1415" xyz="-0.55 0.15 0"/>
+    <parent link="base_link"/>
+    <child link="d455_front_link"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <joint name="d455_front_rgb_joint" type="fixed">
+    <!-- these values have to be these values otherwise the gazebo camera
+        image won't be aligned properly with the frame it is supposedly
+        originating from -->
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    <parent link="d455_front_link"/>
+    <child link="d455_front_rgb_link"/>
+  </joint>
+
+  <joint name="d455_front_depth_joint" type="fixed">
+    <!-- these values have to be these values otherwise the gazebo camera
+        image won't be aligned properly with the frame it is supposedly
+        originating from -->
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    <parent link="d455_front_link"/>
+    <child link="d455_front_depth_link"/>
+  </joint>
+
+  <gazebo reference="d455_front_link">
+    <sensor name="d455_front_rgb" type="camera">
+      <always_on>1</always_on>
+      <visualize>false</visualize>
+      <update_rate>15</update_rate>
+      <topic>d455_front/color/image_raw</topic>
+      <gz_frame_id>d455_front_rgb_link</gz_frame_id>
+      <camera name="d455_front_rgb">
+        <camera_info_topic>d455_front/color/camera_info</camera_info_topic>
+        <horizontal_fov>1.02974</horizontal_fov>
+        <image>
+          <width>848</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>10</far>
+        </clip>
+      </camera>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="d455_front_link">
+    <sensor name="d455_front_depth" type="depth_camera">
+      <always_on>1</always_on>
+      <visualize>false</visualize>
+      <update_rate>15</update_rate>
+      <topic>d455_front/depth/image_raw</topic>
+      <gz_frame_id>d455_front_depth_link</gz_frame_id>
+      <camera name="d455_front_depth">
+        <camera_info_topic>d455_front/depth/camera_info</camera_info_topic>
+        <horizontal_fov>1.02974</horizontal_fov>
+        <image>
+          <width>848</width>
+          <height>480</height>
+          <format>R_FLOAT32</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>10</far>
+        </clip>
+      </camera>
+    </sensor>
+  </gazebo>
+
   <xacro:include filename="$(find lunabot_description)/urdf/dummy_bot.trans" />
+  <gazebo>
+    <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
+      <left_joint>left_front_rev</left_joint>
+      <left_joint>left_back_rev</left_joint>
+      <right_joint>right_front_rev</right_joint>
+      <right_joint>right_back_rev</right_joint>
+
+      <wheel_separation>0.64</wheel_separation>
+      <wheel_radius>0.2</wheel_radius>
+
+      <odom_publish_frequency>50.0</odom_publish_frequency>
+
+      <topic>cmd_vel</topic>
+
+      <odom_topic>odom</odom_topic>
+
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_link</child_frame_id>
+      <tf_topic>tf</tf_topic>
+
+      <min_velocity>-1.0</min_velocity>
+      <max_velocity>1.0</max_velocity>
+      <min_acceleration>-1.0</min_acceleration>
+      <max_acceleration>1.0</max_acceleration>
+      <min_jerk>0.0</min_jerk>
+      <max_jerk>0.0</max_jerk>
+
+    </plugin>
+
+    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
+        <topic>joint_states</topic>
+        <joint_name>left_front_rev</joint_name>
+        <joint_name>left_back_rev</joint_name>
+        <joint_name>right_front_rev</joint_name>
+        <joint_name>right_back_rev</joint_name>
+    </plugin>
+    
+  </gazebo>
+
 
 </robot>

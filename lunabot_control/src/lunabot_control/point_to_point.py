@@ -23,6 +23,7 @@ class States(Enum):
 class PointToPoint(Node):
     def __init__(self, **kwargs):
         super().__init__('point_to_point_node', **kwargs)
+        # self.get_logger().info("init")
 
         self.LINEAR_P = 3.0
         self.LINEAR_I = 0
@@ -132,7 +133,7 @@ class PointToPoint(Node):
         )
 
         # SUBSCRIBERS ==================================================================================================
-        odom_topic = "/odom"
+        odom_topic = "/rtabmap/odom"
         self.create_subscription(Odometry, odom_topic, self.__odom_callback, 1)
 
         path_topic = "/nav/global_path"
@@ -163,6 +164,7 @@ class PointToPoint(Node):
             self.cmd_vel_publisher.publish(Twist())
 
     def __odom_callback(self, msg: Odometry):
+        # self.get_logger().info("got Odom")
         # self.robot_velocity = [msg.twist.twist.linear, msg.twist.twist.angular]
         angles = euler_from_quaternion(
             [
@@ -205,6 +207,7 @@ class PointToPoint(Node):
         self.last_pose = self.robot_pose
 
     def __path_callback(self, msg: Path):
+        # self.get_logger().info("got path")
         if len(msg.poses) == 0:
             self.__visualize_line_path([])
             self.target_pose = [None, None, None]
@@ -236,6 +239,7 @@ class PointToPoint(Node):
         self.__visualize_line_path(marker_points)
 
     def __map_callback(self, msg: OccupancyGrid):
+        # self.get_logger().info("got map")
         self.map_lock.acquire()
 
         data_arr = np.array(msg.data)
@@ -255,6 +259,7 @@ class PointToPoint(Node):
         self.map_lock.release()
 
     def __map_update_callback(self, msg: OccupancyGridUpdate):
+        # self.get_logger().info("got map update")
 
         self.map_lock.acquire()
 
@@ -355,20 +360,20 @@ class PointToPoint(Node):
         ## -------------------------------------------------
 
         if (self.print_debug_info):
-            print(f'''
+            self.get_logger().info(f'''
                    PTP ------------------------------- \n
                    At Linear Target: {self.at_linear_target} \n
                    At Angular Target: {self.at_angle_target} \n
                    On Final Trajectory: {on_final_trajectory} \n
                    -----------------------------------
                    ''')
-        self.log_publisher.publish(f'''
-                   PTP ------------------------------- \n
-                   At Linear Target: {self.at_linear_target} \n
-                   At Angular Target: {self.at_angle_target} \n
-                   On Final Trajectory: {on_final_trajectory} \n
-                   -----------------------------------
-                   ''')
+        # self.log_publisher.publish(f'''
+        #            PTP ------------------------------- \n
+        #            At Linear Target: {self.at_linear_target} \n
+        #            At Angular Target: {self.at_angle_target} \n
+        #            On Final Trajectory: {on_final_trajectory} \n
+        #            -----------------------------------
+        #            ''')
         if not self.at_linear_target:
             self.state = States.MOVING_TO_LINEAR_TARGET
             if not self.at_angle_target:
@@ -448,8 +453,8 @@ class PointToPoint(Node):
                 v2 /= np.linalg.norm(v2)  # normalize
 
                 if (self.print_debug_info):
-                    print(str(v1) + " " + str(v2))
-                self.log_publisher.publish(str(v1) + " " + str(v2))
+                    self.get_logger().info(str(v1) + " " + str(v2))
+                # self.log_publisher.publish(str(v1) + " " + str(v2))
 
                 # calculate projection size
                 projection_size = np.dot(v1, v2)
@@ -492,18 +497,18 @@ class PointToPoint(Node):
         # marker_points.insert(0, Point(self.robot_pose[0], self.robot_pose[1], 0))
 
         if (self.print_debug_info):
-            print(
+            self.get_logger().info(
                 "SIMPLIFY PATH: Points: "
                 + str(points)
                 + " ; Simple Points: "
                 + str(filtered_points)
             )  # put the points and filtered points into console
-        self.log_publisher.publish(
-            "SIMPLIFY PATH: Points: "
-            + str(points)
-            + " ; Simple Points: "
-            + str(filtered_points)
-        )
+        # self.log_publisher.publish(
+        #     "SIMPLIFY PATH: Points: "
+        #     + str(points)
+        #     + " ; Simple Points: "
+        #     + str(filtered_points)
+        # )
         return filtered_points, marker_points
 
     def __point_list_to_ros_point_list(self, points):
@@ -561,10 +566,10 @@ class PointToPoint(Node):
         marker.pose.orientation.z = 0.0
         marker.pose.orientation.w = 1.0
 
-        if self.robot_pose[0]==None:
+        if self.robot_pose[0]==None or self.robot_pose[1]==None or self.target_pose[0]==None or self.target_pose[1]==None:
            return 
-        start_point = Point(x=float(self.robot_pose[0]), y=float(self.robot_pose[1]), z=0)
-        end_point = Point(x=float(self.target_pose[0]), y=float(self.target_pose[1]), z=0)
+        start_point = Point(x=float(self.robot_pose[0]), y=float(self.robot_pose[1]), z=0.0)
+        end_point = Point(x=float(self.target_pose[0]), y=float(self.target_pose[1]), z=0.0)
 
         marker.points.append(start_point)
         marker.points.append(end_point)
@@ -603,9 +608,9 @@ class PointToPoint(Node):
 
         # Set line properties
         marker.scale.x = 0.01
-        marker.color.r = 1
+        marker.color.r = 1.0
         marker.color.g = 0.05
-        marker.color.b = 1
+        marker.color.b = 1.0
         marker.color.a = 1.0  # Alpha (transparency)
 
         self.path_publisher.publish(marker)
@@ -642,9 +647,10 @@ class PointToPoint(Node):
             self.__visualize_path_to_target()
 
     def run_node(self):
-        rate = self.create_rate(self.FREQUENCY)
+        rate = self.create_rate(self.FREQUENCY, self.get_clock())
 
         while rclpy.ok():
+            # self.get_logger().info("loop")
             if (self.is_enabled):
                 pose = self.robot_pose
 
@@ -663,7 +669,8 @@ class PointToPoint(Node):
                     self.angular_vel = 0
 
                 self.publish_telemetry()
-            rate.sleep()
+            rclpy.spin_once(self, timeout_sec=0)
+            # rate.sleep()
 
 
 # ==================================================================================================================

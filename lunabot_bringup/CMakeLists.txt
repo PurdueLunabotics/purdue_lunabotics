@@ -11,6 +11,12 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
+find_package(rtabmap_ros REQUIRED)
+find_package(rtabmap_launch REQUIRED)
+find_package(nav2_costmap_2d REQUIRED)
+find_package(nav2_lifecycle_manager REQUIRED)
+
+
 # Install launch files
 install(DIRECTORY
         launch

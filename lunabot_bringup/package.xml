@@ -12,7 +12,9 @@
   <!-- Used for launch files -->
   <exec_depend>ros2launch</exec_depend> 
 
-  <depend>octomap_server</depend>
+
+  <depend>rtabmap_ros</depend>
+  <depend>rtabmap_launch</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

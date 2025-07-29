@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
+  <set_parameter name="use_sim_time" value="true" /> <!-- Use time from Gazebo (will break without this)-->
 
   <!-- Set the arena to either KSC or UCF arena based on the boolean argument. -->
   <arg name="KSC_arena" default="true"/>
@@ -15,17 +16,12 @@
   <arg name="initial_pose" default="-x 1.0 -y -1.3 -z 0"/>
   <!-- <arg name="model" default="$(find dummy_bot_description)/urdf/dummy_bot.xacro"/> -->
 
-  <!-- TODO: ADD GAZEBO + RVIZ LAUNCH STUFF HERE -->
-  <include file="$(find-pkg-share mining_arena_gazebo)/launch/gazebo.launch.py">
-    <!-- TODO: args -->
-  </include>
+  <include file="$(find-pkg-share mining_arena_gazebo)/launch/gazebo.launch.py"/>
+
+  <arg default="$(find-pkg-share lunabot_config)/config/sim.rviz" name="rvizconfig"/>
+  <node args="-d $(var rvizconfig)" name="rviz" pkg="rviz2" exec="rviz2"/>
 
   <!-- cameras -->
-  <!-- <ros_gz_bridge
-    bridge_name="ros_gz_bridge"
-    config_file="$(find-pkg-share ros_gz_sim_demos)/config/rgbd_camera_bridge.yaml"
-    use_composition="True" /> -->
-  <node pkg="tf2_ros" exec="static_transform_publisher" args="--frame-id rgbd_camera --child-frame-id rgbd_camera/link/rgbd_camera" />
   <include file="$(find-pkg-share lunabot_perception)/launch/sim_cameras.launch"/>
 
   <!-- navigation -->
@@ -39,15 +35,56 @@
 
   <!-- mapping -->
   <group>
-    <push_ros_namespace namespace="maps"/>
-    <node name="costmap_node" pkg="lunabot_perception" exec="costmap_node" output="screen">
+    <node name="costmap" pkg="nav2_costmap_2d" exec="nav2_costmap_2d" output="screen" namespace="costmap">
       <param from="$(find-pkg-share lunabot_config)/config/global_costmap.yml"/>
+      <remap from="costmap" to="/maps/costmap_node/global_costmap/costmap"/>
+      <remap from="costmap_updates" to="/maps/costmap_node/global_costmap/costmap_updates"/>
+    </node>
+    <node name="costmap_lifecycle" pkg="nav2_lifecycle_manager" exec="lifecycle_manager" namespace="costmap" output="screen">
+      <param name="autostart" value="true"/>
+      <param name="node_names" value="costmap" value-sep=";"/>
     </node>
   </group>
 
-  <node pkg="octomap_server" exec="octomap_server_node" name="octomap_server">
-      <param from="$(find-pkg-share lunabot_config)/config/octomap.yml"/>
-      <!-- data source to integrate (PointCloud2) -->
-      <remap from="cloud_in" to="/pointcloud/depth_combined_cloud" />
-  </node>
+  <group>
+    <push_ros_namespace namespace="rtabmap"/>
+
+    <!-- Odometry -->
+    <!-- <node pkg="rtabmap_odom" exec="rgbd_odometry" name="rgbd_odometry" output="screen">
+      <param name="subscribe_depth"     value="true"/>
+      <param name="frame_id"            value="base_link"/>
+      <param name="Odom/ResetCountdown" value="'1'"/>
+
+      <remap from="depth/image"         to="/d455_front/depth/image_raw"/>
+      <remap from="rgb/image"           to="/d455_front/color/image_raw"/>
+      <remap from="rgb/camera_info"     to="/d455_front/color/camera_info"/>
+    </node> -->
+
+    <node name="rtabmap" pkg="rtabmap_slam" exec="rtabmap" output="screen" args="--delete_db_on_start">
+      <param name="frame_id"                value="base_link"/>
+
+      <param name="subscribe_rgb"           value="false"/>
+      <param name="subscribe_depth"         value="false"/>
+      <param name="subscribe_rgbd"          value="false"/>
+      <param name="subscribe_scan_cloud"    value="true"/>
+
+      <remap from="odom"                    to="odom"/>
+      <remap from="scan_cloud"              to="/pointcloud/depth_combined_cloud"/>
+
+      <param name="gen_scan"                value="true"/>
+
+      <param name="sync_queue_size"              value="10"/>
+      <param name="approx_sync"             value="true"/>
+      <param name="map_always_update"       value="true"/>
+
+      <!-- RTAB-Map's parameters -->
+      <param name="Grid/Sensor"             value="'0'"/> <!-- Only use point clouds-->
+      <param name="Grid/FootprintLength"    value="'1.0'"/>
+      <param name="Grid/FootprintWidth"     value="'0.75'"/> 
+      <param name="Grid/MaxGroundAngle"     value="'30'"/> <!-- 30 degree normal before marked as obstacle -->
+      <param name="Grid/3D"                 value="'true'"/> <!-- 3D occupancy grid -->
+      <param name="Grid/FromDepth"          value="'false'"/> <!-- occupancy grid from lidar -->
+      
+    </node>
+  </group>
 </launch>

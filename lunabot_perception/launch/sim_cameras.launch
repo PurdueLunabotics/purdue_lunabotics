@@ -4,29 +4,56 @@
   <arg name="back"                           default="true"/>
   <arg name="pointcloud" default="true" />
 
+  <arg name="decimation" default="4"/>
+  <arg name="voxel_size" default="0.01"/> <!--meters-->
+  <arg name="noise_filter_radius" default="0.1"/> <!--meters radius-->
+  <arg name="max_depth" default="3.0"/> <!--meters-->
+
   <group if="$(var front)">
-    <push_ros_namespace namespace="d455_front/color"/>
-    <node pkg="image_proc" exec="image_proc" name="image_proc_front"/>
+    <push_ros_namespace namespace="d455_front"/>
     <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
       <arg name="camera_frame" value="d455_front_link" />
+      <arg name="camera_topic" value="color/image_raw"/>
     </include>
+
+    <node pkg="rtabmap_util" exec='point_cloud_xyz' name="point_cloud_xyz" respawn="true">
+      <remap from="depth/camera_info"             to="depth/camera_info" />
+      <remap from="depth/image"                   to="depth/image_raw" />
+      <remap from="cloud"                         to="points" /> <!-- output-->
+
+      <param name="decimation" value="$(var decimation)"/>
+      <param name="voxel_size" value="$(var voxel_size)"/>
+      <param name="noise_filter_radius" value="$(var noise_filter_radius)"/>
+      <param name="max_depth" value="$(var max_depth)"/>
+    </node>
   </group>
 
   <group if="$(var back)">
-    <push_ros_namespace namespace="d455_back/color"/>
-    <node pkg="image_proc" exec="image_proc" name="image_proc_back"/>
+    <push_ros_namespace namespace="d455_back"/>
     <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
       <arg name="camera_frame" value="d455_back_link" />
+      <arg name="camera_topic" value="color/image_raw"/>
     </include>
+
+    <node pkg="rtabmap_util" exec='point_cloud_xyz' name="point_cloud_xyz" respawn="true">
+      <remap from="depth/camera_info"             to="depth/camera_info" />
+      <remap from="depth/image"                   to="depth/image_raw" />
+      <remap from="cloud"                         to="points" /> <!-- output-->
+
+      <param name="decimation" value="$(var decimation)"/>
+      <param name="voxel_size" value="$(var voxel_size)"/>
+      <param name="noise_filter_radius" value="$(var noise_filter_radius)"/>
+      <param name="max_depth" value="$(var max_depth)"/>
+    </node>
   </group>
 
   <group if="$(var pointcloud)">
     <push_ros_namespace namespace="pointcloud"/>
     
     <!-- Aggregate pointclouds from each camera (if using multiple cameras)-->
-    <node pkg="rtabmap_util" exec='point_cloud_aggregator' name="point_cloud_aggregator">
-      <remap from="cloud1" to="/d455_back/camera/points" />
-      <remap from="cloud2" to="/d455_front/camera/points" />
+    <node pkg="rtabmap_util" exec='point_cloud_aggregator' name="point_cloud_aggregator" respawn="true">
+      <remap from="cloud1" to="/d455_back/points" />
+      <remap from="cloud2" to="/d455_front/points" />
       <remap from="combined_cloud" to="depth_combined_cloud"/>       
       <param name="count" value="2"/>
       <param name="xyz_output" value="true"/>

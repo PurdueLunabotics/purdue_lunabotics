@@ -13,11 +13,6 @@ find_package(ament_cmake REQUIRED)
 find_package(image_proc REQUIRED)
 find_package(rtabmap_util REQUIRED)
 find_package(tf2_ros REQUIRED)
-find_package(nav2_costmap_2d REQUIRED)
-find_package(rclcpp REQUIRED)
-
-add_executable(costmap_node src/costmap_node.cpp)
-ament_target_dependencies(costmap_node rclcpp nav2_costmap_2d tf2_ros)
 
 # Install launch files
 install(DIRECTORY
@@ -26,7 +21,6 @@ install(DIRECTORY
 
 # Install C++ files
 install(TARGETS
-  costmap_node
   DESTINATION lib/${PROJECT_NAME})
 
 
