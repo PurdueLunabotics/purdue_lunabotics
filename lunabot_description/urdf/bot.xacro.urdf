@@ -13,7 +13,7 @@
       />
     </inertial>
     <visual>
-      <origin rpy="3.14 0 3.14" xyz="0 0 0"/>
+      <origin rpy="3.14 0 0" xyz="0 0 0"/>
       <geometry>
         <!-- <box size="0.9 0.5 0.1"/> -->
       <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/realistic_robot.stl"/>
@@ -28,6 +28,15 @@
       </geometry>
     </collision>
   </link>
+
+  <link name="middle_link"/>
+
+  <joint name="mid_joint" type="fixed">
+    <origin rpy="0 0 3.14" xyz="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="middle_link"/>
+    <axis xyz="0 0 1"/>
+  </joint>
 
   <!-- left front -->
   <link name="left_front">
@@ -62,7 +71,7 @@
 
   <joint name="left_front_rev" type="continuous">
     <origin rpy="0 0 0" xyz="-0.292 -0.35 -0.162"/>
-    <parent link="base_link"/>
+    <parent link="middle_link"/>
     <child link="left_front"/>
     <axis xyz="0 1 0"/>
     <!-- <limit effort="10.0" velocity="100.0"/> -->
@@ -101,7 +110,7 @@
 
   <joint name="left_back_rev" type="continuous">
     <origin rpy="0 0 0" xyz="0.217 -0.35 -0.162"/>
-    <parent link="base_link"/>
+    <parent link="middle_link"/>
     <child link="left_back"/>
     <axis xyz="0 1 0"/>
     <!-- <limit effort="10.0" velocity="100.0"/> -->
@@ -140,7 +149,7 @@
 
   <joint name="right_front_rev" type="continuous">
     <origin rpy="0 0 0" xyz="-0.292 0.22 -0.162"/>
-    <parent link="base_link"/>
+    <parent link="middle_link"/>
     <child link="right_front"/>
     <axis xyz="0 1 0"/>
     <!-- <limit effort="10.0" velocity="100.0"/> -->
@@ -179,7 +188,7 @@
 
   <joint name="right_back_rev" type="continuous">
     <origin rpy="0 0 0" xyz="0.217 0.22 -0.162"/>
-    <parent link="base_link"/>
+    <parent link="middle_link"/>
     <child link="right_back"/>
     <axis xyz="0 1 0"/>
     <!-- <limit effort="10.0" velocity="100.0"/> -->
@@ -221,7 +230,7 @@
 
   <joint name="d455_back_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0.39 -0.05 0.215"/>
-    <parent link="base_link"/>
+    <parent link="middle_link"/>
     <child link="d455_back_link"/>
     <axis xyz="0 0 1"/>
   </joint>
@@ -253,7 +262,7 @@
       <gz_frame_id>d455_back_rgb_link</gz_frame_id>
       <camera name="d455_back_rgb">
         <camera_info_topic>d455_back/color/camera_info</camera_info_topic>
-        <horizontal_fov>1.02974</horizontal_fov>
+        <horizontal_fov>1.50098</horizontal_fov>
         <image>
           <width>848</width>
           <height>480</height>
@@ -276,7 +285,7 @@
       <gz_frame_id>d455_back_depth_link</gz_frame_id>
       <camera name="d455_back_depth">
         <camera_info_topic>d455_back/depth/camera_info</camera_info_topic>
-        <horizontal_fov>1.02974</horizontal_fov>
+        <horizontal_fov>1.50098</horizontal_fov>
         <image>
           <width>848</width>
           <height>480</height>
@@ -326,8 +335,8 @@
   </link>  
 
   <joint name="d455_front_joint" type="fixed">
-    <origin rpy="0 0 3.1415" xyz="-0.55 0.15 0"/>
-    <parent link="base_link"/>
+    <origin rpy="0 0 3.14" xyz="-0.55 0.15 0"/>
+    <parent link="middle_link"/>
     <child link="d455_front_link"/>
     <axis xyz="0 0 1"/>
   </joint>
@@ -359,7 +368,7 @@
       <gz_frame_id>d455_front_rgb_link</gz_frame_id>
       <camera name="d455_front_rgb">
         <camera_info_topic>d455_front/color/camera_info</camera_info_topic>
-        <horizontal_fov>1.02974</horizontal_fov>
+        <horizontal_fov>1.50098</horizontal_fov>
         <image>
           <width>848</width>
           <height>480</height>
@@ -382,7 +391,7 @@
       <gz_frame_id>d455_front_depth_link</gz_frame_id>
       <camera name="d455_front_depth">
         <camera_info_topic>d455_front/depth/camera_info</camera_info_topic>
-        <horizontal_fov>1.02974</horizontal_fov>
+        <horizontal_fov>1.50098</horizontal_fov>
         <image>
           <width>848</width>
           <height>480</height>
@@ -417,12 +426,12 @@
       <child_frame_id>base_link</child_frame_id>
       <tf_topic>tf</tf_topic>
 
-      <min_velocity>-1.0</min_velocity>
+      <!-- <min_velocity>-1.0</min_velocity>
       <max_velocity>1.0</max_velocity>
       <min_acceleration>-1.0</min_acceleration>
       <max_acceleration>1.0</max_acceleration>
       <min_jerk>0.0</min_jerk>
-      <max_jerk>0.0</max_jerk>
+      <max_jerk>0.0</max_jerk> -->
 
     </plugin>
 

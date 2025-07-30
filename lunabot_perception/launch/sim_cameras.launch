@@ -14,6 +14,7 @@
     <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
       <arg name="camera_frame" value="d455_front_link" />
       <arg name="camera_topic" value="color/image_raw"/>
+      <arg name="use_sim_time" value="true"/>
     </include>
 
     <node pkg="rtabmap_util" exec='point_cloud_xyz' name="point_cloud_xyz" respawn="true">
@@ -25,6 +26,7 @@
       <param name="voxel_size" value="$(var voxel_size)"/>
       <param name="noise_filter_radius" value="$(var noise_filter_radius)"/>
       <param name="max_depth" value="$(var max_depth)"/>
+      <param name="use_sim_time" value="true"/>
     </node>
   </group>
 
@@ -33,6 +35,7 @@
     <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
       <arg name="camera_frame" value="d455_back_link" />
       <arg name="camera_topic" value="color/image_raw"/>
+      <arg name="use_sim_time" value="true"/>
     </include>
 
     <node pkg="rtabmap_util" exec='point_cloud_xyz' name="point_cloud_xyz" respawn="true">
@@ -44,6 +47,7 @@
       <param name="voxel_size" value="$(var voxel_size)"/>
       <param name="noise_filter_radius" value="$(var noise_filter_radius)"/>
       <param name="max_depth" value="$(var max_depth)"/>
+      <param name="use_sim_time" value="true"/>
     </node>
   </group>
 
@@ -59,6 +63,7 @@
       <param name="xyz_output" value="true"/>
       <param name="fixed_frame_id" value="base_link" />
       <param name="approx_sync" value="true"/>
+      <param name="use_sim_time" value="true"/>
     </node>
   </group>
 

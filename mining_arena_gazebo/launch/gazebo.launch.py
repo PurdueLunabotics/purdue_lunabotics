@@ -63,7 +63,7 @@ def generate_launch_description():
             '-topic', 'robot_description',
             '-name', 'dummy_bot',
             '-x', '2.5', '-y', '1.75', '-z', '1.0',
-            '-Y', '1.570796327', # yaw
+            '-Y', '-1.570796327', # yaw
             "--ros-args"
         ],
         output='screen'
@@ -90,8 +90,8 @@ def generate_launch_description():
     
     # Bridge ROS to Gazebo Topics
     bridge_params = os.path.join(
-        get_package_share_directory('mining_arena_gazebo'),
-        'params',
+        get_package_share_directory('lunabot_config'),
+        'config',
         'mining_arena_gazebo_bridge.yaml'
     )
 

@@ -16,7 +16,6 @@ install(DIRECTORY
         launch
         models
         worlds
-        params
         DESTINATION share/${PROJECT_NAME}/)
 
 if(BUILD_TESTING)

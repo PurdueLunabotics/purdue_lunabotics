@@ -11,6 +11,7 @@ Panels:
         - /PointCloud22
         - /Path1
         - /Pose1
+        - /Marker1
       Splitter Ratio: 0.5
     Tree Height: 555
   - Class: rviz_common/Selection
@@ -30,7 +31,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: PointCloud2
 Visualization Manager:
   Class: ""
   Displays:
@@ -77,11 +78,15 @@ Visualization Manager:
           Value: true
         map:
           Value: true
+        middle_link:
+          Value: true
         odom:
           Value: true
         right_back:
           Value: true
         right_front:
+          Value: true
+        tag36h11:7:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -93,24 +98,26 @@ Visualization Manager:
           {}
         odom:
           base_link:
-            d455_back_link:
-              d455_back_depth_link:
+            middle_link:
+              d455_back_link:
+                d455_back_depth_link:
+                  {}
+                d455_back_rgb_link:
+                  {}
+              d455_front_link:
+                d455_front_depth_link:
+                  {}
+                d455_front_rgb_link:
+                  tag36h11:7:
+                    {}
+              left_back:
                 {}
-              d455_back_rgb_link:
+              left_front:
                 {}
-            d455_front_link:
-              d455_front_depth_link:
+              right_back:
                 {}
-              d455_front_rgb_link:
+              right_front:
                 {}
-            left_back:
-              {}
-            left_front:
-              {}
-            right_back:
-              {}
-            right_front:
-              {}
       Update Interval: 0
       Value: true
     - Alpha: 0.699999988079071
@@ -250,6 +257,19 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /goal
       Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Marker
+      Namespaces:
+        target_paths: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /ptp/line_path
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -289,7 +309,6 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /clicked_point
-    - Class: nav2_rviz_plugins/GoalTool
   Transformation:
     Current:
       Class: rviz_default_plugins/TF
@@ -297,25 +316,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 9.832879066467285
+      Distance: 4.883861541748047
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: 0.7977874875068665
+        Y: -1.0913828611373901
+        Z: 0.11846477538347244
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.8603979349136353
+      Pitch: 0.9203976988792419
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.7553980946540833
+      Yaw: 4.7704033851623535
     Saved: ~
 Window Geometry:
   Displays:
@@ -333,5 +352,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: 981
-  Y: 417
+  X: 1091
+  Y: 84

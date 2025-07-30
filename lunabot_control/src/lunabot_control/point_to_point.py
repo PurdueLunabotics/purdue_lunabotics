@@ -29,7 +29,7 @@ class PointToPoint(Node):
         self.LINEAR_I = 0
         self.LINEAR_D = 0
         self.LINEAR_TOLERANCE = 0.2  # meters
-        self.MAX_LINEAR_SPEED = 0.3  # m/s
+        self.MAX_LINEAR_SPEED = 0.1  # m/s
         self.linear_pid = PIDController(
             self.LINEAR_P,
             self.LINEAR_I,
@@ -37,12 +37,12 @@ class PointToPoint(Node):
             max_output=self.MAX_LINEAR_SPEED,
         )
 
-        self.ANGULAR_P = 5.0
+        self.ANGULAR_P = 1.0
         self.ANGULAR_I = 0
         self.ANGULAR_D = 0
-        self.ANGULAR_TOLERANCE_DEG = 10
+        self.ANGULAR_TOLERANCE_DEG = 20
         self.ANGULAR_TOLERANCE_RAD = np.deg2rad(self.ANGULAR_TOLERANCE_DEG)
-        self.MAX_ANGULAR_SPEED_DEG_PER_SEC = 60
+        self.MAX_ANGULAR_SPEED_DEG_PER_SEC = 20
         self.MAX_ANGULAR_SPEED_RAD_PER_SEC = np.deg2rad(
             self.MAX_ANGULAR_SPEED_DEG_PER_SEC
         )
@@ -90,7 +90,7 @@ class PointToPoint(Node):
         self.map_y_offset: int = -1
         self.map_lock: threading.Lock = threading.Lock()
 
-        self.print_debug_info: bool = False
+        self.print_debug_info: bool = True
         
 
         # PUBLISHERS ==================================================================================================
@@ -206,7 +206,8 @@ class PointToPoint(Node):
         # update last position
         self.last_pose = self.robot_pose
 
-    def __path_callback(self, msg: Path):
+    def __path_callback(self, msg: Path): 
+        
         # self.get_logger().info("got path")
         if len(msg.poses) == 0:
             self.__visualize_line_path([])

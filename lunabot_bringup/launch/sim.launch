@@ -19,7 +19,7 @@
   <include file="$(find-pkg-share mining_arena_gazebo)/launch/gazebo.launch.py"/>
 
   <arg default="$(find-pkg-share lunabot_config)/config/sim.rviz" name="rvizconfig"/>
-  <node args="-d $(var rvizconfig)" name="rviz" pkg="rviz2" exec="rviz2"/>
+  <node args="-d $(var rvizconfig)" name="rviz" pkg="rviz2" exec="rviz2" />
 
   <!-- cameras -->
   <include file="$(find-pkg-share lunabot_perception)/launch/sim_cameras.launch"/>
@@ -27,10 +27,14 @@
   <!-- navigation -->
   <group>
     <push_ros_namespace namespace="nav"/>
-    <node name="global_planner_node" pkg="lunabot_nav" exec="dstar_node" output="screen" respawn="false"/>
+    <node name="global_planner_node" pkg="lunabot_nav" exec="dstar_node" output="screen" respawn="true">
+      <param name="use_sim_time" value="true"/>
+    </node>
 
     <!-- Path followers- Point to point or Pure pursuit -->
-    <node name="point_to_point_node" if="$(var ptp)" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="false" />
+    <node name="point_to_point_node" if="$(var ptp)" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="false" >
+      <param name="use_sim_time" value="true"/>
+    </node>
   </group>
 
   <!-- mapping -->
@@ -39,10 +43,12 @@
       <param from="$(find-pkg-share lunabot_config)/config/global_costmap.yml"/>
       <remap from="costmap" to="/maps/costmap_node/global_costmap/costmap"/>
       <remap from="costmap_updates" to="/maps/costmap_node/global_costmap/costmap_updates"/>
+      <param name="use_sim_time" value="true"/>
     </node>
     <node name="costmap_lifecycle" pkg="nav2_lifecycle_manager" exec="lifecycle_manager" namespace="costmap" output="screen">
       <param name="autostart" value="true"/>
       <param name="node_names" value="costmap" value-sep=";"/>
+      <param name="use_sim_time" value="true"/>
     </node>
   </group>
 
@@ -50,18 +56,21 @@
     <push_ros_namespace namespace="rtabmap"/>
 
     <!-- Odometry -->
-    <!-- <node pkg="rtabmap_odom" exec="rgbd_odometry" name="rgbd_odometry" output="screen">
+    <node pkg="rtabmap_odom" exec="rgbd_odometry" name="rgbd_odometry" output="screen">
       <param name="subscribe_depth"     value="true"/>
       <param name="frame_id"            value="base_link"/>
       <param name="Odom/ResetCountdown" value="'1'"/>
+      <param name="use_sim_time" value="true"/>
+
 
       <remap from="depth/image"         to="/d455_front/depth/image_raw"/>
       <remap from="rgb/image"           to="/d455_front/color/image_raw"/>
       <remap from="rgb/camera_info"     to="/d455_front/color/camera_info"/>
-    </node> -->
+    </node>
 
     <node name="rtabmap" pkg="rtabmap_slam" exec="rtabmap" output="screen" args="--delete_db_on_start">
       <param name="frame_id"                value="base_link"/>
+      <param name="use_sim_time" value="true"/>
 
       <param name="subscribe_rgb"           value="false"/>
       <param name="subscribe_depth"         value="false"/>

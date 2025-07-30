@@ -109,6 +109,11 @@
             </box>
           </geometry>
           <material>
+            <pbr>
+              <metal>
+                <albedo_map>model://walls/wall_texture.png</albedo_map>
+              </metal>
+            </pbr>
             <ambient>0.25 0.25 0.25 1.0</ambient>
             <diffuse>0.25 0.25 0.25 1.0</diffuse>
             <specular>0.25 0.25 0.25 1.0</specular>
@@ -143,6 +148,11 @@
             </box>
           </geometry>
           <material>
+            <pbr>
+              <metal>
+                <albedo_map>model://walls/wall_texture.png</albedo_map>
+              </metal>
+            </pbr>
             <ambient>0.25 0.25 0.25 1.0</ambient>
             <diffuse>0.25 0.25 0.25 1.0</diffuse>
             <specular>0.25 0.25 0.25 1.0</specular>
@@ -177,6 +187,11 @@
             </box>
           </geometry>
           <material>
+            <pbr>
+              <metal>
+                <albedo_map>model://walls/wall_texture.png</albedo_map>
+              </metal>
+            </pbr>
             <ambient>0.25 0.25 0.25 1.0</ambient>
             <diffuse>0.25 0.25 0.25 1.0</diffuse>
             <specular>0.25 0.25 0.25 1.0</specular>
@@ -211,6 +226,11 @@
             </box>
           </geometry>
           <material>
+            <pbr>
+              <metal>
+                <albedo_map>model://walls/wall_texture.png</albedo_map>
+              </metal>
+            </pbr>
             <ambient>0.25 0.25 0.25 1.0</ambient>
             <diffuse>0.25 0.25 0.25 1.0</diffuse>
             <specular>0.25 0.25 0.25 1.0</specular>
