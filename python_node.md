@@ -7,24 +7,30 @@ PID is a control method that determines the speed of the robot using 3 formulas.
 
 ### Proportional
 - The error is directly multiplied by a constant to get this portion of the output speed
+- This will get to the target quickly but will oscillate 
 
 ### Integral
 - The error is added up over time (integrated) and then multiplied by a constant
+- If you are close to the target, this will help get to the final value
 
 ### Derivative
 - The rate of change of the error is multiplied by a constant.
+- This will slow you down as you get to the target to reduce oscillations
 
 Add the 3 formulas together and you get the output speed
 
-More information about PID can be found [here](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html#introduction-to-pid)
+More information about PID can be found [here](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html#introduction-to-pid) and [here](https://en.wikipedia.org/wiki/Proportional%E2%80%93integral%E2%80%93derivative_controller#Fundamental_operation)
 
 ## How do you code a Python ROS Node?
 
 ### First Steps
+- Open pid_control.py in lunabot_control/src/lunabot_control
 - To allow a python file to be executable, you must add `#!/usr/bin/env python3` as the first line.
-- rclpy is the class that contains all ROS commands in python `import rclpy` 
+- rclpy is the class that contains all ROS commands in python, add `import rclpy` to the code.
+- You will need to import more things as we add more code, you should keep all imports in the this spot 
 
 ### Creating the class
+- A python class is a collection of variables and functions
 - Here is an example class definition.
   ```py
   class Name(InheritFromClass):
@@ -33,22 +39,51 @@ More information about PID can be found [here](https://docs.wpilib.org/en/stable
   - Then the name of the class. This should be styled in TitleCase
   - In parentheses are any classes that this class inherits from
 - All Python Nodes should inherit from the `rclpy.node.Node` class
+  - Inheriting is a way for us to add functionality to our class without rewriting the code.
 - Every function within the class must have a first parameter of `self`.
+  - This allows us to use the self object later on to create variables that don't get removed at the end of a function and can be accessed from anywhere in the code.
 
-### __init__ function
+### Creating functions
+- Functions in python are defined with 4 parts
+  - The `def` keyword indicates that you are writing a new function rather than calling an existing one
+  - Next we have the name of the function.
+    - Functions with two underscores at the beginning is conventionally used to signify this is a private function and shouldn't be called outside this class.
+    - Functions with two underscores on both sides of the name are generally system functions that are called automatically, such as `__init__` and `__str__` which initalize an object and convert it to a string respectively.
+  - Then we have the parameters of the function within parentheses.
+    - These are the inputs to the function.
+    - Parameters can be named anything, but are typically using snake_case and cannot start with a number or special character
+    - If we want to indicate that a parameter should be a specific type we can do that by putting a colon and then the type
+    - If we want to have optional parameters with a default value, we can do that by putting an equals sign and the default value.
+      - Note: optional parameters must be after all required parameters
+    - If we want to allow a variable length of arguments, we can put an asterisk before the parameter name
+      - This will create a list of the arguments that are passed into the method
+    - If we want people to be able to define any keyword arguments, we can put two asterisks before that parameter
+      - This will create a dictionary of the keyword arguments that are passed into the method.
+  - Finally we have a colon to show that the following indented code is a part of the function
+  ```py
+  def example_function(required_param, string_param: String, optional_param=None, *variable_args, **keyword_args):
+  ```
+
+### \_\_init\_\_ function
 - This will be called when you first create the node.
-- Since we are in a class, every function must have a first parameter of `self`.
+- The first parameter will be `self`.
 - Next we also need to allow for variable length keyword arguments so add `**kwargs` as a parameter at the end.
   - This probably won't be used, but is best practice.
-  - **kwargs must be at the end of the parameter list because it allows for "infinite" arguments, meaning anything after it would never get assigned.
+- Here is an example init function definition.
+  ```py
+  def __init__(self, **kwargs):
+  ```
 - In the init function we need to tell the parent class (Node) to initialize and tell it what the name of our node should be. 
   - To achieve this we need to first get the parent object and then call it's `__init__` function
-  - To find the parent object we will use the `super()` function. 
+    - To find the parent object we will use the `super()` function.
   - The two arguments you need to pass to the init function are the name of the node as a String and any keyword arguments that were passed into your node
+  ```py
+  super().__init__("example_node",**kwargs)
+  ```
 - Now let's define the subscriptions that we will need.
   - We do this through calling `self.create_subscription()`
   - You need to pass 4 arguments to the function
-    - The message type of the subscription (you will need to import the correct object for this)
+    - The message type of the subscription (you will need to import this)
     - The topic as a string
     - The callback function that will be called when a new message is available
     - Quality of Service - this defines the minimum quality of the subscription that the node is willing to deal with. 
@@ -60,13 +95,17 @@ More information about PID can be found [here](https://docs.wpilib.org/en/stable
     - Goal Location
       - Type: `geometry_msgs.msg.PoseStamped`
       - Topic: `/goal`
-      - Callback Function: You define this (later)! 
+      - Callback Function: Leave blank for now 
       - QoS: 1 - we always want the most recent data
     - Current Location
       - Type: `nav_msgs.msg.Odometry`
       - Topic: `/odom`
-      - Callback Function: You define this (later)! 
+      - Callback Function: Leave blank for now 
       - QoS: `1` - we always want the most recent data
+  - Here is an example subscription:
+  ```py
+  self.create_subscription(Type, "topic", self.__example_callback, 1)
+  ```
 - Next let's define the publisher we will output.
   - We can create this object by calling `self.create_publisher()`
   - You need to pass 3 arguments to the function
@@ -82,38 +121,29 @@ More information about PID can be found [here](https://docs.wpilib.org/en/stable
       - Type: `geometry_msgs.msg.Twist`
       - Topic: `/cmd_vel`
       - QoS: `10` - This doesn't *really* matter as we will not be running this node until after the simulation fully starts, 10 is a standard value.
-- That concludes your `__init__` function, you may want to add additional variables and constants here, but we will leave that up to you
+  - Here is an example subscription:
+  ```py
+  self.example_publisher = self.create_publisher(Type, "topic", 10)
+  ```
+
+That concludes your `__init__` function, you may want to add additional variables and constants here, but we will leave that up to you
 
 ### Callback Functions
 - The name of callback functions should be `__name_callback` where the name is the thing that this callback is for. 
-  - The two underscores at the beginning is conventionally used to signify this is a private function and shouldn't be called outside this class (though nothing stops someone from doing so).
 - Callbacks should have two parameters
   - First is the self parameter needed for all members of a class
   - Second is the message that you should get from the subscription. You should define this to be the type you expect.
-    - Defining types of parameters in python is done like so `msg: Type`
-- Within the function you should save any information you need from the message as it will not be saved.
+    - Defining types of parameters in python is done like so `msg: Type`. 
+    - This will indicate to your code editor (and other members) that the variable is a specific type and specific methods can be called on it.
+- Within the function, you should save any information you need from the message. Once the function ends, any unsaved information will go away
+- Make sure to add this to your create_subscription in init.
 
-### Node Logic
-- At this point you should write all the logic needed for your node.
-- To publish you call `publisher.publish(msg)` where publisher is the object from the init function and msg is a message of the type defined above
+### Main Function
 - There are two options for style of Node.
   - The recommended option is to do all processing starting in callback functions and have no loop.
     - The idea behind this is that if nothing changes in your callbacks, the node doesn't need to be processing anything
   - Another option is to have a main loop that pauses occasionally to get callbacks. 
   - Either option works, it is mostly a matter of preference and code complexity.
-- The goal and odom are 3D points, you only need to worry about a single dimension.
-  - You need to figure out which dimension is forwards/backwards
-
-#### Main Loop Only 
-- This is only applicable if you chose to have a main loop.
-- You should have a loop within your code that will run forever while the node is active. This will handle all the processing and publishing of outputs.
-- To keep the node running while it is active, use the `rclpy.ok()` function.
-  - This will return True while the node is active and false once it is killed.
-- After you do your processsing, you should call `rclpy.spin_once(self, timeout_sec=0)`
-  - This will call your callback functions
-
-### Main Function
-- This applies to either approach
 - You need to define a function outside of your class that will be run when the node first starts.
 - This function needs no parameters
 - First you need to initialize ROS by calling `rclpy.init()`
@@ -125,6 +155,33 @@ More information about PID can be found [here](https://docs.wpilib.org/en/stable
 - If you chose to have a main loop
   - You can call the main loop function of your class
 
+### Node Logic
+- At this point you should write all the logic needed for your node within this class.
+- To publish you call `publisher.publish(msg)` where publisher is the object from the init function and msg is a message of the type defined above
+- The goal and odom are 3D points, but you only need to worry about a single dimension.
+  - You need to figure out which dimension is forwards/backwards
+- If you want a hint on how to write this code [here is some pseudocode](https://en.wikipedia.org/wiki/Proportional%E2%80%93integral%E2%80%93derivative_controller#Pseudocode)
+
+#### Message Types
+- PoseStamped
+  - Message Definition [here](https://docs.ros2.org/foxy/api/geometry_msgs/msg/PoseStamped.html)
+  - You only need to care about msg.pose.position
+- Odometry
+  - Message Definition [here](https://docs.ros2.org/foxy/api/nav_msgs/html/msg/Odometry.html)
+  - You only need to care about msg.pose.pose.position
+- Twist
+  - Message Definition [here](https://docs.ros2.org/foxy/api/geometry_msgs/msg/Twist.html)
+  - You only need to care about msg.linear
+
+#### Main Loop Only 
+- This is only applicable if you chose to have a main loop.
+- You should have a loop within your code that will run forever while the node is active. This will handle all the processing and publishing of outputs.
+- To keep the node running while it is active, use the `rclpy.ok()` function.
+  - This will return True while the node is active and false once it is killed.
+- After you do your processsing, you should call `rclpy.spin_once(self, timeout_sec=0)`
+  - This will call your callback functions
+
+
 ### Setup.py
 - To make your node able to be executed you must go into the setup.py file in the package you are in.
 - At the end of the file there is `entry_points`.
@@ -132,4 +189,4 @@ More information about PID can be found [here](https://docs.wpilib.org/en/stable
   ```
   example_node = lunabot_package.example_code:main
   ```
-- Now you can test your node by running ros2 run \<lunabot_package> \<example_node>
+- Now you can test your node by running `ros2 run <lunabot_package> <example_node>`
