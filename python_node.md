@@ -101,6 +101,8 @@ More information about PID can be found [here](https://docs.wpilib.org/en/stable
     - The idea behind this is that if nothing changes in your callbacks, the node doesn't need to be processing anything
   - Another option is to have a main loop that pauses occasionally to get callbacks. 
   - Either option works, it is mostly a matter of preference and code complexity.
+- The goal and odom are 3D points, you only need to worry about a single dimension.
+  - You need to figure out which dimension is forwards/backwards
 
 #### Main Loop Only 
 - This is only applicable if you chose to have a main loop.
@@ -122,3 +124,12 @@ More information about PID can be found [here](https://docs.wpilib.org/en/stable
     - Once you tell ROS to shutdown, it will stop looking for callbacks and go through any code after it (we won't have any so it'll exit the file)
 - If you chose to have a main loop
   - You can call the main loop function of your class
+
+### Setup.py
+- To make your node able to be executed you must go into the setup.py file in the package you are in.
+- At the end of the file there is `entry_points`.
+- Within console scripts, you should add your node's name followed by the path to the main function of your node
+  ```
+  example_node = lunabot_package.example_code:main
+  ```
+- Now you can test your node by running ros2 run \<lunabot_package> \<example_node>
