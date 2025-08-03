@@ -85,14 +85,14 @@ rosdep install -i --from-path src --rosdistro humble -y
 <!-- TODO: Non-ros deps -->
 Install other dependencies
 ```
-sudo apt install ros-humble-gz-ros2-control ros-humble-joint-state-publisher ros-humble-ros-gzharmonic
+sudo apt install ros-humble-gz-ros2-control ros-humble-joint-state-publisher ament-cmake-python ament-cmake curl lsb-release gnupg
 ```
 Install Gazebo Harmonic
 ```
 sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
 sudo apt-get update
-sudo apt-get install gz-harmonic
+sudo apt-get install gz-harmonic ros-humble-ros-gzharmonic
 ```
 
 Build + Source Manually
@@ -110,13 +110,12 @@ source build.sh
 
 ## Testing your setup
 
-1. Run the sim (Not working yet.)
+1. Run the sim
 
 ```
 ros2 launch lunabot_bringup sim.launch
 ```
 > you should see two new windows pop up: once called gazebo and one called rviz
-<!-- TODO: fix this if this changes. remove the not working yet when it does. -->
 
 2. Set goal waypoint in rviz and watch the robot navigate
 ![mpc_fix_gazebo_skid_steer](https://github.com/PurdueLunabotics/purdue_lunabotics/assets/41026849/a5cdaf41-f482-4b47-bd7b-bc8b7cb88880)

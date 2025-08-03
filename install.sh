@@ -102,7 +102,7 @@ echo "##########################################################################
 echo ">>> {Step 4: Updating Ubuntu package index, this will take few minutes depend on your network connection}"
 echo ""
 sudo apt update
-sudo apt upgrade 
+sudo apt upgrade -y 
 
 echo ""
 echo "#######################################################################################################################"
@@ -112,7 +112,7 @@ echo ""
 echo ">>>  {Starting ROS installation, this will take about 20 min. It will depends on your internet  connection}"
 echo ""
 sudo apt-get install -y ros-${name_ros_distro}-desktop 
-sudo apt install ros-dev-tools
+sudo apt install -y ros-dev-tools
 echo ""
 echo ""
 echo "#######################################################################################################################"
@@ -125,10 +125,10 @@ echo ""
 echo "#######################################################################################################################"
 echo "> {Step 7: Setting Up Environment}"
 echo ""
-sudo apt install python3-colcon-common-extensions
+sudo apt install -y python3-colcon-common-extensions
 mkdir -p /home/$user_name/luna_ws/src
 cd ~/luna_ws/src
-sudo apt-get install git
+sudo apt-get install -y git
 git clone --branch ros2-develop https://github.com/PurdueLunabotics/purdue_lunabotics.git
 echo ""
 echo "#######################################################################################################################"
@@ -138,15 +138,15 @@ cd ~/luna_ws
 sudo rosdep init
 rosdep update
 rosdep install -i --from-path src --rosdistro humble -y
-sudo apt install ros-humble-gz-ros2-control ros-humble-joint-state-publisher ament-cmake-python ament-cmake
+sudo apt install -y ros-humble-gz-ros2-control ros-humble-joint-state-publisher ament-cmake-python ament-cmake curl lsb-release gnupg
 sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
 sudo apt-get update
-sudo apt-get install gz-harmonic
-cd ~/luna_ws/src/purdue_lunabotics && source build.sh || cd ~/luna_ws/src/purdue_lunabotics && source build.sh
+sudo apt-get install -y gz-harmonic ros-humble-ros-gzharmonic
+cd ~/luna_ws/src/purdue_lunabotics
 echo ""
 echo "#######################################################################################################################"
 echo "> {Step 9: Run Sim}"
 echo ""
 echo "You will now be able to run the simulation."
-echo "Type [ros2 launch lunabot_bringup sim.launch] to start it"
+echo "Type [source run.sh lunabot_bringup sim.launch] to start it"
