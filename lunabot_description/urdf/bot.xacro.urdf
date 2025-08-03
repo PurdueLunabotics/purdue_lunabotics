@@ -15,8 +15,8 @@
     <visual>
       <origin rpy="3.14 0 0" xyz="0 0 0"/>
       <geometry>
-        <!-- <box size="0.9 0.5 0.1"/> -->
-      <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/realistic_robot.stl"/>
+        <box size="0.9 0.5 0.1"/>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/realistic_robot.stl"/> -->
       </geometry>
       <material name="silver"/>
     </visual>
@@ -24,7 +24,8 @@
     <collision>
       <origin rpy="3.14 0 0" xyz="0 0 0"/>
       <geometry>
-      <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/realistic_robot.stl"/>
+        <box size="0.9 0.5 0.1"/>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/realistic_robot.stl"/> -->
       </geometry>
     </collision>
   </link>
@@ -50,14 +51,20 @@
     </inertial>
 
     <visual>
-      <origin rpy="0 0 1.57080" xyz="0 0 0"/>
-      <geometry><mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/></geometry>
+      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <geometry>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
+      <cylinder radius="0.2" length="0.125"/>
+      </geometry>
       <material name="silver"/>
     </visual>
 
     <collision>
-      <origin rpy="0 0 1.5708" xyz="0 0 0"/>
-      <geometry><mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/></geometry>
+      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <geometry>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
+      <cylinder radius="0.2" length="0.125"/>
+      </geometry>
       <!-- <surface> -->
         <!-- <friction> -->
           <!-- <ode> -->
@@ -89,14 +96,20 @@
     </inertial>
 
     <visual>
-      <origin rpy="3.1415 0 1.5708" xyz="0 0 0"/>
-      <geometry><mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/></geometry>
+      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <geometry>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
+      <cylinder radius="0.2" length="0.125"/>
+      </geometry>
       <material name="silver"/>
     </visual>
 
     <collision>
-      <origin rpy="3.1415 0 1.5708" xyz="0 0 0"/>
-      <geometry><mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/></geometry>
+      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <geometry>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
+      <cylinder radius="0.2" length="0.125"/>
+      </geometry>
       <!-- <surface> -->
         <!-- <friction> -->
           <!-- <ode> -->
@@ -128,14 +141,20 @@
     </inertial>
 
     <visual>
-      <origin rpy="0 0 1.5708" xyz="0 0 0"/>
-      <geometry><mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/></geometry>
+      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <geometry>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
+      <cylinder radius="0.2" length="0.125"/>
+      </geometry>
       <material name="silver"/>
     </visual>
 
     <collision>
-      <origin rpy="0 0 1.5708" xyz="0 0 0"/>
-      <geometry><mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/></geometry>
+      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <geometry>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
+      <cylinder radius="0.2" length="0.125"/>
+      </geometry>
       <!-- <surface> -->
         <!-- <friction> -->
           <!-- <ode> -->
@@ -167,14 +186,20 @@
     </inertial>
 
     <visual>
-      <origin rpy="0 0 1.5708" xyz="0 0 0"/>
-      <geometry><mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/></geometry>
+      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <geometry>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
+      <cylinder radius="0.2" length="0.125"/>
+      </geometry>
       <material name="silver"/>
     </visual>
 
     <collision>
-      <origin rpy="0 0 1.5708" xyz="0 0 0"/>
-      <geometry><mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/></geometry>
+      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <geometry>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
+      <cylinder radius="0.2" length="0.125"/>
+      </geometry>
       <!-- <surface> -->
         <!-- <friction> -->
           <!-- <ode> -->
