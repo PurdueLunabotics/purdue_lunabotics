@@ -2,14 +2,16 @@ from posixpath import join
 from ament_index_python import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import IncludeLaunchDescription, RegisterEventHandler, AppendEnvironmentVariable
+from launch.actions import IncludeLaunchDescription, RegisterEventHandler, AppendEnvironmentVariable, DeclareLaunchArgument
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import PathJoinSubstitution
+from launch.substitutions import PathJoinSubstitution, IfElseSubstitution, LaunchConfiguration
+# from launch.condition import IFCondition
 from launch_ros.substitutions import FindPackageShare
 import os
 
 def generate_launch_description():
+    
     robot_desc_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
             PathJoinSubstitution([
@@ -62,7 +64,7 @@ def generate_launch_description():
         arguments=[
             '-topic', 'robot_description',
             '-name', 'dummy_bot',
-            '-x', '2.5', '-y', '1.75', '-z', '1.0',
+            '-x', '2.5', '-y', '1.75', '-z', '0.25',
             '-Y', '-1.570796327', # yaw
             "--ros-args"
         ],
@@ -131,7 +133,10 @@ def generate_launch_description():
         output='screen',
     )
     
-    ld = LaunchDescription([
+    ld = LaunchDescription([DeclareLaunchArgument(
+            'gui',
+            default_value='true'
+        ),
         AppendEnvironmentVariable('GZ_SIM_RESOURCE_PATH',
         os.path.join(get_package_share_directory('mining_arena_gazebo'),
                      'models')),

@@ -23,13 +23,14 @@ class States(Enum):
 class PointToPoint(Node):
     def __init__(self, **kwargs):
         super().__init__('point_to_point_node', **kwargs)
+        rclpy.get_global_executor().add_node(self)
         # self.get_logger().info("init")
 
         self.LINEAR_P = 3.0
         self.LINEAR_I = 0
         self.LINEAR_D = 0
         self.LINEAR_TOLERANCE = 0.2  # meters
-        self.MAX_LINEAR_SPEED = 0.1  # m/s
+        self.MAX_LINEAR_SPEED = 0.3  # m/s
         self.linear_pid = PIDController(
             self.LINEAR_P,
             self.LINEAR_I,
@@ -37,12 +38,12 @@ class PointToPoint(Node):
             max_output=self.MAX_LINEAR_SPEED,
         )
 
-        self.ANGULAR_P = 1.0
+        self.ANGULAR_P = 5.0
         self.ANGULAR_I = 0
         self.ANGULAR_D = 0
-        self.ANGULAR_TOLERANCE_DEG = 20
+        self.ANGULAR_TOLERANCE_DEG = 10
         self.ANGULAR_TOLERANCE_RAD = np.deg2rad(self.ANGULAR_TOLERANCE_DEG)
-        self.MAX_ANGULAR_SPEED_DEG_PER_SEC = 20
+        self.MAX_ANGULAR_SPEED_DEG_PER_SEC = 60
         self.MAX_ANGULAR_SPEED_RAD_PER_SEC = np.deg2rad(
             self.MAX_ANGULAR_SPEED_DEG_PER_SEC
         )
@@ -90,7 +91,7 @@ class PointToPoint(Node):
         self.map_y_offset: int = -1
         self.map_lock: threading.Lock = threading.Lock()
 
-        self.print_debug_info: bool = True
+        self.print_debug_info: bool = False
         
 
         # PUBLISHERS ==================================================================================================
@@ -529,14 +530,14 @@ class PointToPoint(Node):
             # stop linear translation if angle error becomes too big
             self.linear_vel = 0
 
-            self.angular_vel = -self.angular_pid.calculate(
+            self.angular_vel = self.angular_pid.calculate(
                 state=self.angle_error, dt=self.pid_dt, setpoint=0
             )
             
         elif self.state == States.MOVING_TO_LINEAR_TARGET:
             self.angular_vel = 0
 
-            self.linear_vel = -self.linear_pid.calculate(
+            self.linear_vel = self.linear_pid.calculate(
                 state=self.linear_error, dt=self.pid_dt, setpoint=0
             )
 
@@ -670,15 +671,23 @@ class PointToPoint(Node):
                     self.angular_vel = 0
 
                 self.publish_telemetry()
-            rclpy.spin_once(self, timeout_sec=0)
-            # rate.sleep()
+            rate.sleep()
 
 
 # ==================================================================================================================
 # MAIN METHOD
 # ==================================================================================================================
+def spin_in_background():
+    executor = rclpy.get_global_executor()
+    try:
+        executor.spin()
+    except ExternalShutdownException:
+        pass
+
 
 def main():
     rclpy.init()
+    t = threading.Thread(target=spin_in_background)
+    t.start()
     point_to_point = PointToPoint()
     point_to_point.run_node()
