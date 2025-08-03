@@ -1,240 +1,474 @@
-<?xml version="1.0" ?>
+<?xml version="1.0"?>
 <robot name="dummy_bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
-
-<xacro:property name="PI" value="3.1415926535897931"/>
-
-<xacro:property name="chassisHeight" value="0.1"/>
-<xacro:property name="chassisLength" value="0.9"/>
-<xacro:property name="chassisWidth" value="0.5"/>
-<xacro:property name="chassisMass" value="50.0"/>
-
-<xacro:property name="wheelWidth" value="0.125"/>
-<xacro:property name="wheelRadius" value="0.2"/>
-<xacro:property name="wheelMass" value="5.0"/>
-
-<xacro:macro name="box_inertia" params="m x y z">
-  <inertia  ixx="${m*(y*y+z*z)/12}" ixy = "0" ixz = "0"
-    iyy="${m*(x*x+z*z)/12}" iyz = "0"
-    izz="${m*(x*x+z*z)/12}"
-  />
-</xacro:macro>
-
-<xacro:macro name="cylinder_inertia" params="m r h">
-  <inertia  ixx="${m*(3*r*r+h*h)/12}" ixy = "0" ixz = "0"
-    iyy="${m*(3*r*r+h*h)/12}" iyz = "0"
-    izz="${m*r*r/2}"
-  />
-</xacro:macro>
-
-<!-- NOTE: STL files don't work in gazebo with binary encoding, try ASCII instead -->
-
-<xacro:include filename="$(find lunabot_description)/urdf/materials.xacro" />
-<!-- <xacro:include filename="$(find lunabot_description)/urdf/dummy_bot.trans" /> -->
-<!-- <xacro:include filename="$(find lunabot_description)/urdf/dummy_bot.gazebo" /> -->
-<link name="base_link">
-  <inertial>
-    <origin rpy="0 0 0" xyz="0 0 0"/>
-    <mass value="${chassisMass}"/>
-    <xacro:box_inertia m="${chassisMass}" x="${chassisLength}" y="${chassisWidth}" z="${chassisHeight}"/>
-  </inertial>
-  <visual>
-    <origin rpy="0 0 0" xyz="0 0 0"/>
-    <geometry>
-      <!-- <mesh filename="package://lunabot_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/> -->
-      <box size="${chassisLength} ${chassisWidth} ${chassisHeight}"/>
-    </geometry>
-    <material name="silver"/>
-  </visual>
-  <collision>
-    <origin rpy="0 0 0" xyz="0 0 0"/>
-    <geometry>
-      <!-- <mesh filename="package://lunabot_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/> -->
-      <box size="${chassisLength} ${chassisWidth} ${chassisHeight}"/>
-    </geometry>
-  </collision>
-</link>
-
-<!-- wheel macro -->
-<xacro:macro name="wheel" params="name x y">
-  <link name="${name}">
+  <material name="silver">
+    <color rgba="0.75 0.75 0.75 1"/>
+  </material>
+  <link name="base_link">
     <inertial>
-      <origin xyz="0 0 0"/>
-      <mass value="${wheelMass}"/>
-      <xacro:cylinder_inertia m="${wheelMass}" r="${wheelRadius}" h="${wheelWidth}"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="50.0"/>
+      <inertia  ixx="3.416666667" ixy = "0" ixz = "0"
+        iyy="3.416666667" iyz = "0"
+        izz="3.416666667"
+      />
     </inertial>
     <visual>
-      <origin rpy="1.5708 0 0" xyz="0 0 0"/>
-      <geometry><cylinder radius="${wheelRadius}" length="${wheelWidth}"/></geometry>
+      <origin rpy="3.14 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.9 0.5 0.1"/>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/realistic_robot.stl"/> -->
+      </geometry>
       <material name="silver"/>
     </visual>
+
     <collision>
-      <origin rpy="1.5708 0 0" xyz="0 0 0"/>
-      <geometry><cylinder radius="${wheelRadius}" length="${wheelWidth}"/></geometry>
+      <origin rpy="3.14 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.9 0.5 0.1"/>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/realistic_robot.stl"/> -->
+      </geometry>
     </collision>
   </link>
 
-  <joint name="${name}_rev" type="continuous">
-    <origin rpy="0 0 0" xyz="${x} ${y} 0"/>
+  <link name="middle_link"/>
+
+  <joint name="mid_joint" type="fixed">
+    <origin rpy="0 0 3.14" xyz="0 0 0"/>
     <parent link="base_link"/>
-    <child link="${name}"/>
+    <child link="middle_link"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <!-- left front -->
+  <link name="left_front">
+    <inertial>
+      <origin xyz="0 0 0"/>
+      <mass value="5.0"/>
+      <inertia  ixx="0.056510417" ixy = "0" ixz = "0"
+        iyy="0.056510417" iyz = "0"
+        izz="0.1"
+      />
+    </inertial>
+
+    <visual>
+      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <geometry>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
+      <cylinder radius="0.2" length="0.125"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+
+    <collision>
+      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <geometry>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
+      <cylinder radius="0.2" length="0.125"/>
+      </geometry>
+      <!-- <surface> -->
+        <!-- <friction> -->
+          <!-- <ode> -->
+            <!-- <mu>0.01</mu> -->
+            <!-- <mu2>0.01</mu2> -->
+          <!-- </ode> -->
+        <!-- </friction> -->
+      <!-- </surface> -->
+    </collision>
+  </link>
+
+  <joint name="left_front_rev" type="continuous">
+    <origin rpy="0 0 0" xyz="-0.292 -0.35 -0.162"/>
+    <parent link="middle_link"/>
+    <child link="left_front"/>
     <axis xyz="0 1 0"/>
-    <limit effort="10.0" velocity="100.0"/>
+    <!-- <limit effort="10.0" velocity="100.0"/> -->
   </joint>
-</xacro:macro>
 
-<!-- Instantiate wheels -->
-<xacro:wheel name="left_front"  x="0.25" y="0.32"/>
-<xacro:wheel name="left_back"   x="-0.25" y="0.32"/>
-<xacro:wheel name="right_front" x="0.25" y="-0.32"/>
-<xacro:wheel name="right_back"  x="-0.25" y="-0.32"/>
+  <!-- left back -->
+  <link name="left_back">
+    <inertial>
+      <origin xyz="0 0 0"/>
+      <mass value="5.0"/>
+      <inertia  ixx="0.056510417" ixy = "0" ixz = "0"
+        iyy="0.056510417" iyz = "0"
+        izz="0.1"
+      />
+    </inertial>
 
-<!-- <xacro:include filename="package://lunabot_sim/realsense_ros_gazebo/xacro/depthcam.xacro"/> -->
-<!-- <xacro:realsense_d435 sensor_name="d435_forward" parent_link="base_link" rate="10"> -->
-  <!-- <origin xyz="0.000 0.229 0.482" rpy="0 0 0" /> -->
-<!-- </xacro:realsense_d435> -->
-<!-- <xacro:realsense_d435 sensor_name="d435_backward" parent_link="base_link" rate="10"> -->
-  <!-- <origin xyz="0.000 0.20 0.482" rpy="0 0 3.1415" /> -->
-<!-- </xacro:realsense_d435> -->
+    <visual>
+      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <geometry>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
+      <cylinder radius="0.2" length="0.125"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
 
-<!-- Based on Intel realsense D435 (intrinsics and distortion not modeled)-->
-<sensor name="rs_front" type="rgbd_camera">
-  <pose>0.122 0 0.257 0 0.46 0</pose>
-  <always_on>1</always_on>
-  <update_rate>30</update_rate>
-  <camera name="rs_front">
-    <horizontal_fov>1.50098</horizontal_fov>
-    <lens>
-      <intrinsics>
-        <!-- fx = fy = width / ( 2 * tan (hfov / 2 ) ) -->
-        <fx>343.159</fx>
-        <fy>343.159</fy>
-        <!-- cx = ( width - 1 ) / 2 -->
-        <cx>319.5</cx>
-        <!-- cy = ( height - 1 ) / 2 -->
-        <cy>179.5</cy>
-        <s>0</s>
-      </intrinsics>
-    </lens>
-    <distortion>
-      <k1>0.0</k1>
-      <k2>0.0</k2>
-      <k3>0.0</k3>
-      <p1>0.0</p1>
-      <p2>0.0</p2>
-      <center>0.5 0.5</center>
-    </distortion>
-    <image>
-      <width>640</width>
-      <height>360</height>
-      <format>R8G8B8</format>
-    </image>
-    <clip>
-      <near>0.01</near>
-      <far>300</far>
-    </clip>
-    <depth_camera>
-      <clip>
-        <near>0.1</near>
-        <far>10</far>
-      </clip>
-    </depth_camera>
-    <noise>
-      <type>gaussian</type>
-      <mean>0</mean>
-      <stddev>0.007</stddev>
-    </noise>
-  </camera>
-</sensor>
+    <collision>
+      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <geometry>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
+      <cylinder radius="0.2" length="0.125"/>
+      </geometry>
+      <!-- <surface> -->
+        <!-- <friction> -->
+          <!-- <ode> -->
+            <!-- <mu>0.01</mu> -->
+            <!-- <mu2>0.01</mu2> -->
+          <!-- </ode> -->
+        <!-- </friction> -->
+      <!-- </surface> -->
+    </collision>
+  </link>
 
-<ros2_control name="GazeboSystem" type="system">
-  <hardware>
-    <plugin>gz_ros2_control/GazeboSimSystem</plugin>
-  </hardware>
-  <joint name="right_front_rev">
-    <command_interface name="velocity"/>
-    <state_interface name="position"/>
-    <state_interface name="velocity"/>
-    <state_interface name="effort"/>
+  <joint name="left_back_rev" type="continuous">
+    <origin rpy="0 0 0" xyz="0.217 -0.35 -0.162"/>
+    <parent link="middle_link"/>
+    <child link="left_back"/>
+    <axis xyz="0 1 0"/>
+    <!-- <limit effort="10.0" velocity="100.0"/> -->
   </joint>
-  <joint name="left_front_rev">
-    <command_interface name="velocity"/>
-    <state_interface name="position"/>
-    <state_interface name="velocity"/>
-    <state_interface name="effort"/>
+
+  <!-- right front -->
+  <link name="right_front">
+    <inertial>
+      <origin xyz="0 0 0"/>
+      <mass value="5.0"/>
+      <inertia  ixx="0.056510417" ixy = "0" ixz = "0"
+        iyy="0.056510417" iyz = "0"
+        izz="0.1"
+      />
+    </inertial>
+
+    <visual>
+      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <geometry>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
+      <cylinder radius="0.2" length="0.125"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+
+    <collision>
+      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <geometry>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
+      <cylinder radius="0.2" length="0.125"/>
+      </geometry>
+      <!-- <surface> -->
+        <!-- <friction> -->
+          <!-- <ode> -->
+            <!-- <mu>0.01</mu> -->
+            <!-- <mu2>0.01</mu2> -->
+          <!-- </ode> -->
+        <!-- </friction> -->
+      <!-- </surface> -->
+    </collision>
+  </link>
+
+  <joint name="right_front_rev" type="continuous">
+    <origin rpy="0 0 0" xyz="-0.292 0.22 -0.162"/>
+    <parent link="middle_link"/>
+    <child link="right_front"/>
+    <axis xyz="0 1 0"/>
+    <!-- <limit effort="10.0" velocity="100.0"/> -->
   </joint>
-  <joint name="right_back_rev">
-    <command_interface name="velocity"/>
-    <state_interface name="position"/>
-    <state_interface name="velocity"/>
-    <state_interface name="effort"/>
+
+  <!-- right back -->
+  <link name="right_back">
+    <inertial>
+      <origin xyz="0 0 0"/>
+      <mass value="5.0"/>
+      <inertia  ixx="0.056510417" ixy = "0" ixz = "0"
+        iyy="0.056510417" iyz = "0"
+        izz="0.1"
+      />
+    </inertial>
+
+    <visual>
+      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <geometry>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
+      <cylinder radius="0.2" length="0.125"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+
+    <collision>
+      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <geometry>
+      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
+      <cylinder radius="0.2" length="0.125"/>
+      </geometry>
+      <!-- <surface> -->
+        <!-- <friction> -->
+          <!-- <ode> -->
+            <!-- <mu>0.01</mu> -->
+            <!-- <mu2>0.01</mu2> -->
+          <!-- </ode> -->
+        <!-- </friction> -->
+      <!-- </surface> -->
+    </collision>
+  </link>
+
+  <joint name="right_back_rev" type="continuous">
+    <origin rpy="0 0 0" xyz="0.217 0.22 -0.162"/>
+    <parent link="middle_link"/>
+    <child link="right_back"/>
+    <axis xyz="0 1 0"/>
+    <!-- <limit effort="10.0" velocity="100.0"/> -->
   </joint>
-  <joint name="left_back_rev">
-    <command_interface name="velocity"/>
-    <state_interface name="position"/>
-    <state_interface name="velocity"/>
-    <state_interface name="effort"/>
+
+
+  <!-- Back Camera -->
+  <link name="d455_back_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia 
+        ixx="0.001" 
+        ixy="0.000" 
+        ixz="0.000"
+        iyy="0.001"
+        iyz="0.000"
+        izz="0.001"
+      />
+      <mass value="0.035"/>
+    </inertial>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.03 0.1 0.03" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.03 0.1 0.03" />
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="d455_back_rgb_link">
+  </link>
+  <link name="d455_back_depth_link">
+  </link>  
+
+  <joint name="d455_back_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0.39 -0.05 0.215"/>
+    <parent link="middle_link"/>
+    <child link="d455_back_link"/>
+    <axis xyz="0 0 1"/>
   </joint>
-</ros2_control>
 
-<!-- Transmissions -->
-<!-- <xacro:macro name="transmission" params="joint_name"> -->
-  <!-- <transmission name="${joint_name}_trans"> -->
-    <!-- <type>transmission_interface/SimpleTransmission</type> -->
-    <!-- <joint name="${joint_name}"> -->
-      <!-- <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface> -->
-    <!-- </joint> -->
-    <!-- <actuator name="${joint_name}_motor"> -->
-      <!-- <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface> -->
-      <!-- <mechanicalReduction>1.0</mechanicalReduction> -->
-    <!-- </actuator> -->
-  <!-- </transmission> -->
-<!-- </xacro:macro> -->
+  <joint name="d455_back_rgb_joint" type="fixed">
+    <!-- these values have to be these values otherwise the gazebo camera
+        image won't be aligned properly with the frame it is supposedly
+        originating from -->
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    <parent link="d455_back_link"/>
+    <child link="d455_back_rgb_link"/>
+  </joint>
 
-<!-- <xacro:transmission joint_name="left_front_rev"/> -->
-<!-- <xacro:transmission joint_name="left_back_rev"/> -->
-<!-- <xacro:transmission joint_name="right_front_rev"/> -->
-<!-- <xacro:transmission joint_name="right_back_rev"/> -->
+  <joint name="d455_back_depth_joint" type="fixed">
+    <!-- these values have to be these values otherwise the gazebo camera
+        image won't be aligned properly with the frame it is supposedly
+        originating from -->
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    <parent link="d455_back_link"/>
+    <child link="d455_back_depth_link"/>
+  </joint>
 
-<!-- friction -->
-<!-- <xacro:macro name="wheel_friction" params="name"> -->
-  <!-- <gazebo reference="${name}"> -->
-    <!-- <mu1>1.0</mu1> -->
-    <!-- <mu2>1.0</mu2> -->
-    <!-- <joint><provideFeedback>true</provideFeedback></joint> -->
-  <!-- </gazebo> -->
-<!-- </xacro:macro> -->
+  <gazebo reference="d455_back_link">
+    <sensor name="d455_back_rgb" type="camera">
+      <always_on>1</always_on>
+      <visualize>false</visualize>
+      <update_rate>15</update_rate>
+      <topic>d455_back/color/image_raw</topic>
+      <gz_frame_id>d455_back_rgb_link</gz_frame_id>
+      <camera name="d455_back_rgb">
+        <camera_info_topic>d455_back/color/camera_info</camera_info_topic>
+        <horizontal_fov>1.50098</horizontal_fov>
+        <image>
+          <width>848</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>10</far>
+        </clip>
+      </camera>
+    </sensor>
+  </gazebo>
 
-<!-- <xacro:wheel_friction name="left_front"/> -->
-<!-- <xacro:wheel_friction name="left_back"/> -->
-<!-- <xacro:wheel_friction name="right_front"/> -->
-<!-- <xacro:wheel_friction name="right_back"/> -->
+  <gazebo reference="d455_back_link">
+    <sensor name="d455_back_depth" type="depth_camera">
+      <always_on>1</always_on>
+      <visualize>false</visualize>
+      <update_rate>15</update_rate>
+      <topic>d455_back/depth/image_raw</topic>
+      <gz_frame_id>d455_back_depth_link</gz_frame_id>
+      <camera name="d455_back_depth">
+        <camera_info_topic>d455_back/depth/camera_info</camera_info_topic>
+        <horizontal_fov>1.50098</horizontal_fov>
+        <image>
+          <width>848</width>
+          <height>480</height>
+          <format>R_FLOAT32</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>10</far>
+        </clip>
+      </camera>
+    </sensor>
+  </gazebo>
 
-<gazebo>
-  <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
-    <left_joint>left_front_rev</left_joint>
-    <left_joint>left_back_rev</left_joint>
-    <right_joint>right_front_rev</right_joint>
-    <right_joint>right_back_rev</right_joint>
+  <!-- Front Camera -->
 
-    <wheel_separation>0.64</wheel_separation>
-    <wheel_radius>0.2</wheel_radius>
 
-    <odom_publish_frequency>50.0</odom_publish_frequency>
+  <link name="d455_front_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia 
+        ixx="0.001" 
+        ixy="0.000" 
+        ixz="0.000"
+        iyy="0.001"
+        iyz="0.000"
+        izz="0.001"
+      />
+      <mass value="0.035"/>
+    </inertial>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.03 0.1 0.03" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.03 0.1 0.03" />
+      </geometry>
+    </visual>
+  </link>
 
-    <topic>cmd_vel</topic>
+  <link name="d455_front_rgb_link">
+  </link>
+  <link name="d455_front_depth_link">
+  </link>  
 
-    <odom_topic>odom</odom_topic>
+  <joint name="d455_front_joint" type="fixed">
+    <origin rpy="0 0 3.14" xyz="-0.55 0.15 0"/>
+    <parent link="middle_link"/>
+    <child link="d455_front_link"/>
+    <axis xyz="0 0 1"/>
+  </joint>
 
-    <frame_id>base_link</frame_id>
+  <joint name="d455_front_rgb_joint" type="fixed">
+    <!-- these values have to be these values otherwise the gazebo camera
+        image won't be aligned properly with the frame it is supposedly
+        originating from -->
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    <parent link="d455_front_link"/>
+    <child link="d455_front_rgb_link"/>
+  </joint>
 
-    <min_velocity>-1.0</min_velocity>
-    <max_velocity>1.0</max_velocity>
-    <min_acceleration>-1.0</min_acceleration>
-    <max_acceleration>1.0</max_acceleration>
-    <min_jerk>0.0</min_jerk>
-    <max_jerk>0.0</max_jerk>
+  <joint name="d455_front_depth_joint" type="fixed">
+    <!-- these values have to be these values otherwise the gazebo camera
+        image won't be aligned properly with the frame it is supposedly
+        originating from -->
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    <parent link="d455_front_link"/>
+    <child link="d455_front_depth_link"/>
+  </joint>
 
-  </plugin>
-</gazebo>
+  <gazebo reference="d455_front_link">
+    <sensor name="d455_front_rgb" type="camera">
+      <always_on>1</always_on>
+      <visualize>false</visualize>
+      <update_rate>15</update_rate>
+      <topic>d455_front/color/image_raw</topic>
+      <gz_frame_id>d455_front_rgb_link</gz_frame_id>
+      <camera name="d455_front_rgb">
+        <camera_info_topic>d455_front/color/camera_info</camera_info_topic>
+        <horizontal_fov>1.50098</horizontal_fov>
+        <image>
+          <width>848</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>10</far>
+        </clip>
+      </camera>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="d455_front_link">
+    <sensor name="d455_front_depth" type="depth_camera">
+      <always_on>1</always_on>
+      <visualize>false</visualize>
+      <update_rate>15</update_rate>
+      <topic>d455_front/depth/image_raw</topic>
+      <gz_frame_id>d455_front_depth_link</gz_frame_id>
+      <camera name="d455_front_depth">
+        <camera_info_topic>d455_front/depth/camera_info</camera_info_topic>
+        <horizontal_fov>1.50098</horizontal_fov>
+        <image>
+          <width>848</width>
+          <height>480</height>
+          <format>R_FLOAT32</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>10</far>
+        </clip>
+      </camera>
+    </sensor>
+  </gazebo>
+
+  <xacro:include filename="$(find lunabot_description)/urdf/dummy_bot.trans" />
+  <gazebo>
+    <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
+      <left_joint>left_front_rev</left_joint>
+      <left_joint>left_back_rev</left_joint>
+      <right_joint>right_front_rev</right_joint>
+      <right_joint>right_back_rev</right_joint>
+
+      <wheel_separation>0.64</wheel_separation>
+      <wheel_radius>0.2</wheel_radius>
+
+      <odom_publish_frequency>50.0</odom_publish_frequency>
+
+      <topic>cmd_vel</topic>
+
+      <odom_topic>odom</odom_topic>
+
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_link</child_frame_id>
+      <tf_topic>tf</tf_topic>
+
+      <!-- <min_velocity>-1.0</min_velocity>
+      <max_velocity>1.0</max_velocity>
+      <min_acceleration>-1.0</min_acceleration>
+      <max_acceleration>1.0</max_acceleration>
+      <min_jerk>0.0</min_jerk>
+      <max_jerk>0.0</max_jerk> -->
+
+    </plugin>
+
+    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
+        <topic>joint_states</topic>
+        <joint_name>left_front_rev</joint_name>
+        <joint_name>left_back_rev</joint_name>
+        <joint_name>right_front_rev</joint_name>
+        <joint_name>right_back_rev</joint_name>
+    </plugin>
+    
+  </gazebo>
+
 
 </robot>
