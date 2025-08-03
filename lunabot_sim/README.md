@@ -1,4 +1,4 @@
-# mining_arena_gazebo
+# lunabot_sim
 Gazebo world environments for the NASA competition
 
 

@@ -8,15 +8,19 @@
   <!-- Should we use Point To Point or Pure pursuit -->
   <arg name="ptp" default="true"/>
 
+  <arg name="gui" default="true"/>
+
   <!-- Values for arena world (Nasa is KSC, UCF is not.) The above boolean argument changes 
   what arg is passed to the launch file below (therefore, there are two duplicate launch files)
-  $(find mining_arena_gazebo)/worlds/arena_nasa.world
-  $(find mining_arena_gazebo)/worlds/arena_ucf.world -->
+  $(find lunabot_sim)/worlds/arena_nasa.world
+  $(find lunabot_sim)/worlds/arena_ucf.world -->
 
   <arg name="initial_pose" default="-x 1.0 -y -1.3 -z 0"/>
   <!-- <arg name="model" default="$(find dummy_bot_description)/urdf/dummy_bot.xacro"/> -->
 
-  <include file="$(find-pkg-share mining_arena_gazebo)/launch/gazebo.launch.py"/>
+  <include file="$(find-pkg-share lunabot_sim)/launch/gazebo.launch.py">
+    <arg name="gui" value="$(var gui)"/>
+  </include>
 
   <arg default="$(find-pkg-share lunabot_config)/config/sim.rviz" name="rvizconfig"/>
   <node args="-d $(var rvizconfig)" name="rviz" pkg="rviz2" exec="rviz2" />
@@ -56,7 +60,7 @@
     <push_ros_namespace namespace="rtabmap"/>
 
     <!-- Odometry -->
-    <node pkg="rtabmap_odom" exec="rgbd_odometry" name="rgbd_odometry" output="screen">
+    <node pkg="rtabmap_odom" exec="rgbd_odometry" output="log" name="rgbd_odometry" ros_args="--log-level WARN">
       <param name="subscribe_depth"     value="true"/>
       <param name="frame_id"            value="base_link"/>
       <param name="Odom/ResetCountdown" value="'1'"/>
@@ -68,7 +72,7 @@
       <remap from="rgb/camera_info"     to="/d455_front/color/camera_info"/>
     </node>
 
-    <node name="rtabmap" pkg="rtabmap_slam" exec="rtabmap" output="screen" args="--delete_db_on_start">
+    <node name="rtabmap" pkg="rtabmap_slam" exec="rtabmap" output="log" args="--delete_db_on_start" ros_args="--log-level WARN">
       <param name="frame_id"                value="base_link"/>
       <param name="use_sim_time" value="true"/>
 

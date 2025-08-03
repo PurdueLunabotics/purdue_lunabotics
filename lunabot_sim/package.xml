@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>mining_arena_gazebo</name>
+  <name>lunabot_sim</name>
   <version>0.0.0</version>
   <description>Runs the Gazebo sim for the lunabot</description>
   <maintainer email="lunabot@purdue.edu">Purdue Lunabotics</maintainer>
