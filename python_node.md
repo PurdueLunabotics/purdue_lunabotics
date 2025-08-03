@@ -85,7 +85,7 @@ More information about PID can be found [here](https://docs.wpilib.org/en/stable
   - You need to pass 4 arguments to the function
     - The message type of the subscription (you will need to import this)
     - The topic as a string
-    - The callback function that will be called when a new message is available
+    - The callback function that ROS will call when a new message is available
     - Quality of Service - this defines the minimum quality of the subscription that the node is willing to deal with. 
       - You can either pass a QoS profile object or an int representing the queue size.
         - Since python nodes will only update callbacks when you allow them to, it is possible for many messages to build up in that time. If you just looked at them in the order they appear, you would end up with out of date data.
@@ -142,7 +142,7 @@ That concludes your `__init__` function, you may want to add additional variable
 - There are two options for style of Node.
   - The recommended option is to do all processing starting in callback functions and have no loop.
     - The idea behind this is that if nothing changes in your callbacks, the node doesn't need to be processing anything
-  - Another option is to have a main loop that pauses occasionally to get callbacks. 
+  - Another option is to have a main loop that will continuously process and publish output at a specified rate. 
   - Either option works, it is mostly a matter of preference and code complexity.
 - You need to define a function outside of your class that will be run when the node first starts.
 - This function needs no parameters
@@ -153,7 +153,35 @@ That concludes your `__init__` function, you may want to add additional variable
     - This will allow ROS to respond to new messages by calling the callback functions and should run your node
     - Once you tell ROS to shutdown, it will stop looking for callbacks and go through any code after it (we won't have any so it'll exit the file)
 - If you chose to have a main loop
-  - You can call the main loop function of your class
+  - You need to tell your node to execute callbacks in the background. To do this you need to start another thread for the callbacks
+  - First we will make a function that will tell ros to respond to callbacks.
+    - In this function we need to get the global executor, which deals with executing the code by running `rclpy.get_global_executor()`
+    - Then we need to run that object's `spin()` function.
+    - When the program exits, this function will return an error so we should encase it within a try/except block.
+      - Try Excepts will try to run the first section of the code and if there's an error, go to the second section.
+      ```py
+      try:
+        function_might_return_error()
+        print("no error")
+      except:
+        print("error happpened")
+      ```
+      - Since we don't want anything to happen when the error occurs, we can just put the keyword `pass`, which python will ignore, in the except block.
+    - Now going back to the main function, we need to start another thread. This can be done by using the `threading.Thread` class.
+      - You need to pass the function you just created into the constructor
+      ```py 
+      thread = threading.Thread(target=cool_multi_threaded_function)
+      ```
+      - Next you have to run the `start()` function on that thread.
+    - Finally we need to tell our node to also run using the global executor.
+      - Back in the `__init__` function, below the call to `super()`, we need to add the following line
+      ```py
+      rclpy.get_global_executor().add_node(self)
+      ```
+      - Since the class we are making inherits from Node, we can tell it to add itself as a node to the executor.
+    - Now we will be able to get callbacks while also running our processing.
+
+
 
 ### Node Logic
 - At this point you should write all the logic needed for your node within this class.
@@ -178,8 +206,15 @@ That concludes your `__init__` function, you may want to add additional variable
 - You should have a loop within your code that will run forever while the node is active. This will handle all the processing and publishing of outputs.
 - To keep the node running while it is active, use the `rclpy.ok()` function.
   - This will return True while the node is active and false once it is killed.
-- After you do your processsing, you should call `rclpy.spin_once(self, timeout_sec=0)`
-  - This will call your callback functions
+- In the begining of this function you should define a rate object. This will ensure that your loop runs at a maximum of the specified times per second.
+  - If you do not do this, it will attempt to run as fast as possible, which may waste resources
+  - If the code takes a long time to run, you may run slower than the specified rate.
+  - You can create your rate object by using a function that was inherited from the Node class
+    ```py
+    rate = self.create_rate(self.FREQUENCY, self.get_clock())
+    ```
+- After you do your processsing, you should call `rate.sleep()`
+  - This will pause your program to maintain the rate.
 
 
 ### Setup.py

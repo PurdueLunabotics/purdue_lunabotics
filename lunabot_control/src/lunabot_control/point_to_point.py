@@ -6,7 +6,6 @@ from std_msgs.msg import Bool, Float32, String
 from nav_msgs.msg import Path, Odometry, OccupancyGrid
 from map_msgs.msg import OccupancyGridUpdate
 from geometry_msgs.msg import Twist, Point, Pose2D
-from lunabot_control.pid_controller import PIDController
 from visualization_msgs.msg import Marker
 from tf_transformations import euler_from_quaternion
 import numpy as np
