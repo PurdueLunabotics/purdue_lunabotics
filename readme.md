@@ -125,4 +125,4 @@ ros2 launch lunabot_bringup sim.launch
 - [contributing guidelines](contributing.md)
 - [running_the_robot](https://github.com/PurdueLunabotics/purdue_lunabotics/blob/master/running_the_robot.md) 
 - [firmware setup](https://github.com/PurdueLunabotics/purdue_lunabotics/blob/master/lunabot_embedded/readme.md)
-- [simulated arena docs](https://github.com/PurdueLunabotics/mining_arena_gazebo/blob/master/README.md)
+- [simulated arena docs](https://github.com/PurdueLunabotics/lunabot_sim/blob/master/README.md)

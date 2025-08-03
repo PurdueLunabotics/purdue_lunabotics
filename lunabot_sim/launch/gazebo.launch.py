@@ -29,10 +29,10 @@ def generate_launch_description():
 
 
     # add model directory to env variable so it knows where to look
-    os.environ['GAZEBO_MODEL_PATH'] = f"$GAZEBO_MODEL_PATH:{get_package_share_directory('mining_arena_gazebo')}/models"
+    os.environ['GAZEBO_MODEL_PATH'] = f"$GAZEBO_MODEL_PATH:{get_package_share_directory('lunabot_sim')}/models"
 
     world = PathJoinSubstitution([
-                            FindPackageShare('mining_arena_gazebo'),
+                            FindPackageShare('lunabot_sim'),
                             'worlds',
 
                             # OUR WORLD DIR
@@ -94,7 +94,7 @@ def generate_launch_description():
     bridge_params = os.path.join(
         get_package_share_directory('lunabot_config'),
         'config',
-        'mining_arena_gazebo_bridge.yaml'
+        'gazebo_bridge.yaml'
     )
 
     start_gazebo_ros_bridge_cmd = Node(
@@ -138,7 +138,7 @@ def generate_launch_description():
             default_value='true'
         ),
         AppendEnvironmentVariable('GZ_SIM_RESOURCE_PATH',
-        os.path.join(get_package_share_directory('mining_arena_gazebo'),
+        os.path.join(get_package_share_directory('lunabot_sim'),
                      'models')),
         # RegisterEventHandler(
         #     event_handler=OnProcessExit(
