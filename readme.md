@@ -4,11 +4,21 @@ This is the official ROS 2 git repo of the Purdue Lunabotics software team.
 
 ## Supported Platforms
 - Ubuntu 22.04
-- Windows and Mac:
-  - Ubuntu 22.04 is the only *fully* supported platform. There are a few ways to run a virtual machine with linux on it. 
-    - Windows: [WSL2](https://ubuntu.com/desktop/wsl) (caveat: strange interactions with GPUs may make GUIs stutter) 
-    - Dual boot linux (caveat: can be hard to set up, not recommended for beginners)
-    - [Docker](https://docs.docker.com/get-docker/) containers (caveat: not tested)
+  - Directly supported, this is the ideal operating system
+- Windows: [WSL2](https://ubuntu.com/desktop/wsl)
+  - This acts as a ubuntu computer within your windows computer. It mostly works and will be good enough for most applications.
+  - Can be slower than running ubuntu directly
+  - Make sure to install Ubuntu 22.04
+- Other Linux Versions: [Docker](https://docs.docker.com/get-docker/)
+  - Running a docker container that has ubuntu 22.04 will work fairly well.
+  - You may need to do some setup to get the GUI to show up.
+- Bare Windows: Not Supported
+  - It is possible to use ROS on bare windows, but highly advised against as it is hard to do and not well supported
+  - WSL is the prefered method of running ROS on Windows Computers
+- Mac: 
+  - It is possible to dual boot Ubuntu and MacOS, but this has not been tested.
+  - It is also possible to run ROS on bare MacOS, but you will have to build from source. See [here](https://docs.ros.org/en/humble/Installation/Alternatives/macOS-Development-Setup.html)
+
 
 ## Getting started
 
@@ -83,7 +93,7 @@ cd ~/luna_ws
 rosdep install -i --from-path src --rosdistro humble -y
 ```
 <!-- TODO: Non-ros deps -->
-Install other dependencies
+### 4. Install other dependencies
 ```
 sudo apt install ros-humble-gz-ros2-control ros-humble-joint-state-publisher ament-cmake-python ament-cmake curl lsb-release gnupg
 ```
