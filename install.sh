@@ -16,7 +16,7 @@ echo ""
 version=`lsb_release -sc`
 relesenum=`grep DISTRIB_DESCRIPTION /etc/*-release | awk -F 'Ubuntu ' '{print $2}' | awk -F ' LTS' '{print $1}'`
 echo ">>> {Your Ubuntu version is: [Ubuntu $version $relesenum]}"
-#Checking version is focal, if yes proceed othervice quit
+#Checking version is jammy, if yes proceed othervice quit
 case $version in
   "jammy" )
   ;;
@@ -26,7 +26,7 @@ case $version in
 esac
 
 echo ""
-echo ">>> {ROS 2 HUmble is fully compatible with Ubuntu Jammy 22.04}"
+echo ">>> {ROS 2 Humble is fully compatible with Ubuntu Jammy 22.04}"
 echo ""
 echo "#######################################################################################################################"
 echo ">>> {Step 1: Configure your Ubuntu repositories}"
@@ -38,7 +38,7 @@ echo ""
 locale  # check for UTF-8
 
 sudo apt update 
-sudo apt install locales
+sudo apt install -y locales
 sudo locale-gen en_US en_US.UTF-8
 sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 export LANG=en_US.UTF-8
@@ -148,5 +148,8 @@ echo ""
 echo "#######################################################################################################################"
 echo "> {Step 9: Run Sim}"
 echo ""
+echo "Installation Succeeded"
+echo ""
 echo "You will now be able to run the simulation."
+echo "Navigate to ~/luna_ws/src/purdue_lunabotics to get to the code"
 echo "Type [source run.sh lunabot_bringup sim.launch] to start it"
