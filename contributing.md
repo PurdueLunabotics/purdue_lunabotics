@@ -44,6 +44,18 @@ Similar to python except [Google C++ Style Guide](https://google.github.io/style
 
 ## ROS 2 Tips
 
+### Workspace Layout
+```
+- ros2_ws
+  - src
+    - purdue_lunabotics
+    - any other ROS2 projects
+  - install (automatically generated on build)
+  - log (automatically generated on build)
+  - build (automatically generated on build)
+```
+When building the packages in your workspace, always call the build command from the ros2_ws directory. This will prevent the install, build, and log directories from being generated in arbitrary places in your project.
+
 ### Package Layout
 ```
 - lunabot_PACKAGE
