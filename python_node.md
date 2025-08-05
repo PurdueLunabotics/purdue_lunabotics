@@ -22,6 +22,7 @@ Add the 3 formulas together and you get the output speed
 More information about PID can be found [here](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html#introduction-to-pid) and [here](https://en.wikipedia.org/wiki/Proportional%E2%80%93integral%E2%80%93derivative_controller#Fundamental_operation)
 
 ## How do you code a Python ROS Node?
+The following steps will guide you through the creation of a python node in ROS2. If you find yourself needing more information/documentation, [here](https://docs.ros.org/en/humble/Tutorials/Beginner-Client-Libraries/Writing-A-Simple-Py-Publisher-And-Subscriber.html) is the ROS2 documentation for writing a Python node.
 
 ### First Steps
 - Open pid_control.py in lunabot_control/src/lunabot_control
