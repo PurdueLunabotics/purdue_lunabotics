@@ -46,10 +46,9 @@ Similar to python except [Google C++ Style Guide](https://google.github.io/style
 
 ### Workspace Layout
 ```
-- ros2_ws
+- luna_ws
   - src
     - purdue_lunabotics
-    - any other ROS2 projects
   - install (automatically generated on build)
   - log (automatically generated on build)
   - build (automatically generated on build)
@@ -60,17 +59,18 @@ When building the packages in your workspace, always call the build command from
 ```
 - lunabot_PACKAGE
   - include
-     - lunabot_PACKAGE
-        - *.h header files
-  - scripts
-     - Python ROS Node executables (use *.py extensions)
-  - lunabot_PACKAGE
-     - __init__.py (empty)
-     - python source files (.py), imported by executables in "scripts"
+    - lunabot_PACKAGE
+      - *.h header files
   - src
-     - *.cpp (source files and nodes)
+    - lunabot_PACKAGE
+     - __init__.py (empty)
+     - Python ROS Node executables (use *.py extensions)
+     - Other python source files (.py)
+    - *.cpp (source files and nodes)
   - package.xml
   - CMakelists.txt
+  - setup.cfg (for python packages)
+  - setup.py (for python packages)
 ```
 Use `ros2 pkg create <name>` to create a new package. 
 
@@ -112,23 +112,38 @@ install(TARGETS
 <buildtool_depend>ament_cmake_python</buildtool_depend>
 ```
 as well as any other dependencies for the python code.
-- In CMakeLists, make sure it contains
-```
-find_package(ament_cmake_python REQUIRED)
+- Make sure `setup.py` has this code:
+```py
+#!/usr/bin/env python3
 
-find_package(rclpy REQUIRED)
+from setuptools import setup
+
+package_name = "lunabot_PACKAGE"
+setup(
+  name=package_name,
+  version='1.0.0',
+  maintainer='Purdue Lunabotics',
+  maintainer_email='lunabot@purdue.edu',
+  description='DESCRIPTION',
+  license='None',
+  packages=[package_name], 
+  package_dir={"": "src"},
+  install_requires=['setuptools'],
+  zip_safe=True,
+  data_files=[
+    ('share/ament_index/resource_index/packages',
+        ['resource/' + package_name]),
+    ('share/' + package_name, ['package.xml']),
+],
+  entry_points={
+    'console_scripts': [
+        f'NODE = {package_name}.SOURCE_FILE:main',
+    ],
+},
+)
 ```
-and any other dependencies.
-- Set up a python package with 
-```
-ament_python_install_package(${PROJECT_NAME})
-```
-- Install the executable with
-```
-install(PROGRAMS
-        scripts/<name>.py
-        DESTINATION lib/${PROJECT_NAME})
-```
+  - Replace SOURCE_FILE with the file name without the .py extension
+  - Replace NODE with the name of the node, this is what you will call in a launch file
 
 ### Adding new messages:
 - Add a new `.msg` file to `lunabot_msgs/msg` with the datatypes/names (see current examples).
