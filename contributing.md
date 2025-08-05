@@ -54,7 +54,7 @@ Similar to python except [Google C++ Style Guide](https://google.github.io/style
   - log (automatically generated on build)
   - build (automatically generated on build)
 ```
-When building the packages in your workspace, always call the build command from the ros2_ws directory. This will prevent the install, build, and log directories from being generated in arbitrary places in your project.
+When building the packages in your workspace, always call the build command from the `ros2_ws` directory. This will prevent the install, build, and log directories from being generated in arbitrary places in your project.
 
 ### Package Layout
 ```
