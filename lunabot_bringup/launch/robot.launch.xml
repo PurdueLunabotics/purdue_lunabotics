@@ -1,5 +1,5 @@
-<!-- TODO: Finish pls -->
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- TODO: Finish pls -->
 <launch>
     <arg name="autonomy" default="true" />
     <arg name="record" default="true" />
@@ -77,3 +77,5 @@
 
         <!-- Launch the costmap node -->
         <include file="$(find lunabot_bringup)/launch/costmap.launch" />
+    </group>
+</launch>
