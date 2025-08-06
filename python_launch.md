@@ -47,10 +47,13 @@ node = Node(
 Using this template, you should now have the tools to create a basic launch file to launch the Python PID node you created. Below is an example of the general structure that your file should have. _Hint: the package name is 'lunabot_control', executable name is the node name you put into `lunabot_control`'s `setup.py`, and there shouldn't be any arguments._
 ```
 from launch import LaunchDescription
+from launch_ros.actions import Node
 
 def generate_launch_description():
   # define your node argument to pass into the launch file
+  node_launch_object = Node(...)
 
+  # define your launch description
   ld = LaunchDescription([
     node_launch_object
   ])
