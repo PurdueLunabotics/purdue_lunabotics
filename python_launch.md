@@ -66,4 +66,4 @@ def generate_launch_description():
 ```
 
 ## Additional Resources
-You are always advised to look toward the ROS2 documentation when in doubt (even your leads find themselves on it quite often ;)). The documentation on how to make a simple launch file in ROS2 is [here](https://docs.ros.org/en/foxy/Tutorials/Intermediate/Launch/Creating-Launch-Files.html).
+You are always advised to look toward the ROS2 documentation when in doubt (even your leads find themselves on it quite often ;)). The official documentation on how to make a simple launch file in ROS2 is [here](https://docs.ros.org/en/foxy/Tutorials/Intermediate/Launch/Creating-Launch-Files.html).
