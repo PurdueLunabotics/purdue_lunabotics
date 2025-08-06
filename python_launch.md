@@ -23,7 +23,12 @@ Every Python launch file needs a `generate_launch_description()` function. This 
 ### Making a Launch Description
 A `LaunchDescription` is instantiated as follows.
 ```
-ld = LaunchDescription([node1, launch_file, node2, etc., ...])
+ld = LaunchDescription([
+  node1,
+  another_launch_file,
+  node2,
+  ...
+])
 ```
 After the `launch,LaunchDescription` is created inside the `generate_launch_description()` function, all you need to do is return it from the function to finish your launch file.
 
