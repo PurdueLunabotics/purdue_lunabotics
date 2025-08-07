@@ -41,6 +41,7 @@ The following steps will guide you through the creation of a python node in ROS2
   - In parentheses are any classes that this class inherits from
 - All Python Nodes should inherit from the `rclpy.node.Node` class
   - Inheriting is a way for us to add functionality to our class without rewriting the code.
+  - You can import the Node class by using the from keyword. `from rclpy.node import Node` 
 - Every function within the class must have a first parameter of `self`.
   - This allows us to use the self object later on to create variables that don't get removed at the end of a function and can be accessed from anywhere in the code.
 
@@ -174,13 +175,14 @@ That concludes your `__init__` function, you may want to add additional variable
       thread = threading.Thread(target=cool_multi_threaded_function)
       ```
       - Next you have to run the `start()` function on that thread.
-    - Finally we need to tell our node to also run using the global executor.
+    - Finally, we need to tell our node to also run using the global executor.
       - Back in the `__init__` function, below the call to `super()`, we need to add the following line
       ```py
       rclpy.get_global_executor().add_node(self)
       ```
       - Since the class we are making inherits from Node, we can tell it to add itself as a node to the executor.
     - Now we will be able to get callbacks while also running our processing.
+  - Finally, you need to call your class's main loop function using the object you created before.
 
 
 
@@ -223,6 +225,6 @@ That concludes your `__init__` function, you may want to add additional variable
 - At the end of the file there is `entry_points`.
 - Within console scripts, you should add your node's name followed by the path to the main function of your node
   ```
-  example_node = lunabot_package.example_code:main
+  example_node = lunabot_package.example_code_file:main
   ```
 - Now you can test your node by running `ros2 run <lunabot_package> <example_node>`
