@@ -6,18 +6,18 @@ This is the official ROS 2 git repo of the Purdue Lunabotics software team.
 - Ubuntu 22.04
   - Directly supported, this is the ideal operating system
 - Windows: [WSL2](https://ubuntu.com/desktop/wsl)
-  - This acts as a ubuntu computer within your windows computer. It mostly works and will be good enough for most applications.
-  - Can be slower than running ubuntu directly
+  - This acts as an Ubuntu computer within your Windows computer. It mostly works and will be good enough for most applications.
+  - Can be slower than running Ubuntu directly
   - Make sure to install Ubuntu 22.04
 - Other Linux Versions: [Docker](https://docs.docker.com/get-docker/)
-  - Running a docker container that has ubuntu 22.04 will work fairly well.
+  - Running a docker container that has Ubuntu 22.04 will work fairly well.
   - You may need to do some setup to get the GUI to show up.
 - Bare Windows: Not Supported
-  - It is possible to use ROS on bare windows, but highly advised against as it is hard to do and not well supported
-  - WSL is the prefered method of running ROS on Windows Computers
+  - It is possible to use ROS on bare windows, but highly advised against as it is hard to do and not well-supported
+  - WSL is the preferred method of running ROS on Windows Computers
 - Mac: 
-  - It is possible to dual boot Ubuntu and MacOS, but this has not been tested.
-  - It is also possible to run ROS on bare MacOS, but you will have to build from source. See [here](https://docs.ros.org/en/humble/Installation/Alternatives/macOS-Development-Setup.html)
+  - It is possible to dual boot Ubuntu and macOS, but this has not been tested.
+  - It is also possible to run ROS on bare macOS, but you will have to build from source. See [here](https://docs.ros.org/en/humble/Installation/Alternatives/macOS-Development-Setup.html)
 
 
 ## Getting started
@@ -25,7 +25,7 @@ This is the official ROS 2 git repo of the Purdue Lunabotics software team.
 ### One Line Install:
 Run the following command to install everything (Must be in Ubuntu 22.04)
 ```
-wget -c https://raw.githubusercontent.com/PurdueLunabotics/purdue_lunabotics/refs/heads/ros2-develop/install.sh && chmod +x ./install.sh && ./install.sh
+wget -c https://raw.githubusercontent.com/PurdueLunabotics/purdue_lunabotics/refs/heads/ros2-develop/install.sh && chmod +x ./install.sh && ./install.sh && cd ~/luna_ws/src/purdue_lunabotics
 ```
 
 ### 1. Install Ubuntu 22.04
@@ -58,13 +58,13 @@ sudo apt update
 sudo apt upgrade
 ```
 
-Install Ros and Dev tools.
+Install ROS and Dev tools.
 ```
 sudo apt install ros-humble-desktop
 sudo apt install ros-dev-tools
 ```
 
-Setup your ros environment:
+Set up your ROS environment:
 ```
 source /opt/ros/humble/setup.bash
 ```
@@ -125,9 +125,9 @@ source build.sh
 ```
 ros2 launch lunabot_bringup sim.launch
 ```
-> you should see two new windows pop up: once called gazebo and one called rviz
+> you should see two new windows pop up: once called gazebo and one called RViz
 
-2. Set goal waypoint in rviz and watch the robot navigate
+2. Set goal waypoint in RViz and watch the robot navigate
 ![mpc_fix_gazebo_skid_steer](https://github.com/PurdueLunabotics/purdue_lunabotics/assets/41026849/a5cdaf41-f482-4b47-bd7b-bc8b7cb88880)
 
 <!-- TODO: fix any links once these things exist -->
