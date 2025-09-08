@@ -1,7 +1,7 @@
 ### Docker Setup
 This is intended for non-Mac, non-Windows, and non-Ubuntu 22.04 users. If you do not fall into this category, please follow the installation instructions on the main page.
 
-#### 1. Install [Docker Engine]<https://docs.docker.com/engine/install>
+#### 1. Install [Docker Engine](https://docs.docker.com/engine/install)
 Follow the installation instructions for your operating system on this page. Make sure that you are installing Docker Engine, and not Docker Desktop, to avoid issues.
 
 Following installation, open a terminal and run the following commands.
