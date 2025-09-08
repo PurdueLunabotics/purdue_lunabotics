@@ -95,7 +95,14 @@ rosdep install -i --from-path src --rosdistro humble -y
 <!-- TODO: Non-ros deps -->
 ### 4. Install other dependencies
 ```
-sudo apt install ros-humble-gz-ros2-control ros-humble-joint-state-publisher ament-cmake-python ament-cmake curl lsb-release gnupg
+sudo apt install \
+  ros-humble-gz-ros2-control \
+  ros-humble-joint-state-publisher \
+  ros-humble-rtabmap-ros \
+  ament-cmake-python \
+  ament-cmake \
+  curl \
+  lsb-release gnupg
 ```
 Install Gazebo Harmonic
 ```
