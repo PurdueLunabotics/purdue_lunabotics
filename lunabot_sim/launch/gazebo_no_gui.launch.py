@@ -51,13 +51,6 @@ def generate_launch_description():
         launch_arguments={'gz_args': ['-r -s -v4 ', world], 'on_exit_shutdown': 'true'}.items()
     )
 
-    gzclient_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(ros_gz_sim, 'launch', 'gz_sim.launch.py')
-        ),
-        launch_arguments={'gz_args': '-g -v4 ', 'on_exit_shutdown': 'true'}.items()
-    )
-
     robot_spawn_node = Node(
         package='ros_gz_sim',
         executable='create',
@@ -154,7 +147,6 @@ def generate_launch_description():
         # ),
 
         gzserver_cmd,
-        gzclient_cmd, #COMMENT THIS LINE TO REMOVE GUI
         robot_desc_launch,
         robot_spawn_node,
         start_gazebo_ros_bridge_cmd,

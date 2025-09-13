@@ -12,6 +12,8 @@ Panels:
         - /Path1
         - /Pose1
         - /Marker1
+        - /RobotModel1
+        - /RobotModel1/Description Topic1
       Splitter Ratio: 0.5
     Tree Height: 555
   - Class: rviz_common/Selection
@@ -31,7 +33,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2
+    SyncSource: ""
 Visualization Manager:
   Class: ""
   Displays:
@@ -76,8 +78,6 @@ Visualization Manager:
           Value: true
         left_front:
           Value: true
-        map:
-          Value: true
         middle_link:
           Value: true
         odom:
@@ -86,16 +86,12 @@ Visualization Manager:
           Value: true
         right_front:
           Value: true
-        tag36h11:7:
-          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        map:
-          {}
         odom:
           base_link:
             middle_link:
@@ -108,8 +104,7 @@ Visualization Manager:
                 d455_front_depth_link:
                   {}
                 d455_front_rgb_link:
-                  tag36h11:7:
-                    {}
+                  {}
               left_back:
                 {}
               left_front:
@@ -261,7 +256,7 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        target_paths: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -270,6 +265,87 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /ptp/line_path
       Value: true
+    - Alpha: 1
+      Class: rviz_default_plugins/RobotModel
+      Collision Enabled: false
+      Description File: ""
+      Description Source: Topic
+      Description Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /robot_description
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        d455_back_depth_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        d455_back_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        d455_back_rgb_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        d455_front_depth_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        d455_front_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        d455_front_rgb_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        left_back:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_front:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        middle_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        right_back:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_front:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+      Mass Properties:
+        Inertia: false
+        Mass: false
+      Name: RobotModel
+      TF Prefix: ""
+      Update Interval: 0
+      Value: true
+      Visual Enabled: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -352,5 +428,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: 1091
-  Y: 84
+  X: 1059
+  Y: 52

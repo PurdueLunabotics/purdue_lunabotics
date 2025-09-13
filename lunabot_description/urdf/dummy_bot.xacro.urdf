@@ -289,13 +289,13 @@
         <camera_info_topic>d455_back/color/camera_info</camera_info_topic>
         <horizontal_fov>1.50098</horizontal_fov>
         <image>
-          <width>848</width>
-          <height>480</height>
+          <width>424</width>
+          <height>240</height>
           <format>R8G8B8</format>
         </image>
         <clip>
           <near>0.02</near>
-          <far>10</far>
+          <far>3</far>
         </clip>
       </camera>
     </sensor>
@@ -312,13 +312,13 @@
         <camera_info_topic>d455_back/depth/camera_info</camera_info_topic>
         <horizontal_fov>1.50098</horizontal_fov>
         <image>
-          <width>848</width>
-          <height>480</height>
+          <width>424</width>
+          <height>240</height>
           <format>R_FLOAT32</format>
         </image>
         <clip>
           <near>0.02</near>
-          <far>10</far>
+          <far>3</far>
         </clip>
       </camera>
     </sensor>
@@ -395,13 +395,13 @@
         <camera_info_topic>d455_front/color/camera_info</camera_info_topic>
         <horizontal_fov>1.50098</horizontal_fov>
         <image>
-          <width>848</width>
-          <height>480</height>
+          <width>424</width>
+          <height>240</height>
           <format>R8G8B8</format>
         </image>
         <clip>
           <near>0.02</near>
-          <far>10</far>
+          <far>5</far>
         </clip>
       </camera>
     </sensor>
@@ -418,13 +418,13 @@
         <camera_info_topic>d455_front/depth/camera_info</camera_info_topic>
         <horizontal_fov>1.50098</horizontal_fov>
         <image>
-          <width>848</width>
-          <height>480</height>
+          <width>424</width>
+          <height>240</height>
           <format>R_FLOAT32</format>
         </image>
         <clip>
           <near>0.02</near>
-          <far>10</far>
+          <far>5</far>
         </clip>
       </camera>
     </sensor>

@@ -45,13 +45,13 @@
 
     <scene>
       <ambient>0.4 0.4 0.4 1</ambient>
-      <shadows>1</shadows>
+      <shadows>0</shadows>
     </scene>
 
     <physics type='ode'>
       <max_step_size>0.01</max_step_size>
       <real_time_factor>1</real_time_factor>
-      <real_time_update_rate>1000</real_time_update_rate>
+      <real_time_update_rate>100</real_time_update_rate>
     </physics>
 
     <gravity>0 0 -9.81</gravity>
@@ -253,143 +253,7 @@
         </collision>
       </link>
     </model>
-
-    <model name='arena_glass_short'>
-      <pose>3.66 0 1.85 0 0 0</pose>
-      <static>1</static>
-      <link name='arena_glass_short_link'>
-        <visual name='arena_glass_short'>
-          <geometry>
-            <box>
-              <size>0.1 5.26 2.0</size>
-            </box>
-          </geometry>
-          <material>
-            <ambient>0 0 0 0.5</ambient>
-            <diffuse>0 0 0 0.5</diffuse>
-            <specular>0 0 0 0.5</specular>
-          </material>
-        </visual>
-        <collision name='arena_glass_short_collision'>
-          <geometry>
-            <box>
-              <size>0.1 5 2.0</size>
-            </box>
-          </geometry>
-          <surface>
-            <friction>
-              <ode>
-                <mu>0.3</mu>
-                <mu2>0.3</mu2>
-              </ode>
-            </friction>
-          </surface>
-        </collision>
-      </link>
-    </model>
-
-    <model name='arena_glass_short_2'>
-      <pose>-3.66 0 1.85 0 0 0</pose>
-      <static>1</static>
-      <link name='arena_glass_short_2_link'>
-        <visual name='arena_glass_short_2'>
-          <geometry>
-            <box>
-              <size>0.1 5.26 2.0</size>
-            </box>
-          </geometry>
-          <material>
-            <ambient>0 0 0 0.5</ambient>
-            <diffuse>0 0 0 0.5</diffuse>
-            <specular>0 0 0 0.5</specular>
-          </material>
-        </visual>
-        <collision name='arena_glass_short_2_collision'>
-          <geometry>
-            <box>
-              <size>0.1 5.26 2.0</size>
-            </box>
-          </geometry>
-          <surface>
-            <friction>
-              <ode>
-                <mu>0.3</mu>
-                <mu2>0.3</mu2>
-              </ode>
-            </friction>
-          </surface>
-        </collision>
-      </link>
-    </model>
-
-    <model name='arena_glass_long'>
-      <pose>0 2.68 1.85 0 0 0</pose>
-      <static>1</static>
-      <link name='arena_glass_long_link'>
-        <visual name='arena_glass_long'>
-          <geometry>
-            <box>
-              <size>7.42 0.1 2</size>
-            </box>
-          </geometry>
-          <material>
-            <ambient>0 0 0 0.5</ambient>
-            <diffuse>0 0 0 0.5</diffuse>
-            <specular>0 0 0 0.5</specular>
-          </material>
-        </visual>
-        <collision name='arena_glass_long_collision'>
-          <geometry>
-            <box>
-              <size>7.42 0.1 2</size>
-            </box>
-          </geometry>
-          <surface>
-            <friction>
-              <ode>
-                <mu>0.3</mu>
-                <mu2>0.3</mu2>
-              </ode>
-            </friction>
-          </surface>
-        </collision>
-      </link>
-    </model>
-
-    <model name='arena_glass_long_2'>
-      <pose>0 -2.68 1.85 0 0 0</pose>
-      <static>1</static>
-      <link name='arena_glass_long_2_link'>
-        <visual name='arena_wall_short_2'>
-          <geometry>
-            <box>
-              <size>7.42 0.1 2</size>
-            </box>
-          </geometry>
-          <material>
-            <ambient>0 0 0 0.5</ambient>
-            <diffuse>0 0 0 0.5</diffuse>
-            <specular>0 0 0 0.5</specular>
-          </material>
-        </visual>
-        <collision name='arena_wall_short_2_collision'>
-          <geometry>
-            <box>
-              <size>7.42 0.1 2</size>
-            </box>
-          </geometry>
-          <surface>
-            <friction>
-              <ode>
-                <mu>0.3</mu>
-                <mu2>0.3</mu2>
-              </ode>
-            </friction>
-          </surface>
-        </collision>
-      </link>
-    </model>
-
+    
     <model name='column'>
       <pose>0 0 -0.02 0 0 0</pose>
       <static>1</static>
@@ -473,48 +337,6 @@
               </ode>
             </friction>
           </surface>
-        </collision>
-      </link>
-    </model>
-
-    <model name='rock_rough_2'>
-      <pose>0.63 -1.84 0.05 0 0 -0.62</pose>
-      <self_collide>1</self_collide>
-      <static>0</static>
-      <link name='rock_rough_2_link'>
-        <inertial>
-          <mass>5.0</mass>
-          <inertia>
-            <ixx>3.0</ixx>
-            <iyy>3.0</iyy>
-            <izz>3.0</izz>
-          </inertia>
-        </inertial>
-        <velocity_decay>
-          <linear>0.39</linear>
-          <angular>0.9</angular>
-        </velocity_decay>
-        <visual name='rock_rough_2'>
-          <geometry>
-            <mesh>
-              <uri>model://rock_rough/rock_rough.stl</uri>
-              <scale>1 1 1</scale>
-            </mesh>
-          </geometry>
-          <material>
-            <ambient>0.65 0.65 0.65 1</ambient>
-            <diffuse>0.65 0.65 0.65 1</diffuse>
-            <specular>0.65 0.65 0.65 1</specular>
-            <emissive>0 0 0 0</emissive>
-          </material>
-        </visual>
-        <collision name='rock_rough_2_collision'>
-          <geometry>
-            <mesh>
-              <uri>model://rock_rough/rock_rough.stl</uri>
-              <scale>1 1 1</scale>
-            </mesh>
-          </geometry>
         </collision>
       </link>
     </model>
@@ -603,49 +425,7 @@
       </link>
     </model>
 
-    <model name='rock_round_3'>
-      <pose>1.25 -1.0 0.05 0 0 2.5</pose>
-      <self_collide>1</self_collide>
-      <static>0</static>
-      <link name='rock_round_3_link'>
-        <inertial>
-          <mass>5.0</mass>
-          <inertia>
-            <ixx>3.0</ixx>
-            <iyy>3.0</iyy>
-            <izz>3.0</izz>
-          </inertia>
-        </inertial>
-        <velocity_decay>
-          <linear>0.39</linear>
-          <angular>0.9</angular>
-        </velocity_decay>
-        <visual name='rock_round_3'>
-          <geometry>
-            <mesh>
-              <uri>model://rock_round/rock_round.stl</uri>
-              <scale>1 1 1</scale>
-            </mesh>
-          </geometry>
-          <material>
-            <ambient>0.65 0.65 0.65 1</ambient>
-            <diffuse>0.65 0.65 0.65 1</diffuse>
-            <specular>0.65 0.65 0.65 1</specular>
-            <emissive>0 0 0 0</emissive>
-          </material>
-        </visual>
-        <collision name='rock_round_3_collision'>
-          <geometry>
-            <mesh>
-              <uri>model://rock_round/rock_round.stl</uri>
-              <scale>1 1 1</scale>
-            </mesh>
-          </geometry>
-        </collision>
-      </link>
-    </model>
-
-        <model name='tag_36_11_00007'>
+    <model name='tag_36_11_00007'>
       <pose>3.4 1.8 0.4 0 -1.58 0</pose>
       <static>1</static>
       <link name='link'>
