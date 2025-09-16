@@ -41,8 +41,8 @@
 
   <!-- mapping -->
   <group>
-    <node name="costmap" pkg="map_server" exec="map_server" output="screen" namespace="costmap">
-      <param from="$(find-pkg-share lunabot_config)/config/sim_map.yml"/>
+    <node name="costmap" pkg="nav2_map_server" exec="map_server" output="screen" namespace="costmap">
+      <param from="$(find-pkg-share lunabot_config)/config/map_server_params.yaml"/>
       <param name="use_sim_time" value="true"/>
     </node>
   </group>
