@@ -25,7 +25,6 @@
   <node args="-d $(var rvizconfig)" name="rviz" pkg="rviz2" exec="rviz2" />
 
   <!-- cameras -->
-  <include file="$(find-pkg-share lunabot_perception)/launch/sim_cameras.launch"/>
 
   <!-- navigation -->
   <group>
@@ -42,61 +41,9 @@
 
   <!-- mapping -->
   <group>
-    <node name="costmap" pkg="nav2_costmap_2d" exec="nav2_costmap_2d" output="screen" namespace="costmap">
-      <param from="$(find-pkg-share lunabot_config)/config/global_costmap.yml"/>
-      <remap from="costmap" to="/maps/costmap_node/global_costmap/costmap"/>
-      <remap from="costmap_updates" to="/maps/costmap_node/global_costmap/costmap_updates"/>
+    <node name="costmap" pkg="map_server" exec="map_server" output="screen" namespace="costmap">
+      <param from="$(find-pkg-share lunabot_config)/config/sim_map.yml"/>
       <param name="use_sim_time" value="true"/>
-    </node>
-    <node name="costmap_lifecycle" pkg="nav2_lifecycle_manager" exec="lifecycle_manager" namespace="costmap" output="screen">
-      <param name="autostart" value="true"/>
-      <param name="node_names" value="costmap" value-sep=";"/>
-      <param name="use_sim_time" value="true"/>
-    </node>
-  </group>
-
-  <group>
-    <push_ros_namespace namespace="rtabmap"/>
-
-    <!-- Odometry -->
-    <node pkg="rtabmap_odom" exec="rgbd_odometry" output="log" name="rgbd_odometry" ros_args="--log-level WARN">
-      <param name="subscribe_depth"     value="true"/>
-      <param name="frame_id"            value="base_link"/>
-      <param name="Odom/ResetCountdown" value="'1'"/>
-      <param name="use_sim_time" value="true"/>
-
-
-      <remap from="depth/image"         to="/d455_front/depth/image_raw"/>
-      <remap from="rgb/image"           to="/d455_front/color/image_raw"/>
-      <remap from="rgb/camera_info"     to="/d455_front/color/camera_info"/>
-    </node>
-
-    <node name="rtabmap" pkg="rtabmap_slam" exec="rtabmap" output="log" args="--delete_db_on_start" ros_args="--log-level WARN">
-      <param name="frame_id"                value="base_link"/>
-      <param name="use_sim_time" value="true"/>
-
-      <param name="subscribe_rgb"           value="false"/>
-      <param name="subscribe_depth"         value="false"/>
-      <param name="subscribe_rgbd"          value="false"/>
-      <param name="subscribe_scan_cloud"    value="true"/>
-
-      <remap from="odom"                    to="odom"/>
-      <remap from="scan_cloud"              to="/pointcloud/depth_combined_cloud"/>
-
-      <param name="gen_scan"                value="true"/>
-
-      <param name="sync_queue_size"              value="10"/>
-      <param name="approx_sync"             value="true"/>
-      <param name="map_always_update"       value="true"/>
-
-      <!-- RTAB-Map's parameters -->
-      <param name="Grid/Sensor"             value="'0'"/> <!-- Only use point clouds-->
-      <param name="Grid/FootprintLength"    value="'1.0'"/>
-      <param name="Grid/FootprintWidth"     value="'0.75'"/> 
-      <param name="Grid/MaxGroundAngle"     value="'30'"/> <!-- 30 degree normal before marked as obstacle -->
-      <param name="Grid/3D"                 value="'true'"/> <!-- 3D occupancy grid -->
-      <param name="Grid/FromDepth"          value="'false'"/> <!-- occupancy grid from lidar -->
-      
     </node>
   </group>
 </launch>
