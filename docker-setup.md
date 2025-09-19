@@ -104,7 +104,7 @@ RUN rosdep update && rosdep install --from-paths . --ignore-src -r -y
 COPY luna_ws/src/purdue_lunabotics /workspace/luna_ws/src/purdue_lunabotics
 RUN source ${ROS_SETUP}
 
-WORKDIR /workspace/ros2_ws
+WORKDIR /workspace/luna_ws
 RUN rosdep install -i --from-paths src --rosdistro humble -y
 
 
