@@ -50,17 +50,17 @@ class HomingController:
 
         # Decide on which camera to use
         if self.is_sim:
-            cam_topic = "/d435_backward/color/tag_detections"
+            cam_topic = "/d435_forward/color/tag_detections"
             self.cam_mode = "sim"
             rospy.loginfo("Homing Controller: Sim")
             self.BERM_TAG_IDS = [2,3]
-            self.camera_tf = "d435_backward_link"
+            self.camera_tf = "d435_forward_link"
         else:
-            cam_topic = "/d455_back/camera/color/tag_detections"
+            cam_topic = "/d455_front/camera/color/tag_detections"
             self.cam_mode = "back"
-            rospy.loginfo("Homing Controller: Using back cam")
+            rospy.loginfo("Homing Controller: Using front cam")
             self.BERM_TAG_IDS = [2,6]
-            self.camera_tf = "d455_back_link"
+            self.camera_tf = "d455_front_link"
 
         self.apriltag_subscriber = rospy.Subscriber(cam_topic,  AprilTagDetectionArray, self.apritag_callback)
 

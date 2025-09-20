@@ -156,10 +156,16 @@ def find_mining_zone(apriltag_pose_in_odom: PoseStamped, is_sim: bool)->Zone:
     """
 
     # KSC
-    DIST_X = 3.78  # In meters, the distance from the leftmost wall to the left border of the mining zone
-    LENGTH_X = 3   # In meters, the length of the mining zone (left to right)
-    DIST_Y = 1.5   # In meters, the distance from the bottom-most wall to the bottom border of the mining zone
-    LENGTH_Y = 3   # In meters, the length of the mining zone (bottom to top)
+    # DIST_X = 3.78  # In meters, the distance from the leftmost wall to the left border of the mining zone
+    # LENGTH_X = 3   # In meters, the length of the mining zone (left to right)
+    # DIST_Y = 1.5   # In meters, the distance from the bottom-most wall to the bottom border of the mining zone
+    # LENGTH_Y = 3   # In meters, the length of the mining zone (bottom to top)
+
+    # UK
+    DIST_X = 7.9-2.75
+    LENGTH_X = 2.75
+    DIST_Y = 0
+    LENGTH_Y = 4.4
 
     # UCF TOP
     # DIST_X = 5.44
@@ -186,10 +192,16 @@ def find_berm_zone(apriltag_pose_in_odom: PoseStamped, is_sim: bool)->Zone:
     """
 
     # KSC
-    DIST_X = 4.45
+    # DIST_X = 4.45
+    # LENGTH_X = 2
+    # DIST_Y = 0.45
+    # LENGTH_Y = -0.7  # Negative, because I'm defining the start as the top, and going down
+
+    # UK
+    DIST_X = 0.3
     LENGTH_X = 2
-    DIST_Y = 0.45
-    LENGTH_Y = -0.7  # Negative, because I'm defining the start as the top, and going down
+    DIST_Y = 3.3
+    LENGTH_Y = 0.7
 
     # UCF TOP
     # DIST_X = 5.94

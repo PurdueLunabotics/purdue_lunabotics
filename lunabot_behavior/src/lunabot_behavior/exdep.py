@@ -112,10 +112,7 @@ class ExdepController:
             # only plunge first two cycles to ensure full autonomy points
 
             # Note- this is changed back to normal until plunging can be stopped correctly
-            if self.cycle_count < 2:
-                self.excavation.excavate()
-            else:
-                self.excavation.excavate()
+            self.excavation.excavate()
 
             self.cycle_count += 1
 
@@ -144,13 +141,27 @@ class ExdepController:
             rospy.loginfo("Behavior: Moving to berm area")
             self.set_color(2) # Green for traversal
             
-            if (self.cycle_count > 1):
-                #move backwards back to berm area
-                cmd_vel.linear.x = -0.3
-                cmd_vel.angular.z = 0
-                self.cmd_vel_publisher.publish(cmd_vel)
+            # if (self.cycle_count > 1):
+            #     #move backwards back to berm area
+            #     cmd_vel.linear.x = -0.3
+            #     cmd_vel.angular.z = 0
+            #     self.cmd_vel_publisher.publish(cmd_vel)
 
-                rospy.sleep(2.5)
+            #     rospy.sleep(2.5)
+            
+            mining_goal = PoseStamped()
+            mining_goal.pose.position.x = self.mining_zone.middle[0]
+            mining_goal.pose.position.y = self.mining_zone.middle[1]
+
+            offset = zones.calc_offset(-0.3, 0, self.apriltag_pose_in_odom, self.is_sim)
+            mining_goal.pose.position.x += offset[0]
+            mining_goal.pose.position.y += offset[1]
+            mining_goal.pose.position.z = 0
+
+            mining_goal.header.stamp = rospy.Time.now()
+            mining_goal.header.frame_id = "odom"
+            
+            self.traversal_manager.traverse_to_goal(berm_goal, drive_backwards=True)
 
             # once we've arrived, stop.
             cmd_vel = Twist()
@@ -216,10 +227,12 @@ class ExdepController:
             cmd_vel.angular.z = 0
             self.cmd_vel_publisher.publish(cmd_vel)
 
-            if (self.cycle_count <= 3):
-                travel_time = (self.cycle_count - 1) * 0.5 + 3.5
-            else:
-                travel_time = (((self.cycle_count-3) // 3) * 1) + 3.5
+            # if (self.cycle_count <= 3):
+            #     travel_time = (self.cycle_count - 1) * 0.5 + 3.5
+            # else:
+            #     travel_time = (((self.cycle_count-3) // 3) * 1) + 3.5\
+            
+            travel_time = 1
 
             rospy.sleep(travel_time)
 
@@ -234,44 +247,58 @@ class ExdepController:
             rospy.loginfo("Behavior: Moving to mining area")
             self.set_color(2) # Green for traversal
             
-            if self.cycle_count <= 3 or self.cycle_count % 3 == 0 :
-                #center
-                pass
-            elif self.cycle_count % 3 == 1:
-                #left
-                cmd_vel.linear.x = 0
-                cmd_vel.angular.z = 0.2
-                self.cmd_vel_publisher.publish(cmd_vel)
+            # if self.cycle_count <= 3 or self.cycle_count % 3 == 0 :
+            #     #center
+            #     pass
+            # elif self.cycle_count % 3 == 1:
+            #     #left
+            #     cmd_vel.linear.x = 0
+            #     cmd_vel.angular.z = 0.2
+            #     self.cmd_vel_publisher.publish(cmd_vel)
 
-                rospy.sleep(4)
+            #     rospy.sleep(4)
 
-                # stop
-                cmd_vel.linear.x = 0
-                cmd_vel.angular.z = 0
-                self.cmd_vel_publisher.publish(cmd_vel)
+            #     # stop
+            #     cmd_vel.linear.x = 0
+            #     cmd_vel.angular.z = 0
+            #     self.cmd_vel_publisher.publish(cmd_vel)
 
-                rospy.sleep(0.3)
-            else:
-                #right
-                cmd_vel.linear.x = 0
-                cmd_vel.angular.z = -0.2
-                self.cmd_vel_publisher.publish(cmd_vel)
+            #     rospy.sleep(0.3)
+            # else:
+            #     #right
+            #     cmd_vel.linear.x = 0
+            #     cmd_vel.angular.z = -0.2
+            #     self.cmd_vel_publisher.publish(cmd_vel)
 
-                rospy.sleep(4)
+            #     rospy.sleep(4)
 
-                # stop
-                cmd_vel.linear.x = 0
-                cmd_vel.angular.z = 0
-                self.cmd_vel_publisher.publish(cmd_vel)
+            #     # stop
+            #     cmd_vel.linear.x = 0
+            #     cmd_vel.angular.z = 0
+            #     self.cmd_vel_publisher.publish(cmd_vel)
 
-                rospy.sleep(0.3)
+            #     rospy.sleep(0.3)
             
-            #move forwards to new excavation spot
-            cmd_vel.linear.x = 0.3
-            cmd_vel.angular.z = 0
-            self.cmd_vel_publisher.publish(cmd_vel)
+            # #move forwards to new excavation spot
+            # cmd_vel.linear.x = 0.3
+            # cmd_vel.angular.z = 0
+            # self.cmd_vel_publisher.publish(cmd_vel)
 
-            rospy.sleep(0.5)
+            # rospy.sleep(0.5)
+            
+            mining_goal = PoseStamped()
+            mining_goal.pose.position.x = self.mining_zone.middle[0]
+            mining_goal.pose.position.y = self.mining_zone.middle[1]
+
+            offset = zones.calc_offset(-0.3, 0, self.apriltag_pose_in_odom, self.is_sim)
+            mining_goal.pose.position.x += offset[0]
+            mining_goal.pose.position.y += offset[1]
+            mining_goal.pose.position.z = 0
+
+            mining_goal.header.stamp = rospy.Time.now()
+            mining_goal.header.frame_id = "odom"    
+            
+            self.traversal_manager.traverse_to_goal()
 
             # stop
             cmd_vel.linear.x = 0
