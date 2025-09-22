@@ -149,17 +149,17 @@ class ExdepController:
 
             #     rospy.sleep(2.5)
             
-            mining_goal = PoseStamped()
-            mining_goal.pose.position.x = self.mining_zone.middle[0]
-            mining_goal.pose.position.y = self.mining_zone.middle[1]
+            berm_goal = PoseStamped()
+            berm_goal.pose.position.x = self.berm_zone.middle[0]
+            berm_goal.pose.position.y = self.berm_zone.middle[1]
 
             offset = zones.calc_offset(-0.3, 0, self.apriltag_pose_in_odom, self.is_sim)
-            mining_goal.pose.position.x += offset[0]
-            mining_goal.pose.position.y += offset[1]
-            mining_goal.pose.position.z = 0
+            berm_goal.pose.position.x += offset[0]
+            berm_goal.pose.position.y += offset[1] + 1
+            berm_goal.pose.position.z = 0
 
-            mining_goal.header.stamp = rospy.Time.now()
-            mining_goal.header.frame_id = "odom"
+            berm_goal.header.stamp = rospy.Time.now()
+            berm_goal.header.frame_id = "odom"
             
             self.traversal_manager.traverse_to_goal(berm_goal, drive_backwards=True)
 

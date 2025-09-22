@@ -162,10 +162,10 @@ def find_mining_zone(apriltag_pose_in_odom: PoseStamped, is_sim: bool)->Zone:
     # LENGTH_Y = 3   # In meters, the length of the mining zone (bottom to top)
 
     # UK
-    DIST_X = 7.9-2.75
-    LENGTH_X = 2.75
+    DIST_X = 7.9
+    LENGTH_X = -2.75
     DIST_Y = 0
-    LENGTH_Y = 4.4
+    LENGTH_Y = -4.4
 
     # UCF TOP
     # DIST_X = 5.44
@@ -200,7 +200,7 @@ def find_berm_zone(apriltag_pose_in_odom: PoseStamped, is_sim: bool)->Zone:
     # UK
     DIST_X = 0.3
     LENGTH_X = 2
-    DIST_Y = 3.3
+    DIST_Y = -3.3
     LENGTH_Y = 0.7
 
     # UCF TOP
