@@ -152,7 +152,7 @@ double Dstar::calculate_RHS(grid_point point) {
         addition = sqrt(2);
       }
 
-      surrounding_values[i] = g_val + 1; // sqrt(2); TODO - handle non-cardinal directions - this should fix hugging obstacle
+      surrounding_values[i] = g_val + current_map [new_point.y][new_point.x]+1; // sqrt(2); TODO - handle non-cardinal directions - this should fix hugging obstacle
     } else {
       surrounding_values[i] = INT_MAX;
     }
