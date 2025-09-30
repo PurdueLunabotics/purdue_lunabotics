@@ -22,6 +22,7 @@ setup(
   entry_points={
     'console_scripts': [
         'point_to_point_node = lunabot_control.point_to_point:main',
+        'differential_drive_controller_node = lunabot_control.differential_drive_controller:main',
     ],
 },
 )
