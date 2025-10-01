@@ -16,13 +16,13 @@ class DifferentialDriveController(Node):
         super().__init__('differential_drive_controller_node', **kwargs)
         rclpy.get_global_executor().add_node(self)
 
-        # ROS Publishers and subsribers to get / send data
-
         self.declare_parameter("~width", 0.5588)
         self.declare_parameter("~max_speed_percentage", 0.8)
         self.declare_parameter("~hz", 20.0)
         self.declare_parameter("~max_speed", 1000.0)
         self.declare_parameter("autonomy", True)
+
+        # ROS Publishers and subsribers to get / send data
 
         self._vel_sub = self.create_subscription(Twist, "/cmd_vel", self._vel_cb, 1)
         self._right_drive_pub = self.create_publisher(Int32, "/right_drive", 10)
