@@ -151,8 +151,9 @@ double Dstar::calculate_RHS(grid_point point) {
       if (abs(cardinal_directions[i].x) == 1 && abs(cardinal_directions[i].y) == 1) {
         addition = sqrt(2);
       }
-
-      surrounding_values[i] = g_val + current_map [new_point.y][new_point.x]+1; // sqrt(2); TODO - handle non-cardinal directions - this should fix hugging obstacle
+      // uses the current occupancy grid to get information about the cost of a certain point
+      // also add a flat 1 for distance
+      surrounding_values[i] = g_val + current_map [new_point.y][new_point.x] + 1; // sqrt(2); TODO - handle non-cardinal directions - this should fix hugging obstacle
     } else {
       surrounding_values[i] = INT_MAX;
     }
