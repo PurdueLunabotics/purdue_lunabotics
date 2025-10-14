@@ -10,5 +10,5 @@ Columns are, in order
 - Name. This is displayed in the GUI.
 - Package the file is located in
 - Launch file name. This is the name of the file to be called
-- Whether or not to launch the file on the robot. True = robot, false = computer
+- Which device to launch it on. 0 = computer, 1 = main robot, 2 = minibot
 - Whether or not to launch the file when the "default startup" button is pressed. True = yes, false = no
