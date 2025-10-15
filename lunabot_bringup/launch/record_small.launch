@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="exp_name" default="exp" />
+  <node name="recorder_small" pkg="rosbag" type="record"
+    args="--repeat-latched -o $(find lunabot_bringup)/bags/simple-$(arg exp_name) 
+
+  /goal /maps/costmap_node/global_costmap/costmap /nav/global_path 
+  
+  /cmd_vel /rtabmap/odom /tf /tf_static /effort /sensors /errors /imu 
+
+  /mining_zone /apriltag_visual /berm_zone
+  
+  /ptp/log /ptp/target_pose /ptp/current_target /ptp/robot_state 
+  /ptp/line_path /ptp/angular_disparity /ptp/linear_disparity /ptp/heading /ptp/angle_target /ptp/pid_linear /ptp/pid_angular
+
+  /purePursuit/controller_vel /purePursuit/target_vel /purePursuit/slip_vec /purePursuit/final_vel /purePursuit/heading_err
+  "
+    output="screen" />
+</launch>

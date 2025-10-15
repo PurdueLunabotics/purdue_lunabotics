@@ -1,0 +1,6 @@
+<launch>
+  <arg default="$(find dummy_bot_description)/launch/urdf.rviz" name="rvizconfig"/>
+  <arg default="true" name="gui"/>
+  <param name="use_gui" value="$(arg gui)"/>
+  <node args="-d $(arg rvizconfig)" name="rviz" pkg="rviz" required="true" type="rviz"/>
+</launch>

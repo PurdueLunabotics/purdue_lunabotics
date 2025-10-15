@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="bag_name" default="2-5-mapping"/>
+  <arg name="rate" default="10"/>
+  <node pkg="rosbag" type="play" name="player" output="screen" args="--rate $(arg rate) --clock $(find lunabot_bringup)/bags/$(arg bag_name).bag" />
+</launch>

@@ -1,0 +1,22 @@
+Dummy bot URDF Specifications (in)
+Note: +x is forward facing, +z is upward, and +y is to the left 
+
+Wheel diameter
+15.75
+
+Wheel thickness
+1.75
+
+Distance between centers of wheels
+x: 24.00
+y: 20.00
+
+Wheel axle to camera
+x: 0.00
+y: 8.50 (from inside wheel) 
+z: 11.875 
+
+Wheel axle to realsense
+x: 4.25
+y: 8.50 (from inside wheel) 
+z: 3.95

@@ -1,0 +1,36 @@
+depth_topics:
+  - /d435_backward/depth/color/points
+  - /d435_forward/depth/color/points
+depth_frame_id: "d435_backward_link"
+pc_topic: "/point_cloud"
+odom_topic: "/odom"
+nav_goal_topic: "/goal"
+cmd_vel_topic: "/cmd_vel"
+apriltag_topic: "/apriltag_pose"
+
+nav:
+    map_topic: "/maps/costmap_node/global_costmap/costmap"
+    map_update_topic: "/maps/costmap_node/global_costmap/costmap_updates"
+    global_path_topic: "/nav/global_path"
+    occ_threshold: 50 # greater than this corresponds to possibly-in-collision
+    bezier_step: 0.01
+    lerp_step: 0.05
+
+    dstar_node:
+        path_sampling_rate: 5 # Take every <n-th> point from the path
+
+    pure_pursuit:
+        slip_k1: 0.3
+        heading_k2: 0.15
+        kp: 0.05
+        ki: 0
+        kd: 0
+        kv: 0.8
+        ka: 0.0002
+        frequency_p: 15
+        lookahead: 0.5
+        velocity_limits_p:
+            linear: [-0.5, 0.5]
+            angular: [-0.785, 0.785]
+
+is_sim: true

@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+message RobotSensors {
+  float lead_screw_curr = 1;
+  float act_right_curr = 2;
+  float dep_curr = 3;
+  float exc_curr = 4;
+  float drive_left_curr = 5;
+  float drive_right_curr = 6;
+
+  float drive_left_torque = 7;
+  float drive_right_torque = 8;
+  float exc_torque = 9;
+
+  float dep_weight = 10;
+  float uwb_dist_0 = 11;
+  float uwb_dist_1 = 12;
+  float uwb_dist_2 = 13;
+
+  float drive_left_vel = 14;
+  float drive_right_vel = 15;
+  float exc_vel = 16;
+  float load_cell_weight = 17;
+}
+
+message RobotEffort {
+  sint32 lin_act = 1;
+  sint32 left_drive = 2;
+  sint32 right_drive = 3;
+  sint32 excavate = 4;
+  sint32 deposit = 5;
+  bool should_reset = 6;
+}
