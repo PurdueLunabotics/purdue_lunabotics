@@ -6,20 +6,4 @@
 
 > Make sure you have 40-80GB of free space on the host computer
 
-3. Install ROS [Offical Noetic install](http://wiki.ros.org/noetic/Installation/Ubuntu)
-
-4. Install catkin 
-
-```
-sudo apt install python3-catkin-tools
-```
-
-5. Create a catkin workspace
-
-```
-mkdir /catkin_ws
-cd /catkin_ws
-catkin init
-```
-
-6. Clone the `purdue_lunabotics` repo. Follow setup instructions in readme
+3. Install the repo using the instructions in the readme

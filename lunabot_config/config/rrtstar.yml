@@ -1,4 +1,0 @@
-max_iter: 150
-disc_step: 0.05
-gamma: 7
-goal_sample_rate: 10 

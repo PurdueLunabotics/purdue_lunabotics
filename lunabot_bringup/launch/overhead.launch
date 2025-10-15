@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-  <arg name="image_view" default="false" />
-
-  <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
-      <rosparam command="load" file="$(find lunabot_config)/config/overhead.yml"/>
-  </node>
-
-</launch>
