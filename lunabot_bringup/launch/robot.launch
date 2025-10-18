@@ -56,12 +56,12 @@
             <arg name="rviz" value="false" />
         </include>
 
-         <!-- Launch effort factory -->
-        <node pkg="lunabot_control" type="effort_factory.py" name="effort_factory" output="screen" />
-
         <!-- Launch diff drive controller -->
-        <node pkg="lunabot_control" type="differential_drive_controller.py"
-              name="differential_drive_controller" output="screen" />
+        <node name="differential_drive_controller_node" pkg="lunabot_control" exec="differential_drive_controller_node" output="screen" respawn="true" />
+
+         <!-- Launch effort factory -->
+        <node name="effort_factory_node" pkg="lunabot_control" exec="effort_factory_node" output="screen" respawn="true" />
+
 
         <!-- Launch path following and path planning (navigation) -->
         <group>

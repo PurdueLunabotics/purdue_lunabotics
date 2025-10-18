@@ -40,6 +40,17 @@
     </node>
   </group>
 
+  <group>
+    <node name="differential_drive_controller_node" pkg="lunabot_control" exec="differential_drive_controller_node" output="screen" respawn="true" >
+    </node>
+
+    <node name="effort_factory_node" pkg="lunabot_control" exec="effort_factory_node" output="screen" respawn="true" >
+    </node>
+
+    <node name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true" >
+    </node>
+  </group>
+
   <!-- mapping -->
   <group>
     <node name="costmap" pkg="nav2_costmap_2d" exec="nav2_costmap_2d" output="screen" namespace="costmap">
