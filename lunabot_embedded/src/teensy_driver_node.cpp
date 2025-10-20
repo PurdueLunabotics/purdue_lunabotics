@@ -23,9 +23,6 @@ extern "C" {
 using namespace std;
 
 #define BUF_SIZE 64
-#define MAX_ANGLE_DELTA_DEG 15
-
-#define LEAKY_INTEGRATOR_ALPHA 0.6
 
 uint8_t buf[BUF_SIZE];
 
@@ -53,10 +50,6 @@ void recv(ros::Publisher &pub) {
   state_msg.drive_right_vel = state.drive_right_vel;
   state_msg.exc_torque = state.exc_torque;
   state_msg.exc_vel = state.exc_vel;
-  state_msg.uwb_dists.push_back(state.uwb_dist_0);
-  state_msg.uwb_dists.push_back(state.uwb_dist_1);
-  state_msg.uwb_dists.push_back(state.uwb_dist_2);
-  state_msg.load_cell_weight = state.load_cell_weight;
 
   pub.publish(state_msg);
 }
