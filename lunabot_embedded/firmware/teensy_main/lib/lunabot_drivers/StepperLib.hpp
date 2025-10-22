@@ -3,6 +3,11 @@
 #include <Arduino.h>
 #include "ModbusLite.hpp"
 
+enum StepperLibMotorType {
+    ISV2,
+    BLD305S,
+};
+
 class StepperMotor {
 public:
   uint16_t def_speed;

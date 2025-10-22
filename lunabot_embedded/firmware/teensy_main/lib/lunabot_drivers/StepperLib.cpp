@@ -52,6 +52,7 @@ struct ControlCmds {
   uint16_t ResetAlarm = 0x1111;
 } ControlCmds;
 
+
 // Create a StepperMotor object
 // MotorID and baudrate are required
 // Optional default values for speed, acceleration, deceleration
