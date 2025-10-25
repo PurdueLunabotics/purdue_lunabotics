@@ -98,5 +98,7 @@
       <param name="Grid/FromDepth"          value="'false'"/> <!-- occupancy grid from lidar -->
       
     </node>
+
+    <node name="map_base_node" pkg="lunabot_slam" exec="map_base_node.py" output="screen" respawn="false"/>
   </group>
 </launch>
