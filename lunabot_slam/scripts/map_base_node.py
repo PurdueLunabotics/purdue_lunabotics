@@ -15,7 +15,7 @@ class MapBase(Node):
     def __init__(self):
         super().__init__("map_base_node")
 
-        # transform we're looking for is from map to baselink
+        # transform we're looking for is from base link back to map
         self.from_frame_rel = "base_link"
         self.to_frame_rel = "map"
 
@@ -24,7 +24,6 @@ class MapBase(Node):
 
         self.odom_listener = self.create_subscription(Odometry, "odom", self.__odom_callback, 10)
         self.position_publisher = self.create_publisher(PoseStamped, "position", 10)
-        # self.transform_publisher = self.create_publisher(Transform, "map_baselink", 10)
 
     def __odom_callback(self, msg: Odometry):
         try:
@@ -40,17 +39,9 @@ class MapBase(Node):
 
         map_pose.header = Header()
         map_pose.header.stamp = msg.header.stamp
-        map_pose.header.frame_id = self.to_frame_rel
+        map_pose.header.frame_id = self.to_frame_rel # transformed pose should be in "map"
 
-        # pos = Point()
-        # [pos.x, pos.y, pos.z] = [t.transform.translation.x, t.transform.translation.y, t.transform.translation.z]
-        # map_pose.pose.position = pos
-
-        # map_pose.pose.orientation = Quaternion() #t.transform.rotation
-
-        # self.transform_publisher.publish(t)
         self.position_publisher.publish(map_pose)
-        # print("[POSE CONVERSION] Created map-based pose")
 
 def main():
     # print("running")

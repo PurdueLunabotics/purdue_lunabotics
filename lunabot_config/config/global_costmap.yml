@@ -2,7 +2,7 @@ costmap:
   costmap:
     ros__parameters:
       publish_frequency: 30.0
-      global_frame: "odom"
+      global_frame: "map"
       robot_base_frame: "base_link"
       robot_radius: 0.5
       plugins: ["static_layer", "inflation_layer"]
