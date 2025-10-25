@@ -4,7 +4,7 @@ import numpy as np
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Int32
+from std_msgs.msg import Bool, Int32
 import threading
 
 from lunabot_msgs.msg import RobotSensors
@@ -20,7 +20,9 @@ class DifferentialDriveController(Node):
         self.declare_parameter("~max_speed_percentage", 0.8)
         self.declare_parameter("~hz", 20.0)
         self.declare_parameter("~max_speed", 1000.0)
-        self.declare_parameter("autonomy", True)
+
+        self.autonomy = True
+        self._autonomy_sub = self.create_subscription(Bool, "/autonomy", self._autonomy_cb, 1)
 
         # ROS Publishers and subsribers to get / send data
 
@@ -55,11 +57,14 @@ class DifferentialDriveController(Node):
         # rospy.on_shutdown(self.shutdown_hook)
 
         while rclpy.ok():
-            if (self.get_parameter("autonomy").get_parameter_value().bool_value):
+            if (self.autonomy):
                 self._loop()
             rate.sleep()
 
         self.shutdown_hook()
+
+    def _autonomy_cb(self, autonomy: Bool):
+        self.autonomy = autonomy.data
 
     def _vel_cb(self, vel_msg):
         self.lin = vel_msg.linear.x

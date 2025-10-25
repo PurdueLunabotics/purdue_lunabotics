@@ -19,7 +19,6 @@ find_package(std_msgs REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/RobotEffort.msg"
   "msg/RobotSensors.msg"
-  "msg/RobotErrors.msg"
   DEPENDENCIES std_msgs
 )
 # Add any packages that above messages depend on in a list next to DEPENDENCIES.

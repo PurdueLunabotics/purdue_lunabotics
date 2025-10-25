@@ -4,7 +4,7 @@ from rclpy.node import Node
 import threading
 import rclpy
 
-from lunabot_msgs.msg import RobotEffort, RobotErrors
+from lunabot_msgs.msg import RobotEffort 
 from std_msgs.msg import Int8, Int32, Bool
 
 
@@ -25,9 +25,8 @@ class EffortFactory(Node):
         self.deposition = 0
         self.should_reset = False
 
-        self.declare_parameter("autonomy", True)
-
-        self.robot_errors = RobotErrors()
+        self.autonomy = True
+        self._autonomy_sub = self.create_subscription(Bool, "/autonomy", self._autonomy_cb, 1)
 
         self.effort_publisher = self.create_publisher(
             RobotEffort, "/effort",  10
@@ -39,23 +38,15 @@ class EffortFactory(Node):
         self.excavate_subscriber = self.create_subscription(Int32, "/excavate", self.set_excavate, 1)
         self.deposition_subscriber = self.create_subscription(Int32, "/deposition", self.set_deposition, 1)
 
-        self.error_subscriber = self.create_subscription(RobotErrors, "/errors", self.error_callback, 1)
-        self.stall_subscriber = self.create_subscription(Bool, "/stalled", self.stall_callback, 1)
-        self.stall_publisher = self.create_publisher(Bool, "/stalled", 10)
-        self.stalled = False
-        self.cleared_stall = False
-
         rate = self.create_rate(50.0, self.get_clock())
 
         while rclpy.ok():
-            if (self.get_parameter("autonomy").get_parameter_value().bool_value):
-                if self.stalled == True: # if stalled, don't publish effort
-                    self.fix_stall()
-                elif self.robot_errors.manual_stop == False:
-                    self.publish_effort()
-                else:
-                    self.stop()
+            if (self.autonomy):
+                self.publish_effort()
             rate.sleep()
+
+    def _autonomy_cb(self, autonomy: Bool):
+        self.autonomy = autonomy.data
 
     def set_lin_act(self, lin_act: Int32):
         self.lin_act = lin_act.data
@@ -71,13 +62,6 @@ class EffortFactory(Node):
 
     def set_deposition(self, deposition: Int32):
         self.deposition = deposition.data
-
-    def error_callback(self, msg: RobotErrors):
-        self.robot_errors = msg
-
-    def stall_callback(self, msg: Bool):
-        self.stalled = msg.data
-        self.cleared_stall = False
 
     def publish_effort(self):
         # print("published effort")
@@ -99,41 +83,13 @@ class EffortFactory(Node):
         self.effort.deposit = 0
 
         self.effort_publisher.publish(self.effort)
-    
-    def fix_stall(self):
-        self.get_logger().error("Fixing Stall")
-
-        self.effort.lin_act = 0
-        self.effort.left_drive = 0
-        self.effort.right_drive = 0
-        self.effort.excavate = 0
-        self.effort.deposit = 0
-        self.effort.should_reset = True
-        
-        self.effort_publisher.publish(self.effort)
-
-        self.create_timer(0.5).sleep()
-
-        # self.effort.lin_act = 100
-        # self.effort.left_drive = 0
-        # self.effort.right_drive = 0
-        # self.effort.excavate = 0
-        # self.effort.deposit = 0
-        # self.effort.should_reset = False
-        self.stalled = False
-        self.should_reset = False
-        
-        # self.effort_publisher.publish(self.effort)
-        self.stall_publisher.publish(False)
-        
-        # self.cleared_stall = True
 
 
 def spin_in_background():
     executor = rclpy.get_global_executor()
     try:
         executor.spin()
-    except ExternalShutdownException: # Not defined
+    except Exception: # Not defined
         pass
 
 def main():
@@ -141,4 +97,3 @@ def main():
     t = threading.Thread(target=spin_in_background)
     t.start()
     controller = EffortFactory()
-    controller.run_node()
