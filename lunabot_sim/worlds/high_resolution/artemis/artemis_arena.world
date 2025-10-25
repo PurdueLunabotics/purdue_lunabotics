@@ -243,7 +243,7 @@
     </model>
 
     <model name='rock_round'>
-      <pose>1.32307 0.270163 0.05 0 0 0.846674</pose>
+      <pose>1.52307 0.570163 0.05 0 0 0.846674</pose>
       <static>1</static>
       <link name='link'>
         <visual name='rock_round'>
