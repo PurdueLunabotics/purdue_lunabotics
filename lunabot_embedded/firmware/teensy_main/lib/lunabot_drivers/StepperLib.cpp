@@ -10,7 +10,7 @@
 
 // TODO RJN - deal with alarms and error codes
 
-struct Addrs {                   // addrs of various motor params
+struct ISV2Addrs {                   // addrs of various motor params
   uint16_t ControlMode = 0x0003; // position or velocity control
   uint16_t Reset = 0x0033;       // reset alarms or the entire motor
   // there is a bunch of PID stuff here - probably easier to tune with motionstudio
@@ -41,16 +41,49 @@ struct Addrs {                   // addrs of various motor params
   uint16_t Acceleration = 0x0319;
   uint16_t Deceleration = 0x031B;
 
-} Addrs;
+} ISV2Addrs;
 
-struct ControlCmds {
+struct BLD305SAddrs {                   // addrs of various motor params
+  //uint16_t ControlMode = 0xFFFF; // Not applicable
+  uint16_t AutoReset = 0x0106;       // whether motor auto resets
+  uint16_t InternalEnable = 0x0136; 
+  //uint16_t RS485_Mode = 0xFFFF;     // Not applicable
+  uint16_t RS485_BAUD = 0x00F6;     // USE SWITCHES INSTEAD - BAUD SHOULD BE 19200
+  uint16_t RS485_ID = 0x00A6;       // Spec sheet refers to this as driver address
+
+  uint16_t ErrorCode = 0x0076;      // 1-Overcurrent, 2-Over temperature, 3-Overpressure, 4-Undervoltage, 5-Sensor abnormality, 6-Overspeed, 8-Stalled, 9-Peak current
+  uint16_t MotorState = 0x0066;     // 0 - Stop, 1 - Forward rotation, 2 - Reverse rotation, 3 - Stop brake
+  //uint16_t Read_Torque = ;         // % of rated
+  uint16_t Read_Current = 0x00B6;        // 1 /25 A
+  uint16_t Read_Speed = 0x005F;       // rpm, does not differentiate between filtered or unfiltered
+  uint16_t Read_Voltage = 0x00C6;        // V
+  uint16_t Read_Temperature = 0x0096;    // deg C
+  //uint16_t Read_OverLoadRatio = 0xFFFF;  // %
+  //uint16_t Read_RegenLoadRatio = 0xFFFF; // %
+  // digital input stuff
+  // motor position stuff
+  //uint16_t Read_MotorPosition = 0xFFFF; // unit: pulses - 32 bit! (low is +1)
+  uint16_t Set_Speed = 0X0056; // 0 to 4000 in rpm
+  uint16_t Acceleration = 0x00E6; // in units of time. No differentiation betwen acceleration and deceleration
+  uint16_t Save_State = 0x80FF; // write save code to save state
+
+} BLD305SAddrs;
+
+struct ISV2ControlCmds {
   uint8_t ESTOP = 0x40;
   uint8_t ENABLE = 0x83;
   uint16_t VelocityMode = 0x0001;
   uint16_t DigitalSpeedMode = 0x0001;
   uint16_t Save = 0x2211;
   uint16_t ResetAlarm = 0x1111;
-} ControlCmds;
+} ISV2ControlCmds;
+
+struct BLD305SControlCmds {
+  uint16_t ESTOP = 0x0000;
+  uint16_t ENABLE = 0x0001;
+  uint16_t Save = 0x55AA;
+  uint16_t Reset = 0x0000;
+} BLD305SControlCmds;
 
 
 // Create a StepperMotor object
@@ -58,39 +91,72 @@ struct ControlCmds {
 // Optional default values for speed, acceleration, deceleration
 // speed in rpm
 // acceleration and deceleration in ms/1000 rpm
-StepperMotor::StepperMotor(uint8_t MotorID, uint16_t def_acceleration, uint16_t def_deceleration) {
+StepperMotor::StepperMotor(uint8_t MotorID, StepperLibMotorType motor_type, uint16_t def_acceleration, uint16_t def_deceleration) {
   this->MotorID = MotorID;
+  this->motor_type = motor_type;
   this->def_acceleration = def_acceleration;
   this->def_deceleration = def_deceleration;
 }
 
 void StepperMotor::begin() {
   modbus_begin();
-  write_register(Addrs.InternalEnable, ControlCmds.ENABLE);
+  if (motor_type == ISV2) {
+    write_register(ISV2Addrs.InternalEnable, ISV2ControlCmds.ENABLE);
 
-  write_register(Addrs.ControlMode, ControlCmds.VelocityMode);
-  write_register(Addrs.SpeedMode, ControlCmds.DigitalSpeedMode);
-  write_register(Addrs.Reset, ControlCmds.Save);
+    write_register(ISV2Addrs.ControlMode, ISV2ControlCmds.VelocityMode);
+    write_register(ISV2Addrs.SpeedMode, ISV2ControlCmds.DigitalSpeedMode);
+    write_register(ISV2Addrs.Reset, ISV2ControlCmds.Save);
 
-  write_register(Addrs.Acceleration, def_acceleration);
-  write_register(Addrs.Deceleration, def_deceleration);
-  write_register(Addrs.Speed, 0);
+    write_register(ISV2Addrs.Acceleration, def_acceleration);
+    write_register(ISV2Addrs.Deceleration, def_deceleration);
+    write_register(ISV2Addrs.Speed, 0);
+  }
+  else if (motor_type == BLD305S) {
+    write_register(BLD305SAddrs.InternalEnable, BLD305SControlCmds.ENABLE);
+    write_register(BLD305SAddrs.Save_State, BLD305SControlCmds.Save);
+    write_register(BLD305SAddrs.Acceleration, def_acceleration); // no differentiation between acceleration and deceleration
+    write_register(BLD305SAddrs.Set_Speed, 0);
+  }
 }
 
 // emergency stops motor
 void StepperMotor::write_estop() {
-  move_at_speed(0);
+  if (motor_type == ISV2) {
+    move_at_speed(0);
+  }
+  else if (motor_type == BLD305S) {
+    write_register(BLD305SAddrs.MotorState, 3);
+  }
+  //Note: forBLD305S, you can set the motor state to stop.
 }
 
-// emergency stops motor
+// clears errors
 void StepperMotor::clear_errors() {
-  write_register(Addrs.Reset, ControlCmds.ResetAlarm);
+  if (motor_type == ISV2) {
+    write_register(ISV2Addrs.Reset, ISV2ControlCmds.ResetAlarm);
+  }
+  else if (motor_type == BLD305S) {
+    write_register(BLD305SAddrs.ErrorCode, 0);
+  }
 }
 
 // move the motor at constant velocity, using default values for acceleration and deceleration unless specified
 // speed in rpm
-void StepperMotor::move_at_speed(uint16_t speed) {
-  write_register(Addrs.Speed, speed);
+//NEEDS to be signed since negative and positive values can be passed in. doesn't change underlying bits stored, 
+// but changes how c code interprets the value in arthmetic operations.
+void StepperMotor::move_at_speed(int16_t speed) {
+  if (motor_type == ISV2) {
+    write_register(ISV2Addrs.Speed, speed);
+  }
+  else if (motor_type == BLD305S) {
+    if (speed < 0) {
+      write_register(BLD305SAddrs.MotorState, 2);
+    }
+    else {
+      write_register(BLD305SAddrs.MotorState, 1);
+    }
+    write_register(BLD305SAddrs.Set_Speed, abs(speed));
+  }
 }
 
 void StepperMotor::write_register(uint16_t addr, uint16_t data) {
@@ -103,85 +169,225 @@ int StepperMotor::read_register(uint16_t addr, uint16_t num_to_read) {
 
 // rpm - unfilitered
 int StepperMotor::read_raw_velocity() {
-  return (int16_t)read_register(Addrs.Read_RawVelocity);
+  if (motor_type == ISV2) {
+    return (int16_t)read_register(ISV2Addrs.Read_RawVelocity);
+  }
+  else if (motor_type == BLD305S) {
+    if (read_register(BLD305SAddrs.MotorState) == 2) {
+      return -1 * (int16_t)read_register(BLD305SAddrs.Read_Speed);
+    }
+    else {
+      return (int16_t)read_register(BLD305SAddrs.Read_Speed);
+    }
+  }
+  return -1;
 }
 
 // rpm
 int StepperMotor::read_velocity() {
-  return (int16_t)read_register(Addrs.Read_Velocity);
+  if (motor_type == ISV2) {
+    return (int16_t)read_register(ISV2Addrs.Read_Velocity);
+  }
+  else if (motor_type == BLD305S) {
+    if (read_register(BLD305SAddrs.MotorState) == 2) {
+      return -1 * (int16_t)read_register(BLD305SAddrs.Read_Speed);
+    }
+    else {
+      return (int16_t)read_register(BLD305SAddrs.Read_Speed);
+    }
+  }
+  return -1;
+  
 }
 
 // % of rated
 int StepperMotor::read_torque() {
-  return (int16_t)read_register(Addrs.Read_Torque);
+  if (motor_type == ISV2) {
+    return (int16_t)read_register(ISV2Addrs.Read_Torque);
+  }
+  else if (motor_type == BLD305S) {
+    return -1;
+  }
+  return -1;
+  
 }
 
 // amps
 float StepperMotor::read_current() {
-  int x = (int16_t)read_register(Addrs.Read_Current);
-  if (x == -1) {
-    return -1;
+  if (motor_type == ISV2) {
+    int x = (int16_t)read_register(ISV2Addrs.Read_Current);
+    if (x == -1) {
+      return -1;
+    }
+    return x * 0.1;
   }
-  return x * 0.1;
+  else if (motor_type == BLD305S) {
+    int x = (int16_t)read_register(BLD305SAddrs.Read_Current);
+    if (x == -1) {
+      return -1;
+    }
+    return x / 25.0;
+  }
+  return -1;
 }
 
 // volts
 int StepperMotor::read_voltage() {
-  return read_register(Addrs.Read_Voltage);
+  if (motor_type == ISV2) {
+    return read_register(ISV2Addrs.Read_Voltage);
+  }
+  else if (motor_type == BLD305S) {
+    return read_register(BLD305SAddrs.Read_Voltage);
+  }
+  return -1;
+  
 }
 
 // deg C
 int StepperMotor::read_temperature() {
-  return read_register(Addrs.Read_Temperature);
+  if (motor_type == ISV2) {
+    return read_register(ISV2Addrs.Read_Temperature);
+  }
+  else if (motor_type == BLD305S) {
+    return read_register(BLD305SAddrs.Read_Temperature);
+  }
+  return -1;
+  
 }
 
 // %
 int StepperMotor::read_over_load_ratio() {
-  return read_register(Addrs.Read_OverLoadRatio);
+  if (motor_type == ISV2) {
+    return read_register(ISV2Addrs.Read_OverLoadRatio);
+  }
+  else if (motor_type == BLD305S) {
+    return -1;
+  }
+  return -1;
+  
 }
 
 // %
 int StepperMotor::read_regen_load_ratio() {
-  return read_register(Addrs.Read_RegenLoadRatio);
+  if (motor_type == ISV2) {
+    return read_register(ISV2Addrs.Read_RegenLoadRatio);
+  }
+  else if (motor_type == BLD305S) {
+    return -1;
+  }
+  return -1;
+  
 }
 
 // pulses
 int StepperMotor::read_motor_position_raw() {
-  return read_register(Addrs.Read_MotorPosition, 2); // this is a 2 byte value
+  if (motor_type == ISV2) {
+    return read_register(ISV2Addrs.Read_MotorPosition, 2); // this is a 2 byte value
+  }
+  else if (motor_type == BLD305S) {
+    return -1;
+  }
+  return -1;
 }
 
 // radians
 float StepperMotor::read_motor_position_radians() {
-  int x = read_motor_position_raw();
-  if (x == -1) {
+  if (motor_type == ISV2) {
+    int x = read_motor_position_raw();
+    if (x == -1) {
+      return -1;
+    }
+    return x / 10000.0 * 2 * PI; // 2500 pulses per rotation, * 2 * PI
+  }
+  else if (motor_type == BLD305S) {
     return -1;
   }
-  return x / 10000.0 * 2 * PI; // 2500 pulses per rotation, * 2 * PI
+  return -1;
+  
 }
 
 // print the motor state from the state register
 void StepperMotor::print_motor_state() {
-  switch (read_register(Addrs.Read_MotorState)) {
-  case 0:
-    Serial.println("Motor State: Ready");
-    break;
-  case 1:
-    Serial.println("Motor State: Run");
-    break;
-  case 2:
-    Serial.println("Motor State: Error");
-    break;
-  case 3:
-    Serial.println("Motor State: Home OK");
-    break;
-  case 4:
-    Serial.println("Motor State: at pos");
-    break;
-  case 5:
-    Serial.println("Motor State: at speed");
-    break;
-  default:
-    Serial.println("Motor State: ???");
-    break;
+  if (motor_type == ISV2) {
+    switch (read_register(ISV2Addrs.Read_MotorState)) {
+    case 0:
+      Serial.println("Motor State: Ready");
+      break;
+    case 1:
+      Serial.println("Motor State: Run");
+      break;
+    case 2:
+      Serial.println("Motor State: Error");
+      break;
+    case 3:
+      Serial.println("Motor State: Home OK");
+      break;
+    case 4:
+      Serial.println("Motor State: at pos");
+      break;
+    case 5:
+      Serial.println("Motor State: at speed");
+      break;
+    default:
+      Serial.println("Motor State: ???");
+      break;
+    }
+  }
+  else if (motor_type == BLD305S) {
+    switch (read_register(BLD305SAddrs.Read_MotorState)) {
+    case 0:
+      Serial.println("Motor State: Stop");
+      break;
+    case 1:
+      Serial.println("Motor State: Run Forward");
+      break;
+    case 2:
+      Serial.println("Motor State: Run Backwards");
+      break;
+    case 3:
+      Serial.println("Motor State: Brake Stop");
+      break;
+    default:
+      Serial.println("Motor State: ???");
+      break;
+    }
+    switch (read_register(BLD305SAddrs.ErrorCode)) {
+    case 0:
+      Serial.println("Error State: Nothing");
+      break;
+    case 1:
+      Serial.println("Error State: Overcurrent");
+      break;
+    case 2:
+      Serial.println("Error State: Over temperature");
+      break;
+    case 3:
+      Serial.println("Error State: Overpressure");
+      break;
+    case 4:
+      Serial.println("Error State: Undervoltage");
+      break;
+    case 5:
+      Serial.println("Error State: Sensor abnormality");
+      break;
+    case 6:
+      Serial.println("Error State: Overspeed");
+      break;
+    case 7:
+      Serial.println("Error State: ????");
+      break;
+    case 8:
+      Serial.println("Error State: Stalled");
+      break;
+    case 9:
+      Serial.println("Error State: Peak current");
+      break;
+    default:
+      Serial.println("Error State: ???");
+      break;
+    }
+  }
+  else {
+    Serial.println("Invalid motor type");
   }
 }

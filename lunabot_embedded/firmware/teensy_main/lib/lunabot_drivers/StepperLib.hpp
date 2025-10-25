@@ -11,10 +11,11 @@ enum StepperLibMotorType {
 class StepperMotor {
 public:
   uint16_t def_speed;
+  StepperLibMotorType motor_type;
   uint16_t def_acceleration;
   uint16_t def_deceleration;
 
-  StepperMotor(uint8_t MotorID, uint16_t def_acceleration = 470, uint16_t def_deceleration = 470);
+  StepperMotor(uint8_t MotorID, StepperLibMotorType motor_type, uint16_t def_acceleration = 470, uint16_t def_deceleration = 470);
 
   void begin();
   void write_estop();
