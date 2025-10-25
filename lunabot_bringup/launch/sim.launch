@@ -49,6 +49,12 @@
 
     <node name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true" >
     </node>
+
+    <node name="manual_controller_node" pkg="lunabot_control" exec="manual_controller_node" output="screen" respawn="true" >
+    </node>
+
+    <node name="joystick_node" pkg="joy" exec="joy_node" output="screen" respawn="true" >
+    </node>
   </group>
 
   <!-- mapping -->
