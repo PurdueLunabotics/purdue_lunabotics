@@ -62,9 +62,21 @@ def generate_launch_description():
         package='ros_gz_sim',
         executable='create',
         arguments=[
-            '-topic', 'robot_description',
+            '-topic', 'dummy_bot/robot_description',
             '-name', 'dummy_bot',
             '-x', '2.5', '-y', '1.75', '-z', '0.25',
+            '-Y', '-1.570796327', # yaw
+            "--ros-args"
+        ],
+        output='screen'
+    )
+    mini_robot_spawn_node = Node(
+        package='ros_gz_sim',
+        executable='create',
+        arguments=[
+            '-topic', 'mini_bot/robot_description',
+            '-name', 'mini_bot',
+            '-x', '1.5', '-y', '1.75', '-z', '0.25',
             '-Y', '-1.570796327', # yaw
             "--ros-args"
         ],
@@ -108,28 +120,16 @@ def generate_launch_description():
         output='screen',
     )
     
-    start_gazebo_ros_rgb_back_image_bridge_cmd = Node(
+    start_gazebo_ros_image_bridge_cmd = Node(
         package='ros_gz_image',
         executable='image_bridge',
-        arguments=['/d455_back/color/image_raw'],
+        arguments=['/d455_back/color/image_raw', '/d455_back/depth/image_raw', '/d455_front/color/image_raw', '/d455_front/depth/image_raw'],
         output='screen',
     )
-    start_gazebo_ros_depth_back_image_bridge_cmd = Node(
+    start_gazebo_ros_mini_image_bridge_cmd = Node(
         package='ros_gz_image',
         executable='image_bridge',
-        arguments=['/d455_back/depth/image_raw'],
-        output='screen',
-    )
-    start_gazebo_ros_rgb_front_image_bridge_cmd = Node(
-        package='ros_gz_image',
-        executable='image_bridge',
-        arguments=['/d455_front/color/image_raw'],
-        output='screen',
-    )
-    start_gazebo_ros_depth_front_image_bridge_cmd = Node(
-        package='ros_gz_image',
-        executable='image_bridge',
-        arguments=['/d455_front/depth/image_raw'],
+        arguments=['/mini/d455_back/color/image_raw', '/mini/d455_back/depth/image_raw', '/mini/d455_front/color/image_raw', '/mini/d455_front/depth/image_raw'],
         output='screen',
     )
     
@@ -157,10 +157,9 @@ def generate_launch_description():
         gzclient_cmd, #COMMENT THIS LINE TO REMOVE GUI
         robot_desc_launch,
         robot_spawn_node,
+        mini_robot_spawn_node,
         start_gazebo_ros_bridge_cmd,
-        start_gazebo_ros_rgb_back_image_bridge_cmd,
-        start_gazebo_ros_depth_back_image_bridge_cmd,
-        start_gazebo_ros_rgb_front_image_bridge_cmd,
-        start_gazebo_ros_depth_front_image_bridge_cmd
+        start_gazebo_ros_image_bridge_cmd,
+        start_gazebo_ros_mini_image_bridge_cmd
     ])
     return ld

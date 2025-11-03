@@ -1,0 +1,80 @@
+<launch>
+  <push_ros_namespace namespace="mini"/>
+  <arg name="ptp" default="true" />
+
+  <!-- cameras -->
+  <include file="$(find-pkg-share lunabot_perception)/launch/mini_sim_cameras.launch"/>
+
+  <!-- navigation -->
+  <group>
+    <push_ros_namespace namespace="nav"/>
+    <node name="global_planner_node" pkg="lunabot_nav" exec="dstar_node" output="screen" respawn="true">
+      <param name="use_sim_time" value="true"/>
+    </node>
+
+    <!-- Path followers- Point to point or Pure pursuit -->
+    <node name="point_to_point_node" if="$(var ptp)" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="false" >
+      <param name="use_sim_time" value="true"/>
+    </node>
+  </group>
+
+  <!-- mapping -->
+  <group>
+    <node name="costmap" pkg="nav2_costmap_2d" exec="nav2_costmap_2d" output="screen" namespace="costmap">
+      <param from="$(find-pkg-share lunabot_config)/config/mini_global_costmap.yml"/>
+      <remap from="costmap" to="/mini/maps/costmap_node/global_costmap/costmap"/>
+      <remap from="costmap_updates" to="/mini/maps/costmap_node/global_costmap/costmap_updates"/>
+      <param name="use_sim_time" value="true"/>
+    </node>
+    <node name="costmap_lifecycle" pkg="nav2_lifecycle_manager" exec="lifecycle_manager" namespace="costmap" output="screen">
+      <param name="autostart" value="true"/>
+      <param name="node_names" value="/mini/costmap" value-sep=";"/>
+      <param name="use_sim_time" value="true"/>
+    </node>
+  </group>
+
+  <group>
+    <push_ros_namespace namespace="rtabmap"/>
+
+    <!-- Odometry -->
+    <node pkg="rtabmap_odom" exec="rgbd_odometry" output="log" name="rgbd_odometry" ros_args="--log-level WARN">
+      <param name="subscribe_depth"     value="true"/>
+      <param name="frame_id"            value="mini_base_link"/>
+      <param name="Odom/ResetCountdown" value="'1'"/>
+      <param name="use_sim_time" value="true"/>
+
+
+      <remap from="depth/image"         to="/mini/d455_front/depth/image_raw"/>
+      <remap from="rgb/image"           to="/mini/d455_front/color/image_raw"/>
+      <remap from="rgb/camera_info"     to="/mini/d455_front/color/camera_info"/>
+    </node>
+
+    <node name="rtabmap" pkg="rtabmap_slam" exec="rtabmap" output="log" args="--delete_db_on_start" ros_args="--log-level WARN">
+      <param name="frame_id"                value="base_link"/>
+      <param name="use_sim_time" value="true"/>
+
+      <param name="subscribe_rgb"           value="false"/>
+      <param name="subscribe_depth"         value="false"/>
+      <param name="subscribe_rgbd"          value="false"/>
+      <param name="subscribe_scan_cloud"    value="true"/>
+
+      <remap from="odom"                    to="odom"/>
+      <remap from="scan_cloud"              to="/mini/pointcloud/depth_combined_cloud"/>
+
+      <param name="gen_scan"                value="true"/>
+
+      <param name="sync_queue_size"              value="10"/>
+      <param name="approx_sync"             value="true"/>
+      <param name="map_always_update"       value="true"/>
+
+      <!-- RTAB-Map's parameters -->
+      <param name="Grid/Sensor"             value="'0'"/> <!-- Only use point clouds-->
+      <param name="Grid/FootprintLength"    value="'1.0'"/>
+      <param name="Grid/FootprintWidth"     value="'0.75'"/> 
+      <param name="Grid/MaxGroundAngle"     value="'30'"/> <!-- 30 degree normal before marked as obstacle -->
+      <param name="Grid/3D"                 value="'true'"/> <!-- 3D occupancy grid -->
+      <param name="Grid/FromDepth"          value="'false'"/> <!-- occupancy grid from lidar -->
+      
+    </node>
+  </group>
+</launch>
