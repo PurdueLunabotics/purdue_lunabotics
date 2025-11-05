@@ -2,7 +2,8 @@
   <push_ros_namespace namespace="mini"/>
   <arg name="ptp" default="true" />
 
-
+  <arg default="$(find-pkg-share lunabot_config)/config/mini_sim.rviz" name="rvizconfig2"/>
+  <node args="-d $(var rvizconfig2)" name="rviz" pkg="rviz2" exec="rviz2" />
 
   <!-- cameras -->
   <include file="$(find-pkg-share lunabot_perception)/launch/mini_sim_cameras.launch"/>
