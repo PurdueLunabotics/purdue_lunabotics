@@ -33,7 +33,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: PointCloud2
 Visualization Manager:
   Class: ""
   Displays:
@@ -80,7 +80,33 @@ Visualization Manager:
           Value: true
         middle_link:
           Value: true
-        odom:
+        mini/base_link:
+          Value: true
+        mini/d455_back_depth_link:
+          Value: true
+        mini/d455_back_link:
+          Value: true
+        mini/d455_back_rgb_link:
+          Value: true
+        mini/d455_front_depth_link:
+          Value: true
+        mini/d455_front_link:
+          Value: true
+        mini/d455_front_rgb_link:
+          Value: true
+        mini/left_back:
+          Value: true
+        mini/left_front:
+          Value: true
+        mini/map:
+          Value: true
+        mini/middle_link:
+          Value: true
+        mini/odom:
+          Value: true
+        mini/right_back:
+          Value: true
+        mini/right_front:
           Value: true
         right_back:
           Value: true
@@ -92,27 +118,28 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
-        odom:
-          base_link:
-            middle_link:
-              d455_back_link:
-                d455_back_depth_link:
+        mini/map:
+          mini/odom:
+            mini/base_link:
+              mini/middle_link:
+                mini/d455_back_link:
+                  mini/d455_back_depth_link:
+                    {}
+                  mini/d455_back_rgb_link:
+                    {}
+                mini/d455_front_link:
+                  mini/d455_front_depth_link:
+                    {}
+                  mini/d455_front_rgb_link:
+                    {}
+                mini/left_back:
                   {}
-                d455_back_rgb_link:
+                mini/left_front:
                   {}
-              d455_front_link:
-                d455_front_depth_link:
+                mini/right_back:
                   {}
-                d455_front_rgb_link:
+                mini/right_front:
                   {}
-              left_back:
-                {}
-              left_front:
-                {}
-              right_back:
-                {}
-              right_front:
-                {}
       Update Interval: 0
       Value: true
     - Alpha: 0.699999988079071
@@ -283,61 +310,6 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        d455_back_depth_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        d455_back_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        d455_back_rgb_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        d455_front_depth_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        d455_front_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        d455_front_rgb_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        left_back:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        left_front:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        middle_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        right_back:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        right_front:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
       Mass Properties:
         Inertia: false
         Mass: false
@@ -349,7 +321,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: odom
+    Fixed Frame: /odom
     Frame Rate: 30
   Name: root
   Tools:
@@ -360,16 +332,6 @@ Visualization Manager:
     - Class: rviz_default_plugins/FocusCamera
     - Class: rviz_default_plugins/Measure
       Line color: 128; 128; 0
-    - Class: rviz_default_plugins/SetInitialPose
-      Covariance x: 0.25
-      Covariance y: 0.25
-      Covariance yaw: 0.06853891909122467
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /initialpose
     - Class: rviz_default_plugins/SetGoal
       Topic:
         Depth: 5
@@ -377,14 +339,6 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /goal
-    - Class: rviz_default_plugins/PublishPoint
-      Single click: true
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /clicked_point
   Transformation:
     Current:
       Class: rviz_default_plugins/TF
@@ -428,5 +382,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: 1059
-  Y: 52
+  X: 1027
+  Y: 20

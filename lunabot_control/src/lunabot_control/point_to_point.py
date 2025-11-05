@@ -95,61 +95,61 @@ class PointToPoint(Node):
         
 
         # PUBLISHERS ==================================================================================================
-        cmd_vel_topic = "/cmd_vel"
+        cmd_vel_topic = "cmd_vel"
         self.cmd_vel_publisher = self.create_publisher(Twist, cmd_vel_topic, 10)
 
         # TODO: debugging
         self.angular_disparity_publisher = self.create_publisher(
-            Float32, "/ptp/angular_disparity", 10
+            Float32, "ptp/angular_disparity", 10
         )
         self.linear_disparity_publisher = self.create_publisher(
-            Float32, "/ptp/linear_disparity", 10
+            Float32, "ptp/linear_disparity", 10
         )
-        self.heading_publisher = self.create_publisher(Float32, "/ptp/heading", 10)
+        self.heading_publisher = self.create_publisher(Float32, "ptp/heading", 10)
         self.angle_target_publisher = self.create_publisher(
-            Float32, "/ptp/angle_target", 10
+            Float32, "ptp/angle_target", 10
         )
         self.pid_linear_publisher = self.create_publisher(
-            Float32, "/ptp/pid_linear", 10
+            Float32, "ptp/pid_linear", 10
         )
         self.pid_angular_publisher = self.create_publisher(
-            Float32, "/ptp/pid_angular", 10
+            Float32, "ptp/pid_angular", 10
         )
 
         self.path_segment_publisher = self.create_publisher(
-            Marker, "/ptp/current_target", 10
+            Marker, "ptp/current_target", 10
         )
 
-        self.path_publisher = self.create_publisher(Marker, "/ptp/line_path", 10)
+        self.path_publisher = self.create_publisher(Marker, "ptp/line_path", 10)
 
         self.state_publisher = self.create_publisher(
-            String, "/ptp/robot_state", 10
+            String, "ptp/robot_state", 10
         )
 
         self.target_publisher = self.create_publisher(
-            Pose2D, "/ptp/target_pose", 10
+            Pose2D, "ptp/target_pose", 10
         )
         self.log_publisher = self.create_publisher(
-            String, "/ptp/log", 10
+            String, "ptp/log", 10
         )
 
         # SUBSCRIBERS ==================================================================================================
-        odom_topic = "/rtabmap/odom"
+        odom_topic = "odom"
         self.create_subscription(Odometry, odom_topic, self.__odom_callback, 1)
 
-        path_topic = "/nav/global_path"
+        path_topic = "global_path"
         self.create_subscription(Path, path_topic, self.__path_callback, 1)
         
-        backwards_topic = "/traversal/backwards"
+        backwards_topic = "backwards"
         self.create_subscription(Bool, backwards_topic, self.__backwards_callback, 1)
         
-        traversal_topic = "/behavior/traversal_enabled"
+        traversal_topic = "traversal_enabled"
         self.create_subscription(Bool, traversal_topic, self.__traversal_callback, 1)
 
-        map_topic = "/maps/costmap_node/global_costmap/costmap"
+        map_topic = "costmap"
         self.create_subscription(OccupancyGrid, map_topic, self.__map_callback, 1)
 
-        map_update_topic = "/maps/costmap_node/global_costmap/costmap_updates"
+        map_update_topic = "costmap_updates"
         self.create_subscription(OccupancyGridUpdate, map_update_topic, self.__map_update_callback, 1)
 
     # ==================================================================================================================

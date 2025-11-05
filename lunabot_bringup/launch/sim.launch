@@ -10,6 +10,10 @@
 
   <arg name="gui" default="true"/>
 
+  
+  <arg default="$(find-pkg-share lunabot_config)/config/sim.rviz" name="rvizconfig"/>
+  <node args="-d $(var rvizconfig)" name="rviz" pkg="rviz2" exec="rviz2" />
+
   <!-- Values for arena world (Nasa is KSC, UCF is not.) The above boolean argument changes 
   what arg is passed to the launch file below (therefore, there are two duplicate launch files)
   $(find lunabot_sim)/worlds/arena_nasa.world
@@ -21,9 +25,8 @@
   <include if="$(var gui)" file="$(find-pkg-share lunabot_sim)/launch/gazebo.launch.py"/>
   <include unless="$(var gui)" file="$(find-pkg-share lunabot_sim)/launch/gazebo_no_gui.launch.py"/>
 
-  <arg default="$(find-pkg-share lunabot_config)/config/sim.rviz" name="rvizconfig"/>
-  <node args="-d $(var rvizconfig)" name="rviz" pkg="rviz2" exec="rviz2" />
+  <arg name="two_bots" default="true"/>
 
-  <!-- <include file="$(find-pkg-share lunabot_bringup)/launch/sim_main_robot.launch"/> -->
-  <include file="$(find-pkg-share lunabot_bringup)/launch/sim_mini_robot.launch"/>
+  <include file="$(find-pkg-share lunabot_bringup)/launch/sim_main_robot.launch"/>
+  <include if="$(var two_bots)" file="$(find-pkg-share lunabot_bringup)/launch/sim_mini_robot.launch"/>
 </launch>

@@ -9,23 +9,40 @@
     <push_ros_namespace namespace="nav"/>
     <node name="global_planner_node" pkg="lunabot_nav" exec="dstar_node" output="screen" respawn="true">
       <param name="use_sim_time" value="true"/>
+
+      <remap from="odom" to="/rtabmap/odom"/>
+      <remap from="goal" to="/goal"/>
+      <remap from="global_path" to="/nav/global_path"/>
+      <remap from="costmap_enabled" to="/costmap_enabled"/>
+      <remap from="planning_enabled" to="/planning_enabled"/>
+      <remap from="costmap" to="/maps/costmap_node/global_costmap/costmap"/>
+      <remap from="costmap_updates" to="/maps/costmap_node/global_costmap/costmap_updates"/>
     </node>
 
     <!-- Path followers- Point to point or Pure pursuit -->
     <node name="point_to_point_node" if="$(var ptp)" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="false" >
       <param name="use_sim_time" value="true"/>
+
+      <remap from="odom" to="/rtabmap/odom"/>
+      <remap from="global_path" to="/nav/global_path"/>
+      <remap from="backwards" to="/traversal/backwards"/>
+      <remap from="traversal_enabled" to="/behavior/traversal_enabled"/>
+      <remap from="costmap" to="/maps/costmap_node/global_costmap/costmap"/>
+      <remap from="costmap_updates" to="/maps/costmap_node/global_costmap/costmap_updates"/>
+
+      <remap from="cmd_vel" to="/cmd_vel"/>
     </node>
   </group>
 
   <!-- mapping -->
   <group>
-    <node name="costmap" pkg="nav2_costmap_2d" exec="nav2_costmap_2d" output="screen" namespace="costmap">
+    <node name="costmap" pkg="nav2_costmap_2d" exec="nav2_costmap_2d" output="screen">
       <param from="$(find-pkg-share lunabot_config)/config/global_costmap.yml"/>
       <remap from="costmap" to="/maps/costmap_node/global_costmap/costmap"/>
       <remap from="costmap_updates" to="/maps/costmap_node/global_costmap/costmap_updates"/>
       <param name="use_sim_time" value="true"/>
     </node>
-    <node name="costmap_lifecycle" pkg="nav2_lifecycle_manager" exec="lifecycle_manager" namespace="costmap" output="screen">
+    <node name="costmap_lifecycle" pkg="nav2_lifecycle_manager" exec="lifecycle_manager" output="screen">
       <param name="autostart" value="true"/>
       <param name="node_names" value="costmap" value-sep=";"/>
       <param name="use_sim_time" value="true"/>
