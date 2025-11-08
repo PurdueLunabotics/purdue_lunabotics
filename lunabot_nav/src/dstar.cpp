@@ -422,6 +422,7 @@ std::vector<real_world_point> Dstar::update_map(std::vector<std::vector<int>> ne
 
   // Create a new map filled with -1 (buffer)
   current_map = std::vector<std::vector<int>>(map_new_rows, std::vector<int>(map_new_cols, -1));
+  // current_map = std::vector<std::vector<int>>(map_new_rows, std::vector<int>(map_new_cols, 40));
 
   // Copy the original map into the new buffered map
   for (int y = 0; y < map_original_rows; y++) {
