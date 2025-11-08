@@ -37,9 +37,9 @@ void send() {
 
   excavation::update(state.exc_curr, state.exc_torque, state.exc_vel);
 
-  uwb::update(state.uwb_dist_0, state.uwb_dist_1, state.uwb_dist_2);
+  //uwb::update(state.uwb_dist_0, state.uwb_dist_1, state.uwb_dist_2);
 
-  load_cell::update(state.load_cell_weight);
+  //load_cell::update(state.load_cell_weight);
 
   /*
   Serial.print("Raw: ");
