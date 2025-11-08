@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <arg name="serial_no_d435_right"           default="'053122251286'"/>  <!-- Right and back are swapped -->
+  <arg name="serial_no_d435_left"            default="'141222070808'"/>
+  <arg name="serial_no_d455_front"           default="'053122251335'"/>
+  <arg name="serial_no_d455_back"            default="'939622074382'"/>
+  <arg name="profile"                           default="424x240x15"/>
+
+  <arg name="initial_reset"                   default="true"/>
+
+  <arg name="front"                           default="true"/>
+  <arg name="back"                           default="true"/>
+  <arg name="pointcloud" default="true" />
+
+  <arg name="decimation" default="4"/>
+  <arg name="voxel_size" default="0.01"/> <!--meters-->
+  <arg name="noise_filter_radius" default="0.1"/> <!--meters radius-->
+  <arg name="max_depth" default="3.0"/> <!--meters-->
+
+  <group if="$(var front)">
+    <push_ros_namespace namespace="d455_front"/>
+    <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py">
+      <arg name="camera_namespace" value ="" />
+
+      <arg name="serial_no"                value="$(var serial_no_d455_front)"/>
+
+      <arg name="initial_reset"            value="$(var initial_reset)"/>
+
+      <arg name="pointcloud.enable"        value="false"/>
+      <arg name="enable_sync"              value="true"/>
+      <arg name="align_depth.enable"              value="true"/>
+
+      <arg name="enable_depth"             value="true"/>
+      <arg name="depth_module.depth_profile" value="$(var profile)" />
+
+      <arg name="enable_color"             value="true"/>
+      <arg name="rgb_camera.color_profile" value="$(var profile)" />
+
+      <arg name="decimation_filter.enable" value="true"/>
+
+      <arg name="publish_tf"               value="true"/>
+      <arg name="tf_publish_rate"          value="0"/>
+
+      <arg name="clip_distance"            value="-1"/>
+    </include>
+
+    <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
+      <arg name="camera_frame" value="d455_front_link" />
+      <arg name="camera_topic" value="color/image_raw"/>
+      <arg name="use_sim_time" value="true"/>
+    </include>
+
+    <node pkg="rtabmap_util" exec='point_cloud_xyz' name="point_cloud_xyz" respawn="true">
+	    <remap from="depth/camera_info"             to="camera/aligned_depth_to_color/camera_info" />
+	    <remap from="depth/image"                   to="camera/aligned_depth_to_color/image_raw" />
+      <remap from="cloud"                         to="points" /> <!-- output-->
+
+      <param name="decimation" value="$(var decimation)"/>
+      <param name="voxel_size" value="$(var voxel_size)"/>
+      <param name="noise_filter_radius" value="$(var noise_filter_radius)"/>
+      <param name="max_depth" value="$(var max_depth)"/>
+      <param name="use_sim_time" value="true"/>
+    </node>
+  </group>
+
+  <group if="$(var back)">
+    <push_ros_namespace namespace="d455_back"/>
+
+    <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py">
+      <arg name="serial_no"                value="$(var serial_no_d455_back)"/>
+      <arg name="camera_namespace" value ="" />
+
+      <arg name="initial_reset"            value="$(var initial_reset)"/>
+
+      <arg name="pointcloud.enable"        value="false"/>
+      <arg name="enable_sync"              value="true"/>
+      <arg name="align_depth.enable"              value="true"/>
+
+      <arg name="enable_depth"             value="true"/>
+      <arg name="depth_module.depth_profile" value="$(var profile)" />
+
+      <arg name="enable_color"             value="true"/>
+      <arg name="rgb_camera.color_profile" value="$(var profile)" />
+
+      <arg name="decimation_filter.enable" value="true"/>
+
+      <arg name="publish_tf"               value="true"/>
+      <arg name="tf_publish_rate"          value="0"/>
+
+      <arg name="clip_distance"            value="-1"/>
+    </include>
+
+    <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
+      <arg name="camera_frame" value="d455_back_link" />
+      <arg name="camera_topic" value="color/image_raw"/>
+      <arg name="use_sim_time" value="true"/>
+    </include>
+
+    <node pkg="rtabmap_util" exec='point_cloud_xyz' name="point_cloud_xyz" respawn="true">
+	    <remap from="depth/camera_info"             to="camera/aligned_depth_to_color/camera_info" />
+	    <remap from="depth/image"                   to="camera/aligned_depth_to_color/image_raw" />
+      <remap from="cloud"                         to="points" /> <!-- output-->
+
+      <param name="decimation" value="$(var decimation)"/>
+      <param name="voxel_size" value="$(var voxel_size)"/>
+      <param name="noise_filter_radius" value="$(var noise_filter_radius)"/>
+      <param name="max_depth" value="$(var max_depth)"/>
+      <param name="use_sim_time" value="true"/>
+    </node>
+  </group>
+
+  <group if="$(var pointcloud)">
+    <push_ros_namespace namespace="pointcloud"/>
+    
+    <!-- Aggregate pointclouds from each camera (if using multiple cameras)-->
+    <node pkg="rtabmap_util" exec='point_cloud_aggregator' name="point_cloud_aggregator" respawn="true">
+      <remap from="cloud1" to="/d455_back/points" />
+      <remap from="cloud2" to="/d455_front/points" />
+      <remap from="combined_cloud" to="depth_combined_cloud"/>       
+      <param name="count" value="2"/>
+      <param name="xyz_output" value="true"/>
+      <param name="fixed_frame_id" value="base_link" />
+      <param name="approx_sync" value="true"/>
+      <param name="use_sim_time" value="true"/>
+    </node>
+  </group>
+
+</launch>
+
