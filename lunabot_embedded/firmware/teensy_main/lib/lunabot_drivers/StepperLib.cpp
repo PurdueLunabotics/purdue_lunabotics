@@ -334,7 +334,7 @@ void StepperMotor::print_motor_state() {
     }
   }
   else if (motor_type == BLD305S) {
-    switch (read_register(BLD305SAddrs.Read_MotorState)) {
+    switch (read_register(BLD305SAddrs.MotorState)) {
     case 0:
       Serial.println("Motor State: Stop");
       break;
