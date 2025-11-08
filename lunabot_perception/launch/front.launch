@@ -63,6 +63,9 @@
         <arg name="clip_distance"            value="-1"/>
       </include>
 
+      <node pkg="rclcpp_components" exec="component_container" name="isaac_ros_container" 
+              output="screen">
+    </node>
       <!-- RGB processing -->
       <!-- Color rectified image -->
       <node pkg="nodelet" type="nodelet" name="color_rectify_color"
@@ -74,26 +77,40 @@
       </node>
 
       <!-- Publish registered XYZ only point cloud using RTabMap's formula -->
-      <node if="$(arg pointcloud)" pkg="nodelet" type="nodelet" name="points_xyz_rtabmap"
-            args="standalone rtabmap_util/point_cloud_xyz" respawn="false">
-        <remap from="depth/camera_info"             to="aligned_depth_to_color/camera_info" />
-        <remap from="depth/image" to="aligned_depth_to_color/image_raw" />
-        <remap from="cloud"     to="points" /> <!-- output-->
+    <node pkg="rclcpp_components" exec="component_loader" name="d455_front_pointcloud_loader">
+            <param name="load_nodes" value="true"/>
+            <param name="load_log_level" value="info"/>
+            <param name="components" value="[{
+                pkg: 'isaac_ros_depth_image_proc',
+                plugin: 'nvidia::isaac_ros::depth_image_proc::PointCloudXyzNode',
+                name: 'point_cloud_xyz',
+                container_name: 'isaac_ros_container',
+                remaps: [
+                    ('image_rect', 'aligned_depth_to_color/image_raw'),
+                    ('camera_info', 'aligned_depth_to_color/camera_info'),
+                    ('points', 'points')
+                ]
+            }]"/>
+        </node>
+      
 
-        <!-- reduce pointcloud size -->
-        <param name="decimation" type="int" value="$(arg decimation)"/>
-        <param name="voxel_size" type="double" value="$(arg voxel_size)"/>
-        <param name="noise_filter_radius" type="double" value="$(arg noise_filter_radius)"/>
-        <param name="max_depth" type="double" value="$(arg max_depth)"/>
-      </node>
-
-      <group ns="color">
-        <node pkg="image_proc" type="image_proc" name="image_proc"
-              args="image:=camera/color/image_raw" />
-        <include file="$(find lunabot_perception)/launch/apriltag.launch">
-          <arg name="camera_frame" value="d455_back_base" />
-        </include>
-      </group>
+      <node pkg="rclcpp_components" exec="component_loader" name="d455_front_apriltag_loader">
+            <param name="load_nodes" value="true"/>
+            <param name="load_log_level" value="info"/>
+            <param name="components" value="[{
+                pkg: 'isaac_ros_apriltag',
+                plugin: 'nvidia::isaac_ros::apriltag::AprilTagNode',
+                name: 'apriltag',
+                container_name: 'isaac_ros_container',
+                params: [{
+                    size: 0.1,  tag_family: 'tag36h11'
+                }],
+                remaps: [
+                    ('image', 'color/image_raw'),
+                    ('camera_info', 'color/camera_info')
+                ]
+            }]"/>
+        </node>
 
     </group>
 
