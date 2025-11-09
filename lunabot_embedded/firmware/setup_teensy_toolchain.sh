@@ -3,7 +3,7 @@
 arduino-cli config init
 python3 update_board_manager.py
 arduino-cli core install teensy:avr
-arduino-cli core install teensy:avr
+arduino-cli lib install Stepper
 
 ## Installs teensy flasher
 sudo apt-get install libusb-dev
