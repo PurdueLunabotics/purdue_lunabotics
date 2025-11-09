@@ -3,11 +3,9 @@ float32 dep_curr
 float32 exc_curr
 float32 drive_left_curr
 float32 drive_right_curr
-float32 drive_left_ang
-float32 drive_right_ang
+float32 drive_left_torque
+float32 drive_right_torque
 float32 drive_left_vel
 float32 drive_right_vel
-float32 exc_ang
+float32 exc_torque
 float32 exc_vel
-float32[] uwb_dists
-float32[] load_cell_weights

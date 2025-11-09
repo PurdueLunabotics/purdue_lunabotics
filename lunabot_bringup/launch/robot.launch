@@ -20,15 +20,18 @@
 
     <!-- Launch robot, joint state/robot state publishers, previously in display.launch -->
     <arg name="model" default="$(find-pkg-share lunabot_description)/urdf/dummmy_bot.xacro.urdf"/>
-    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
-    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" exec="joint_state_publisher"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" exec="robot_state_publisher"/>
     <!-- TODO: Figure out where to put the xacro param-->
+
+    <!-- Launch Cameras -->
+    <include file="$(find-pkg-share lunabot_perception)/launch/cameras.launch"/>
 
     <include if="$(var record)" file="$(find-pkg-share lunabot_bringup)/launch/record.launch">
         <arg name="exp_name" value="$(var exp_name)" />
     </include>
 
-    <group if="$(arg autonomy)">
+    <group if="$(var autonomy)">
         <!-- Launch diff drive controller -->
         <node name="differential_drive_controller_node" pkg="lunabot_control" exec="differential_drive_controller_node" output="screen" respawn="true" >
         </node>
@@ -47,12 +50,12 @@
             <param name="use_sim_time" value="true"/>
 
 
-            <remap from="depth/image"         to="/d455_front/depth/image_raw"/>
-            <remap from="rgb/image"           to="/d455_front/color/image_raw"/>
-            <remap from="rgb/camera_info"     to="/d455_front/color/camera_info"/>
+            <remap from="depth/image"         to="/d455_back/depth/image_raw"/>
+            <remap from="rgb/image"           to="/d455_back/color/image_raw"/>
+            <remap from="rgb/camera_info"     to="/d455_back/color/camera_info"/>
         </node>
 
-        <node if="$(arg slam)" name="rtabmap" pkg="rtabmap_slam" exec="rtabmap" output="log" args="--delete_db_on_start" ros_args="--log-level WARN">
+        <node if="$(var slam)" name="rtabmap" pkg="rtabmap_slam" exec="rtabmap" output="log" args="--delete_db_on_start" ros_args="--log-level WARN">
             <param name="frame_id"                value="base_link"/>
             <param name="use_sim_time" value="true"/>
 

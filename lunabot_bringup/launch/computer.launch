@@ -15,7 +15,7 @@
 
     <!-- Launch rviz -->
     <arg default="$(find-pkg-share lunabot_config)/config/sim.rviz" name="rvizconfig"/>
-    <node args="-d $(var rvizconfig)" name="rviz2" pkg="rviz2" required="true" exec="rviz2"/>
+    <node args="-d $(var rvizconfig)" name="rviz2" pkg="rviz2" exec="rviz2"/>
     
     <!-- Launch small rosbag recorder-->
     <include file="$(find-pkg-share lunabot_bringup)/launch/record_small.launch">
