@@ -56,7 +56,13 @@ def generate_launch_description():
         output="screen"
     )
 
+    controller = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['velocity_controller'],
+    )
+
     return LaunchDescription([
-        robot_state_publisher_node, joint_state_publisher_node,
+        robot_state_publisher_node, joint_state_publisher_node, controller,
         robot_state_publisher_node2, joint_state_publisher_node2
     ])

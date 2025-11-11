@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="foxglove" default="false"  />
+    <arg name="exp_name" default="" />
+
+    <include if="$(var foxglove)" file="$(find-pkg-share foxglove_bridge)/launch/foxglove_bridge_launch.xml" />
+
+    <group>
+        <node name="manual_controller_node" pkg="lunabot_control" exec="manual_controller_node" output="screen" respawn="true" >
+        </node>
+
+        <node name="joystick_node" pkg="joy" exec="joy_node" output="screen" respawn="true" >
+        </node>
+    </group>
+
+    <!-- Launch rviz -->
+    <arg default="$(find-pkg-share lunabot_config)/config/sim.rviz" name="rvizconfig"/>
+    <node args="-d $(var rvizconfig)" name="rviz2" pkg="rviz2" exec="rviz2"/>
+    
+    <!-- Launch small rosbag recorder-->
+    <include file="$(find-pkg-share lunabot_bringup)/launch/record_small.launch">
+        <arg name="exp_name" value="$(var exp_name)" />
+    </include>
+
+</launch>
