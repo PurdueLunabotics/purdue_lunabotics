@@ -15,6 +15,15 @@
 
   <depend>rtabmap_ros</depend>
   <depend>rtabmap_launch</depend>
+  <depend>nav2_costmap_2d</depend>
+  <depend>nav2_lifecycle_manager</depend>
+  <depend>rviz2</depend>
+
+  <depend>lunabot_control</depend>
+  <depend>lunabot_sim</depend>
+  <depend>lunabot_nav</depend>
+  <depend>lunabot_perception</depend>
+  <depend>lunabot_config</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

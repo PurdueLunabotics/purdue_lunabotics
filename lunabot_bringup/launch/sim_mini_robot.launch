@@ -96,7 +96,8 @@
       <param name="Grid/FootprintLength"    value="'1.0'"/>
       <param name="Grid/FootprintWidth"     value="'0.75'"/> 
       <param name="Grid/MaxGroundAngle"     value="'30'"/> <!-- 30 degree normal before marked as obstacle -->
-      <param name="Grid/3D"                 value="'true'"/> <!-- 3D occupancy grid -->
+      <param name="Grid/3D"                 value="'false'"/> <!-- 2D occupancy grid -->
+      <param name="Grid/RayTracing"         value="'true'"/> <!-- RayTracing to clear obstacles -->
       <param name="Grid/FromDepth"          value="'false'"/> <!-- occupancy grid from lidar -->
       
     </node>
