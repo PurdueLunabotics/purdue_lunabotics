@@ -17,7 +17,7 @@ def generate_launch_description():
             PathJoinSubstitution([
                 FindPackageShare('lunabot_description'),
                 'launch',
-                'robot_description.launch.py'
+                'sim_robot_description.launch.py'
             ])
         ])
     )

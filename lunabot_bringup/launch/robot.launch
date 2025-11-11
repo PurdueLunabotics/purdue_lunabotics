@@ -19,10 +19,7 @@
     <node if="$(var teensy)" name="teensy_driver" pkg="lunabot_embedded" exec="teensy_driver_node" output="screen" />
 
     <!-- Launch robot, joint state/robot state publishers, previously in display.launch -->
-    <arg name="model" default="$(find-pkg-share lunabot_description)/urdf/dummmy_bot.xacro.urdf"/>
-    <node name="joint_state_publisher" pkg="joint_state_publisher" exec="joint_state_publisher"/>
-    <node name="robot_state_publisher" pkg="robot_state_publisher" exec="robot_state_publisher"/>
-    <!-- TODO: Figure out where to put the xacro param-->
+    <include file="$(find-pkg-share lunabot_description)/launch/robot_description.launch.py"/>
 
     <!-- Launch Cameras -->
     <include file="$(find-pkg-share lunabot_perception)/launch/cameras.launch"/>
