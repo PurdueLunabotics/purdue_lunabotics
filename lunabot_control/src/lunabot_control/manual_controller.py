@@ -98,7 +98,7 @@ class ManualController(Node):
         self._autonomy_sub = self.create_subscription(Bool, "/autonomy", self._autonomy_cb, 1)
         self._autonomy_pub = self.create_publisher(Bool, "/autonomy", 10)
 
-        self.joy_subscriber = self.create_subscription(Joy, "joy0", self.joy_callback, 1)
+        self.joy_subscriber = self.create_subscription(Joy, "/joy", self.joy_callback, 1)
         self.effort_publisher = self.create_publisher(RobotEffort, "effort", 10)
         self.effort_msg = RobotEffort()
 
@@ -123,8 +123,9 @@ class ManualController(Node):
         self.EXCAVATION_SPEED = 3000 
 
         self.publish = True
+        self.timer = self.create_timer(1 / 20, self.loop)
 
-        self.stop()
+        # self.stop()
 
     def _autonomy_cb(self, autonomy: Bool):
         self.autonomy = autonomy.data
@@ -171,14 +172,11 @@ class ManualController(Node):
 
             # Set the drive effort to the left and right stick vertical axes (Tank Drive)
             if self.driving_mode == "Forwards":
-                effort_msg.left_drive = constrain_RPM(joy.axes[Axes.L_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
-                effort_msg.right_drive = constrain_RPM(joy.axes[Axes.R_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
+                effort_msg.left_drive = int(constrain_RPM(joy.axes[Axes.L_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier)
+                effort_msg.right_drive = int(constrain_RPM(joy.axes[Axes.R_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier)
             else:
-                effort_msg.left_drive = -1 * constrain_RPM(joy.axes[Axes.R_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
-                effort_msg.right_drive = -1 * constrain_RPM(joy.axes[Axes.L_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier
-
-            effort_msg.left_drive = int(effort_msg.left_drive)
-            effort_msg.right_drive = int(effort_msg.right_drive)
+                effort_msg.left_drive = int(-1 * constrain_RPM(joy.axes[Axes.R_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier)
+                effort_msg.right_drive = int(-1 * constrain_RPM(joy.axes[Axes.L_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier)
 
 
             # If not latched, use the trigger axis to control the excavation speed. Otherwise, use the latched speed
@@ -203,9 +201,9 @@ class ManualController(Node):
 
                 # Take priority for right trigger. If it is nearly zero, use the left trigger instead
                 if (right_trigger_axis_normalized <= 0.01):
-                    effort_msg.excavate = -1 * constrain_RPM(left_trigger_axis_normalized, self.EXCAVATION_SPEED)
+                    effort_msg.excavate = int(-1 * constrain_RPM(left_trigger_axis_normalized, self.EXCAVATION_SPEED))
                 else:
-                    effort_msg.excavate = constrain_RPM(right_trigger_axis_normalized, self.EXCAVATION_SPEED)
+                    effort_msg.excavate = int(constrain_RPM(right_trigger_axis_normalized, self.EXCAVATION_SPEED))
 
             # Y button: latch excavation speed. This keeps excavation at the same speed until the latch is released
             if joy.buttons[Buttons.Y.value] == 1 and self.last_joy.buttons[Buttons.Y.value] == 0:  
@@ -222,15 +220,15 @@ class ManualController(Node):
 
             # Deposition- B to go, view/select/back to move backwards
             if (joy.buttons[Buttons.B.value] == 1):
-                effort_msg.deposit = self.DEPOSITION_SPEED
+                effort_msg.deposit = int(self.DEPOSITION_SPEED)
             elif (joy.buttons[Buttons.BACK.value] == 1):
-                effort_msg.deposit = -1 * self.DEPOSITION_SPEED
+                effort_msg.deposit = int(-1 * self.DEPOSITION_SPEED)
 
             self.effort_msg = effort_msg
             self.last_joy = joy
 
     def loop(self):
-        if self.publish:
+        if self.publish and not self.autonomy:
             color = Int32()
             color.data = 3
             self.set_color(color) # Blue for manual control
@@ -261,11 +259,5 @@ def spin_in_background():
 
 def main():
     rclpy.init()
-    t = threading.Thread(target=spin_in_background)
-    t.start()
     controller = ManualController()
-    rate = controller.create_rate(20)
-    while rclpy.ok():
-        if not controller.autonomy:
-            controller.loop()
-        rate.sleep()
+    rclpy.spin(controller)
