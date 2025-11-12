@@ -138,7 +138,7 @@ cd ~/luna_ws
 sudo rosdep init
 rosdep update
 rosdep install -i --from-path src --rosdistro humble -y
-sudo apt install -y ros-humble-gz-ros2-control ros-humble-joint-state-publisher ament-cmake-python ament-cmake curl lsb-release gnupg
+sudo apt install -y ros-humble-gz-ros2-control ros-humble-joint-state-publisher ament-cmake-python ament-cmake curl lsb-release gnupg libusb-dev
 sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
 sudo apt-get update
