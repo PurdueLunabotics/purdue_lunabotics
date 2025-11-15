@@ -13,5 +13,6 @@
   <depend>map_msgs</depend>
   <export>
     <build_type>ament_cmake</build_type>
+    <nav2_core plugin="${prefix}/global_planner_plugin.xml"/>
   </export>
 </package>

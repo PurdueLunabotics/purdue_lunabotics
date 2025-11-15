@@ -27,6 +27,10 @@
   <!-- cameras -->
   <include file="$(find-pkg-share lunabot_perception)/launch/sim_cameras.launch"/>
 
+  <node name="nav2_bridge" pkg="lunabot_nav" exec="nav2_bridge_node" output="screen" respawn="true">
+    <param name="use_sim_time" value="true"/>
+  </node>
+
   <!-- navigation -->
   <group>
     <push_ros_namespace namespace="nav"/>
