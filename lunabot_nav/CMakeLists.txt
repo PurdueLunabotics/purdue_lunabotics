@@ -12,19 +12,26 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(rcutils REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(nav2_msgs REQUIRED)
 find_package(map_msgs REQUIRED)
 find_package(rosidl_runtime_cpp REQUIRED)
+find_package(tf2_ros REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
 add_executable(dstar_node src/dstar_node.cpp src/dstar.cpp)
+add_executable(dijkstra_node src/dijkstra.cpp)
+add_executable(nav2_bridge_node src/nav2_bridge.cpp)
 
 ament_target_dependencies(dstar_node rclcpp std_msgs nav_msgs map_msgs)
+ament_target_dependencies(dijkstra_node rclcpp std_msgs nav_msgs map_msgs tf2_ros)
+ament_target_dependencies(nav2_bridge_node rclcpp std_msgs nav_msgs rclcpp_action nav2_msgs)
 
 # Install files
 
@@ -34,6 +41,8 @@ ament_target_dependencies(dstar_node rclcpp std_msgs nav_msgs map_msgs)
 # Install Programs
 install(TARGETS
   dstar_node
+  dijkstra_node
+  nav2_bridge_node
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)

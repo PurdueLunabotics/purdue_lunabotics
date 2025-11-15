@@ -137,7 +137,7 @@ class PointToPoint(Node):
         odom_topic = "/rtabmap/odom"
         self.create_subscription(Odometry, odom_topic, self.__odom_callback, 1)
 
-        path_topic = "/nav/global_path"
+        path_topic = "/test_path"
         self.create_subscription(Path, path_topic, self.__path_callback, 1)
         
         backwards_topic = "/traversal/backwards"
@@ -146,10 +146,10 @@ class PointToPoint(Node):
         traversal_topic = "/behavior/traversal_enabled"
         self.create_subscription(Bool, traversal_topic, self.__traversal_callback, 1)
 
-        map_topic = "/maps/costmap_node/global_costmap/costmap"
+        map_topic = "/global_costmap/costmap"
         self.create_subscription(OccupancyGrid, map_topic, self.__map_callback, 1)
 
-        map_update_topic = "/maps/costmap_node/global_costmap/costmap_updates"
+        map_update_topic = "/global_costmap/costmap_updates"
         self.create_subscription(OccupancyGridUpdate, map_update_topic, self.__map_update_callback, 1)
 
     # ==================================================================================================================

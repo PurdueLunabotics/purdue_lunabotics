@@ -42,15 +42,17 @@
 
   <!-- mapping -->
   <group>
-    <node name="costmap" pkg="nav2_costmap_2d" exec="nav2_costmap_2d" output="screen" namespace="costmap">
-      <param from="$(find-pkg-share lunabot_config)/config/global_costmap.yml"/>
-      <remap from="costmap" to="/maps/costmap_node/global_costmap/costmap"/>
-      <remap from="costmap_updates" to="/maps/costmap_node/global_costmap/costmap_updates"/>
+    <node name="planner_server" pkg="nav2_planner" exec="planner_server" output="screen">
+      <param from="$(find-pkg-share lunabot_config)/config/planner.yml"/>
       <param name="use_sim_time" value="true"/>
     </node>
-    <node name="costmap_lifecycle" pkg="nav2_lifecycle_manager" exec="lifecycle_manager" namespace="costmap" output="screen">
+    <node name="controller_server" pkg="nav2_controller" exec="controller_server" output="screen">
+      <param from="$(find-pkg-share lunabot_config)/config/planner.yml"/>
+      <param name="use_sim_time" value="true"/>
+    </node>
+    <node name="lifecycle" pkg="nav2_lifecycle_manager" exec="lifecycle_manager" output="screen">
       <param name="autostart" value="true"/>
-      <param name="node_names" value="costmap" value-sep=";"/>
+      <param name="node_names" value="planner_server;controller_server" value-sep=";"/>
       <param name="use_sim_time" value="true"/>
     </node>
   </group>
