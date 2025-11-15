@@ -1,8 +1,10 @@
 #include "dstar.hpp"
 
 #define NUM_DIRECTIONS 4
+#define TURN_FACTOR 5
 // grid_point cardinal_directions[NUM_DIRECTIONS] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}, {1, -1}, {1, 1}, {-1, 1}, {-1, -1}};
 grid_point cardinal_directions[NUM_DIRECTIONS] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+grid_point prev_direction = {0, 0};
 
 
 Dstar::Dstar() {};
@@ -151,8 +153,9 @@ double Dstar::calculate_RHS(grid_point point) {
       if (abs(cardinal_directions[i].x) == 1 && abs(cardinal_directions[i].y) == 1) {
         addition = sqrt(2);
       }
-
-      surrounding_values[i] = g_val + 1; // sqrt(2); TODO - handle non-cardinal directions - this should fix hugging obstacle
+      // uses the current occupancy grid to get information about the cost of a certain point
+      // also add a flat 1 for distance
+      surrounding_values[i] = g_val + current_map [new_point.y][new_point.x] + 1; // sqrt(2); TODO - handle non-cardinal directions - this should fix hugging obstacle
     } else {
       surrounding_values[i] = INT_MAX;
     }
@@ -308,10 +311,17 @@ std::vector<real_world_point> Dstar::create_path_list() {
     double best_g_val = INT_MAX;
     double best_tie_break = INT_MAX;
     for (int i = 0; i < NUM_DIRECTIONS; i++) {
-      if (gvals[i].valid && (gvals[i].g_val < best_g_val || (gvals[i].g_val == best_g_val && gvals[i].heuristic < best_tie_break))) {
+      double penalized_gval = gvals[i].g_val;
+      if (!path_list.empty() && (prev_direction.x != cardinal_directions[i].x || prev_direction.y != cardinal_directions[i].y)) {
+        penalized_gval *= TURN_FACTOR; // multiply by 5 to incur a turning penalty
+      }
+      // if (gvals[i].valid && (gvals[i].g_val < best_g_val || (gvals[i].g_val == best_g_val && gvals[i].heuristic < best_tie_break))) {
+      if (gvals[i].valid && (penalized_gval < best_g_val || (penalized_gval == best_g_val && gvals[i].heuristic < best_tie_break))) {
         path_point = gvals[i].pt;
-        best_g_val = gvals[i].g_val;
+        // best_g_val = gvals[i].g_val;
+        best_g_val = penalized_gval; // add to path list or else you will only go straight for last two nodes of a path due to replanning
         best_tie_break = gvals[i].heuristic;
+        prev_direction = cardinal_directions[i];
       }
     }
 
@@ -421,6 +431,7 @@ std::vector<real_world_point> Dstar::update_map(std::vector<std::vector<int>> ne
 
   // Create a new map filled with -1 (buffer)
   current_map = std::vector<std::vector<int>>(map_new_rows, std::vector<int>(map_new_cols, -1));
+  // current_map = std::vector<std::vector<int>>(map_new_rows, std::vector<int>(map_new_cols, 40));
 
   // Copy the original map into the new buffered map
   for (int y = 0; y < map_original_rows; y++) {
