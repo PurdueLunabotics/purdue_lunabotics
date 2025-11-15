@@ -1,8 +1,10 @@
 #include "dstar.hpp"
 
 #define NUM_DIRECTIONS 4
+#define TURN_FACTOR 5
 // grid_point cardinal_directions[NUM_DIRECTIONS] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}, {1, -1}, {1, 1}, {-1, 1}, {-1, -1}};
 grid_point cardinal_directions[NUM_DIRECTIONS] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+grid_point prev_direction = {0, 0};
 
 
 Dstar::Dstar() {};
@@ -309,10 +311,17 @@ std::vector<real_world_point> Dstar::create_path_list() {
     double best_g_val = INT_MAX;
     double best_tie_break = INT_MAX;
     for (int i = 0; i < NUM_DIRECTIONS; i++) {
-      if (gvals[i].valid && (gvals[i].g_val < best_g_val || (gvals[i].g_val == best_g_val && gvals[i].heuristic < best_tie_break))) {
+      double penalized_gval = gvals[i].g_val;
+      if (!path_list.empty() && (prev_direction.x != cardinal_directions[i].x || prev_direction.y != cardinal_directions[i].y)) {
+        penalized_gval *= TURN_FACTOR; // multiply by 5 to incur a turning penalty
+      }
+      // if (gvals[i].valid && (gvals[i].g_val < best_g_val || (gvals[i].g_val == best_g_val && gvals[i].heuristic < best_tie_break))) {
+      if (gvals[i].valid && (penalized_gval < best_g_val || (penalized_gval == best_g_val && gvals[i].heuristic < best_tie_break))) {
         path_point = gvals[i].pt;
-        best_g_val = gvals[i].g_val;
+        // best_g_val = gvals[i].g_val;
+        best_g_val = penalized_gval; // add to path list or else you will only go straight for last two nodes of a path due to replanning
         best_tie_break = gvals[i].heuristic;
+        prev_direction = cardinal_directions[i];
       }
     }
 

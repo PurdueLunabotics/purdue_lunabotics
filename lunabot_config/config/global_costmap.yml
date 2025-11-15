@@ -4,7 +4,7 @@ costmap:
       publish_frequency: 30.0
       global_frame: "odom"
       robot_base_frame: "base_link"
-      robot_radius: 0.01
+      robot_radius: 0.625
       plugins: ["static_layer", "inflation_layer"]
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
@@ -16,7 +16,7 @@ costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         enabled: true
-        inflation_radius: 3.00
-        cost_scaling_factor: 1.1
+        inflation_radius: 0.5
+        cost_scaling_factor: 5.0
         inflate_unknown: false
         inflate_around_unknown: true
