@@ -313,7 +313,7 @@ std::vector<real_world_point> Dstar::create_path_list() {
     for (int i = 0; i < NUM_DIRECTIONS; i++) {
       double penalized_gval = gvals[i].g_val; // maybe since we arent altering the actual g_val itself we are not considering cost properly?
       if (!path_list.empty() && prev_direction != cardinal_directions[i]) { // builtin comparator in header file
-        penalized_gval += TURN_PENALTY;// multiply by 5 to incur a turning penalty
+        penalized_gval += TURN_PENALTY;// just add some turning cost constant value if needed
       }
       // if (gvals[i].valid && (gvals[i].g_val < best_g_val || (gvals[i].g_val == best_g_val && gvals[i].heuristic < best_tie_break))) {
       if (gvals[i].valid && (penalized_gval < best_g_val || (penalized_gval == best_g_val && gvals[i].heuristic < best_tie_break))) {
