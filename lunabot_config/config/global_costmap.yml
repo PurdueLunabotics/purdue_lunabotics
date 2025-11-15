@@ -16,7 +16,7 @@ costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         enabled: true
-        inflation_radius: 0.5
-        cost_scaling_factor: 5.0
-        inflate_unknown: false
+        inflation_radius: 1.5
+        cost_scaling_factor: 6.0
+        inflate_unknown: true  # should treat unknown as obstacles (maybe change init values)
         inflate_around_unknown: true

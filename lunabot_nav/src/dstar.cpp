@@ -1,8 +1,8 @@
 #include "dstar.hpp"
 
 #define NUM_DIRECTIONS 4
-#define TURN_FACTOR 5
-// grid_point cardinal_directions[NUM_DIRECTIONS] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}, {1, -1}, {1, 1}, {-1, 1}, {-1, -1}};
+#define TURN_PENALTY 2.5
+// grid_point cardinal_directions[NUM_DIRECTIONS] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}, {1, -1}, {1, 1}, {-1, 1}, {-1, -1}}; // might be worth it to give this a shot if we disnincentivize turning and do different types of turns
 grid_point cardinal_directions[NUM_DIRECTIONS] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
 grid_point prev_direction = {0, 0};
 
@@ -311,9 +311,9 @@ std::vector<real_world_point> Dstar::create_path_list() {
     double best_g_val = INT_MAX;
     double best_tie_break = INT_MAX;
     for (int i = 0; i < NUM_DIRECTIONS; i++) {
-      double penalized_gval = gvals[i].g_val;
-      if (!path_list.empty() && (prev_direction.x != cardinal_directions[i].x || prev_direction.y != cardinal_directions[i].y)) {
-        penalized_gval *= TURN_FACTOR; // multiply by 5 to incur a turning penalty
+      double penalized_gval = gvals[i].g_val; // maybe since we arent altering the actual g_val itself we are not considering cost properly?
+      if (!path_list.empty() && prev_direction != cardinal_directions[i]) { // builtin comparator in header file
+        penalized_gval += TURN_PENALTY;// multiply by 5 to incur a turning penalty
       }
       // if (gvals[i].valid && (gvals[i].g_val < best_g_val || (gvals[i].g_val == best_g_val && gvals[i].heuristic < best_tie_break))) {
       if (gvals[i].valid && (penalized_gval < best_g_val || (penalized_gval == best_g_val && gvals[i].heuristic < best_tie_break))) {
