@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="foxglove" default="false"  />
+    <arg name="foxglove" default="true"  />
     <arg name="exp_name" default="" />
 
     <include if="$(var foxglove)" file="$(find-pkg-share foxglove_bridge)/launch/foxglove_bridge_launch.xml" />

@@ -54,7 +54,7 @@ class TeensyDriverNode : public rclcpp::Node {
 
       r = rawhid_open(1, 0x16C0, 0x0486, 0xFFAB, 0x0200);
       if (r <= 0) {
-        printf("no rawhid device found\n");
+        RCLCPP_WARN(this->get_logger(), "no rawhid device found\n");
         throw -1;
       }
       printf("found rawhid device\n");
