@@ -1,0 +1,32 @@
+import os
+from ament_index_python import get_package_share_directory
+from launch import LaunchDescription
+from launch_ros.actions import Node, SetParameter
+from launch.substitutions import Command, FindExecutable, PathJoinSubstitution
+from launch_ros.substitutions import FindPackageShare
+from launch_ros.parameter_descriptions import ParameterValue
+import xacro
+
+def generate_launch_description():
+    xacro_file = os.path.join(get_package_share_directory("lunabot_description"), "urdf", "dummy_bot.xacro.urdf")
+    doc = xacro.parse(open(xacro_file))
+    xacro.process_doc(doc)
+    robot_description = doc.toxml()
+
+    robot_state_publisher = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        parameters=[{'robot_description': robot_description}],
+        output='screen'
+    )
+
+    controller = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['velocity_controller'],
+    )
+
+    return LaunchDescription([
+        robot_state_publisher,
+        controller,
+    ])
