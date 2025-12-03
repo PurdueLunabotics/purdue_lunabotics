@@ -26,7 +26,7 @@ class PointToPoint(Node):
         rclpy.get_global_executor().add_node(self)
         # self.get_logger().info("init")
 
-        self.LINEAR_P = 3.0
+        self.LINEAR_P = 2.0
         self.LINEAR_I = 0
         self.LINEAR_D = 0
         self.LINEAR_TOLERANCE = 0.2  # meters
@@ -38,7 +38,7 @@ class PointToPoint(Node):
             max_output=self.MAX_LINEAR_SPEED,
         )
 
-        self.ANGULAR_P = 5.0
+        self.ANGULAR_P = 4.0
         self.ANGULAR_I = 0
         self.ANGULAR_D = 0
         self.ANGULAR_TOLERANCE_DEG = 10

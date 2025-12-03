@@ -31,6 +31,7 @@
     <param name="use_sim_time" value="true"/>
   </node>
 
+
   <!-- navigation -->
   <group>
     <push_ros_namespace namespace="nav"/>
@@ -40,6 +41,10 @@
 
     <!-- Path followers- Point to point or Pure pursuit -->
     <node name="point_to_point_node" if="$(var ptp)" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="false" >
+      <param name="use_sim_time" value="true"/>
+    </node>
+
+    <node name="nav2_localclient" pkg="lunabot_control" exec="nav2_localclient_node" output="screen" respawn="true">
       <param name="use_sim_time" value="true"/>
     </node>
   </group>
