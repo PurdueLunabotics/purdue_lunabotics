@@ -120,6 +120,7 @@ echo ">>> {Step 6: Setting ROS Environment, This will add ROS environment to .ba
 echo ">>> { After adding this, you can able to access ROS commands in terminal}"
 echo ""
 echo "source /opt/ros/${name_ros_distro}/setup.bash" >> /home/$user_name/.bashrc
+echo "export GZ_VERSION=harmonic" >> /home/$user_name/.bashrc
 source /home/$user_name/.bashrc
 echo ""
 echo "#######################################################################################################################"
@@ -129,7 +130,7 @@ sudo apt install -y python3-colcon-common-extensions
 mkdir -p /home/$user_name/luna_ws/src
 cd ~/luna_ws/src
 sudo apt-get install -y git
-git clone --branch develop https://github.com/PurdueLunabotics/purdue_lunabotics.git
+git clone --branch develop --recurse-submodules https://github.com/PurdueLunabotics/purdue_lunabotics.git
 echo ""
 echo "#######################################################################################################################"
 echo "> {Step 8: Installing Dependencies}"
