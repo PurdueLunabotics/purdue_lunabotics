@@ -2,9 +2,16 @@
   <arg name="camera_frame" />
   <arg name="camera_topic" />
   <arg name="use_sim_time" />
-  <node pkg="apriltag_ros" exec="apriltag_node" name="apriltag" output="screen">
-    <param from="$(find-pkg-share lunabot_config)/config/apriltags/apriltags.yml" />
-    <remap from="image_rect" to="$(var camera_topic)"/>
-    <param name="use_sim_time" value="$(var use_sim_time)"/>
-  </node>
+  <node_container pkg="rclcpp_components" exec="component_container_mt" name="apriltag_container" namespace="" output="screen">
+        <composable_node pkg="isaac_ros_apriltag" plugin="nvidia::isaac_ros::apriltag::AprilTagNode" name="apriltag">
+            <param name="size" value="0.1" />
+            <param name="tag_family" value="tag36h11" />
+            <param name="max_tags" value="64" />
+            <param name="tile_size" value="4" />
+            <param name="use_sim_time" value="$(var use_sim_time)"/>
+
+            <remap from="image" to="$(var camera_topic)"/>
+            <remap from="camera_info" to="camera_info"/>
+        </composable_node>
+    </node_container>
 </launch>
