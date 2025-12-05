@@ -26,17 +26,17 @@ class EffortFactory(Node):
         self.should_reset = False
 
         self.autonomy = True
-        self._autonomy_sub = self.create_subscription(Bool, "/autonomy", self._autonomy_cb, 1)
+        self._autonomy_sub = self.create_subscription(Bool, "autonomy", self._autonomy_cb, 1)
 
         self.effort_publisher = self.create_publisher(
-            RobotEffort, "/effort",  10
+            RobotEffort, "effort",  10
         )
 
-        self.lin_act_subscriber = self.create_subscription(Int32, "/lin_act", self.set_lin_act, 1)
-        self.left_drive_subscriber = self.create_subscription(Int32, "/left_drive", self.set_left_drive, 1)
-        self.right_drive_subscriber = self.create_subscription(Int32, "/right_drive", self.set_right_drive, 1)
-        self.excavate_subscriber = self.create_subscription(Int32, "/excavate", self.set_excavate, 1)
-        self.deposition_subscriber = self.create_subscription(Int32, "/deposition", self.set_deposition, 1)
+        self.lin_act_subscriber = self.create_subscription(Int32, "lin_act", self.set_lin_act, 1)
+        self.left_drive_subscriber = self.create_subscription(Int32, "left_drive", self.set_left_drive, 1)
+        self.right_drive_subscriber = self.create_subscription(Int32, "right_drive", self.set_right_drive, 1)
+        self.excavate_subscriber = self.create_subscription(Int32, "excavate", self.set_excavate, 1)
+        self.deposition_subscriber = self.create_subscription(Int32, "deposition", self.set_deposition, 1)
 
         rate = self.create_rate(50.0, self.get_clock())
 

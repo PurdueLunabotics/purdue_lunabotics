@@ -1,28 +1,103 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
-    <arg name="autonomy" default="true" />
-    <arg name="record" default="true" />
-    <arg name="teensy" default="true" />
-    <arg name="cameras" default="true" />
-    <arg name="overhead" default="true" />
-    <arg name="slam" default="true" />
-    <arg name="exp_name" default="exp" />
-    <arg name="front" default="true" />
-    <arg name="back" default="true" />
-    <arg name="extra_cams" default="false" />
-    <arg name="loginternet" default="false" />
+    <!-- ============================== -->
+    <!-- ========= ARGUMENTS ========== -->
+    <!-- ============================== -->
 
-    <!-- Should we use Point To Point or Pure pursuit -->
-    <arg name="ptp" default="true"/>
+    <!-- Type of Robot Args -->
+    <arg name="robot_num" default="0"/>
+    <let name="ns" if="$(eval '$(var robot_num) == 1')" value="mini"/>
+    <let name="ns" if="$(eval '$(var robot_num) == 0')" value=""/>
+
+    <!-- Add a slash before the ns if it is not empty -->
+    <let name="/ns" if="$(eval 'len(\'$(var ns)\') > 0')" value="/$(var ns)"/>
+    <let name="/ns" unless="$(eval 'len(\'$(var ns)\') > 0')" value=""/>
+
+    <arg name="sim" default="False"/>
+    <let name="real" value="$(eval '\'$(var sim)\' != \'True\'')"/>
+
+    <push_ros_namespace if="$(eval '$(var robot_num) != 0')" namespace="$(var ns)"/>
+
+    <!-- What to Launch Args -->
+    <arg name="autonomy" default="true" />
+    <arg name="record" default="$(var real)" />
+    <arg name="slam" default="true" />
+    <arg name="teensy" default="$(var real)" />
+    <arg name="loginternet" default="false" />
+    
+    <!-- Robot Description Args -->
+    <arg name="entity_name" default="dummy_bot" if="$(eval '$(var robot_num) == 0')"/>
+    <arg name="entity_name" default="mini_bot" if="$(eval '$(var robot_num) == 1')"/>
+
+    <!-- Camera Args -->
+    <arg name="cameras" default="false" />
+
+    <let name="cam_1_name"              value="d455_front"/>
+    <let name="cam_2_name"              value="d455_back"/>
+    <let name="cam_3_name"              value="d455_left"/>
+    <let name="cam_4_name"              value="d455_right"/>
+    <!-- Main -->
+    <arg name="cams"                    default="'12'"      if="$(eval '$(var robot_num) == 0')"/> <!-- Camera numbers -->
+    <arg name="odom_cam_name"           default="$(var cam_1_name)"  if="$(eval '$(var robot_num) == 0')"/>
+
+    <!-- Mini -->
+    <arg name="cams"                    default="'34'"      if="$(eval '$(var robot_num) == 1')"/> <!-- Camera numbers -->
+    <arg name="odom_cam_name"           default="$(var cam_3_name)"  if="$(eval '$(var robot_num) == 1')"/>
+
+    <arg name="pointcloud"                      default="$(eval 'len($(var cams)) > 1')" />
+
+    <!-- Differential Drive Args -->
+    <arg name="diff_drive_hz"           default="20.0"/>
+    <!-- Main -->
+    <arg name="width"                   default="0.5588"    if="$(eval '$(var robot_num) == 0')"/>
+    <arg name="max_speed_percentage"    default="0.8"       if="$(eval '$(var robot_num) == 0')"/>
+    <arg name="max_speed"               default="1000"      if="$(eval '$(var robot_num) == 0')"/>
+    <arg name="wheel_diameter"          default="0.3429"    if="$(eval '$(var robot_num) == 0')"/>
+    <arg name="gearbox_ratio"           default="50.0"/>
+    <!-- Mini -->
+    <arg name="width"                   default="0.5588"    if="$(eval '$(var robot_num) == 1')"/>
+    <arg name="max_speed_percentage"    default="0.8"       if="$(eval '$(var robot_num) == 1')"/>
+    <arg name="max_speed"               default="1000"      if="$(eval '$(var robot_num) == 1')"/>
+    <arg name="wheel_diameter"          default="0.3429"    if="$(eval '$(var robot_num) == 1')"/>
+    <arg name="gearbox_ratio"           default="50.0"        if="$(eval '$(var robot_num) == 1')"/>
+
+    <!-- Record Args -->
+    <arg name="exp_name" default="exp" />
+
+    <!-- ============================== -->
+    <!-- ======= LAUNCH NODES ========= -->
+    <!-- ============================== -->
 
     <!-- Launch Teensy Driver -->
-    <node if="$(var teensy)" name="teensy_driver" pkg="lunabot_embedded" exec="teensy_driver_node" output="screen" />
+    <node if="$(var teensy)" name="teensy_driver" pkg="lunabot_embedded" exec="teensy_driver_node" 
+            output="screen">
+        <param name="use_sim_time" value="$(var sim)"/>
+        
+        <!-- Input -->
+        <remap from="effort" to="effort"/>
+        <remap from="led_color" to="led_color"/>
 
-    <!-- Launch robot, joint state/robot state publishers, previously in display.launch -->
-    <include file="$(find-pkg-share lunabot_description)/launch/robot_description.launch.py"/>
+        <!-- Output -->
+        <remap from="sensors" to="sensors"/>
+    </node>
+
+    <!-- Launch Robot State, Joint State Publishers (TFs) -->
+    <include file="$(find-pkg-share lunabot_description)/launch/robot_description.launch.py">
+        <arg name="entity_name" value="$(var entity_name)"/>
+        <arg name="ns" value="$(var ns)"/>
+        <arg name="sim" value="$(var sim)"/>
+    </include>
 
     <!-- Launch Cameras -->
-    <include file="$(find-pkg-share lunabot_perception)/launch/cameras.launch"/>
+    <include if="$(var cameras)" file="$(find-pkg-share lunabot_perception)/launch/cameras.launch">
+        <arg name="robot_num" value="$(var robot_num)"/>
+        <arg name="ns" value="$(var ns)"/>
+        <arg name="sim" value="$(var sim)"/>
+        <arg name="front" value="$(var front)"/>
+        <arg name="back" value="$(var back)"/>
+        <arg name="extra_cams" value="$(var extra_cams)"/>
+    </include>
+        
 
     <include if="$(var record)" file="$(find-pkg-share lunabot_bringup)/launch/record.launch">
         <arg name="exp_name" value="$(var exp_name)" />
@@ -30,41 +105,74 @@
 
     <group if="$(var autonomy)">
         <!-- Launch diff drive controller -->
-        <node name="differential_drive_controller_node" pkg="lunabot_control" exec="differential_drive_controller_node" output="screen" respawn="true" >
+        <node name="differential_drive_controller_node" pkg="lunabot_control" 
+                exec="differential_drive_controller_node" output="screen" respawn="true" >
+            <param name="use_sim_time" value="$(var sim)"/>
+
+            <param name="width" value="$(var width)"/>
+            <param name="max_speed_percentage" value="$(var max_speed_percentage)"/>
+            <param name="hz" value="$(var diff_drive_hz)"/>
+            <param name="max_speed" value="$(var max_speed)"/>
+            <param name="wheel_diameter" value="$(var wheel_diameter)"/>
+            <param name="gearbox_ratio" value="$(var gearbox_ratio)"/>
+            
+            <!-- Input -->
+            <remap from="cmd_vel" to="cmd_vel"/>
+            <remap from="sensors" to="sensors"/>
+            <remap from="autonomy" to="autonomy"/>
+
+            <!-- Output -->
+            <remap from="right_drive" to="right_drive"/>
+            <remap from="left_drive" to="left_drive"/>
         </node>
 
         <!-- Launch effort factory -->
-        <node name="effort_factory_node" pkg="lunabot_control" exec="effort_factory_node" output="screen" respawn="true" >
+        <node name="effort_factory_node" pkg="lunabot_control" exec="effort_factory_node" 
+                output="screen" respawn="true" >
+            <param name="use_sim_time" value="$(var sim)"/>
+            
+            <!-- Input -->
+            <remap from="effort" to="effort"/>
+
+            <!-- Output -->
+            <remap from="autonomy" to="autonomy"/>
+
         </node>
 
         <push_ros_namespace namespace="rtabmap"/>
 
         <!-- Odometry -->
         <node pkg="rtabmap_odom" exec="rgbd_odometry" output="screen" name="rgbd_odometry" ros_args="--log-level WARN">
+            <param name="use_sim_time" value="$(var sim)"/>
+            
             <param name="subscribe_depth"     value="true"/>
             <param name="frame_id"            value="base_link"/>
             <param name="Odom/ResetCountdown" value="'1'"/>
 
 
-            <remap from="depth/image"         to="/d455_back/aligned_depth_to_color/image_raw"/>
-            <remap from="rgb/image"           to="/d455_back/color/image_raw"/>
-            <remap from="rgb/camera_info"     to="/d455_back/color/camera_info"/>
+            <remap from="depth/image"         to="$(var /ns)/$(var odom_cam_name)/aligned_depth_to_color/image_raw"/>
+            <remap from="rgb/image"           to="$(var /ns)/$(var odom_cam_name)/color/image_raw"/>
+            <remap from="rgb/camera_info"     to="$(var /ns)/$(var odom_cam_name)/color/camera_info"/>
         </node>
 
         <node if="$(var slam)" name="rtabmap" pkg="rtabmap_slam" exec="rtabmap" output="log" args="--delete_db_on_start" ros_args="--log-level WARN">
+            <param name="use_sim_time" value="$(var sim)"/>
+
             <param name="frame_id"                value="base_link"/>
 
-            <param name="subscribe_rgb"           value="false"/>
-            <param name="subscribe_depth"         value="false"/>
+            <param name="subscribe_rgb"           value="$(eval '\'$(var pointcloud)\' != \'True\'')"/>
+            <param name="subscribe_depth"         value="$(eval '\'$(var pointcloud)\' != \'True\'')"/>
             <param name="subscribe_rgbd"          value="false"/>
-            <param name="subscribe_scan_cloud"    value="true"/>
+            <param name="subscribe_scan_cloud"    value="$(var pointcloud)"/>
 
             <remap from="odom"                    to="odom"/>
-            <remap from="scan_cloud"              to="/pointcloud/depth_combined_cloud"/>
+            <remap from="scan_cloud"              to="$(var /ns)/pointcloud/depth_combined_cloud"/>
 
-            <param name="gen_scan"                value="true"/>
+            <remap from="depth/image"             to="$(var /ns)/$(var odom_cam_name)/aligned_depth_to_color/image_raw"/>
+            <remap from="rgb/image"               to="$(var /ns)/$(var odom_cam_name)/color/image_raw"/>
+            <remap from="rgb/camera_info"         to="$(var /ns)/$(var odom_cam_name)/color/camera_info"/>
 
-            <param name="sync_queue_size"              value="10"/>
+            <param name="sync_queue_size"         value="10"/>
             <param name="approx_sync"             value="true"/>
             <param name="map_always_update"       value="true"/>
 
@@ -82,22 +190,42 @@
     <group>
         <push_ros_namespace namespace="nav"/>
         <node name="global_planner_node" pkg="lunabot_nav" exec="dstar_node" output="screen" respawn="true">
+            <param name="use_sim_time" value="$(var sim)"/>
+
+            <remap from="odom" to="$(var /ns)/rtabmap/odom"/>
+            <remap from="goal" to="$(var /ns)/goal"/>
+            <remap from="global_path" to="$(var /ns)/nav/global_path"/>
+            <remap from="costmap_enabled" to="$(var /ns)/costmap_enabled"/>
+            <remap from="planning_enabled" to="$(var /ns)/planning_enabled"/>
+            <remap from="costmap" to="$(var /ns)/maps/costmap_node/global_costmap/costmap"/>
+            <remap from="costmap_updates" to="$(var /ns)/maps/costmap_node/global_costmap/costmap_updates"/>
         </node>
 
-        <!-- Path followers- Point to point or Pure pursuit -->
         <node name="point_to_point_node" if="$(var ptp)" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="false" >
+            <param name="use_sim_time" value="$(var sim)"/>
+
+            <remap from="odom" to="$(var /ns)/rtabmap/odom"/>
+            <remap from="global_path" to="$(var /ns)/nav/global_path"/>
+            <remap from="backwards" to="$(var /ns)/traversal/backwards"/>
+            <remap from="traversal_enabled" to="$(var /ns)/behavior/traversal_enabled"/>
+            <remap from="costmap" to="$(var /ns)/maps/costmap_node/global_costmap/costmap"/>
+            <remap from="costmap_updates" to="$(var /ns)/maps/costmap_node/global_costmap/costmap_updates"/>
+
+            <remap from="cmd_vel" to="$(var /ns)/cmd_vel"/>
         </node>
     </group>
 
     <group>
         <node name="costmap" pkg="nav2_costmap_2d" exec="nav2_costmap_2d" output="screen" namespace="costmap">
             <param from="$(find-pkg-share lunabot_config)/config/global_costmap.yml"/>
-            <remap from="costmap" to="/maps/costmap_node/global_costmap/costmap"/>
-            <remap from="costmap_updates" to="/maps/costmap_node/global_costmap/costmap_updates"/>
+            <remap from="costmap" to="$(var /ns)/maps/costmap_node/global_costmap/costmap"/>
+            <remap from="costmap_updates" to="$(var /ns)/maps/costmap_node/global_costmap/costmap_updates"/>
+            <param name="use_sim_time" value="$(var sim)"/>
         </node>
         <node name="costmap_lifecycle" pkg="nav2_lifecycle_manager" exec="lifecycle_manager" namespace="costmap" output="screen">
             <param name="autostart" value="true"/>
             <param name="node_names" value="costmap" value-sep=";"/>
+            <param name="use_sim_time" value="$(var sim)"/>
         </node>
     </group>
 </launch>

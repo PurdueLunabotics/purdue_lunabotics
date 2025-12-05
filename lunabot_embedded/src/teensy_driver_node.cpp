@@ -46,9 +46,9 @@ class TeensyDriverNode : public rclcpp::Node {
 
   public:
     TeensyDriverNode() : Node("teensy_driver_node"), state(), effort() {
-      effort_sub = this->create_subscription<lunabot_msgs::msg::RobotEffort>("/effort", 10, std::bind(&TeensyDriverNode::effort_cb, this, placeholders::_1));
-      color_sub = this->create_subscription<std_msgs::msg::Int32>("/led_color", 10, std::bind(&TeensyDriverNode::color_cb, this, placeholders::_1));
-      state_pub = this->create_publisher<lunabot_msgs::msg::RobotSensors>("/sensors", 10);
+      effort_sub = this->create_subscription<lunabot_msgs::msg::RobotEffort>("effort", 10, std::bind(&TeensyDriverNode::effort_cb, this, placeholders::_1));
+      color_sub = this->create_subscription<std_msgs::msg::Int32>("led_color", 10, std::bind(&TeensyDriverNode::color_cb, this, placeholders::_1));
+      state_pub = this->create_publisher<lunabot_msgs::msg::RobotSensors>("sensors", 10);
 
       num_read_fails = 0;
 
