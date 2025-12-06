@@ -35,7 +35,7 @@
     <arg name="entity_name" default="mini_bot" if="$(eval '$(var robot_num) == 1')"/>
 
     <!-- Camera Args -->
-    <arg name="cameras" default="false" />
+    <arg name="cameras" default="true" />
 
     <let name="cam_1_name"              value="d455_front"/>
     <let name="cam_2_name"              value="d455_back"/>
@@ -113,9 +113,6 @@
         <arg name="robot_num" value="$(var robot_num)"/>
         <arg name="ns" value="$(var ns)"/>
         <arg name="sim" value="$(var sim)"/>
-        <arg name="front" value="$(var front)"/>
-        <arg name="back" value="$(var back)"/>
-        <arg name="extra_cams" value="$(var extra_cams)"/>
     </include>
         
 
@@ -221,7 +218,7 @@
             <remap from="costmap_updates" to="$(var /ns)/maps/costmap_node/global_costmap/costmap_updates"/>
         </node>
 
-        <node name="point_to_point_node" if="$(var ptp)" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="false" >
+        <node name="point_to_point_node" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="false" >
             <param name="use_sim_time" value="$(var sim)"/>
 
             <remap from="odom" to="$(var /ns)/rtabmap/odom"/>

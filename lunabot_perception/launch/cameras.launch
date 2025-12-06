@@ -228,13 +228,15 @@
 
   <group if="$(var pointcloud)">
     <push_ros_namespace namespace="pointcloud"/>
+
+    
     
     <!-- Aggregate pointclouds from each camera (if using multiple cameras)-->
     <node pkg="rtabmap_util" exec='point_cloud_aggregator' name="point_cloud_aggregator" respawn="true">
-      <remap if="$(eval '\'1\' in $(arg cams)')" from="cloud$(eval '$(arg cams).find(\'1\')+1')" to="/$(var cam_1_name)/points" />
-      <remap if="$(eval '\'2\' in $(arg cams)')" from="cloud$(eval '$(arg cams).find(\'2\')+1')" to="/$(var cam_1_name)/points" />
-      <remap if="$(eval '\'3\' in $(arg cams)')" from="cloud$(eval '$(arg cams).find(\'3\')+1')" to="/$(var cam_1_name)/points" />
-      <remap if="$(eval '\'4\' in $(arg cams)')" from="cloud$(eval '$(arg cams).find(\'4\')+1')" to="/$(var cam_1_name)/points" />
+      <remap from="cloud$(eval '$(var cams).find(\'1\')+1')" to="/$(var cam_1_name)/points" />
+      <remap from="cloud$(eval '$(var cams).find(\'2\')+1')" to="/$(var cam_2_name)/points" />
+      <remap from="cloud$(eval '$(var cams).find(\'3\')+1')" to="/$(var cam_3_name)/points" />
+      <remap from="cloud$(eval '$(var cams).find(\'4\')+1')" to="/$(var cam_4_name)/points" />
       <remap from="combined_cloud" to="depth_combined_cloud"/>       
       <param name="count" value="$(eval 'len($(var cams))')"/>
       <param name="xyz_output" value="true"/>
