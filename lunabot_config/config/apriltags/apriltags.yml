@@ -7,4 +7,5 @@ apriltag:                 # node name
 
     # Tag Configuration
     size: 0.19            # Tag edge size in meters
-    tag_family: "36h11"   # Tag family name
+    tag_family: 36h11   # Tag family name
+
