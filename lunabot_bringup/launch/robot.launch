@@ -177,8 +177,8 @@
 
             <param name="frame_id"                value="base_link"/>
 
-            <param name="subscribe_rgb"           value="$(eval '\'$(var pointcloud)\' != \'True\'')"/>
-            <param name="subscribe_depth"         value="$(eval '\'$(var pointcloud)\' != \'True\'')"/>
+            <param name="subscribe_rgb"           value="true"/>
+            <param name="subscribe_depth"         value="true"/>
             <param name="subscribe_rgbd"          value="false"/>
             <param name="subscribe_scan_cloud"    value="$(var pointcloud)"/>
 
@@ -253,8 +253,15 @@
 
     <group if="$(var sim)">
         <executable cmd="ros2 run ros_gz_sim create --topic $(var entity_name)/robot_description --name $(var entity_name) -x 2.5 -y 1.75
-            -z 0.1 -Y -1.570796327"/>
+            -z 0.25 -Y -1.570796327"/>
 
-        <executable cmd="ros2 run ros_gz_image image_bridge $(var cam_1_topic)$(var cam_2_topic)$(var cam_3_topic)$(var cam_4_topic)"/>
+        <node name="image_bridge_cam_1_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_1_name)/color/image_raw" if="$(eval '\'1\' in $(var cams)')"/>
+        <node name="image_bridge_cam_1_depth" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_1_name)/aligned_depth_to_color/image_raw" if="$(eval '\'1\' in $(var cams)')"/>
+        <node name="image_bridge_cam_2_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_2_name)/color/image_raw" if="$(eval '\'2\' in $(var cams)')"/>
+        <node name="image_bridge_cam_2_depth" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_2_name)/aligned_depth_to_color/image_raw" if="$(eval '\'2\' in $(var cams)')"/>
+        <node name="image_bridge_cam_3_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_3_name)/color/image_raw" if="$(eval '\'3\' in $(var cams)')"/>
+        <node name="image_bridge_cam_3_depth" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_3_name)/aligned_depth_to_color/image_raw" if="$(eval '\'3\' in $(var cams)')"/>
+        <node name="image_bridge_cam_4_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_4_name)/color/image_raw" if="$(eval '\'4\' in $(var cams)')"/>
+        <node name="image_bridge_cam_4_depth" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_4_name)/aligned_depth_to_color/image_raw" if="$(eval '\'4\' in $(var cams)')"/>
     </group>
 </launch>

@@ -306,10 +306,10 @@
       <always_on>1</always_on>
       <visualize>false</visualize>
       <update_rate>15</update_rate>
-      <topic>mini/d455_back/depth/image_raw</topic>
+      <topic>mini/d455_back/aligned_depth_to_color/image_raw</topic>
       <gz_frame_id>mini/d455_back_depth_link</gz_frame_id>
       <camera name="d455_back_depth">
-        <camera_info_topic>mini/d455_back/depth/camera_info</camera_info_topic>
+        <camera_info_topic>mini/d455_back/aligned_depth_to_color/camera_info</camera_info_topic>
         <horizontal_fov>1.50098</horizontal_fov>
         <image>
           <width>424</width>
@@ -412,10 +412,10 @@
       <always_on>1</always_on>
       <visualize>false</visualize>
       <update_rate>15</update_rate>
-      <topic>mini/d455_front/depth/image_raw</topic>
+      <topic>mini/d455_front/aligned_depth_to_color/image_raw</topic>
       <gz_frame_id>mini/d455_front_depth_link</gz_frame_id>
       <camera name="d455_front_depth">
-        <camera_info_topic>mini/d455_front/depth/camera_info</camera_info_topic>
+        <camera_info_topic>mini/d455_front/aligned_depth_to_color/camera_info</camera_info_topic>
         <horizontal_fov>1.50098</horizontal_fov>
         <image>
           <width>424</width>

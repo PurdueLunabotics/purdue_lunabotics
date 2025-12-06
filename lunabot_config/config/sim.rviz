@@ -21,7 +21,6 @@ Panels:
   - Class: rviz_common/Tool Properties
     Expanded:
       - /2D Goal Pose1
-      - /Publish Point1
     Name: Tool Properties
     Splitter Ratio: 0.5886790156364441
   - Class: rviz_common/Views
@@ -33,7 +32,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2
+    SyncSource: ""
 Visualization Manager:
   Class: ""
   Displays:
@@ -78,35 +77,11 @@ Visualization Manager:
           Value: true
         left_front:
           Value: true
+        map:
+          Value: true
         middle_link:
           Value: true
-        mini/base_link:
-          Value: true
-        mini/d455_back_depth_link:
-          Value: true
-        mini/d455_back_link:
-          Value: true
-        mini/d455_back_rgb_link:
-          Value: true
-        mini/d455_front_depth_link:
-          Value: true
-        mini/d455_front_link:
-          Value: true
-        mini/d455_front_rgb_link:
-          Value: true
-        mini/left_back:
-          Value: true
-        mini/left_front:
-          Value: true
-        mini/map:
-          Value: true
-        mini/middle_link:
-          Value: true
-        mini/odom:
-          Value: true
-        mini/right_back:
-          Value: true
-        mini/right_front:
+        odom:
           Value: true
         right_back:
           Value: true
@@ -118,28 +93,29 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
-        mini/map:
-          mini/odom:
-            mini/base_link:
-              mini/middle_link:
-                mini/d455_back_link:
-                  mini/d455_back_depth_link:
-                    {}
-                  mini/d455_back_rgb_link:
-                    {}
-                mini/d455_front_link:
-                  mini/d455_front_depth_link:
-                    {}
-                  mini/d455_front_rgb_link:
-                    {}
-                mini/left_back:
+        map:
+          {}
+        odom:
+          base_link:
+            middle_link:
+              d455_back_link:
+                d455_back_depth_link:
                   {}
-                mini/left_front:
+                d455_back_rgb_link:
                   {}
-                mini/right_back:
+              d455_front_link:
+                d455_front_depth_link:
                   {}
-                mini/right_front:
+                d455_front_rgb_link:
                   {}
+              left_back:
+                {}
+              left_front:
+                {}
+              right_back:
+                {}
+              right_front:
+                {}
       Update Interval: 0
       Value: true
     - Alpha: 0.699999988079071
@@ -283,14 +259,14 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        {}
+        target_paths: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /ptp/line_path
+        Value: /nav/ptp/line_path
       Value: true
     - Alpha: 1
       Class: rviz_default_plugins/RobotModel
@@ -321,7 +297,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: /odom
+    Fixed Frame: odom
     Frame Rate: 30
   Name: root
   Tools:
@@ -346,7 +322,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 4.883861541748047
+      Distance: 8.2405366897583
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -361,10 +337,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.9203976988792419
+      Pitch: 0.9753977060317993
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.7704033851623535
+      Yaw: 5.225404739379883
     Saved: ~
 Window Geometry:
   Displays:
@@ -382,5 +358,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: 1027
-  Y: 20
+  X: 995
+  Y: -12

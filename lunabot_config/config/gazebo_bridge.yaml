@@ -41,8 +41,8 @@
   direction: GZ_TO_ROS
 
 # gz topic published by Sensors plugin (Camera)
-- ros_topic_name: "d455_back/depth/camera_info"
-  gz_topic_name: "d455_back/depth/camera_info"
+- ros_topic_name: "d455_back/aligned_depth_to_color/camera_info"
+  gz_topic_name: "d455_back/aligned_depth_to_color/camera_info"
   ros_type_name: "sensor_msgs/msg/CameraInfo"
   gz_type_name: "gz.msgs.CameraInfo"
   direction: GZ_TO_ROS
@@ -55,8 +55,8 @@
   direction: GZ_TO_ROS
 
 # gz topic published by Sensors plugin (Camera)
-- ros_topic_name: "d455_front/depth/camera_info"
-  gz_topic_name: "d455_front/depth/camera_info"
+- ros_topic_name: "d455_front/aligned_depth_to_color/camera_info"
+  gz_topic_name: "d455_front/aligned_depth_to_color/camera_info"
   ros_type_name: "sensor_msgs/msg/CameraInfo"
   gz_type_name: "gz.msgs.CameraInfo"
   direction: GZ_TO_ROS
@@ -99,8 +99,8 @@
   direction: GZ_TO_ROS
 
 # gz topic published by Sensors plugin (Camera)
-- ros_topic_name: "mini/d455_back/depth/camera_info"
-  gz_topic_name: "mini/d455_back/depth/camera_info"
+- ros_topic_name: "mini/d455_back/aligned_depth_to_color/camera_info"
+  gz_topic_name: "mini/d455_back/aligned_depth_to_color/camera_info"
   ros_type_name: "sensor_msgs/msg/CameraInfo"
   gz_type_name: "gz.msgs.CameraInfo"
   direction: GZ_TO_ROS
@@ -113,8 +113,8 @@
   direction: GZ_TO_ROS
 
 # gz topic published by Sensors plugin (Camera)
-- ros_topic_name: "mini/d455_front/depth/camera_info"
-  gz_topic_name: "mini/d455_front/depth/camera_info"
+- ros_topic_name: "mini/d455_front/aligned_depth_to_color/camera_info"
+  gz_topic_name: "mini/d455_front/aligned_depth_to_color/camera_info"
   ros_type_name: "sensor_msgs/msg/CameraInfo"
   gz_type_name: "gz.msgs.CameraInfo"
   direction: GZ_TO_ROS
