@@ -129,7 +129,7 @@ sudo apt install -y python3-colcon-common-extensions
 mkdir -p /home/$user_name/luna_ws/src
 cd ~/luna_ws/src
 sudo apt-get install -y git
-git clone --branch ros2-develop https://github.com/PurdueLunabotics/purdue_lunabotics.git
+git clone --branch develop https://github.com/PurdueLunabotics/purdue_lunabotics.git
 echo ""
 echo "#######################################################################################################################"
 echo "> {Step 8: Installing Dependencies}"

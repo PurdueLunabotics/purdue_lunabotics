@@ -15,7 +15,7 @@ This is the official ROS 2 git repo of the Purdue Lunabotics software team.
 ### One Line Install:
 Run the following command to install everything (Must be in Ubuntu 22.04)
 ```
-wget -c https://raw.githubusercontent.com/PurdueLunabotics/purdue_lunabotics/refs/heads/ros2-develop/install.sh && chmod +x ./install.sh && ./install.sh
+wget -c https://raw.githubusercontent.com/PurdueLunabotics/purdue_lunabotics/refs/heads/develop/install.sh && chmod +x ./install.sh && ./install.sh
 ```
 
 ### 1. Install Ubuntu 22.04
