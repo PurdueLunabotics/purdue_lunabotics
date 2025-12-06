@@ -4,7 +4,7 @@
   <arg name="camera_info_topic" default="$(var camera_topic)/../camera_info"/>
   <arg name="use_sim_time" />
   <node pkg="isaac_ros_apriltag" exec="isaac_ros_apriltag" name="apriltag" output="screen">
-    <param from="$(dirname)/apriltags.yml" />
+    <param from="$(find-pkg-share lunabot_config)/config/apriltags/apriltags.yml" />
     <remap from="image" to="$(var camera_topic)"/>
     <remap from="camera_info" to="$(var camera_info_topic)"/>
     <param name="use_sim_time" value="$(var use_sim_time)"/>
