@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
-  <executable cmd="mkdir ~/bags"/>
+  <executable cmd="mkdir $HOME/bags"/>
   <arg name="exp_name" default="exp" />
-  <executable cmd="ros2 bag record --repeat-latched -o ~/bags/$(var exp_name) 
+  <executable cmd="ros2 bag record -o ~/bags/$(var exp_name) 
 
   /goal /maps/costmap_node/global_costmap/costmap /nav/global_path 
   

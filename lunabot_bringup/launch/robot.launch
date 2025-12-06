@@ -8,15 +8,20 @@
     <arg name="robot_num" default="0"/>
     <let name="ns" if="$(eval '$(var robot_num) == 1')" value="mini"/>
     <let name="ns" if="$(eval '$(var robot_num) == 0')" value=""/>
+    <arg name="sim" default="false"/>
+    <let name="real" value="$(eval '\'$(var sim)\' == \'false\'')"/>
+
+    <push_ros_namespace if="$(eval 'len(\'$(var ns)\') > 0')" namespace="$(var ns)"/>
 
     <!-- Add a slash before the ns if it is not empty -->
     <let name="/ns" if="$(eval 'len(\'$(var ns)\') > 0')" value="/$(var ns)"/>
     <let name="/ns" unless="$(eval 'len(\'$(var ns)\') > 0')" value=""/>
 
-    <arg name="sim" default="False"/>
-    <let name="real" value="$(eval '\'$(var sim)\' != \'True\'')"/>
+    <!-- Add an underscore after the ns if it is not empty -->
+    <let name="ns_" if="$(eval 'len(\'$(var ns)\') > 0')" value="$(var ns)_"/>
+    <let name="ns_" unless="$(eval 'len(\'$(var ns)\') > 0')" value=""/>
 
-    <push_ros_namespace if="$(eval '$(var robot_num) != 0')" namespace="$(var ns)"/>
+
 
     <!-- What to Launch Args -->
     <arg name="autonomy" default="true" />
@@ -44,6 +49,23 @@
     <arg name="cams"                    default="'34'"      if="$(eval '$(var robot_num) == 1')"/> <!-- Camera numbers -->
     <arg name="odom_cam_name"           default="$(var cam_3_name)"  if="$(eval '$(var robot_num) == 1')"/>
 
+    <let name="cam_1_topic"             value="$(var /ns)/$(var cam_1_name)/color/image_raw $(var /ns)/$(var cam_1_name)/depth/image_raw "
+        if="$(eval '\'1\' in $(var cams)')"/>
+    <let name="cam_1_topic"             value="" 
+        unless="$(eval '\'1\' in $(var cams)')"/>
+    <let name="cam_2_topic"             value="$(var /ns)/$(var cam_2_name)/color/image_raw $(var /ns)/$(var cam_2_name)/depth/image_raw "
+        if="$(eval '\'2\' in $(var cams)')"/>
+    <let name="cam_2_topic"             value="" 
+        unless="$(eval '\'2\' in $(var cams)')"/>
+    <let name="cam_3_topic"             value="$(var /ns)/$(var cam_3_name)/color/image_raw $(var /ns)/$(var cam_3_name)/depth/image_raw "
+        if="$(eval '\'3\' in $(var cams)')"/>
+    <let name="cam_3_topic"             value="" 
+        unless="$(eval '\'3\' in $(var cams)')"/>
+    <let name="cam_4_topic"             value="$(var /ns)/$(var cam_4_name)/color/image_raw $(var /ns)/$(var cam_4_name)/depth/image_raw "
+        if="$(eval '\'4\' in $(var cams)')"/>
+    <let name="cam_4_topic"             value="" 
+        unless="$(eval '\'4\' in $(var cams)')"/>
+
     <arg name="pointcloud"                      default="$(eval 'len($(var cams)) > 1')" />
 
     <!-- Differential Drive Args -->
@@ -70,9 +92,7 @@
 
     <!-- Launch Teensy Driver -->
     <node if="$(var teensy)" name="teensy_driver" pkg="lunabot_embedded" exec="teensy_driver_node" 
-            output="screen">
-        <param name="use_sim_time" value="$(var sim)"/>
-        
+            output="screen">        
         <!-- Input -->
         <remap from="effort" to="effort"/>
         <remap from="led_color" to="led_color"/>
@@ -218,6 +238,11 @@
     <group>
         <node name="costmap" pkg="nav2_costmap_2d" exec="nav2_costmap_2d" output="screen" namespace="costmap">
             <param from="$(find-pkg-share lunabot_config)/config/global_costmap.yml"/>
+            <param name="global_frame" value="$(var ns_)odom"/>
+            <param name="robot_base_frame" value="$(var ns_)base_link"/>
+            <param name="static_layer">
+                <param name="map_topic" value="$(var /ns)/rtabmap/octomap_grid"/>
+            </param>
             <remap from="costmap" to="$(var /ns)/maps/costmap_node/global_costmap/costmap"/>
             <remap from="costmap_updates" to="$(var /ns)/maps/costmap_node/global_costmap/costmap_updates"/>
             <param name="use_sim_time" value="$(var sim)"/>
@@ -227,5 +252,12 @@
             <param name="node_names" value="costmap" value-sep=";"/>
             <param name="use_sim_time" value="$(var sim)"/>
         </node>
+    </group>
+
+    <group if="$(var sim)">
+        <executable cmd="ros2 run ros_gz_sim create --topic $(var entity_name)/robot_description --name $(var entity_name) -x 2.5 -y 1.75
+            -z 0.1 -Y -1.570796327"/>
+
+        <executable cmd="ros2 run ros_gz_image image_bridge $(var cam_1_topic)$(var cam_2_topic)$(var cam_3_topic)$(var cam_4_topic)"/>
     </group>
 </launch>

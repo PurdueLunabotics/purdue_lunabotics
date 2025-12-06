@@ -1,13 +1,10 @@
 costmap:
   ros__parameters:
     publish_frequency: 30.0
-    global_frame: "odom"
-    robot_base_frame: "base_link"
     robot_radius: 0.5
     plugins: ["static_layer", "inflation_layer"]
     static_layer:
       plugin: "nav2_costmap_2d::StaticLayer"
-      map_topic: "/rtabmap/octomap_grid"
       enabled: true
       map_subscribe_transient_local: false
       subscribe_to_updates: true
