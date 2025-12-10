@@ -14,8 +14,8 @@ class DrivetrainController(Node):
 
         self._gearbox_ratio = 50.0
 
-        self.effort_subscriber = self.create_subscription(RobotEffort, "/effort", self.effort_callback, 1)
-        self.velocity_commands_publisher = self.create_publisher(Float64MultiArray, "/velocity_controller/commands", 10)
+        self.effort_subscriber = self.create_subscription(RobotEffort, "effort", self.effort_callback, 1)
+        self.velocity_commands_publisher = self.create_publisher(Float64MultiArray, "velocity_controller/commands", 10)
 
     def scale_rpm(self, rpm):
         return rpm / 60.0 * 2.0 * math.pi / self._gearbox_ratio

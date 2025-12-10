@@ -120,6 +120,10 @@
         <arg name="exp_name" value="$(var exp_name)" />
     </include>
 
+    <node if="$(var sim)" name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true" />
+    <node if="$(var sim)" pkg="controller_manager" exec="spawner" args="-p $(find-pkg-share lunabot_config)/config/controller.yaml velocity_controller"/>
+    
+    
     <group if="$(var autonomy)">
         <!-- Launch diff drive controller -->
         <node name="differential_drive_controller_node" pkg="lunabot_control" 
@@ -142,6 +146,8 @@
             <remap from="right_drive" to="right_drive"/>
             <remap from="left_drive" to="left_drive"/>
         </node>
+        
+
 
         <!-- Launch effort factory -->
         <node name="effort_factory_node" pkg="lunabot_control" exec="effort_factory_node" 

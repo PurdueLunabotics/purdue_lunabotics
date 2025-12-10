@@ -34,6 +34,7 @@ def launch_setup(context):
         parameters=[{'frame_prefix': ns, 'use_sim_time': True, 'robot_description': Command(['xacro ', robot_desc_path, ' robot_name:=', entity_name])}],
         output="screen"
     )
+    
     return [robot_state_publisher_node, joint_state_publisher_node]
 
 

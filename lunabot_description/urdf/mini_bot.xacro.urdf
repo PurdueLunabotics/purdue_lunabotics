@@ -432,32 +432,9 @@
 
   <xacro:include filename="$(find lunabot_description)/urdf/dummy_bot.trans" />
   <gazebo>
-    <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
-      <left_joint>left_front_rev</left_joint>
-      <left_joint>left_back_rev</left_joint>
-      <right_joint>right_front_rev</right_joint>
-      <right_joint>right_back_rev</right_joint>
-
-      <wheel_separation>0.64</wheel_separation>
-      <wheel_radius>0.2</wheel_radius>
-
-      <odom_publish_frequency>50.0</odom_publish_frequency>
-
-      <topic>mini/cmd_vel</topic>
-
-      <odom_topic>mini/odom</odom_topic>
-
-      <frame_id>odom</frame_id>
-      <child_frame_id>base_link</child_frame_id>
-      <tf_topic>tf</tf_topic>
-
-      <!-- <min_velocity>-1.0</min_velocity>
-      <max_velocity>1.0</max_velocity>
-      <min_acceleration>-1.0</min_acceleration>
-      <max_acceleration>1.0</max_acceleration>
-      <min_jerk>0.0</min_jerk>
-      <max_jerk>0.0</max_jerk> -->
-
+    <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+        <parameters>$(find lunabot_description)/config/controller.yaml</parameters>
+        <controller_manager_prefix_node_name>mini/controller_manager</controller_manager_prefix_node_name>
     </plugin>
 
     <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">

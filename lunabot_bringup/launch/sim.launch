@@ -16,7 +16,7 @@
 
   <include if="$(var gui)" file="$(find-pkg-share lunabot_sim)/launch/gazebo.launch.py"/>
   <include unless="$(var gui)" file="$(find-pkg-share lunabot_sim)/launch/gazebo_no_gui.launch.py"/>
-
+  
   <arg name="two_bots" default="false"/>
 
   <include file="$(find-pkg-share lunabot_bringup)/launch/robot.launch">
