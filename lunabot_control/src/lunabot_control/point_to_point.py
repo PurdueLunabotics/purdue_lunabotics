@@ -5,7 +5,7 @@ from rclpy.node import Node
 from std_msgs.msg import Bool, Float32, String
 from nav_msgs.msg import Path, Odometry, OccupancyGrid
 from map_msgs.msg import OccupancyGridUpdate
-from geometry_msgs.msg import Twist, Point, Pose2D
+from geometry_msgs.msg import Twist, Point, Pose2D, PoseStamped
 from lunabot_control.pid_controller import PIDController
 from visualization_msgs.msg import Marker
 from tf_transformations import euler_from_quaternion
@@ -164,20 +164,20 @@ class PointToPoint(Node):
         if(not self.is_enabled):
             self.cmd_vel_publisher.publish(Twist())
 
-    def __odom_callback(self, msg: Odometry):
+    def __odom_callback(self, msg: PoseStamped):
         # self.get_logger().info("got Odom")
         # self.robot_velocity = [msg.twist.twist.linear, msg.twist.twist.angular]
         angles = euler_from_quaternion(
             [
-                msg.pose.pose.orientation.x,
-                msg.pose.pose.orientation.y,
-                msg.pose.pose.orientation.z,
-                msg.pose.pose.orientation.w,
+                msg.pose.orientation.x,
+                msg.pose.orientation.y,
+                msg.pose.orientation.z,
+                msg.pose.orientation.w,
             ]
         )
         self.robot_pose = (
-            msg.pose.pose.position.x,
-            msg.pose.pose.position.y,
+            msg.pose.position.x,
+            msg.pose.position.y,
             (angles[2]) %(2*np.pi) - np.pi  if self.is_moving_backwards else angles[2],  # -pi to pi
         )
 

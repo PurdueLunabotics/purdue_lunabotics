@@ -32,10 +32,18 @@ public:
 
     // rclcpp::QoS *qos = new rclcpp::QoS(rclcpp::KeepAll());
     int qos = 10;
+<<<<<<< HEAD
     odom_topic = "odom";
     goal_topic = "goal";
     map_topic = "costmap";
     map_update_topic = "costmap_updates";
+=======
+    // odom_topic = "/rtabmap/odom";
+    odom_topic = "/rtabmap/position";
+    goal_topic = "/goal";
+    map_topic = "/maps/costmap_node/global_costmap/costmap";
+    map_update_topic = "/maps/costmap_node/global_costmap/costmap_updates";
+>>>>>>> origin/develop
     path_sampling_rate = 5;
     path_topic = "global_path";
     occupancy_threshold = 50;
@@ -44,7 +52,7 @@ public:
 
     auto map_sub = node->create_subscription<nav_msgs::msg::OccupancyGrid>(map_topic, qos, std::bind(&DstarNode::grid_callback, this, _1));
     auto map_update_sub = node->create_subscription<map_msgs::msg::OccupancyGridUpdate>(map_update_topic, qos, std::bind(&DstarNode::grid_update_callback, this, _1));
-    auto odom_sub = node->create_subscription<nav_msgs::msg::Odometry>(odom_topic, qos, std::bind(&DstarNode::position_callback, this, _1));
+    auto odom_sub = node->create_subscription<geometry_msgs::msg::PoseStamped>(odom_topic, qos, std::bind(&DstarNode::position_callback, this, _1));
     auto goal_sub = node->create_subscription<geometry_msgs::msg::PoseStamped>(goal_topic, qos, std::bind(&DstarNode::goal_callback, this, _1));
     path_pub = node->create_publisher<nav_msgs::msg::Path>(path_topic, 10);
     auto planning_enabled_subscriber = node->create_subscription<std_msgs::msg::Bool>("planning_enabled", qos, std::bind(&DstarNode::enable_callback, this, _1));
@@ -228,11 +236,11 @@ private:
     map_lock.unlock();
   }
 
-  void position_callback(const nav_msgs::msg::Odometry &data)
+  void position_callback(const geometry_msgs::msg::PoseStamped &data)
   {
     // RCLCPP_INFO(node->get_logger(), "Got Pose");
-    pose.x = data.pose.pose.position.x;
-    pose.y = data.pose.pose.position.y;
+    pose.x = data.pose.position.x;
+    pose.y = data.pose.position.y;
     pose_init = true;
   }
 
