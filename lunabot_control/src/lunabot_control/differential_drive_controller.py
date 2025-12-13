@@ -37,7 +37,7 @@ class DifferentialDriveController(Node):
         self.max_speed_percentage = self.get_parameter("max_speed_percentage").get_parameter_value().double_value
         self.hz = self.get_parameter("hz").get_parameter_value().double_value
 
-        self._max_speed = self.get_parameter("max_speed").get_parameter_value().double_value # In rad/s converted to RPM
+        self._max_speed = self.get_parameter("max_speed").get_parameter_value().integer_value # In rad/s converted to RPM
         
         self.lin = 0
         self.ang = 0
@@ -94,6 +94,7 @@ class DifferentialDriveController(Node):
         if self.lin == 0 and self.ang == 0:
             left_drive_msg.data = 0
             right_drive_msg.data = 0
+
         self._left_drive_pub.publish(left_drive_msg)
         self._right_drive_pub.publish(right_drive_msg)
 

@@ -145,7 +145,7 @@ private:
   // Updates the map given a new occupancy grid.Update the flag such that dstar will update the map.
   void grid_callback(const nav_msgs::msg::OccupancyGrid &data)
   {
-    // RCLCPP_INFO(node->get_logger(), "Got Grid");
+    // RCLCPP_DEBUG(node->get_logger(), "Got Grid");
     map_lock.lock();
 
     bool map_ok = false;
@@ -191,7 +191,7 @@ private:
   // Update the grid given the occupancy grid update (applied on top of the current grid). Also update the flag for dstar to update the map.
   void grid_update_callback(const map_msgs::msg::OccupancyGridUpdate &data)
   {
-    // RCLCPP_INFO(node->get_logger(), "Got Grid Update");
+    // RCLCPP_DEBUG(node->get_logger(), "Got Grid Update");
     map_lock.lock();
 
     bool map_ok = false;
@@ -230,7 +230,7 @@ private:
 
   void position_callback(const geometry_msgs::msg::PoseStamped &data)
   {
-    // RCLCPP_INFO(node->get_logger(), "Got Pose");
+    // RCLCPP_DEBUG(node->get_logger(), "Got Pose");
     pose.x = data.pose.position.x;
     pose.y = data.pose.position.y;
     pose_init = true;
