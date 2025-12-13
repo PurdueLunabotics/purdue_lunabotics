@@ -26,7 +26,7 @@ class PointToPoint(Node):
         rclpy.get_global_executor().add_node(self)
         # self.get_logger().info("init")
 
-        self.LINEAR_P = 3.0
+        self.LINEAR_P = 2.0
         self.LINEAR_I = 0
         self.LINEAR_D = 0
         self.LINEAR_TOLERANCE = 0.2  # meters
@@ -38,7 +38,7 @@ class PointToPoint(Node):
             max_output=self.MAX_LINEAR_SPEED,
         )
 
-        self.ANGULAR_P = 5.0
+        self.ANGULAR_P = 4.0
         self.ANGULAR_I = 0
         self.ANGULAR_D = 0
         self.ANGULAR_TOLERANCE_DEG = 10
@@ -216,7 +216,7 @@ class PointToPoint(Node):
             return
 
 
-        complex_path = []  # create list for storing all d* poses
+        self.path = []  # create list for storing all d* poses
         for pose in msg.poses:
             angles = euler_from_quaternion(
                 [
@@ -228,17 +228,11 @@ class PointToPoint(Node):
             )
 
             # add all points to complex path
-            complex_path.append([pose.pose.position.x, pose.pose.position.y, angles[2]])
-
-        marker_points = []
-        self.path, marker_points = self.__simplify_path(complex_path)
+            self.path.append([pose.pose.position.x, pose.pose.position.y, angles[2]])
 
         # initialize target point
         self.target_pose_index = 0
         self.target_pose = self.path[self.target_pose_index]
-
-        # visualize sequence of lines
-        self.__visualize_line_path(marker_points)
 
     def __map_callback(self, msg: OccupancyGrid):
         # self.get_logger().info("got map")
