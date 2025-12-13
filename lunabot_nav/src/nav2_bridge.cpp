@@ -27,7 +27,7 @@ class Nav2Bridge : public rclcpp::Node {
 
   public:
     Nav2Bridge() : rclcpp::Node("nav2_bridge_node") {
-      odom_sub = create_subscription<PoseStampedMsg>("/rtabmap/position", 10, [this] (PoseStampedMsg value) {
+      odom_sub = create_subscription<PoseStampedMsg>("/position", 10, [this] (PoseStampedMsg value) {
           this->odom = value;
       });
       goal_sub = create_subscription<PoseStampedMsg>("/goal", 10, [this] (PoseStampedMsg value) {
