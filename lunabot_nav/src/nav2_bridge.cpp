@@ -23,11 +23,11 @@ class Nav2Bridge : public rclcpp::Node {
   rclcpp::Publisher<PathMsg>::SharedPtr path_pub;
 
   PoseStampedMsg goal;
-  OdometryMsg odom;
+  PoseStampedMsg odom;
 
   public:
     Nav2Bridge() : rclcpp::Node("nav2_bridge_node") {
-      odom_sub = create_subscription<OdometryMsg>("/rtabmap/odom", 10, [this] (OdometryMsg value) {
+      odom_sub = create_subscription<PoseStampedMsg>("/position", 10, [this] (OdometryMsg value) {
           this->odom = value;
       });
       goal_sub = create_subscription<PoseStampedMsg>("/goal", 10, [this] (PoseStampedMsg value) {
@@ -49,8 +49,7 @@ class Nav2Bridge : public rclcpp::Node {
 
       auto goal = ComputePathToPose::Goal();
       goal.goal = this->goal;
-      goal.start.pose = odom.pose.pose; 
-      goal.start.header = odom.header; 
+      goal.start = odom; 
       goal.use_start = true;
       goal.planner_id = "GridBased";
 
