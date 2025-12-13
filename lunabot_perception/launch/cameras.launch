@@ -24,7 +24,7 @@
   <let name="decimation"                      value="4"/> 
   <let name="voxel_size"                      value="0.01"/> <!--meters-->
   <let name="noise_filter_radius"             value="0.1"/> <!--meters radius-->
-  <let name="max_depth"                       value="3.0"/> <!--meters-->
+  <let name="max_depth"                       value="2.0"/> <!--meters-->
 
   <group if="$(eval '\'1\' in $(var cams)')">
     <group unless="$(var sim)">
