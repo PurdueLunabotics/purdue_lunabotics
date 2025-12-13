@@ -21,5 +21,5 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        robot_state_publisher
+        robot_state_publisher,
     ])

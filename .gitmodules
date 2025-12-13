@@ -1,0 +1,3 @@
+[submodule "gz_ros2_control"]
+	path = gz_ros2_control
+	url = https://github.com/ros-controls/gz_ros2_control

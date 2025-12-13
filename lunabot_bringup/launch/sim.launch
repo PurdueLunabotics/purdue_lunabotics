@@ -49,6 +49,23 @@
     </node>
   </group>
 
+  <group>
+    <node name="differential_drive_controller_node" pkg="lunabot_control" exec="differential_drive_controller_node" output="screen" respawn="true" >
+    </node>
+
+    <node name="effort_factory_node" pkg="lunabot_control" exec="effort_factory_node" output="screen" respawn="true" >
+    </node>
+
+    <node name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true" >
+    </node>
+
+    <node name="manual_controller_node" pkg="lunabot_control" exec="manual_controller_node" output="screen" respawn="true" >
+    </node>
+
+    <node name="joystick_node" pkg="joy" exec="joy_node" output="screen" respawn="true" >
+    </node>
+  </group>
+
   <!-- mapping -->
   <group>
     <node name="planner_server" pkg="nav2_planner" exec="planner_server" output="screen">
@@ -109,5 +126,7 @@
       <param name="Grid/FromDepth"          value="'false'"/> <!-- occupancy grid from lidar -->
       
     </node>
+
+    <node name="map_base_node" pkg="lunabot_slam" exec="map_base_node.py" output="screen" respawn="false"/>
   </group>
 </launch>
