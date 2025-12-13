@@ -210,19 +210,32 @@
         </node>
     </group>
 
+    <node name="planner_server" pkg="nav2_planner" exec="planner_server" output="screen">
+      <param from="$(find-pkg-share lunabot_config)/config/planner.yml"/>
+      <param name="use_sim_time" value="$(var sim)"/>
+    </node>
+    <node name="lifecycle" pkg="nav2_lifecycle_manager" exec="lifecycle_manager" output="screen">
+      <param name="autostart" value="true"/>
+      <param name="node_names" value="planner_server" value-sep=";"/>
+      <param name="use_sim_time" value="$(var sim)"/>
+    </node>
+    <node name="nav2_bridge" pkg="lunabot_nav" exec="nav2_bridge_node" output="screen" respawn="true">
+      <param name="use_sim_time" value="$(var sim)"/>
+    </node>
+
     <group>
         <push_ros_namespace namespace="nav"/>
-        <node name="global_planner_node" pkg="lunabot_nav" exec="dstar_node" output="screen" respawn="true">
-            <param name="use_sim_time" value="$(var sim)"/>
-
-            <remap from="odom" to="$(var /ns)/rtabmap/odom"/>
-            <remap from="goal" to="$(var /ns)/goal"/>
-            <remap from="global_path" to="$(var /ns)/nav/global_path"/>
-            <remap from="costmap_enabled" to="$(var /ns)/costmap_enabled"/>
-            <remap from="planning_enabled" to="$(var /ns)/planning_enabled"/>
-            <remap from="costmap" to="$(var /ns)/maps/costmap_node/global_costmap/costmap"/>
-            <remap from="costmap_updates" to="$(var /ns)/maps/costmap_node/global_costmap/costmap_updates"/>
-        </node>
+        <!-- <node name="global_planner_node" pkg="lunabot_nav" exec="dstar_node" output="screen" respawn="true"> -->
+        <!--     <param name="use_sim_time" value="$(var sim)"/> -->
+        <!---->
+        <!--     <remap from="odom" to="$(var /ns)/rtabmap/odom"/> -->
+        <!--     <remap from="goal" to="$(var /ns)/goal"/> -->
+        <!--     <remap from="global_path" to="$(var /ns)/nav/global_path"/> -->
+        <!--     <remap from="costmap_enabled" to="$(var /ns)/costmap_enabled"/> -->
+        <!--     <remap from="planning_enabled" to="$(var /ns)/planning_enabled"/> -->
+        <!--     <remap from="costmap" to="$(var /ns)/maps/costmap_node/global_costmap/costmap"/> -->
+        <!--     <remap from="costmap_updates" to="$(var /ns)/maps/costmap_node/global_costmap/costmap_updates"/> -->
+        <!-- </node> -->
 
         <node name="point_to_point_node" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="false" >
             <param name="use_sim_time" value="$(var sim)"/>
@@ -231,29 +244,8 @@
             <remap from="global_path" to="$(var /ns)/nav/global_path"/>
             <remap from="backwards" to="$(var /ns)/traversal/backwards"/>
             <remap from="traversal_enabled" to="$(var /ns)/behavior/traversal_enabled"/>
-            <remap from="costmap" to="$(var /ns)/maps/costmap_node/global_costmap/costmap"/>
-            <remap from="costmap_updates" to="$(var /ns)/maps/costmap_node/global_costmap/costmap_updates"/>
 
             <remap from="cmd_vel" to="$(var /ns)/cmd_vel"/>
-        </node>
-    </group>
-
-    <group>
-        <node name="costmap" pkg="nav2_costmap_2d" exec="nav2_costmap_2d" output="screen" namespace="costmap">
-            <param from="$(find-pkg-share lunabot_config)/config/global_costmap.yml"/>
-            <param name="global_frame" value="$(var ns_)odom"/>
-            <param name="robot_base_frame" value="$(var ns_)base_link"/>
-            <param name="static_layer">
-                <param name="map_topic" value="$(var /ns)/rtabmap/octomap_grid"/>
-            </param>
-            <remap from="costmap" to="$(var /ns)/maps/costmap_node/global_costmap/costmap"/>
-            <remap from="costmap_updates" to="$(var /ns)/maps/costmap_node/global_costmap/costmap_updates"/>
-            <param name="use_sim_time" value="$(var sim)"/>
-        </node>
-        <node name="costmap_lifecycle" pkg="nav2_lifecycle_manager" exec="lifecycle_manager" namespace="costmap" output="screen">
-            <param name="autostart" value="true"/>
-            <param name="node_names" value="costmap" value-sep=";"/>
-            <param name="use_sim_time" value="$(var sim)"/>
         </node>
     </group>
 
