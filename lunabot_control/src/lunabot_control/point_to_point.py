@@ -216,7 +216,7 @@ class PointToPoint(Node):
             return
 
 
-        complex_path = []  # create list for storing all d* poses
+        self.path = []  # create list for storing all d* poses
         for pose in msg.poses:
             angles = euler_from_quaternion(
                 [
@@ -228,17 +228,11 @@ class PointToPoint(Node):
             )
 
             # add all points to complex path
-            complex_path.append([pose.pose.position.x, pose.pose.position.y, angles[2]])
-
-        marker_points = []
-        self.path, marker_points = self.__simplify_path(complex_path)
+            self.path.append([pose.pose.position.x, pose.pose.position.y, angles[2]])
 
         # initialize target point
         self.target_pose_index = 0
         self.target_pose = self.path[self.target_pose_index]
-
-        # visualize sequence of lines
-        self.__visualize_line_path(marker_points)
 
     def __map_callback(self, msg: OccupancyGrid):
         # self.get_logger().info("got map")

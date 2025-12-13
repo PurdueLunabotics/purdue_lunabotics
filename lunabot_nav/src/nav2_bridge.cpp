@@ -19,7 +19,7 @@ class Nav2Bridge : public rclcpp::Node {
   rclcpp_action::Client<ComputePathToPose>::SharedPtr action_compute;
   rclcpp_action::Client<FollowPath>::SharedPtr action_follow;
   rclcpp::Subscription<PoseStampedMsg>::SharedPtr goal_sub;
-  rclcpp::Subscription<OdometryMsg>::SharedPtr odom_sub;
+  rclcpp::Subscription<PoseStampedMsg>::SharedPtr odom_sub;
   rclcpp::Publisher<PathMsg>::SharedPtr path_pub;
 
   PoseStampedMsg goal;
@@ -27,7 +27,7 @@ class Nav2Bridge : public rclcpp::Node {
 
   public:
     Nav2Bridge() : rclcpp::Node("nav2_bridge_node") {
-      odom_sub = create_subscription<PoseStampedMsg>("/position", 10, [this] (OdometryMsg value) {
+      odom_sub = create_subscription<PoseStampedMsg>("/rtabmap/position", 10, [this] (PoseStampedMsg value) {
           this->odom = value;
       });
       goal_sub = create_subscription<PoseStampedMsg>("/goal", 10, [this] (PoseStampedMsg value) {
