@@ -12,10 +12,12 @@ using PoseStampedMsg = geometry_msgs::msg::PoseStamped;
 using PathMsg = nav_msgs::msg::Path;
 using OdometryMsg = nav_msgs::msg::Odometry;
 using ComputePathToPose = nav2_msgs::action::ComputePathToPose;
+using FollowPath = nav2_msgs::action::FollowPath;
 
 class Nav2Bridge : public rclcpp::Node {
   rclcpp::TimerBase::SharedPtr timer;
-  rclcpp_action::Client<ComputePathToPose>::SharedPtr action;
+  rclcpp_action::Client<ComputePathToPose>::SharedPtr action_compute;
+  rclcpp_action::Client<FollowPath>::SharedPtr action_follow;
   rclcpp::Subscription<PoseStampedMsg>::SharedPtr goal_sub;
   rclcpp::Subscription<OdometryMsg>::SharedPtr odom_sub;
   rclcpp::Publisher<PathMsg>::SharedPtr path_pub;
@@ -33,13 +35,14 @@ class Nav2Bridge : public rclcpp::Node {
       });
       path_pub = create_publisher<PathMsg>("/test_path", 10);
 
-      action = rclcpp_action::create_client<ComputePathToPose>(this, "/compute_path_to_pose");
+      action_compute = rclcpp_action::create_client<ComputePathToPose>(this, "/compute_path_to_pose");
+      action_follow = rclcpp_action::create_client<FollowPath>(this, "/follow_path");
       timer = create_wall_timer(std::chrono::milliseconds(500), std::bind(&Nav2Bridge::plan_path, this));
     }
 
   private:
     void plan_path() {
-      if (!action->wait_for_action_server()) {
+      if (!action_compute->wait_for_action_server()) {
         RCLCPP_WARN(get_logger(), "Action server not ready yet");
         return;
       }
@@ -60,7 +63,38 @@ class Nav2Bridge : public rclcpp::Node {
         }
       };
 
-      action->async_send_goal(goal, options);
+      action_compute->async_send_goal(goal, options);
+    }
+
+    void follow_path(PathMsg path) {
+      if (!action_follow->wait_for_action_server()) {
+        RCLCPP_WARN(get_logger(), "Action server not ready yet");
+        return;
+      }
+
+      auto goal = FollowPath::Goal();
+      goal.controller_id = "FollowPath";
+      goal.goal_checker_id = "goal_checker";
+      goal.path = path;
+
+      auto options = rclcpp_action::Client<FollowPath>::SendGoalOptions();
+      options.goal_response_callback = [this] (rclcpp_action::ClientGoalHandle<FollowPath>::SharedPtr handle) {
+        if (handle) {
+          RCLCPP_INFO(get_logger(), "Goal response!");
+        } else {
+          RCLCPP_ERROR(get_logger(), "Things are bad!");
+        }
+      };
+      options.feedback_callback = [this] (rclcpp_action::ClientGoalHandle<FollowPath>::SharedPtr handle, const std::shared_ptr<const FollowPath::Feedback> feedback) {
+        RCLCPP_INFO(get_logger(), "Feedback!");
+      };
+      options.result_callback = [this] (rclcpp_action::ClientGoalHandle<FollowPath>::WrappedResult result) {
+        if (result.code != rclcpp_action::ResultCode::SUCCEEDED) {
+          RCLCPP_WARN(get_logger(), "Failed to follow path");
+        }
+      };
+
+      action_follow->async_send_goal(goal, options);
     }
 };
 
