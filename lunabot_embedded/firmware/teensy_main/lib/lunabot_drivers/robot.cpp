@@ -94,7 +94,7 @@ namespace LEDs {
 }
 
 namespace excavation {
-StepperMotor exc_mtr(EXC_MOTOR_ID, BLD305S);
+StepperMotor exc_mtr(EXC_MOTOR_ID, ISV2);
 
 void begin() {
   exc_mtr.begin();
