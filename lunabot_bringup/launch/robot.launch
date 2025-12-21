@@ -21,6 +21,8 @@
     <let name="ns_" if="$(eval 'len(\'$(var ns)\') > 0')" value="$(var ns)_"/>
     <let name="ns_" unless="$(eval 'len(\'$(var ns)\') > 0')" value=""/>
 
+    <let name="starting_x" if="$(eval '$(var robot_num) == 1')" value="1.5"/>
+    <let name="starting_x" if="$(eval '$(var robot_num) == 0')" value="2.5"/>
 
 
     <!-- What to Launch Args -->
@@ -31,8 +33,6 @@
     <arg name="loginternet" default="false" />
     
     <!-- Robot Description Args -->
-    <arg name="entity_name" default="dummy_bot" if="$(eval '$(var robot_num) == 0')"/>
-    <arg name="entity_name" default="mini_bot" if="$(eval '$(var robot_num) == 1')"/>
 
     <!-- Camera Args -->
     <arg name="cameras" default="true" />
@@ -120,13 +120,16 @@
         <arg name="exp_name" value="$(var exp_name)" />
     </include>
 
+    <node if="$(var sim)" name="manual_controller_node" pkg="lunabot_control" exec="manual_controller_node" output="screen" respawn="true">
+    </node>
+
     <node if="$(var sim)" name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true" />
     <node if="$(var sim)" pkg="controller_manager" exec="spawner" args="-p $(find-pkg-share lunabot_config)/config/controller.yaml velocity_controller"/>
     <node pkg="lunabot_slam" exec="map_base_node.py">
         <remap from="odom" to="$(var /ns)/rtabmap/odom"/>
         <remap from="position" to="$(var /ns)/position"/>
     </node>
-    
+
     <group if="$(var autonomy)">
         <!-- Launch diff drive controller -->
         <node name="differential_drive_controller_node" pkg="lunabot_control" 
@@ -256,7 +259,7 @@
     </group>
 
     <group if="$(var sim)">
-        <executable cmd="ros2 run ros_gz_sim create --topic $(var entity_name)/robot_description --name $(var entity_name) -x 2.5 -y 1.75
+        <node exec="create" pkg="ros_gz_sim" args="--topic $(var entity_name)/robot_description --name $(var entity_name) -x $(var starting_x) -y 1.75
             -z 0.25 -Y -1.570796327"/>
 
         <node name="image_bridge_cam_1_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_1_name)/color/image_raw" if="$(eval '\'1\' in $(var cams)')"/>
