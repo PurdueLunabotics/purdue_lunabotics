@@ -113,6 +113,7 @@ void StepperMotor::begin() {
   }
   else if (motor_type == BLD305S) {
     write_register(BLD305SAddrs.InternalEnable, BLD305SControlCmds.ENABLE);
+    write_register(0x0116, 0x04);
     write_register(BLD305SAddrs.Save_State, BLD305SControlCmds.Save);
     write_register(BLD305SAddrs.Acceleration, def_acceleration); // no differentiation between acceleration and deceleration
     write_register(BLD305SAddrs.Set_Speed, 0);
@@ -173,12 +174,15 @@ int StepperMotor::read_raw_velocity() {
     return (int16_t)read_register(ISV2Addrs.Read_RawVelocity);
   }
   else if (motor_type == BLD305S) {
+    return (int16_t)read_register(BLD305SAddrs.Read_Speed);
+    /*
     if (read_register(BLD305SAddrs.MotorState) == 2) {
       return -1 * (int16_t)read_register(BLD305SAddrs.Read_Speed);
     }
     else {
       return (int16_t)read_register(BLD305SAddrs.Read_Speed);
     }
+      */
   }
   return -1;
 }
@@ -237,7 +241,7 @@ int StepperMotor::read_voltage() {
     return read_register(ISV2Addrs.Read_Voltage);
   }
   else if (motor_type == BLD305S) {
-    return read_register(BLD305SAddrs.Read_Voltage);
+    return read_register(BLD305SAddrs.Read_Voltage)/4;
   }
   return -1;
   
