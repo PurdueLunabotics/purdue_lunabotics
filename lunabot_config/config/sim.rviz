@@ -233,7 +233,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /test_path
+        Value: /nav_path
       Value: true
     - Alpha: 1
       Axes Length: 1

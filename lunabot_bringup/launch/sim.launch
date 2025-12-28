@@ -12,7 +12,9 @@
 
   
   <arg default="$(find-pkg-share lunabot_config)/config/sim.rviz" name="rvizconfig"/>
+  <arg default="$(find-pkg-share lunabot_config)/config/mini_sim.rviz" name="minirvizconfig"/>
   <node args="-d $(var rvizconfig)" name="rviz" pkg="rviz2" exec="rviz2" />
+  <node args="-d $(var minirvizconfig)" name="rviz" pkg="rviz2" exec="rviz2" />
 
   <include if="$(var gui)" file="$(find-pkg-share lunabot_sim)/launch/gazebo.launch.py"/>
   <include unless="$(var gui)" file="$(find-pkg-share lunabot_sim)/launch/gazebo_no_gui.launch.py"/>

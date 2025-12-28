@@ -80,33 +80,33 @@ Visualization Manager:
           Value: true
         middle_link:
           Value: true
-        mini/base_link:
+        minibase_link:
           Value: true
-        mini/d455_back_depth_link:
+        minid455_back_depth_link:
           Value: true
-        mini/d455_back_link:
+        minid455_back_link:
           Value: true
-        mini/d455_back_rgb_link:
+        minid455_back_rgb_link:
           Value: true
-        mini/d455_front_depth_link:
+        minid455_front_depth_link:
           Value: true
-        mini/d455_front_link:
+        minid455_front_link:
           Value: true
-        mini/d455_front_rgb_link:
+        minid455_front_rgb_link:
           Value: true
-        mini/left_back:
+        minileft_back:
           Value: true
-        mini/left_front:
+        minileft_front:
           Value: true
-        mini/map:
+        minimap:
           Value: true
-        mini/middle_link:
+        minimiddle_link:
           Value: true
-        mini/odom:
+        miniodom:
           Value: true
-        mini/right_back:
+        miniright_back:
           Value: true
-        mini/right_front:
+        miniright_front:
           Value: true
         right_back:
           Value: true
@@ -118,27 +118,27 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
-        mini/map:
-          mini/odom:
-            mini/base_link:
-              mini/middle_link:
-                mini/d455_back_link:
-                  mini/d455_back_depth_link:
+        minimap:
+          miniodom:
+            minibase_link:
+              minimiddle_link:
+                minid455_back_link:
+                  minid455_back_depth_link:
                     {}
-                  mini/d455_back_rgb_link:
+                  minid455_back_rgb_link:
                     {}
-                mini/d455_front_link:
-                  mini/d455_front_depth_link:
+                minid455_front_link:
+                  minid455_front_depth_link:
                     {}
-                  mini/d455_front_rgb_link:
+                  minid455_front_rgb_link:
                     {}
-                mini/left_back:
+                minileft_back:
                   {}
-                mini/left_front:
+                minileft_front:
                   {}
-                mini/right_back:
+                miniright_back:
                   {}
-                mini/right_front:
+                miniright_front:
                   {}
       Update Interval: 0
       Value: true
@@ -154,13 +154,13 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /mini/maps/costmap_node/global_costmap/costmap
+        Value: /mini/global_costmap/costmap
       Update Topic:
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /mini/maps/costmap_node/global_costmap/costmap_updates
+        Value: /mini/global_costmap/costmap_updates
       Use Timestamp: false
       Value: true
     - Alpha: 1
@@ -257,7 +257,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /mini/nav/global_path
+        Value: /mini/nav_path
       Value: true
     - Alpha: 1
       Axes Length: 1
@@ -321,7 +321,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: mini/odom
+    Fixed Frame: miniodom
     Frame Rate: 30
   Name: root
   Tools:

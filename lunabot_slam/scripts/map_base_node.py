@@ -15,9 +15,11 @@ class MapBase(Node):
     def __init__(self):
         super().__init__("map_base_node")
 
+        ns = self.get_namespace().lstrip('/')
+
         # transform we're looking for is from base link back to map
-        self.from_frame_rel = "base_link"
-        self.to_frame_rel = "map"
+        self.from_frame_rel = f"{ns}base_link"
+        self.to_frame_rel = f"{ns}map"
 
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
@@ -29,7 +31,7 @@ class MapBase(Node):
         try:
             t = self.tf_buffer.lookup_transform(self.to_frame_rel, self.from_frame_rel, rclpy.time.Time())
         except Exception as e:
-            print(f"Could not transform {self.from_frame_rel} to {self.to_frame_rel}: {e}")
+            self.get_logger().error(f"Could not transform {self.from_frame_rel} to {self.to_frame_rel}: {e}")
             return
         
         # create new pose stamped object with the transform data
@@ -44,14 +46,11 @@ class MapBase(Node):
         self.position_publisher.publish(map_pose)
 
 def main():
-    # print("running")
     rclpy.init()
     map_pose_node = MapBase()
 
-    # print("spinning")
     rclpy.spin(map_pose_node)
 
-    # print("shutting down")
     map_pose_node.destroy_node()
     rclpy.shutdown()
 

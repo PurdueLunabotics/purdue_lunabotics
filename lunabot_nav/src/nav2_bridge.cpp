@@ -27,16 +27,16 @@ class Nav2Bridge : public rclcpp::Node {
 
   public:
     Nav2Bridge() : rclcpp::Node("nav2_bridge_node") {
-      odom_sub = create_subscription<PoseStampedMsg>("/position", 10, [this] (PoseStampedMsg value) {
+      odom_sub = create_subscription<PoseStampedMsg>("position", 10, [this] (PoseStampedMsg value) {
           this->odom = value;
       });
-      goal_sub = create_subscription<PoseStampedMsg>("/goal", 10, [this] (PoseStampedMsg value) {
+      goal_sub = create_subscription<PoseStampedMsg>("goal", 10, [this] (PoseStampedMsg value) {
           this->goal = value;
       });
-      path_pub = create_publisher<PathMsg>("/test_path", 10);
+      path_pub = create_publisher<PathMsg>("nav_path", 10);
 
-      action_compute = rclcpp_action::create_client<ComputePathToPose>(this, "/compute_path_to_pose");
-      action_follow = rclcpp_action::create_client<FollowPath>(this, "/follow_path");
+      action_compute = rclcpp_action::create_client<ComputePathToPose>(this, "compute_path_to_pose");
+      action_follow = rclcpp_action::create_client<FollowPath>(this, "follow_path");
       timer = create_wall_timer(std::chrono::milliseconds(500), std::bind(&Nav2Bridge::plan_path, this));
     }
 

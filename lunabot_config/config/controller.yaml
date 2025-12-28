@@ -13,6 +13,7 @@ mini:
       velocity_controller:
         type: velocity_controllers/JointGroupVelocityController
 
+# This makes the controller spawner mad, but it doesn't actually break things
 velocity_controller:
   ros__parameters:
     joints:

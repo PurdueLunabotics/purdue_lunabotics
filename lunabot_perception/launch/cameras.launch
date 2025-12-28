@@ -12,9 +12,9 @@
   <let name="serial_no_cam_1"               value="'141222070808'"/>
   <arg name="cam_2_name"                    default="d455_back"/>
   <let name="serial_no_cam_3"               value="'_053122251335'"/>
-  <arg name="cam_3_name"                    default="d455_left"/>
+  <arg name="cam_3_name"                    default="d455_front"/>
   <let name="serial_no_cam_2"               value="'939622074382'"/>
-  <arg name="cam_4_name"                    default="d455_right"/>
+  <arg name="cam_4_name"                    default="d455_back"/>
   <arg name="cams"                          default="''"/>
 
   <arg name="pointcloud"                      default="$(eval 'len($(var cams)) > 1')" />
@@ -25,6 +25,9 @@
   <let name="voxel_size"                      value="0.01"/> <!--meters-->
   <let name="noise_filter_radius"             value="0.1"/> <!--meters radius-->
   <let name="max_depth"                       value="2.0"/> <!--meters-->
+
+  <let name="/ns" if="$(eval 'len(\'$(var ns)\') > 0')" value="/$(var ns)"/>
+  <let name="/ns" unless="$(eval 'len(\'$(var ns)\') > 0')" value=""/>
 
   <group if="$(eval '\'1\' in $(var cams)')">
     <group unless="$(var sim)">
@@ -58,7 +61,7 @@
     </group>
     <push_ros_namespace namespace="$(var cam_1_name)"/>
     <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
-      <arg name="camera_frame"                    value="$(var cam_1_name)_link" />
+      <arg name="camera_frame"                    value="$(var ns)$(var cam_1_name)_link" />
       <arg name="camera_topic"                    value="color/image_raw"/>
 
       <arg name="use_sim_time"                    value="$(var sim)"/>
@@ -108,7 +111,7 @@
     </group>
     <push_ros_namespace namespace="$(var cam_2_name)"/>
     <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
-      <arg name="camera_frame"                    value="$(var cam_2_name)_link" />
+      <arg name="camera_frame"                    value="$(var ns)$(var cam_2_name)_link" />
       <arg name="camera_topic"                    value="color/image_raw"/>
 
       <arg name="use_sim_time"                    value="$(var sim)"/>
@@ -158,7 +161,7 @@
     </group>
     <push_ros_namespace namespace="$(var cam_3_name)"/>
     <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
-      <arg name="camera_frame"                    value="$(var cam_3_name)_link" />
+      <arg name="camera_frame"                    value="$(var ns)$(var cam_3_name)_link" />
       <arg name="camera_topic"                    value="color/image_raw"/>
 
       <arg name="use_sim_time"                    value="$(var sim)"/>
@@ -208,7 +211,7 @@
     </group>
     <push_ros_namespace namespace="$(var cam_4_name)"/>
     <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
-      <arg name="camera_frame"                    value="$(var cam_4_name)_link" />
+      <arg name="camera_frame"                    value="$(var ns)$(var cam_4_name)_link" />
       <arg name="camera_topic"                    value="color/image_raw"/>
 
       <arg name="use_sim_time"                    value="$(var sim)"/>
@@ -233,14 +236,14 @@
     
     <!-- Aggregate pointclouds from each camera (if using multiple cameras)-->
     <node pkg="rtabmap_util" exec='point_cloud_aggregator' name="point_cloud_aggregator" respawn="true">
-      <remap from="cloud$(eval '$(var cams).find(\'1\')+1')" to="/$(var cam_1_name)/points" />
-      <remap from="cloud$(eval '$(var cams).find(\'2\')+1')" to="/$(var cam_2_name)/points" />
-      <remap from="cloud$(eval '$(var cams).find(\'3\')+1')" to="/$(var cam_3_name)/points" />
-      <remap from="cloud$(eval '$(var cams).find(\'4\')+1')" to="/$(var cam_4_name)/points" />
+      <remap from="cloud$(eval '$(var cams).find(\'1\')+1')" to="$(var /ns)/$(var cam_1_name)/points" />
+      <remap from="cloud$(eval '$(var cams).find(\'2\')+1')" to="$(var /ns)/$(var cam_2_name)/points" />
+      <remap from="cloud$(eval '$(var cams).find(\'3\')+1')" to="$(var /ns)/$(var cam_3_name)/points" />
+      <remap from="cloud$(eval '$(var cams).find(\'4\')+1')" to="$(var /ns)/$(var cam_4_name)/points" />
       <remap from="combined_cloud" to="depth_combined_cloud"/>       
       <param name="count" value="$(eval 'len($(var cams))')"/>
       <param name="xyz_output" value="true"/>
-      <param name="fixed_frame_id" value="base_link" />
+      <param name="fixed_frame_id" value="$(var ns)base_link" />
       <param name="approx_sync" value="true"/>
     </node>
   </group>
