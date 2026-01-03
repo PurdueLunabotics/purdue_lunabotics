@@ -17,12 +17,12 @@ import threading
 class States(Enum):
     MOVING_TO_ANGULAR_TARGET = 1
     MOVING_TO_LINEAR_TARGET = 2
-    AT_DESTINATION = 4 #at final path point
+    AT_DESTINATION = 4  # at final path point
 
 
 class PointToPoint(Node):
     def __init__(self, **kwargs):
-        super().__init__('point_to_point_node', **kwargs)
+        super().__init__("point_to_point_node", **kwargs)
         rclpy.get_global_executor().add_node(self)
         # self.get_logger().info("init")
 
@@ -92,7 +92,6 @@ class PointToPoint(Node):
         self.map_lock: threading.Lock = threading.Lock()
 
         self.print_debug_info: bool = False
-        
 
         # PUBLISHERS ==================================================================================================
         cmd_vel_topic = "cmd_vel"
@@ -109,9 +108,7 @@ class PointToPoint(Node):
         self.angle_target_publisher = self.create_publisher(
             Float32, "ptp/angle_target", 10
         )
-        self.pid_linear_publisher = self.create_publisher(
-            Float32, "ptp/pid_linear", 10
-        )
+        self.pid_linear_publisher = self.create_publisher(Float32, "ptp/pid_linear", 10)
         self.pid_angular_publisher = self.create_publisher(
             Float32, "ptp/pid_angular", 10
         )
@@ -122,16 +119,10 @@ class PointToPoint(Node):
 
         self.path_publisher = self.create_publisher(Marker, "ptp/line_path", 10)
 
-        self.state_publisher = self.create_publisher(
-            String, "ptp/robot_state", 10
-        )
+        self.state_publisher = self.create_publisher(String, "ptp/robot_state", 10)
 
-        self.target_publisher = self.create_publisher(
-            Pose2D, "ptp/target_pose", 10
-        )
-        self.log_publisher = self.create_publisher(
-            String, "ptp/log", 10
-        )
+        self.target_publisher = self.create_publisher(Pose2D, "ptp/target_pose", 10)
+        self.log_publisher = self.create_publisher(String, "ptp/log", 10)
 
         # SUBSCRIBERS ==================================================================================================
         odom_topic = "odom"
@@ -139,10 +130,10 @@ class PointToPoint(Node):
 
         path_topic = "global_path"
         self.create_subscription(Path, path_topic, self.__path_callback, 1)
-        
+
         backwards_topic = "backwards"
         self.create_subscription(Bool, backwards_topic, self.__backwards_callback, 1)
-        
+
         traversal_topic = "traversal_enabled"
         self.create_subscription(Bool, traversal_topic, self.__traversal_callback, 1)
 
@@ -150,7 +141,9 @@ class PointToPoint(Node):
         self.create_subscription(OccupancyGrid, map_topic, self.__map_callback, 1)
 
         map_update_topic = "costmap_updates"
-        self.create_subscription(OccupancyGridUpdate, map_update_topic, self.__map_update_callback, 1)
+        self.create_subscription(
+            OccupancyGridUpdate, map_update_topic, self.__map_update_callback, 1
+        )
 
     # ==================================================================================================================
     # CALLBACKS
@@ -158,10 +151,10 @@ class PointToPoint(Node):
 
     def __backwards_callback(self, msg: Bool):
         self.is_moving_backwards = msg.data
-        
+
     def __traversal_callback(self, msg: Bool):
         self.is_enabled = msg.data
-        if(not self.is_enabled):
+        if not self.is_enabled:
             self.cmd_vel_publisher.publish(Twist())
 
     def __odom_callback(self, msg: Odometry):
@@ -178,10 +171,14 @@ class PointToPoint(Node):
         self.robot_pose = (
             msg.pose.pose.position.x,
             msg.pose.pose.position.y,
-            (angles[2]) %(2*np.pi) - np.pi  if self.is_moving_backwards else angles[2],  # -pi to pi
+            (angles[2]) % (2 * np.pi) - np.pi
+            if self.is_moving_backwards
+            else angles[2],  # -pi to pi
         )
 
-        self.odom_dt = self.get_clock().now().seconds_nanoseconds()[0] - self.prev_odom_time
+        self.odom_dt = (
+            self.get_clock().now().seconds_nanoseconds()[0] - self.prev_odom_time
+        )
         self.prev_odom_time = self.get_clock().now().seconds_nanoseconds()[0]
 
         if (
@@ -207,14 +204,12 @@ class PointToPoint(Node):
         # update last position
         self.last_pose = self.robot_pose
 
-    def __path_callback(self, msg: Path): 
-        
+    def __path_callback(self, msg: Path):
         # self.get_logger().info("got path")
         if len(msg.poses) == 0:
             self.__visualize_line_path([])
             self.target_pose = [None, None, None]
             return
-
 
         complex_path = []  # create list for storing all d* poses
         for pose in msg.poses:
@@ -254,7 +249,9 @@ class PointToPoint(Node):
         self.map_x_offset = msg.info.origin.position.x
         self.map_y_offset = msg.info.origin.position.y
 
-        if (np.all(data_arr == 0)): # If we get a blank map, we still use it as it will be followed by an update
+        if np.all(
+            data_arr == 0
+        ):  # If we get a blank map, we still use it as it will be followed by an update
             self.map_lock.release()
             return
 
@@ -267,11 +264,11 @@ class PointToPoint(Node):
 
         data_arr = np.array(msg.data)
 
-        if (self.map is None):
+        if self.map is None:
             self.map_lock.release()
             return
 
-        if (np.all(data_arr == 0)):
+        if np.all(data_arr == 0):
             self.map_lock.release()
             return
 
@@ -287,7 +284,6 @@ class PointToPoint(Node):
 
         self.map_lock.release()
 
-
     # ==================================================================================================================
     # STATE PROCESSING
     # ==================================================================================================================
@@ -300,8 +296,8 @@ class PointToPoint(Node):
             target (list-like): target 2D pose of format (x, y, theta)
             pose (list-like): current robot 2D pose in format (x, y, theta)
             path (list-like): sequence of target poses in the path, each of which are in format (x, y, theta)
-        """        
-        
+        """
+
         # store x and y coords of pose in a location variable
         current_location = np.array(current_pose[:2])
 
@@ -321,8 +317,11 @@ class PointToPoint(Node):
         # check if robot linear position is within tolerance - if so, terminate linear motion
         self.at_linear_target = np.abs(self.linear_error) < self.LINEAR_TOLERANCE
 
-        #ensure that error is negative if robot overshoots target
-        if (np.abs(self.linear_error) - np.abs(self.prev_linear_error) >= self.LINEAR_TOLERANCE):
+        # ensure that error is negative if robot overshoots target
+        if (
+            np.abs(self.linear_error) - np.abs(self.prev_linear_error)
+            >= self.LINEAR_TOLERANCE
+        ):
             self.linear_error = self.linear_error * -1
 
         # update previous linear error after checking that the magnitude is decreasing
@@ -350,9 +349,8 @@ class PointToPoint(Node):
         if np.abs(2 * np.pi - np.abs(self.angle_error)) < np.abs(self.angle_error):
             # normalize to make error reflect around-the-world
             self.angle_error = 2 * np.pi - np.abs(self.angle_error)
-            #ensure that the direction is correct
+            # ensure that the direction is correct
             self.angle_error *= -1 if pose_target_angle - current_pose[2] > 0 else 1
-            
 
         # check if robot heading is within tolerance - if so, terminate turning procedure
         self.at_angle_target = np.abs(self.angle_error) < self.ANGULAR_TOLERANCE_RAD
@@ -361,14 +359,14 @@ class PointToPoint(Node):
         ## UPDATE STATE -------
         ## -------------------------------------------------
 
-        if (self.print_debug_info):
-            self.get_logger().info(f'''
+        if self.print_debug_info:
+            self.get_logger().info(f"""
                    PTP ------------------------------- \n
                    At Linear Target: {self.at_linear_target} \n
                    At Angular Target: {self.at_angle_target} \n
                    On Final Trajectory: {on_final_trajectory} \n
                    -----------------------------------
-                   ''')
+                   """)
         # self.log_publisher.publish(f'''
         #            PTP ------------------------------- \n
         #            At Linear Target: {self.at_linear_target} \n
@@ -392,8 +390,8 @@ class PointToPoint(Node):
     # ==================================================================================================================
     # PATH PROCESSING
     # ==================================================================================================================
-    
-    def __convert_to_grid(self, position: 'list[float]') -> 'list[int]':
+
+    def __convert_to_grid(self, position: "list[float]") -> "list[int]":
         """
         Convert a real world (x y) position to grid coordinates. Grid offset should be in the same frame as position, the grid is row-major.
         """
@@ -401,11 +399,10 @@ class PointToPoint(Node):
         shifted_pos = [position[0] - self.map_x_offset, position[1] - self.map_y_offset]
         coord = [
             int(shifted_pos[1] / self.map_resolution + 0.5),
-            int(shifted_pos[0] / self.map_resolution + 0.5)
+            int(shifted_pos[0] / self.map_resolution + 0.5),
         ]
 
         return coord
-    
 
     def __line_intersects_obstacle(self, p1: list, p2: list):
         """
@@ -413,7 +410,7 @@ class PointToPoint(Node):
         """
 
         # find the number of points along the path to check using the resolution of the map
-        length = ((p2[1] - p1[1]) ** 2 + (p2[0] - p1[0]) ** 2)**0.5
+        length = ((p2[1] - p1[1]) ** 2 + (p2[0] - p1[0]) ** 2) ** 0.5
         increments = int(length / self.map_resolution)
 
         # check each point along the path
@@ -425,15 +422,19 @@ class PointToPoint(Node):
             grid_pt = self.__convert_to_grid(pt)
 
             # if out of bounds, the map is unknown, and treated as a free space
-            if (grid_pt[0] < 0 or grid_pt[0] >= len(self.map) or grid_pt[1] < 0 or grid_pt[1] >= len(self.map[0])):
+            if (
+                grid_pt[0] < 0
+                or grid_pt[0] >= len(self.map)
+                or grid_pt[1] < 0
+                or grid_pt[1] >= len(self.map[0])
+            ):
                 continue
 
             # if the map's occupancy probability is over 50, it's an obstacle
-            if (self.map[grid_pt[0]][grid_pt[1]] > 50):
+            if self.map[grid_pt[0]][grid_pt[1]] > 50:
                 return True
-            
-        return False
 
+        return False
 
     ### Simplifies a complex path by removing points that are close to colinear with their neighbors
     ### ensures that gradual changes are still done
@@ -454,7 +455,7 @@ class PointToPoint(Node):
                 v2 = np.array(p3, "float64") - np.array(p1, "float64")
                 v2 /= np.linalg.norm(v2)  # normalize
 
-                if (self.print_debug_info):
+                if self.print_debug_info:
                     self.get_logger().info(str(v1) + " " + str(v2))
                 # self.log_publisher.publish(str(v1) + " " + str(v2))
 
@@ -462,12 +463,12 @@ class PointToPoint(Node):
                 projection_size = np.dot(v1, v2)
 
                 # if line p1 to p3 goes through an obstacle, add point [p3 - 1] to the filtered points
-                if (self.__line_intersects_obstacle(p1, p3)):
+                if self.__line_intersects_obstacle(p1, p3):
                     filtered_points.append(points[i - 1])
                     last_filtered_index = i - 1
 
                 # if less than difference threshold (vectors are different enough angles), find the next point to keep
-                elif projection_size <= difference_threshold: 
+                elif projection_size <= difference_threshold:
                     j = 0
                     # check the points between the indicies of p1 and p3 to find the last p2 that isn't within tolerance
                     for j in range(0, i - last_filtered_index):
@@ -477,11 +478,13 @@ class PointToPoint(Node):
                         v2 = np.array(p3, "float64") - np.array(p1, "float64")
                         v2 /= np.linalg.norm(v2)  # normalize
                         projection_size = np.dot(v1, v2)
-                        #TODO: check if the line from p1 to p2 crosses an obstacle here
+                        # TODO: check if the line from p1 to p2 crosses an obstacle here
                         if projection_size > difference_threshold:
                             p2 = points[last_filtered_index + j]
                             break
-                    if (((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5) > min_linear_dist: #minimum distance between points
+                    if (
+                        ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5
+                    ) > min_linear_dist:  # minimum distance between points
                         filtered_points.append(p2)
                         last_filtered_index += j
 
@@ -498,7 +501,7 @@ class PointToPoint(Node):
         # marker_points.insert(0, marker_points[0])
         # marker_points.insert(0, Point(self.robot_pose[0], self.robot_pose[1], 0))
 
-        if (self.print_debug_info):
+        if self.print_debug_info:
             self.get_logger().info(
                 "SIMPLIFY PATH: Points: "
                 + str(points)
@@ -517,7 +520,9 @@ class PointToPoint(Node):
         results = []
         for i in range(len(points) - 1):
             results.append(Point(x=float(points[i][0]), y=float(points[i][1]), z=0.0))
-            results.append(Point(x=float(points[i + 1][0]), y=float(points[i + 1][1]), z=0.0))
+            results.append(
+                Point(x=float(points[i + 1][0]), y=float(points[i + 1][1]), z=0.0)
+            )
 
         return results
 
@@ -533,7 +538,7 @@ class PointToPoint(Node):
             self.angular_vel = self.angular_pid.calculate(
                 state=self.angle_error, dt=self.pid_dt, setpoint=0
             )
-            
+
         elif self.state == States.MOVING_TO_LINEAR_TARGET:
             self.angular_vel = 0
 
@@ -568,10 +573,19 @@ class PointToPoint(Node):
         marker.pose.orientation.z = 0.0
         marker.pose.orientation.w = 1.0
 
-        if self.robot_pose[0]==None or self.robot_pose[1]==None or self.target_pose[0]==None or self.target_pose[1]==None:
-           return 
-        start_point = Point(x=float(self.robot_pose[0]), y=float(self.robot_pose[1]), z=0.0)
-        end_point = Point(x=float(self.target_pose[0]), y=float(self.target_pose[1]), z=0.0)
+        if (
+            self.robot_pose[0] == None
+            or self.robot_pose[1] == None
+            or self.target_pose[0] == None
+            or self.target_pose[1] == None
+        ):
+            return
+        start_point = Point(
+            x=float(self.robot_pose[0]), y=float(self.robot_pose[1]), z=0.0
+        )
+        end_point = Point(
+            x=float(self.target_pose[0]), y=float(self.target_pose[1]), z=0.0
+        )
 
         marker.points.append(start_point)
         marker.points.append(end_point)
@@ -630,7 +644,7 @@ class PointToPoint(Node):
         vel = Twist()
         vel.linear.x = float(self.linear_vel)
         vel.angular.z = float(self.angular_vel)
-        
+
         vel.linear.x *= -1 if self.is_moving_backwards else 1
         self.cmd_vel_publisher.publish(vel)
 
@@ -653,17 +667,25 @@ class PointToPoint(Node):
 
         while rclpy.ok():
             # self.get_logger().info("loop")
-            if (self.is_enabled):
+            if self.is_enabled:
                 pose = self.robot_pose
 
                 # update difference in time
-                self.pid_dt = self.get_clock().now().seconds_nanoseconds()[0] - self.prev_pid_time
-                self.prev_pid_time = self.get_clock().now().seconds_nanoseconds()[0]  # update previous time
+                self.pid_dt = (
+                    self.get_clock().now().seconds_nanoseconds()[0] - self.prev_pid_time
+                )
+                self.prev_pid_time = (
+                    self.get_clock().now().seconds_nanoseconds()[0]
+                )  # update previous time
 
                 if self.pid_dt == 0 or self.pid_dt is None:  # ensure no div by 0 errors
                     self.pid_dt = 1 / self.FREQUENCY
 
-                if self.target_pose != [None, None, None] and pose != [None, None, None]:
+                if self.target_pose != [None, None, None] and pose != [
+                    None,
+                    None,
+                    None,
+                ]:
                     self.__update_state(pose)
                     self.__move_to_point()
                 else:
@@ -681,7 +703,7 @@ def spin_in_background():
     executor = rclpy.get_global_executor()
     try:
         executor.spin()
-    except ExternalShutdownException:
+    except Exception:
         pass
 
 
