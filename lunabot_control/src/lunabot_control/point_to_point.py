@@ -25,7 +25,7 @@ class PointToPoint(Node):
         rclpy.get_global_executor().add_node(self)
         # self.get_logger().info("init")
 
-        self.LINEAR_P = 0.5
+        self.LINEAR_P = 5.0
         self.LINEAR_I = 0
         self.LINEAR_D = 0
         self.LINEAR_TOLERANCE = 0.2  # meters
@@ -37,7 +37,7 @@ class PointToPoint(Node):
             max_output=self.MAX_LINEAR_SPEED,
         )
 
-        self.ANGULAR_P = 0.5
+        self.ANGULAR_P = 5.0
         self.ANGULAR_I = 0
         self.ANGULAR_D = 0
         self.ANGULAR_TOLERANCE_DEG = 10
@@ -81,7 +81,7 @@ class PointToPoint(Node):
         self.path = []
 
         self.state = States.AT_DESTINATION
-        self.is_moving_backwards = True
+        self.is_moving_backwards = False
         self.is_enabled = True
 
         self.print_debug_info: bool = False
@@ -331,14 +331,14 @@ class PointToPoint(Node):
             # stop linear translation if angle error becomes too big
             self.linear_vel = 0
 
-            self.angular_vel = -self.angular_pid.calculate(
+            self.angular_vel = self.angular_pid.calculate(
                 state=self.angle_error, dt=self.pid_dt, setpoint=0
             )
             
         elif self.state == States.MOVING_TO_LINEAR_TARGET:
             self.angular_vel = 0
 
-            self.linear_vel = -self.linear_pid.calculate(
+            self.linear_vel = self.linear_pid.calculate(
                 state=self.linear_error, dt=self.pid_dt, setpoint=0
             )
 
