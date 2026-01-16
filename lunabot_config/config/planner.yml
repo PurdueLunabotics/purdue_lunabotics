@@ -25,7 +25,7 @@ planner_server:
   ros__parameters:
     planner_plugins: ["GridBased"]
     GridBased:
-      plugin: "DijkstraPlanner"
+      plugin: "SThetaStarPlanner"
 
 mini:
   global_costmap:
@@ -55,4 +55,4 @@ mini:
     ros__parameters:
       planner_plugins: ["GridBased"]
       GridBased:
-        plugin: "DijkstraPlanner"
+        plugin: "SThetaStarPlanner"

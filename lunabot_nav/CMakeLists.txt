@@ -30,18 +30,18 @@ find_package(nav2_util REQUIRED)
 # find_package(<dependency> REQUIRED)
 
 add_executable(dstar_node src/dstar_node.cpp src/dstar.cpp)
-add_library(dijkstra_plugin SHARED src/dijkstra.cpp)
+add_library(stheta_star_planner SHARED src/stheta_star_planner.cpp src/stheta_star.cpp)
 add_executable(nav2_bridge_node src/nav2_bridge.cpp)
 
 ament_target_dependencies(dstar_node rclcpp std_msgs nav_msgs map_msgs)
-ament_target_dependencies(dijkstra_plugin rclcpp std_msgs nav_msgs map_msgs tf2_ros nav2_core nav2_costmap_2d nav2_util)
+ament_target_dependencies(stheta_star_planner rclcpp std_msgs nav_msgs map_msgs tf2_ros nav2_core nav2_costmap_2d nav2_util)
 ament_target_dependencies(nav2_bridge_node rclcpp std_msgs nav_msgs rclcpp_action nav2_msgs)
 
 # Install files
 
-pluginlib_export_plugin_description_file(nav2_core dijkstra_planner.xml)
+pluginlib_export_plugin_description_file(nav2_core stheta_star_planner.xml)
 
-install(FILES dijkstra_planner.xml
+install(FILES stheta_star_planner.xml
   DESTINATION share/${PROJECT_NAME}
 )
 
@@ -54,7 +54,7 @@ install(TARGETS
   nav2_bridge_node
   DESTINATION lib/${PROJECT_NAME})
 
-install(TARGETS dijkstra_plugin
+install(TARGETS stheta_star_planner
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
@@ -72,6 +72,6 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-ament_export_libraries(dijkstra_plugin)
+ament_export_libraries(stheta_star_planner)
 
 ament_package()
