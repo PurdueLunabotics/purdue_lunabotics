@@ -1,0 +1,29 @@
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      publish_frequency: 30.0
+      global_frame: "map"
+      robot_base_frame: "robot"
+      robot_radius: 0.2
+      plugins: ["static_layer", "inflation_layer"]
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        enabled: true
+        inflation_radius: 1.5
+        cost_scaling_factor: 1.5
+        inflate_unknown: true  # should treat unknown as obstacles (maybe change init values)
+        inflate_around_unknown: true
+
+planner_server:
+  ros__parameters:
+    planner_plugins: ["GridBased"]
+    GridBased:
+      plugin: "SThetaStarPlanner"
+      driving_cost: 0.0
+      node_cost: 10.0
+      traversal_cost: 40.0
+      turning_cost: 1.2
+      costmap_exponential: 2.0
+
