@@ -48,7 +48,7 @@ void SThetaStar::updateVertexList() {
   width = costmap->getSizeInCellsX();
   height = costmap->getSizeInCellsY();
 
-  vertex_list = new Vertex[width * height];
+  vertex_list = std::vector<Vertex>(width * height);
   for (unsigned int y = 0; y < height; y++) {
     for (unsigned int x = 0; x < width; x++) {
       vertex_list[x + y * width].coord.x = x;
@@ -90,7 +90,6 @@ PathMsg SThetaStar::createPlan(const PoseStampedMsg &start,
                                const PoseStampedMsg &goal) {
   if (costmap->getSizeInCellsX() != width ||
       costmap->getSizeInCellsY() != height) {
-    delete[] vertex_list;
     updateVertexList();
   }
 

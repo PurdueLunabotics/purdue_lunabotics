@@ -51,7 +51,7 @@ class SThetaStar {
     rclcpp::Logger logger;
     Options options;
 
-    Vertex *vertex_list;
+    std::vector<Vertex> vertex_list;
     unsigned int width;
     unsigned int height;
 
