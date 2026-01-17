@@ -98,7 +98,7 @@ class PointToPoint(Node):
         self.path = []
 
         self.state = States.AT_DESTINATION
-        self.is_moving_backwards = False
+        self.is_moving_backwards = True
         self.is_enabled = True
 
         self.print_debug_info: bool = False
@@ -375,14 +375,14 @@ class PointToPoint(Node):
             # stop linear translation if angle error becomes too big
             self.linear_vel = 0
 
-            self.angular_vel = self.angular_pid.calculate(
+            self.angular_vel = -self.angular_pid.calculate(
                 state=self.angle_error, dt=self.pid_dt, setpoint=0
             )
 
         elif self.state == States.MOVING_TO_LINEAR_TARGET:
             self.angular_vel = 0
 
-            self.linear_vel = self.linear_pid.calculate(
+            self.linear_vel = -self.linear_pid.calculate(
                 state=self.linear_error, dt=self.pid_dt, setpoint=0
             )
 

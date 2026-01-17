@@ -33,7 +33,7 @@
   <link name="middle_link"/>
 
   <joint name="mid_joint" type="fixed">
-    <origin rpy="0 0 3.14" xyz="0 0 0"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
     <parent link="base_link"/>
     <child link="middle_link"/>
     <axis xyz="0 0 1"/>
@@ -77,7 +77,7 @@
   </link>
 
   <joint name="left_front_rev" type="continuous">
-    <origin rpy="0 0 0" xyz="-0.292 -0.35 -0.162"/>
+    <origin rpy="0 0 0" xyz="0.3302 0.254 0.1778"/>
     <parent link="middle_link"/>
     <child link="left_front"/>
     <axis xyz="0 1 0"/>
@@ -122,7 +122,7 @@
   </link>
 
   <joint name="left_back_rev" type="continuous">
-    <origin rpy="0 0 0" xyz="0.217 -0.35 -0.162"/>
+    <origin rpy="0 0 0" xyz="-0.228 0.254 0.178"/>
     <parent link="middle_link"/>
     <child link="left_back"/>
     <axis xyz="0 1 0"/>
@@ -167,7 +167,7 @@
   </link>
 
   <joint name="right_front_rev" type="continuous">
-    <origin rpy="0 0 0" xyz="-0.292 0.22 -0.162"/>
+    <origin rpy="0 0 0" xyz="0.3302 -0.254 0.178"/>
     <parent link="middle_link"/>
     <child link="right_front"/>
     <axis xyz="0 1 0"/>
@@ -212,7 +212,7 @@
   </link>
 
   <joint name="right_back_rev" type="continuous">
-    <origin rpy="0 0 0" xyz="0.217 0.22 -0.162"/>
+    <origin rpy="0 0 0" xyz="-0.228 -0.254 0.178"/>
     <parent link="middle_link"/>
     <child link="right_back"/>
     <axis xyz="0 1 0"/>
@@ -254,7 +254,7 @@
   </link>  
 
   <joint name="d455_back_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0.39 -0.05 0.215"/>
+    <origin rpy="${pi} 0 ${pi}" xyz="-0.381 0.05 0.558"/>
     <parent link="middle_link"/>
     <child link="d455_back_link"/>
     <axis xyz="0 0 1"/>
@@ -360,7 +360,7 @@
   </link>  
 
   <joint name="d455_front_joint" type="fixed">
-    <origin rpy="0 0 3.14" xyz="-0.55 0.15 0"/>
+    <origin rpy="0 0.3 0" xyz="0.558 -0.17 0.33"/>
     <parent link="middle_link"/>
     <child link="d455_front_link"/>
     <axis xyz="0 0 1"/>
