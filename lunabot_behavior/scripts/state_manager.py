@@ -9,24 +9,36 @@ from enum import Enum, auto
 class Events(Enum):
     SUCCESS = auto()
     STALL = auto()
-    FAIL = auto()
+    NO_PATH = auto()
 
 
 class MainStates(Enum):
-    STALL = auto()
     IDLE = auto()
-    INIT_TO_LINKUP = auto()
-    ALIGN_TO_TRENCH = auto()
-    PLUNGE_ACT = auto()
-    TRENCH = auto()
-    RAISE_ACT = auto()
-    MOVE_TO_LINKUP = auto()
-    DEPOSIT = auto()
 
-    ANY = auto()
+    INIT_TO_LINKUP = auto()
+    INIT_TO_LINKUP_STALL = auto()
+    INIT_TO_LINKUP_NO_PATH = auto()
+    
+    ALIGN_TO_TRENCH = auto()
+    ALIGN_TO_TRENCH_STALL = auto()
+    
+    PLUNGE_ACT = auto()
+    PLUNGE_ACT_STALL = auto()
+    
+    TRENCH = auto()
+    TRENCH_STALL = auto()
+    
+    RAISE_ACT = auto()
+    RAISE_ACT_STALL = auto()
+    
+    MOVE_TO_LINKUP = auto()
+    MOVE_TO_LINKUP_STALL = auto()
+    MOVE_TO_LINKUP_NO_PATH = auto()
+    
+    DEPOSIT = auto()
+    DEPOSIT_STALL = auto()
 
     transitions = {
-        (ANY, Events.STALL): STALL,
         (IDLE, Events.SUCCESS): INIT_TO_LINKUP,
         (INIT_TO_LINKUP, Events.SUCCESS): ALIGN_TO_TRENCH,
         (ALIGN_TO_TRENCH, Events.SUCCESS): PLUNGE_ACT,
@@ -38,15 +50,12 @@ class MainStates(Enum):
     }
 
     @staticmethod
-    def get_transition(state, event):
-        if (MainStates.ANY, event) in MainStates.transitions:
-            return MainStates.transitions.get((MainStates.ANY, event))
-
+    def get_transition(state, event: Events):
         return MainStates.transitions.get((state, event), None)
 
 
+
 class MiniStates(Enum):
-    STALL = auto()
     IDLE = auto()
     FIND_LINKUP = auto()
     MOVE_TO_BERM = auto()
@@ -56,10 +65,7 @@ class MiniStates(Enum):
     COLLECT_REGOLITH = auto()
     SEPARATE_FROM_MAIN = auto()
 
-    ANY = auto()
-
     transitions = {
-        (ANY, Events.STALL): STALL,
         (IDLE, Events.SUCCESS): FIND_LINKUP,
         (FIND_LINKUP, Events.SUCCESS): MOVE_TO_BERM,
         (MOVE_TO_BERM, Events.SUCCESS): DEPOSIT,
@@ -71,7 +77,7 @@ class MiniStates(Enum):
     }
 
     @staticmethod
-    def get_transition(state, event):
+    def get_transition(state, event: Events):
         if (MiniStates.ANY, event) in MiniStates.transitions:
             return MiniStates.transitions.get((MiniStates.ANY, event))
 
@@ -164,6 +170,33 @@ class StateManager(Node):
 
             match self.main_state:
                 case MiniStates.IDLE:
+                    # stop all robot behaviors
+                    pass
+
+                case MiniStates.FIND_LINKUP:
+                    # path to berm
+                    # identify linkup spot as one that has a straight line of sight (of some length) to excavation zone
+                    # keep track of that line - will be useful for angular lineup of main bot and determining of staging area for minibot
+                    pass
+
+                case MiniStates.MOVE_TO_BERM:
+                    # path to berm - store the final path
+                    pass
+
+                case MiniStates.DEPOSIT:
+                    pass
+
+                case MiniStates.MOVE_TO_STAGING:
+                    # move to area a certain distance away from linkup spot on the line with straight line of sight
+                    pass
+
+                case MiniStates.ALIGN_TO_MAIN:
+                    pass
+
+                case MiniStates.COLLECT_REGOLITH:
+                    pass
+
+                case MiniStates.SEPARATE_FROM_MAIN:
                     pass
 
                 case MiniStates.STALL:
