@@ -217,6 +217,7 @@
             <param name="Grid/MaxGroundAngle"     value="'30'"/> <!-- 30 degree normal before marked as obstacle -->
             <param name="Grid/3D"                 value="'true'"/> <!-- 3D occupancy grid -->
             <param name="Grid/FromDepth"          value="'false'"/> <!-- occupancy grid from lidar -->
+            <param name="database_path"           value="~/.ros/$(var ns)rtabmap.db"/>
 
         </node>
     </group>
