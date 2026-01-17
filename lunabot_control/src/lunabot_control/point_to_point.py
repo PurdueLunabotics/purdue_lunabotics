@@ -358,7 +358,7 @@ class PointToPoint(Node):
             if not self.at_angle_target:
                 self.state = States.MOVING_TO_ANGULAR_TARGET
         else:  # move to angular target if angle target is not met
-            if on_final_trajectory:
+            if on_final_trajectory or len(self.path) <= self.target_pose_index:
                 self.state = States.AT_DESTINATION  # update state if at destination
             else:
                 # if at linear target and not on final trajectory, target point should update
