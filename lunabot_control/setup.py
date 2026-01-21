@@ -22,7 +22,6 @@ setup(
   entry_points={
     'console_scripts': [
         'point_to_point_node = lunabot_control.point_to_point:main',
-        'nav2_localclient_node = lunabot_control.nav2_localclient:main',
         'differential_drive_controller_node = lunabot_control.differential_drive_controller:main',
         'effort_factory_node = lunabot_control.effort_factory:main',
         'manual_controller_node = lunabot_control.manual_controller:main',
