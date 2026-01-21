@@ -2,8 +2,9 @@
 import rclpy
 from rclpy.node import Node
 
-from lunabot_msgs.msg import RobotEffort, RobotSensors
+from lunabot_msgs.msg import RobotEffort
 from lunabot_msgs.msg import RobotStall
+from lunabot_msgs.msg import RobotSensors
 import threading
 
 class StallDetector(Node):
@@ -23,7 +24,6 @@ class StallDetector(Node):
         self.effort = msg
 
     def sensors_callback(self, msg: RobotSensors):
-        
         # first is left, second is right, third is exc
         
         if abs(msg.drive_left_vel) < 10 and abs(self.effort.left_drive) > 0:
