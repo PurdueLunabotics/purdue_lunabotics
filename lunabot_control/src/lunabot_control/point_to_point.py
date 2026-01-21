@@ -98,7 +98,7 @@ class PointToPoint(Node):
         self.path = []
 
         self.state = States.AT_DESTINATION
-        self.is_moving_backwards = True
+        self.is_moving_backwards = False
         self.is_enabled = True
 
         self.print_debug_info: bool = False
