@@ -89,7 +89,7 @@ def spin_in_background():
     executor = rclpy.get_global_executor()
     try:
         executor.spin()
-    except Exception: # Not defined
+    except Exception:
         pass
 
 def main():

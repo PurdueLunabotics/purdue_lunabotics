@@ -80,7 +80,7 @@
     <arg name="width"                   default="0.5588"    if="$(eval '$(var robot_num) == 1')"/>
     <arg name="max_speed_percentage"    default="0.8"       if="$(eval '$(var robot_num) == 1')"/>
     <arg name="max_speed"               default="1000"      if="$(eval '$(var robot_num) == 1')"/>
-    <arg name="wheel_diameter"          default="0.3429"    if="$(eval '$(var robot_num) == 1')"/>
+    <arg name="wheel_diameter"          default="0.06"    if="$(eval '$(var robot_num) == 1')"/>
     <arg name="gearbox_ratio"           default="50.0"        if="$(eval '$(var robot_num) == 1')"/>
 
     <!-- Record Args -->
