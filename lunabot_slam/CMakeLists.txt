@@ -20,6 +20,7 @@ ament_python_install_package(${PROJECT_NAME})
 # Install Python executables
 install(PROGRAMS
   scripts/map_base_node.py
+  scripts/sim_odom.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

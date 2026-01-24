@@ -6,6 +6,7 @@
   <!-- Should we use Point To Point or Pure pursuit -->
 
   <arg name="gui" default="true"/>
+  <arg name="odom_from_sim" default="false" />
 
   
   <arg default="$(find-pkg-share lunabot_config)/config/sim.rviz" name="rvizconfig"/>
@@ -29,10 +30,12 @@
     <arg name="sim" value="true"/>
     <arg name="robot_num" value="0"/>
     <arg name="entity_name" value="dummy_bot"/>
+    <arg name="odom_from_sim" value="$(var odom_from_sim)"/>
   </include>
   <include if="$(var two_bots)" file="$(find-pkg-share lunabot_bringup)/launch/robot.launch">
     <arg name="sim" value="true"/>
     <arg name="robot_num" value="1"/>
     <arg name="entity_name" value="mini_bot"/>
+    <arg name="odom_from_sim" value="$(var odom_from_sim)"/>
   </include>
 </launch>
