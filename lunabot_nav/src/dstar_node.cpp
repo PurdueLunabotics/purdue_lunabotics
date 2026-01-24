@@ -44,7 +44,7 @@ public:
 
     auto map_sub = node->create_subscription<nav_msgs::msg::OccupancyGrid>(map_topic, qos, std::bind(&DstarNode::grid_callback, this, _1));
     auto map_update_sub = node->create_subscription<map_msgs::msg::OccupancyGridUpdate>(map_update_topic, qos, std::bind(&DstarNode::grid_update_callback, this, _1));
-    auto odom_sub = node->create_subscription<nav_msgs::msg::Odometry>(odom_topic, qos, std::bind(&DstarNode::position_callback, this, _1));
+    auto odom_sub = node->create_subscription<geometry_msgs::msg::PoseStamped>(odom_topic, qos, std::bind(&DstarNode::position_callback, this, _1));
     auto goal_sub = node->create_subscription<geometry_msgs::msg::PoseStamped>(goal_topic, qos, std::bind(&DstarNode::goal_callback, this, _1));
     path_pub = node->create_publisher<nav_msgs::msg::Path>(path_topic, 10);
     auto planning_enabled_subscriber = node->create_subscription<std_msgs::msg::Bool>("planning_enabled", qos, std::bind(&DstarNode::enable_callback, this, _1));
@@ -145,7 +145,7 @@ private:
   // Updates the map given a new occupancy grid.Update the flag such that dstar will update the map.
   void grid_callback(const nav_msgs::msg::OccupancyGrid &data)
   {
-    // RCLCPP_INFO(node->get_logger(), "Got Grid");
+    // RCLCPP_DEBUG(node->get_logger(), "Got Grid");
     map_lock.lock();
 
     bool map_ok = false;
@@ -191,7 +191,7 @@ private:
   // Update the grid given the occupancy grid update (applied on top of the current grid). Also update the flag for dstar to update the map.
   void grid_update_callback(const map_msgs::msg::OccupancyGridUpdate &data)
   {
-    // RCLCPP_INFO(node->get_logger(), "Got Grid Update");
+    // RCLCPP_DEBUG(node->get_logger(), "Got Grid Update");
     map_lock.lock();
 
     bool map_ok = false;
@@ -228,11 +228,11 @@ private:
     map_lock.unlock();
   }
 
-  void position_callback(const nav_msgs::msg::Odometry &data)
+  void position_callback(const geometry_msgs::msg::PoseStamped &data)
   {
-    // RCLCPP_INFO(node->get_logger(), "Got Pose");
-    pose.x = data.pose.pose.position.x;
-    pose.y = data.pose.pose.position.y;
+    // RCLCPP_DEBUG(node->get_logger(), "Got Pose");
+    pose.x = data.pose.position.x;
+    pose.y = data.pose.position.y;
     pose_init = true;
   }
 

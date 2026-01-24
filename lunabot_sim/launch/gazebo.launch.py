@@ -2,25 +2,26 @@ from posixpath import join
 from ament_index_python import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import IncludeLaunchDescription, RegisterEventHandler, AppendEnvironmentVariable, DeclareLaunchArgument
+from launch.actions import IncludeLaunchDescription, RegisterEventHandler, AppendEnvironmentVariable, DeclareLaunchArgument, OpaqueFunction
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import PathJoinSubstitution, IfElseSubstitution, LaunchConfiguration
-# from launch.condition import IFCondition
 from launch_ros.substitutions import FindPackageShare
 import os
 
+def is_gui(context):
+    ros_gz_sim = get_package_share_directory('ros_gz_sim')
+    if LaunchConfiguration('gui').perform(context):
+        gzclient_cmd = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(ros_gz_sim, 'launch', 'gz_sim.launch.py')
+            ),
+            launch_arguments={'gz_args': '-g -v4 ', 'on_exit_shutdown': 'true'}.items()
+        )
+        return [gzclient_cmd]
+    return []
+
 def generate_launch_description():
-    
-    robot_desc_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([
-            PathJoinSubstitution([
-                FindPackageShare('lunabot_description'),
-                'launch',
-                'robot_description.launch.py'
-            ])
-        ])
-    )
 
     # ====================================
     # GAZEBO STUFF =======================
@@ -51,38 +52,8 @@ def generate_launch_description():
         launch_arguments={'gz_args': ['-r -s -v4 ', world], 'on_exit_shutdown': 'true'}.items()
     )
 
-    gzclient_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(ros_gz_sim, 'launch', 'gz_sim.launch.py')
-        ),
-        launch_arguments={'gz_args': '-g -v4 ', 'on_exit_shutdown': 'true'}.items()
-    )
-
-    robot_spawn_node = Node(
-        package='ros_gz_sim',
-        executable='create',
-        arguments=[
-            '-topic', 'dummy_bot/robot_description',
-            '-name', 'dummy_bot',
-            '-x', '2.5', '-y', '1.75', '-z', '0.25',
-            '-Y', '-1.570796327', # yaw
-            "--ros-args"
-        ],
-        output='screen'
-    )
-    mini_robot_spawn_node = Node(
-        package='ros_gz_sim',
-        executable='create',
-        arguments=[
-            '-topic', 'mini_bot/robot_description',
-            '-name', 'mini_bot',
-            '-x', '1.5', '-y', '1.75', '-z', '0.25',
-            '-Y', '-1.570796327', # yaw
-            "--ros-args"
-        ],
-        output='screen'
-    )
-
+    client = OpaqueFunction(function = is_gui)
+    
     # ====================================
     # ROS2 CONTROL =======================
 
@@ -120,20 +91,8 @@ def generate_launch_description():
         output='screen',
     )
     
-    start_gazebo_ros_image_bridge_cmd = Node(
-        package='ros_gz_image',
-        executable='image_bridge',
-        arguments=['/d455_back/color/image_raw', '/d455_back/depth/image_raw', '/d455_front/color/image_raw', '/d455_front/depth/image_raw'],
-        output='screen',
-    )
-    start_gazebo_ros_mini_image_bridge_cmd = Node(
-        package='ros_gz_image',
-        executable='image_bridge',
-        arguments=['/mini/d455_back/color/image_raw', '/mini/d455_back/depth/image_raw', '/mini/d455_front/color/image_raw', '/mini/d455_front/depth/image_raw'],
-        output='screen',
-    )
-    
-    ld = LaunchDescription([DeclareLaunchArgument(
+    ld = LaunchDescription([
+        DeclareLaunchArgument(
             'gui',
             default_value='true'
         ),
@@ -154,12 +113,7 @@ def generate_launch_description():
         # ),
 
         gzserver_cmd,
-        gzclient_cmd, #COMMENT THIS LINE TO REMOVE GUI
-        robot_desc_launch,
-        robot_spawn_node,
-        # mini_robot_spawn_node,
-        start_gazebo_ros_bridge_cmd,
-        start_gazebo_ros_image_bridge_cmd,
-        # start_gazebo_ros_mini_image_bridge_cmd
+        client,
+        start_gazebo_ros_bridge_cmd
     ])
     return ld

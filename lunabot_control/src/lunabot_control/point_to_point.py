@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 
+import threading
+from enum import Enum
+
+import numpy as np
+from rcl_interfaces.msg import SetParametersResult, ParameterDescriptor, ParameterType
 import rclpy
+from geometry_msgs.msg import Point, Pose2D, PoseStamped, Twist
+from nav_msgs.msg import Odometry, Path
 from rclpy.node import Node
 from std_msgs.msg import Bool, Float32, String
-from nav_msgs.msg import Path, Odometry, OccupancyGrid
-from map_msgs.msg import OccupancyGridUpdate
-from geometry_msgs.msg import Twist, Point, Pose2D
-from lunabot_control.pid_controller import PIDController
-from visualization_msgs.msg import Marker
 from tf_transformations import euler_from_quaternion
-import numpy as np
-from enum import Enum
-import threading
+from visualization_msgs.msg import Marker
+
+from lunabot_control.pid_controller import PIDController
 
 
 class States(Enum):
@@ -26,11 +28,25 @@ class PointToPoint(Node):
         rclpy.get_global_executor().add_node(self)
         # self.get_logger().info("init")
 
-        self.LINEAR_P = 3.0
-        self.LINEAR_I = 0
-        self.LINEAR_D = 0
-        self.LINEAR_TOLERANCE = 0.2  # meters
-        self.MAX_LINEAR_SPEED = 0.3  # m/s
+        self.declare_parameters("linear", [("p", 3.0, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
+                                           ("i", 0.0, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
+                                           ("d", 0.0, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
+                                           ("max_speed", 0.3, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
+                                           ("tolerance", 0.2, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE))])
+
+        self.declare_parameters("angular", [("p", 5.0, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
+                                           ("i", 0.0, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
+                                           ("d", 0.0, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
+                                           ("max_speed", 60.0, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
+                                           ("tolerance", 10.0, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE))])
+
+        self.declare_parameter("frequency", 60.0, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE))
+
+        self.LINEAR_P = self.get_parameter("linear.p").get_parameter_value().double_value
+        self.LINEAR_I = self.get_parameter("linear.i").get_parameter_value().double_value
+        self.LINEAR_D = self.get_parameter("linear.d").get_parameter_value().double_value
+        self.LINEAR_TOLERANCE = self.get_parameter("linear.tolerance").get_parameter_value().double_value  # meters
+        self.MAX_LINEAR_SPEED = self.get_parameter("linear.max_speed").get_parameter_value().double_value  # m/s
         self.linear_pid = PIDController(
             self.LINEAR_P,
             self.LINEAR_I,
@@ -38,12 +54,12 @@ class PointToPoint(Node):
             max_output=self.MAX_LINEAR_SPEED,
         )
 
-        self.ANGULAR_P = 5.0
-        self.ANGULAR_I = 0
-        self.ANGULAR_D = 0
-        self.ANGULAR_TOLERANCE_DEG = 10
+        self.ANGULAR_P = self.get_parameter("angular.p").get_parameter_value().double_value
+        self.ANGULAR_I = self.get_parameter("angular.i").get_parameter_value().double_value
+        self.ANGULAR_D = self.get_parameter("angular.i").get_parameter_value().double_value
+        self.ANGULAR_TOLERANCE_DEG = self.get_parameter("angular.tolerance").get_parameter_value().double_value
         self.ANGULAR_TOLERANCE_RAD = np.deg2rad(self.ANGULAR_TOLERANCE_DEG)
-        self.MAX_ANGULAR_SPEED_DEG_PER_SEC = 60
+        self.MAX_ANGULAR_SPEED_DEG_PER_SEC = self.get_parameter("angular.max_speed").get_parameter_value().double_value
         self.MAX_ANGULAR_SPEED_RAD_PER_SEC = np.deg2rad(
             self.MAX_ANGULAR_SPEED_DEG_PER_SEC
         )
@@ -57,7 +73,7 @@ class PointToPoint(Node):
         self.robot_pose = [None, None, None]  # x, y, heading (rad)
         self.last_pose = [None, None, None]  # for velocity calculations
 
-        self.FREQUENCY = 60.0
+        self.FREQUENCY = self.get_parameter("frequency").get_parameter_value().double_value
         self.pid_dt = 1 / self.FREQUENCY
         self.prev_pid_time = 0
         self.odom_dt = 1 / self.FREQUENCY
@@ -84,12 +100,6 @@ class PointToPoint(Node):
         self.state = States.AT_DESTINATION
         self.is_moving_backwards = False
         self.is_enabled = True
-
-        self.map: np.ndarray = None
-        self.map_resolution: float = 0
-        self.map_x_offset: int = -1
-        self.map_y_offset: int = -1
-        self.map_lock: threading.Lock = threading.Lock()
 
         self.print_debug_info: bool = False
 
@@ -120,13 +130,18 @@ class PointToPoint(Node):
         self.path_publisher = self.create_publisher(Marker, "ptp/line_path", 10)
 
         self.state_publisher = self.create_publisher(String, "ptp/robot_state", 10)
+<<<<<<< HEAD
 
         self.target_publisher = self.create_publisher(Pose2D, "ptp/target_pose", 10)
         self.log_publisher = self.create_publisher(String, "ptp/log", 10)
+=======
+>>>>>>> feature/two-robot-nav2
 
+        self.target_publisher = self.create_publisher(Pose2D, "ptp/target_pose", 10)
+        self.log_publisher = self.create_publisher(String, "ptp/log", 10)
         # SUBSCRIBERS ==================================================================================================
         odom_topic = "odom"
-        self.create_subscription(Odometry, odom_topic, self.__odom_callback, 1)
+        self.create_subscription(PoseStamped, odom_topic, self.__odom_callback, 1)
 
         path_topic = "global_path"
         self.create_subscription(Path, path_topic, self.__path_callback, 1)
@@ -137,6 +152,7 @@ class PointToPoint(Node):
         traversal_topic = "traversal_enabled"
         self.create_subscription(Bool, traversal_topic, self.__traversal_callback, 1)
 
+<<<<<<< HEAD
         map_topic = "costmap"
         self.create_subscription(OccupancyGrid, map_topic, self.__map_callback, 1)
 
@@ -144,6 +160,9 @@ class PointToPoint(Node):
         self.create_subscription(
             OccupancyGridUpdate, map_update_topic, self.__map_update_callback, 1
         )
+=======
+        self.add_on_set_parameters_callback(self.__parameter_callback)
+>>>>>>> feature/two-robot-nav2
 
     # ==================================================================================================================
     # CALLBACKS
@@ -157,20 +176,25 @@ class PointToPoint(Node):
         if not self.is_enabled:
             self.cmd_vel_publisher.publish(Twist())
 
-    def __odom_callback(self, msg: Odometry):
+    def __odom_callback(self, msg: PoseStamped):
         # self.get_logger().info("got Odom")
         # self.robot_velocity = [msg.twist.twist.linear, msg.twist.twist.angular]
         angles = euler_from_quaternion(
             [
-                msg.pose.pose.orientation.x,
-                msg.pose.pose.orientation.y,
-                msg.pose.pose.orientation.z,
-                msg.pose.pose.orientation.w,
+                msg.pose.orientation.x,
+                msg.pose.orientation.y,
+                msg.pose.orientation.z,
+                msg.pose.orientation.w,
             ]
         )
         self.robot_pose = (
+<<<<<<< HEAD
             msg.pose.pose.position.x,
             msg.pose.pose.position.y,
+=======
+            msg.pose.position.x,
+            msg.pose.position.y,
+>>>>>>> feature/two-robot-nav2
             (angles[2]) % (2 * np.pi) - np.pi
             if self.is_moving_backwards
             else angles[2],  # -pi to pi
@@ -205,13 +229,20 @@ class PointToPoint(Node):
         self.last_pose = self.robot_pose
 
     def __path_callback(self, msg: Path):
+<<<<<<< HEAD
         # self.get_logger().info("got path")
+=======
+>>>>>>> feature/two-robot-nav2
         if len(msg.poses) == 0:
             self.__visualize_line_path([])
             self.target_pose = [None, None, None]
             return
 
+<<<<<<< HEAD
         complex_path = []  # create list for storing all d* poses
+=======
+        self.path = []  # create list for storing all d* poses
+>>>>>>> feature/two-robot-nav2
         for pose in msg.poses:
             angles = euler_from_quaternion(
                 [
@@ -223,18 +254,19 @@ class PointToPoint(Node):
             )
 
             # add all points to complex path
-            complex_path.append([pose.pose.position.x, pose.pose.position.y, angles[2]])
-
-        marker_points = []
-        self.path, marker_points = self.__simplify_path(complex_path)
+            self.path.append([pose.pose.position.x, pose.pose.position.y, angles[2]])
 
         # initialize target point
         self.target_pose_index = 0
         self.target_pose = self.path[self.target_pose_index]
 
-        # visualize sequence of lines
-        self.__visualize_line_path(marker_points)
+    def __parameter_callback(self, params: list[rclpy.Parameter]):
+        for param in params:
+            if param.type_ != rclpy.Parameter.Type.DOUBLE:
+                self.get_logger().error(f"Invalid parameter type for {param.name}")
+                return SetParametersResult(successful = False, reason = f"Invalid parameter type for {param.name}")
 
+<<<<<<< HEAD
     def __map_callback(self, msg: OccupancyGrid):
         # self.get_logger().info("got map")
         self.map_lock.acquire()
@@ -284,6 +316,34 @@ class PointToPoint(Node):
 
         self.map_lock.release()
 
+=======
+            if param.name == "linear.p":
+                self.linear_pid.kp = param.get_parameter_value().double_value
+            elif param.name == "linear.d":
+                self.linear_pid.kd = param.get_parameter_value().double_value
+            elif param.name == "linear.i":
+                self.linear_pid.ki = param.get_parameter_value().double_value
+            elif param.name == "linear.max_speed":
+                self.linear_pid.max_output = param.get_parameter_value().double_value
+            elif param.name == "linear.tolerance":
+                self.LINEAR_TOLERANCE = param.get_parameter_value().double_value
+            elif param.name == "angular.p":
+                self.angular_pid.kp = param.get_parameter_value().double_value
+            elif param.name == "angular.d":
+                self.angular_pid.kd = param.get_parameter_value().double_value
+            elif param.name == "angular.i":
+                self.angular_pid.ki = param.get_parameter_value().double_value
+            elif param.name == "angular.max_speed":
+                self.angular_pid.max_output = np.deg2rad(param.get_parameter_value().double_value)
+            elif param.name == "angular.tolerance":
+                self.ANGULAR_TOLERANCE_RAD = np.deg2rad(param.get_parameter_value().double_value)
+            else:
+                self.get_logger().error(f"Unknown parameter: {param.name}")
+                return SetParametersResult(successful = False, reason = f"Unknown parameter: {param.name}")
+
+        return SetParametersResult(successful = True)
+
+>>>>>>> feature/two-robot-nav2
     # ==================================================================================================================
     # STATE PROCESSING
     # ==================================================================================================================
@@ -379,7 +439,7 @@ class PointToPoint(Node):
             if not self.at_angle_target:
                 self.state = States.MOVING_TO_ANGULAR_TARGET
         else:  # move to angular target if angle target is not met
-            if on_final_trajectory:
+            if on_final_trajectory or len(self.path) <= self.target_pose_index:
                 self.state = States.AT_DESTINATION  # update state if at destination
             else:
                 # if at linear target and not on final trajectory, target point should update
@@ -388,6 +448,7 @@ class PointToPoint(Node):
                 self.__update_state(current_pose)
 
     # ==================================================================================================================
+<<<<<<< HEAD
     # PATH PROCESSING
     # ==================================================================================================================
 
@@ -527,6 +588,8 @@ class PointToPoint(Node):
         return results
 
     # ==================================================================================================================
+=======
+>>>>>>> feature/two-robot-nav2
     # MOTION
     # ==================================================================================================================
 
@@ -535,14 +598,14 @@ class PointToPoint(Node):
             # stop linear translation if angle error becomes too big
             self.linear_vel = 0
 
-            self.angular_vel = self.angular_pid.calculate(
+            self.angular_vel = -self.angular_pid.calculate(
                 state=self.angle_error, dt=self.pid_dt, setpoint=0
             )
 
         elif self.state == States.MOVING_TO_LINEAR_TARGET:
             self.angular_vel = 0
 
-            self.linear_vel = self.linear_pid.calculate(
+            self.linear_vel = -self.linear_pid.calculate(
                 state=self.linear_error, dt=self.pid_dt, setpoint=0
             )
 

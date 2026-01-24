@@ -2,31 +2,40 @@
 <launch>
   <set_parameter name="use_sim_time" value="true" /> <!-- Use time from Gazebo (will break without this)-->
 
-  <!-- Set the arena to either KSC or UCF arena based on the boolean argument. -->
-  <arg name="KSC_arena" default="true"/>
-
+  <arg name="two_bots" default="false"/>
   <!-- Should we use Point To Point or Pure pursuit -->
-  <arg name="ptp" default="true"/>
 
   <arg name="gui" default="true"/>
+  <arg name="odom_from_sim" default="false" />
 
   
   <arg default="$(find-pkg-share lunabot_config)/config/sim.rviz" name="rvizconfig"/>
+  <arg default="$(find-pkg-share lunabot_config)/config/mini_sim.rviz" name="minirvizconfig"/>
   <node args="-d $(var rvizconfig)" name="rviz" pkg="rviz2" exec="rviz2" />
-
-  <!-- Values for arena world (Nasa is KSC, UCF is not.) The above boolean argument changes 
-  what arg is passed to the launch file below (therefore, there are two duplicate launch files)
-  $(find lunabot_sim)/worlds/arena_nasa.world
-  $(find lunabot_sim)/worlds/arena_ucf.world -->
-
-  <arg name="initial_pose" default="-x 1.0 -y -1.3 -z 0"/>
-  <!-- <arg name="model" default="$(find dummy_bot_description)/urdf/dummy_bot.xacro"/> -->
+  <node if="$(var two_bots)" args="-d $(var minirvizconfig)" name="rviz" pkg="rviz2" exec="rviz2" />
 
   <include if="$(var gui)" file="$(find-pkg-share lunabot_sim)/launch/gazebo.launch.py"/>
   <include unless="$(var gui)" file="$(find-pkg-share lunabot_sim)/launch/gazebo_no_gui.launch.py"/>
+  
 
-  <arg name="two_bots" default="true"/>
+  <node name="joy_node" pkg="joy" exec="joy_node" output="screen" respawn="true" namespace="mini">
+    <param name="device_id" value="1" />
+  </node>
 
-  <include file="$(find-pkg-share lunabot_bringup)/launch/sim_main_robot.launch"/>
-  <include if="$(var two_bots)" file="$(find-pkg-share lunabot_bringup)/launch/sim_mini_robot.launch"/>
+  <node if="$(var two_bots)" name="joy_node" pkg="joy" exec="joy_node" output="screen" respawn="true" namespace="">
+    <param name="device_id" value="0" />
+  </node>
+
+  <include file="$(find-pkg-share lunabot_bringup)/launch/robot.launch">
+    <arg name="sim" value="true"/>
+    <arg name="robot_num" value="0"/>
+    <arg name="entity_name" value="dummy_bot"/>
+    <arg name="odom_from_sim" value="$(var odom_from_sim)"/>
+  </include>
+  <include if="$(var two_bots)" file="$(find-pkg-share lunabot_bringup)/launch/robot.launch">
+    <arg name="sim" value="true"/>
+    <arg name="robot_num" value="1"/>
+    <arg name="entity_name" value="mini_bot"/>
+    <arg name="odom_from_sim" value="$(var odom_from_sim)"/>
+  </include>
 </launch>
