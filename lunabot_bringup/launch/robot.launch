@@ -68,21 +68,6 @@
 
     <arg name="pointcloud"                      default="$(eval 'len($(var cams)) > 1')" />
 
-    <!-- Differential Drive Args -->
-    <arg name="diff_drive_hz"           default="20.0"/>
-    <!-- Main -->
-    <arg name="width"                   default="0.5588"    if="$(eval '$(var robot_num) == 0')"/>
-    <arg name="max_speed_percentage"    default="0.8"       if="$(eval '$(var robot_num) == 0')"/>
-    <arg name="max_speed"               default="1000"      if="$(eval '$(var robot_num) == 0')"/>
-    <arg name="wheel_diameter"          default="0.3429"    if="$(eval '$(var robot_num) == 0')"/>
-    <arg name="gearbox_ratio"           default="50.0"/>
-    <!-- Mini -->
-    <arg name="width"                   default="0.5588"    if="$(eval '$(var robot_num) == 1')"/>
-    <arg name="max_speed_percentage"    default="0.8"       if="$(eval '$(var robot_num) == 1')"/>
-    <arg name="max_speed"               default="1000"      if="$(eval '$(var robot_num) == 1')"/>
-    <arg name="wheel_diameter"          default="0.06"    if="$(eval '$(var robot_num) == 1')"/>
-    <arg name="gearbox_ratio"           default="50.0"        if="$(eval '$(var robot_num) == 1')"/>
-
     <!-- Record Args -->
     <arg name="exp_name" default="exp" />
 
@@ -123,7 +108,9 @@
     <node if="$(var sim)" name="manual_controller_node" pkg="lunabot_control" exec="manual_controller_node" output="screen" respawn="true">
     </node>
 
-    <node if="$(var sim)" name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true" />
+    <node if="$(var sim)" name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true">
+            <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
+    </node>
     <node if="$(var sim)" pkg="controller_manager" exec="spawner" args="-p $(find-pkg-share lunabot_config)/config/sim_controller.yaml velocity_controller"/>
     <node pkg="lunabot_slam" exec="map_base_node.py">
         <remap from="odom" to="$(var /ns)/rtabmap/odom"/>
@@ -136,12 +123,7 @@
                 exec="differential_drive_controller_node" output="screen" respawn="true" >
             <param name="use_sim_time" value="$(var sim)"/>
 
-            <param name="width" value="$(var width)"/>
-            <param name="max_speed_percentage" value="$(var max_speed_percentage)"/>
-            <param name="hz" value="$(var diff_drive_hz)"/>
-            <param name="max_speed" value="$(var max_speed)"/>
-            <param name="wheel_diameter" value="$(var wheel_diameter)"/>
-            <param name="gearbox_ratio" value="$(var gearbox_ratio)"/>
+            <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
             
             <!-- Input -->
             <remap from="cmd_vel" to="cmd_vel"/>
@@ -246,6 +228,7 @@
 
         <node name="point_to_point_node" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="false" >
             <param name="use_sim_time" value="$(var sim)"/>
+            <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
 
             <remap from="odom" to="position"/>
             <remap from="global_path" to="nav_path"/>
