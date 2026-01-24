@@ -20,7 +20,6 @@ differential_drive_controller_node:
     hz: 20.0
     max_speed: 1000
     max_speed_percentage: 0.8
-    use_sim_time: true
     wheel_diameter: 0.3429
     width: 0.5588
 
@@ -52,7 +51,6 @@ mini:
       hz: 20.0
       max_speed: 3000
       max_speed_percentage: 0.8
-      use_sim_time: true
       wheel_diameter: 0.0528
       width: 0.5588
 

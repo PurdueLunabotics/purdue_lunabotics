@@ -195,17 +195,6 @@
             <remap from="depth/image"             to="$(var /ns)/$(var odom_cam_name)/aligned_depth_to_color/image_raw"/>
             <remap from="rgb/image"               to="$(var /ns)/$(var odom_cam_name)/color/image_raw"/>
 
-        <let name="rtabmap_max_features" value="'0'" if="$(var odom_from_sim)"/>
-        <let name="rtabmap_max_features" value="'500'" unless="$(var odom_from_sim)"/>
-
-
-        <let name="rtabmap_max_features" value="'0'" if="$(var odom_from_sim)"/>
-        <let name="rtabmap_max_features" value="'500'" unless="$(var odom_from_sim)"/>
-
-
-        <let name="rtabmap_max_features" value="'0'" if="$(var odom_from_sim)"/>
-        <let name="rtabmap_max_features" value="'500'" unless="$(var odom_from_sim)"/>
-
             <remap from="rgb/camera_info"         to="$(var /ns)/$(var odom_cam_name)/color/camera_info"/>
 
             <param name="sync_queue_size"         value="10"/>
