@@ -157,9 +157,9 @@ def generate_launch_description():
         gzclient_cmd, #COMMENT THIS LINE TO REMOVE GUI
         robot_desc_launch,
         robot_spawn_node,
-        mini_robot_spawn_node,
+        # mini_robot_spawn_node,
         start_gazebo_ros_bridge_cmd,
         start_gazebo_ros_image_bridge_cmd,
-        start_gazebo_ros_mini_image_bridge_cmd
+        # start_gazebo_ros_mini_image_bridge_cmd
     ])
     return ld
