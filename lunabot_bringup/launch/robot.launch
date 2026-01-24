@@ -124,7 +124,7 @@
     </node>
 
     <node if="$(var sim)" name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true" />
-    <node if="$(var sim)" pkg="controller_manager" exec="spawner" args="-p $(find-pkg-share lunabot_config)/config/controller.yaml velocity_controller"/>
+    <node if="$(var sim)" pkg="controller_manager" exec="spawner" args="-p $(find-pkg-share lunabot_config)/config/sim_controller.yaml velocity_controller"/>
     <node pkg="lunabot_slam" exec="map_base_node.py">
         <remap from="odom" to="$(var /ns)/rtabmap/odom"/>
         <remap from="position" to="$(var /ns)/position"/>
