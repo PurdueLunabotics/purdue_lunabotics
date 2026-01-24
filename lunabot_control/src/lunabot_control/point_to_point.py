@@ -130,12 +130,6 @@ class PointToPoint(Node):
         self.path_publisher = self.create_publisher(Marker, "ptp/line_path", 10)
 
         self.state_publisher = self.create_publisher(String, "ptp/robot_state", 10)
-<<<<<<< HEAD
-
-        self.target_publisher = self.create_publisher(Pose2D, "ptp/target_pose", 10)
-        self.log_publisher = self.create_publisher(String, "ptp/log", 10)
-=======
->>>>>>> feature/two-robot-nav2
 
         self.target_publisher = self.create_publisher(Pose2D, "ptp/target_pose", 10)
         self.log_publisher = self.create_publisher(String, "ptp/log", 10)
@@ -152,17 +146,7 @@ class PointToPoint(Node):
         traversal_topic = "traversal_enabled"
         self.create_subscription(Bool, traversal_topic, self.__traversal_callback, 1)
 
-<<<<<<< HEAD
-        map_topic = "costmap"
-        self.create_subscription(OccupancyGrid, map_topic, self.__map_callback, 1)
-
-        map_update_topic = "costmap_updates"
-        self.create_subscription(
-            OccupancyGridUpdate, map_update_topic, self.__map_update_callback, 1
-        )
-=======
         self.add_on_set_parameters_callback(self.__parameter_callback)
->>>>>>> feature/two-robot-nav2
 
     # ==================================================================================================================
     # CALLBACKS
@@ -188,13 +172,8 @@ class PointToPoint(Node):
             ]
         )
         self.robot_pose = (
-<<<<<<< HEAD
-            msg.pose.pose.position.x,
-            msg.pose.pose.position.y,
-=======
             msg.pose.position.x,
             msg.pose.position.y,
->>>>>>> feature/two-robot-nav2
             (angles[2]) % (2 * np.pi) - np.pi
             if self.is_moving_backwards
             else angles[2],  # -pi to pi
@@ -229,20 +208,12 @@ class PointToPoint(Node):
         self.last_pose = self.robot_pose
 
     def __path_callback(self, msg: Path):
-<<<<<<< HEAD
-        # self.get_logger().info("got path")
-=======
->>>>>>> feature/two-robot-nav2
         if len(msg.poses) == 0:
             self.__visualize_line_path([])
             self.target_pose = [None, None, None]
             return
 
-<<<<<<< HEAD
-        complex_path = []  # create list for storing all d* poses
-=======
         self.path = []  # create list for storing all d* poses
->>>>>>> feature/two-robot-nav2
         for pose in msg.poses:
             angles = euler_from_quaternion(
                 [
@@ -266,57 +237,6 @@ class PointToPoint(Node):
                 self.get_logger().error(f"Invalid parameter type for {param.name}")
                 return SetParametersResult(successful = False, reason = f"Invalid parameter type for {param.name}")
 
-<<<<<<< HEAD
-    def __map_callback(self, msg: OccupancyGrid):
-        # self.get_logger().info("got map")
-        self.map_lock.acquire()
-
-        data_arr = np.array(msg.data)
-
-        width = msg.info.width
-        height = msg.info.height
-        self.map = np.reshape(data_arr, (height, width))
-
-        self.map_resolution = msg.info.resolution
-        self.map_x_offset = msg.info.origin.position.x
-        self.map_y_offset = msg.info.origin.position.y
-
-        if np.all(
-            data_arr == 0
-        ):  # If we get a blank map, we still use it as it will be followed by an update
-            self.map_lock.release()
-            return
-
-        self.map_lock.release()
-
-    def __map_update_callback(self, msg: OccupancyGridUpdate):
-        # self.get_logger().info("got map update")
-
-        self.map_lock.acquire()
-
-        data_arr = np.array(msg.data)
-
-        if self.map is None:
-            self.map_lock.release()
-            return
-
-        if np.all(data_arr == 0):
-            self.map_lock.release()
-            return
-
-        temp_map = self.map.copy()
-
-        index = 0
-        for i in range(msg.y, msg.y + msg.height):
-            for j in range(msg.x, msg.x + msg.width):
-                temp_map[i][j] = data_arr[index]
-                index += 1
-
-        self.map = temp_map.copy()
-
-        self.map_lock.release()
-
-=======
             if param.name == "linear.p":
                 self.linear_pid.kp = param.get_parameter_value().double_value
             elif param.name == "linear.d":
@@ -343,7 +263,6 @@ class PointToPoint(Node):
 
         return SetParametersResult(successful = True)
 
->>>>>>> feature/two-robot-nav2
     # ==================================================================================================================
     # STATE PROCESSING
     # ==================================================================================================================
@@ -448,148 +367,6 @@ class PointToPoint(Node):
                 self.__update_state(current_pose)
 
     # ==================================================================================================================
-<<<<<<< HEAD
-    # PATH PROCESSING
-    # ==================================================================================================================
-
-    def __convert_to_grid(self, position: "list[float]") -> "list[int]":
-        """
-        Convert a real world (x y) position to grid coordinates. Grid offset should be in the same frame as position, the grid is row-major.
-        """
-
-        shifted_pos = [position[0] - self.map_x_offset, position[1] - self.map_y_offset]
-        coord = [
-            int(shifted_pos[1] / self.map_resolution + 0.5),
-            int(shifted_pos[0] / self.map_resolution + 0.5),
-        ]
-
-        return coord
-
-    def __line_intersects_obstacle(self, p1: list, p2: list):
-        """
-        Check if a line between two points intersects an obstacle in the map.
-        """
-
-        # find the number of points along the path to check using the resolution of the map
-        length = ((p2[1] - p1[1]) ** 2 + (p2[0] - p1[0]) ** 2) ** 0.5
-        increments = int(length / self.map_resolution)
-
-        # check each point along the path
-        for i in range(increments):
-            pt_x = p1[0] + (p2[0] - p1[0]) * (i / increments)
-            pt_y = p1[1] + (p2[1] - p1[1]) * (i / increments)
-            pt = [pt_x, pt_y]
-
-            grid_pt = self.__convert_to_grid(pt)
-
-            # if out of bounds, the map is unknown, and treated as a free space
-            if (
-                grid_pt[0] < 0
-                or grid_pt[0] >= len(self.map)
-                or grid_pt[1] < 0
-                or grid_pt[1] >= len(self.map[0])
-            ):
-                continue
-
-            # if the map's occupancy probability is over 50, it's an obstacle
-            if self.map[grid_pt[0]][grid_pt[1]] > 50:
-                return True
-
-        return False
-
-    ### Simplifies a complex path by removing points that are close to colinear with their neighbors
-    ### ensures that gradual changes are still done
-
-    def __simplify_path(self, points, difference_threshold=0.99, min_linear_dist=0.25):
-        filtered_points = [points[0]]
-        last_filtered_index = 0
-        if len(points) >= 3:
-            for i in range(2, len(points)):
-                p1 = points[last_filtered_index]
-                p2 = points[last_filtered_index + 1]
-                p3 = points[i]
-                # find projection of vectors on each other
-                # vector 1 is from the last filtered point to its next point in the complex path
-                v1 = np.array(p2, "float64") - np.array(p1, "float64")
-                v1 /= np.linalg.norm(v1)  # normalize
-                # vector 2 is from the last filtered point to the current point being examined in the complex path
-                v2 = np.array(p3, "float64") - np.array(p1, "float64")
-                v2 /= np.linalg.norm(v2)  # normalize
-
-                if self.print_debug_info:
-                    self.get_logger().info(str(v1) + " " + str(v2))
-                # self.log_publisher.publish(str(v1) + " " + str(v2))
-
-                # calculate projection size
-                projection_size = np.dot(v1, v2)
-
-                # if line p1 to p3 goes through an obstacle, add point [p3 - 1] to the filtered points
-                if self.__line_intersects_obstacle(p1, p3):
-                    filtered_points.append(points[i - 1])
-                    last_filtered_index = i - 1
-
-                # if less than difference threshold (vectors are different enough angles), find the next point to keep
-                elif projection_size <= difference_threshold:
-                    j = 0
-                    # check the points between the indicies of p1 and p3 to find the last p2 that isn't within tolerance
-                    for j in range(0, i - last_filtered_index):
-                        p2 = points[last_filtered_index + 1 + j]
-                        v1 = np.array(p2, "float64") - np.array(p1, "float64")
-                        v1 /= np.linalg.norm(v1)  # normalize
-                        v2 = np.array(p3, "float64") - np.array(p1, "float64")
-                        v2 /= np.linalg.norm(v2)  # normalize
-                        projection_size = np.dot(v1, v2)
-                        # TODO: check if the line from p1 to p2 crosses an obstacle here
-                        if projection_size > difference_threshold:
-                            p2 = points[last_filtered_index + j]
-                            break
-                    if (
-                        ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5
-                    ) > min_linear_dist:  # minimum distance between points
-                        filtered_points.append(p2)
-                        last_filtered_index += j
-
-                # add last point to end up in same location
-                if i == len(points) - 1:
-                    filtered_points.append(points[-1])
-        else:
-            filtered_points = points
-        if len(filtered_points) == 0:
-            filtered_points = points
-
-        marker_points = self.__point_list_to_ros_point_list(filtered_points)
-
-        # marker_points.insert(0, marker_points[0])
-        # marker_points.insert(0, Point(self.robot_pose[0], self.robot_pose[1], 0))
-
-        if self.print_debug_info:
-            self.get_logger().info(
-                "SIMPLIFY PATH: Points: "
-                + str(points)
-                + " ; Simple Points: "
-                + str(filtered_points)
-            )  # put the points and filtered points into console
-        # self.log_publisher.publish(
-        #     "SIMPLIFY PATH: Points: "
-        #     + str(points)
-        #     + " ; Simple Points: "
-        #     + str(filtered_points)
-        # )
-        return filtered_points, marker_points
-
-    def __point_list_to_ros_point_list(self, points):
-        results = []
-        for i in range(len(points) - 1):
-            results.append(Point(x=float(points[i][0]), y=float(points[i][1]), z=0.0))
-            results.append(
-                Point(x=float(points[i + 1][0]), y=float(points[i + 1][1]), z=0.0)
-            )
-
-        return results
-
-    # ==================================================================================================================
-=======
->>>>>>> feature/two-robot-nav2
     # MOTION
     # ==================================================================================================================
 
