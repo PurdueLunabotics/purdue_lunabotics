@@ -146,15 +146,17 @@ PathMsg SThetaStar::createPlan(const PoseStampedMsg &start,
         continue;
       }
 
-      double los_cost =
-          getDistance(item.prev_coord.x - new_x, item.prev_coord.y - new_y) * options.driving_cost;
-      if (hasLineOfSight(item.prev_coord, Coord(new_x, new_y), los_cost)) {
-        PriorityItem queue_item(
-            &vertex_list[new_x + new_y * width], item.prev_coord,
-            vertex_list[item.prev_coord.x + item.prev_coord.y * width].cost +
-                los_cost,
-            goal_x, goal_y, current_dir, options);
-        queue.push(queue_item);
+      if (item.prev_coord.x != -1 && item.prev_coord.y != -1) {
+        double los_cost =
+            getDistance(item.prev_coord.x - new_x, item.prev_coord.y - new_y) * options.driving_cost;
+        if (hasLineOfSight(item.prev_coord, Coord(new_x, new_y), los_cost)) {
+          PriorityItem queue_item(
+              &vertex_list[new_x + new_y * width], item.prev_coord,
+              vertex_list[item.prev_coord.x + item.prev_coord.y * width].cost +
+                  los_cost,
+              goal_x, goal_y, current_dir, options);
+          queue.push(queue_item);
+        }
       }
 
       PriorityItem queue_item(
