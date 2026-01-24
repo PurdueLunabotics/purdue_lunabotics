@@ -29,6 +29,7 @@
     <arg name="autonomy" default="true" />
     <arg name="record" default="$(var real)" />
     <arg name="slam" default="true" />
+    <arg name="odom_from_sim" default="false" />
     <arg name="teensy" default="$(var real)" />
     <arg name="loginternet" default="false" />
     
