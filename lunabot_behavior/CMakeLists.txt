@@ -19,11 +19,6 @@ find_package(std_msgs REQUIRED)
 
 # 'install' nodes, so that they can be run using "ros2 run <package> <node>"
 install(PROGRAMS
-        scripts/listener.py
-        DESTINATION lib/${PROJECT_NAME})
-
-install(PROGRAMS
-        scripts/talker.py
         DESTINATION lib/${PROJECT_NAME})
         
 
