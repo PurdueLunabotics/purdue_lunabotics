@@ -2,10 +2,11 @@ apriltag:                 # node name
   ros__parameters:
     # Key Isaac ROS Parameters
     backends: "CUDA"      # Options: "CPU", "CUDA", "PVA"
-    max_tags: 64          # Maximum number of tags to detect
+    max_tags: 10          # Maximum number of tags to detect
     tile_size: 4          # Tile size for adaptive thresholding
 
     # Tag Configuration
     size: 0.19            # Tag edge size in meters
     tag_family: 36h11   # Tag family name
+
 
