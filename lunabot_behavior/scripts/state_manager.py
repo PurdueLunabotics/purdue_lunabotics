@@ -329,14 +329,14 @@ class StateManager(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = StateManager()
+    state_manager = StateManager()
 
-    rclpy.spin(minimal_subscriber)
+    rclpy.spin(state_manager)
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    minimal_subscriber.destroy_node()
+    state_manager.destroy_node()
     rclpy.shutdown()
 
 
