@@ -24,7 +24,6 @@ find_package(tf2_ros REQUIRED)
 find_package(nav2_core REQUIRED)
 find_package(nav2_costmap_2d REQUIRED)
 find_package(nav2_util REQUIRED)
-find_package(ros2_controllers REQUIRED)
 
 # uncomment the following section in order to fill in
 # further dependencies manually.

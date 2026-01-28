@@ -29,6 +29,7 @@
     <arg name="autonomy" default="true" />
     <arg name="record" default="$(var real)" />
     <arg name="slam" default="true" />
+    <arg name="odom_from_sim" default="false" />
     <arg name="teensy" default="$(var real)" />
     <arg name="loginternet" default="false" />
     
@@ -67,21 +68,6 @@
         unless="$(eval '\'4\' in $(var cams)')"/>
 
     <arg name="pointcloud"                      default="$(eval 'len($(var cams)) > 1')" />
-
-    <!-- Differential Drive Args -->
-    <arg name="diff_drive_hz"           default="20.0"/>
-    <!-- Main -->
-    <arg name="width"                   default="0.5588"    if="$(eval '$(var robot_num) == 0')"/>
-    <arg name="max_speed_percentage"    default="0.8"       if="$(eval '$(var robot_num) == 0')"/>
-    <arg name="max_speed"               default="1000"      if="$(eval '$(var robot_num) == 0')"/>
-    <arg name="wheel_diameter"          default="0.3429"    if="$(eval '$(var robot_num) == 0')"/>
-    <arg name="gearbox_ratio"           default="50.0"/>
-    <!-- Mini -->
-    <arg name="width"                   default="0.5588"    if="$(eval '$(var robot_num) == 1')"/>
-    <arg name="max_speed_percentage"    default="0.8"       if="$(eval '$(var robot_num) == 1')"/>
-    <arg name="max_speed"               default="1000"      if="$(eval '$(var robot_num) == 1')"/>
-    <arg name="wheel_diameter"          default="0.06"    if="$(eval '$(var robot_num) == 1')"/>
-    <arg name="gearbox_ratio"           default="50.0"        if="$(eval '$(var robot_num) == 1')"/>
 
     <!-- Record Args -->
     <arg name="exp_name" default="exp" />
@@ -123,8 +109,10 @@
     <node if="$(var sim)" name="manual_controller_node" pkg="lunabot_control" exec="manual_controller_node" output="screen" respawn="true">
     </node>
 
-    <node if="$(var sim)" name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true" />
-    <node if="$(var sim)" pkg="controller_manager" exec="spawner" args="-p $(find-pkg-share lunabot_config)/config/controller.yaml velocity_controller"/>
+    <node if="$(var sim)" name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true">
+            <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
+    </node>
+    <node if="$(var sim)" pkg="controller_manager" exec="spawner" args="-p $(find-pkg-share lunabot_config)/config/sim_controller.yaml velocity_controller"/>
     <node pkg="lunabot_slam" exec="map_base_node.py">
         <remap from="odom" to="$(var /ns)/rtabmap/odom"/>
         <remap from="position" to="$(var /ns)/position"/>
@@ -136,12 +124,7 @@
                 exec="differential_drive_controller_node" output="screen" respawn="true" >
             <param name="use_sim_time" value="$(var sim)"/>
 
-            <param name="width" value="$(var width)"/>
-            <param name="max_speed_percentage" value="$(var max_speed_percentage)"/>
-            <param name="hz" value="$(var diff_drive_hz)"/>
-            <param name="max_speed" value="$(var max_speed)"/>
-            <param name="wheel_diameter" value="$(var wheel_diameter)"/>
-            <param name="gearbox_ratio" value="$(var gearbox_ratio)"/>
+            <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
             
             <!-- Input -->
             <remap from="cmd_vel" to="cmd_vel"/>
@@ -190,6 +173,10 @@
 
         <let if="$(var pointcloud)" name="scan_cloud" value="$(var /ns)/pointcloud/depth_combined_cloud"/>
         <let unless="$(var pointcloud)" name="scan_cloud" value="$(var /ns)/$(var odom_cam_name)/points"/>
+
+        <let name="rtabmap_max_features" value="'0'" if="$(var odom_from_sim)"/>
+        <let name="rtabmap_max_features" value="'500'" unless="$(var odom_from_sim)"/>
+
         <node if="$(var slam)" name="rtabmap" pkg="rtabmap_slam" exec="rtabmap" output="screen" args="--delete_db_on_start" ros_args="--log-level WARN">
             <param name="use_sim_time" value="$(var sim)"/>
 
@@ -207,6 +194,7 @@
 
             <remap from="depth/image"             to="$(var /ns)/$(var odom_cam_name)/aligned_depth_to_color/image_raw"/>
             <remap from="rgb/image"               to="$(var /ns)/$(var odom_cam_name)/color/image_raw"/>
+
             <remap from="rgb/camera_info"         to="$(var /ns)/$(var odom_cam_name)/color/camera_info"/>
 
             <param name="sync_queue_size"         value="10"/>
@@ -220,6 +208,7 @@
             <param name="Grid/MaxGroundAngle"     value="'30'"/> <!-- 30 degree normal before marked as obstacle -->
             <param name="Grid/3D"                 value="'true'"/> <!-- 3D occupancy grid -->
             <param name="Grid/FromDepth"          value="'false'"/> <!-- occupancy grid from lidar -->
+            <param name="Kp/MaxFeatures"          value="$(var rtabmap_max_features)"/>
             
             <param name="database_path"           value="~/.ros/$(var ns)rtabmap.db"/>
 
@@ -246,6 +235,7 @@
 
         <node name="point_to_point_node" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="false" >
             <param name="use_sim_time" value="$(var sim)"/>
+            <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
 
             <remap from="odom" to="position"/>
             <remap from="global_path" to="nav_path"/>
