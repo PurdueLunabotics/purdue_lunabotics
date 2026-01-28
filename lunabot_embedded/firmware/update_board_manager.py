@@ -5,7 +5,7 @@ import yaml
 if __name__ == "__main__":
     # Step 4: Make the .arduino directory if it doesn't exist
     yaml_file_path = os.path.join(
-        os.path.expanduser("~"), ".arduino15/arduino-cli.yaml"
+        os.path.expanduser("~"), "AppData/Local/Arduino15/arduino-cli.yaml"
     )
 
     # Check if pyyaml is installed and import it
