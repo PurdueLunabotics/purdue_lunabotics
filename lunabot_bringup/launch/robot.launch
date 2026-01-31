@@ -112,7 +112,9 @@
     <node if="$(var sim)" name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true">
             <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
     </node>
+
     <node if="$(var sim)" pkg="controller_manager" exec="spawner" args="-p $(find-pkg-share lunabot_config)/config/sim_controller.yaml velocity_controller"/>
+
     <node pkg="lunabot_slam" exec="map_base_node.py">
         <remap from="odom" to="$(var /ns)/rtabmap/odom"/>
         <remap from="position" to="$(var /ns)/position"/>
@@ -151,8 +153,7 @@
 
         </node>
 
-        <node pkg="lunabot_slam" exec="sim_odom.py" if="$(var odom_from_sim)">
-        </node>
+        <node pkg="lunabot_slam" exec="sim_odom.py" if="$(var odom_from_sim)"/>
 
         <push_ros_namespace namespace="rtabmap"/>
 
@@ -247,16 +248,16 @@
     </group>
 
     <group if="$(var sim)">
-        <node exec="create" pkg="ros_gz_sim" args="--topic $(var entity_name)/robot_description --name $(var entity_name) -x $(var starting_x) -y 1.75
-            -z 0.0 -Y -1.570796327"/>
+        <node exec="create" pkg="ros_gz_sim" args="--topic $(var entity_name)/robot_description --name $(var entity_name) -x $(var starting_x) -y 1.75 -z 0.0 -Y -1.570796327"/>
 
-        <node name="image_bridge_cam_1_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_1_name)/color/image_raw" if="$(eval '\'1\' in $(var cams)')"/>
+        <node name="image_bridge_cam_1_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_1_name)/color/image_raw"                  if="$(eval '\'1\' in $(var cams)')"/>
         <node name="image_bridge_cam_1_depth" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_1_name)/aligned_depth_to_color/image_raw" if="$(eval '\'1\' in $(var cams)')"/>
-        <node name="image_bridge_cam_2_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_2_name)/color/image_raw" if="$(eval '\'2\' in $(var cams)')"/>
+        <node name="image_bridge_cam_2_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_2_name)/color/image_raw"                  if="$(eval '\'2\' in $(var cams)')"/>
         <node name="image_bridge_cam_2_depth" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_2_name)/aligned_depth_to_color/image_raw" if="$(eval '\'2\' in $(var cams)')"/>
-        <node name="image_bridge_cam_3_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_3_name)/color/image_raw" if="$(eval '\'3\' in $(var cams)')"/>
+        <node name="image_bridge_cam_3_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_3_name)/color/image_raw"                  if="$(eval '\'3\' in $(var cams)')"/>
         <node name="image_bridge_cam_3_depth" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_3_name)/aligned_depth_to_color/image_raw" if="$(eval '\'3\' in $(var cams)')"/>
-        <node name="image_bridge_cam_4_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_4_name)/color/image_raw" if="$(eval '\'4\' in $(var cams)')"/>
+        <node name="image_bridge_cam_4_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_4_name)/color/image_raw"                  if="$(eval '\'4\' in $(var cams)')"/>
         <node name="image_bridge_cam_4_depth" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_4_name)/aligned_depth_to_color/image_raw" if="$(eval '\'4\' in $(var cams)')"/>
     </group>
+
 </launch>
