@@ -4,6 +4,13 @@ controller_manager:
 
     velocity_controller:
       type: velocity_controllers/JointGroupVelocityController
+    excavation_controller:
+      type: position_controllers/JointGroupPositionController
+
+excavation_controller:
+  ros__parameters:
+    joints:
+      - excavation_joint
 
 mini:
   controller_manager:

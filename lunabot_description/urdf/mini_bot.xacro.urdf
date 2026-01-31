@@ -493,7 +493,7 @@
     </plugin>
 
     <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
-        <topic>joint_states</topic>
+        <topic>mini/joint_states</topic>
         <joint_name>left_front_rev</joint_name>
         <joint_name>left_back_rev</joint_name>
         <joint_name>right_front_rev</joint_name>

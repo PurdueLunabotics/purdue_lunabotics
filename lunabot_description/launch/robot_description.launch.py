@@ -31,7 +31,7 @@ def launch_setup(context):
             executable='joint_state_publisher',
             name='joint_state_publisher',
             namespace=entity_name,
-        parameters=[{'frame_prefix': ns, 'use_sim_time': True, 'robot_description': Command(['xacro ', robot_desc_path, ' robot_name:=', entity_name])}],
+            parameters=[{'frame_prefix': ns, 'use_sim_time': True, 'robot_description': Command(['xacro ', robot_desc_path, ' robot_name:=', entity_name]), 'source_list': [f"{ns}/joint_states"]}],
         output="screen"
     )
     
