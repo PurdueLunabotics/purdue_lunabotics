@@ -33,12 +33,14 @@ class SThetaStarPlanner : public nav2_core::GlobalPlanner {
     nav2_util::declare_parameter_if_not_declared(node, name + ".traversal_cost", rclcpp::ParameterValue(20.0));
     nav2_util::declare_parameter_if_not_declared(node, name + ".node_cost", rclcpp::ParameterValue(2.0));
     nav2_util::declare_parameter_if_not_declared(node, name + ".costmap_exponential", rclcpp::ParameterValue(2.0));
+    nav2_util::declare_parameter_if_not_declared(node, name + ".max_goal_adjustment_meters", rclcpp::ParameterValue(0.75));
 
     node->get_parameter(name + ".turning_cost", options.turning_cost);
     node->get_parameter(name + ".driving_cost", options.driving_cost);
     node->get_parameter(name + ".traversal_cost", options.traversal_cost);
     node->get_parameter(name + ".node_cost", options.node_cost);
     node->get_parameter(name + ".costmap_exponential", options.costmap_exponential);
+    node->get_parameter(name + ".max_goal_adjustment_meters", options.max_goal_adjustment_meters);
 
     algorithm = std::make_unique<SThetaStar>(costmap_ros->getCostmap(), costmap_ros->getGlobalFrameID(), options);
   }
@@ -90,6 +92,14 @@ class SThetaStarPlanner : public nav2_core::GlobalPlanner {
             options.costmap_exponential = param.as_double();
           } else {
             result.reason = "Invalid type for costmap exponential param";
+            result.successful = false;
+            return result;
+          }
+        } else if (param.get_name() == name + ".max_goal_adjustment_meters") {
+          if (param.get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE) {
+            options.max_goal_adjustment_meters = param.as_double();
+          } else {
+            result.reason = "Invalid type for max goal adjustment meters";
             result.successful = false;
             return result;
           }

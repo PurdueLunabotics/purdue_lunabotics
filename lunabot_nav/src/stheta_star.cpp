@@ -105,11 +105,13 @@ PathMsg SThetaStar::retracePath(Vertex vertex) {
 }
 
 PathMsg SThetaStar::createPlan(const PoseStampedMsg &start,
-                               const PoseStampedMsg &goal) {
+                               const PoseStampedMsg &originalGoal) {
   if (costmap->getSizeInCellsX() != width ||
       costmap->getSizeInCellsY() != height) {
     updateVertexList();
   }
+
+  auto goal = moveGoal(start, originalGoal);
 
   if (has_prev && prev_goal == goal && !prev_path.poses.empty()) {
     prev_path.poses[0] = start;
@@ -320,4 +322,82 @@ double SThetaStar::calculatePathCost(PathMsg path) {
   }
 
   return cost;
+}
+
+PoseStampedMsg SThetaStar::moveGoal(PoseStampedMsg start, PoseStampedMsg goal) {
+    PoseStampedMsg newGoal;
+    int x, y;
+    this->costmap->worldToMapEnforceBounds(goal.pose.position.x, goal.pose.position.y, x, y);
+    Coord initial = {x, y};
+    this->costmap->worldToMapEnforceBounds(start.pose.position.x, start.pose.position.y, x, y);
+    Coord end = {x, y};
+
+    Coord current = initial;
+    int distance_x = abs(initial.x - end.x);
+    int distance_y = abs(initial.y - end.y);
+
+    int divisor = std::gcd(distance_x, distance_y);
+    int dx = (end.x - initial.x) / divisor;
+    int dy = (end.y - initial.y) / divisor;
+
+    int x_increment = 0;
+    if (distance_x != 0) {
+      x_increment = (end.x - current.x) / distance_x;
+    }
+    int y_increment = 0;
+    if (distance_y != 0) {
+      y_increment = (end.y - current.y) / distance_y;
+    }
+
+    if (distance_x > distance_y) {
+      while (isBlocked(current) && getDistance(current.x - initial.x, current.y - initial.y) * costmap->getResolution() < options.max_goal_adjustment_meters) {
+        current.x += x_increment;
+        int target_y = dy * (current.x - initial.x) / dx + initial.y;
+        if (target_y != current.y) {
+          current.y += y_increment;
+        }
+      }
+    } else {
+      while (isBlocked(current) && getDistance(current.x - initial.x, current.y - initial.y) * costmap->getResolution() < options.max_goal_adjustment_meters) {
+        current.y += y_increment;
+        int target_x = dx * (current.y - initial.y) / dy + initial.x;
+        if (target_x != current.x) {
+          current.x += x_increment;
+        }
+      }
+    }
+
+    newGoal.header = goal.header;
+    newGoal.pose.orientation = goal.pose.orientation;
+    newGoal.pose.position = goal.pose.position;
+
+    for (unsigned int i = 0; i < width * height; i++) {
+      vertex_list[i].visited = false;
+    }
+
+
+    std::queue<Coord> queue;
+    queue.push(current);
+    while (!queue.empty()) {
+      if (!isBlocked(queue.front())) {
+        this->costmap->mapToWorld(queue.front().x, queue.front().y, newGoal.pose.position.x, newGoal.pose.position.y);
+        break;
+      }
+
+      Coord offsets[4] = {{-1, 0}, {1, 0}, {0, 1}, {0, -1}};
+      for (auto offset : offsets) {
+        Coord new_coord = {queue.front().x + offset.x, queue.front().y + offset.y};
+        if (new_coord.x < 0 || new_coord.x >= (int) width || new_coord.y < 0 || new_coord.y >= (int) height) {
+          continue;
+        }
+        if (!vertex_list[new_coord.x + new_coord.y * width].visited) {
+          queue.push(new_coord);
+          vertex_list[new_coord.x + new_coord.y * width].visited = true;
+        }
+      }
+
+      queue.pop();
+    }
+
+    return newGoal;
 }
