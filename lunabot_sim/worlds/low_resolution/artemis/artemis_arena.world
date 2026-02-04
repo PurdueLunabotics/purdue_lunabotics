@@ -432,7 +432,7 @@
         <visual name='tag_36_11_00007'>
           <geometry>
             <box>
-              <size>0.3 0.3 0.005</size>
+              <size>0.238125 0.238125 0.005</size>
             </box>
           </geometry>
           <material>
@@ -450,7 +450,7 @@
         <collision name='tag_36_11_00007_collision'>
           <geometry>
             <box>
-              <size>0.3 0.3 0.005</size>
+              <size>0.238125 0.238125 0.005</size>
             </box>
           </geometry>
         </collision>
@@ -464,7 +464,7 @@
         <visual name='tag_36_11_00011'>
           <geometry>
             <box>
-              <size>0.3 0.3 0.005</size>
+              <size>0.238125 0.238125 0.005</size>
             </box>
           </geometry>
           <material>
@@ -482,7 +482,7 @@
         <collision name='tag_36_11_00011_collision'>
           <geometry>
             <box>
-              <size>0.3 0.3 0.005</size>
+              <size>0.238125 0.238125 0.005</size>
             </box>
           </geometry>
         </collision>

@@ -2,120 +2,42 @@
 <launch>
   <set_parameter name="use_sim_time" value="true" /> <!-- Use time from Gazebo (will break without this)-->
 
-  <!-- Set the arena to either KSC or UCF arena based on the boolean argument. -->
-  <arg name="KSC_arena" default="true"/>
-
+  <arg name="two_bots" default="false"/>
   <!-- Should we use Point To Point or Pure pursuit -->
-  <arg name="ptp" default="true"/>
 
   <arg name="gui" default="true"/>
+  <arg name="odom_from_sim" default="false" />
 
-  <!-- Values for arena world (Nasa is KSC, UCF is not.) The above boolean argument changes 
-  what arg is passed to the launch file below (therefore, there are two duplicate launch files)
-  $(find lunabot_sim)/worlds/arena_nasa.world
-  $(find lunabot_sim)/worlds/arena_ucf.world -->
+  <executable cmd="pkill -9 ruby" />
 
-  <arg name="initial_pose" default="-x 1.0 -y -1.3 -z 0"/>
-  <!-- <arg name="model" default="$(find dummy_bot_description)/urdf/dummy_bot.xacro"/> -->
+  
+  <arg default="$(find-pkg-share lunabot_config)/config/sim.rviz" name="rvizconfig"/>
+  <arg default="$(find-pkg-share lunabot_config)/config/mini_sim.rviz" name="minirvizconfig"/>
+  <node args="-d $(var rvizconfig)" name="rviz" pkg="rviz2" exec="rviz2" />
+  <node if="$(var two_bots)" args="-d $(var minirvizconfig)" name="rviz" pkg="rviz2" exec="rviz2" />
 
   <include if="$(var gui)" file="$(find-pkg-share lunabot_sim)/launch/gazebo.launch.py"/>
   <include unless="$(var gui)" file="$(find-pkg-share lunabot_sim)/launch/gazebo_no_gui.launch.py"/>
+  
 
-  <arg default="$(find-pkg-share lunabot_config)/config/sim.rviz" name="rvizconfig"/>
-  <node args="-d $(var rvizconfig)" name="rviz" pkg="rviz2" exec="rviz2" />
+  <node name="joy_node" pkg="joy" exec="joy_node" output="screen" respawn="true" namespace="mini">
+    <param name="device_id" value="1" />
+  </node>
 
-  <!-- cameras -->
-  <include file="$(find-pkg-share lunabot_perception)/launch/sim_cameras.launch"/>
+  <node if="$(var two_bots)" name="joy_node" pkg="joy" exec="joy_node" output="screen" respawn="true" namespace="">
+    <param name="device_id" value="0" />
+  </node>
 
-  <!-- navigation -->
-  <group>
-    <push_ros_namespace namespace="nav"/>
-    <node name="global_planner_node" pkg="lunabot_nav" exec="dstar_node" output="screen" respawn="true">
-      <param name="use_sim_time" value="true"/>
-    </node>
-
-    <!-- Path followers- Point to point or Pure pursuit -->
-    <node name="point_to_point_node" if="$(var ptp)" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="false" >
-      <param name="use_sim_time" value="true"/>
-    </node>
-  </group>
-
-  <group>
-    <node name="differential_drive_controller_node" pkg="lunabot_control" exec="differential_drive_controller_node" output="screen" respawn="true" >
-    </node>
-
-    <node name="effort_factory_node" pkg="lunabot_control" exec="effort_factory_node" output="screen" respawn="true" >
-    </node>
-
-    <node name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true" >
-    </node>
-
-    <node name="manual_controller_node" pkg="lunabot_control" exec="manual_controller_node" output="screen" respawn="true" >
-    </node>
-
-    <node name="joystick_node" pkg="joy" exec="joy_node" output="screen" respawn="true" >
-    </node>
-  </group>
-
-  <!-- mapping -->
-  <group>
-    <node name="costmap" pkg="nav2_costmap_2d" exec="nav2_costmap_2d" output="screen" namespace="costmap">
-      <param from="$(find-pkg-share lunabot_config)/config/global_costmap.yml"/>
-      <remap from="costmap" to="/maps/costmap_node/global_costmap/costmap"/>
-      <remap from="costmap_updates" to="/maps/costmap_node/global_costmap/costmap_updates"/>
-      <param name="use_sim_time" value="true"/>
-    </node>
-    <node name="costmap_lifecycle" pkg="nav2_lifecycle_manager" exec="lifecycle_manager" namespace="costmap" output="screen">
-      <param name="autostart" value="true"/>
-      <param name="node_names" value="costmap" value-sep=";"/>
-      <param name="use_sim_time" value="true"/>
-    </node>
-  </group>
-
-  <group>
-    <push_ros_namespace namespace="rtabmap"/>
-
-    <!-- Odometry -->
-    <node pkg="rtabmap_odom" exec="rgbd_odometry" output="log" name="rgbd_odometry" ros_args="--log-level WARN">
-      <param name="subscribe_depth"     value="true"/>
-      <param name="frame_id"            value="base_link"/>
-      <param name="Odom/ResetCountdown" value="'1'"/>
-      <param name="use_sim_time" value="true"/>
-
-
-      <remap from="depth/image"         to="/d455_front/depth/image_raw"/>
-      <remap from="rgb/image"           to="/d455_front/color/image_raw"/>
-      <remap from="rgb/camera_info"     to="/d455_front/color/camera_info"/>
-    </node>
-
-    <node name="rtabmap" pkg="rtabmap_slam" exec="rtabmap" output="log" args="--delete_db_on_start" ros_args="--log-level WARN">
-      <param name="frame_id"                value="base_link"/>
-      <param name="use_sim_time" value="true"/>
-
-      <param name="subscribe_rgb"           value="false"/>
-      <param name="subscribe_depth"         value="false"/>
-      <param name="subscribe_rgbd"          value="false"/>
-      <param name="subscribe_scan_cloud"    value="true"/>
-
-      <remap from="odom"                    to="odom"/>
-      <remap from="scan_cloud"              to="/pointcloud/depth_combined_cloud"/>
-
-      <param name="gen_scan"                value="true"/>
-
-      <param name="sync_queue_size"              value="10"/>
-      <param name="approx_sync"             value="true"/>
-      <param name="map_always_update"       value="true"/>
-
-      <!-- RTAB-Map's parameters -->
-      <param name="Grid/Sensor"             value="'0'"/> <!-- Only use point clouds-->
-      <param name="Grid/FootprintLength"    value="'1.0'"/>
-      <param name="Grid/FootprintWidth"     value="'0.75'"/> 
-      <param name="Grid/MaxGroundAngle"     value="'30'"/> <!-- 30 degree normal before marked as obstacle -->
-      <param name="Grid/3D"                 value="'true'"/> <!-- 3D occupancy grid -->
-      <param name="Grid/FromDepth"          value="'false'"/> <!-- occupancy grid from lidar -->
-      
-    </node>
-
-    <node name="map_base_node" pkg="lunabot_slam" exec="map_base_node.py" output="screen" respawn="false"/>
-  </group>
+  <include file="$(find-pkg-share lunabot_bringup)/launch/robot.launch">
+    <arg name="sim" value="true"/>
+    <arg name="robot_num" value="0"/>
+    <arg name="entity_name" value="dummy_bot"/>
+    <arg name="odom_from_sim" value="$(var odom_from_sim)"/>
+  </include>
+  <include if="$(var two_bots)" file="$(find-pkg-share lunabot_bringup)/launch/robot.launch">
+    <arg name="sim" value="true"/>
+    <arg name="robot_num" value="1"/>
+    <arg name="entity_name" value="mini_bot"/>
+    <arg name="odom_from_sim" value="$(var odom_from_sim)"/>
+  </include>
 </launch>

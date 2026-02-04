@@ -98,14 +98,14 @@ class ManualController(Node):
         self._autonomy_sub = self.create_subscription(Bool, "/autonomy", self._autonomy_cb, 1)
         self._autonomy_pub = self.create_publisher(Bool, "/autonomy", 10)
 
-        self.joy_subscriber = self.create_subscription(Joy, "/joy", self.joy_callback, 1)
+        self.joy_subscriber = self.create_subscription(Joy, "joy", self.joy_callback, 1)
         self.effort_publisher = self.create_publisher(RobotEffort, "effort", 10)
         self.effort_msg = RobotEffort()
 
         self.last_joy = Joy()
         self.last_joy.buttons = [0,0,0,0,0,0,0,0,0,0,0]
 
-        self.led_publisher = self.create_publisher(Int32, "/led_color", 10);
+        self.led_publisher = self.create_publisher(Int32, "led_color", 10);
 
         self.driving_mode = "Forwards"
         

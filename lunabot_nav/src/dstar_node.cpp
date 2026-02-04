@@ -32,13 +32,12 @@ public:
 
     // rclcpp::QoS *qos = new rclcpp::QoS(rclcpp::KeepAll());
     int qos = 10;
-    // odom_topic = "/rtabmap/odom";
-    odom_topic = "/rtabmap/position";
-    goal_topic = "/goal";
-    map_topic = "/maps/costmap_node/global_costmap/costmap";
-    map_update_topic = "/maps/costmap_node/global_costmap/costmap_updates";
+    odom_topic = "odom";
+    goal_topic = "goal";
+    map_topic = "costmap";
+    map_update_topic = "costmap_updates";
     path_sampling_rate = 5;
-    path_topic = "/nav/global_path";
+    path_topic = "global_path";
     occupancy_threshold = 50;
 
     int frequency = 3; // hz
@@ -48,8 +47,8 @@ public:
     auto odom_sub = node->create_subscription<geometry_msgs::msg::PoseStamped>(odom_topic, qos, std::bind(&DstarNode::position_callback, this, _1));
     auto goal_sub = node->create_subscription<geometry_msgs::msg::PoseStamped>(goal_topic, qos, std::bind(&DstarNode::goal_callback, this, _1));
     path_pub = node->create_publisher<nav_msgs::msg::Path>(path_topic, 10);
-    auto planning_enabled_subscriber = node->create_subscription<std_msgs::msg::Bool>("/nav/planning_enabled", qos, std::bind(&DstarNode::enable_callback, this, _1));
-    auto costmap_enabled_subscriber = node->create_subscription<std_msgs::msg::Bool>("/costmap_enabled", qos, std::bind(&DstarNode::costmap_enabled_callback, this, _1));
+    auto planning_enabled_subscriber = node->create_subscription<std_msgs::msg::Bool>("planning_enabled", qos, std::bind(&DstarNode::enable_callback, this, _1));
+    auto costmap_enabled_subscriber = node->create_subscription<std_msgs::msg::Bool>("costmap_enabled", qos, std::bind(&DstarNode::costmap_enabled_callback, this, _1));
 
     rclcpp::Rate rate(frequency);
     while (rclcpp::ok())
@@ -146,7 +145,7 @@ private:
   // Updates the map given a new occupancy grid.Update the flag such that dstar will update the map.
   void grid_callback(const nav_msgs::msg::OccupancyGrid &data)
   {
-    // RCLCPP_INFO(node->get_logger(), "Got Grid");
+    // RCLCPP_DEBUG(node->get_logger(), "Got Grid");
     map_lock.lock();
 
     bool map_ok = false;
@@ -192,7 +191,7 @@ private:
   // Update the grid given the occupancy grid update (applied on top of the current grid). Also update the flag for dstar to update the map.
   void grid_update_callback(const map_msgs::msg::OccupancyGridUpdate &data)
   {
-    // RCLCPP_INFO(node->get_logger(), "Got Grid Update");
+    // RCLCPP_DEBUG(node->get_logger(), "Got Grid Update");
     map_lock.lock();
 
     bool map_ok = false;
@@ -231,7 +230,7 @@ private:
 
   void position_callback(const geometry_msgs::msg::PoseStamped &data)
   {
-    // RCLCPP_INFO(node->get_logger(), "Got Pose");
+    // RCLCPP_DEBUG(node->get_logger(), "Got Pose");
     pose.x = data.pose.position.x;
     pose.y = data.pose.position.y;
     pose_init = true;
