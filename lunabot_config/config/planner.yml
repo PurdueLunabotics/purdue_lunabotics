@@ -5,7 +5,7 @@ global_costmap:
       global_frame: "map"
       robot_base_frame: "base_link"
       robot_radius: 0.2
-      plugins: ["static_layer", "inflation_layer"]
+      plugins: ["static_layer", "denoise_layer", "inflation_layer"]
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_topic: "/rtabmap/octomap_grid"
@@ -13,6 +13,11 @@ global_costmap:
         map_subscribe_transient_local: false
         subscribe_to_updates: true
         transform_tolerance: 0.1
+      denoise_layer:
+        plugin: "nav2_costmap_2d::DenoiseLayer"
+        enabled: true
+        minimal_group_size: 2
+        group_connectivity_type: 4 # 4 is adjacent, 8 includes diagonals
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         enabled: true
@@ -35,7 +40,7 @@ mini:
         global_frame: "minimap"
         robot_base_frame: "minibase_link"
         robot_radius: 0.2
-        plugins: ["static_layer", "inflation_layer"]
+        plugins: ["static_layer", "denoise_layer", "inflation_layer"]
         static_layer:
           plugin: "nav2_costmap_2d::StaticLayer"
           map_topic: "/mini/rtabmap/octomap_grid"
@@ -43,6 +48,11 @@ mini:
           map_subscribe_transient_local: false
           subscribe_to_updates: true
           transform_tolerance: 0.1
+        denoise_layer:
+          plugin: "nav2_costmap_2d::DenoiseLayer"
+          enabled: true
+          minimal_group_size: 2
+          group_connectivity_type: 4 # 4 is adjacent, 8 includes diagonals
         inflation_layer:
           plugin: "nav2_costmap_2d::InflationLayer"
           enabled: true

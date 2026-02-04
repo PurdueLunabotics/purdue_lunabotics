@@ -65,19 +65,20 @@
       <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
       <cylinder radius="0.2" length="0.125"/>
       </geometry>
-      <!-- <surface> -->
-        <!-- <friction> -->
-          <!-- <ode> -->
-            <!-- <mu>0.01</mu> -->
-            <!-- <mu2>0.01</mu2> -->
-          <!-- </ode> -->
-        <!-- </friction> -->
-      <!-- </surface> -->
+      <surface>
+        <friction>
+          <ode>
+            <mu>1</mu>
+            <mu2>1</mu2>
+            <fdir1>1 0 0</fdir1>
+          </ode>
+        </friction>
+      </surface>
     </collision>
   </link>
 
   <joint name="left_front_rev" type="continuous">
-    <origin rpy="0 0 0" xyz="0.3302 0.254 0.1778"/>
+    <origin rpy="0 0 0" xyz="0.3302 0.254 0.178"/>
     <parent link="base_link"/>
     <child link="left_front"/>
     <axis xyz="0 1 0"/>
@@ -110,14 +111,15 @@
       <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
       <cylinder radius="0.2" length="0.125"/>
       </geometry>
-      <!-- <surface> -->
-        <!-- <friction> -->
-          <!-- <ode> -->
-            <!-- <mu>0.01</mu> -->
-            <!-- <mu2>0.01</mu2> -->
-          <!-- </ode> -->
-        <!-- </friction> -->
-      <!-- </surface> -->
+      <surface>
+        <friction>
+          <ode>
+            <mu>1</mu>
+            <mu2>1</mu2>
+            <fdir1>1 0 0</fdir1>
+          </ode>
+        </friction>
+      </surface>
     </collision>
   </link>
 
@@ -155,14 +157,15 @@
       <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
       <cylinder radius="0.2" length="0.125"/>
       </geometry>
-      <!-- <surface> -->
-        <!-- <friction> -->
-          <!-- <ode> -->
-            <!-- <mu>0.01</mu> -->
-            <!-- <mu2>0.01</mu2> -->
-          <!-- </ode> -->
-        <!-- </friction> -->
-      <!-- </surface> -->
+      <surface>
+        <friction>
+          <ode>
+            <mu>1</mu>
+            <mu2>1</mu2>
+            <fdir1>1 0 0</fdir1>
+          </ode>
+        </friction>
+      </surface>
     </collision>
   </link>
 
@@ -200,14 +203,15 @@
       <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
       <cylinder radius="0.2" length="0.125"/>
       </geometry>
-      <!-- <surface> -->
-        <!-- <friction> -->
-          <!-- <ode> -->
-            <!-- <mu>0.01</mu> -->
-            <!-- <mu2>0.01</mu2> -->
-          <!-- </ode> -->
-        <!-- </friction> -->
-      <!-- </surface> -->
+      <surface>
+        <friction>
+          <ode>
+            <mu>1</mu>
+            <mu2>1</mu2>
+            <fdir1>1 0 0</fdir1>
+          </ode>
+        </friction>
+      </surface>
     </collision>
   </link>
 
