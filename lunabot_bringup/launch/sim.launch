@@ -6,7 +6,7 @@
   <!-- Should we use Point To Point or Pure pursuit -->
 
   <arg name="gui" default="true"/>
-  <arg name="odom_from_sim" default="false" />
+  <arg name="odom_from_sim" default="true" />
 
   <executable cmd="pkill -9 ruby" />
 
