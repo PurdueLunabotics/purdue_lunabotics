@@ -80,33 +80,33 @@ Visualization Manager:
           Value: true
         middle_link:
           Value: true
-        minibase_link:
+        mini/base_link:
           Value: true
-        minid455_back_depth_link:
+        mini/d455_back_depth_link:
           Value: true
-        minid455_back_link:
+        mini/d455_back_link:
           Value: true
-        minid455_back_rgb_link:
+        mini/d455_back_rgb_link:
           Value: true
-        minid455_front_depth_link:
+        mini/d455_front_depth_link:
           Value: true
-        minid455_front_link:
+        mini/d455_front_link:
           Value: true
-        minid455_front_rgb_link:
+        mini/d455_front_rgb_link:
           Value: true
-        minileft_back:
+        mini/left_back:
           Value: true
-        minileft_front:
+        mini/left_front:
           Value: true
-        minimap:
+        mini/map:
           Value: true
-        minimiddle_link:
+        mini/middle_link:
           Value: true
-        miniodom:
+        mini/odom:
           Value: true
-        miniright_back:
+        mini/right_back:
           Value: true
-        miniright_front:
+        mini/right_front:
           Value: true
         odom:
           Value: true
@@ -120,28 +120,28 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
-        minimap:
+        mini/map:
           {}
-        miniodom:
-          minibase_link:
-            minimiddle_link:
-              minid455_back_link:
-                minid455_back_depth_link:
+        mini/odom:
+          mini/base_link:
+            mini/middle_link:
+              mini/d455_back_link:
+                mini/d455_back_depth_link:
                   {}
-                minid455_back_rgb_link:
+                mini/d455_back_rgb_link:
                   {}
-              minid455_front_link:
-                minid455_front_depth_link:
+              mini/d455_front_link:
+                mini/d455_front_depth_link:
                   {}
-                minid455_front_rgb_link:
+                mini/d455_front_rgb_link:
                   {}
-              minileft_back:
+              mini/left_back:
                 {}
-              minileft_front:
+              mini/left_front:
                 {}
-              miniright_back:
+              mini/right_back:
                 {}
-              miniright_front:
+              mini/right_front:
                 {}
       Update Interval: 0
       Value: true
@@ -324,7 +324,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: miniodom
+    Fixed Frame: mini/map
     Frame Rate: 30
   Name: root
   Tools:

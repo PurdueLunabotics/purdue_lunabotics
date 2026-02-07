@@ -16,6 +16,8 @@ class MapBase(Node):
         super().__init__("map_base_node")
 
         ns = self.get_namespace().lstrip('/')
+        if len(ns) != 0:
+            ns = ns + '/';
 
         # transform we're looking for is from base link back to map
         self.from_frame_rel = f"{ns}base_link"

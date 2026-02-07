@@ -28,6 +28,8 @@
 
   <let name="/ns" if="$(eval 'len(\'$(var ns)\') > 0')" value="/$(var ns)"/>
   <let name="/ns" unless="$(eval 'len(\'$(var ns)\') > 0')" value=""/>
+  <let name="ns/" if="$(eval 'len(\'$(var ns)\') > 0')" value="$(var ns)/"/>
+  <let name="ns/" unless="$(eval 'len(\'$(var ns)\') > 0')" value=""/>
 
   <group if="$(eval '\'1\' in $(var cams)')">
     <group unless="$(var sim)">
@@ -243,7 +245,7 @@
       <remap from="combined_cloud" to="depth_combined_cloud"/>       
       <param name="count" value="$(eval 'len($(var cams))')"/>
       <param name="xyz_output" value="true"/>
-      <param name="fixed_frame_id" value="$(var ns)base_link" />
+      <param name="fixed_frame_id" value="$(var ns/)base_link" />
       <param name="approx_sync" value="true"/>
     </node>
   </group>

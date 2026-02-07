@@ -37,8 +37,8 @@ mini:
     global_costmap:
       ros__parameters:
         publish_frequency: 30.0
-        global_frame: "minimap"
-        robot_base_frame: "minibase_link"
+        global_frame: "mini/map"
+        robot_base_frame: "mini/base_link"
         robot_radius: 0.2
         plugins: ["static_layer", "denoise_layer", "inflation_layer"]
         static_layer:

@@ -16,7 +16,7 @@ def launch_setup(context):
     robot_desc_path = os.path.join(get_package_share_directory(package_description), "urdf", xacro_file)
     ns = nsConfig.perform(context)
     if (len(ns) > 0):
-        ns = "/" + ns
+        ns = ns + "/"
     robot_state_publisher_node = Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
