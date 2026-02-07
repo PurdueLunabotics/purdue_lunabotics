@@ -77,6 +77,8 @@ Visualization Manager:
           Value: false
         deposition_apriltag_link:
           Value: true
+        excavation:
+          Value: true
         left_back:
           Value: true
         left_front:
@@ -108,11 +110,6 @@ Visualization Manager:
                 d455_back_rgb_link:
                   tag36h11:11:
                     {}
-              d455_front_link:
-                d455_front_depth_link:
-                  {}
-                d455_front_rgb_link:
-                  {}
               deposition_apriltag_link:
                 {}
               left_back:
@@ -120,7 +117,12 @@ Visualization Manager:
               left_front:
                 {}
               middle_link:
-                {}
+                excavation:
+                  d455_front_link:
+                    d455_front_depth_link:
+                      {}
+                    d455_front_rgb_link:
+                      {}
               right_back:
                 {}
               right_front:
@@ -338,18 +340,18 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.6482949256896973
-        Y: 0.8359774351119995
-        Z: 0.2350912094116211
+        X: 0.7562789916992188
+        Y: 0.4891897141933441
+        Z: 0.0006925258785486221
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.985397458076477
+      Pitch: 0.5703975558280945
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.22040057182312
+      Yaw: 4.925400733947754
     Saved: ~
 Window Geometry:
   Displays:
@@ -367,5 +369,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1034
-  X: 784
-  Y: 37
+  X: 752
+  Y: 5

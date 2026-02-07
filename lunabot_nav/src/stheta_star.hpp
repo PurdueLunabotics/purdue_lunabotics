@@ -34,12 +34,12 @@ struct Vertex {
 
 struct PriorityItem {
   Vertex *vertex = nullptr;
-  Coord prev_coord;
+  Vertex *prev_vertex = nullptr;
   double cost;
   double heuristic_cost;
 
-  PriorityItem(Vertex *vertex, Coord prev_coord, double cost, int goal_x,
-               int goal_y, double prev_dir, Options options);
+  PriorityItem(Vertex *vertex, Vertex *prev_vertex, double cost, int goal_x,
+               int goal_y, Options options);
 
   bool operator>(const PriorityItem &other) const;
 };
@@ -50,6 +50,10 @@ class SThetaStar {
     std::string frame_id;
     rclcpp::Logger logger;
     Options options;
+    bool has_prev;
+    PathMsg prev_path;
+    PoseStampedMsg prev_goal;
+    double prev_cost;
 
     std::vector<Vertex> vertex_list;
     unsigned int width;
@@ -65,10 +69,11 @@ class SThetaStar {
     void updateVertexList();
     PathMsg retracePath(Vertex vertex);
     double getDistance(double dx, double dy);
-    double getCost(Coord coord) const;
+    double getCostmapCost(Coord coord) const;
     double getTraversalCost(Coord coord);
     bool isBlocked(Coord coord);
     bool hasLineOfSight(Coord initial, Coord end, double &cost);
+    double calculatePathCost(PathMsg path);
 };
 
 #endif
