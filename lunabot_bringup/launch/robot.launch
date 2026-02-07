@@ -25,6 +25,10 @@
     <let name="starting_x" if="$(eval '$(var robot_num) == 0')" value="2.5"/>
 
 
+    <let name="entity_name" if="$(eval '$(var robot_num) == 1')" value="mini_bot"/>
+    <let name="entity_name" if="$(eval '$(var robot_num) == 0')" value="dummy_bot"/>
+
+
     <!-- What to Launch Args -->
     <arg name="autonomy" default="true" />
     <arg name="record" default="$(var real)" />
