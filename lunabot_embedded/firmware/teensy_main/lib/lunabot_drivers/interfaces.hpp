@@ -122,7 +122,7 @@ class HX711_Bus {
 public:
   HX711_Bus() {};
   static void init();
-  static float read_scale(uint8_t id);
+  static std::pair<long, long> read_scale(uint8_t id);
 
 private:
   static constexpr int NUM_SENSORS = 2;
@@ -132,6 +132,19 @@ private:
                                                            20120.0f}; // TODO, calibrate these
 
   static HX711 encs[NUM_SENSORS];
+};
+
+class Encoder_Bus {
+public:
+  Encoder_Bus() {};
+  static void init();
+  static long read(uint8_t id);
+
+private:
+  static constexpr int NUM_ACTUATORS = 2;
+  static constexpr int PIN_LIST[NUM_ACTUATORS * 2] = {6, 7, 8, 9};
+
+  static Encoder encs[NUM_ACTUATORS];
 };
 
 #endif

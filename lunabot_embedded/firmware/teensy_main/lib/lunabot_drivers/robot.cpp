@@ -1,3 +1,4 @@
+#include "interfaces.hpp"
 #include <robot.hpp>
 
 // sensor wire documentation 2022-2023:
@@ -11,17 +12,23 @@ namespace actuation {
 
 Sabertooth_MotorCtrl act_right_mtr{&MC1, STMotor::M1};
 Sabertooth_MotorCtrl act_left_mtr{&MC1, STMotor::M2};
+Encoder_Bus enc_bus;
 
 constexpr uint8_t ACT_RIGHT_CURR_MUX = 0;
 constexpr uint8_t ACT_LEFT_CURR_MUX = 2;
 
-void update(float &act_right_curr) {
+void update(float &act_right_curr, long &lin_enc_0, long &lin_enc_1) {
   act_right_curr = ADS1119_Current_Bus::read(ACT_RIGHT_CURR_MUX);
+  lin_enc_0 = enc_bus.read(0);
+  lin_enc_1 = enc_bus.read(1);
 }
 
-void cb(int8_t lin_act_volt) {
+void cb(int8_t lin_act_volt, uint8_t should_zero_act_pos) {
   act_left_mtr.write(-lin_act_volt);
   act_right_mtr.write(lin_act_volt);
+  if (should_zero_act_pos) {
+    enc_bus.init(); // zeros the actuator position
+  }
 }
 
 } // namespace actuation

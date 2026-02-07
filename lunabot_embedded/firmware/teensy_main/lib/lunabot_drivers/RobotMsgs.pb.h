@@ -22,6 +22,8 @@ typedef struct _RobotSensors {
     float drive_left_vel;
     float drive_right_vel;
     float exc_vel;
+    long act_left_pos;
+    long act_right_pos;
 } RobotSensors;
 
 typedef struct _RobotEffort {
@@ -31,6 +33,7 @@ typedef struct _RobotEffort {
     int32_t excavate;
     int32_t deposit;
     bool should_reset;
+    bool should_zero_act_pos;
     int32_t led_color;
 } RobotEffort;
 
@@ -42,7 +45,7 @@ extern "C" {
 /* Initializer values for message structs */
 #define RobotSensors_init_default                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 #define RobotEffort_init_default                 {0, 0, 0, 0, 0, 0, 0}
-#define RobotSensors_init_zero                   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define RobotSensors_init_zero                   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 #define RobotEffort_init_zero                    {0, 0, 0, 0, 0, 0, 0}
 
 /* Field tags (for use in manual encoding/decoding) */

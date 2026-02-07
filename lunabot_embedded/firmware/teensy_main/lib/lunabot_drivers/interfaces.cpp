@@ -1,4 +1,6 @@
 #include "interfaces.hpp"
+#include "ADS1119.h"
+#include "wiring.h"
 
 // Sabertooth MC Interfacing
 
@@ -293,3 +295,21 @@ float HX711_Bus::read_scale(uint8_t id) {
   }
   FastLED.show();
 }
+
+Encoder Encoder_Bus::encs[NUM_ACTUATORS] = {
+    Encoder(PIN_LIST[0], PIN_LIST[1]),
+    Encoder(PIN_LIST[2], PIN_LIST[3]),
+};
+
+void Encoder_Bus::init() {
+  for (int i = 0; i < NUM_ACTUATORS; i++) {
+    encs[i].write(0);
+  }
+}
+
+long Encoder_Bus::read(uint8_t id) {
+  // returns the count since last read, and resets the count to 0
+  long val = encs[id].read();
+  return val;
+}
+
