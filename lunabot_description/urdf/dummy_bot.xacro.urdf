@@ -98,8 +98,9 @@
       <surface>
         <friction>
           <ode>
-            <mu>0.3</mu>
-            <mu2>0.1</mu2>
+            <mu>1</mu>
+            <mu2>1</mu2>
+            <fdir1>1 0 0</fdir1>
           </ode>
         </friction>
       </surface>
@@ -107,7 +108,7 @@
   </link>
 
   <joint name="left_front_rev" type="continuous">
-    <origin rpy="0 0 0" xyz="0.3302 0.254 0.1778"/>
+    <origin rpy="0 0 0" xyz="0.3302 0.254 0.178"/>
     <parent link="base_link"/>
     <child link="left_front"/>
     <axis xyz="0 1 0"/>
@@ -141,8 +142,9 @@
       <surface>
         <friction>
           <ode>
-            <mu>0.3</mu>
-            <mu2>0.1</mu2>
+            <mu>1</mu>
+            <mu2>1</mu2>
+            <fdir1>1 0 0</fdir1>
           </ode>
         </friction>
       </surface>
@@ -184,8 +186,9 @@
       <surface>
         <friction>
           <ode>
-            <mu>0.3</mu>
-            <mu2>0.1</mu2>
+            <mu>1</mu>
+            <mu2>1</mu2>
+            <fdir1>1 0 0</fdir1>
           </ode>
         </friction>
       </surface>
@@ -227,8 +230,9 @@
       <surface>
         <friction>
           <ode>
-            <mu>0.3</mu>
-            <mu2>0.1</mu2>
+            <mu>1</mu>
+            <mu2>1</mu2>
+            <fdir1>1 0 0</fdir1>
           </ode>
         </friction>
       </surface>

@@ -17,7 +17,6 @@ Panels:
         - /RobotModel1
         - /RobotModel1/Status1
         - /RobotModel1/Description Topic1
-        - /RobotModel1/Links1
       Splitter Ratio: 0.5
     Tree Height: 475
   - Class: rviz_common/Selection
@@ -88,33 +87,25 @@ Visualization Manager:
           Value: false
         middle_link:
           Value: false
-        minibase_link:
+        mini/base_link:
           Value: true
-        minid455_back_depth_link:
+        mini/d455_back_depth_link:
           Value: false
-        minid455_back_link:
+        mini/d455_back_link:
           Value: true
-        minid455_back_rgb_link:
+        mini/d455_back_rgb_link:
           Value: false
-        minid455_front_depth_link:
+        mini/d455_front_depth_link:
           Value: false
-        minid455_front_link:
+        mini/d455_front_link:
           Value: true
-        minid455_front_rgb_link:
+        mini/d455_front_rgb_link:
           Value: false
-        minileft_back:
+        mini/map:
           Value: true
-        minileft_front:
+        mini/middle_link:
           Value: true
-        minimap:
-          Value: true
-        minimiddle_link:
-          Value: true
-        miniodom:
-          Value: true
-        miniright_back:
-          Value: true
-        miniright_front:
+        mini/odom:
           Value: true
         odom:
           Value: false
@@ -124,39 +115,27 @@ Visualization Manager:
           Value: false
         tag36h11:11:
           Value: true
-        tag36h11:7:
-          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        minimap:
-          {}
-        miniodom:
-          minibase_link:
-            minid455_back_link:
-              minid455_back_depth_link:
-                {}
-              minid455_back_rgb_link:
-                tag36h11:7:
+        mini/map:
+          mini/odom:
+            mini/base_link:
+              mini/d455_back_link:
+                mini/d455_back_depth_link:
                   {}
-            minid455_front_link:
-              minid455_front_depth_link:
+                mini/d455_back_rgb_link:
+                  {}
+              mini/d455_front_link:
+                mini/d455_front_depth_link:
+                  {}
+                mini/d455_front_rgb_link:
+                  {}
+              mini/middle_link:
                 {}
-              minid455_front_rgb_link:
-                {}
-            minileft_back:
-              {}
-            minileft_front:
-              {}
-            minimiddle_link:
-              {}
-            miniright_back:
-              {}
-            miniright_front:
-              {}
       Update Interval: 0
       Value: true
     - Alpha: 0.699999988079071
@@ -320,25 +299,80 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /mini/mini_bot/robot_description
-      Enabled: false
+      Enabled: true
       Links:
         All Links Enabled: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        d455_back_depth_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        d455_back_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        d455_back_rgb_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        d455_front_depth_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        d455_front_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        d455_front_rgb_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        left_back:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_front:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        middle_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_back:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_front:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Mass Properties:
         Inertia: false
         Mass: false
       Name: RobotModel
       TF Prefix: mini
       Update Interval: 0
-      Value: false
+      Value: true
       Visual Enabled: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: minimap
+    Fixed Frame: mini/map
     Frame Rate: 30
   Name: root
   Tools:
@@ -380,18 +414,18 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.4463232755661011
-        Y: -1.0003654956817627
-        Z: 0.6774569153785706
+        X: 0.8609461784362793
+        Y: -1.0418561697006226
+        Z: 0.5539635419845581
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.585397481918335
+      Pitch: 0.6903974413871765
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.8104023933410645
+      Yaw: 4.8004021644592285
     Saved: ~
 Window Geometry:
   Displays:
@@ -409,5 +443,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1127
-  X: 710
-  Y: 25
+  X: 678
+  Y: -7
