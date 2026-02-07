@@ -17,22 +17,40 @@ class StallDetector(Node):
         sensors_topic = "/sensors"
         self.create_subscription(sensors_topic, RobotSensors, self.sensors_callback, 1)
         
+        self.declare_parameter("~waitTime",2)
+        
         self.stall_publisher = self.create_publisher(RobotStall, "/stalled", 10)
         self.stall = RobotStall
+        self.stallCounter = {'left':0,
+                             'right':0,
+                             'exc':0}
         
     def effort_callback(self, msg: RobotEffort):
         self.effort = msg
 
     def sensors_callback(self, msg: RobotSensors):
+        time = self.get_parameter("~waitTime").get_parameter_value()
         # first is left, second is right, third is exc
         
         if abs(msg.drive_left_vel) < 10 and abs(self.effort.left_drive) > 0:
-            self.stall.left_stall = True
+            self.stallCounter['left'] += 1
+        else:
+            self.stallCounter['left'] = 0
         if abs(msg.drive_right_vel) < 10 and abs(self.effort.right_drive) > 0:
-            self.stall.right_stall = True
+            self.stallCounter['right'] += 1
+        else:
+            self.stallCounter['right'] = 0
         if abs(msg.excavate_vel) < 10 and abs(self.effort.excavate) > 0:
-            self.stall.exc_stall = True
+            self.stallCounter['exc'] += 1
+        else:
+            self.stallCounter['exc'] = 0
         
+        if (self.stallCounter['left'] > time):
+            self.stall.left_stall = True
+        if (self.stallCounter['right'] > time):
+            self.stall.right_stall = True
+        if (self.stallCounter['exc'] > time):
+            self.stall.exc_stall = True
         
         self.stall_publisher.publish(self.stall)
         
