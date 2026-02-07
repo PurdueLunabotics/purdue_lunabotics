@@ -53,15 +53,16 @@
       <arg name="use_sim_time" value="false"/>
     </include>
 
-    <node pkg="rtabmap_util" exec='point_cloud_xyz' name="point_cloud_xyz" respawn="true">
+    <node pkg="isaac_ros_depth_image_proc" exec='PointCloudXyzNode' name="point_cloud_isaac" respawn="true">
 	    <remap from="depth/camera_info"             to="aligned_depth_to_color/camera_info" />
-	    <remap from="depth/image"                   to="aligned_depth_to_color/image_raw" />
-      <remap from="cloud"                         to="points" /> <!-- output-->
-
+	    <remap from="depth/image_rect"                   to="aligned_depth_to_color/image_raw" />
+      <remap from="points"                         to="points" /> <!-- output-->
+	  <!-- rtabmap_util params, isaac does not have these. may instead have to use node for decimation
       <param name="decimation" value="$(var decimation)"/>
       <param name="voxel_size" value="$(var voxel_size)"/>
       <param name="noise_filter_radius" value="$(var noise_filter_radius)"/>
       <param name="max_depth" value="$(var max_depth)"/>
+	  -->
     </node>
   </group>
 
