@@ -16,6 +16,7 @@ struct Options {
   double node_cost;
   double costmap_exponential;
   double max_goal_adjustment_meters; // max distance it will go in a line
+  double remapping_cost_change_percent;
 };
 
 struct Coord {

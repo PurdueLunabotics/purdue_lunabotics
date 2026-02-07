@@ -116,11 +116,11 @@ PathMsg SThetaStar::createPlan(const PoseStampedMsg &start,
   if (has_prev && prev_goal == goal && !prev_path.poses.empty()) {
     prev_path.poses[0] = start;
     double new_cost = calculatePathCost(prev_path);
-    if (std::abs(new_cost - prev_cost) / prev_cost < 0.05) {
+    if (std::abs(new_cost - prev_cost) / prev_cost < options.remapping_cost_change_percent) {
       if (new_cost < prev_cost) {
         prev_cost = new_cost;
       }
-      RCLCPP_INFO(logger, "Sending modified old path");
+      RCLCPP_DEBUG(logger, "Sending modified old path");
       return prev_path;
     }
   }

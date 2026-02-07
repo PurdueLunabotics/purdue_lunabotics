@@ -34,6 +34,7 @@ class SThetaStarPlanner : public nav2_core::GlobalPlanner {
     nav2_util::declare_parameter_if_not_declared(node, name + ".node_cost", rclcpp::ParameterValue(2.0));
     nav2_util::declare_parameter_if_not_declared(node, name + ".costmap_exponential", rclcpp::ParameterValue(2.0));
     nav2_util::declare_parameter_if_not_declared(node, name + ".max_goal_adjustment_meters", rclcpp::ParameterValue(0.75));
+    nav2_util::declare_parameter_if_not_declared(node, name + ".remapping_cost_change_percent", rclcpp::ParameterValue(0.05));
 
     node->get_parameter(name + ".turning_cost", options.turning_cost);
     node->get_parameter(name + ".driving_cost", options.driving_cost);
@@ -41,6 +42,7 @@ class SThetaStarPlanner : public nav2_core::GlobalPlanner {
     node->get_parameter(name + ".node_cost", options.node_cost);
     node->get_parameter(name + ".costmap_exponential", options.costmap_exponential);
     node->get_parameter(name + ".max_goal_adjustment_meters", options.max_goal_adjustment_meters);
+    node->get_parameter(name + ".remapping_cost_change_percent", options.remapping_cost_change_percent);
 
     algorithm = std::make_unique<SThetaStar>(costmap_ros->getCostmap(), costmap_ros->getGlobalFrameID(), options);
   }
@@ -100,6 +102,14 @@ class SThetaStarPlanner : public nav2_core::GlobalPlanner {
             options.max_goal_adjustment_meters = param.as_double();
           } else {
             result.reason = "Invalid type for max goal adjustment meters";
+            result.successful = false;
+            return result;
+          }
+        } else if (param.get_name() == name + ".remapping_cost_change_percent") {
+          if (param.get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE) {
+            options.remapping_cost_change_percent = param.as_double();
+          } else {
+            result.reason = "Invalid type for remapping cost change percent";
             result.successful = false;
             return result;
           }
