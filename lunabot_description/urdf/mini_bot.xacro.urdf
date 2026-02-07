@@ -9,8 +9,12 @@
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <mass value="50.0"/>
-      <inertia  ixx="3.416666667" ixy = "0" ixz = "0"
-        iyy="3.416666667" iyz = "0"
+      <inertia  
+        ixx="3.416666667" 
+        ixy = "0" 
+        ixz = "0"
+        iyy="3.416666667" 
+        iyz = "0"
         izz="3.416666667"
       />
     </inertial>
@@ -18,7 +22,6 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <box size="0.355 0.43 0.1"/>
-      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/realistic_robot.stl"/> -->
       </geometry>
       <material name="silver"/>
     </visual>
@@ -27,7 +30,6 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <box size="0.355 0.43 0.1"/>
-      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/realistic_robot.stl"/> -->
       </geometry>
     </collision>
   </link>
@@ -36,7 +38,6 @@
     <origin rpy="0 0 0" xyz="0.0 0 0.15"/>
     <parent link="base_link"/>
     <child link="middle_link"/>
-    <axis xyz="0 0 1"/>
   </joint>
 
   <!-- left front -->
@@ -53,8 +54,7 @@
     <visual>
       <origin rpy="1.57 0 0" xyz="0 0 0"/>
       <geometry>
-      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
-      <cylinder radius="0.03" length="0.09"/>
+        <cylinder radius="0.03" length="0.09"/>
       </geometry>
       <material name="silver"/>
     </visual>
@@ -62,8 +62,7 @@
     <collision>
       <origin rpy="1.57 0 0" xyz="0 0 0"/>
       <geometry>
-      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
-      <cylinder radius="0.03" length="0.09"/>
+        <cylinder radius="0.03" length="0.09"/>
       </geometry>
       <!-- <surface> -->
         <!-- <friction> -->
@@ -78,11 +77,9 @@
 
   <joint name="left_front_rev" type="continuous">
     <origin rpy="0 0 0" xyz="0.0532 0.305 0.03"/>
-    <!-- <origin rpy="0 0 0" xyz="0.3302 0.254 0.1778"/> -->
     <parent link="base_link"/>
     <child link="left_front"/>
     <axis xyz="0 1 0"/>
-    <!-- <limit effort="10.0" velocity="100.0"/> -->
   </joint>
 
   <!-- left back -->
@@ -99,8 +96,7 @@
     <visual>
       <origin rpy="1.57 0 0" xyz="0 0 0"/>
       <geometry>
-      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
-      <cylinder radius="0.03" length="0.09"/>
+        <cylinder radius="0.03" length="0.09"/>
       </geometry>
       <material name="silver"/>
     </visual>
@@ -108,8 +104,7 @@
     <collision>
       <origin rpy="1.57 0 0" xyz="0 0 0"/>
       <geometry>
-      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
-      <cylinder radius="0.03" length="0.09"/>
+        <cylinder radius="0.03" length="0.09"/>
       </geometry>
       <!-- <surface> -->
         <!-- <friction> -->
@@ -127,7 +122,6 @@
     <parent link="base_link"/>
     <child link="left_back"/>
     <axis xyz="0 1 0"/>
-    <!-- <limit effort="10.0" velocity="100.0"/> -->
   </joint>
 
   <!-- right front -->
@@ -144,8 +138,7 @@
     <visual>
       <origin rpy="1.57 0 0" xyz="0 0 0"/>
       <geometry>
-      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
-      <cylinder radius="0.03" length="0.09"/>
+        <cylinder radius="0.03" length="0.09"/>
       </geometry>
       <material name="silver"/>
     </visual>
@@ -153,8 +146,7 @@
     <collision>
       <origin rpy="1.57 0 0" xyz="0 0 0"/>
       <geometry>
-      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
-      <cylinder radius="0.03" length="0.09"/>
+        <cylinder radius="0.03" length="0.09"/>
       </geometry>
       <!-- <surface> -->
         <!-- <friction> -->
@@ -169,11 +161,9 @@
 
   <joint name="right_front_rev" type="continuous">
     <origin rpy="0 0 0" xyz="0.0532 -0.305 0.03"/>
-    <!-- <origin rpy="0 0 0" xyz="0.3302 -0.254 0.178"/> -->
     <parent link="base_link"/>
     <child link="right_front"/>
     <axis xyz="0 1 0"/>
-    <!-- <limit effort="10.0" velocity="100.0"/> -->
   </joint>
 
   <!-- right back -->
@@ -190,8 +180,7 @@
     <visual>
       <origin rpy="1.57 0 0" xyz="0 0 0"/>
       <geometry>
-      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
-      <cylinder radius="0.03" length="0.09"/>
+        <cylinder radius="0.03" length="0.09"/>
       </geometry>
       <material name="silver"/>
     </visual>
@@ -199,8 +188,7 @@
     <collision>
       <origin rpy="1.57 0 0" xyz="0 0 0"/>
       <geometry>
-      <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
-      <cylinder radius="0.03" length="0.09"/>
+        <cylinder radius="0.03" length="0.09"/>
       </geometry>
       <!-- <surface> -->
         <!-- <friction> -->
@@ -218,7 +206,6 @@
     <parent link="base_link"/>
     <child link="right_back"/>
     <axis xyz="0 1 0"/>
-    <!-- <limit effort="10.0" velocity="100.0"/> -->
   </joint>
 
 
@@ -256,7 +243,7 @@
   </link>  
 
   <joint name="d455_back_joint" type="fixed">
-    <origin rpy="${pi} 0 ${pi}" xyz="-0.381 0.05 0.558"/>
+    <origin rpy="0 0 ${pi}" xyz="-0.21 0 0.5"/>
     <parent link="base_link"/>
     <child link="d455_back_link"/>
     <axis xyz="0 0 1"/>
@@ -328,7 +315,6 @@
 
   <!-- Front Camera -->
 
-
   <link name="d455_front_link">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -362,7 +348,7 @@
   </link>  
 
   <joint name="d455_front_joint" type="fixed">
-    <origin rpy="0 0.3 0" xyz="0.558 -0.17 0.33"/>
+    <origin rpy="0 0.5 0" xyz="0.2 0 0.5"/>
     <parent link="base_link"/>
     <child link="d455_front_link"/>
     <axis xyz="0 0 1"/>

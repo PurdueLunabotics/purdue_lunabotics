@@ -6,6 +6,8 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /TF1
+        - /TF1/Frames1
         - /Map1
         - /PointCloud21
         - /PointCloud22
@@ -13,7 +15,9 @@ Panels:
         - /Pose1
         - /Marker1
         - /RobotModel1
+        - /RobotModel1/Status1
         - /RobotModel1/Description Topic1
+        - /RobotModel1/Links1
       Splitter Ratio: 0.5
     Tree Height: 475
   - Class: rviz_common/Selection
@@ -31,7 +35,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: PointCloud2
 Visualization Manager:
   Class: ""
   Displays:
@@ -57,45 +61,47 @@ Visualization Manager:
       Enabled: true
       Frame Timeout: 15
       Frames:
-        All Enabled: true
+        All Enabled: false
         base_link:
-          Value: true
+          Value: false
         d455_back_depth_link:
-          Value: true
+          Value: false
         d455_back_link:
-          Value: true
+          Value: false
         d455_back_rgb_link:
-          Value: true
+          Value: false
         d455_front_depth_link:
-          Value: true
+          Value: false
         d455_front_link:
-          Value: true
+          Value: false
         d455_front_rgb_link:
-          Value: true
+          Value: false
         deposition_apriltag_link:
-          Value: true
+          Value: false
+        excavation:
+          Value: false
         left_back:
-          Value: true
+          Value: false
         left_front:
-          Value: true
+          Value: false
         map:
-          Value: true
+          Value: false
         middle_link:
-          Value: true
+          Value: false
         minibase_link:
           Value: true
         minid455_back_depth_link:
-          Value: true
+          Value: false
         minid455_back_link:
           Value: true
         minid455_back_rgb_link:
-          Value: true
+          Value: false
         minid455_front_depth_link:
-          Value: true
+          Value: false
         minid455_front_link:
           Value: true
         minid455_front_rgb_link:
-          Value: true
+          Value: false
         minileft_back:
           Value: true
         minileft_front:
@@ -111,12 +117,14 @@ Visualization Manager:
         miniright_front:
           Value: true
         odom:
-          Value: true
+          Value: false
         right_back:
-          Value: true
+          Value: false
         right_front:
-          Value: true
+          Value: false
         tag36h11:11:
+          Value: true
+        tag36h11:7:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -132,7 +140,8 @@ Visualization Manager:
               minid455_back_depth_link:
                 {}
               minid455_back_rgb_link:
-                {}
+                tag36h11:7:
+                  {}
             minid455_front_link:
               minid455_front_depth_link:
                 {}
@@ -310,8 +319,8 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /mini/robot_description
-      Enabled: true
+        Value: /mini/mini_bot/robot_description
+      Enabled: false
       Links:
         All Links Enabled: true
         Expand Joint Details: false
@@ -322,14 +331,14 @@ Visualization Manager:
         Inertia: false
         Mass: false
       Name: RobotModel
-      TF Prefix: ""
+      TF Prefix: mini
       Update Interval: 0
-      Value: true
+      Value: false
       Visual Enabled: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: miniodom
+    Fixed Frame: minimap
     Frame Rate: 30
   Name: root
   Tools:
@@ -364,25 +373,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 4.883861541748047
+      Distance: 3.2192912101745605
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.7977874875068665
-        Y: -1.0913828611373901
-        Z: 0.11846477538347244
+        X: 0.4463232755661011
+        Y: -1.0003654956817627
+        Z: 0.6774569153785706
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.9203976988792419
+      Pitch: 0.585397481918335
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.7704033851623535
+      Yaw: 4.8104023933410645
     Saved: ~
 Window Geometry:
   Displays:
@@ -400,5 +409,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1127
-  X: 742
-  Y: 57
+  X: 710
+  Y: 25

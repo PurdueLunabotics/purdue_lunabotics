@@ -84,16 +84,46 @@ Visualization Manager:
         left_front:
           Value: true
         map:
-          Value: false
+          Value: true
         middle_link:
           Value: true
-        odom:
+        minibase_link:
           Value: false
+        minid455_back_depth_link:
+          Value: false
+        minid455_back_link:
+          Value: false
+        minid455_back_rgb_link:
+          Value: false
+        minid455_front_depth_link:
+          Value: false
+        minid455_front_link:
+          Value: false
+        minid455_front_rgb_link:
+          Value: false
+        minileft_back:
+          Value: false
+        minileft_front:
+          Value: false
+        minimap:
+          Value: false
+        minimiddle_link:
+          Value: false
+        miniodom:
+          Value: true
+        miniright_back:
+          Value: false
+        miniright_front:
+          Value: false
+        odom:
+          Value: true
         right_back:
           Value: true
         right_front:
           Value: true
         tag36h11:11:
+          Value: true
+        tag36h11:7:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -122,7 +152,8 @@ Visualization Manager:
                     d455_front_depth_link:
                       {}
                     d455_front_rgb_link:
-                      {}
+                      tag36h11:7:
+                        {}
               right_back:
                 {}
               right_front:
@@ -289,7 +320,7 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /robot_description
+        Value: /dummy_bot/robot_description
       Enabled: true
       Links:
         All Links Enabled: true
@@ -297,6 +328,71 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        d455_back_depth_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        d455_back_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        d455_back_rgb_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        d455_front_depth_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        d455_front_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        d455_front_rgb_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        deposition_apriltag_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        excavation:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_back:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_front:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        middle_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_back:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_front:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Mass Properties:
         Inertia: false
         Mass: false
@@ -333,25 +429,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 5.633284568786621
+      Distance: 6.9852728843688965
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.7562789916992188
-        Y: 0.4891897141933441
-        Z: 0.0006925258785486221
+        X: -1.3399121761322021
+        Y: -1.431221604347229
+        Z: -0.5256727933883667
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5703975558280945
+      Pitch: 1.0103975534439087
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.925400733947754
+      Yaw: 2.9704010486602783
     Saved: ~
 Window Geometry:
   Displays:
@@ -369,5 +465,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1034
-  X: 752
-  Y: 5
+  X: 720
+  Y: -27
