@@ -1,5 +1,10 @@
 #include "stheta_star.hpp"
+#include <cmath>
+#include <limits>
 #include <rclcpp/logging.hpp>
+#include <tf2/LinearMath/Matrix3x3.hpp>
+#include <tf2/LinearMath/Quaternion.hpp>
+#include <angles/angles.h>
 
 const int LETHAL_COST = 252;
 
@@ -10,18 +15,29 @@ Coord::Coord(int x, int y) {
 
 Coord::Coord() {}
 
-PriorityItem::PriorityItem(Vertex *vertex, Coord prev_coord, double cost, int goal_x,
-             int goal_y, double prev_dir, Options options) {
-  double current_dir = std::atan2(prev_coord.y - vertex->coord.y,
-                                  prev_coord.x - vertex->coord.x);
+double distSquared(Coord a, Coord b) {
+  return std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2);
+}
+
+double calculateAlphaCost(Coord current, Coord grandparent, Coord goal) {
+  return std::acos(
+      (distSquared(grandparent, current) + distSquared(grandparent, goal) - distSquared(current, goal)) /
+      (2 * std::sqrt(distSquared(grandparent, current)) * std::sqrt(distSquared(grandparent, goal))));
+}
+
+PriorityItem::PriorityItem(Vertex *vertex, Vertex *prev_vertex, double cost, int goal_x,
+             int goal_y, Options options) {
+  double alpha_cost = 0;
+  if (prev_vertex && (prev_vertex->prev_coord.x != -1 || prev_vertex->prev_coord.y != -1)) {
+    alpha_cost = calculateAlphaCost(vertex->coord, prev_vertex->prev_coord, Coord(goal_x, goal_y));
+  }
 
   this->vertex = vertex;
-  this->cost = cost + options.node_cost;
-  this->prev_coord = prev_coord;
+  this->cost = cost + options.node_cost + alpha_cost * options.turning_cost;
+  this->prev_vertex = prev_vertex;
   this->heuristic_cost =
       std::sqrt(std::pow((double)goal_x - (double)vertex->coord.x, 2.) +
-                std::pow((double)goal_y - (double)vertex->coord.y, 2.)) +
-      std::abs(current_dir - prev_dir) * options.turning_cost;
+                std::pow((double)goal_y - (double)vertex->coord.y, 2.));
 }
 
 bool PriorityItem::operator>(const PriorityItem &other) const {
@@ -32,11 +48,13 @@ SThetaStar::SThetaStar(nav2_costmap_2d::Costmap2D *costmap, std::string frame_id
   this->costmap = costmap;
   this->frame_id = frame_id;
   this->options = options;
+  this->has_prev = false;
   updateVertexList();
 }
 
 void SThetaStar::updateOptions(Options options) {
   RCLCPP_INFO(logger, "set options");
+  this->has_prev = false;
   this->options = options;
 }
 
@@ -93,6 +111,18 @@ PathMsg SThetaStar::createPlan(const PoseStampedMsg &start,
     updateVertexList();
   }
 
+  if (has_prev && prev_goal == goal && !prev_path.poses.empty()) {
+    prev_path.poses[0] = start;
+    double new_cost = calculatePathCost(prev_path);
+    if (std::abs(new_cost - prev_cost) / prev_cost < 0.05) {
+      if (new_cost < prev_cost) {
+        prev_cost = new_cost;
+      }
+      RCLCPP_INFO(logger, "Sending modified old path");
+      return prev_path;
+    }
+  }
+
   for (unsigned int i = 0; i < width * height; i++) {
     vertex_list[i].visited = false;
   }
@@ -112,8 +142,7 @@ PathMsg SThetaStar::createPlan(const PoseStampedMsg &start,
   initial->prev_coord.y = -1;
 
   queue.push(
-      PriorityItem(initial, Coord(-1, -1), 0, goal_x, goal_y,
-                   0, options));  // FIXME: make this actually use the robot rotation
+      PriorityItem(initial, nullptr, 0, goal_x, goal_y, options));
 
   while (!queue.empty()) {
     PriorityItem item = queue.top();
@@ -124,15 +153,21 @@ PathMsg SThetaStar::createPlan(const PoseStampedMsg &start,
 
     item.vertex->cost = item.cost;
     item.vertex->visited = true;
-    item.vertex->prev_coord = item.prev_coord;
-
-    if (item.vertex->coord.x == goal_x && item.vertex->coord.y == goal_y) {
-      return retracePath(*item.vertex);
+    if (item.prev_vertex) {
+      item.vertex->prev_coord = item.prev_vertex->coord;
+    } else {
+      item.vertex->prev_coord.x = -1;
+      item.vertex->prev_coord.y = -1;
     }
 
-    double current_dir =
-        std::atan2(item.vertex->prev_coord.y - item.vertex->coord.y,
-                   item.vertex->prev_coord.x - item.vertex->coord.x);
+    if (item.vertex->coord.x == goal_x && item.vertex->coord.y == goal_y) {
+      auto path = retracePath(*item.vertex);
+      this->prev_path = path;
+      this->prev_cost = item.vertex->cost;
+      this->prev_goal = goal;
+      this->has_prev = true;
+      return path;
+    }
 
     int x_offsets[] = {-1, 1, 0, 0};
     int y_offsets[] = {0, 0, -1, 1};
@@ -146,23 +181,23 @@ PathMsg SThetaStar::createPlan(const PoseStampedMsg &start,
         continue;
       }
 
-      if (item.prev_coord.x != -1 && item.prev_coord.y != -1) {
+      if (item.prev_vertex) {
+        Coord prev_coord = item.prev_vertex->coord;
         double los_cost =
-            getDistance(item.prev_coord.x - new_x, item.prev_coord.y - new_y) * options.driving_cost;
-        if (hasLineOfSight(item.prev_coord, Coord(new_x, new_y), los_cost)) {
+            getDistance(prev_coord.x - new_x, prev_coord.y - new_y) * options.driving_cost;
+        if (hasLineOfSight(prev_coord, Coord(new_x, new_y), los_cost)) {
           PriorityItem queue_item(
-              &vertex_list[new_x + new_y * width], item.prev_coord,
-              vertex_list[item.prev_coord.x + item.prev_coord.y * width].cost +
-                  los_cost,
-              goal_x, goal_y, current_dir, options);
+              &vertex_list[new_x + new_y * width], item.prev_vertex,
+              vertex_list[prev_coord.x + prev_coord.y * width].cost +
+                  los_cost, goal_x, goal_y, options);
           queue.push(queue_item);
         }
       }
 
       PriorityItem queue_item(
-          &vertex_list[new_x + new_y * width], item.vertex->coord,
+          &vertex_list[new_x + new_y * width], item.vertex,
           item.cost + options.driving_cost + getTraversalCost(Coord(new_x, new_y)), goal_x,
-          goal_y, current_dir, options);
+          goal_y, options);
       queue.push(queue_item);
     }
   }
@@ -174,12 +209,12 @@ double SThetaStar::getDistance(double dx, double dy) {
   return std::sqrt(std::pow(dx, 2.0) + std::pow(dy, 2.0));
 }
 
-double SThetaStar::getCost(Coord coord) const {
+double SThetaStar::getCostmapCost(Coord coord) const {
   return 26 + 0.9 * costmap->getCost(coord.x, coord.y);
 }
 
 double SThetaStar::getTraversalCost(Coord coord) {
-  double curr_cost = getCost(coord);
+  double curr_cost = getCostmapCost(coord);
   return options.traversal_cost * std::pow(curr_cost / (double)LETHAL_COST, options.costmap_exponential);
 }
 
@@ -238,4 +273,51 @@ bool SThetaStar::hasLineOfSight(Coord initial, Coord end, double &cost) {
   }
 
   return true;
+}
+
+double SThetaStar::calculatePathCost(PathMsg path) {
+  double cost = options.node_cost;
+  unsigned int x, y;
+
+  Coord goal;
+  costmap->worldToMap(path.poses.end()->pose.position.x, path.poses.end()->pose.position.y, x, y);
+  goal.x = x;
+  goal.y = y;
+
+  for (int i = 0; i < (int) path.poses.size() - 1; i++) {
+    Coord start, end;
+
+    costmap->worldToMap(path.poses[i].pose.position.x, path.poses[i].pose.position.y, x, y);
+    start.x = x;
+    start.y = y;
+    costmap->worldToMap(path.poses[i + 1].pose.position.x, path.poses[i + 1].pose.position.y, x, y);
+    end.x = x;
+    end.y = y;
+
+    double traversal_cost = 0;
+
+    if (!hasLineOfSight(start, end, traversal_cost)) {
+      return std::numeric_limits<double>::infinity();
+    }
+
+    int dx = end.x - start.x;
+    int dy = end.y - start.y;
+
+    double alpha_cost = 0;
+    if (i > 0) {
+      Coord grandparent;
+      costmap->worldToMap(path.poses[i - 1].pose.position.x, path.poses[i - 1].pose.position.y, x, y);
+      grandparent.x = x;
+      grandparent.y = y;
+      alpha_cost = calculateAlphaCost(end, grandparent, goal);
+    }
+
+    cost +=
+        traversal_cost +
+        getDistance(dx, dy) * options.driving_cost +
+        alpha_cost * options.driving_cost +
+        options.node_cost;
+  }
+
+  return cost;
 }
