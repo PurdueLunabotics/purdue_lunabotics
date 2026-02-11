@@ -1,5 +1,6 @@
 from enum import Enum, auto
 from rclpy.node import Node
+from abc import ABC, abstractmethod
 
 class Events(Enum):
     # Interal
@@ -7,20 +8,23 @@ class Events(Enum):
     FAIL = auto()
 
     # External
-    STALL = 11
-    NO_PATH = 12
-    STUCK = 13
-    ARRIVED = 14
+    STALL = auto()
+    NO_PATH = auto()
+    STUCK = auto()
 
-class State:
+class State(ABC):
+    @abstractmethod
     def setup(self, manager: Node):
         pass
     
+    @abstractmethod
     def start(self):
         pass
 
+    @abstractmethod
     def periodic(self) -> None | Events:
         return None
 
+    @abstractmethod
     def exit(self):
         pass
