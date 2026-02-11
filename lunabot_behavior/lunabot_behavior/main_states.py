@@ -1,89 +1,108 @@
-from enum import Enum, auto
-from state import Events
+from enum import Enum
+from state import Events, State
+import rclpy
+from state_manager import StateManager
 
 class MainStates(Enum):
-    INIT_TO_LINKUP = auto()
-    INIT_TO_LINKUP_STALL = auto()
-    INIT_TO_LINKUP_NO_PATH = auto()
+    INIT_TO_LINKUP = State()
+    INIT_TO_LINKUP_STALL = State()
+    INIT_TO_LINKUP_NO_PATH = State()
     
-    ALIGN_TO_TRENCH = auto()
-    ALIGN_TO_TRENCH_STALL = auto()
+    ALIGN_TO_TRENCH = State()
+    ALIGN_TO_TRENCH_STALL = State()
     
-    PLUNGE_ACT = auto()
-    PLUNGE_ACT_STALL = auto()
+    PLUNGE_ACT = State()
+    PLUNGE_ACT_STALL = State()
     
-    TRENCH = auto()
-    TRENCH_STALL = auto()
+    TRENCH = State()
+    TRENCH_STALL = State()
     
-    RAISE_ACT = auto()
-    RAISE_ACT_STALL = auto()
+    RAISE_ACT = State()
+    RAISE_ACT_STALL = State()
     
-    TRAVERSE_TO_LINKUP = auto()
-    TRAVERSE_TO_LINKUP_STALL = auto()
-    TRAVERSE_TO_LINKUP_NO_PATH = auto()
+    TRAVERSE_TO_LINKUP = State()
+    TRAVERSE_TO_LINKUP_STALL = State()
+    TRAVERSE_TO_LINKUP_NO_PATH = State()
 
-    WAIT_FOR_LINKUP = auto()
+    WAIT_FOR_LINKUP = State()
 
-    TRAVERSE_TO_BERM = auto()
-    TRAVERSE_TO_BERM_STALL = auto()
-    TRAVERSE_TO_BERM_NO_PATH = auto()
+    TRAVERSE_TO_BERM = State()
+    TRAVERSE_TO_BERM_STALL = State()
+    TRAVERSE_TO_BERM_NO_PATH = State()
 
-    ALIGN_TO_BERM = auto()
-    ALIGN_TO_BERM_STALL = auto()
+    ALIGN_TO_BERM = State()
+    ALIGN_TO_BERM_STALL = State()
     
-    APPROACH_BERM = auto()
-    APPROACH_BERM_STALL = auto()
+    APPROACH_BERM = State()
+    APPROACH_BERM_STALL = State()
     
-    DEPOSIT = auto()
-    DEPOSIT_STALL = auto()
-
-    transitions = {
-        (INIT_TO_LINKUP, Events.SUCCESS): ALIGN_TO_TRENCH,
-        (INIT_TO_LINKUP, Events.STALL): INIT_TO_LINKUP_STALL,
-        (INIT_TO_LINKUP, Events.NO_PATH): INIT_TO_LINKUP_NO_PATH,
-        (INIT_TO_LINKUP_NO_PATH, Events.SUCCESS): INIT_TO_LINKUP,
-        (INIT_TO_LINKUP_STALL, Events.SUCCESS): INIT_TO_LINKUP,
-
-        (ALIGN_TO_TRENCH, Events.SUCCESS): PLUNGE_ACT,
-        (ALIGN_TO_TRENCH, Events.STALL): ALIGN_TO_TRENCH_STALL,
-        (ALIGN_TO_TRENCH_STALL, Events.SUCCESS): ALIGN_TO_TRENCH,
-        
-        (PLUNGE_ACT, Events.SUCCESS): TRENCH,
-        (PLUNGE_ACT, Events.STALL): PLUNGE_ACT_STALL,
-        (PLUNGE_ACT_STALL, Events.SUCCESS): PLUNGE_ACT,
-        
-        (TRENCH, Events.SUCCESS): RAISE_ACT,
-        (TRENCH, Events.STALL): TRENCH_STALL,
-        (TRENCH_STALL, Events.SUCCESS): TRENCH,
-        
-        (RAISE_ACT, Events.SUCCESS): TRAVERSE_TO_LINKUP,
-        (RAISE_ACT, Events.STALL): RAISE_ACT_STALL,
-        (RAISE_ACT_STALL, Events.SUCCESS): RAISE_ACT,
-        
-        (TRAVERSE_TO_LINKUP, Events.SUCCESS): DEPOSIT,
-        (TRAVERSE_TO_LINKUP, Events.STALL): TRAVERSE_TO_LINKUP_STALL,
-        (TRAVERSE_TO_LINKUP, Events.NO_PATH): TRAVERSE_TO_LINKUP_NO_PATH,
-        (TRAVERSE_TO_LINKUP_STALL, Events.SUCCESS): TRAVERSE_TO_LINKUP,
-        (TRAVERSE_TO_LINKUP_NO_PATH, Events.SUCCESS): TRAVERSE_TO_LINKUP,
-
-        (WAIT_FOR_LINKUP, Events.SUCCESS): DEPOSIT,
-        (WAIT_FOR_LINKUP, Events.FAIL): TRAVERSE_TO_BERM,
-
-        # in case minibot is indisposed and big bot has to make full cycles
-        (TRAVERSE_TO_BERM, Events.SUCCESS): ALIGN_TO_BERM,
-        (TRAVERSE_TO_BERM, Events.STALL): ALIGN_TO_BERM,
-        (TRAVERSE_TO_BERM, Events.NO_PATH): TRAVERSE_TO_BERM_NO_PATH,
-        (TRAVERSE_TO_BERM_STALL, Events.SUCCESS): TRAVERSE_TO_BERM,
-        (TRAVERSE_TO_BERM_NO_PATH, Events.SUCCESS): TRAVERSE_TO_BERM,
-
-        (ALIGN_TO_BERM, Events.SUCCESS): APPROACH_BERM,
-        (APPROACH_BERM, Events.SUCCESS): DEPOSIT,
-        
-        (DEPOSIT, Events.SUCCESS): ALIGN_TO_TRENCH,
-        (DEPOSIT, Events.STALL): DEPOSIT_STALL,
-        (DEPOSIT_STALL, Events.SUCCESS): DEPOSIT
-    }
+    DEPOSIT = State()
+    DEPOSIT_STALL = State()
 
     @staticmethod
     def get_transition(state, event: Events):
-        return MainStates.transitions.get((state, event), None)
+        transitions = {
+            (MainStates.INIT_TO_LINKUP, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
+            (MainStates.INIT_TO_LINKUP, Events.STALL): MainStates.INIT_TO_LINKUP_STALL,
+            (MainStates.INIT_TO_LINKUP, Events.NO_PATH): MainStates.INIT_TO_LINKUP_NO_PATH,
+            (MainStates.INIT_TO_LINKUP_NO_PATH, Events.SUCCESS): MainStates.INIT_TO_LINKUP,
+            (MainStates.INIT_TO_LINKUP_STALL, Events.SUCCESS): MainStates.INIT_TO_LINKUP,
+
+            (MainStates.ALIGN_TO_TRENCH, Events.SUCCESS): MainStates.PLUNGE_ACT,
+            (MainStates.ALIGN_TO_TRENCH, Events.STALL): MainStates.ALIGN_TO_TRENCH_STALL,
+            (MainStates.ALIGN_TO_TRENCH_STALL, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
+            
+            (MainStates.PLUNGE_ACT, Events.SUCCESS): MainStates.TRENCH,
+            (MainStates.PLUNGE_ACT, Events.STALL): MainStates.PLUNGE_ACT_STALL,
+            (MainStates.PLUNGE_ACT_STALL, Events.SUCCESS): MainStates.PLUNGE_ACT,
+            
+            (MainStates.TRENCH, Events.SUCCESS): MainStates.RAISE_ACT,
+            (MainStates.TRENCH, Events.STALL): MainStates.TRENCH_STALL,
+            (MainStates.TRENCH_STALL, Events.SUCCESS): MainStates.TRENCH,
+            
+            (MainStates.RAISE_ACT, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
+            (MainStates.RAISE_ACT, Events.STALL): MainStates.RAISE_ACT_STALL,
+            (MainStates.RAISE_ACT_STALL, Events.SUCCESS): MainStates.RAISE_ACT,
+            
+            (MainStates.TRAVERSE_TO_LINKUP, Events.SUCCESS): MainStates.DEPOSIT,
+            (MainStates.TRAVERSE_TO_LINKUP, Events.STALL): MainStates.TRAVERSE_TO_LINKUP_STALL,
+            (MainStates.TRAVERSE_TO_LINKUP, Events.NO_PATH): MainStates.TRAVERSE_TO_LINKUP_NO_PATH,
+            (MainStates.TRAVERSE_TO_LINKUP_STALL, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
+            (MainStates.TRAVERSE_TO_LINKUP_NO_PATH, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
+
+            (MainStates.WAIT_FOR_LINKUP, Events.SUCCESS): MainStates.DEPOSIT,
+            (MainStates.WAIT_FOR_LINKUP, Events.FAIL): MainStates.TRAVERSE_TO_BERM,
+
+            # in case minibot is indisposed and big bot has to make full cycles
+            (MainStates.TRAVERSE_TO_BERM, Events.SUCCESS): MainStates.ALIGN_TO_BERM,
+            (MainStates.TRAVERSE_TO_BERM, Events.STALL): MainStates.ALIGN_TO_BERM,
+            (MainStates.TRAVERSE_TO_BERM, Events.NO_PATH): MainStates.TRAVERSE_TO_BERM_NO_PATH,
+            (MainStates.TRAVERSE_TO_BERM_STALL, Events.SUCCESS): MainStates.TRAVERSE_TO_BERM,
+            (MainStates.TRAVERSE_TO_BERM_NO_PATH, Events.SUCCESS): MainStates.TRAVERSE_TO_BERM,
+
+            (MainStates.ALIGN_TO_BERM, Events.SUCCESS): MainStates.APPROACH_BERM,
+            (MainStates.APPROACH_BERM, Events.SUCCESS): MainStates.DEPOSIT,
+            
+            (MainStates.DEPOSIT, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
+            (MainStates.DEPOSIT, Events.STALL): MainStates.DEPOSIT_STALL,
+            (MainStates.DEPOSIT_STALL, Events.SUCCESS): MainStates.DEPOSIT
+        }
+
+        return transitions.get((state, event), None)
+
+def main(args=None):
+    rclpy.init(args=args)
+
+    minimal_subscriber = StateManager(MainStates, MainStates.INIT_TO_LINKUP, Events)
+
+    rclpy.spin(minimal_subscriber)
+
+    # Destroy the node explicitly
+    # (optional - otherwise it will be done automatically
+    # when the garbage collector destroys the node object)
+    minimal_subscriber.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
