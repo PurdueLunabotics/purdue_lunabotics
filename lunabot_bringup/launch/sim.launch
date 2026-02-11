@@ -5,9 +5,6 @@
   <arg name="two_bots" default="true"/> 
   <arg name="gui" default="true"/>
   <arg name="odom_from_sim" default="false" />
-
-  <executable cmd="pkill -9 ruby" />
-
   
   <arg default="$(find-pkg-share lunabot_config)/config/sim.rviz" name="rvizconfig"/>
   <arg default="$(find-pkg-share lunabot_config)/config/mini_sim.rviz" name="minirvizconfig"/>

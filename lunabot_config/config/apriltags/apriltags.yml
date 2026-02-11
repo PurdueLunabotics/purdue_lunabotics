@@ -7,7 +7,7 @@
   
   # (optional) list of tags
     # If defined, 'frames' and 'sizes' must have the same length as 'ids'.
-    # tag:
-    #   ids:    [<id1>, <id2>, ...]         # tag IDs for which to publish transform
-    #   frames: [<frame1>, <frame2>, ...]   # frame names
-    #   sizes:  [<size1>, <size1>, ...]     # tag-specific edge size, overrides the default 'size'
+      tag:
+        ids:    [368]         # tag IDs for which to publish transform
+        frames: [main_deposition]   # frame names
+        sizes:  [0.12192]     # tag-specific edge size, overrides the default 'size'
