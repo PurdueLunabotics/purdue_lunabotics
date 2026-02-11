@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import rclpy
 
 from geometry_msgs.msg import Point
@@ -10,20 +12,21 @@ from rclpy.node import Node
 import time
 
 # zone geometries - based on guidebook orientations (all measurements in meters)
-START_OFFSET_X = 2.44
-START_OFFSET_Y = 1.5
-START_LENGTH_X = 2
-START_LENGTH_Y = 2
+class ZoneMeasurements:
+    START_OFFSET_X = 2.44
+    START_OFFSET_Y = 1.5
+    START_LENGTH_X = 2
+    START_LENGTH_Y = 2
 
-EXC_OFFSET_X = 2.19
-EXC_OFFSET_Y = 0
-EXC_LENGTH_X = 2.5
-EXC_LENGTH_Y = 5
+    EXC_OFFSET_X = 2.19
+    EXC_OFFSET_Y = 0
+    EXC_LENGTH_X = 2.5
+    EXC_LENGTH_Y = 5
 
-BERM_OFFSET_X = -1.94
-BERM_OFFSET_Y = 1.9
-BERM_LENGTH_X = 1.7
-BERM_LENGTH_Y = 0.8
+    BERM_OFFSET_X = -1.94
+    BERM_OFFSET_Y = 1.9
+    BERM_LENGTH_X = 1.7
+    BERM_LENGTH_Y = 0.8
 
 class ZonesNode(Node):
     def __init__(self):
@@ -53,27 +56,25 @@ class ZonesNode(Node):
         self.start_time = time.perf_counter_ns()
 
         self.start_zone = self.make_zone(
-            START_OFFSET_X,
-            START_OFFSET_Y,
-            START_LENGTH_X,
-            START_LENGTH_Y)
+            ZoneMeasurements.START_OFFSET_X,
+            ZoneMeasurements.START_OFFSET_Y,
+            ZoneMeasurements.START_LENGTH_X,
+            ZoneMeasurements.START_LENGTH_Y)
         
         self.exc_zone = self.make_zone(
-            EXC_OFFSET_X,
-            EXC_OFFSET_Y,
-            EXC_LENGTH_X,
-            EXC_LENGTH_Y)
+            ZoneMeasurements.EXC_OFFSET_X,
+            ZoneMeasurements.EXC_OFFSET_Y,
+            ZoneMeasurements.EXC_LENGTH_X,
+            ZoneMeasurements.EXC_LENGTH_Y)
         
         self.berm_zone = self.make_zone(
-            BERM_OFFSET_X,
-            BERM_OFFSET_Y,
-            BERM_LENGTH_X,
-            BERM_LENGTH_Y)
+            ZoneMeasurements.BERM_OFFSET_X,
+            ZoneMeasurements.BERM_OFFSET_Y,
+            ZoneMeasurements.BERM_LENGTH_X,
+            ZoneMeasurements.BERM_LENGTH_Y)
 
 
-        # transform we're looking for is from base link back to map
-        # self.from_frame_rel = f"{ns}base_link"
-        # self.to_frame_rel = f"{ns}map"
+        self.create_timer(1 / 30, self.mainloop)
 
     def make_zone(self, offset_x, offset_y, length_x, length_y):
         z = Zone()
@@ -156,7 +157,7 @@ class ZonesNode(Node):
 
     def mainloop(self):
         # rate = self.create_rate(30) # 30 hz
-        while rclpy.ok():
+        if rclpy.ok():
             # zone = Zone((1.0, 2.0), (2.0, 2.0), (1.0, 1.0), (2.0, 1.0))
 
             if (self.exc_zone is not None):

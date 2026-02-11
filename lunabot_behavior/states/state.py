@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from enum import Enum, auto
 from rclpy.node import Node
 from abc import ABC, abstractmethod
