@@ -44,6 +44,14 @@
       <arg name="tf_publish_rate"          value="0"/>
 
       <arg name="clip_distance"            value="-1"/>
+
+  <! -- Added parameters for isaac_ros_image_proc -->
+      <arg name="width"                    default="424"/>
+      <arg name="height"                   default="240"/>
+
+      <arg name="output_width"             default="424"/>
+      <arg name="output_height"            default="240"/>
+      <arg name="crop_mode"                default="CENTER"/>
     </include>
     <push_ros_namespace namespace="d455_front"/>
     <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
@@ -52,6 +60,16 @@
 
       <arg name="use_sim_time" value="false"/>
     </include>
+
+    <!-- RGB processing -->
+    <!-- Color rectified image -->
+    <node pkg="isaac_ros_image_proc" exec="rectify_node" name="color_rectify_color"
+    <param name="output_width" value="$(var output_width)" />
+    <param name="output_height" value="$(var output_height)" />
+       <remap from="image_raw" to="color/image_raw" />
+       <remap from="camera_info" to="color/camera_info" />
+       <remap from="image_rect" to="color/image_rect_color" />
+    </node>
 
     <node pkg="isaac_ros_depth_image_proc" exec='PointCloudXyzNode' name="point_cloud_isaac" respawn="true">
 	    <remap from="depth/camera_info"             to="aligned_depth_to_color/camera_info" />
@@ -93,6 +111,15 @@
       <arg name="tf_publish_rate"          value="0"/>
 
       <arg name="clip_distance"            value="-1"/>
+
+
+  <! -- Added parameters for isaac_ros_image_proc -->
+      <arg name="width"                    default="424"/>
+      <arg name="height"                   default="240"/>
+
+      <arg name="output_width"             default="424"/>
+      <arg name="output_height"            default="240"/>
+      <arg name="crop_mode"                default="CENTER"/>
     </include>
     <push_ros_namespace namespace="d455_back"/>
 
@@ -102,6 +129,17 @@
 
       <arg name="use_sim_time" value="false"/>
     </include>
+
+
+    <!-- RGB processing -->
+    <!-- Color rectified image -->
+    <node pkg="isaac_ros_image_proc" exec="rectify_node" name="color_rectify_color"
+    <param name="output_width" value="$(var output_width)" />
+    <param name="output_height" value="$(var output_height)" />
+       <remap from="image_raw" to="color/image_raw" />
+       <remap from="camera_info" to="color/camera_info" />
+       <remap from="image_rect" to="color/image_rect_color" />
+    </node>
 
     <node pkg="isaac_ros_depth_image_proc" exec='PointCloudXyzNode' name="point_cloud_isaac" respawn="true">
 	    <remap from="depth/camera_info"             to="aligned_depth_to_color/camera_info" />
