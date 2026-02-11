@@ -38,8 +38,6 @@ class MainStates(Enum):
     DEPOSIT_STALL = auto()
 
     transitions = {
-        (IDLE, Events.SUCCESS): INIT_TO_LINKUP,
-        
         (INIT_TO_LINKUP, Events.SUCCESS): ALIGN_TO_TRENCH,
         (INIT_TO_LINKUP, Events.STALL): INIT_TO_LINKUP_STALL,
         (INIT_TO_LINKUP, Events.NO_PATH): INIT_TO_LINKUP_NO_PATH,

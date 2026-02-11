@@ -26,8 +26,6 @@ class MiniStates(Enum):
     SEPARATE_FROM_MAIN_STALL = auto()
 
     transitions = {
-        (IDLE, Events.SUCCESS): FIND_LINKUP,
-
         (FIND_LINKUP, Events.SUCCESS): MOVE_TO_BERM,
         (FIND_LINKUP, Events.STALL): FIND_LINKUP_STALL,
         (FIND_LINKUP, Events.NO_PATH): FIND_LINKUP_NO_PATH,
