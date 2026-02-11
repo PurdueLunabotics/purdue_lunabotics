@@ -311,15 +311,15 @@ class PointToPoint(Node):
         ## -------------------------------------------------
 
         # calculate angle to target from x axis
-        # pose_target_angle = None
-        # if on_final_trajectory and self.at_linear_target:
-        #     # set target to final path angle if reached linear destination
-        #     pose_target_angle = self.target_pose[2]
-        # else:
-        pose_target_angle = np.arctan2(  # calculate target angle [-pi,pi]
-            self.target_pose[1] - current_pose[1],
-            self.target_pose[0] - current_pose[0],
-        )
+        pose_target_angle = None
+        if on_final_trajectory and self.at_linear_target:
+            # set target to final path angle if reached linear destination
+            pose_target_angle = self.target_pose[2]
+        else:
+            pose_target_angle = np.arctan2(  # calculate target angle [-pi,pi]
+                self.target_pose[1] - current_pose[1],
+                self.target_pose[0] - current_pose[0],
+            )
 
         # subtract heading to find angle error
         self.angle_error = pose_target_angle - current_pose[2]
@@ -353,10 +353,10 @@ class PointToPoint(Node):
         #            On Final Trajectory: {on_final_trajectory} \n
         #            -----------------------------------
         #            ''')
-        if not self.at_linear_target:
+        if (not self.at_angle_target) and (not self.at_linear_target or on_final_trajectory):
+            self.state = States.MOVING_TO_ANGULAR_TARGET
+        elif not self.at_linear_target:
             self.state = States.MOVING_TO_LINEAR_TARGET
-            if not self.at_angle_target:
-                self.state = States.MOVING_TO_ANGULAR_TARGET
         else:  # move to angular target if angle target is not met
             if on_final_trajectory or len(self.path) <= self.target_pose_index:
                 self.state = States.AT_DESTINATION  # update state if at destination
