@@ -1,0 +1,34 @@
+####################################################
+# lidar sdk configuration
+####################################################
+
+# Configuration
+initialize_type: 2 # 1-Serial, 2-UDP
+work_mode: 0
+use_system_timestamp: true
+range_min: 0
+range_max: 100
+cloud_scan_num: 18
+
+# Serial Port
+serial_port: "/dev/ttyACM0"
+baudrate: 4000000
+
+# UDP Port
+lidar_port: 6101
+lidar_ip: "192.168.1.62"
+pc_port: 6201
+pc_ip: "192.168.1.2"
+
+# PointCloud
+cloud_frame: "unilidar_lidar"  # default: "unilidar_lidar"
+cloud_topic: "unilidar/cloud"  # default: "unilidar/cloud"
+
+
+# IMU
+imu_frame: "unilidar_imu"      # default: "unilidar_imu" 
+imu_topic: "unilidar/imu"      # default: "unilidar/imu"
+
+# 2d Laser Scan
+laserscan_frame: "unilidar_laserscan"  # default: "unilidar_laserscan
+laserscan_topic: "unilidar/laserscan"

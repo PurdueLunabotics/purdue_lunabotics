@@ -40,7 +40,7 @@ class MiniStates(Enum):
 
         (DEPOSIT, Events.SUCCESS): MOVE_TO_STAGING,
         (DEPOSIT, Events.STALL): DEPOSIT_STALL,
-        (DEPOSIT_STALL, Events.STALL): DEPOSIT,
+        (DEPOSIT_STALL, Events.SUCCESS): DEPOSIT,
 
         (MOVE_TO_STAGING, Events.SUCCESS): ALIGN_TO_MAIN,
         (MOVE_TO_STAGING, Events.STALL): MOVE_TO_STAGING_STALL,
