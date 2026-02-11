@@ -228,6 +228,8 @@
             <param name="database_path"           value="~/.ros/$(var ns)rtabmap.db"/>
 
         </node>
+
+        <node name="zones_node" pkg="lunabot_behavior" exec="zones" output="screen" respawn="false" />
     </group>
 
 

@@ -6,7 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /TF1
+        - /TF1/Status1
         - /TF1/Frames1
         - /Map1
         - /PointCloud21
@@ -101,19 +101,25 @@ Visualization Manager:
           Value: false
         mini/d455_front_rgb_link:
           Value: false
+        mini/left_back:
+          Value: false
+        mini/left_front:
+          Value: false
         mini/map:
           Value: false
         mini/middle_link:
           Value: false
         mini/odom:
           Value: false
+        mini/right_back:
+          Value: false
+        mini/right_front:
+          Value: false
         odom:
           Value: true
         right_back:
           Value: true
         right_front:
-          Value: true
-        tag36h11:11:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -128,8 +134,7 @@ Visualization Manager:
                 d455_back_depth_link:
                   {}
                 d455_back_rgb_link:
-                  tag36h11:11:
-                    {}
+                  {}
               deposition_apriltag_link:
                 {}
               left_back:
@@ -390,6 +395,45 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Marker
+      Namespaces:
+        zones: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /start_zone_marker
+      Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Marker
+      Namespaces:
+        zones: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /berm_zone_marker
+      Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Marker
+      Namespaces:
+        zones: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /exc_zone_marker
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -418,25 +462,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 8.502798080444336
+      Distance: 4.716001510620117
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.199154257774353
-        Y: -0.7392585277557373
-        Z: -1.2210092544555664
+        X: 0.37502074241638184
+        Y: -0.32252809405326843
+        Z: -0.5930054187774658
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.0353972911834717
+      Pitch: 1.0603973865509033
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.980401515960693
+      Yaw: 5.715400695800781
     Saved: ~
 Window Geometry:
   Displays:
@@ -454,5 +498,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1034
-  X: 833
-  Y: 106
+  X: 769
+  Y: 42
