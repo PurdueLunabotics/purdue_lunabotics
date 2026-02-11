@@ -7,10 +7,9 @@ class Events(Enum):
     FAIL = auto()
 
     # External
-    STALL = 11
-    NO_PATH = 12
-    STUCK = 13
-    ARRIVED = 14
+    STALL = auto()
+    NO_PATH = auto()
+    STUCK = auto()
 
 class State:
     def setup(self, manager: Node):
