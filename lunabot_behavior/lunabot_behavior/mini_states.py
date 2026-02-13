@@ -2,6 +2,7 @@ from enum import Enum
 from state import Events, State
 import rclpy
 from state_manager import StateManager
+from lunabot_msgs.msg import Event
 
 class MiniStates(Enum):
     FIND_LINKUP = State()
@@ -44,7 +45,7 @@ class MiniStates(Enum):
 
             (MiniStates.DEPOSIT, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
             (MiniStates.DEPOSIT, Events.STALL): MiniStates.DEPOSIT_STALL,
-            (MiniStates.DEPOSIT_STALL, Events.STALL): MiniStates.DEPOSIT,
+            (MiniStates.DEPOSIT_STALL, Events.SUCCESS): MiniStates.DEPOSIT,
 
             (MiniStates.MOVE_TO_STAGING, Events.SUCCESS): MiniStates.ALIGN_TO_MAIN,
             (MiniStates.MOVE_TO_STAGING, Events.STALL): MiniStates.MOVE_TO_STAGING_STALL,
@@ -68,7 +69,7 @@ class MiniStates(Enum):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = StateManager(MiniStates, MiniStates.FIND_LINKUP, Events)
+    minimal_subscriber = StateManager(MiniStates, MiniStates.FIND_LINKUP, Events, Event)
 
     rclpy.spin(minimal_subscriber)
 

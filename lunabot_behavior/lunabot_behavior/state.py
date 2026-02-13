@@ -1,5 +1,6 @@
 from enum import Enum, auto
 from rclpy.node import Node
+from lunabot_msgs.msg import Event
 
 class Events(Enum):
     # Interal
@@ -7,10 +8,10 @@ class Events(Enum):
     FAIL = auto()
 
     # External
-    STALL = 11
-    NO_PATH = 12
-    STUCK = 13
-    ARRIVED = 14
+    STALL = Event.STALL
+    NO_PATH = Event.NO_PATH
+    STUCK = Event.STUCK
+    ARRIVED = Event.ARRIVED
 
 class State:
     def setup(self, manager: Node):
