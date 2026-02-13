@@ -24,6 +24,7 @@ find_package(tf2_ros REQUIRED)
 find_package(nav2_core REQUIRED)
 find_package(nav2_costmap_2d REQUIRED)
 find_package(nav2_util REQUIRED)
+find_package(lunabot_msgs REQUIRED)
 
 # uncomment the following section in order to fill in
 # further dependencies manually.
@@ -34,7 +35,7 @@ add_executable(nav2_bridge_node src/nav2_bridge.cpp)
 add_executable(planner_test_node src/planner_test_node.cpp)
 
 ament_target_dependencies(stheta_star_planner rclcpp std_msgs nav_msgs map_msgs tf2_ros nav2_core nav2_costmap_2d nav2_util)
-ament_target_dependencies(nav2_bridge_node rclcpp std_msgs nav_msgs rclcpp_action nav2_msgs)
+ament_target_dependencies(nav2_bridge_node rclcpp std_msgs nav_msgs rclcpp_action nav2_msgs lunabot_msgs)
 ament_target_dependencies(planner_test_node rclcpp std_msgs nav_msgs rclcpp_action nav2_msgs)
 
 # Install files

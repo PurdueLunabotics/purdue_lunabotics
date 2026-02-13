@@ -12,6 +12,7 @@ from rclpy.node import Node
 from std_msgs.msg import Bool, Float32, String
 from tf_transformations import euler_from_quaternion
 from visualization_msgs.msg import Marker
+from lunabot_msgs.msg import Event
 
 from lunabot_control.pid_controller import PIDController
 
@@ -133,6 +134,7 @@ class PointToPoint(Node):
 
         self.target_publisher = self.create_publisher(Pose2D, "ptp/target_pose", 10)
         self.log_publisher = self.create_publisher(String, "ptp/log", 10)
+        self.event_publisher = self.create_publisher(Event, "events", 10)
         # SUBSCRIBERS ==================================================================================================
         odom_topic = "odom"
         self.create_subscription(PoseStamped, odom_topic, self.__odom_callback, 1)
@@ -360,6 +362,7 @@ class PointToPoint(Node):
         else:  # move to angular target if angle target is not met
             if on_final_trajectory or len(self.path) <= self.target_pose_index:
                 self.state = States.AT_DESTINATION  # update state if at destination
+                self.event_publisher.publish(Event(data = Event.ARRIVED))
             else:
                 # if at linear target and not on final trajectory, target point should update
                 self.target_pose_index += 1
