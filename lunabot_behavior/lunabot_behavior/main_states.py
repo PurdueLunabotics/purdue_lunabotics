@@ -1,7 +1,10 @@
+#!/usr/bin/env python3
+
 from enum import Enum
 from state import Events, State
 import rclpy
 from state_manager import StateManager
+from lunabot_msgs.msg import Event
 
 class MainStates(Enum):
     INIT_TO_LINKUP = State()
@@ -38,6 +41,8 @@ class MainStates(Enum):
     
     DEPOSIT = State()
     DEPOSIT_STALL = State()
+
+    IDLE = State()
 
     @staticmethod
     def get_transition(state, event: Events):
@@ -93,7 +98,7 @@ class MainStates(Enum):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = StateManager(MainStates, MainStates.INIT_TO_LINKUP, Events)
+    minimal_subscriber = StateManager(MainStates, MainStates.INIT_TO_LINKUP, Events, Event)
 
     rclpy.spin(minimal_subscriber)
 
