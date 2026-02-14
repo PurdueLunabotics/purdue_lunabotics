@@ -26,7 +26,7 @@ void update(float &act_right_curr, long &lin_enc_0, long &lin_enc_1) {
 void cb(int8_t lin_act_volt, uint8_t should_zero_act_pos) {
   act_left_mtr.write(-lin_act_volt);
   act_right_mtr.write(lin_act_volt);
-  if (should_zero_act_pos) {
+  if (should_zero_act_pos) { // maybe need an argument to specify the actuator
     enc_bus.init(); // zeros the actuator position
   }
 }

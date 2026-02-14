@@ -30,7 +30,7 @@ void ctrl() {
 }
 
 void send() {
-  actuation::update(state.act_right_curr, state.act_right_pos, state.act_left_pos);
+  actuation::update(state.act_right_curr, state.act_left_pos, state.act_right_pos);
   drivetrain::update(state.drive_left_curr, state.drive_right_curr, state.drive_left_torque,
                      state.drive_right_torque, state.drive_left_vel, state.drive_right_vel);
   deposition::update(state.dep_curr);
@@ -62,6 +62,7 @@ void setup() {
   KillSwitchRelay::init();
   Led_Strip::init();
   HX711_Bus::init();
+  Encoder_Bus::init();
 
   ADS1119_Current_Bus::init_ads1119();
 

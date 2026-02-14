@@ -12,6 +12,8 @@
 /* Struct definitions */
 typedef struct _RobotSensors {
     float act_right_curr;
+    long act_left_pos;
+    long act_right_pos;
     float dep_curr;
     float exc_curr;
     float drive_left_curr;
@@ -22,8 +24,6 @@ typedef struct _RobotSensors {
     float drive_left_vel;
     float drive_right_vel;
     float exc_vel;
-    long act_left_pos;
-    long act_right_pos;
 } RobotSensors;
 
 typedef struct _RobotEffort {
@@ -43,7 +43,7 @@ extern "C" {
 #endif
 
 /* Initializer values for message structs */
-#define RobotSensors_init_default                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define RobotSensors_init_default                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 #define RobotEffort_init_default                 {0, 0, 0, 0, 0, 0, 0}
 #define RobotSensors_init_zero                   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 #define RobotEffort_init_zero                    {0, 0, 0, 0, 0, 0, 0}
@@ -60,6 +60,8 @@ extern "C" {
 #define RobotSensors_drive_left_vel_tag          9
 #define RobotSensors_drive_right_vel_tag         10
 #define RobotSensors_exc_vel_tag                 11
+#define RobotSensors_act_left_pos_tag            12
+#define RobotSensors_act_right_pos_tag           13
 #define RobotEffort_lin_act_tag                  1
 #define RobotEffort_left_drive_tag               2
 #define RobotEffort_right_drive_tag              3
@@ -80,7 +82,9 @@ X(a, STATIC,   SINGULAR, FLOAT,    drive_right_torque,   7) \
 X(a, STATIC,   SINGULAR, FLOAT,    exc_torque,        8) \
 X(a, STATIC,   SINGULAR, FLOAT,    drive_left_vel,    9) \
 X(a, STATIC,   SINGULAR, FLOAT,    drive_right_vel,  10) \
-X(a, STATIC,   SINGULAR, FLOAT,    exc_vel,          11)
+X(a, STATIC,   SINGULAR, FLOAT,    exc_vel,          11) \
+X(a, STATIC,   SINGULAR, LONG,     act_left_pos,     12 )\
+X(a, STATIC,   SINGULAR, LONG      act_right_pos,    13)
 #define RobotSensors_CALLBACK NULL
 #define RobotSensors_DEFAULT NULL
 

@@ -40,6 +40,8 @@ void recv(ros::Publisher &pub) {
   lunabot_msgs::RobotSensors state_msg;
 
   state_msg.act_right_curr = state.act_right_curr;
+  state_msg.act_left_pos = state.act_left_pos;
+  state_msg.act_right_pos = state.act_right_pos;
   state_msg.drive_right_curr = state.drive_right_curr;
   state_msg.drive_left_curr = state.drive_left_curr;
   state_msg.dep_curr = state.dep_curr;

@@ -46,7 +46,7 @@ void ADS1119_Current_Bus::init_ads1119() {
 }
 
 float ADS1119_Current_Bus::read(uint8_t mux) {
-  //ports are zero and 
+  //ports are zero and
   ads1.selectChannel(mux);
   return ADS1119_Current_Bus::adc_to_current_31A(ads1.readVoltage());
 }
@@ -213,15 +213,15 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
 
 CRGB Led_Strip::all_led[Led_Strip::NUM_LEDS];
 
-void Led_Strip::init() { 
+void Led_Strip::init() {
   FastLED.addLeds<WS2812B, 6, GRB>(Led_Strip::all_led, Led_Strip::NUM_LEDS);
-  FastLED.setBrightness(Led_Strip::BRIGHTNESS); 
+  FastLED.setBrightness(Led_Strip::BRIGHTNESS);
 }
 
-void Led_Strip::set_color(int32_t color_in) { 
+void Led_Strip::set_color(int32_t color_in) {
   CRGB color_choice;
 
-  switch (color_in) { 
+  switch (color_in) {
   case 0:
     color_choice = CRGB::Black;
     break;
@@ -285,7 +285,7 @@ float HX711_Bus::read_scale(uint8_t id) {
     // .get_value(times) gets offset but not scaled
     // .get_units(times) gets offset and scaled
     // times does nothing in raw mode (as we are)
-    float val = encs[id].get_units(1); 
+    float val = encs[id].get_units(1);
     // if load cell is not returning any data, but HX711 is connected
     if (val == 0)
       return -1;
@@ -309,7 +309,10 @@ void Encoder_Bus::init() {
 
 long Encoder_Bus::read(uint8_t id) {
   // returns the count since last read, and resets the count to 0
+  if (id != 1 && id != 0) {
+      printf("Called encoder bus in linear actuator with incorrect id.\nExpected 0 or 1 but was %d.\n", id);
+      return -1;
+  }
   long val = encs[id].read();
   return val;
 }
-
