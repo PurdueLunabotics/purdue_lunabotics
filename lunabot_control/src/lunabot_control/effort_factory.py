@@ -4,7 +4,7 @@ from rclpy.node import Node
 import threading
 import rclpy
 
-from lunabot_msgs.msg import RobotEffort 
+from lunabot_msgs.msg import RobotEffort, RobotStall 
 from std_msgs.msg import Int8, Int32, Bool
 
 
@@ -23,7 +23,7 @@ class EffortFactory(Node):
         self.right_drive = 0
         self.excavate = 0
         self.deposition = 0
-        self.should_reset = False
+        self.should_reset = RobotStall()
 
         self.autonomy = True
         self._autonomy_sub = self.create_subscription(Bool, "autonomy", self._autonomy_cb, 1)
