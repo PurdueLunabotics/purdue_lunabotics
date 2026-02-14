@@ -47,50 +47,38 @@ def make_zone(offset_x, offset_y, length_x, length_y):
 
     return z
 
+start_zone = make_zone(
+    ZoneMeasurements.START_OFFSET_X,
+    ZoneMeasurements.START_OFFSET_Y,
+    ZoneMeasurements.START_LENGTH_X,
+    ZoneMeasurements.START_LENGTH_Y)
+
+exc_zone = make_zone(
+    ZoneMeasurements.EXC_OFFSET_X,
+    ZoneMeasurements.EXC_OFFSET_Y,
+    ZoneMeasurements.EXC_LENGTH_X,
+    ZoneMeasurements.EXC_LENGTH_Y)
+
+berm_zone = make_zone(
+    ZoneMeasurements.BERM_OFFSET_X,
+    ZoneMeasurements.BERM_OFFSET_Y,
+    ZoneMeasurements.BERM_LENGTH_X,
+    ZoneMeasurements.BERM_LENGTH_Y)
 
 class ZonesNode(Node):
     def __init__(self):
-        self.start_zone = self.make_zone(
-            ZoneMeasurements.START_OFFSET_X,
-            ZoneMeasurements.START_OFFSET_Y,
-            ZoneMeasurements.START_LENGTH_X,
-            ZoneMeasurements.START_LENGTH_Y)
-        
-        self.exc_zone = self.make_zone(
-            ZoneMeasurements.EXC_OFFSET_X,
-            ZoneMeasurements.EXC_OFFSET_Y,
-            ZoneMeasurements.EXC_LENGTH_X,
-            ZoneMeasurements.EXC_LENGTH_Y)
-        
-        self.berm_zone = self.make_zone(
-            ZoneMeasurements.BERM_OFFSET_X,
-            ZoneMeasurements.BERM_OFFSET_Y,
-            ZoneMeasurements.BERM_LENGTH_X,
-            ZoneMeasurements.BERM_LENGTH_Y)
+        super().__init__("zones_node")
+    
+        self.exc_zone_marker_pub = self.create_publisher(Marker, "exc_zone_marker", 10)
+        self.berm_zone_marker_pub = self.create_publisher(Marker, "berm_zone_marker", 10)
+        self.start_zone_marker_pub = self.create_publisher(Marker, "start_zone_marker", 10)
 
+        self.exc_zone_pub = self.create_publisher(Zone, "exc_zone", 10)
+        self.berm_zone_pub = self.create_publisher(Zone, "berm_zone", 10)
+        self.start_zone_pub = self.create_publisher(Zone, "start_zone", 10)
 
+        self.start_time = time.perf_counter_ns()
         self.create_timer(1 / 30, self.mainloop)
-
-    def make_zone(self, offset_x, offset_y, length_x, length_y):
-        z = Zone()
-
-        z.v1 = Point()
-        z.v1.x = offset_x + (length_x / 2)
-        z.v1.y = offset_y + (length_y / 2)
-
-        z.v2 = Point()
-        z.v2.x = offset_x + (length_x / 2)
-        z.v2.y = offset_y - (length_y / 2)
-
-        z.v3 = Point()
-        z.v3.x = offset_x - (length_x / 2)
-        z.v3.y = offset_y - (length_y / 2)
-
-        z.v4 = Point()
-        z.v4.x = offset_x - (length_x / 2)
-        z.v4.y = offset_y + (length_y / 2)
-
-        return z
 
     def visualize_zone(self, zone: Zone, publisher: rclpy.publisher.Publisher, id=0, color=(1.0, 0.0, 0.0, 1.0)):
         """
@@ -151,31 +139,24 @@ class ZonesNode(Node):
         publisher.publish(zone_marker)
 
     def mainloop(self):
-        # rate = self.create_rate(30) # 30 hz
         if rclpy.ok():
-            # zone = Zone((1.0, 2.0), (2.0, 2.0), (1.0, 1.0), (2.0, 1.0))
+            if (exc_zone is not None):
+                self.visualize_zone(exc_zone, self.exc_zone_marker_pub)
+                self.exc_zone_pub.publish(exc_zone)
 
-            if (self.exc_zone is not None):
-                self.visualize_zone(self.exc_zone, self.exc_zone_marker_pub)
-                self.exc_zone_pub.publish(self.exc_zone)
+            if (berm_zone is not None):
+                self.visualize_zone(berm_zone, self.berm_zone_marker_pub)
+                self.berm_zone_pub.publish(berm_zone)
 
-            if (self.berm_zone is not None):
-                self.visualize_zone(self.berm_zone, self.berm_zone_marker_pub)
-                self.berm_zone_pub.publish(self.berm_zone)
-
-            if (self.start_zone is not None):
-                self.visualize_zone(self.start_zone, self.start_zone_marker_pub)
-                self.start_zone_pub.publish(self.start_zone)
-            # print("published zone")
-
-            # rate.sleep()
+            if (start_zone is not None):
+                self.visualize_zone(start_zone, self.start_zone_marker_pub)
+                self.start_zone_pub.publish(start_zone)
 
 def main():
     rclpy.init()
     zones_node = ZonesNode()
 
-    # print("starting")
-    zones_node.mainloop()
+    rclpy.spin(zones_node)
 
     zones_node.destroy_node()
     rclpy.shutdown()
