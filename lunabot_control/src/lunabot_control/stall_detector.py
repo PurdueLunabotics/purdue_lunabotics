@@ -2,9 +2,7 @@
 import rclpy
 from rclpy.node import Node
 
-from lunabot_msgs.msg import RobotEffort
-from lunabot_msgs.msg import RobotStall
-from lunabot_msgs.msg import RobotSensors
+from lunabot_msgs.msg import RobotEffort, RobotStall, RobotSensors, Event
 import threading
 
 class StallDetector(Node):
@@ -20,6 +18,7 @@ class StallDetector(Node):
         self.declare_parameter("~waitTime",2)
         
         self.stall_publisher = self.create_publisher(RobotStall, "stalled", 10)
+        self.event_publisher = self.create_publisher(Event, "events", 10)
         self.stall = RobotStall
         self.stallCounter = {'left':0,
                              'right':0,
@@ -51,6 +50,9 @@ class StallDetector(Node):
             self.stall.right_stall = True
         if (self.stallCounter['exc'] > time):
             self.stall.exc_stall = True
+
+        if (any(count > time for count in self.stallCounter.values())):
+            self.event_publisher.publish(Event(data = Event.STALL))
         
         self.stall_publisher.publish(self.stall)
         
