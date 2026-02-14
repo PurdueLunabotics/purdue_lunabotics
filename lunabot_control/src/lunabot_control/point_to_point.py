@@ -12,6 +12,7 @@ from rclpy.node import Node
 from std_msgs.msg import Bool, Float32, String
 from tf_transformations import euler_from_quaternion
 from visualization_msgs.msg import Marker
+from lunabot_msgs.msg import Event
 
 from lunabot_control.pid_controller import PIDController
 
@@ -133,6 +134,7 @@ class PointToPoint(Node):
 
         self.target_publisher = self.create_publisher(Pose2D, "ptp/target_pose", 10)
         self.log_publisher = self.create_publisher(String, "ptp/log", 10)
+        self.event_publisher = self.create_publisher(Event, "events", 10)
         # SUBSCRIBERS ==================================================================================================
         odom_topic = "odom"
         self.create_subscription(PoseStamped, odom_topic, self.__odom_callback, 1)
@@ -311,15 +313,15 @@ class PointToPoint(Node):
         ## -------------------------------------------------
 
         # calculate angle to target from x axis
-        # pose_target_angle = None
-        # if on_final_trajectory and self.at_linear_target:
-        #     # set target to final path angle if reached linear destination
-        #     pose_target_angle = self.target_pose[2]
-        # else:
-        pose_target_angle = np.arctan2(  # calculate target angle [-pi,pi]
-            self.target_pose[1] - current_pose[1],
-            self.target_pose[0] - current_pose[0],
-        )
+        pose_target_angle = None
+        if on_final_trajectory and self.at_linear_target:
+            # set target to final path angle if reached linear destination
+            pose_target_angle = self.target_pose[2]
+        else:
+            pose_target_angle = np.arctan2(  # calculate target angle [-pi,pi]
+                self.target_pose[1] - current_pose[1],
+                self.target_pose[0] - current_pose[0],
+            )
 
         # subtract heading to find angle error
         self.angle_error = pose_target_angle - current_pose[2]
@@ -353,13 +355,14 @@ class PointToPoint(Node):
         #            On Final Trajectory: {on_final_trajectory} \n
         #            -----------------------------------
         #            ''')
-        if not self.at_linear_target:
+        if (not self.at_angle_target) and (not self.at_linear_target or on_final_trajectory):
+            self.state = States.MOVING_TO_ANGULAR_TARGET
+        elif not self.at_linear_target:
             self.state = States.MOVING_TO_LINEAR_TARGET
-            if not self.at_angle_target:
-                self.state = States.MOVING_TO_ANGULAR_TARGET
         else:  # move to angular target if angle target is not met
             if on_final_trajectory or len(self.path) <= self.target_pose_index:
                 self.state = States.AT_DESTINATION  # update state if at destination
+                self.event_publisher.publish(Event(data = Event.ARRIVED))
             else:
                 # if at linear target and not on final trajectory, target point should update
                 self.target_pose_index += 1

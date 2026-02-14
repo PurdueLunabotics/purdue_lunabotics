@@ -1,7 +1,11 @@
+#!/usr/bin/env python3
+
 from enum import Enum
+from lunabot_behavior.states.traverse import NoPath, TraverseToBerm
 from state import Events, State
 import rclpy
 from state_manager import StateManager
+from lunabot_msgs.msg import Event
 
 class MainStates(Enum):
     INIT_TO_LINKUP = State()
@@ -26,9 +30,9 @@ class MainStates(Enum):
 
     WAIT_FOR_LINKUP = State()
 
-    TRAVERSE_TO_BERM = State()
+    TRAVERSE_TO_BERM = TraverseToBerm()
     TRAVERSE_TO_BERM_STALL = State()
-    TRAVERSE_TO_BERM_NO_PATH = State()
+    TRAVERSE_TO_BERM_NO_PATH = NoPath()
 
     ALIGN_TO_BERM = State()
     ALIGN_TO_BERM_STALL = State()
@@ -38,6 +42,8 @@ class MainStates(Enum):
     
     DEPOSIT = State()
     DEPOSIT_STALL = State()
+
+    IDLE = State()
 
     @staticmethod
     def get_transition(state, event: Events):
@@ -74,8 +80,8 @@ class MainStates(Enum):
             (MainStates.WAIT_FOR_LINKUP, Events.FAIL): MainStates.TRAVERSE_TO_BERM,
 
             # in case minibot is indisposed and big bot has to make full cycles
-            (MainStates.TRAVERSE_TO_BERM, Events.SUCCESS): MainStates.ALIGN_TO_BERM,
-            (MainStates.TRAVERSE_TO_BERM, Events.STALL): MainStates.ALIGN_TO_BERM,
+            (MainStates.TRAVERSE_TO_BERM, Events.ARRIVED): MainStates.IDLE,
+            (MainStates.TRAVERSE_TO_BERM, Events.STALL): MainStates.TRAVERSE_TO_BERM_STALL,
             (MainStates.TRAVERSE_TO_BERM, Events.NO_PATH): MainStates.TRAVERSE_TO_BERM_NO_PATH,
             (MainStates.TRAVERSE_TO_BERM_STALL, Events.SUCCESS): MainStates.TRAVERSE_TO_BERM,
             (MainStates.TRAVERSE_TO_BERM_NO_PATH, Events.SUCCESS): MainStates.TRAVERSE_TO_BERM,
@@ -93,7 +99,7 @@ class MainStates(Enum):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = StateManager(MainStates, MainStates.INIT_TO_LINKUP, Events)
+    minimal_subscriber = StateManager(MainStates, MainStates.TRAVERSE_TO_BERM, Events, Event)
 
     rclpy.spin(minimal_subscriber)
 

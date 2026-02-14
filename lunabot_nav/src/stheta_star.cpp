@@ -164,6 +164,7 @@ PathMsg SThetaStar::createPlan(const PoseStampedMsg &start,
 
     if (item.vertex->coord.x == goal_x && item.vertex->coord.y == goal_y) {
       auto path = retracePath(*item.vertex);
+      path.poses.back() = goal;
       this->prev_path = path;
       this->prev_cost = item.vertex->cost;
       this->prev_goal = goal;

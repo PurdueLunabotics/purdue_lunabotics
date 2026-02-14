@@ -3,13 +3,11 @@
 import rclpy
 
 from geometry_msgs.msg import Point
-from visualization_msgs.msg import Marker
-from rcl_interfaces.msg import ParameterDescriptor, ParameterType
 from lunabot_msgs.msg import Zone
+from visualization_msgs.msg import Marker
+import time
 
 from rclpy.node import Node
-
-import time
 
 # zone geometries - based on guidebook orientations (all measurements in meters)
 class ZoneMeasurements:
@@ -28,33 +26,30 @@ class ZoneMeasurements:
     BERM_LENGTH_X = 1.7
     BERM_LENGTH_Y = 0.8
 
+def make_zone(offset_x, offset_y, length_x, length_y):
+    z = Zone()
+
+    z.v1 = Point()
+    z.v1.x = offset_x + (length_x / 2)
+    z.v1.y = offset_y + (length_y / 2)
+
+    z.v2 = Point()
+    z.v2.x = offset_x + (length_x / 2)
+    z.v2.y = offset_y - (length_y / 2)
+
+    z.v3 = Point()
+    z.v3.x = offset_x - (length_x / 2)
+    z.v3.y = offset_y - (length_y / 2)
+
+    z.v4 = Point()
+    z.v4.x = offset_x - (length_x / 2)
+    z.v4.y = offset_y + (length_y / 2)
+
+    return z
+
+
 class ZonesNode(Node):
     def __init__(self):
-        super().__init__("zones_node")
-
-        self.declare_parameter("sim", True, ParameterDescriptor(type = ParameterType.PARAMETER_BOOL))
-
-        self.exc_zone_marker_pub = self.create_publisher(Marker, "/exc_zone_marker", 10)
-        self.berm_zone_marker_pub = self.create_publisher(Marker, "/berm_zone_marker", 10)
-        self.start_zone_marker_pub = self.create_publisher(Marker, "/start_zone_marker", 10)
-
-        self.exc_zone_pub = self.create_publisher(Zone, "/exc_zone", 10)
-        self.berm_zone_pub = self.create_publisher(Zone, "/berm_zone", 10)
-        self.start_zone_pub = self.create_publisher(Zone, "/start_zone", 10)
-        
-        # self.exc_zone_pub = self.create_publisher(lunabot_msgs.Zone, "/exc_zone", 10)
-
-        # self.create_subscription(AprilTagDetectionArray, "/d455_back/detections", self.apriltag_callback, 1)
-
-        # self.START_APRILTAG_ID = 11
-
-        self.exc_zone = None
-        self.berm_zone = None
-        self.start_zone = None
-
-        # self.is_sim = self.get_parameter("sim").get_parameter_value().bool_value
-        self.start_time = time.perf_counter_ns()
-
         self.start_zone = self.make_zone(
             ZoneMeasurements.START_OFFSET_X,
             ZoneMeasurements.START_OFFSET_Y,
