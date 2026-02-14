@@ -11,6 +11,7 @@ from std_msgs.msg import Bool
 from std_srvs.srv import Empty
 from rcl_interfaces.srv import SetParameters, GetParameters
 import zones 
+import math
 
 class TraverseToBerm(State): # TODO: ensure that we are actually
     def setup(self, manager: Node):
@@ -46,18 +47,27 @@ class TraverseToBerm(State): # TODO: ensure that we are actually
         self.logger.info("send disable");
         self.enabled_pub.publish(Bool(data = False))
 
+num_failed = 0
+
 class NoPath(State):
     def setup(self, manager: Node):
         self.waiting_for_planning = False
-        self.waiting_for_future = False
-        self.failed = True
-        self.num_failed = 0
+        self.waiting_for_reset = False
+        self.waiting_for_set_radius = False
+
         self.failed_sub = manager.create_subscription(Bool, "nav/failed", self.failed_cb, 10)
         self.costmap_set_params_service = manager.create_client(SetParameters, "global_costmap/global_costmap/set_parameters")
         self.costmap_get_params_service = manager.create_client(GetParameters, "global_costmap/global_costmap/get_parameters")
         self.rtabmap_reset_service = manager.create_client(Empty, "rtabmap/rtabmap/reset")
+
+        self.failed = True
+        self.initial_radius = None
+
         self.logger = manager.get_logger()
         self.manager = manager
+
+        get_request = GetParameters.Request(names = ["robot_radius"])
+        self.costmap_get_params_service.call_async(get_request).add_done_callback(self.radius_cb)
 
     def failed_cb(self, value: Bool):
         self.waiting_for_planning = False
@@ -66,39 +76,46 @@ class NoPath(State):
     def start(self):
         self.waiting_for_planning = False
         self.failed = True
-        self.num_failed = 0
 
-    def future_complete_cb(self, future: rclpy.Future):
-        self.logger.info("future complete")
-        self.waiting_for_future = False
+    def reset_cb(self, future: rclpy.Future):
+        self.waiting_for_reset = False
+
+    def set_radius_cb(self, future: rclpy.Future):
+        self.waiting_for_set_radius = False
 
     def radius_cb(self, future: rclpy.Future):
         get_response: GetParameters.Response = future.result()
-        robot_radius: float = get_response.values[0].double_value
-        self.logger.info(f"robot radius: {robot_radius}, new: {robot_radius * 2.0 / 3.0}")
-
-        request = SetParameters.Request()
-        request.parameters = [Parameter(name = "robot_radius", value = ParameterValue(double_value = robot_radius * 2.0 / 3.0, type = ParameterType.PARAMETER_DOUBLE))]
-        self.costmap_set_params_service.call_async(request).add_done_callback(self.future_complete_cb)
+        self.initial_radius: float = get_response.values[0].double_value
 
     def periodic(self):
-        if self.waiting_for_planning or self.waiting_for_future:
-            self.logger.info(f"waiting {self.waiting_for_future} {self.waiting_for_planning}")
+        global num_failed
+
+        if self.waiting_for_planning or self.waiting_for_set_radius or self.waiting_for_reset or self.initial_radius == None:
+            self.logger.info(f"waiting: {self.waiting_for_planning} {self.waiting_for_set_radius} {self.waiting_for_reset} {self.initial_radius}")
             return None
         elif not self.failed:
-            self.logger.info("No path success")
             return Events.SUCCESS
-        elif (self.num_failed == 0 or self.num_failed == 1):
-            self.logger.info(f"failed: {self.num_failed}")
-            get_request = GetParameters.Request(names = ["robot_radius"])
-            self.costmap_get_params_service.call_async(get_request).add_done_callback(self.radius_cb)
-            self.waiting_for_future = True
-        elif (self.num_failed == 2):
-            self.rtabmap_reset_service.call_async(Empty.Request()).add_done_callback(self.future_complete_cb)
-            self.waiting_for_future = True
-        elif (self.num_failed > 2):
+        elif (num_failed == 0 or num_failed == 1):
+            self.waiting_for_set_radius = True
+            request = SetParameters.Request()
+            request.parameters = [Parameter(name = "robot_radius", value = ParameterValue(double_value = self.initial_radius * math.pow(2.0 / 3.0, num_failed + 1), type = ParameterType.PARAMETER_DOUBLE))]
+            self.costmap_set_params_service.call_async(request).add_done_callback(self.set_radius_cb)
+        elif (num_failed == 2):
+            self.waiting_for_set_radius = True
+            request = SetParameters.Request()
+            request.parameters = [Parameter(name = "robot_radius", value = ParameterValue(double_value = self.initial_radius, type = ParameterType.PARAMETER_DOUBLE))]
+            self.costmap_set_params_service.call_async(request).add_done_callback(self.set_radius_cb)
+
+            self.waiting_for_reset = True
+            self.rtabmap_reset_service.call_async(Empty.Request()).add_done_callback(self.reset_cb)
+        elif (num_failed > 2):
             self.logger.info(f"failed final")
+            num_failed = 0
             return Events.FAIL
 
-        self.num_failed += 1
+        num_failed += 1
         self.waiting_for_planning = True
+
+class Stall(State):
+    def setup(self, manager: Node):
+
