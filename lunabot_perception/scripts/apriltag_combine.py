@@ -9,7 +9,7 @@ class ApriltagCombine(Node):
         super().__init__("apriltag_combine_node", **kwargs)
 
         self.declare_parameter("input_topics", ["example"], ParameterDescriptor(type = ParameterType.PARAMETER_STRING_ARRAY))
-        self.declare_parameter("input_tags", [11, 7], ParameterDescriptor(type = ParameterType.PARAMETER_INTEGER_ARRAY))
+        self.declare_parameter("input_tags", [11, 7, 6, 2], ParameterDescriptor(type = ParameterType.PARAMETER_INTEGER_ARRAY))
 
         self.subs = [self.create_subscription(AprilTagDetectionArray, topic, self.detection_cb, 10)
                      for topic in self.get_parameter("input_topics").get_parameter_value().string_array_value]
