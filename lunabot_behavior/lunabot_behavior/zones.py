@@ -29,19 +29,19 @@ class ZoneMeasurements:
 def make_zone(offset_x, offset_y, length_x, length_y):
     z = Zone()
 
-    z.v1 = Point()
+    z.v1 = Point() # top right
     z.v1.x = offset_x + (length_x / 2)
     z.v1.y = offset_y + (length_y / 2)
 
-    z.v2 = Point()
+    z.v2 = Point() # bottom right
     z.v2.x = offset_x + (length_x / 2)
     z.v2.y = offset_y - (length_y / 2)
 
-    z.v3 = Point()
+    z.v3 = Point() # bottom left
     z.v3.x = offset_x - (length_x / 2)
     z.v3.y = offset_y - (length_y / 2)
 
-    z.v4 = Point()
+    z.v4 = Point() # top left
     z.v4.x = offset_x - (length_x / 2)
     z.v4.y = offset_y + (length_y / 2)
 
