@@ -310,7 +310,6 @@ void Encoder_Bus::init() {
 long Encoder_Bus::read(uint8_t id) {
   // returns the count since last read, and resets the count to 0
   if (id != 1 && id != 0) {
-      printf("Called encoder bus in linear actuator with incorrect id.\nExpected 0 or 1 but was %d.\n", id);
       return -1;
   }
   long val = encs[id].read();

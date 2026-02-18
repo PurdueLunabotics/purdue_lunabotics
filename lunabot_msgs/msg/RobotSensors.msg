@@ -1,6 +1,6 @@
 float32 act_right_curr
 int64   act_left_pos
-int64   act_left_pos
+int64   act_right_pos
 float32 dep_curr
 float32 exc_curr
 float32 drive_left_curr
