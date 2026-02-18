@@ -177,10 +177,14 @@
 
         <let if="$(var pointcloud)" name="scan_cloud" value="$(var /ns)/pointcloud/depth_combined_cloud"/>
         <let unless="$(var pointcloud)" name="scan_cloud" value="$(var /ns)/$(var odom_cam_name)/points"/>
+        <node if="$(var pointcloud)" name="crater_generation_node" pkg="lunabot_perception" exec="crater_generation.py" respawn="true">
+          <remap from="nav_path" to="nav_path"/>
+          <param name="use_sim_time" value="$(var sim)"/>
+        </node>
 
         <let name="rtabmap_max_features" value="'-1'" if="$(var odom_from_sim)"/>
         <let name="rtabmap_max_features" value="'500'" unless="$(var odom_from_sim)"/>
-
+        
         <node if="$(var slam)" name="rtabmap" pkg="rtabmap_slam" exec="rtabmap" output="screen" args="--delete_db_on_start" ros_args="--log-level WARN">
             <param name="use_sim_time" value="$(var sim)"/>
 
