@@ -25,10 +25,6 @@
     <let name="starting_x" if="$(eval '$(var robot_num) == 0')" value="2.5"/>
 
 
-    <let name="entity_name" if="$(eval '$(var robot_num) == 1')" value="mini_bot"/>
-    <let name="entity_name" if="$(eval '$(var robot_num) == 0')" value="dummy_bot"/>
-
-
     <!-- What to Launch Args -->
     <arg name="autonomy" default="true" />
     <arg name="record" default="$(var real)" />
@@ -47,7 +43,7 @@
     <let name="cam_3_name"              value="d455_front"/>
     <let name="cam_4_name"              value="d455_back"/>
     <!-- Main -->
-    <arg name="cams"                    default="'2'"      if="$(eval '$(var robot_num) == 0')"/> <!-- Camera numbers -->
+    <arg name="cams"                    default="'12'"      if="$(eval '$(var robot_num) == 0')"/> <!-- Camera numbers -->
     <arg name="odom_cam_name"           default="$(var cam_2_name)"  if="$(eval '$(var robot_num) == 0')"/>
 
     <!-- Mini -->
@@ -99,11 +95,11 @@
     </include>
 
     <!-- Launch Cameras -->
-    <!-- <include if="$(var cameras)" file="$(find-pkg-share lunabot_perception)/launch/cameras.launch"> -->
-        <!-- <arg name="robot_num" value="$(var robot_num)"/> -->
-        <!-- <arg name="ns" value="$(var ns)"/> -->
-        <!-- <arg name="sim" value="$(var sim)"/> -->
-    <!-- </include> -->
+    <include if="$(var cameras)" file="$(find-pkg-share lunabot_perception)/launch/cameras.launch">
+        <arg name="robot_num" value="$(var robot_num)"/>
+        <arg name="ns" value="$(var ns)"/>
+        <arg name="sim" value="$(var sim)"/>
+    </include>
         
 
     <include if="$(var record)" file="$(find-pkg-share lunabot_bringup)/launch/record.launch">
@@ -144,7 +140,7 @@
 
         <!-- Launch effort factory -->
         <node name="effort_factory_node" pkg="lunabot_control" exec="effort_factory_node" 
-                output="screen" respawn="false" >
+                output="screen" respawn="true" >
             <param name="use_sim_time" value="$(var sim)"/>
             
             <!-- Input -->
@@ -162,9 +158,9 @@
             <param name="input_topics" value="d455_back/detections;d455_front/detections" value-sep=";"/>
         </node>
 
-        <!-- <node name="stall_detection_node" pkg="lunabot_control" exec="stall_detection_node" output="screen" respawn="true"> -->
-            <!-- <param name="~waitTime" value="2"/> -->
-        <!-- </node> -->
+        <node name="stall_detection_node" pkg="lunabot_control" exec="stall_detection_node" output="screen" respawn="true">
+            <param name="~waitTime" value="2"/>
+        </node>
 
         <push_ros_namespace namespace="rtabmap"/>
 
@@ -220,6 +216,7 @@
             <param name="Grid/Sensor"             value="'0'"/> <!-- Only use point clouds-->
             <param name="Grid/FootprintLength"    value="'1.0'"/>
             <param name="Grid/FootprintWidth"     value="'0.75'"/> 
+            <param name="Grid/MaxGroundAngle"     value="'30'"/> <!-- 30 degree normal before marked as obstacle -->
             <!-- <param name="Grid/MaxObstacleHeight"  value="'2.   0"/> points greater than 2m above are not obstacles -->
             <param name="Grid/RangeMax"           value="'0.0'"/> <!-- don't cap range (do this in cameras.launch) -->
             <param name="Grid/PreVoxelFiltering"  value="'false'"/> <!-- don't filter with voxels (do this in cameras.launch) -->
@@ -231,10 +228,10 @@
             <param name="GridGlobal/Eroded"       value="'true'" /> <!-- TODO: Figure out what this does? -->
             <param name="GridGlobal/FootprintRadius" value="'0.75'" /> <!-- Clear obstacles within this radius -->
             <param name="GridGlobal/MinSize"      value="'1.0'"/> <!-- Minimum map size (m) -->
-            <param name="GridGlobal/OccupancyThr" value="'0.75'"/> <!-- Threshold for occupancy -->
+            <param name="GridGlobal/OccupancyThr" value="'0.5'"/> <!-- Threshold for occupancy -->
             
             <param name="Kp/MaxFeatures"          value="$(var rtabmap_max_features)"/>
-            <param name="Marker/Priors"           value="'6 2.5 2.5 0.4 1.57 1.57 0|7 3.4 1.8 0.4 1.57 0 -1.57'"/>
+            <param name="Marker/Priors"           value="'11 2.5 2.5 0.4 1.57 1.57 0|7 3.4 1.8 0.4 1.57 0 -1.57'"/>
             <param name="Optimizer/PriorsIgnored" value="'false'"/>
             
             <param name="database_path"           value="~/.ros/$(var ns)rtabmap.db"/>

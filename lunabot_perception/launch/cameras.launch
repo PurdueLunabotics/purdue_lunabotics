@@ -7,18 +7,15 @@
   <!-- Type of Camera Args -->
   <arg name="sim"                             default="false"/>
 
-  <let name="serial_no_cam_1"               value="'339222072367'"/>
+  <let name="serial_no_cam_4"               value="'_053122251286'"/>
   <arg name="cam_1_name"                    default="d455_front"/>
-  <let name="serial_no_cam_2"               value="'939622074382'"/>
+  <let name="serial_no_cam_1"               value="'141222070808'"/>
   <arg name="cam_2_name"                    default="d455_back"/>
   <let name="serial_no_cam_3"               value="'_053122251335'"/>
-  <arg name="cam_3_name"                    default="d455_left"/>
-  <let name="serial_no_cam_4"               value="''"/>
-  <arg name="cam_4_name"                    default="d455_right"/>
-  <arg name="cams"                          default="'12'"/>
-
-  <arg name="ns" default="" />
-  <arg name="robot_num" default="0" />
+  <arg name="cam_3_name"                    default="d455_front"/>
+  <let name="serial_no_cam_2"               value="'939622074382'"/>
+  <arg name="cam_4_name"                    default="d455_back"/>
+  <arg name="cams"                          default="''"/>
 
   <arg name="pointcloud"                      default="$(eval 'len($(var cams)) > 1')" />
 

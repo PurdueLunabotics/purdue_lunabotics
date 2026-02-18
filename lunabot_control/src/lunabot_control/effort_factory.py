@@ -23,7 +23,7 @@ class EffortFactory(Node):
         self.right_drive = 0
         self.excavate = 0
         self.deposition = 0
-        self.should_reset = False
+        self.should_reset = RobotStall()
 
         self.autonomy = True
         self._autonomy_sub = self.create_subscription(Bool, "autonomy", self._autonomy_cb, 1)
@@ -71,8 +71,6 @@ class EffortFactory(Node):
         self.effort.excavate = self.excavate
         self.effort.deposit = self.deposition
         self.effort.should_reset = self.should_reset
-
-        # self.get_logger().info("gottem")
 
         self.effort_publisher.publish(self.effort)
 

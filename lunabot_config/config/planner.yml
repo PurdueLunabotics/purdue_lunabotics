@@ -4,7 +4,7 @@ global_costmap:
       publish_frequency: 30.0
       global_frame: "map"
       robot_base_frame: "base_link"
-      robot_radius: 0.3
+      robot_radius: 0.4
       plugins: ["static_layer", "denoise_layer", "inflation_layer"]
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
@@ -17,7 +17,7 @@ global_costmap:
       denoise_layer:
         plugin: "nav2_costmap_2d::DenoiseLayer"
         enabled: true
-        minimal_group_size: 10
+        minimal_group_size: 2
         group_connectivity_type: 4 # 4 is adjacent, 8 includes diagonals
         footprint_clearing_enabled: true
       inflation_layer:
