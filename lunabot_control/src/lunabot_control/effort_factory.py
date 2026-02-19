@@ -23,7 +23,7 @@ class EffortFactory(Node):
         self.right_drive = 0
         self.excavate = 0
         self.deposition = 0
-        self.should_reset = RobotStall()
+        self.should_reset = False
 
         self.autonomy = True
         self._autonomy_sub = self.create_subscription(Bool, "autonomy", self._autonomy_cb, 1)

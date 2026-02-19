@@ -1,24 +1,26 @@
 from enum import Enum
-from state import Events, State
+from lunabot_behavior.state import Events, State
 import rclpy
-from state_manager import StateManager
+from lunabot_behavior.state_manager import StateManager
+from lunabot_behavior.states.traverse import NoPath, Traverse, Stall
 from lunabot_msgs.msg import Event
+from geometry_msgs.msg import PoseStamped
 
 class MiniStates(Enum):
-    FIND_LINKUP = State()
-    FIND_LINKUP_STALL = State()
-    FIND_LINKUP_NO_PATH = State()
+    FIND_LINKUP = Traverse(PoseStamped())
+    FIND_LINKUP_STALL = Stall()
+    FIND_LINKUP_NO_PATH = NoPath()
 
-    MOVE_TO_BERM = State()
-    MOVE_TO_BERM_STALL = State()
-    MOVE_TO_BERM_NO_PATH = State()
+    MOVE_TO_BERM = Traverse(PoseStamped())
+    MOVE_TO_BERM_STALL = Stall()
+    MOVE_TO_BERM_NO_PATH = NoPath()
 
     DEPOSIT = State()
     DEPOSIT_STALL = State()
 
-    MOVE_TO_STAGING = State()
-    MOVE_TO_STAGING_STALL = State()
-    MOVE_TO_STAGING_NO_PATH = State()
+    MOVE_TO_STAGING = Traverse(PoseStamped())
+    MOVE_TO_STAGING_STALL = Stall()
+    MOVE_TO_STAGING_NO_PATH = NoPath()
 
     ALIGN_TO_MAIN = State()
     ALIGN_TO_MAIN_STALL = State()

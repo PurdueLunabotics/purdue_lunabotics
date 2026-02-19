@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 from enum import Enum
-from lunabot_behavior.states.traverse import NoPath, TraverseToBerm
-from state import Events, State
+from lunabot_behavior.states.traverse import NoPath, Traverse, Stall
+from lunabot_behavior.state import Events, State
+from lunabot_behavior.state_manager import StateManager
+from geometry_msgs.msg import PoseStamped
 import rclpy
-from state_manager import StateManager
 from lunabot_msgs.msg import Event
 
 class MainStates(Enum):
@@ -24,14 +25,14 @@ class MainStates(Enum):
     RAISE_ACT = State()
     RAISE_ACT_STALL = State()
     
-    TRAVERSE_TO_LINKUP = State()
-    TRAVERSE_TO_LINKUP_STALL = State()
-    TRAVERSE_TO_LINKUP_NO_PATH = State()
+    TRAVERSE_TO_LINKUP = Traverse(PoseStamped())
+    TRAVERSE_TO_LINKUP_STALL = Stall()
+    TRAVERSE_TO_LINKUP_NO_PATH = NoPath()
 
     WAIT_FOR_LINKUP = State()
 
-    TRAVERSE_TO_BERM = TraverseToBerm()
-    TRAVERSE_TO_BERM_STALL = State()
+    TRAVERSE_TO_BERM = Traverse(PoseStamped())
+    TRAVERSE_TO_BERM_STALL = Stall()
     TRAVERSE_TO_BERM_NO_PATH = NoPath()
 
     ALIGN_TO_BERM = State()

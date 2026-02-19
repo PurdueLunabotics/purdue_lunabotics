@@ -2,30 +2,30 @@
 
 from math import sqrt
 from geometry_msgs.msg import PoseStamped
-from lunabot_msgs.msg import Event
+from lunabot_msgs.msg import Event, RobotEffort, RobotStall
 from rcl_interfaces.msg import ParameterType, ParameterValue, Parameter
 import rclpy
-from state import State, Events
+from rclpy.time import Duration
+from lunabot_behavior.state import State, Events
 from rclpy.node import Node
 from std_msgs.msg import Bool
 from std_srvs.srv import Empty
 from rcl_interfaces.srv import SetParameters, GetParameters
-import zones 
 import math
 
-class TraverseToBerm(State): # TODO: ensure that we are actually
+class Traverse(State):
+    def __init__(self, goal: PoseStamped):
+        self.goal = goal
+
+    def set_goal(self, goal: PoseStamped):
+        self.goal = goal
+
     def setup(self, manager: Node):
         self.goal_pub = manager.create_publisher(PoseStamped, "goal", 10)
         self.backwards_pub = manager.create_publisher(Bool, "traversal/backwards", 10)
         self.enabled_pub = manager.create_publisher(Bool, "traversal/enabled", 10)
         self.odom = None
         self.tolerance = 0.1
-        self.goal = PoseStamped()
-        self.goal.pose.position.x = (zones.berm_zone.v2.x + zones.berm_zone.v3.x) / 2
-        self.goal.pose.position.y = (zones.berm_zone.v2.y + zones.berm_zone.v3.y) / 2
-        self.goal.pose.position.z = (zones.berm_zone.v2.z + zones.berm_zone.v3.z) / 2
-        self.goal.header.frame_id = "map"
-        self.goal.header.stamp = manager.get_clock().now().to_msg()
         self.logger = manager.get_logger()
 
     def odom_cb(self, pose: PoseStamped):
@@ -61,7 +61,7 @@ class NoPath(State):
         self.rtabmap_reset_service = manager.create_client(Empty, "rtabmap/rtabmap/reset")
 
         self.failed = True
-        self.initial_radius = None
+        self.initial_radius: None | float = None
 
         self.logger = manager.get_logger()
         self.manager = manager
@@ -85,7 +85,7 @@ class NoPath(State):
 
     def radius_cb(self, future: rclpy.Future):
         get_response: GetParameters.Response = future.result()
-        self.initial_radius: float = get_response.values[0].double_value
+        self.initial_radius = get_response.values[0].double_value
 
     def periodic(self):
         global num_failed
@@ -118,4 +118,24 @@ class NoPath(State):
 
 class Stall(State):
     def setup(self, manager: Node):
+        self.logger = manager.get_logger()
+        self.manager = manager
+        self.effort_pub = manager.create_publisher(RobotEffort, "effort", 10)
+        self.stalled_sub = manager.create_subscription(RobotStall, "stalled", self.stalled_cb, 1)
+        manager.declare_parameter("stall.wait_duration_seconds", 2.0)
+        self.stalled = RobotStall()
 
+    def stalled_cb(self, stalled: RobotStall):
+        self.stalled = stalled
+
+    def start(self):
+        effort = RobotEffort()
+        effort.should_reset = True
+        self.effort_pub.publish(effort)
+        self.start_time = self.manager.get_clock().now()
+
+    def periodic(self) -> None | Events:
+        duration: Duration = self.manager.get_clock().now() - self.start_time
+        if duration.nanoseconds / 1e9 > self.manager.get_parameter("stall.wait_duration_seconds").get_parameter_value().double_value:
+            return Events.SUCCESS
+        return None
