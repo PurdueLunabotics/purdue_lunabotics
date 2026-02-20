@@ -11,10 +11,19 @@
     <param name="lidar_ip" value="192.168.1.62"/>
     <param name="local_port" value="6201"/>
     <param name="local_ip" value="192.168.1.2"/>
-    <param name="cloud_frame" value="unilidar_lidar"/>
+    <param name="cloud_frame" value="lidar_link"/>
     <param name="cloud_topic" value="unilidar/cloud"/>
     <param name="imu_frame" value="unilidar_imu"/>
     <param name="imu_topic" value="unilidar/imu"/>
   </node>
+
+   <!-- Assemble pointclouds over time-->
+    <node pkg="rtabmap_util" exec='point_cloud_assembler' name="point_cloud_assembler" respawn="true">
+      <remap from="cloud" to="unilidar/cloud"/>
+      <remap from="odom" to="odom"/>
+      <remap from="assembled_cloud" to="lidar_assembled_cloud"/>       
+      <param name="circular_buffer" value="true"/> <!-- remove oldest instead of waiting for entirely new clouds-->
+      <param name="assembling_time" value="1"/> <!-- Seconds-->
+    </node>
 
 </launch>
