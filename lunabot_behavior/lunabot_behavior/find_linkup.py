@@ -1,43 +1,46 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.task import Future
+from rclpy.executors import MultiThreadedExecutor
 
 from rclpy.action import ActionClient
 from nav2_msgs.action import ComputePathToPose
 from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped, Point
 from visualization_msgs.msg import Marker
+from std_msgs.msg import Bool
+from lunabot_msgs.srv import FindLinkup
 
-from lunabot_behavior.zones import ZoneMeasurements
+from lunabot_behavior.zones import ZoneMeasurements, get_distance_from_exc, get_distance_from_berm
 
 import numpy as np
 from shapely.geometry import LineString
 
-class FindLinkup(Node):
+class FindLinkupService(Node):
     # STATE CORE FUNCTIONS ==========================================================
 
     def __init__(self):
         super().__init__("find_linkup_node")
 
-        self.start_pose = PoseStamped()
-        self.start_pose.header.frame_id = "map"
-        self.start_pose.pose.position.x = ZoneMeasurements.START_OFFSET_X
-        self.start_pose.pose.position.y = ZoneMeasurements.START_OFFSET_Y
-        self.start_pose.pose.position.z = 0.0
-        self.start_pose.pose.orientation.x = 0.0
-        self.start_pose.pose.orientation.y = 0.0
-        self.start_pose.pose.orientation.z = 0.0
-        self.start_pose.pose.orientation.w = 1.0
-
         self.goal_pose = PoseStamped()
         self.goal_pose.header.frame_id = "map"
-        self.goal_pose.pose.position.x = ZoneMeasurements.BERM_OFFSET_X
-        self.goal_pose.pose.position.y = 0.0
+        self.goal_pose.pose.position.x = ZoneMeasurements.START_OFFSET_X
+        self.goal_pose.pose.position.y = ZoneMeasurements.START_OFFSET_Y
         self.goal_pose.pose.position.z = 0.0
         self.goal_pose.pose.orientation.x = 0.0
         self.goal_pose.pose.orientation.y = 0.0
         self.goal_pose.pose.orientation.z = 0.0
         self.goal_pose.pose.orientation.w = 1.0
+
+        # self.goal_pose = PoseStamped()
+        # self.goal_pose.header.frame_id = "map"
+        # self.goal_pose.pose.position.x = ZoneMeasurements.BERM_OFFSET_X
+        # self.goal_pose.pose.position.y = 0.0
+        # self.goal_pose.pose.position.z = 0.0
+        # self.goal_pose.pose.orientation.x = 0.0
+        # self.goal_pose.pose.orientation.y = 0.0
+        # self.goal_pose.pose.orientation.z = 0.0
+        # self.goal_pose.pose.orientation.w = 1.0
 
         self.linkup_found = False
         self.path: Path = None
@@ -62,33 +65,55 @@ class FindLinkup(Node):
         self.start_pub = self.create_publisher(PoseStamped, "linkup_start", 10)
         self.end_pub = self.create_publisher(PoseStamped, "linkup_end", 10)
 
-        self.create_timer(1 / 2, self.periodic)
-
-    def start(self):
-        pass
+        self.srv = self.create_service(FindLinkup, "find_linkup_srv", self.find_linkup_srv)
     
-    def periodic(self):
-        self.start_pose.header.stamp = self.get_clock().now().to_msg()
+    def find_linkup_srv(self, request, response):
+        print("finding linkup")
         self.goal_pose.header.stamp = self.get_clock().now().to_msg()
 
-        self.get_path(self.start_pose, self.goal_pose)
+        # dw abt it having the same arg twice - the planner overrides the start pose with robot pose
+        # solution is to call find linkup as a service once survey point is reached and just plan backwards from current position
+        self.get_path(self.goal_pose, self.goal_pose)
+
+        # while self.path is None: # TODO: figure out nonblocking
+        #     pass
 
         linkup_segment = self.find_linkup(self.path)
         if linkup_segment is not None:
+            response.success = Bool(data = True)
+
+            # main target should be closer to berm (low dist), mini target closer to berm (high dist)
+            p1_dist = get_distance_from_exc(linkup_segment[0])
+            p2_dist = get_distance_from_exc(linkup_segment[1])
+            if (p1_dist == p2_dist): # tiebreaker - subtract distance to berm
+                p1_dist -= get_distance_from_berm(linkup_segment[0])
+                p2_dist -= get_distance_from_berm(linkup_segment[1])
+
+            main_target = linkup_segment[0] if p1_dist < p2_dist else linkup_segment[1]
+            mini_target = linkup_segment[0] if p1_dist > p2_dist else linkup_segment[1]
+
+            response.main_target = Point()
+            response.main_target.x = main_target[0]
+            response.main_target.y = main_target[1]
+
+            response.mini_target = Point()
+            response.mini_target.x = mini_target[0]
+            response.mini_target.y = mini_target[1]
+
             self.visualize_line_segment(linkup_segment, self.linkup_line_publisher)
-    
-    def exit(self):
-        pass
+        else:
+            response.success = Bool(data = False)
+            response.main_target = Point()
+            response.mini_target = Point()
+        
+        return response
 
-    def is_finished(self):
-        pass
-
-    # HELPER FUNCTIONS ===============================================================
+    # HELPER FUNCTIONS ===========================================================================
 
     def get_path(self, start: PoseStamped, end: PoseStamped):
         goal_msg = ComputePathToPose.Goal()
-        goal_msg.start = end
-        goal_msg.goal = start
+        goal_msg.start = start
+        goal_msg.goal = end
 
         self.start_pub.publish(start)
         self.end_pub.publish(end)
@@ -124,7 +149,7 @@ class FindLinkup(Node):
     
     def find_linkup(self, path=Path) -> list[np.array]:
         if path is not None:
-            self.get_logger().info("finding linkup")
+            # self.get_logger().info("finding linkup")
 
             visited = []
             prev_waypoint: np.array = None
@@ -133,7 +158,7 @@ class FindLinkup(Node):
             poses: list[PoseStamped] = path.poses
 
             for i, waypoint in enumerate(poses): # determine which segments have enough length
-                self.get_logger().info(f"waypoint {i}")
+                # self.get_logger().info(f"waypoint {i}")
                 p1 = self.point_from_pose(waypoint)
 
                 if prev_waypoint is not None:
@@ -141,11 +166,12 @@ class FindLinkup(Node):
                     is_crossing_edge = self.crosses_exc_edge(segment)
 
                     if is_crossing_edge:
-                        self.get_logger().info("calculating things")
+                        # self.get_logger().info("calculating things")
                         # determine whether current segment is what we're looking for
                         dist = np.linalg.norm(p1 - prev_waypoint)
+                        # print(dist)
                         if dist >= self.MIN_SEGMENT_LENGTH:
-                            self.get_logger().info("crossing edge")
+                            # self.get_logger().info("crossing edge")
                             linkup_segment = [prev_waypoint, p1]
                             break
                         
@@ -154,7 +180,7 @@ class FindLinkup(Node):
                             next_segment = [p1, self.point_from_pose(poses[i+1])]
                             if self.is_viable_segment(next_segment, self.MIN_SEGMENT_LENGTH):
                                 linkup_segment = next_segment
-                                self.get_logger().info("berm edge")
+                                # self.get_logger().info("berm edge")
                                 break
 
                         # if neither option successful, check previous segment (inside exc zone)
@@ -162,7 +188,7 @@ class FindLinkup(Node):
                             prev_segment = [self.point_from_pose(poses[i-1]), prev_waypoint]
                             if self.is_viable_segment(prev_segment, self.MIN_SEGMENT_LENGTH):
                                 linkup_segment = next_segment
-                                self.get_logger().info("exc edge")
+                                # self.get_logger().info("exc edge")
                                 break
 
                         # no linkup option found
@@ -182,6 +208,8 @@ class FindLinkup(Node):
     def is_viable_segment(self, segment: list[np.array], min_segment_len):
         dist = np.linalg.norm(segment[0] - segment[1])
         return dist >= min_segment_len
+    
+    # VISUALIZATION HELPERS ==========================================================================
     
     def visualize_line_segment(self, segment: list[np.array], publisher, r=1.0, g=0.0, b=0.0):
         marker = Marker()
@@ -216,7 +244,7 @@ class FindLinkup(Node):
 
 def main():
     rclpy.init()
-    node = FindLinkup()
+    node = FindLinkupService()
 
     rclpy.spin(node)
 

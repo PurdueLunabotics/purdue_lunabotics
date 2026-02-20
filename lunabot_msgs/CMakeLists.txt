@@ -22,6 +22,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/RobotSensors.msg"
   "msg/Zone.msg"
   "msg/Event.msg"
+  "srv/FindLinkup.srv"
   DEPENDENCIES std_msgs geometry_msgs
 )
 # Add any packages that above messages depend on in a list next to DEPENDENCIES.

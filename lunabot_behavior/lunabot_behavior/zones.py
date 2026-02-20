@@ -9,6 +9,8 @@ import time
 
 from rclpy.node import Node
 
+import numpy as np
+
 # zone geometries - based on guidebook orientations (all measurements in meters)
 class ZoneMeasurements:
     START_OFFSET_X = 2.44
@@ -64,6 +66,19 @@ berm_zone = make_zone(
     ZoneMeasurements.BERM_OFFSET_Y,
     ZoneMeasurements.BERM_LENGTH_X,
     ZoneMeasurements.BERM_LENGTH_Y)
+
+# TODO: replace with actual point to line calculation
+def get_distance_from_start(p: np.array):
+    start_center = np.array([ZoneMeasurements.START_OFFSET_X, ZoneMeasurements.START_OFFSET_Y])
+    return np.linalg.norm(p - start_center)
+
+def get_distance_from_exc(p: np.array):
+    start_center = np.array([ZoneMeasurements.EXC_OFFSET_X, ZoneMeasurements.EXC_OFFSET_Y])
+    return np.linalg.norm(p - start_center)
+
+def get_distance_from_berm(p: np.array):
+    start_center = np.array([ZoneMeasurements.BERM_OFFSET_X, ZoneMeasurements.BERM_OFFSET_Y])
+    return np.linalg.norm(p - start_center)
 
 class ZonesNode(Node):
     def __init__(self):
