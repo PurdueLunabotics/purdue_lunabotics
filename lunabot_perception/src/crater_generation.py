@@ -85,6 +85,7 @@ class CraterGeneration(Node):
                     crater_vals.append(p[:-1])
                     
             
+            
             # self.get_logger().info(f"{craternp}")
             # initial guess for the ring center and radius (if no previous info about those, increase uncertainty accordingly)
             guessed_cx = 0
