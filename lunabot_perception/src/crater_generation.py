@@ -49,15 +49,17 @@ class CraterGeneration(Node):
         
     def estimate_crater(self):
     
+        did_read = True
         obst = []
         try:
             #self.get_logger
             vals = point_cloud2.read_points(self.pointCloud, field_names = ("x", "y", "z"), skip_nans=True)
             for p in vals:
-                obst.append((p[0], p[1], p[2])) 
+                obst.append([p[0], p[1], p[2]]) 
         except Exception as inst:
             self.get_logger().info(f"{inst}")
             self.get_logger().info("first problem :D")
+            did_read = False
         # get average height of ground
         # find points below average height of ground in obstacles
         self.get_logger().info(f"{len(self.ground.data)}")
@@ -66,7 +68,7 @@ class CraterGeneration(Node):
         try:
             ground = point_cloud2.read_points(self.ground, field_names = ("x", "y", "z"), skip_nans=True)
             for p in ground: 
-                ground_vals.append((p[0], p[1], p[2])) 
+                ground_vals.append([p[0], p[1], p[2]]) 
             ground_height = np.mean(ground_vals, axis = 0)[2]
         
             # self.get_logger().info(values)
@@ -74,85 +76,73 @@ class CraterGeneration(Node):
         except Exception as inst:
             self.get_logger().info(f"{inst}")
             self.get_logger().warn("Failed to read")
+            did_read = False
         
         crater_vals = []
-        
-        for p in obst:
-            if(p[2]<ground_height-0.01):
-                crater_vals.append(p[:-1])
-                
-        for i in range(30):
-                x = 0.3 + 0.25 * np.cos(i*12*2*np.pi/360)
-                y = 0.2 + 0.25 * np.sin(i*12*2*np.pi/360)
-                crater_vals.append([x, y, 0])
-        
-        for i in range(30):
-                x = 2 + 0.25 * np.cos(i*12*2*np.pi/360)
-                y = 0.2 + 0.25 * np.sin(i*12*2*np.pi/360)
-                crater_vals.append([x, y, 0])
-                
-        
-        
-        
-        
-        # self.get_logger().info(f"{craternp}")
-        # initial guess for the ring center and radius (if no previous info about those, increase uncertainty accordingly)
-        guessed_cx = 0
-        guessed_cy = 0
-        guessed_r = 0.3
+        if(did_read):
+            for p in obst:
+                if(p[2]<ground_height-0.01):
+                    crater_vals.append(p[:-1])
+                    
+            
+            # self.get_logger().info(f"{craternp}")
+            # initial guess for the ring center and radius (if no previous info about those, increase uncertainty accordingly)
+            guessed_cx = 0
+            guessed_cy = 0
+            guessed_r = 0.3
 
-        # uncertainty of the initial guess
-        uncertainty = 10
+            # uncertainty of the initial guess
+            uncertainty = 10
 
-        # width where points can still be counted to be part of the ring
-        epsilon = 0.05
-        
-        crater_pointcloud = []
-        
-        for n in range(4):
+            # width where points can still be counted to be part of the ring
+            epsilon = 0.05
             
-            craternp = np.array(crater_vals)
-        
-            hough_cx, hough_cy, hough_r = hough.hough_pointcloud(
-                guessed_cx, guessed_cy, guessed_r, craternp,
-                uncertainty, epsilon
-                )
+            crater_pointcloud = []
             
-            try:
+            for n in range(4):
                 
-                self.get_logger().warn(f"hough {hough_cx}")
-                self.get_logger().warn(f"hough {hough_cy}")
-                self.get_logger().warn(f"hough {hough_r}")
-                
-                
-            except Exception as inst:
-                self.get_logger().info(f"{inst}")   
-                self.get_logger().warn("Not generating craters")
-                
-           
+                craternp = np.array(crater_vals, dtype=object)
             
-            if(hough_r < 0.4 and hough_r > 0):
-                for i in range(30):
-                    x = hough_cx + hough_r * np.cos(i*12*2*np.pi/360)
-                    y = hough_cy + hough_r * np.sin(i*12*2*np.pi/360)
-                    crater_pointcloud.append([x, y, 0])
+                hough_cx, hough_cy, hough_r = hough.hough_pointcloud(
+                    guessed_cx, guessed_cy, guessed_r, craternp,
+                    uncertainty, epsilon
+                    )
+                
+                try:
+                    
+                    self.get_logger().warn(f"hough {hough_cx}")
+                    self.get_logger().warn(f"hough {hough_cy}")
+                    self.get_logger().warn(f"hough {hough_r}")
                     
                     
-                def dont_remove(j):
-                    return(((j[0]<hough_cx-hough_r-0.05) or (j[0]>hough_cx+hough_r+0.05)) or ((j[1]<hough_cy-hough_r-0.05) or (j[1]>hough_cy+hough_r+0.05)))
-                
-                crater_vals = list(filter(dont_remove, crater_vals))
-                
-                self.get_logger().info(f"{crater_vals}")
+                except Exception as inst:
+                    self.get_logger().info(f"{inst}")   
+                    self.get_logger().warn("Not generating craters")
+                    
             
-        
-        header = Header()
-        t = self.get_clock().now()
-        header.stamp = t.to_msg()
-        header.frame_id = "map"
-        pc2 = point_cloud2.create_cloud_xyz32(header, crater_pointcloud)
+                
+                if(hough_r < 0.4 and hough_r > 0):
+                    for i in range(30):
+                        x = hough_cx + hough_r * np.cos(i*12*2*np.pi/360)
+                        y = hough_cy + hough_r * np.sin(i*12*2*np.pi/360)
+                        crater_pointcloud.append([x, y, 0])
+                        
+                        
+                    def dont_remove(j):
+                        return(((j[0]<hough_cx-hough_r-0.05) or (j[0]>hough_cx+hough_r+0.05)) or ((j[1]<hough_cy-hough_r-0.05) or (j[1]>hough_cy+hough_r+0.05)))
+                    
+                    crater_vals = list(filter(dont_remove, crater_vals))
+                    
+                    self.get_logger().info(f"{crater_vals}")
+                
+            
+            header = Header()
+            t = self.get_clock().now()
+            header.stamp = t.to_msg()
+            header.frame_id = "map"
+            pc2 = point_cloud2.create_cloud_xyz32(header, crater_pointcloud)
 
-        self.crater_publisher.publish(pc2)
+            self.crater_publisher.publish(pc2)
         
         
     def set_points(self, points : PointCloud2):
