@@ -50,7 +50,7 @@ class MainStates(Enum):
     APPROACH_BERM = ApproachBerm()
     APPROACH_BERM_STALL = State()
     
-    DEPOSIT = Deposit()
+    DEPOSIT = Deposit(True)
     DEPOSIT_STALL = State()
     
     DEPOSIT_BERM = Deposit()

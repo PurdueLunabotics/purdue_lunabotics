@@ -6,7 +6,7 @@ from std_msgs.msg import Int32, Bool
 from lunabot_msgs.msg import Event
 
 class Deposit(State):
-  def __init__(self, transfer, **kwargs):
+  def __init__(self, transfer=False, **kwargs):
     super().__init__()
     self.transfer = transfer
   def setup(self, manager: Node):
