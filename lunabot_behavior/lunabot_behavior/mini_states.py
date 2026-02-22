@@ -3,8 +3,12 @@ from state import Events, State
 import rclpy
 from state_manager import StateManager
 from lunabot_msgs.msg import Event
+from align_to_angle_state import AlignToAngleState
 
 class MiniStates(Enum):
+    INIT = State()
+    INIT_STALL = State()
+    
     FIND_LINKUP = State()
     FIND_LINKUP_STALL = State()
     FIND_LINKUP_NO_PATH = State()
@@ -13,7 +17,7 @@ class MiniStates(Enum):
     TRAVERSE_TO_BERM_STALL = State()
     TRAVERSE_TO_BERM_NO_PATH = State()
 
-    ALIGN_TO_BERM = State()
+    ALIGN_TO_BERM = AlignToAngleState(180)
     ALIGN_TO_BERM_STALL = State()
     
     APPROACH_BERM = State()
@@ -31,6 +35,9 @@ class MiniStates(Enum):
 
     ALIGN_TO_MAIN = State()
     ALIGN_TO_MAIN_STALL = State()
+    
+    APPROACH_MAIN = State()
+    APPROACH_MAIN_STALL = State()
 
     COLLECT_REGOLITH = State()
 
@@ -40,6 +47,11 @@ class MiniStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
+            (MiniStates.INIT, Events.SUCCESS): MiniStates.FIND_LINKUP,
+            (MiniStates.INIT, Events.STALL): MiniStates.INIT_STALL,
+            (MiniStates.INIT_STALL, Events.SUCCESS): MiniStates.INIT,
+            
+            
             (MiniStates.FIND_LINKUP, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
             (MiniStates.FIND_LINKUP, Events.STALL): MiniStates.FIND_LINKUP_STALL,
             (MiniStates.FIND_LINKUP, Events.NO_PATH): MiniStates.FIND_LINKUP_NO_PATH,
@@ -74,10 +86,14 @@ class MiniStates(Enum):
             (MiniStates.MOVE_TO_STAGING_STALL, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
             (MiniStates.MOVE_TO_STAGING_NO_PATH, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
 
-            (MiniStates.ALIGN_TO_MAIN, Events.SUCCESS): MiniStates.COLLECT_REGOLITH,
+            (MiniStates.ALIGN_TO_MAIN, Events.SUCCESS): MiniStates.APPROACH_MAIN,
             (MiniStates.ALIGN_TO_MAIN, Events.STALL): MiniStates.ALIGN_TO_MAIN_STALL,
             (MiniStates.ALIGN_TO_MAIN_STALL, Events.SUCCESS): MiniStates.ALIGN_TO_MAIN,
 
+            (MiniStates.APPROACH_MAIN, Events.SUCCESS): MiniStates.COLLECT_REGOLITH,
+            (MiniStates.APPROACH_MAIN, Events.STALL): MiniStates.APPROACH_MAIN_STALL,
+            (MiniStates.APPROACH_MAIN_STALL, Events.SUCCESS): MiniStates.APPROACH_MAIN,
+            
             (MiniStates.COLLECT_REGOLITH, Events.SUCCESS): MiniStates.SEPARATE_FROM_MAIN,
 
             (MiniStates.SEPARATE_FROM_MAIN, Events.SUCCESS): MiniStates.TRAVERSE_TO_BERM,

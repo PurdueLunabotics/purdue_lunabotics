@@ -8,9 +8,13 @@ from state_manager import StateManager
 from lunabot_msgs.msg import Event
 
 class MainStates(Enum):
-    INIT_TO_LINKUP = State()
-    INIT_TO_LINKUP_STALL = State()
-    INIT_TO_LINKUP_NO_PATH = State()
+    
+    INIT = State()
+    INIT_STALL = State()
+    
+    TRAVERSE_TO_LINKUP = State()
+    TRAVERSE_TO_LINKUP_STALL = State()
+    TRAVERSE_TO_LINKUP_NO_PATH = State()
     
     ALIGN_TO_TRENCH = State()
     ALIGN_TO_TRENCH_STALL = State()
@@ -48,11 +52,15 @@ class MainStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
-            (MainStates.INIT_TO_LINKUP, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
-            (MainStates.INIT_TO_LINKUP, Events.STALL): MainStates.INIT_TO_LINKUP_STALL,
-            (MainStates.INIT_TO_LINKUP, Events.NO_PATH): MainStates.INIT_TO_LINKUP_NO_PATH,
-            (MainStates.INIT_TO_LINKUP_NO_PATH, Events.SUCCESS): MainStates.INIT_TO_LINKUP,
-            (MainStates.INIT_TO_LINKUP_STALL, Events.SUCCESS): MainStates.INIT_TO_LINKUP,
+            (MainStates.INIT, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
+            (MainStates.INIT, Events.STALL): MainStates.INIT_STALL,
+            (MainStates.INIT_STALL, Events.SUCCESS): MainStates.INIT,
+            
+            (MainStates.TRAVERSE_TO_LINKUP, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
+            (MainStates.TRAVERSE_TO_LINKUP, Events.STALL): MainStates.TRAVERSE_TO_LINKUP_STALL,
+            (MainStates.TRAVERSE_TO_LINKUP, Events.NO_PATH): MainStates.TRAVERSE_TO_LINKUP_NO_PATH,
+            (MainStates.TRAVERSE_TO_LINKUP_NO_PATH, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
+            (MainStates.TRAVERSE_TO_LINKUP_STALL, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
 
             (MainStates.ALIGN_TO_TRENCH, Events.SUCCESS): MainStates.PLUNGE_ACT,
             (MainStates.ALIGN_TO_TRENCH, Events.STALL): MainStates.ALIGN_TO_TRENCH_STALL,
@@ -99,7 +107,7 @@ class MainStates(Enum):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = StateManager(MainStates, MainStates.INIT_TO_LINKUP, Events, Event)
+    minimal_subscriber = StateManager(MainStates, MainStates.TRAVERSE_TO_LINKUP, Events, Event)
 
     rclpy.spin(minimal_subscriber)
 

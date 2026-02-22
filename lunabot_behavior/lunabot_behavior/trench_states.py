@@ -11,7 +11,7 @@ from lunabot_msgs.msg import RobotSensors
 class trench_state(State):
     def setup(self, manager: Node):
         self.state_manager = manager
-        self.trench_pub = manager.create_publisher(Int32, "trench", 10)
+        self.excavation_pub = manager.create_publisher(Int32, "excavate", 10)
         self.linact_pub = manager.create_publisher(Int32, "linact", 10)
         self.cmdvel_pub = manager.create_publisher(Twist, "cmd_vel", 10)
 
@@ -23,6 +23,7 @@ class trench_state(State):
         self.TRENCHING_TIME = 30  # seconds
         # speed to run drivetrain during trenching (m/s)
         self.TRENCHING_SPEED = 0.01 # lil slow - exc stalled at 0.02, try 0.015 next
+        self.EXCAVATION_SPEED = 1500 # rpm
         self.LIN_ACT_CURR_THRESHOLD = 0.1  # Amps; TODO find value
         self.MAX_LIN_ACT_VEL = 0.00688405797  # In meters/s, the speed of the linear actuators at the max power (from experiment - 19 cm / 27.6 seconds)
         self.LIN_ACT_MAX_POWER = 110
@@ -35,7 +36,7 @@ class trench_state(State):
             return None
         
         self.linact_pub.publish(self.LIN_ACT_MAX_POWER)
-        self.trench_pub.publish(1000)
+        self.excavation_pub.publish(self.EXCAVATION_SPEED)
 
         cmd = Twist()
         cmd.linear.x = self.TRENCHING_SPEED
@@ -49,6 +50,6 @@ class trench_state(State):
         return None 
     
     def exit(self):
-        self.trench_pub.publish(0)
+        self.excavation_pub.publish(0)
         self.linact_pub.publish(0)
         self.cmdvel_pub.publish(Twist())

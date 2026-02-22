@@ -7,7 +7,7 @@ from state import Events
 from std_msgs.msg import Int32
 from lunabot_msgs.msg import RobotSensors
 
-class plunge_state(State):
+class RaiseState(State):
     def setup(self, manager: Node):
         self.excavation_pub = manager.create_publisher(Int32, "excavate", 10)
         self.linact_pub = manager.create_publisher(Int32, "linact", 10)
@@ -16,11 +16,10 @@ class plunge_state(State):
         self.sensor_sub = manager.create_subscription(Int32, "sensors", self.sensor_callback, 10)
         self.sensors = None
 
-        # Constants (in meters)  TODO: update these 
-        self.PLUNGE_TIME = 30  # seconds
-        self.MIN_TIME = 2  # seconds
+        # Constants  TODO: update these 
+        self.RAISE_TIME = 30  # seconds
         self.EXCAVATION_SPEED = 1500 # rpm
-        self.LIN_ACT_MAX_POWER = 127 # -127 - 127
+        self.LIN_ACT_MAX_POWER = -127 # -127 - 127
         self.LIN_ACT_CURR_THRESHOLD = 0.1  # Amps; TODO find value
 
     def start(self):
@@ -34,7 +33,7 @@ class plunge_state(State):
         self.linact_pub.publish(self.LIN_ACT_MAX_POWER)
         
         elapsed = self.manager.get_clock().now() - self.start_time
-        if elapsed > Duration(seconds=self.PLUNGE_TIME):
+        if elapsed > Duration(seconds=self.RAISE_TIME):
                 return Events.SUCCESS
         
         
