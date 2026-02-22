@@ -39,6 +39,8 @@ class MainStates(Enum):
     TRAVERSE_TO_LINKUP_NO_PATH = State()
 
     WAIT_FOR_LINKUP = State()
+    
+    WAIT_FOR_DIVERGE = State() # This will stay as State(), no logic needed
 
     TRAVERSE_TO_BERM = State()
     TRAVERSE_TO_BERM_STALL = State()
@@ -58,7 +60,6 @@ class MainStates(Enum):
     
     RETREAT_BERM = RetreatBerm()
     RETREAT_BERM_STALL = State()
-
 
     IDLE = State()
 
@@ -97,9 +98,11 @@ class MainStates(Enum):
             (MainStates.TRAVERSE_TO_LINKUP_STALL, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
             (MainStates.TRAVERSE_TO_LINKUP_NO_PATH, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
 
-            (MainStates.DEPOSIT, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
+            (MainStates.DEPOSIT, Events.SUCCESS): MainStates.WAIT_FOR_DIVERGE,
             (MainStates.DEPOSIT, Events.STALL): MainStates.DEPOSIT_STALL,
             (MainStates.DEPOSIT_STALL, Events.SUCCESS): MainStates.DEPOSIT,
+            
+            (MainStates.WAIT_FOR_DIVERGE, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
             
             (MainStates.WAIT_FOR_LINKUP, Events.SUCCESS): MainStates.DEPOSIT,
             (MainStates.WAIT_FOR_LINKUP, Events.FAIL): MainStates.TRAVERSE_TO_BERM,
@@ -128,7 +131,7 @@ class MainStates(Enum):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = StateManager(MainStates, MainStates.TRAVERSE_TO_LINKUP, Events, Event)
+    minimal_subscriber = StateManager(MainStates, MainStates.INIT, Events, Event)
 
     rclpy.spin(minimal_subscriber)
 

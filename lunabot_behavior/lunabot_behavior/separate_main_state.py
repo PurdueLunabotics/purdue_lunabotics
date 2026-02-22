@@ -3,13 +3,18 @@ from rclpy.node import Node
 from state import State, Events
 
 from geometry_msgs.msg import Twist
+from lunabot_msgs.msg import Event
+
 
 class SeparateMain(State):
   def setup(self, manager: Node):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "cmd_vel", 10)
+    self.main_event_pub = manager.create_publisher(Event, "/events", 10)
+
     self.manager = manager
     self.move_time = 5 #seconds
     self.linear_speed = 0.2 #m/s
+    
   
   def start(self):
     self.start_time = self.manager.get_clock().now()
@@ -24,3 +29,4 @@ class SeparateMain(State):
   
   def exit(self):
     self.cmd_vel_publisher.publish(Twist())
+    self.main_event_pub.publish(Event.SUCCESS)
