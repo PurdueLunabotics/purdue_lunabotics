@@ -1,7 +1,6 @@
 from rclpy.node import Node
 
-from state import State
-from state import Events
+from state import State, Events
 
 from std_msgs.msg import Int32
 

@@ -3,6 +3,7 @@
 from enum import Enum
 from state import Events, State
 import rclpy
+from align_to_angle_state import AlignToAngleState
 from state_manager import StateManager
 from lunabot_msgs.msg import Event
 
@@ -33,7 +34,7 @@ class MainStates(Enum):
     TRAVERSE_TO_BERM_STALL = State()
     TRAVERSE_TO_BERM_NO_PATH = State()
 
-    ALIGN_TO_BERM = State()
+    ALIGN_TO_BERM = AlignToAngleState(180)
     ALIGN_TO_BERM_STALL = State()
     
     APPROACH_BERM = State()
