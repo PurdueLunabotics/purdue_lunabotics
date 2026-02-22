@@ -9,9 +9,18 @@ class MiniStates(Enum):
     FIND_LINKUP_STALL = State()
     FIND_LINKUP_NO_PATH = State()
 
-    MOVE_TO_BERM = State()
-    MOVE_TO_BERM_STALL = State()
-    MOVE_TO_BERM_NO_PATH = State()
+    TRAVERSE_TO_BERM = State()
+    TRAVERSE_TO_BERM_STALL = State()
+    TRAVERSE_TO_BERM_NO_PATH = State()
+
+    ALIGN_TO_BERM = State()
+    ALIGN_TO_BERM_STALL = State()
+    
+    APPROACH_BERM = State()
+    APPROACH_BERM_STALL = State()
+    
+    RETREAT_BERM = State()
+    RETREAT_BERM_STALL = State()
 
     DEPOSIT = State()
     DEPOSIT_STALL = State()
@@ -31,22 +40,34 @@ class MiniStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
-            (MiniStates.FIND_LINKUP, Events.SUCCESS): MiniStates.MOVE_TO_BERM,
+            (MiniStates.FIND_LINKUP, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
             (MiniStates.FIND_LINKUP, Events.STALL): MiniStates.FIND_LINKUP_STALL,
             (MiniStates.FIND_LINKUP, Events.NO_PATH): MiniStates.FIND_LINKUP_NO_PATH,
             (MiniStates.FIND_LINKUP_STALL, Events.SUCCESS): MiniStates.FIND_LINKUP,
             (MiniStates.FIND_LINKUP_NO_PATH, Events.SUCCESS): MiniStates.FIND_LINKUP,
 
-            (MiniStates.MOVE_TO_BERM, Events.SUCCESS): MiniStates.DEPOSIT,
-            (MiniStates.MOVE_TO_BERM, Events.STALL): MiniStates.MOVE_TO_BERM_STALL,
-            (MiniStates.MOVE_TO_BERM, Events.NO_PATH): MiniStates.MOVE_TO_BERM_NO_PATH,
-            (MiniStates.MOVE_TO_BERM_STALL, Events.SUCCESS): MiniStates.MOVE_TO_BERM,
-            (MiniStates.MOVE_TO_BERM_NO_PATH, Events.SUCCESS): MiniStates.MOVE_TO_BERM,
-
-            (MiniStates.DEPOSIT, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
+            (MiniStates.TRAVERSE_TO_BERM, Events.SUCCESS): MiniStates.ALIGN_TO_BERM,
+            (MiniStates.TRAVERSE_TO_BERM, Events.STALL): MiniStates.TRAVERSE_TO_BERM_STALL,
+            (MiniStates.TRAVERSE_TO_BERM, Events.NO_PATH): MiniStates.TRAVERSE_TO_BERM_NO_PATH,
+            (MiniStates.TRAVERSE_TO_BERM_STALL, Events.SUCCESS): MiniStates.TRAVERSE_TO_BERM,
+            (MiniStates.TRAVERSE_TO_BERM_NO_PATH, Events.SUCCESS): MiniStates.TRAVERSE_TO_BERM,
+            
+            (MiniStates.ALIGN_TO_BERM, Events.SUCCESS): MiniStates.APPROACH_BERM,
+            (MiniStates.ALIGN_TO_BERM, Events.STALL): MiniStates.ALIGN_TO_BERM_STALL,
+            (MiniStates.ALIGN_TO_BERM_STALL, Events.SUCCESS): MiniStates.ALIGN_TO_BERM,
+            
+            (MiniStates.APPROACH_BERM, Events.SUCCESS): MiniStates.DEPOSIT,
+            (MiniStates.APPROACH_BERM, Events.STALL): MiniStates.APPROACH_BERM_STALL,
+            (MiniStates.APPROACH_BERM_STALL, Events.SUCCESS): MiniStates.APPROACH_BERM,
+            
+            (MiniStates.DEPOSIT, Events.SUCCESS): MiniStates.RETREAT_BERM,
             (MiniStates.DEPOSIT, Events.STALL): MiniStates.DEPOSIT_STALL,
             (MiniStates.DEPOSIT_STALL, Events.SUCCESS): MiniStates.DEPOSIT,
-
+            
+            (MiniStates.RETREAT_BERM, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
+            (MiniStates.RETREAT_BERM, Events.STALL): MiniStates.RETREAT_BERM_STALL,
+            (MiniStates.RETREAT_BERM_STALL, Events.SUCCESS): MiniStates.RETREAT_BERM,
+            
             (MiniStates.MOVE_TO_STAGING, Events.SUCCESS): MiniStates.ALIGN_TO_MAIN,
             (MiniStates.MOVE_TO_STAGING, Events.STALL): MiniStates.MOVE_TO_STAGING_STALL,
             (MiniStates.MOVE_TO_STAGING, Events.NO_PATH): MiniStates.MOVE_TO_STAGING_NO_PATH,
@@ -59,7 +80,7 @@ class MiniStates(Enum):
 
             (MiniStates.COLLECT_REGOLITH, Events.SUCCESS): MiniStates.SEPARATE_FROM_MAIN,
 
-            (MiniStates.SEPARATE_FROM_MAIN, Events.SUCCESS): MiniStates.MOVE_TO_BERM,
+            (MiniStates.SEPARATE_FROM_MAIN, Events.SUCCESS): MiniStates.TRAVERSE_TO_BERM,
             (MiniStates.SEPARATE_FROM_MAIN, Events.STALL): MiniStates.SEPARATE_FROM_MAIN_STALL,
             (MiniStates.SEPARATE_FROM_MAIN_STALL, Events.SUCCESS): MiniStates.SEPARATE_FROM_MAIN
         }
