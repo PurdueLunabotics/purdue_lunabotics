@@ -1,6 +1,7 @@
 from enum import Enum
 from approach_berm_state import ApproachBerm
 from deposit_state import Deposit
+from separate_main_state import SeparateMain
 from retreat_berm_state import RetreatBerm
 from state import Events, State
 import rclpy
@@ -44,7 +45,7 @@ class MiniStates(Enum):
 
     COLLECT_REGOLITH = State()
 
-    SEPARATE_FROM_MAIN = State()
+    SEPARATE_FROM_MAIN = SeparateMain()
     SEPARATE_FROM_MAIN_STALL = State()
 
     @staticmethod

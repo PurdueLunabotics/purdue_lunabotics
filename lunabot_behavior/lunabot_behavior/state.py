@@ -4,8 +4,8 @@ from lunabot_msgs.msg import Event
 
 class Events(Enum):
     # Interal
-    SUCCESS = auto()
-    FAIL = auto()
+    SUCCESS = Event.SUCCESS
+    FAIL = Event.FAIL
 
     # External
     STALL = Event.STALL
