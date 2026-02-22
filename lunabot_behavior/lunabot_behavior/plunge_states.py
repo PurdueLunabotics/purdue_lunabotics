@@ -7,7 +7,7 @@ from state import Events
 from std_msgs.msg import Int32
 from lunabot_msgs.msg import RobotSensors
 
-class plunge_state(State):
+class Plunge(State):
     def setup(self, manager: Node):
         self.excavation_pub = manager.create_publisher(Int32, "excavate", 10)
         self.linact_pub = manager.create_publisher(Int32, "linact", 10)

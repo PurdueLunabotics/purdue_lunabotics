@@ -1,4 +1,7 @@
 from enum import Enum
+from approach_berm_state import ApproachBerm
+from deposit_state import Deposit
+from retreat_berm_state import RetreatBerm
 from state import Events, State
 import rclpy
 from state_manager import StateManager
@@ -20,13 +23,13 @@ class MiniStates(Enum):
     ALIGN_TO_BERM = AlignToAngleState(180)
     ALIGN_TO_BERM_STALL = State()
     
-    APPROACH_BERM = State()
+    APPROACH_BERM = ApproachBerm()
     APPROACH_BERM_STALL = State()
     
-    RETREAT_BERM = State()
+    RETREAT_BERM = RetreatBerm()
     RETREAT_BERM_STALL = State()
 
-    DEPOSIT = State()
+    DEPOSIT = Deposit()
     DEPOSIT_STALL = State()
 
     MOVE_TO_STAGING = State()

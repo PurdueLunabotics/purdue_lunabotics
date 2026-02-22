@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 
 from enum import Enum
+from deposit_state import Deposit
+from approach_berm_state import ApproachBerm
+from plunge_states import Plunge
+from raise_states import Raise
+from retreat_berm_state import RetreatBerm
+from trench_states import Trench
 from state import Events, State
 import rclpy
 from align_to_angle_state import AlignToAngleState
@@ -19,13 +25,13 @@ class MainStates(Enum):
     ALIGN_TO_TRENCH = State()
     ALIGN_TO_TRENCH_STALL = State()
     
-    PLUNGE_ACT = State()
+    PLUNGE_ACT = Plunge()
     PLUNGE_ACT_STALL = State()
     
-    TRENCH = State()
+    TRENCH = Trench()
     TRENCH_STALL = State()
     
-    RAISE_ACT = State()
+    RAISE_ACT = Raise()
     RAISE_ACT_STALL = State()
     
     TRAVERSE_TO_LINKUP = State()
@@ -41,11 +47,18 @@ class MainStates(Enum):
     ALIGN_TO_BERM = AlignToAngleState(180)
     ALIGN_TO_BERM_STALL = State()
     
-    APPROACH_BERM = State()
+    APPROACH_BERM = ApproachBerm()
     APPROACH_BERM_STALL = State()
     
-    DEPOSIT = State()
+    DEPOSIT = Deposit()
     DEPOSIT_STALL = State()
+    
+    DEPOSIT_BERM = Deposit()
+    DEPOSIT_BERM_STALL = State()
+    
+    RETREAT_BERM = RetreatBerm()
+    RETREAT_BERM_STALL = State()
+
 
     IDLE = State()
 
@@ -84,6 +97,10 @@ class MainStates(Enum):
             (MainStates.TRAVERSE_TO_LINKUP_STALL, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
             (MainStates.TRAVERSE_TO_LINKUP_NO_PATH, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
 
+            (MainStates.DEPOSIT, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
+            (MainStates.DEPOSIT, Events.STALL): MainStates.DEPOSIT_STALL,
+            (MainStates.DEPOSIT_STALL, Events.SUCCESS): MainStates.DEPOSIT,
+            
             (MainStates.WAIT_FOR_LINKUP, Events.SUCCESS): MainStates.DEPOSIT,
             (MainStates.WAIT_FOR_LINKUP, Events.FAIL): MainStates.TRAVERSE_TO_BERM,
 
@@ -95,11 +112,15 @@ class MainStates(Enum):
             (MainStates.TRAVERSE_TO_BERM_NO_PATH, Events.SUCCESS): MainStates.TRAVERSE_TO_BERM,
 
             (MainStates.ALIGN_TO_BERM, Events.SUCCESS): MainStates.APPROACH_BERM,
-            (MainStates.APPROACH_BERM, Events.SUCCESS): MainStates.DEPOSIT,
+            (MainStates.APPROACH_BERM, Events.SUCCESS): MainStates.DEPOSIT_BERM,
             
-            (MainStates.DEPOSIT, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
-            (MainStates.DEPOSIT, Events.STALL): MainStates.DEPOSIT_STALL,
-            (MainStates.DEPOSIT_STALL, Events.SUCCESS): MainStates.DEPOSIT
+            (MainStates.DEPOSIT_BERM, Events.SUCCESS): MainStates.RETREAT_BERM,
+            (MainStates.DEPOSIT_BERM, Events.STALL): MainStates.DEPOSIT_BERM_STALL,
+            (MainStates.DEPOSIT_BERM_STALL, Events.SUCCESS): MainStates.DEPOSIT_BERM,
+            
+            (MainStates.RETREAT_BERM, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
+            (MainStates.RETREAT_BERM, Events.STALL): MainStates.RETREAT_BERM_STALL,
+            (MainStates.RETREAT_BERM_STALL, Events.SUCCESS): MainStates.RETREAT_BERM
         }
 
         return transitions.get((state, event), None)
