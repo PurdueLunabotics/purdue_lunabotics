@@ -23,6 +23,10 @@ install(DIRECTORY
 install(TARGETS
   DESTINATION lib/${PROJECT_NAME})
 
+install(PROGRAMS
+  scripts/apriltag_combine.py
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

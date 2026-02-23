@@ -153,7 +153,16 @@
 
         </node>
 
-        <node pkg="lunabot_slam" exec="sim_odom.py" if="$(var odom_from_sim)"/>
+        <node pkg="lunabot_slam" exec="sim_odom.py" if="$(var odom_from_sim)">
+        </node>
+        <node pkg="lunabot_perception" exec="apriltag_combine.py">
+            <remap from="detections"         to="rtabmap/apriltag/detections"/>
+            <param name="input_topics" value="d455_back/detections;d455_front/detections" value-sep=";"/>
+        </node>
+
+        <node name="stall_detection_node" pkg="lunabot_control" exec="stall_detection_node" output="screen" respawn="true">
+            <param name="~waitTime" value="2"/>
+        </node>
 
         <push_ros_namespace namespace="rtabmap"/>
 
@@ -224,12 +233,16 @@
             <param name="GridGlobal/OccupancyThr" value="'0.5'"/> <!-- Threshold for occupancy -->
             
             <param name="Kp/MaxFeatures"          value="$(var rtabmap_max_features)"/>
+            <param name="Marker/Priors"           value="'11 2.5 2.5 0.4 1.57 1.57 0|7 3.4 1.8 0.4 1.57 0 -1.57'"/>
+            <param name="Optimizer/PriorsIgnored" value="'false'"/>
             
             <param name="database_path"           value="~/.ros/$(var ns)rtabmap.db"/>
 
         </node>
     </group>
 
+    <node name="zones_node" pkg="lunabot_behavior" exec="zones" output="screen"/>
+    <node name="find_linkup_node" pkg="lunabot_behavior" exec="find_linkup" output="screen"/>
 
     <group>
         <node name="planner_server" pkg="nav2_planner" exec="planner_server" output="screen" respawn="true">
