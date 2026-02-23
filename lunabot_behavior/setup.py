@@ -14,7 +14,7 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='root',
-    maintainer_email='xlr9.chitiveli@gmail.com',
+    maintainer_email='lunabot@purdue.edu',
     description='TODO: Package description',
     license='Apache-2.0',
     extras_require={
@@ -27,7 +27,7 @@ setup(
             "zones = lunabot_behavior.zones:main",
             "find_linkup = lunabot_behavior.find_linkup:main",
             "main = lunabot_behavior.main_states:main",
-            "mini = lunabot_behavior.mini_states:main"
+            "mini = lunabot_behavior.mini_states:main",
         ],
     },
 )

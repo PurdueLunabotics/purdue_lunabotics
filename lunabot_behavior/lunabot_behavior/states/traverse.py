@@ -77,7 +77,7 @@ class NoPath(State):
 
         get_request = GetParameters.Request(names = ["robot_radius"])
         fut = self.costmap_get_params_service.call_async(get_request)
-        self.logger.info(f"fut: {fut.result()}")
+        self.logger.info(f"[No Path]: fut: {fut.result()}")
         fut.add_done_callback(self.radius_cb)
 
     def failed_cb(self, value: Bool):

@@ -1,25 +1,37 @@
 #!/usr/bin/env python3
 
 from enum import Enum
+
+from geometry_msgs.msg import PoseStamped
+from lunabot_msgs.msg import Event
+
 from lunabot_behavior.states.align_to_angle import AlignToAngle
-from lunabot_behavior.states.approach_berm import ApproachBerm
+from lunabot_behavior.states.traverse_to_berm import TraverseToBerm
+from lunabot_behavior.states.traverse import NoPath, Traverse, Stall
 from lunabot_behavior.states.deposit import Deposit
+from lunabot_behavior.states.approach_berm import ApproachBerm
 from lunabot_behavior.states.plunge import Plunge
 from lunabot_behavior.states.raise_act import Raise
 from lunabot_behavior.states.retreat_berm import RetreatBerm
 from lunabot_behavior.states.trench import Trench
-from lunabot_behavior.states.traverse_to_berm import TraverseToBerm
-from lunabot_behavior.states.traverse import NoPath, Traverse, Stall
-from geometry_msgs.msg import PoseStamped
+
 from lunabot_behavior.state import Events, State
-import rclpy
 from lunabot_behavior.state_manager import StateManager
-from lunabot_msgs.msg import Event
+
+import rclpy
 
 class MainStates(Enum):
     
     INIT = State()
     INIT_STALL = State()
+    
+    STARTING_PLUNGE = Plunge()
+    STARTING_PLUNGE_STALL = State()
+    
+    STARTING_RAISE = Raise()
+    STARTING_RAISE_STALL = State()
+    
+    WAIT_FOR_LINKUP = State() # This will stay as State(), no logic needed
     
     TRAVERSE_TO_LINKUP = Traverse(PoseStamped(), False)
     TRAVERSE_TO_LINKUP_STALL = Stall()
@@ -37,7 +49,6 @@ class MainStates(Enum):
     RAISE_ACT = Raise()
     RAISE_ACT_STALL = State()
 
-    WAIT_FOR_LINKUP = State()
     
     WAIT_FOR_DIVERGE = State() # This will stay as State(), no logic needed
 
@@ -65,10 +76,20 @@ class MainStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
-            (MainStates.INIT, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
+            (MainStates.INIT, Events.SUCCESS): MainStates.STARTING_PLUNGE,
             (MainStates.INIT, Events.STALL): MainStates.INIT_STALL,
             (MainStates.INIT_STALL, Events.SUCCESS): MainStates.INIT,
             
+            (MainStates.STARTING_PLUNGE, Events.SUCCESS): MainStates.STARTING_RAISE,
+            (MainStates.STARTING_PLUNGE, Events.STALL): MainStates.STARTING_PLUNGE_STALL,
+            (MainStates.STARTING_PLUNGE_STALL, Events.SUCCESS): MainStates.STARTING_PLUNGE,
+            
+            (MainStates.STARTING_RAISE, Events.SUCCESS): MainStates.WAIT_FOR_LINKUP,
+            (MainStates.STARTING_RAISE, Events.STALL): MainStates.STARTING_RAISE_STALL,
+            (MainStates.STARTING_RAISE_STALL, Events.SUCCESS): MainStates.STARTING_RAISE,
+            
+            (MainStates.WAIT_FOR_LINKUP, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
+                        
             (MainStates.TRAVERSE_TO_LINKUP, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
             (MainStates.TRAVERSE_TO_LINKUP, Events.STALL): MainStates.TRAVERSE_TO_LINKUP_STALL,
             (MainStates.TRAVERSE_TO_LINKUP, Events.NO_PATH): MainStates.TRAVERSE_TO_LINKUP_NO_PATH,
@@ -102,9 +123,6 @@ class MainStates(Enum):
             (MainStates.DEPOSIT_STALL, Events.SUCCESS): MainStates.DEPOSIT,
             
             (MainStates.WAIT_FOR_DIVERGE, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
-            
-            (MainStates.WAIT_FOR_LINKUP, Events.SUCCESS): MainStates.DEPOSIT,
-            (MainStates.WAIT_FOR_LINKUP, Events.FAIL): MainStates.TRAVERSE_TO_BERM,
 
             # in case minibot is indisposed and big bot has to make full cycles
             (MainStates.TRAVERSE_TO_BERM, Events.ARRIVED): MainStates.IDLE,

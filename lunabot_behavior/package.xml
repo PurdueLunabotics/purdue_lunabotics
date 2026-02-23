@@ -4,7 +4,7 @@
   <name>lunabot_behavior</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="xlr9.chitiveli@gmail.com">root</maintainer>
+  <maintainer email="lunabot@purdue.edu">root</maintainer>
   <license>Apache-2.0</license>
 
   <test_depend>ament_copyright</test_depend>
