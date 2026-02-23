@@ -142,7 +142,7 @@ public:
 
 private:
   static constexpr int NUM_ACTUATORS = 2;
-  static constexpr int PIN_LIST[NUM_ACTUATORS * 2] = {6, 7, 8, 9};
+  static constexpr int PIN_LIST[NUM_ACTUATORS * 2] = {27, 26, 29, 28};
 
   static Encoder encs[NUM_ACTUATORS];
 };
