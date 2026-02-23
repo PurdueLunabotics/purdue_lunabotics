@@ -26,6 +26,7 @@ differential_drive_controller_node:
 drivetrain_controller_node:
   ros__parameters:
     gearbox_ratio: 50.0
+    do_excavation: true
 
 
 mini:
@@ -57,3 +58,4 @@ mini:
   drivetrain_controller_node:
     ros__parameters:
       gearbox_ratio: 10.0
+      do_excavation: false
