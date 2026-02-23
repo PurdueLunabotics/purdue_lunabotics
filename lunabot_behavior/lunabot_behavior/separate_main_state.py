@@ -13,7 +13,7 @@ class SeparateMain(State):
 
     self.manager = manager
     self.move_time = 5 #seconds
-    self.linear_speed = 0.2 #m/s
+    self.linear_speed = 0.1 #m/s
     
   
   def start(self):
@@ -21,9 +21,9 @@ class SeparateMain(State):
   
   def periodic(self) -> None | Events:
     output = Twist()
-    output.linear.x = self.linear_speed
-    self.cmd_vel_publisher.publish()
-    if (self.start_time.seconds_nanoseconds()[0] + self.deposit_time < self.manager.get_clock().now().seconds_nanoseconds()[0]):
+    output.linear.x = -self.linear_speed # TODO: determine the direction of the mini bot
+    self.cmd_vel_publisher.publish(output)
+    if (self.start_time.seconds_nanoseconds()[0] + self.move_time < self.manager.get_clock().now().seconds_nanoseconds()[0]):
       return Events.SUCCESS
     return None  
   

@@ -24,14 +24,14 @@ class MiniStates(Enum):
     TRAVERSE_TO_BERM_STALL = Stall()
     TRAVERSE_TO_BERM_NO_PATH = NoPath()
 
-    ALIGN_TO_BERM = AlignToAngleState(180)
-    ALIGN_TO_BERM_STALL = State()
+    ALIGN_TO_BERM = AlignToAngleState(270)
+    ALIGN_TO_BERM_STALL = Stall()
     
     APPROACH_BERM = ApproachBerm()
-    APPROACH_BERM_STALL = State()
+    APPROACH_BERM_STALL = Stall()
     
     RETREAT_BERM = RetreatBerm()
-    RETREAT_BERM_STALL = State()
+    RETREAT_BERM_STALL = Stall()
 
     DEPOSIT = Deposit()
     DEPOSIT_STALL = State()
@@ -49,7 +49,7 @@ class MiniStates(Enum):
     COLLECT_REGOLITH = State()
 
     SEPARATE_FROM_MAIN = SeparateMain()
-    SEPARATE_FROM_MAIN_STALL = State()
+    SEPARATE_FROM_MAIN_STALL = Stall()
 
     @staticmethod
     def get_transition(state, event: Events):

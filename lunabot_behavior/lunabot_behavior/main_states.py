@@ -46,10 +46,10 @@ class MainStates(Enum):
     TRAVERSE_TO_BERM_NO_PATH = NoPath()
 
     ALIGN_TO_BERM = AlignToAngleState(270)
-    ALIGN_TO_BERM_STALL = State()
+    ALIGN_TO_BERM_STALL = Stall()
     
     APPROACH_BERM = ApproachBerm()
-    APPROACH_BERM_STALL = State()
+    APPROACH_BERM_STALL = Stall()
     
     DEPOSIT = Deposit(True)
     DEPOSIT_STALL = State()
@@ -58,7 +58,7 @@ class MainStates(Enum):
     DEPOSIT_BERM_STALL = State()
     
     RETREAT_BERM = RetreatBerm()
-    RETREAT_BERM_STALL = State()
+    RETREAT_BERM_STALL = Stall()
 
     IDLE = State()
 
