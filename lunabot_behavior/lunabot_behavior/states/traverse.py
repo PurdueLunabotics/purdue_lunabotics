@@ -5,7 +5,7 @@ from lunabot_msgs.msg import RobotEffort, RobotStall
 from rcl_interfaces.msg import ParameterType, ParameterValue, Parameter
 import rclpy
 from rclpy.time import Duration
-from state import State, Events
+from lunabot_behavior.state import State, Events
 from rclpy.node import Node
 from std_msgs.msg import Bool
 from std_srvs.srv import Empty
@@ -47,7 +47,7 @@ class Traverse(State):
         return None
 
     def exit(self):
-        self.logger.info("send disable");
+        self.logger.info("[Traverse]: send disable")
         self.enabled_pub.publish(Bool(data = False))
 
 num_failed = 0
@@ -69,8 +69,10 @@ class NoPath(State):
         self.logger = manager.get_logger()
         self.manager = manager
 
+        self.logger.info("[No Path]: Waiting for costmap service")
         self.costmap_get_params_service.wait_for_service()
         self.costmap_set_params_service.wait_for_service()
+        self.logger.info("[No Path]: Waiting for rtabmap service")
         self.rtabmap_reset_service.wait_for_service()
 
         get_request = GetParameters.Request(names = ["robot_radius"])
@@ -94,7 +96,7 @@ class NoPath(State):
 
     def radius_cb(self, future: rclpy.Future):
         get_response: GetParameters.Response = future.result()
-        self.logger.info(f"got radius: {get_response.values[0].double_value}")
+        self.logger.info(f"[No Path]: got radius: {get_response.values[0].double_value}")
         self.initial_radius = get_response.values[0].double_value
 
     def periodic(self):
@@ -118,7 +120,7 @@ class NoPath(State):
             self.waiting_for_reset = True
             self.rtabmap_reset_service.call_async(Empty.Request()).add_done_callback(self.reset_cb)
         elif (num_failed > 2):
-            self.logger.info(f"failed final")
+            self.logger.info(f"[No Path]: failed final")
             num_failed = 0
             return Events.FAIL
 

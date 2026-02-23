@@ -1,9 +1,9 @@
 import math
 from builtin_interfaces.msg import Time
 from geometry_msgs.msg import PoseStamped
-from states.traverse import Traverse
+from lunabot_behavior.states.traverse import Traverse
 from tf_transformations import quaternion_from_euler
-import zones
+from lunabot_behavior import zones
 
 class TraverseToBerm(Traverse):
     def __init__(self):

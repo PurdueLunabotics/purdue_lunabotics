@@ -1,8 +1,8 @@
 from rclpy.node import Node
 from rclpy.duration import Duration
 
-from state import State
-from state import Events
+from lunabot_behavior.state import State, Events
+
 
 from std_msgs.msg import Int32
 from geometry_msgs.msg import Twist

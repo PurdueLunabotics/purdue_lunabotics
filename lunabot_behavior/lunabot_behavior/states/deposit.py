@@ -1,6 +1,6 @@
 from rclpy.node import Node
 
-from state import State, Events
+from lunabot_behavior.state import State, Events
 
 from std_msgs.msg import Int32, Bool
 from lunabot_msgs.msg import Event

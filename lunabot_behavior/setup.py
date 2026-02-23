@@ -25,7 +25,9 @@ setup(
     entry_points={
         'console_scripts': [
             "zones = lunabot_behavior.zones:main",
-            "find_linkup = lunabot_behavior.find_linkup:main"
+            "find_linkup = lunabot_behavior.find_linkup:main",
+            "main = lunabot_behavior.main_states:main",
+            "mini = lunabot_behavior.mini_states:main"
         ],
     },
 )

@@ -1,10 +1,10 @@
 from enum import Enum
-from approach_berm_state import ApproachBerm
-from deposit_state import Deposit
+from lunabot_behavior.states.align_to_angle import AlignToAngle
+from lunabot_behavior.states.approach_berm import ApproachBerm
+from lunabot_behavior.states.deposit import Deposit
+from lunabot_behavior.states.retreat_berm import RetreatBerm
+from lunabot_behavior.states.separate_main import SeparateMain
 from states.traverse_to_berm import TraverseToBerm
-from separate_main_state import SeparateMain
-from retreat_berm_state import RetreatBerm
-from align_to_angle_state import AlignToAngleState
 from states.traverse import NoPath, Traverse, Stall
 from state import Events, State
 import rclpy
@@ -24,7 +24,7 @@ class MiniStates(Enum):
     TRAVERSE_TO_BERM_STALL = Stall()
     TRAVERSE_TO_BERM_NO_PATH = NoPath()
 
-    ALIGN_TO_BERM = AlignToAngleState(270)
+    ALIGN_TO_BERM = AlignToAngle(270)
     ALIGN_TO_BERM_STALL = Stall()
     
     APPROACH_BERM = ApproachBerm()

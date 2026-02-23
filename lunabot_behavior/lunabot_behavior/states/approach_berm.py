@@ -1,4 +1,4 @@
-from state import State, Events
+from lunabot_behavior.state import State, Events
 from rclpy.node import Node
 from geometry_msgs.msg import Twist, PoseStamped
 

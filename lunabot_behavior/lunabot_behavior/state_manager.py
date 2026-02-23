@@ -9,6 +9,7 @@ class StateManager(Node):
 
         for state in states:
             state.value.setup(self)
+            self.get_logger().info(f"starting state {state}")
 
         self.states = states
         self.events = events

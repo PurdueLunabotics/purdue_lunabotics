@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 
 from enum import Enum
-from states.traverse_to_berm import TraverseToBerm
-from states.traverse import NoPath, Traverse, Stall
+from lunabot_behavior.states.align_to_angle import AlignToAngle
+from lunabot_behavior.states.approach_berm import ApproachBerm
+from lunabot_behavior.states.deposit import Deposit
+from lunabot_behavior.states.plunge import Plunge
+from lunabot_behavior.states.raise_act import Raise
+from lunabot_behavior.states.retreat_berm import RetreatBerm
+from lunabot_behavior.states.trench import Trench
+from lunabot_behavior.states.traverse_to_berm import TraverseToBerm
+from lunabot_behavior.states.traverse import NoPath, Traverse, Stall
 from geometry_msgs.msg import PoseStamped
-from deposit_state import Deposit
-from approach_berm_state import ApproachBerm
-from plunge_states import Plunge
-from raise_states import Raise
-from retreat_berm_state import RetreatBerm
-from trench_states import Trench
-from state import Events, State
+from lunabot_behavior.state import Events, State
 import rclpy
-from align_to_angle_state import AlignToAngleState
-from state_manager import StateManager
+from lunabot_behavior.state_manager import StateManager
 from lunabot_msgs.msg import Event
 
 class MainStates(Enum):
@@ -45,7 +45,7 @@ class MainStates(Enum):
     TRAVERSE_TO_BERM_STALL = Stall()
     TRAVERSE_TO_BERM_NO_PATH = NoPath()
 
-    ALIGN_TO_BERM = AlignToAngleState(270)
+    ALIGN_TO_BERM = AlignToAngle(270)
     ALIGN_TO_BERM_STALL = Stall()
     
     APPROACH_BERM = ApproachBerm()

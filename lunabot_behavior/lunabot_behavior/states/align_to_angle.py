@@ -1,11 +1,11 @@
-from state import State, Events
+from lunabot_behavior.state import State, Events
 from rclpy.node import Node
 from geometry_msgs.msg import Twist, PoseStamped
 from tf_transformations import euler_from_quaternion
 import numpy as np
 
 
-class AlignToAngleState(State):
+class AlignToAngle(State):
   def __init__(self, angle, **kwargs):
     self.target_angle = np.deg2rad(angle) % (2 * np.pi)
     
