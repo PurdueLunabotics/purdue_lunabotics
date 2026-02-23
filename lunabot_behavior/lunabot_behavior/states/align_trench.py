@@ -9,7 +9,7 @@ class AlignTrench(AlignToAngle):
     super().__init__(0)
     
   def setup(self, manager:Node):
-    super().__init__(manager)
+    super().setup(manager)
     self.min_angle = np.deg2rad(-90)
     self.max_angle = np.deg2rad(90)
     self.angle_step = np.deg2rad(30)
