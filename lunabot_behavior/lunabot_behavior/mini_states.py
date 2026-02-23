@@ -1,6 +1,7 @@
 from enum import Enum
 from approach_berm_state import ApproachBerm
 from deposit_state import Deposit
+from states.traverse_to_berm import TraverseToBerm
 from separate_main_state import SeparateMain
 from retreat_berm_state import RetreatBerm
 from align_to_angle_state import AlignToAngleState
@@ -15,11 +16,11 @@ class MiniStates(Enum):
     INIT = State()
     INIT_STALL = State()
     
-    FIND_LINKUP = Traverse(PoseStamped())
+    FIND_LINKUP = Traverse(PoseStamped(), False)
     FIND_LINKUP_STALL = Stall()
     FIND_LINKUP_NO_PATH = NoPath()
 
-    TRAVERSE_TO_BERM = Traverse(PoseStamped())
+    TRAVERSE_TO_BERM = TraverseToBerm()
     TRAVERSE_TO_BERM_STALL = Stall()
     TRAVERSE_TO_BERM_NO_PATH = NoPath()
 
@@ -35,7 +36,7 @@ class MiniStates(Enum):
     DEPOSIT = Deposit()
     DEPOSIT_STALL = State()
 
-    MOVE_TO_STAGING = Traverse(PoseStamped())
+    MOVE_TO_STAGING = Traverse(PoseStamped(), False)
     MOVE_TO_STAGING_STALL = Stall()
     MOVE_TO_STAGING_NO_PATH = NoPath()
 

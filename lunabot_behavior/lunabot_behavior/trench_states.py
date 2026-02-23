@@ -16,11 +16,6 @@ class Trench(State):
         self.cmdvel_pub = manager.create_publisher(Twist, "cmd_vel", 10)
         self.dep_pub = manager.create_publisher(Int32, "deposition", 10)
 
-
-        self.sensors_sub = manager.create_subscription(RobotSensors, "sensors", self.sensors_callback, 10)
-        
-        self.sensors = None
-
         # Constants TODO: update these
         self.TRENCHING_TIME = 30  # seconds
         # speed to run drivetrain during trenching (m/s)
@@ -34,9 +29,6 @@ class Trench(State):
         self.start_time = self.state_manager.get_clock().now()
 
     def periodic(self) -> None | Events:
-        if self.sensors is None:
-            return None
-        
         self.linact_pub.publish(self.LIN_ACT_MAX_POWER)
         self.excavation_pub.publish(self.EXCAVATION_SPEED)
         self.dep_pub.publish(self.DEPOSITION_SPEED)

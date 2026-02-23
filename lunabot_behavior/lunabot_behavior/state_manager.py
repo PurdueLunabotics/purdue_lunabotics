@@ -21,7 +21,7 @@ class StateManager(Node):
         self.process_event(self.events(event.data))
 
     def process_event(self, event):
-        self.get_logger().info(f"got event {event}")
+        self.get_logger().info(f"got event {event} @ {self.state}")
         next_state = self.states.get_transition(self.state, event)
         self.get_logger().info(f"switching to state {next_state}")
 

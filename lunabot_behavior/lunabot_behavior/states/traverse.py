@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
-from math import sqrt
 from geometry_msgs.msg import PoseStamped
-from lunabot_msgs.msg import Event, RobotEffort, RobotStall
+from lunabot_msgs.msg import RobotEffort, RobotStall
 from rcl_interfaces.msg import ParameterType, ParameterValue, Parameter
 import rclpy
 from rclpy.time import Duration
-from lunabot_behavior.state import State, Events
+from state import State, Events
 from rclpy.node import Node
 from std_msgs.msg import Bool
 from std_srvs.srv import Empty
@@ -14,11 +13,15 @@ from rcl_interfaces.srv import SetParameters, GetParameters
 import math
 
 class Traverse(State):
-    def __init__(self, goal: PoseStamped):
+    def __init__(self, goal: PoseStamped, backwards: bool):
         self.goal = goal
+        self.backwards = backwards
 
     def set_goal(self, goal: PoseStamped):
         self.goal = goal
+
+    def set_backwards(self, backwards: bool):
+        self.backwards = backwards
 
     def setup(self, manager: Node):
         self.goal_pub = manager.create_publisher(PoseStamped, "goal", 10)
@@ -66,8 +69,14 @@ class NoPath(State):
         self.logger = manager.get_logger()
         self.manager = manager
 
+        self.costmap_get_params_service.wait_for_service()
+        self.costmap_set_params_service.wait_for_service()
+        self.rtabmap_reset_service.wait_for_service()
+
         get_request = GetParameters.Request(names = ["robot_radius"])
-        self.costmap_get_params_service.call_async(get_request).add_done_callback(self.radius_cb)
+        fut = self.costmap_get_params_service.call_async(get_request)
+        self.logger.info(f"fut: {fut.result()}")
+        fut.add_done_callback(self.radius_cb)
 
     def failed_cb(self, value: Bool):
         self.waiting_for_planning = False
@@ -85,13 +94,13 @@ class NoPath(State):
 
     def radius_cb(self, future: rclpy.Future):
         get_response: GetParameters.Response = future.result()
+        self.logger.info(f"got radius: {get_response.values[0].double_value}")
         self.initial_radius = get_response.values[0].double_value
 
     def periodic(self):
         global num_failed
 
         if self.waiting_for_planning or self.waiting_for_set_radius or self.waiting_for_reset or self.initial_radius == None:
-            self.logger.info(f"waiting: {self.waiting_for_planning} {self.waiting_for_set_radius} {self.waiting_for_reset} {self.initial_radius}")
             return None
         elif not self.failed:
             return Events.SUCCESS
@@ -122,7 +131,8 @@ class Stall(State):
         self.manager = manager
         self.effort_pub = manager.create_publisher(RobotEffort, "effort", 10)
         self.stalled_sub = manager.create_subscription(RobotStall, "stalled", self.stalled_cb, 1)
-        manager.declare_parameter("stall.wait_duration_seconds", 2.0)
+        if not manager.has_parameter("stall.wait_duration_seconds"):
+            manager.declare_parameter("stall.wait_duration_seconds", 2.0)
         self.stalled = RobotStall()
 
     def stalled_cb(self, stalled: RobotStall):

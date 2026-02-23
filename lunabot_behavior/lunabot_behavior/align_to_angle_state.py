@@ -7,7 +7,6 @@ import numpy as np
 
 class AlignToAngleState(State):
   def __init__(self, angle, **kwargs):
-    super.__init__()
     self.target_angle = np.deg2rad(angle)
     
   def setup(self, manager:Node):

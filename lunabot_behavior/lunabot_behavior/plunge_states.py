@@ -23,6 +23,9 @@ class Plunge(State):
         self.LIN_ACT_MAX_POWER = 127 # -127 - 127
         self.LIN_ACT_CURR_THRESHOLD = 0.1  # Amps; TODO find value
 
+    def sensor_callback(self, sensors: RobotSensors):
+        self.sensors = sensors
+
     def start(self):
         self.start_time = self.manager.get_clock().now()
 

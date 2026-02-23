@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from enum import Enum
+from states.traverse_to_berm import TraverseToBerm
 from states.traverse import NoPath, Traverse, Stall
 from geometry_msgs.msg import PoseStamped
 from deposit_state import Deposit
@@ -20,7 +21,7 @@ class MainStates(Enum):
     INIT = State()
     INIT_STALL = State()
     
-    TRAVERSE_TO_LINKUP = Traverse(PoseStamped())
+    TRAVERSE_TO_LINKUP = Traverse(PoseStamped(), False)
     TRAVERSE_TO_LINKUP_STALL = Stall()
     TRAVERSE_TO_LINKUP_NO_PATH = NoPath()
     
@@ -40,7 +41,7 @@ class MainStates(Enum):
     
     WAIT_FOR_DIVERGE = State() # This will stay as State(), no logic needed
 
-    TRAVERSE_TO_BERM = Traverse(PoseStamped())
+    TRAVERSE_TO_BERM = TraverseToBerm()
     TRAVERSE_TO_BERM_STALL = Stall()
     TRAVERSE_TO_BERM_NO_PATH = NoPath()
 
