@@ -268,7 +268,7 @@
             <remap from="odom" to="position"/>
             <remap from="global_path" to="nav_path"/>
             <remap from="backwards" to="traversal/backwards"/>
-            <remap from="traversal_enabled" to="behavior/traversal_enabled"/>
+            <remap from="traversal_enabled" to="traversal/enabled"/>
 
             <remap from="cmd_vel" to="cmd_vel"/>
         </node>
