@@ -45,7 +45,7 @@ class MainStates(Enum):
     TRAVERSE_TO_BERM_STALL = Stall()
     TRAVERSE_TO_BERM_NO_PATH = NoPath()
 
-    ALIGN_TO_BERM = AlignToAngleState(180)
+    ALIGN_TO_BERM = AlignToAngleState(270)
     ALIGN_TO_BERM_STALL = State()
     
     APPROACH_BERM = ApproachBerm()
