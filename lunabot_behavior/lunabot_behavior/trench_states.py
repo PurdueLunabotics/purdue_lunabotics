@@ -8,11 +8,13 @@ from std_msgs.msg import Int32
 from geometry_msgs.msg import Twist
 from lunabot_msgs.msg import RobotSensors
 
+# TODO: what happens if the node stalls? does the time reset? also should we do distance not time based?
+
 class Trench(State):
     def setup(self, manager: Node):
         self.state_manager = manager
         self.excavation_pub = manager.create_publisher(Int32, "excavate", 10)
-        self.linact_pub = manager.create_publisher(Int32, "linact", 10)
+        self.linact_pub = manager.create_publisher(Int32, "lin_act", 10)
         self.cmdvel_pub = manager.create_publisher(Twist, "cmd_vel", 10)
         self.dep_pub = manager.create_publisher(Int32, "deposition", 10)
 
@@ -29,9 +31,9 @@ class Trench(State):
         self.start_time = self.state_manager.get_clock().now()
 
     def periodic(self) -> None | Events:
-        self.linact_pub.publish(self.LIN_ACT_MAX_POWER)
-        self.excavation_pub.publish(self.EXCAVATION_SPEED)
-        self.dep_pub.publish(self.DEPOSITION_SPEED)
+        self.linact_pub.publish(Int32(data = self.LIN_ACT_MAX_POWER)) # TODO: why?
+        self.excavation_pub.publish(Int32(data = self.EXCAVATION_SPEED))
+        self.dep_pub.publish(Int32(data = self.DEPOSITION_SPEED))
 
         cmd = Twist()
         cmd.linear.x = self.TRENCHING_SPEED
@@ -45,7 +47,7 @@ class Trench(State):
         return None 
     
     def exit(self):
-        self.excavation_pub.publish(0)
-        self.dep_pub.publish(0)
-        self.linact_pub.publish(0)
+        self.excavation_pub.publish(Int32(data = 0))
+        self.dep_pub.publish(Int32(data = 0))
+        self.linact_pub.publish(Int32(data = 0))
         self.cmdvel_pub.publish(Twist())
