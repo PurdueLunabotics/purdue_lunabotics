@@ -16,6 +16,7 @@ class StateManager(Node):
         self.event_sub = self.create_subscription(event_type, "events", self.event_cb, 10)
         self.timer = self.create_timer(0.1, self.periodic)
         self.get_logger().info(f"starting at state {self.state}")
+        self.state.value.start()
 
     def event_cb(self, event: UInt8):
         self.process_event(self.events(event.data))
