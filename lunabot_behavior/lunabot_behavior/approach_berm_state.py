@@ -5,11 +5,11 @@ from geometry_msgs.msg import Twist, PoseStamped
 class ApproachBerm(State):    
   def setup(self, manager:Node):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "cmd_vel", 10)
-    manager.create_subscription(PoseStamped, "odom", self.odom_cb, 1)
+    manager.create_subscription(PoseStamped, "position", self.odom_cb, 1)
     self.manager = manager
     self.robot_pose = (None, None)
     self.linear_speed = 0.1 #m/s
-    self.target_x = 1.5
+    self.target_y = 1.5
   
   def odom_cb(self, msg:PoseStamped):
     self.robot_pose = (
@@ -23,12 +23,12 @@ class ApproachBerm(State):
   def periodic(self):
     if self.robot_pose[0] == None:
       return None
-    linear_error = self.target_x - self.robot_pose[0]
+    linear_error = self.target_y - self.robot_pose[1]
     output = Twist()
     if linear_error < 0:
       return Events.SUCCESS
     else:
-      output.linear.x = self.linear_speed
+      output.linear.x = -self.linear_speed
     self.cmd_vel_publisher.publish(output)
     return None
   
