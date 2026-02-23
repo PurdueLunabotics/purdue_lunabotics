@@ -5,6 +5,8 @@ from enum import Enum
 from geometry_msgs.msg import PoseStamped
 from lunabot_msgs.msg import Event
 
+from lunabot_behavior.states.approach_trench import ApproachTrench
+from lunabot_behavior.states.align_trench import AlignTrench
 from lunabot_behavior.states.align_to_angle import AlignToAngle
 from lunabot_behavior.states.traverse_to_berm import TraverseToBerm
 from lunabot_behavior.states.traverse import NoPath, Traverse, Stall
@@ -37,8 +39,11 @@ class MainStates(Enum):
     TRAVERSE_TO_LINKUP_STALL = Stall()
     TRAVERSE_TO_LINKUP_NO_PATH = NoPath()
     
-    ALIGN_TO_TRENCH = State()
+    ALIGN_TO_TRENCH = AlignTrench()
     ALIGN_TO_TRENCH_STALL = State()
+    
+    APPROACH_TRENCH = ApproachTrench()
+    APPROACH_TRENCH_STALL = State()
     
     PLUNGE_ACT = Plunge()
     PLUNGE_ACT_STALL = State()
@@ -96,9 +101,13 @@ class MainStates(Enum):
             (MainStates.TRAVERSE_TO_LINKUP_NO_PATH, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
             (MainStates.TRAVERSE_TO_LINKUP_STALL, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
 
-            (MainStates.ALIGN_TO_TRENCH, Events.SUCCESS): MainStates.PLUNGE_ACT,
+            (MainStates.ALIGN_TO_TRENCH, Events.SUCCESS): MainStates.APPROACH_TRENCH,
             (MainStates.ALIGN_TO_TRENCH, Events.STALL): MainStates.ALIGN_TO_TRENCH_STALL,
             (MainStates.ALIGN_TO_TRENCH_STALL, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
+            
+            (MainStates.APPROACH_TRENCH, Events.SUCCESS): MainStates.PLUNGE_ACT,
+            (MainStates.APPROACH_TRENCH, Events.STALL): MainStates.APPROACH_TRENCH_STALL,
+            (MainStates.APPROACH_TRENCH_STALL, Events.SUCCESS): MainStates.APPROACH_TRENCH,
             
             (MainStates.PLUNGE_ACT, Events.SUCCESS): MainStates.TRENCH,
             (MainStates.PLUNGE_ACT, Events.STALL): MainStates.PLUNGE_ACT_STALL,
