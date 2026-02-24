@@ -109,8 +109,7 @@
 
     <include if="$(var lidar)" file="$(find-pkg-share lunabot_perception)/launch/lidar.launch">
 
-    </include>
-        
+    </include>        
 
     <include if="$(var record)" file="$(find-pkg-share lunabot_bringup)/launch/record.launch">
         <arg name="exp_name" value="$(var exp_name)" />
@@ -164,6 +163,25 @@
         <node pkg="lunabot_slam" exec="sim_odom.py" if="$(var odom_from_sim)">
         </node>
 
+
+        <let if="$(var pointcloud)" name="temp_cloud" value="$(var /ns)/pointcloud/depth_combined_cloud"/>
+        <let unless="$(var pointcloud)" name="temp_cloud" value="$(var /ns)/$(var odom_cam_name)/points"/>
+
+        
+
+        <let if="$(var lidar)" name="scan_cloud" value="$(var /ns)/lidar_combined_cloud"/>
+        <let unless="$(var lidar)" name="scan_cloud" value="$(var /ns)/$(var temp_cloud)"/>
+
+        <node if="$(var lidar)" pkg="rtabmap_util" exec='point_cloud_aggregator' name="point_cloud_aggregator2" respawn="true">
+            <remap from="cloud1" to="$(var temp_cloud)" />
+            <remap from="cloud2" to="lidar_assembled_cloud" />
+            <remap from="combined_cloud" to="lidar_combined_cloud"/>       
+            <param name="count" value="$(eval 'len($(var cams))')"/>
+            <param name="xyz_output" value="true"/>
+            <param name="fixed_frame_id" value="$(var ns)base_link" />
+            <param name="approx_sync" value="true"/>
+        </node>
+
         <push_ros_namespace namespace="rtabmap"/>
 
         <!-- Odometry -->
@@ -184,21 +202,6 @@
 
         </node>
 
-        <let if="$(var pointcloud)" name="temp_cloud" value="$(var /ns)/pointcloud/depth_combined_cloud"/>
-        <let unless="$(var pointcloud)" name="temp_cloud" value="$(var /ns)/$(var odom_cam_name)/points"/>
-
-        <node if="$(var lidar)" pkg="rtabmap_util" exec='point_cloud_aggregator' name="point_cloud_aggregator" respawn="true">
-            <remap from="cloud1" to="$(var temp_cloud)" />
-            <remap from="cloud2" to="unilidar/cloud" />
-            <remap from="combined_cloud" to="lidar_combined_cloud"/>       
-            <param name="count" value="$(eval 'len($(var cams))')"/>
-            <param name="xyz_output" value="true"/>
-            <param name="fixed_frame_id" value="$(var ns)base_link" />
-            <param name="approx_sync" value="true"/>
-        </node>
-
-        <let if="$(var lidar)" name="scan_cloud" value="$(var /ns)/lidar_combined_cloud"/>
-        <let unless="$(var lidar)" name="scan_cloud" value="$(var /ns)/$(var temp_cloud)"/>
         
 
         <let name="rtabmap_max_features" value="'-1'" if="$(var odom_from_sim)"/>
@@ -233,7 +236,7 @@
             <param name="Grid/FootprintLength"    value="'1.0'"/>
             <param name="Grid/FootprintWidth"     value="'0.75'"/> 
             <param name="Grid/MaxGroundAngle"     value="'30'"/> <!-- 30 degree normal before marked as obstacle -->
-            <!-- <param name="Grid/MaxObstacleHeight"  value="'2.   0"/> points greater than 2m above are not obstacles -->
+            <param name="Grid/MaxObstacleHeight"  value="'2.0'"/> <!-- points greater than 2m above are not obstacles -->
             <param name="Grid/RangeMax"           value="'0.0'"/> <!-- don't cap range (do this in cameras.launch) -->
             <param name="Grid/PreVoxelFiltering"  value="'false'"/> <!-- don't filter with voxels (do this in cameras.launch) -->
             <param name="Grid/NormalK"            value="'20'" /> <!-- use the nearest 20 points to find ground normals -->

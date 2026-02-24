@@ -225,36 +225,24 @@
 
 
   <!-- Lidar -->
+  <link name="lidar_mid_link">
+    
+  </link>
+
   <link name="lidar_link">
-    <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <inertia 
-        ixx="0.001" 
-        ixy="0.000" 
-        ixz="0.000"
-        iyy="0.001"
-        iyz="0.000"
-        izz="0.001"
-      />
-      <mass value="0.035"/>
-    </inertial>
-    <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="0.03 0.1 0.03" />
-      </geometry>
-    </collision>
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="0.03 0.1 0.03" />
-      </geometry>
-    </visual>
+    
   </link>
 
   <joint name="lidar_joint" type="fixed">
-    <origin rpy="${pi} 0 ${pi}" xyz="-0.381 -0.05 0.558"/>
+    <origin rpy="0 ${-pi/2} 0" xyz="-0.381 -0.05 0.558"/>
     <parent link="base_link"/>
+    <child link="lidar_mid_link"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <joint name="lidar_joint2" type="fixed">
+    <origin rpy="0 0 ${pi*0.375}" xyz="0 0 0"/>
+    <parent link="lidar_mid_link"/>
     <child link="lidar_link"/>
     <axis xyz="0 0 1"/>
   </joint>
