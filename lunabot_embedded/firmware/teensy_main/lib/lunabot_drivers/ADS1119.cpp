@@ -248,7 +248,7 @@ uint8_t ADS1119::readRegister(ADS1119RegisterToRead registerToRead)
     */
 
     // 1. The first frame, the host sends the RREG command including the register address to the ADS1119.
-    uint8_t byteToWrite = ADS1119_WREG_CMD || (uint8_t(registerToRead) << 2);
+    uint8_t byteToWrite = ADS1119_WREG_CMD | (uint8_t(registerToRead) << 2);
     _i2c->beginTransmission(_address);
     _i2c->write(byteToWrite);
     if (_i2c->endTransmission() != 0)
