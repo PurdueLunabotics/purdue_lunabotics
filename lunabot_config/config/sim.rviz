@@ -21,7 +21,6 @@ Panels:
   - Class: rviz_common/Tool Properties
     Expanded:
       - /2D Goal Pose1
-      - /Publish Point1
     Name: Tool Properties
     Splitter Ratio: 0.5886790156364441
   - Class: rviz_common/Views
@@ -78,6 +77,8 @@ Visualization Manager:
           Value: true
         left_front:
           Value: true
+        map:
+          Value: true
         middle_link:
           Value: true
         odom:
@@ -92,6 +93,8 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
+        map:
+          {}
         odom:
           base_link:
             middle_link:
@@ -127,13 +130,13 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /maps/costmap_node/global_costmap/costmap
+        Value: /global_costmap/costmap
       Update Topic:
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /maps/costmap_node/global_costmap/costmap_updates
+        Value: /global_costmap/costmap_updates
       Use Timestamp: false
       Value: true
     - Alpha: 1
@@ -230,7 +233,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /nav/global_path
+        Value: /nav_path
       Value: true
     - Alpha: 1
       Axes Length: 1
@@ -256,14 +259,14 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        {}
+        target_paths: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /ptp/line_path
+        Value: /nav/ptp/line_path
       Value: true
     - Alpha: 1
       Class: rviz_default_plugins/RobotModel
@@ -283,61 +286,6 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        d455_back_depth_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        d455_back_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        d455_back_rgb_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        d455_front_depth_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        d455_front_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        d455_front_rgb_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        left_back:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        left_front:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        middle_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        right_back:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        right_front:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
       Mass Properties:
         Inertia: false
         Mass: false
@@ -349,7 +297,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: odom
+    Fixed Frame: map
     Frame Rate: 30
   Name: root
   Tools:
@@ -360,16 +308,6 @@ Visualization Manager:
     - Class: rviz_default_plugins/FocusCamera
     - Class: rviz_default_plugins/Measure
       Line color: 128; 128; 0
-    - Class: rviz_default_plugins/SetInitialPose
-      Covariance x: 0.25
-      Covariance y: 0.25
-      Covariance yaw: 0.06853891909122467
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /initialpose
     - Class: rviz_default_plugins/SetGoal
       Topic:
         Depth: 5
@@ -377,14 +315,6 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /goal
-    - Class: rviz_default_plugins/PublishPoint
-      Single click: true
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /clicked_point
   Transformation:
     Current:
       Class: rviz_default_plugins/TF
@@ -392,7 +322,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 4.883861541748047
+      Distance: 8.2405366897583
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -407,10 +337,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.9203976988792419
+      Pitch: 0.9753977060317993
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.7704033851623535
+      Yaw: 5.225404739379883
     Saved: ~
 Window Geometry:
   Displays:
@@ -428,5 +358,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: 1059
-  Y: 52
+  X: 995
+  Y: -12

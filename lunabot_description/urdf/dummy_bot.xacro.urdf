@@ -3,7 +3,9 @@
   <material name="silver">
     <color rgba="0.75 0.75 0.75 1"/>
   </material>
-  <link name="base_link">
+  <link name="base_link"/>
+
+  <link name="middle_link">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <mass value="50.0"/>
@@ -30,10 +32,8 @@
     </collision>
   </link>
 
-  <link name="middle_link"/>
-
   <joint name="mid_joint" type="fixed">
-    <origin rpy="0 0 3.14" xyz="0 0 0"/>
+    <origin rpy="0 0 0" xyz="0.1 0 0.3"/>
     <parent link="base_link"/>
     <child link="middle_link"/>
     <axis xyz="0 0 1"/>
@@ -65,20 +65,21 @@
       <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
       <cylinder radius="0.2" length="0.125"/>
       </geometry>
-      <!-- <surface> -->
-        <!-- <friction> -->
-          <!-- <ode> -->
-            <!-- <mu>0.01</mu> -->
-            <!-- <mu2>0.01</mu2> -->
-          <!-- </ode> -->
-        <!-- </friction> -->
-      <!-- </surface> -->
+      <surface>
+        <friction>
+          <ode>
+            <mu>1</mu>
+            <mu2>1</mu2>
+            <fdir1>1 0 0</fdir1>
+          </ode>
+        </friction>
+      </surface>
     </collision>
   </link>
 
   <joint name="left_front_rev" type="continuous">
-    <origin rpy="0 0 0" xyz="-0.292 -0.35 -0.162"/>
-    <parent link="middle_link"/>
+    <origin rpy="0 0 0" xyz="0.3302 0.254 0.178"/>
+    <parent link="base_link"/>
     <child link="left_front"/>
     <axis xyz="0 1 0"/>
     <!-- <limit effort="10.0" velocity="100.0"/> -->
@@ -110,20 +111,21 @@
       <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
       <cylinder radius="0.2" length="0.125"/>
       </geometry>
-      <!-- <surface> -->
-        <!-- <friction> -->
-          <!-- <ode> -->
-            <!-- <mu>0.01</mu> -->
-            <!-- <mu2>0.01</mu2> -->
-          <!-- </ode> -->
-        <!-- </friction> -->
-      <!-- </surface> -->
+      <surface>
+        <friction>
+          <ode>
+            <mu>1</mu>
+            <mu2>1</mu2>
+            <fdir1>1 0 0</fdir1>
+          </ode>
+        </friction>
+      </surface>
     </collision>
   </link>
 
   <joint name="left_back_rev" type="continuous">
-    <origin rpy="0 0 0" xyz="0.217 -0.35 -0.162"/>
-    <parent link="middle_link"/>
+    <origin rpy="0 0 0" xyz="-0.228 0.254 0.178"/>
+    <parent link="base_link"/>
     <child link="left_back"/>
     <axis xyz="0 1 0"/>
     <!-- <limit effort="10.0" velocity="100.0"/> -->
@@ -155,20 +157,21 @@
       <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
       <cylinder radius="0.2" length="0.125"/>
       </geometry>
-      <!-- <surface> -->
-        <!-- <friction> -->
-          <!-- <ode> -->
-            <!-- <mu>0.01</mu> -->
-            <!-- <mu2>0.01</mu2> -->
-          <!-- </ode> -->
-        <!-- </friction> -->
-      <!-- </surface> -->
+      <surface>
+        <friction>
+          <ode>
+            <mu>1</mu>
+            <mu2>1</mu2>
+            <fdir1>1 0 0</fdir1>
+          </ode>
+        </friction>
+      </surface>
     </collision>
   </link>
 
   <joint name="right_front_rev" type="continuous">
-    <origin rpy="0 0 0" xyz="-0.292 0.22 -0.162"/>
-    <parent link="middle_link"/>
+    <origin rpy="0 0 0" xyz="0.3302 -0.254 0.178"/>
+    <parent link="base_link"/>
     <child link="right_front"/>
     <axis xyz="0 1 0"/>
     <!-- <limit effort="10.0" velocity="100.0"/> -->
@@ -200,20 +203,21 @@
       <!-- <mesh filename="file://$(find mining_arena_gazebo)/models/realistic_robot/robot_wheel.stl"/> -->
       <cylinder radius="0.2" length="0.125"/>
       </geometry>
-      <!-- <surface> -->
-        <!-- <friction> -->
-          <!-- <ode> -->
-            <!-- <mu>0.01</mu> -->
-            <!-- <mu2>0.01</mu2> -->
-          <!-- </ode> -->
-        <!-- </friction> -->
-      <!-- </surface> -->
+      <surface>
+        <friction>
+          <ode>
+            <mu>1</mu>
+            <mu2>1</mu2>
+            <fdir1>1 0 0</fdir1>
+          </ode>
+        </friction>
+      </surface>
     </collision>
   </link>
 
   <joint name="right_back_rev" type="continuous">
-    <origin rpy="0 0 0" xyz="0.217 0.22 -0.162"/>
-    <parent link="middle_link"/>
+    <origin rpy="0 0 0" xyz="-0.228 -0.254 0.178"/>
+    <parent link="base_link"/>
     <child link="right_back"/>
     <axis xyz="0 1 0"/>
     <!-- <limit effort="10.0" velocity="100.0"/> -->
@@ -254,8 +258,8 @@
   </link>  
 
   <joint name="d455_back_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0.39 -0.05 0.215"/>
-    <parent link="middle_link"/>
+    <origin rpy="${pi} 0 ${pi}" xyz="-0.381 0.05 0.558"/>
+    <parent link="base_link"/>
     <child link="d455_back_link"/>
     <axis xyz="0 0 1"/>
   </joint>
@@ -306,10 +310,10 @@
       <always_on>1</always_on>
       <visualize>false</visualize>
       <update_rate>15</update_rate>
-      <topic>d455_back/depth/image_raw</topic>
+      <topic>d455_back/aligned_depth_to_color/image_raw</topic>
       <gz_frame_id>d455_back_depth_link</gz_frame_id>
       <camera name="d455_back_depth">
-        <camera_info_topic>d455_back/depth/camera_info</camera_info_topic>
+        <camera_info_topic>d455_back/aligned_depth_to_color/camera_info</camera_info_topic>
         <horizontal_fov>1.50098</horizontal_fov>
         <image>
           <width>424</width>
@@ -360,8 +364,8 @@
   </link>  
 
   <joint name="d455_front_joint" type="fixed">
-    <origin rpy="0 0 3.14" xyz="-0.55 0.15 0"/>
-    <parent link="middle_link"/>
+    <origin rpy="0 0.3 0" xyz="0.558 -0.17 0.33"/>
+    <parent link="base_link"/>
     <child link="d455_front_link"/>
     <axis xyz="0 0 1"/>
   </joint>
@@ -412,10 +416,10 @@
       <always_on>1</always_on>
       <visualize>false</visualize>
       <update_rate>15</update_rate>
-      <topic>d455_front/depth/image_raw</topic>
+      <topic>d455_front/aligned_depth_to_color/image_raw</topic>
       <gz_frame_id>d455_front_depth_link</gz_frame_id>
       <camera name="d455_front_depth">
-        <camera_info_topic>d455_front/depth/camera_info</camera_info_topic>
+        <camera_info_topic>d455_front/aligned_depth_to_color/camera_info</camera_info_topic>
         <horizontal_fov>1.50098</horizontal_fov>
         <image>
           <width>424</width>
@@ -430,34 +434,63 @@
     </sensor>
   </gazebo>
 
+  <ros2_control name="GazeboSimSystem" type="system">
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+    <joint name="left_front_rev">
+      <command_interface name="velocity">
+        <param name="min">-15</param>
+        <param name="max">15</param>
+      </command_interface>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="left_back_rev">
+      <command_interface name="velocity">
+        <param name="min">-15</param>
+        <param name="max">15</param>
+      </command_interface>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="right_front_rev">
+      <command_interface name="velocity">
+        <param name="min">-15</param>
+        <param name="max">15</param>
+      </command_interface>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="right_back_rev">
+      <command_interface name="velocity">
+        <param name="min">-15</param>
+        <param name="max">15</param>
+      </command_interface>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+  </ros2_control>
+
   <xacro:include filename="$(find lunabot_description)/urdf/dummy_bot.trans" />
   <gazebo>
-    <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
-      <left_joint>left_front_rev</left_joint>
-      <left_joint>left_back_rev</left_joint>
-      <right_joint>right_front_rev</right_joint>
-      <right_joint>right_back_rev</right_joint>
 
-      <wheel_separation>0.64</wheel_separation>
-      <wheel_radius>0.2</wheel_radius>
-
-      <odom_publish_frequency>50.0</odom_publish_frequency>
-
-      <topic>cmd_vel</topic>
-
-      <odom_topic>odom</odom_topic>
-
-      <frame_id>odom</frame_id>
-      <child_frame_id>base_link</child_frame_id>
-      <tf_topic>tf</tf_topic>
-
-      <!-- <min_velocity>-1.0</min_velocity>
-      <max_velocity>1.0</max_velocity>
-      <min_acceleration>-1.0</min_acceleration>
-      <max_acceleration>1.0</max_acceleration>
-      <min_jerk>0.0</min_jerk>
-      <max_jerk>0.0</max_jerk> -->
-
+    <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+        <parameters>$(find lunabot_config)/config/sim_controller.yaml</parameters>
+        <controller_manager_prefix_node_name>controller_manager</controller_manager_prefix_node_name>
+        <robot_param_node>dummy_bot/robot_state_publisher</robot_param_node>
     </plugin>
 
     <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
@@ -466,6 +499,17 @@
         <joint_name>left_back_rev</joint_name>
         <joint_name>right_front_rev</joint_name>
         <joint_name>right_back_rev</joint_name>
+    </plugin>
+
+    <plugin
+        filename="gz-sim-pose-publisher-system"
+        name="gz::sim::systems::PosePublisher">
+        <publish_link_pose>false</publish_link_pose>
+        <publish_visual_pose>false</publish_visual_pose>
+        <publish_collision_pose>false</publish_collision_pose>
+        <publish_sensor_pose>false</publish_sensor_pose>
+        <publish_model_pose>true</publish_model_pose>
+        <publish_nested_model_pose>false</publish_nested_model_pose>
     </plugin>
     
   </gazebo>

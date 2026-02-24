@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <node args="-d $(find-pkg-share lunabot_config)/config/test.rviz" name="rviz" pkg="rviz2" exec="rviz2" />
+
+  <node name="transform" pkg="tf2_ros" exec="static_transform_publisher" output="screen" args="--frame-id map --child-frame-id robot">
+  </node>
+
+  <node pkg="lunabot_nav" exec="planner_test_node" output="screen" />
+
+  <node name="planner_server" pkg="nav2_planner" exec="planner_server" output="screen" respawn="true">
+    <param from="$(find-pkg-share lunabot_config)/config/test_planner.yml"/>
+  </node>
+
+  <node name="map_server" pkg="nav2_map_server" exec="map_server" output="screen" respawn="true">
+    <param name="yaml_filename" value="$(find-pkg-share lunabot_config)/config/map.yml"/>
+  </node>
+
+  <node name="lifecycle" pkg="nav2_lifecycle_manager" exec="lifecycle_manager" output="screen">
+    <param name="autostart" value="true"/>
+    <param name="node_names" value="planner_server;map_server" value-sep=";"/>
+  </node>
+</launch>

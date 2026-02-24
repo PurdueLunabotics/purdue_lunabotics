@@ -1,0 +1,5 @@
+<library path="stheta_star_planner">
+    <class name="SThetaStarPlanner" type="SThetaStarPlanner" base_class_type="nav2_core::GlobalPlanner">
+        <description>S-Theta* planner</description>
+    </class>
+</library>

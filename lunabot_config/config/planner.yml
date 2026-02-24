@@ -1,0 +1,68 @@
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      publish_frequency: 30.0
+      global_frame: "map"
+      robot_base_frame: "base_link"
+      robot_radius: 0.2
+      plugins: ["static_layer", "denoise_layer", "inflation_layer"]
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        map_topic: "/rtabmap/map"
+        enabled: true
+        map_subscribe_transient_local: false
+        subscribe_to_updates: true
+        transform_tolerance: 0.1
+      denoise_layer:
+        plugin: "nav2_costmap_2d::DenoiseLayer"
+        enabled: true
+        minimal_group_size: 2
+        group_connectivity_type: 4 # 4 is adjacent, 8 includes diagonals
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        enabled: true
+        inflation_radius: 1.5
+        cost_scaling_factor: 6.0
+        inflate_unknown: true  # should treat unknown as obstacles (maybe change init values)
+        inflate_around_unknown: true
+
+planner_server:
+  ros__parameters:
+    planner_plugins: ["GridBased"]
+    GridBased:
+      plugin: "SThetaStarPlanner"
+
+mini:
+  global_costmap:
+    global_costmap:
+      ros__parameters:
+        publish_frequency: 30.0
+        global_frame: "minimap"
+        robot_base_frame: "minibase_link"
+        robot_radius: 0.2
+        plugins: ["static_layer", "denoise_layer", "inflation_layer"]
+        static_layer:
+          plugin: "nav2_costmap_2d::StaticLayer"
+          map_topic: "/mini/rtabmap/map"
+          enabled: true
+          map_subscribe_transient_local: false
+          subscribe_to_updates: true
+          transform_tolerance: 0.1
+        denoise_layer:
+          plugin: "nav2_costmap_2d::DenoiseLayer"
+          enabled: true
+          minimal_group_size: 2
+          group_connectivity_type: 4 # 4 is adjacent, 8 includes diagonals
+        inflation_layer:
+          plugin: "nav2_costmap_2d::InflationLayer"
+          enabled: true
+          inflation_radius: 1.5
+          cost_scaling_factor: 6.0
+          inflate_unknown: true  # should treat unknown as obstacles (maybe change init values)
+          inflate_around_unknown: true
+
+  planner_server:
+    ros__parameters:
+      planner_plugins: ["GridBased"]
+      GridBased:
+        plugin: "SThetaStarPlanner"
