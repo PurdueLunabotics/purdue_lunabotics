@@ -9,3 +9,4 @@ int32 excavate
 # Deposition
 int32 deposit
 bool should_reset
+bool should_zero_act_pos
