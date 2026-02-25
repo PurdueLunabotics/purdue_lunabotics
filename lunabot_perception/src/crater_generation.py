@@ -13,6 +13,7 @@ from sensor_msgs.msg import PointCloud2
 from sensor_msgs_py import point_cloud2 # actually allows to read the point clouds
 # import open3d as o3d
 import numpy as np
+from sklearn import datasets, linear_model
 
 import hough
 
@@ -32,6 +33,10 @@ class CraterGeneration(Node):
             PointCloud2, "crater", 10
         )
         
+        self.plane_publisher = self.create_publisher(
+            PointCloud2, "ground_plane", 10
+        )
+        
         # self.pointcloud_subscriber = self.create_subscription(
         #     PointCloud2, "d455_front/points", self.set_points,  10
         # )
@@ -44,7 +49,52 @@ class CraterGeneration(Node):
             PointCloud2, "/rtabmap/cloud_ground", self.set_ground, 10
         )
 
+        self.create_timer(2, self.plane_generation)
         self.create_timer(1, self.estimate_crater)
+        
+        
+        
+    def plane_generation(self):
+        ground_trainxy = []
+        ground_trainz = []
+        
+        self.get_logger().info(f"{self.get_clock().now()}")
+        
+        try:
+            ground = point_cloud2.read_points(self.ground, field_names = ("x", "y", "z"), skip_nans=True)
+            for p in ground: 
+                ground_trainxy.append([p[0], p[1]]) 
+                ground_trainz.append([p[2]])
+        except Exception as inst:
+            self.get_logger().info(f"{inst}")
+            self.get_logger().warn("Failed to read planes")
+        
+        self.get_logger().info(f"{self.get_clock().now()}")
+        
+        ransac = linear_model.RANSACRegressor(max_trials = 10, stop_probability = 0.9)
+        
+        self.get_logger().info(f"{self.get_clock().now()}")
+        
+        ransac.fit(ground_trainxy, ground_trainz)
+        
+        self.get_logger().info(f"{self.get_clock().now()}")
+        
+        # the plane equation
+        z = lambda x,y: (-ransac.estimator_.intercept_ - ransac.estimator_.coef_[0]*x - ransac.estimator_.coef_[1]*y) / ransac.estimator_.coef_[2]
+        
+        self.get_logger().info(f"{self.get_clock().now()}")
+        
+        plane_pointcloud = [ground_trainxy(0), ground_trainxy(1), z(ground_trainxy(0), ground_trainxy(1))]
+        self.get_logger().warn("it do thing")
+        
+        header = Header()
+        t = self.get_clock().now()
+        header.stamp = t.to_msg()
+        header.frame_id = "map"
+        pc2 = point_cloud2.create_cloud_xyz32(header, plane_pointcloud)
+
+        self.plane_publisher.publish(pc2)
+
 
         
     def estimate_crater(self):
@@ -123,6 +173,7 @@ class CraterGeneration(Node):
             
                 
                 if(hough_r < 0.4 and hough_r > 0):
+                    self.get_logger().warn("god help")
                     for i in range(30):
                         x = hough_cx + hough_r * np.cos(i*12*2*np.pi/360)
                         y = hough_cy + hough_r * np.sin(i*12*2*np.pi/360)
