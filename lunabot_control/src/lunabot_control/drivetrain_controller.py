@@ -34,9 +34,9 @@ class DrivetrainController(Node):
 
         excavation_idx = state.name.index("excavation_joint")
         if abs(state.velocity[excavation_idx] - self.target_excavation_vel) > 0.1:
-            sensors.act_right_curr = 2.0
-        else:
             sensors.act_right_curr = 0.0
+        else:
+            sensors.act_right_curr = 2.0
         self.sensor_pub.publish(sensors)
 
     def scale_rpm(self, rpm):

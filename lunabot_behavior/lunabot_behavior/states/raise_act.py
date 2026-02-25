@@ -40,7 +40,7 @@ class Raise(State):
                 return Events.SUCCESS
         
         
-        if abs(self.sensors.act_right_curr) > self.LIN_ACT_CURR_THRESHOLD and elapsed > Duration(seconds=self.MIN_TIME):
+        if abs(self.sensors.act_right_curr) < self.LIN_ACT_CURR_THRESHOLD and elapsed > Duration(seconds=self.MIN_TIME):
             return Events.SUCCESS
         return None
             

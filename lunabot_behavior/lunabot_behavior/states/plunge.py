@@ -40,7 +40,7 @@ class Plunge(State):
             return Events.SUCCESS
         
         # TODO: Does the current rise (like a stall) or drop when the actuator hits the limit?
-        if abs(self.sensors.act_right_curr) > self.LIN_ACT_CURR_THRESHOLD and elapsed > Duration(seconds=self.MIN_TIME): 
+        if abs(self.sensors.act_right_curr) < self.LIN_ACT_CURR_THRESHOLD and elapsed > Duration(seconds=self.MIN_TIME): 
             return Events.SUCCESS
         return None
             
