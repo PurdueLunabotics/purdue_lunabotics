@@ -31,5 +31,5 @@ class Deposit(State):
     self.dep_pub.publish(Int32(data = 0))
     self.dep_gate_pub.publish(Bool(data = False))
     if self.transfer:
-      self.mini_event_pub.publish(Event(data = Event.SUCCESS))
+      self.mini_event_pub.publish(Event(data = Event.PROCEED))
       

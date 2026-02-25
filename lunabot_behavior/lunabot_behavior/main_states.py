@@ -93,7 +93,7 @@ class MainStates(Enum):
             (MainStates.STARTING_RAISE, Events.STALL): MainStates.STARTING_RAISE_STALL,
             (MainStates.STARTING_RAISE_STALL, Events.SUCCESS): MainStates.STARTING_RAISE,
             
-            (MainStates.WAIT_FOR_LINKUP, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
+            (MainStates.WAIT_FOR_LINKUP, Events.PROCEED): MainStates.TRAVERSE_TO_LINKUP,
                         
             (MainStates.TRAVERSE_TO_LINKUP, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
             (MainStates.TRAVERSE_TO_LINKUP, Events.STALL): MainStates.TRAVERSE_TO_LINKUP_STALL,
@@ -131,7 +131,7 @@ class MainStates(Enum):
             (MainStates.DEPOSIT, Events.STALL): MainStates.DEPOSIT_STALL,
             (MainStates.DEPOSIT_STALL, Events.SUCCESS): MainStates.DEPOSIT,
             
-            (MainStates.WAIT_FOR_DIVERGE, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
+            (MainStates.WAIT_FOR_DIVERGE, Events.PROCEED): MainStates.ALIGN_TO_TRENCH,
 
             # in case minibot is indisposed and big bot has to make full cycles
             (MainStates.TRAVERSE_TO_BERM, Events.ARRIVED): MainStates.IDLE,

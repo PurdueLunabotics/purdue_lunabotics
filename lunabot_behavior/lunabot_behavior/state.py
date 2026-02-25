@@ -12,6 +12,7 @@ class Events(Enum):
     NO_PATH = Event.NO_PATH
     STUCK = Event.STUCK
     ARRIVED = Event.ARRIVED
+    PROCEED = Event.PROCEED
 
 class State:
     def setup(self, manager: Node):

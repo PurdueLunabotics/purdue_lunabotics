@@ -29,4 +29,4 @@ class SeparateMain(State):
   
   def exit(self):
     self.cmd_vel_publisher.publish(Twist())
-    self.main_event_pub.publish(Event.SUCCESS)
+    self.main_event_pub.publish(Event.PROCEED)
