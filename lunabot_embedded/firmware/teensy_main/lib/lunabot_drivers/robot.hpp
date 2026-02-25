@@ -19,8 +19,8 @@ extern Sabertooth MC3; // bottom
 #define DEP_MOTOR_ID 0x04
 
 namespace actuation {
-void cb(int8_t, uint8_t);
-void update(float &, long &, long &);
+void cb(int8_t, uint8_t, uint8_t);
+void update(float &, float &, float &);
 } // namespace actuation
 
 namespace drivetrain {

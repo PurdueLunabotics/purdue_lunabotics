@@ -106,8 +106,8 @@ private:
 class Encoder_Bus {
 public:
   Encoder_Bus() {};
-  static void init();
-  static long read(uint8_t id);
+  static void init(uint8_t is_top);
+  static float read(uint8_t id);
 
 private:
   static constexpr int NUM_ACTUATORS = 2;

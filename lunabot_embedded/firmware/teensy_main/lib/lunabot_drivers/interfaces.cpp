@@ -2,6 +2,11 @@
 #include "ADS1119.h"
 #include "wiring.h"
 
+#define PA01_PULSES_PER_INCH 152
+#define PA01_STROKE_LENGTH_INCHES 8
+#define INVALID_ID 255
+#define INCHES_PER_METER 39.3701
+
 // Sabertooth MC Interfacing
 
 int Sabertooth_MotorCtrl::initialized_serial_ = 0;
@@ -202,17 +207,21 @@ Encoder Encoder_Bus::encs[NUM_ACTUATORS] = {
     Encoder(PIN_LIST[2], PIN_LIST[3]),
 };
 
-void Encoder_Bus::init() {
+void Encoder_Bus::init(uint8_t option) {
   for (int i = 0; i < NUM_ACTUATORS; i++) {
-    encs[i].write(0);
+    if (option) {
+        encs[i].write(0);
+    } else {
+        encs[i].write(PA01_PULSES_PER_INCH * PA01_STROKE_LENGTH_INCHES);
+    }
   }
 }
 
-long Encoder_Bus::read(uint8_t id) {
+float Encoder_Bus::read(uint8_t id) {
   // returns the count since last read, and resets the count to 0
   if (id != 1 && id != 0) {
-      return -1;
+      return INVALID_ID;
   }
-  long val = encs[id].read();
+  float val = (float) encs[id].read() / PA01_PULSES_PER_INCH;
   return val;
 }

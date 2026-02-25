@@ -19,7 +19,7 @@ uint8_t buffer[64];
 uint8_t flags = 0;
 
 void ctrl() {
-  actuation::cb(effort.lin_act, effort.should_zero_act_pos);
+  actuation::cb(effort.lin_act, effort.should_zero_act_pos, effort.is_top);
   drivetrain::cb(effort.left_drive, effort.right_drive, effort.should_reset);
   deposition::cb(effort.deposit, effort.should_reset);
   excavation::cb(effort.excavate, effort.should_reset);
@@ -54,10 +54,10 @@ void setup() {
 
   KillSwitchRelay::init();
   Led_Strip::init();
-  Encoder_Bus::init();
+  Encoder_Bus::init(0); // init to 0 since we are at start and not in a failure state
 
   ADS1119_Current_Bus::init_ads1119();
-  
+
   drivetrain::begin();
   excavation::begin();
   deposition::begin();

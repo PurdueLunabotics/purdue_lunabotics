@@ -17,17 +17,20 @@ Encoder_Bus enc_bus;
 constexpr uint8_t ACT_RIGHT_CURR_MUX = 0;
 constexpr uint8_t ACT_LEFT_CURR_MUX = 2;
 
-void update(float &act_right_curr, long &lin_enc_0, long &lin_enc_1) {
+void update(float &act_right_curr, float &lin_enc_0, float &lin_enc_1) {
   act_right_curr = ADS1119_Current_Bus::read(ACT_RIGHT_CURR_MUX);
   lin_enc_0 = enc_bus.read(0);
   lin_enc_1 = enc_bus.read(1);
 }
 
-void cb(int8_t lin_act_volt, uint8_t should_zero_act_pos) {
+void cb(int8_t lin_act_volt, uint8_t should_zero_act_pos, uint8_t is_top) {
   act_left_mtr.write(-lin_act_volt);
   act_right_mtr.write(lin_act_volt);
   if (should_zero_act_pos) { // maybe need an argument to specify the actuator
-    enc_bus.init(); // zeros the actuator position
+    if (is_top) {
+        enc_bus.init(1); // zeros the actuator position (TOP)
+    }
+    enc_bus.init(0); // zeros the actuator position (BOTTOM)
   }
 }
 
