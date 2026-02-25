@@ -5,7 +5,10 @@ from states.traverse_to_berm import TraverseToBerm
 from separate_main_state import SeparateMain
 from retreat_berm_state import RetreatBerm
 from align_to_angle_state import AlignToAngleState
+
 from states.traverse import NoPath, Traverse, Stall
+from states.find_linkup import FindLinkup
+
 from state import Events, State
 import rclpy
 from state_manager import StateManager
@@ -16,7 +19,7 @@ class MiniStates(Enum):
     INIT = State()
     INIT_STALL = State()
     
-    FIND_LINKUP = Traverse(PoseStamped(), False)
+    FIND_LINKUP = FindLinkup()
     FIND_LINKUP_STALL = Stall()
     FIND_LINKUP_NO_PATH = NoPath()
 

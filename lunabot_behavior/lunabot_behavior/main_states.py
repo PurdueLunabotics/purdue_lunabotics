@@ -37,6 +37,10 @@ class MainStates(Enum):
     RAISE_ACT = Raise()
     RAISE_ACT_STALL = State()
 
+    TRAVERSE_TO_LINKUP = State()
+    TRAVERSE_TO_LINKUP_STALL = State()
+    TRAVERSE_TO_LINKUP_NO_PATH = State()
+
     WAIT_FOR_LINKUP = State()
     
     WAIT_FOR_DIVERGE = State() # This will stay as State(), no logic needed
