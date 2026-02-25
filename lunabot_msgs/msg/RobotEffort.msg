@@ -1,6 +1,6 @@
 std_msgs/Header header
 # Actuation
-int32 lin_act 
+int32 lin_act
 # Drivetrain
 int32 left_drive
 int32 right_drive
@@ -10,3 +10,4 @@ int32 excavate
 int32 deposit
 bool should_reset
 bool should_zero_act_pos
+bool is_top
