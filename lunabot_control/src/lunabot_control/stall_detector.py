@@ -30,6 +30,8 @@ class StallDetector(Node):
     def sensors_callback(self, msg: RobotSensors):
         time = self.get_parameter("~waitTime").get_parameter_value().integer_value
         # first is left, second is right, third is exc
+        if self.effort == None:
+            return
         
         if abs(msg.drive_left_vel) < 10 and abs(self.effort.left_drive) > 0:
             self.stallCounter['left'] += 1

@@ -11,6 +11,7 @@ from lunabot_behavior.states.traverse import NoPath, Traverse, Stall
 from lunabot_behavior.states.deposit import Deposit
 from lunabot_behavior.states.approach_berm import ApproachBerm
 from lunabot_behavior.states.retreat_berm import RetreatBerm
+from lunabot_behavior.states.find_linkup import FindLinkup
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager

@@ -6,6 +6,7 @@
 
     <!-- Type of Robot Args -->
     <arg name="robot_num" default="0"/>
+
     <let name="ns" if="$(eval '$(var robot_num) == 1')" value="mini"/>
     <let name="ns" if="$(eval '$(var robot_num) == 0')" value=""/>
     <arg name="sim" default="false"/>
@@ -26,6 +27,8 @@
     <let name="starting_x" if="$(eval '$(var robot_num) == 1')" value="1.5"/>
     <let name="starting_x" if="$(eval '$(var robot_num) == 0')" value="2.5"/>
 
+    <arg name="entity_name" if="$(eval '$(var robot_num) == 0')" default="dummy_bot"/>
+    <arg name="entity_name" if="$(eval '$(var robot_num) == 1')" default="mini_bot"/>
 
     <!-- What to Launch Args -->
     <arg name="autonomy" default="true" />
@@ -160,9 +163,9 @@
             <param name="input_topics" value="d455_back/detections;d455_front/detections" value-sep=";"/>
         </node>
 
-        <!-- <node name="stall_detection_node" pkg="lunabot_control" exec="stall_detection_node" output="screen" respawn="true"> -->
-        <!--     <param name="~waitTime" value="2"/> -->
-        <!-- </node> -->
+        <node name="stall_detection_node" pkg="lunabot_control" exec="stall_detection_node" output="screen" respawn="true">
+            <param name="~waitTime" value="2"/> 
+        </node>
 
         <push_ros_namespace namespace="rtabmap"/>
 
@@ -241,8 +244,7 @@
         </node>
     </group>
 
-    <!-- <node name="zones_node" pkg="lunabot_behavior" exec="zones" output="screen"/> -->
-    <!-- <node name="find_linkup_node" pkg="lunabot_behavior" exec="find_linkup" output="screen"/> -->
+    <node name="zones_node" pkg="lunabot_behavior" exec="zones" output="screen"/>
 
     <group>
         <node name="planner_server" pkg="nav2_planner" exec="planner_server" output="screen" respawn="true">
