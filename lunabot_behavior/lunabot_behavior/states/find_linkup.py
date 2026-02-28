@@ -37,7 +37,7 @@ class FindLinkup(Traverse):
         self.start_pose.pose.position.y = ZoneMeasurements.START_OFFSET_Y
         self.start_vec = point_from_pose_2d(self.start_pose)
 
-        self.MIN_SEGMENT_LENGTH = 1.325
+        self.MIN_SEGMENT_LENGTH = 0.5 # 1.325
 
         # excavation edge for linkup
         self.exc_p1 = np.array([ZoneMeasurements.EXC_OFFSET_X - (ZoneMeasurements.EXC_LENGTH_X / 2),
@@ -46,6 +46,7 @@ class FindLinkup(Traverse):
                                 ZoneMeasurements.EXC_OFFSET_Y - (ZoneMeasurements.EXC_LENGTH_Y / 2)])
         
         self.excavation_edge = LineString([self.exc_p1, self.exc_p2])
+        self.tolerance = 1.0 # wider tolerance is ok - finding linkup isn't an exact science
         
         self.linkup_found = False
 
@@ -61,7 +62,6 @@ class FindLinkup(Traverse):
         self.odom_sub = manager.create_subscription(PoseStamped, "position", self.odom_cb, 10)
 
         self.odom = None
-        self.tolerance = 0.3 # wider tolerance is ok - finding linkup isn't an exact science
         self.logger = manager.get_logger()
 
         self.path_client = ActionClient(manager, ComputePathToPose, "compute_path_to_pose")
@@ -73,6 +73,8 @@ class FindLinkup(Traverse):
 
     def periodic(self) -> None | Events:
         self.publish_everything()
+        print(f"error: {np.linalg.norm(self.odom - self.goal_vec)}")
+
         if self.linkup_found:
             return Events.SUCCESS
 
@@ -131,13 +133,14 @@ class FindLinkup(Traverse):
 
         # actually determine linkup segment
         segment = self.linkup_seg_from_path(path)
-        self.visualize_line_segment(segment, self.linkup_line_pub)
-        self.visualize_line_segment([self.exc_p1, self.exc_p2], self.exc_edge_pub, g=1.0)
-        self.linkup_found = True
+        if segment is not None:
+            self.visualize_line_segment(segment, self.linkup_line_pub)
+            self.visualize_line_segment([self.exc_p1, self.exc_p2], self.exc_edge_pub, g=1.0)
+            self.linkup_found = True
 
-        # publish result
-        linkup_msg = self.build_linkup_msg(segment)
-        self.linkup_pub.publish(linkup_msg)
+            # publish result
+            linkup_msg = self.build_linkup_msg(segment)
+            self.linkup_pub.publish(linkup_msg)
 
     def build_linkup_msg(self, linkup_segment: list[np.array]):
         linkup = Linkup()
@@ -153,8 +156,8 @@ class FindLinkup(Traverse):
             mini_target = linkup_segment[0] if p1_dist > p2_dist else linkup_segment[1]
 
             linkup.main_target = Point()
-            linkup.main_target.x = main_target[0]
-            linkup.main_target.y = main_target[1]
+            linkup.main_target.x = mini_target[0]#main_target[0]
+            linkup.main_target.y = mini_target[1]#main_target[1]
 
             linkup.mini_target = Point()
             linkup.mini_target.x = mini_target[0]
@@ -208,11 +211,11 @@ class FindLinkup(Traverse):
                                 break
 
                         # otherwise check neighbor on excavation side
-                        if i < len(poses) - 1:
-                            next_segment = [p1, point_from_pose_2d(poses[i+1])]
-                            if self.is_viable_segment(next_segment, self.MIN_SEGMENT_LENGTH):
-                                linkup_segment = next_segment
-                                break
+                        # if i < len(poses) - 1:
+                        #     next_segment = [p1, point_from_pose_2d(poses[i+1])]
+                        #     if self.is_viable_segment(next_segment, self.MIN_SEGMENT_LENGTH):
+                        #         linkup_segment = next_segment
+                        #         break
 
                         # no linkup option found
                         break

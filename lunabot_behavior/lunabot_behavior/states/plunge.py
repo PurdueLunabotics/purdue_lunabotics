@@ -16,10 +16,10 @@ class Plunge(State):
         self.sensors = None
 
         # Constants (in meters)  TODO: update these 
-        self.PLUNGE_TIME = 30  # seconds
+        self.PLUNGE_TIME = 5  # seconds
         self.MIN_TIME = 2  # seconds
         self.EXCAVATION_SPEED = 1500 # rpm
-        self.LIN_ACT_MAX_POWER = 127 # -127 - 127
+        self.LIN_ACT_MAX_POWER = -127 # -127 - 127
         self.LIN_ACT_CURR_THRESHOLD = 0.1  # Amps; TODO find value
 
     def sensor_callback(self, sensors: RobotSensors):
@@ -40,8 +40,6 @@ class Plunge(State):
             return Events.SUCCESS
         
         # TODO: Does the current rise (like a stall) or drop when the actuator hits the limit?
-        if abs(self.sensors.act_right_curr) < self.LIN_ACT_CURR_THRESHOLD and elapsed > Duration(seconds=self.MIN_TIME): 
-            return Events.SUCCESS
         return None
             
     
