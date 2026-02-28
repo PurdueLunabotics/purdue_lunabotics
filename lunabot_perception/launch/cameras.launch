@@ -18,70 +18,45 @@
   <arg name="max_depth" default="3.0"/> <!--meters-->
 
   <group if="$(var front)">
-    <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py">
-      <arg name="camera_name" value ="d455_front" />
-      <arg name="camera_namespace" value ="" />
-      <arg name="base_frame_id" value ="link" />
-
-
-      <arg name="serial_no"                value="$(var serial_no_d455_front)"/>
-
-      <arg name="initial_reset"            value="$(var initial_reset)"/>
-
-      <arg name="pointcloud.enable"        value="false"/>
-      <arg name="enable_sync"              value="true"/>
-      <arg name="align_depth.enable"              value="true"/>
-
-      <arg name="enable_depth"             value="true"/>
-      <arg name="depth_module.depth_profile" value="$(var profile)" />
-
-      <arg name="enable_color"             value="true"/>
-      <arg name="rgb_camera.color_profile" value="$(var profile)" />
-
-      <arg name="decimation_filter.enable" value="true"/>
-
-      <arg name="publish_tf"               value="true"/>
-      <arg name="tf_publish_rate"          value="0"/>
-
-      <arg name="clip_distance"            value="-1"/>
-
-  <! -- Added parameters for isaac_ros_image_proc -->
-      <arg name="width"                    default="424"/>
-      <arg name="height"                   default="240"/>
-
-      <arg name="output_width"             default="424"/>
-      <arg name="output_height"            default="240"/>
-      <arg name="crop_mode"                default="CENTER"/>
-    </include>
     <push_ros_namespace namespace="d455_front"/>
-    <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
-      <arg name="camera_frame" value="d455_front_link" />
-      <arg name="camera_topic" value="color/image_raw"/>
 
-      <arg name="use_sim_time" value="false"/>
-    </include>
+    <composable_node_container name="front_camera_container" namespace="" pkg="rclcpp_components" exec="component_container_mt">
+      
+      <composable_node pkg="realsense2_camera" plugin="realsense2_camera::RealSenseNodeFactory" name="d455_front">
+        <param name="serial_no" value="$(var serial_no_d455_front)"/>
+        <param name="initial_reset" value="$(var initial_reset)"/>
+        <param name="pointcloud.enable" value="false"/>
+        <param name="enable_sync" value="true"/>
+        <param name="align_depth.enable" value="true"/>
+        <param name="enable_depth" value="true"/>
+        <param name="depth_module.depth_profile" value="$(var profile)" />
+        <param name="enable_color" value="true"/>
+        <param name="rgb_camera.color_profile" value="$(var profile)" />
+        <param name="decimation_filter.enable" value="true"/>
+        <param name="publish_tf" value="true"/>
+        <param name="tf_publish_rate" value="0"/>
+      </composable_node>
 
-    <!-- RGB processing -->
-    <!-- Color rectified image -->
-    <node pkg="isaac_ros_image_proc" exec="rectify_node" name="color_rectify_color"
-    <param name="output_width" value="$(var output_width)" />
-    <param name="output_height" value="$(var output_height)" />
-       <remap from="image_raw" to="color/image_raw" />
-       <remap from="camera_info" to="color/camera_info" />
-       <remap from="image_rect" to="color/image_rect_color" />
-    </node>
+      <composable_node pkg="isaac_ros_image_proc" plugin="isaac_ros_image_proc::RectifyNode" name="color_rectify_color">
+        <param name="output_width" value="$(var output_width)" />
+        <param name="output_height" value="$(var output_height)" />
+        <remap from="image_raw" to="color/image_raw" />
+        <remap from="camera_info" to="color/camera_info" />
+        <remap from="image_rect" to="color/image_rect_color" />
+      </composable_node>
 
-    <node pkg="isaac_ros_depth_image_proc" exec='PointCloudXyzNode' name="point_cloud_isaac" respawn="true">
-	    <remap from="depth/camera_info"             to="aligned_depth_to_color/camera_info" />
-	    <remap from="depth/image_rect"                   to="aligned_depth_to_color/image_raw" />
-      <remap from="points"                         to="points" /> <!-- output-->
-	  <!-- rtabmap_util params, isaac does not have these. may instead have to use node for decimation
-      <param name="decimation" value="$(var decimation)"/>
-      <param name="voxel_size" value="$(var voxel_size)"/>
-      <param name="noise_filter_radius" value="$(var noise_filter_radius)"/>
-      <param name="max_depth" value="$(var max_depth)"/>
-	  -->
-    </node>
+      <composable_node pkg="isaac_ros_depth_image_proc" plugin="isaac_ros_depth_image_proc::PointCloudXyzNode" name="point_cloud_isaac">
+        <remap from="depth/camera_info" to="aligned_depth_to_color/camera_info" />
+        <remap from="depth/image_rect" to="aligned_depth_to_color/image_raw" />
+        <remap from="points" to="points" />
+      </composable_node>
+
+      <composable_node pkg="isaac_ros_apriltag" plugin="isaac_ros_apriltag::AprilTagNode" name="apriltag_node">
+        <param name="size" value="0.162"/> <param name="max_tags" value="64"/>
+        <remap from="image" to="color/image_rect_color" /> <remap from="camera_info" to="color/camera_info" />
+      </composable_node>
+
+    </composable_node_container>
   </group>
 
   <group if="$(var back)">
