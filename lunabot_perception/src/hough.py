@@ -3,19 +3,19 @@ from hough_transform import hough_transform_ring
 
 
 def get_bin_centers(
-    c_x, c_y, r, uncertainty
+    c_x, c_y, r, uncertainty_pos, uncertainty_r
 ):
     cx_bin_centers = np.linspace(
-        start=c_x - 0.5*uncertainty,
-        stop=c_x + 0.5*uncertainty,
+        start=c_x - 0.5*uncertainty_pos,
+        stop=c_x + 0.5*uncertainty_pos,
         num=11)
     cy_bin_centers = np.linspace(
-        start=c_y - 0.5*uncertainty,
-        stop=c_y + 0.5*uncertainty,
+        start=c_y - 0.5*uncertainty_pos,
+        stop=c_y + 0.5*uncertainty_pos,
         num=11)
     r_bin_centers = np.linspace(
-        start=r - 0.25,
-        stop=r + 0.25,
+        start=r - 0.25*uncertainty_r,
+        stop=r + 0.25*uncertainty_r,
         num=11)
     return cx_bin_centers, cy_bin_centers, r_bin_centers
 
@@ -30,10 +30,10 @@ def interpretHoughSpace(
 
 def advanced_guess_with_hough(
     guessed_cx, guessed_cy, guessed_r, point_cloud,
-    uncertainty, epsilon
+    uncertainty_pos, uncertainty_r, epsilon
 ):
     cx_bin_centers, cy_bin_centers, r_bin_centers = (
-        get_bin_centers(guessed_cx, guessed_cy, guessed_r, uncertainty)
+        get_bin_centers(guessed_cx, guessed_cy, guessed_r, uncertainty_pos, uncertainty_r)
     )
     epsilon = np.float32(epsilon)
     cx_bin_centers = cx_bin_centers.astype(np.float32)
@@ -69,7 +69,7 @@ def compare_old_new(previous_muon_features, muon_features):
 
 def hough_pointcloud(
     guessed_cx, guessed_cy, guessed_r,
-    point_cloud, uncertainty, epsilon,
+    point_cloud, uncertainty_pos, uncertainty_r, epsilon,
     max_iter=20
 ):
     ring_features = {}
@@ -82,14 +82,15 @@ def hough_pointcloud(
         previous_ring_features = ring_features.copy()
         hough_cx, hough_cy, hough_r = advanced_guess_with_hough(
             ring_features['cx'], ring_features['cy'],
-            ring_features['r'], point_cloud, uncertainty, epsilon)
+            ring_features['r'], point_cloud, uncertainty_pos, uncertainty_r, epsilon)
         ring_features['cx'] = hough_cx
         ring_features['cy'] = hough_cy
         ring_features['r'] = hough_r
         d_cx, d_cy, d_r = compare_old_new(
             previous_ring_features, ring_features
         )
-        uncertainty /= 2
+        uncertainty_pos /= 2
+        uncertainty_r /= 2
         if (
             d_cx <= np.deg2rad(0.05) and
             d_cy <= np.deg2rad(0.05) and
