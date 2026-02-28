@@ -19,9 +19,8 @@ extern Sabertooth MC3; // bottom
 #define DEP_MOTOR_ID 0x04
 
 namespace actuation {
-void cb(int8_t lin_act);
-void update(float &);
-
+void cb(int8_t, uint8_t, uint8_t);
+void update(float &, float &, float &);
 } // namespace actuation
 
 namespace drivetrain {
@@ -32,17 +31,9 @@ float update_curr_left();
 float update_curr_right();
 } // namespace drivetrain
 
-namespace uwb {
-void update(float &d0, float &d1, float &d2);
-} // namespace uwb
-
 namespace LEDs {
 void cb(int32_t);
 }
-
-namespace load_cell {
-void update(float &);
-} // namespace load_cell
 
 namespace deposition {
 void begin();

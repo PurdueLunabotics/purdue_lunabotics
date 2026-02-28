@@ -3,18 +3,24 @@
 #include <Arduino.h>
 #include "ModbusLite.hpp"
 
+enum StepperLibMotorType {
+    ISV2,
+    BLD305S,
+};
+
 class StepperMotor {
 public:
   uint16_t def_speed;
+  StepperLibMotorType motor_type;
   uint16_t def_acceleration;
   uint16_t def_deceleration;
 
-  StepperMotor(uint8_t MotorID, uint16_t def_acceleration = 470, uint16_t def_deceleration = 470);
+  StepperMotor(uint8_t MotorID, StepperLibMotorType motor_type, uint16_t def_acceleration = 470, uint16_t def_deceleration = 470);
 
   void begin();
   void write_estop();
   void clear_errors();
-  void move_at_speed(uint16_t speed);
+  void move_at_speed(int16_t speed);
 
   int read_raw_velocity();
   int read_velocity();
