@@ -76,11 +76,6 @@ class FindLinkup(Traverse):
         if self.linkup_found:
             return Events.SUCCESS
 
-        if self.odom is not None:
-            print()
-            print(f"odom: {self.odom}")
-            print(f"error: {np.linalg.norm(self.odom - self.goal_vec)}")
-        
         if self.odom is not None and np.linalg.norm(self.odom - self.goal_vec) <= self.tolerance:
             self.find_linkup() # find the linkup thingamabob
 

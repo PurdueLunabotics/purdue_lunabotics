@@ -108,11 +108,12 @@ class PIDController:
 class ParameterizedPIDController(PIDController):
     def __init__(self, name: str, node: Node, kp: float = 0.0, ki: float = 0.0, kd: float = 0.0, max_output: float = 1.0, min_output: float = 0.0):
         self.name = name
-        node.declare_parameters("", [(f"{name}.p", kp, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
-                                     (f"{name}.i", ki, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
-                                     (f"{name}.d", kd, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
-                                     (f"{name}.max_output", max_output, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
-                                     (f"{name}.min_output", min_output, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE))])
+        if not node.has_parameter(f"{name}.p"):
+            node.declare_parameters("", [(f"{name}.p", kp, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
+                                         (f"{name}.i", ki, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
+                                         (f"{name}.d", kd, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
+                                         (f"{name}.max_output", max_output, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
+                                         (f"{name}.min_output", min_output, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE))])
 
         super().__init__(kp = node.get_parameter(f"{name}.p").get_parameter_value().double_value,
                          ki = node.get_parameter(f"{name}.i").get_parameter_value().double_value,

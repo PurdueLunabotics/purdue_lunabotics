@@ -17,8 +17,8 @@ class TraverseToLinkup(Traverse):
     super().setup(manager)
 
   def linkup_cb(self, linkup: Linkup):
-    x = linkup.mini_target.x - linkup.main_target.x
-    y = linkup.mini_target.y - linkup.main_target.y
+    x = linkup.main_target.x - linkup.mini_target.x
+    y = linkup.main_target.y - linkup.mini_target.y
     if self.is_main:
       self.goal.pose.position.x = linkup.main_target.x
       self.goal.pose.position.y = linkup.main_target.y

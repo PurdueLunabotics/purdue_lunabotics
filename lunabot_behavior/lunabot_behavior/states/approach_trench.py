@@ -8,12 +8,14 @@ class ApproachTrench(Drive):
     super().__init__(0, False)
 
   def setup(self, manager: Node):
+    super().setup(manager)
     self.manager = manager
     self.num_cycles = 7 # cycles before stepping forward
     self.distance_step = 0.5 # meters
     self.counter = 0
   
   def start(self):
+    super().start()
     self.start_time = self.manager.get_clock().now()
     self.counter += 1
     if self.counter % self.num_cycles == 0:
@@ -30,12 +32,14 @@ class RetreatTrench(Drive):
     super().__init__(0, True)
 
   def setup(self, manager: Node):
+    super().setup(manager)
     self.manager = manager
     self.num_cycles = 7 # cycles before stepping forward
     self.distance_step = 0.5 # meters
     self.counter = 0
   
   def start(self):
+    super().start()
     self.start_time = self.manager.get_clock().now()
     self.counter += 1
     if self.counter % self.num_cycles == 0:

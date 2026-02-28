@@ -42,11 +42,11 @@ class SingleStates(Enum):
     
     WAIT_FOR_LINKUP = State() # This will stay as State(), no logic needed
     
-    TRAVERSE_TO_LINKUP = TraverseToLinkup(True, True)
+    TRAVERSE_TO_LINKUP = TraverseToLinkup(True, False)
     TRAVERSE_TO_LINKUP_STALL = Stall()
     TRAVERSE_TO_LINKUP_NO_PATH = NoPath()
     
-    TRAVERSE_TO_LINKUP_BACKWARDS = TraverseToLinkup(True, False)
+    TRAVERSE_TO_LINKUP_BACKWARDS = TraverseToLinkup(True, True)
     TRAVERSE_TO_LINKUP_BACKWARDS_STALL = Stall()
     TRAVERSE_TO_LINKUP_BACKWARDS_NO_PATH = NoPath()
     
@@ -73,7 +73,7 @@ class SingleStates(Enum):
 
     WAIT_FOR_DIVERGE = State() # This will stay as State(), no logic needed
 
-    TRAVERSE_TO_BERM = TraverseToBerm()
+    TRAVERSE_TO_BERM = TraverseToBerm(True)
     TRAVERSE_TO_BERM_STALL = Stall()
     TRAVERSE_TO_BERM_NO_PATH = NoPath()
 
@@ -115,7 +115,7 @@ class SingleStates(Enum):
             (SingleStates.FIND_LINKUP_STALL, Events.SUCCESS): SingleStates.FIND_LINKUP,
             (SingleStates.FIND_LINKUP_NO_PATH, Events.SUCCESS): SingleStates.FIND_LINKUP,
                         
-            (SingleStates.TRAVERSE_TO_LINKUP, Events.SUCCESS): SingleStates.ALIGN_TO_TRENCH,
+            (SingleStates.TRAVERSE_TO_LINKUP, Events.ARRIVED): SingleStates.ALIGN_TO_TRENCH,
             (SingleStates.TRAVERSE_TO_LINKUP, Events.STALL): SingleStates.TRAVERSE_TO_LINKUP_STALL,
             (SingleStates.TRAVERSE_TO_LINKUP, Events.NO_PATH): SingleStates.TRAVERSE_TO_LINKUP_NO_PATH,
             (SingleStates.TRAVERSE_TO_LINKUP_NO_PATH, Events.SUCCESS): SingleStates.TRAVERSE_TO_LINKUP,
@@ -163,11 +163,11 @@ class SingleStates(Enum):
             (SingleStates.DEPOSIT_BERM, Events.STALL): SingleStates.DEPOSIT_BERM_STALL,
             (SingleStates.DEPOSIT_BERM_STALL, Events.SUCCESS): SingleStates.DEPOSIT_BERM,
             
-            (SingleStates.RETREAT_BERM, Events.SUCCESS): SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS,
+            (SingleStates.RETREAT_BERM, Events.SUCCESS): SingleStates.TRAVERSE_TO_LINKUP,
             (SingleStates.RETREAT_BERM, Events.STALL): SingleStates.RETREAT_BERM_STALL,
             (SingleStates.RETREAT_BERM_STALL, Events.SUCCESS): SingleStates.RETREAT_BERM,
             
-            (SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS, Events.SUCCESS): SingleStates.ALIGN_TO_TRENCH,
+            (SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS, Events.ARRIVED): SingleStates.ALIGN_TO_TRENCH,
             (SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS, Events.STALL): SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS_STALL,
             (SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS, Events.NO_PATH): SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS_NO_PATH,
             (SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS_STALL, Events.SUCCESS): SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS,

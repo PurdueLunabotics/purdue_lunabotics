@@ -26,6 +26,7 @@ class Drive(State):
         self.odom_sub = manager.create_subscription(PoseStamped, "position", self.odom_cb, 1)
         self.linear_pid = ParameterizedPIDController(f"{self.name}.linear", manager, kp=1.0, max_output=0.01)
         self.odom = None
+        self.position = (0, 0)
         while self.odom == None:
             rclpy.spin_once(manager)
             time.sleep(0.25)

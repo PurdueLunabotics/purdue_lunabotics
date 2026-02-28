@@ -12,8 +12,8 @@ class AlignToLinkup(AlignToAngle):
     super().setup(manager)
 
   def linkup_cb(self, linkup: Linkup):
-    x = linkup.mini_target.x - linkup.main_target.x
-    y = linkup.mini_target.y - linkup.main_target.y
+    x = linkup.main_target.x - linkup.mini_target.x
+    y = linkup.main_target.y - linkup.mini_target.y
     self.target_angle = atan2(y, x)
 
   def start(self):

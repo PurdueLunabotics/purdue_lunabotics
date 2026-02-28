@@ -36,7 +36,7 @@ class Traverse(State):
 
     def publish_everything(self):
         self.goal_pub.publish(self.goal)
-        self.backwards_pub.publish(Bool(data = True))
+        self.backwards_pub.publish(Bool(data = self.backwards))
         self.enabled_pub.publish(Bool(data = True))
     
     def start(self):
