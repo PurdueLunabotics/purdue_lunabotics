@@ -1,5 +1,4 @@
 from enum import Enum
-
 from state_manager import StateManager
 from lunabot_msgs.msg import Event
 from geometry_msgs.msg import PoseStamped
@@ -22,7 +21,7 @@ class MiniStates(Enum):
     INIT = State()
     INIT_STALL = State()
     
-    FIND_LINKUP = Traverse(PoseStamped(), False)
+    FIND_LINKUP = FindLinkup()
     FIND_LINKUP_STALL = Stall()
     FIND_LINKUP_NO_PATH = NoPath()
 

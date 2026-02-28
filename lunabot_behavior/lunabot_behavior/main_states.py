@@ -54,7 +54,6 @@ class MainStates(Enum):
     RAISE_ACT = Raise()
     RAISE_ACT_STALL = State()
 
-    
     WAIT_FOR_DIVERGE = State() # This will stay as State(), no logic needed
 
     TRAVERSE_TO_BERM = TraverseToBerm()
