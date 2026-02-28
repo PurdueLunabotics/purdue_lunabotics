@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from rclpy import Future
 from rclpy.node import Node
 from std_msgs.msg import UInt8
 from lunabot_msgs.msg import Event

@@ -14,7 +14,7 @@ from tf_transformations import euler_from_quaternion
 from visualization_msgs.msg import Marker
 from lunabot_msgs.msg import Event
 
-from lunabot_control.pid_controller import PIDController
+from lunabot_control.pid_controller import PIDController, ParameterizedPIDController
 
 
 class States(Enum):
@@ -29,47 +29,16 @@ class PointToPoint(Node):
         rclpy.get_global_executor().add_node(self)
         # self.get_logger().info("init")
 
-        self.declare_parameters("linear", [("p", 3.0, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
-                                           ("i", 0.0, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
-                                           ("d", 0.0, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
-                                           ("max_speed", 0.3, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
-                                           ("tolerance", 0.2, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE))])
-
-        self.declare_parameters("angular", [("p", 5.0, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
-                                           ("i", 0.0, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
-                                           ("d", 0.0, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
-                                           ("max_speed", 60.0, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
-                                           ("tolerance", 10.0, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE))])
-
+        self.declare_parameter("linear.tolerance", 0.2, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE))
+        self.declare_parameter("angular.tolerance", 10.0, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE))
         self.declare_parameter("frequency", 60.0, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE))
 
-        self.LINEAR_P = self.get_parameter("linear.p").get_parameter_value().double_value
-        self.LINEAR_I = self.get_parameter("linear.i").get_parameter_value().double_value
-        self.LINEAR_D = self.get_parameter("linear.d").get_parameter_value().double_value
         self.LINEAR_TOLERANCE = self.get_parameter("linear.tolerance").get_parameter_value().double_value  # meters
-        self.MAX_LINEAR_SPEED = self.get_parameter("linear.max_speed").get_parameter_value().double_value  # m/s
-        self.linear_pid = PIDController(
-            self.LINEAR_P,
-            self.LINEAR_I,
-            self.LINEAR_D,
-            max_output=self.MAX_LINEAR_SPEED,
-        )
+        self.linear_pid = ParameterizedPIDController("linear", self)
 
-        self.ANGULAR_P = self.get_parameter("angular.p").get_parameter_value().double_value
-        self.ANGULAR_I = self.get_parameter("angular.i").get_parameter_value().double_value
-        self.ANGULAR_D = self.get_parameter("angular.i").get_parameter_value().double_value
         self.ANGULAR_TOLERANCE_DEG = self.get_parameter("angular.tolerance").get_parameter_value().double_value
         self.ANGULAR_TOLERANCE_RAD = np.deg2rad(self.ANGULAR_TOLERANCE_DEG)
-        self.MAX_ANGULAR_SPEED_DEG_PER_SEC = self.get_parameter("angular.max_speed").get_parameter_value().double_value
-        self.MAX_ANGULAR_SPEED_RAD_PER_SEC = np.deg2rad(
-            self.MAX_ANGULAR_SPEED_DEG_PER_SEC
-        )
-        self.angular_pid = PIDController(
-            self.ANGULAR_P,
-            self.ANGULAR_I,
-            self.ANGULAR_D,
-            max_output=self.MAX_ANGULAR_SPEED_RAD_PER_SEC,
-        )
+        self.angular_pid = ParameterizedPIDController("angular", self)
 
         self.robot_pose = [None, None, None]  # x, y, heading (rad)
         self.last_pose = [None, None, None]  # for velocity calculations
@@ -149,6 +118,7 @@ class PointToPoint(Node):
         self.create_subscription(Bool, traversal_topic, self.__traversal_callback, 1)
 
         self.add_on_set_parameters_callback(self.__parameter_callback)
+
 
     # ==================================================================================================================
     # CALLBACKS
@@ -235,33 +205,10 @@ class PointToPoint(Node):
 
     def __parameter_callback(self, params: list[rclpy.Parameter]):
         for param in params:
-            if param.type_ != rclpy.Parameter.Type.DOUBLE:
-                self.get_logger().error(f"Invalid parameter type for {param.name}")
-                return SetParametersResult(successful = False, reason = f"Invalid parameter type for {param.name}")
-
-            if param.name == "linear.p":
-                self.linear_pid.kp = param.get_parameter_value().double_value
-            elif param.name == "linear.d":
-                self.linear_pid.kd = param.get_parameter_value().double_value
-            elif param.name == "linear.i":
-                self.linear_pid.ki = param.get_parameter_value().double_value
-            elif param.name == "linear.max_speed":
-                self.linear_pid.max_output = param.get_parameter_value().double_value
-            elif param.name == "linear.tolerance":
+            if param.name == "linear.tolerance":
                 self.LINEAR_TOLERANCE = param.get_parameter_value().double_value
-            elif param.name == "angular.p":
-                self.angular_pid.kp = param.get_parameter_value().double_value
-            elif param.name == "angular.d":
-                self.angular_pid.kd = param.get_parameter_value().double_value
-            elif param.name == "angular.i":
-                self.angular_pid.ki = param.get_parameter_value().double_value
-            elif param.name == "angular.max_speed":
-                self.angular_pid.max_output = np.deg2rad(param.get_parameter_value().double_value)
             elif param.name == "angular.tolerance":
                 self.ANGULAR_TOLERANCE_RAD = np.deg2rad(param.get_parameter_value().double_value)
-            else:
-                self.get_logger().error(f"Unknown parameter: {param.name}")
-                return SetParametersResult(successful = False, reason = f"Unknown parameter: {param.name}")
 
         return SetParametersResult(successful = True)
 

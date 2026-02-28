@@ -160,9 +160,9 @@
             <param name="input_topics" value="d455_back/detections;d455_front/detections" value-sep=";"/>
         </node>
 
-        <node name="stall_detection_node" pkg="lunabot_control" exec="stall_detection_node" output="screen" respawn="true">
-            <param name="~waitTime" value="2"/>
-        </node>
+        <!-- <node name="stall_detection_node" pkg="lunabot_control" exec="stall_detection_node" output="screen" respawn="true"> -->
+        <!--     <param name="~waitTime" value="2"/> -->
+        <!-- </node> -->
 
         <push_ros_namespace namespace="rtabmap"/>
 
@@ -241,8 +241,8 @@
         </node>
     </group>
 
-    <node name="zones_node" pkg="lunabot_behavior" exec="zones" output="screen"/>
-    <node name="find_linkup_node" pkg="lunabot_behavior" exec="find_linkup" output="screen"/>
+    <!-- <node name="zones_node" pkg="lunabot_behavior" exec="zones" output="screen"/> -->
+    <!-- <node name="find_linkup_node" pkg="lunabot_behavior" exec="find_linkup" output="screen"/> -->
 
     <group>
         <node name="planner_server" pkg="nav2_planner" exec="planner_server" output="screen" respawn="true">
@@ -262,7 +262,6 @@
         </node>
 
         <node name="point_to_point_node" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="false" >
-            <param name="use_sim_time" value="$(var sim)"/>
             <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
 
             <remap from="odom" to="position"/>

@@ -6,7 +6,7 @@ from tf_transformations import quaternion_from_euler
 from lunabot_behavior import zones
 
 class TraverseToBerm(Traverse):
-    def __init__(self):
+    def __init__(self, backwards: bool):
         pose = PoseStamped()
         pose.header.stamp = Time()
         pose.header.frame_id = "map"
@@ -18,4 +18,4 @@ class TraverseToBerm(Traverse):
         pose.pose.orientation.y = y
         pose.pose.orientation.z = z
         pose.pose.orientation.w = w
-        super().__init__(pose, True)
+        super().__init__(pose, backwards)

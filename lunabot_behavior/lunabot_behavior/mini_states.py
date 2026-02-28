@@ -25,7 +25,7 @@ class MiniStates(Enum):
     FIND_LINKUP_STALL = Stall()
     FIND_LINKUP_NO_PATH = NoPath()
 
-    TRAVERSE_TO_BERM = TraverseToBerm()
+    TRAVERSE_TO_BERM = TraverseToBerm(False)
     TRAVERSE_TO_BERM_STALL = Stall()
     TRAVERSE_TO_BERM_NO_PATH = NoPath()
 

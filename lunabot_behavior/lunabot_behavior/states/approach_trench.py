@@ -1,33 +1,48 @@
 from rclpy.node import Node
 
-from lunabot_behavior.state import State, Events
+from lunabot_behavior.state import Events
+from lunabot_behavior.states.trench import Drive
 
-from geometry_msgs.msg import Twist
+class ApproachTrench(Drive):
+  def __init__(self) -> None:
+    super().__init__(0, False)
 
-class ApproachTrench(State):
   def setup(self, manager: Node):
-    self.cmd_vel_publisher = manager.create_publisher(Twist, "cmd_vel", 10)
     self.manager = manager
-    self.move_time = 0 #seconds
     self.num_cycles = 7 # cycles before stepping forward
-    self.time_step = 10 #seconds
-    self.linear_speed = 0.2 #m/s
+    self.distance_step = 0.5 # meters
     self.counter = 0
   
   def start(self):
     self.start_time = self.manager.get_clock().now()
     self.counter += 1
-    if self.counter %self.num_cycles == 0:
-      self.move_time += self.time_step
-    
+    if self.counter % self.num_cycles == 0:
+      self.target_distance += self.distance_step
   
   def periodic(self) -> None | Events:
-    output = Twist()
-    output.linear.x = self.linear_speed
-    self.cmd_vel_publisher.publish(output)
-    if (self.start_time.seconds_nanoseconds()[0] + self.move_time <= self.manager.get_clock().now().seconds_nanoseconds()[0]):
-      return Events.SUCCESS
-    return None  
+    return super().periodic()
   
   def exit(self):
-    self.cmd_vel_publisher.publish(Twist())
+    return super().exit()
+
+class RetreatTrench(Drive):
+  def __init__(self) -> None:
+    super().__init__(0, True)
+
+  def setup(self, manager: Node):
+    self.manager = manager
+    self.num_cycles = 7 # cycles before stepping forward
+    self.distance_step = 0.5 # meters
+    self.counter = 0
+  
+  def start(self):
+    self.start_time = self.manager.get_clock().now()
+    self.counter += 1
+    if self.counter % self.num_cycles == 0:
+      self.target_distance += self.distance_step
+  
+  def periodic(self) -> None | Events:
+    return super().periodic()
+  
+  def exit(self):
+    return super().exit()

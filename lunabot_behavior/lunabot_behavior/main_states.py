@@ -5,7 +5,7 @@ from enum import Enum
 from geometry_msgs.msg import PoseStamped
 from lunabot_msgs.msg import Event
 
-from lunabot_behavior.states.approach_trench import ApproachTrench
+from lunabot_behavior.states.approach_trench import ApproachTrench, RetreatTrench
 from lunabot_behavior.states.align_trench import AlignTrench
 from lunabot_behavior.states.align_to_angle import AlignToAngle
 from lunabot_behavior.states.traverse_to_berm import TraverseToBerm
@@ -15,12 +15,15 @@ from lunabot_behavior.states.approach_berm import ApproachBerm
 from lunabot_behavior.states.plunge import Plunge
 from lunabot_behavior.states.raise_act import Raise
 from lunabot_behavior.states.retreat_berm import RetreatBerm
+from lunabot_behavior.states.traverse_to_linkup import TraverseToLinkup
 from lunabot_behavior.states.trench import Trench
+from lunabot_behavior.states.align_to_linkup import AlignToLinkup
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
 
 import rclpy
+import math
 
 class MainStates(Enum):
     
@@ -35,7 +38,7 @@ class MainStates(Enum):
     
     WAIT_FOR_LINKUP = State() # This will stay as State(), no logic needed
     
-    TRAVERSE_TO_LINKUP = Traverse(PoseStamped(), False)
+    TRAVERSE_TO_LINKUP = TraverseToLinkup(True, True)
     TRAVERSE_TO_LINKUP_STALL = Stall()
     TRAVERSE_TO_LINKUP_NO_PATH = NoPath()
     
@@ -43,7 +46,7 @@ class MainStates(Enum):
     ALIGN_TO_TRENCH_STALL = State()
     
     APPROACH_TRENCH = ApproachTrench()
-    APPROACH_TRENCH_STALL = State()
+    APPROACH_TRENCH_STALL = Stall()
     
     PLUNGE_ACT = Plunge()
     PLUNGE_ACT_STALL = State()
@@ -54,9 +57,15 @@ class MainStates(Enum):
     RAISE_ACT = Raise()
     RAISE_ACT_STALL = State()
 
+    RETREAT_TRENCH = RetreatTrench()
+    RETREAT_TRENCH_STALL = Stall()
+
+    ALIGN_TO_LINKUP = AlignToLinkup()
+    ALIGN_TO_LINKUP_STALL = State()
+
     WAIT_FOR_DIVERGE = State() # This will stay as State(), no logic needed
 
-    TRAVERSE_TO_BERM = TraverseToBerm()
+    TRAVERSE_TO_BERM = TraverseToBerm(True)
     TRAVERSE_TO_BERM_STALL = Stall()
     TRAVERSE_TO_BERM_NO_PATH = NoPath()
 
@@ -94,7 +103,7 @@ class MainStates(Enum):
             
             (MainStates.WAIT_FOR_LINKUP, Events.PROCEED): MainStates.TRAVERSE_TO_LINKUP,
                         
-            (MainStates.TRAVERSE_TO_LINKUP, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
+            (MainStates.TRAVERSE_TO_LINKUP, Events.SUCCESS): MainStates.IDLE, # TODO: Go to link up
             (MainStates.TRAVERSE_TO_LINKUP, Events.STALL): MainStates.TRAVERSE_TO_LINKUP_STALL,
             (MainStates.TRAVERSE_TO_LINKUP, Events.NO_PATH): MainStates.TRAVERSE_TO_LINKUP_NO_PATH,
             (MainStates.TRAVERSE_TO_LINKUP_NO_PATH, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
@@ -116,15 +125,17 @@ class MainStates(Enum):
             (MainStates.TRENCH, Events.STALL): MainStates.TRENCH_STALL,
             (MainStates.TRENCH_STALL, Events.SUCCESS): MainStates.TRENCH,
             
-            (MainStates.RAISE_ACT, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
+            (MainStates.RAISE_ACT, Events.SUCCESS): MainStates.RETREAT_TRENCH,
             (MainStates.RAISE_ACT, Events.STALL): MainStates.RAISE_ACT_STALL,
             (MainStates.RAISE_ACT_STALL, Events.SUCCESS): MainStates.RAISE_ACT,
-            
-            (MainStates.TRAVERSE_TO_LINKUP, Events.SUCCESS): MainStates.DEPOSIT,
-            (MainStates.TRAVERSE_TO_LINKUP, Events.STALL): MainStates.TRAVERSE_TO_LINKUP_STALL,
-            (MainStates.TRAVERSE_TO_LINKUP, Events.NO_PATH): MainStates.TRAVERSE_TO_LINKUP_NO_PATH,
-            (MainStates.TRAVERSE_TO_LINKUP_STALL, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
-            (MainStates.TRAVERSE_TO_LINKUP_NO_PATH, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
+
+            (MainStates.RETREAT_TRENCH, Events.SUCCESS): MainStates.ALIGN_TO_LINKUP,
+            (MainStates.RETREAT_TRENCH, Events.STALL): MainStates.RETREAT_TRENCH_STALL,
+            (MainStates.RETREAT_TRENCH_STALL, Events.SUCCESS): MainStates.RETREAT_TRENCH,
+
+            (MainStates.ALIGN_TO_LINKUP, Events.SUCCESS): MainStates.IDLE, # TODO: Go to linkup
+            (MainStates.ALIGN_TO_LINKUP, Events.STALL): MainStates.RETREAT_TRENCH_STALL,
+            (MainStates.ALIGN_TO_LINKUP_STALL, Events.SUCCESS): MainStates.ALIGN_TO_LINKUP,
 
             (MainStates.DEPOSIT, Events.SUCCESS): MainStates.WAIT_FOR_DIVERGE,
             (MainStates.DEPOSIT, Events.STALL): MainStates.DEPOSIT_STALL,
@@ -133,7 +144,7 @@ class MainStates(Enum):
             (MainStates.WAIT_FOR_DIVERGE, Events.PROCEED): MainStates.ALIGN_TO_TRENCH,
 
             # in case minibot is indisposed and big bot has to make full cycles
-            (MainStates.TRAVERSE_TO_BERM, Events.ARRIVED): MainStates.IDLE,
+            (MainStates.TRAVERSE_TO_BERM, Events.ARRIVED): MainStates.ALIGN_TO_BERM,
             (MainStates.TRAVERSE_TO_BERM, Events.STALL): MainStates.TRAVERSE_TO_BERM_STALL,
             (MainStates.TRAVERSE_TO_BERM, Events.NO_PATH): MainStates.TRAVERSE_TO_BERM_NO_PATH,
             (MainStates.TRAVERSE_TO_BERM_STALL, Events.SUCCESS): MainStates.TRAVERSE_TO_BERM,
@@ -148,7 +159,7 @@ class MainStates(Enum):
             
             (MainStates.RETREAT_BERM, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
             (MainStates.RETREAT_BERM, Events.STALL): MainStates.RETREAT_BERM_STALL,
-            (MainStates.RETREAT_BERM_STALL, Events.SUCCESS): MainStates.RETREAT_BERM
+            (MainStates.RETREAT_BERM_STALL, Events.SUCCESS): MainStates.RETREAT_BERM,
         }
 
         return transitions.get((state, event), None)
@@ -156,7 +167,7 @@ class MainStates(Enum):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = StateManager(MainStates, MainStates.INIT, Events, Event)
+    minimal_subscriber = StateManager(MainStates, MainStates.PLUNGE_ACT, Events, Event)
 
     rclpy.spin(minimal_subscriber)
 
