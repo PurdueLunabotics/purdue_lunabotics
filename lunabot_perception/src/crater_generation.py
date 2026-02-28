@@ -29,8 +29,9 @@ class CraterGeneration(Node):
         self.ground = PointCloud2()
         
         
+        # if you don't remember to change this I am disappointed in you
         self.crater_publisher = self.create_publisher(
-            PointCloud2, "crater", 10
+            PointCloud2, "crater_fix", 10
         )
         
         self.plane_publisher = self.create_publisher(
@@ -49,7 +50,9 @@ class CraterGeneration(Node):
             PointCloud2, "/rtabmap/cloud_ground", self.set_ground, 10
         )
 
-        self.create_timer(2, self.plane_generation)
+
+        # i truly hope this isn't needed for my sanity
+        #self.create_timer(2, self.plane_generation)
         self.create_timer(1, self.estimate_crater)
         
         
@@ -59,32 +62,36 @@ class CraterGeneration(Node):
         ground_trainz = []
         
         self.get_logger().info(f"{self.get_clock().now()}")
+        stahp = False
         
         try:
             ground = point_cloud2.read_points(self.ground, field_names = ("x", "y", "z"), skip_nans=True)
             for p in ground: 
                 ground_trainxy.append([p[0], p[1]]) 
                 ground_trainz.append([p[2]])
+                print(f"{p[0]}, {p[1]}, {p[2]}")
         except Exception as inst:
             self.get_logger().info(f"{inst}")
             self.get_logger().warn("Failed to read planes")
+            stahp = True
+        
+        if(not(stahp)):
+            self.get_logger().info(f"{self.get_clock().now()}")
+        
+            ransac = linear_model.RANSACRegressor(max_trials = 1, stop_probability = 0.9)
+        
+            self.get_logger().info(f"{self.get_clock().now()}")
+
+            ransac.fit(ground_trainxy, ground_trainz)
+        
+            self.get_logger().info(f"{self.get_clock().now()}")
+        
+            # the plane equation
+            z = lambda x,y: (-ransac.estimator_.intercept_ - ransac.estimator_.coef_[0]*x - ransac.estimator_.coef_[1]*y) / ransac.estimator_.coef_[2]
         
         self.get_logger().info(f"{self.get_clock().now()}")
         
-        ransac = linear_model.RANSACRegressor(max_trials = 10, stop_probability = 0.9)
-        
-        self.get_logger().info(f"{self.get_clock().now()}")
-        
-        ransac.fit(ground_trainxy, ground_trainz)
-        
-        self.get_logger().info(f"{self.get_clock().now()}")
-        
-        # the plane equation
-        z = lambda x,y: (-ransac.estimator_.intercept_ - ransac.estimator_.coef_[0]*x - ransac.estimator_.coef_[1]*y) / ransac.estimator_.coef_[2]
-        
-        self.get_logger().info(f"{self.get_clock().now()}")
-        
-        plane_pointcloud = [ground_trainxy(0), ground_trainxy(1), z(ground_trainxy(0), ground_trainxy(1))]
+        plane_pointcloud = [ground_trainxy[:,0], ground_trainxy[:,1], z(ground_trainxy[:,0], ground_trainxy[:,1])]
         self.get_logger().warn("it do thing")
         
         header = Header()
@@ -143,7 +150,8 @@ class CraterGeneration(Node):
             guessed_r = 0.3
 
             # uncertainty of the initial guess
-            uncertainty = 10
+            uncertainty_pos = 10
+            uncertainty_r = 0.1
 
             # width where points can still be counted to be part of the ring
             epsilon = 0.05
@@ -156,7 +164,7 @@ class CraterGeneration(Node):
             
                 hough_cx, hough_cy, hough_r = hough.hough_pointcloud(
                     guessed_cx, guessed_cy, guessed_r, craternp,
-                    uncertainty, epsilon
+                    uncertainty_pos,uncertainty_r, epsilon
                     )
                 
                 try:
@@ -171,8 +179,8 @@ class CraterGeneration(Node):
                     self.get_logger().warn("Not generating craters")
                     
             
-                
-                if(hough_r < 0.4 and hough_r > 0):
+                # hough_r < 0.4 and
+                if( hough_r > 0):
                     self.get_logger().warn("god help")
                     for i in range(30):
                         x = hough_cx + hough_r * np.cos(i*12*2*np.pi/360)
