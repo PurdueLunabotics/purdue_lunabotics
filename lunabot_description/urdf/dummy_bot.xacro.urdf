@@ -458,7 +458,7 @@
         </image>
         <clip>
           <near>0.02</near>
-          <far>5</far>
+          <far>10</far>
         </clip>
       </camera>
     </sensor>
@@ -481,7 +481,7 @@
         </image>
         <clip>
           <near>0.02</near>
-          <far>5</far>
+          <far>10</far>
         </clip>
       </camera>
     </sensor>

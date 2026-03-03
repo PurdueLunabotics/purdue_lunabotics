@@ -53,7 +53,7 @@
         <arg name="enable_color"                  value="true"/>
         <arg name="rgb_camera.color_profile"      value="$(var profile)" />
 
-        <arg name="decimation_filter.enable"      value="true"/>
+        <arg name="decimation_filter.enable"      value="false"/>
 
         <arg name="publish_tf"                    value="true"/>
         <arg name="tf_publish_rate"               value="0"/>
@@ -70,15 +70,23 @@
     </include>
 
     <node pkg="rtabmap_util" exec='point_cloud_xyz' name="point_cloud_xyz" respawn="true">
+	    <!-- <remap from="rgb/camera_info"             to="color/camera_info" />
+	    <remap from="rgb/image"                   to="color/image_raw" /> -->
 	    <remap from="depth/camera_info"             to="aligned_depth_to_color/camera_info" />
 	    <remap from="depth/image"                   to="aligned_depth_to_color/image_raw" />
       <remap from="cloud"                         to="points" /> <!-- output-->
 
-      <param name="decimation"                    value="$(var decimation)"/>
-      <param name="voxel_size"                    value="$(var voxel_size)"/>
-      <param name="noise_filter_radius"           value="$(var noise_filter_radius)"/>
-      <param name="max_depth"                     value="$(var max_depth)"/>
+      <!-- <param name="decimation"                    value="$(var decimation)"/>
+      <param name="voxel_size"                    value="$(var voxel_size)"/> -->
+      <!-- <param name="noise_filter_radius"           value="$(var noise_filter_radius)"/> -->
+      <!-- <param name="max_depth"                     value="$(var max_depth)"/> -->
     </node>
+
+    <node pkg="lunabot_perception" exec='bbox_mask_node' name="bbox_mask_node" respawn="true">
+      <remap to="aligned_depth_to_color/camera_info" from="camera_info"/> 
+      <remap to="aligned_depth_to_color/image_raw" from="image_raw"/> 
+    </node>
+    
   </group>
 
   <group if="$(eval '\'2\' in $(var cams)')">

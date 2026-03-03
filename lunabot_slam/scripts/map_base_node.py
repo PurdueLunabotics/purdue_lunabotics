@@ -33,7 +33,7 @@ class MapBase(Node):
         try:
             t = self.tf_buffer.lookup_transform(self.to_frame_rel, self.from_frame_rel, rclpy.time.Time())
         except Exception as e:
-            self.get_logger().error(f"Could not transform {self.from_frame_rel} to {self.to_frame_rel}: {e}")
+            # self.get_logger().error(f"Could not transform {self.from_frame_rel} to {self.to_frame_rel}: {e}")
             return
         
         # create new pose stamped object with the transform data

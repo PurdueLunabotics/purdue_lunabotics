@@ -14,6 +14,15 @@ find_package(image_proc REQUIRED)
 find_package(rtabmap_util REQUIRED)
 find_package(tf2_ros REQUIRED)
 
+find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(image_transport REQUIRED)
+find_package(image_geometry REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(visualization_msgs REQUIRED)
+
+
 # Install launch files
 install(DIRECTORY
         launch
@@ -26,6 +35,37 @@ install(TARGETS
 install(PROGRAMS
   scripts/apriltag_combine.py
   DESTINATION lib/${PROJECT_NAME}
+)
+
+add_executable(bbox_mask_node src/bbox_mask_node.cpp)
+
+ament_target_dependencies(bbox_mask_node
+  rclcpp
+  sensor_msgs
+  cv_bridge
+  image_transport
+  image_geometry
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
+  geometry_msgs
+  visualization_msgs
+)
+
+
+# Link Libraries
+target_link_libraries(bbox_mask_node ${OpenCV_LIBS})
+
+
+# Install Programs
+install(TARGETS
+  bbox_mask_node
+  DESTINATION lib/${PROJECT_NAME})
+
+install(TARGETS bbox_mask_node
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)
