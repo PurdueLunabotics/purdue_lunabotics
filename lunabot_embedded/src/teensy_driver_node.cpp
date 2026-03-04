@@ -26,7 +26,7 @@ extern "C" {
 using namespace std;
 
 #define BUF_SIZE 64
-#define PA01_PULSES_PER_INCH 152
+#define PA01_PULSES_PER_INCH 533
 
 
 class TeensyDriverNode : public rclcpp::Node {
