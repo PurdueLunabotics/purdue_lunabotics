@@ -88,7 +88,7 @@
       <arg name="clip_distance"            value="-1"/>
 
 
-  <! -- Added parameters for isaac_ros_image_proc -->
+  <!-- Added parameters for isaac_ros_image_proc -->
       <arg name="width"                    default="424"/>
       <arg name="height"                   default="240"/>
 
@@ -117,9 +117,9 @@
     </node>
 
     <node pkg="isaac_ros_depth_image_proc" exec='PointCloudXyzNode' name="point_cloud_isaac" respawn="true">
-	    <remap from="depth/camera_info"             to="aligned_depth_to_color/camera_info" />
-	    <remap from="depth/image_rect"                   to="aligned_depth_to_color/image_raw" />
-      <remap from="points"                         to="points" /> <!-- output-->
+      <remap from="depth/camera_info" to="aligned_depth_to_color/camera_info" />
+      <remap from="depth/image_rect" to="aligned_depth_to_color/image_raw" />
+      <remap from="points" to="points" /> <!-- output-->
 	  <!-- rtabmap_util params, isaac does not have these. may instead have to use node for decimation
       <param name="decimation" value="$(var decimation)"/>
       <param name="voxel_size" value="$(var voxel_size)"/>
