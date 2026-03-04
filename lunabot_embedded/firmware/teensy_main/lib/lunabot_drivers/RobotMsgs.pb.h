@@ -22,8 +22,8 @@ typedef struct _RobotSensors {
     float drive_left_vel;
     float drive_right_vel;
     float exc_vel;
-    float act_left_pos;
-    float act_right_pos;
+    int32_t act_left_pos;
+    int32_t act_right_pos;
 } RobotSensors;
 
 typedef struct _RobotEffort {
@@ -86,8 +86,8 @@ X(a, STATIC,   SINGULAR, FLOAT,    exc_torque,        8) \
 X(a, STATIC,   SINGULAR, FLOAT,    drive_left_vel,    9) \
 X(a, STATIC,   SINGULAR, FLOAT,    drive_right_vel,  10) \
 X(a, STATIC,   SINGULAR, FLOAT,    exc_vel,          11) \
-X(a, STATIC,   SINGULAR, FLOAT,    act_left_pos,     12) \
-X(a, STATIC,   SINGULAR, FLOAT,    act_right_pos,    13)
+X(a, STATIC,   SINGULAR, SINT32,    act_left_pos,     12) \
+X(a, STATIC,   SINGULAR, SINT32,    act_right_pos,    13)
 #define RobotSensors_CALLBACK NULL
 #define RobotSensors_DEFAULT NULL
 
