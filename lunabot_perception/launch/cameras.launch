@@ -9,7 +9,7 @@
   <arg name="initial_reset"                   default="true"/>
 
   <arg name="front"                           default="true"/>
-  <arg name="back"                           default="true"/>
+  <arg name="back"                           default="false"/>
   <arg name="pointcloud" default="true" />
 
   <arg name="decimation" default="4"/>
