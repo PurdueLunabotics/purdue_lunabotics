@@ -35,7 +35,7 @@
         <param name="tf_publish_rate" value="0.0"/>
       </composable_node>
 
-      <composable_node pkg="isaac_ros_image_proc" plugin="isaac_ros_image_proc::RectifyNode" name="color_rectify_color">
+      <composable_node pkg="isaac_ros_image_proc" plugin="isaac_ros_image_proc::RectifyNode" name="color_rectify_color" output='screen'>
         <param name="output_width" value="$(var output_width)" />
         <param name="output_height" value="$(var output_height)" />
         <remap from="image_raw" to="/d455_front/d455_front/color/image_raw" />
