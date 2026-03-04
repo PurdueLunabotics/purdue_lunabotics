@@ -28,6 +28,12 @@ public:
             "image_raw",
             std::bind(&BBoxMaskNode::imageCallback, this, std::placeholders::_1),
             "raw");
+        
+        rgb_image_sub_ = image_transport::create_subscription(
+            this,
+            "image_raw",
+            std::bind(&BBoxMaskNode::rgbImageCallback, this, std::placeholders::_1),
+            "raw");
 
         camera_info_sub_ = this->create_subscription<sensor_msgs::msg::CameraInfo>(
             "camera_info",
@@ -219,7 +225,6 @@ private:
                     pt_map.point.x >= xmin_ && pt_map.point.x <= xmax_ &&
                     pt_map.point.y >= ymin_ && pt_map.point.y <= ymax_ &&
                     pt_map.point.z >= zmin_ && pt_map.point.z <= zmax_;
-
                 if (!inside)
                 {
                     depth_image.at<float>(v, u) =
@@ -236,6 +241,10 @@ private:
         image_pub_.publish(out_msg.toImageMsg());
         publishBoxMarker(msg->header.stamp);
     }
+
+    void rgbImageCallback(const sensor_msgs::msg::Image::ConstSharedPtr& msg)
+    {
+        
 };
 
 int main(int argc, char** argv)
