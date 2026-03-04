@@ -18,23 +18,23 @@
   <arg name="voxel_size" default="0.01"/> <arg name="noise_filter_radius" default="0.1"/> <arg name="max_depth" default="3.0"/> <group if="$(var front)">
     <push_ros_namespace namespace="d455_front"/>
 
-    <node_container pkg="rclcpp_components" exec="component_container_mt" name="front_camera_container" namespace="">
-      
-      <composable_node pkg="realsense2_camera" plugin="realsense2_camera::RealSenseNodeFactory" name="d455_front">
+      <node pkg="realsense2_camera" exec="realsense2_camera_node" name="d455_front" output="screen">
         <param name="serial_no" value="$(var serial_no_d455_front)"/>
-        <param name="initial_reset" value="$(var initial_reset)"/>
+        <param name="initial_reset" value="false"/>
         <param name="pointcloud.enable" value="false"/>
         <param name="enable_sync" value="true"/>
         <param name="align_depth.enable" value="true"/>
         <param name="enable_depth" value="true"/>
-        <param name="depth_module.profile" value="$(var profile)" />
+        <param name="depth_module.profile" value="$(var profile)" /> 
         <param name="enable_color" value="true"/>
-        <param name="rgb_camera.profile" value="$(var profile)" />
+        <param name="rgb_camera.profile" value="$(var profile)" /> 
         <param name="decimation_filter.enable" value="true"/>
         <param name="publish_tf" value="true"/>
-        <param name="tf_publish_rate" value="0.0"/>
-      </composable_node>
+        <param name="tf_publish_rate" value="0.0"/> 
+    </node>
 
+    <node_container pkg="rclcpp_components" exec="component_container_mt" name="front_camera_container" namespace="">
+      
       <composable_node pkg="isaac_ros_image_proc" plugin="isaac_ros_image_proc::RectifyNode" name="color_rectify_color" output='screen'>
         <param name="output_width" value="$(var output_width)" />
         <param name="output_height" value="$(var output_height)" />
@@ -52,10 +52,8 @@
       <composable_node pkg="isaac_ros_apriltag" plugin="isaac_ros_apriltag::AprilTagNode" name="apriltag_node">
         <param name="size" value="0.162"/> 
         <param name="max_tags" value="64"/>
-        
         <remap from="image" to="/d455_front/d455_front/color/image_raw" /> 
         <remap from="camera_info" to="/d455_front/d455_front/color/camera_info" />
-        
         <remap from="tag_detections" to="/d455_front/tag_detections" />
       </composable_node>
 
