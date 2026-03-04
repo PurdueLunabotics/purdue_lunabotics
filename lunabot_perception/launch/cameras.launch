@@ -5,6 +5,9 @@
   <arg name="serial_no_d455_back"            default="'939622074382'"/>
   <arg name="profile"                           default="640x480x30"/>
 
+  <arg name="output_width"                      default="640"/>
+  <arg name="output_height"                     default="480"/>
+
   <arg name="initial_reset"                   default="true"/>
 
   <arg name="front"                           default="true"/>
