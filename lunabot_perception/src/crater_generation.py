@@ -31,7 +31,7 @@ class CraterGeneration(Node):
         
         # if you don't remember to change this I am disappointed in you
         self.crater_publisher = self.create_publisher(
-            PointCloud2, "crater_fix", 10
+            PointCloud2, "crater", 10
         )
         
         self.plane_publisher = self.create_publisher(
