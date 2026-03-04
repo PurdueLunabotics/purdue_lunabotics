@@ -108,7 +108,7 @@
 
     <!-- RGB processing -->
     <!-- Color rectified image -->
-    <node pkg="isaac_ros_image_proc" exec="rectify_node" name="color_rectify_color"
+    <node pkg="isaac_ros_image_proc" exec="rectify_node" name="color_rectify_color">
     <param name="output_width" value="$(var output_width)" />
     <param name="output_height" value="$(var output_height)" />
        <remap from="image_raw" to="color/image_raw" />
