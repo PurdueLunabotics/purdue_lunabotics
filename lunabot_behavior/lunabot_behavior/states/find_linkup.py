@@ -57,11 +57,12 @@ class FindLinkup(Traverse):
         self.path_publisher = manager.create_publisher(Path, "linkup_path", 10)
         self.linkup_line_pub = manager.create_publisher(Marker, "linkup_segment", 10)
         self.exc_edge_pub = manager.create_publisher(Marker, "exc_edge", 10)
+        self.short_seg_pub = manager.create_publisher(Marker, "short_segment", 10)
 
         self.odom_sub = manager.create_subscription(PoseStamped, "position", self.odom_cb, 10)
 
         self.odom = None
-        self.tolerance = 0.3 # wider tolerance is ok - finding linkup isn't an exact science
+        self.tolerance = 1.0 # wider tolerance is ok - finding linkup isn't an exact science
         self.logger = manager.get_logger()
 
         self.path_client = ActionClient(manager, ComputePathToPose, "compute_path_to_pose")
@@ -142,7 +143,7 @@ class FindLinkup(Traverse):
     def build_linkup_msg(self, linkup_segment: list[np.array]):
         linkup = Linkup()
         if linkup_segment is not None:
-            # main target should be closer to berm (low dist), mini target closer to berm (high dist)
+            # main target should be closer to exc (low dist), mini target closer to berm (high dist)
             p1_dist = get_distance_from_exc(linkup_segment[0])
             p2_dist = get_distance_from_exc(linkup_segment[1])
             if (p1_dist == p2_dist): # tiebreaker - subtract distance to berm
@@ -151,6 +152,21 @@ class FindLinkup(Traverse):
 
             main_target = linkup_segment[0] if p1_dist < p2_dist else linkup_segment[1]
             mini_target = linkup_segment[0] if p1_dist > p2_dist else linkup_segment[1]
+
+            vector = mini_target - main_target
+            
+            norm = np.linalg.norm(vector)
+            short_vector = vector
+            short_segment = linkup_segment
+            if norm > self.MIN_SEGMENT_LENGTH:
+                short_vector = (vector / np.linalg.norm(vector)) * self.MIN_SEGMENT_LENGTH
+                short_segment = [main_target, main_target + short_vector]
+
+            print(f"short vec: {short_segment}")
+
+            # update after finding shorter segment
+            main_target = short_segment[0]
+            mini_target = short_segment[1]
 
             linkup.main_target = Point()
             linkup.main_target.x = main_target[0]
@@ -161,6 +177,9 @@ class FindLinkup(Traverse):
             linkup.mini_target.y = mini_target[1]
 
             self.visualize_line_segment(linkup_segment, self.linkup_line_pub)
+
+            print("visualizing shit")
+            self.visualize_line_segment(short_segment, self.short_seg_pub, b=1.0)
         else:
             linkup.main_target = Point()
             linkup.mini_target = Point()
@@ -171,10 +190,17 @@ class FindLinkup(Traverse):
         segment_shape = LineString(segment)
 
         intersection_geom = self.excavation_edge.intersection(segment_shape)
+        # print(f"intersection: {list(intersection_geom.coords)}")
         is_valid_intersection = not intersection_geom.is_empty # assumes the cross is a point
         # self.visualize_line_segment(segment, self.linkup_line_publisher, g=1.0)
 
         return is_valid_intersection
+    
+    def get_exc_edge_intersection(self, segment: list[np.array]) -> np.array:
+        segment_shape = LineString(segment)
+
+        intersection_geom = self.excavation_edge.intersection(segment_shape)
+        return np.array(list(intersection_geom.coords)[0])
     
     def linkup_seg_from_path(self, path=Path) -> list[np.array]:
         if path is not None:
@@ -198,21 +224,64 @@ class FindLinkup(Traverse):
                         if dist >= self.MIN_SEGMENT_LENGTH:
                             # self.get_logger().info("crossing edge")
                             linkup_segment = [prev_waypoint, p1]
+
+                            # get subsegment of linkup - ONLY IF EDGE CROSSING EXC IS VALID
+                            intersection = self.get_exc_edge_intersection(linkup_segment)
+                            
+                            prev_half = prev_waypoint - intersection
+                            prev_norm = np.linalg.norm(prev_half)
+
+                            p1_half = p1 - intersection
+                            p1_norm = np.linalg.norm(p1_half)
+
+                            half_seg_len = self.MIN_SEGMENT_LENGTH / 2
+
+                            print(f"int -> prev: {prev_norm}")
+                            print(f"int -> p1: {p1_norm}")
+
+                            prev_unit = prev_half / prev_norm
+                            p1_unit = p1_half / p1_norm
+
+                            # adjust other waypoint
+                            p1_len = self.MIN_SEGMENT_LENGTH - prev_norm
+                            linkup_segment[1] = intersection + p1_len * p1_unit
+
+                            # # one of the following conditions must be true
+                            # if prev_norm <= half_seg_len:
+                            #     # linkup_segment[0] = intersection + half_seg_len * prev_unit
+
+                            #     # adjust other waypoint
+                            #     p1_len = self.MIN_SEGMENT_LENGTH - prev_norm
+                            #     linkup_segment[1] = intersection + p1_len * p1_unit
+
+                            # elif p1_norm >= half_seg_len:
+                            #     # linkup_segment[1] = intersection + half_seg_len * p1_unit
+
+                            #     # adjust other waypoint
+                            #     prev_len = self.MIN_SEGMENT_LENGTH - p1_len
+                            #     linkup_segment[0] = intersection + prev_len * prev_unit
+
+                            # else:
+                            #     linkup_segment[0] = intersection + half_seg_len * prev_unit
+                            #     linkup_segment[1] = intersection + half_seg_len * p1_unit
+
+                            print(f"linkup: {linkup_segment}")
                             break
                         
                         # if exc crossing edge is not viable, check neighbor on berm side
-                        if i > 0:
-                            prev_segment = [point_from_pose_2d(poses[i-1]), prev_waypoint]
+                        if i >= 2:
+                            prev_segment = [point_from_pose_2d(poses[i-2]), prev_waypoint]
                             if self.is_viable_segment(prev_segment, self.MIN_SEGMENT_LENGTH):
                                 linkup_segment = prev_segment
                                 break
 
                         # otherwise check neighbor on excavation side
-                        if i < len(poses) - 1:
-                            next_segment = [p1, point_from_pose_2d(poses[i+1])]
-                            if self.is_viable_segment(next_segment, self.MIN_SEGMENT_LENGTH):
-                                linkup_segment = next_segment
-                                break
+                        # don't actually
+                        # if i < len(poses) - 1:
+                        #     next_segment = [p1, point_from_pose_2d(poses[i+1])]
+                        #     if self.is_viable_segment(next_segment, self.MIN_SEGMENT_LENGTH):
+                        #         linkup_segment = next_segment
+                        #         break
 
                         # no linkup option found
                         break

@@ -179,7 +179,7 @@ class SingleStates(Enum):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = StateManager(SingleStates, SingleStates.STARTING_PLUNGE, Events, Event)
+    minimal_subscriber = StateManager(SingleStates, SingleStates.FIND_LINKUP, Events, Event)
 
     rclpy.spin(minimal_subscriber)
 
