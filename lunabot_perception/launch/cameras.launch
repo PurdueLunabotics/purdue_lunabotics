@@ -1,37 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
-  <arg name="serial_no_d435_right"           default="'053122251286'"/>  <arg name="serial_no_d455_front"            default="'141222070808'"/>
-  <arg name="serial_no_d435_left"           default="'053122251335'"/>
+  <arg name="serial_no_d435_right"           default="'053122251286'"/>
+  <arg name="serial_no_d455_front"           default="'141222070808'"/>
+  <arg name="serial_no_d435_left"            default="'053122251335'"/>
   <arg name="serial_no_d455_back"            default="'939622074382'"/>
-  <arg name="profile"                           default="640x480x30"/>
+  <arg name="profile"                        default="640x480x30"/>
 
-  <arg name="output_width"                      default="640"/>
-  <arg name="output_height"                     default="480"/>
+  <arg name="output_width"                   default="640"/>
+  <arg name="output_height"                  default="480"/>
 
-  <arg name="initial_reset"                   default="true"/>
+  <arg name="initial_reset"                  default="true"/>
 
-  <arg name="front"                           default="true"/>
+  <arg name="front"                          default="true"/>
   <arg name="back"                           default="false"/>
   <arg name="pointcloud" default="false" />
 
   <arg name="decimation" default="4"/>
-  <arg name="voxel_size" default="0.01"/> <arg name="noise_filter_radius" default="0.1"/> <arg name="max_depth" default="3.0"/> <group if="$(var front)">
+  <arg name="voxel_size" default="0.01"/>
+  <arg name="noise_filter_radius" default="0.1"/>
+  <arg name="max_depth" default="3.0"/>
+
+  <group if="$(var front)">
     <push_ros_namespace namespace="d455_front"/>
 
       <node pkg="realsense2_camera" exec="realsense2_camera_node" name="d455_front">
         <param name="serial_no" value="$(var serial_no_d455_front)"/>
-        <param name="initial_reset" value="false"/>
+        <param name="initial_reset" value="$(var initial_reset)"/>
         <param name="pointcloud.enable" value="false"/>
         <param name="enable_sync" value="true"/>
         <param name="align_depth.enable" value="true"/>
         <param name="enable_depth" value="true"/>
+        
         <param name="depth_module.depth_profile" value="$(var profile)" />
         <param name="depth_module.infra_profile" value="$(var profile)" />
-        <param name="rgb_camera.color_profile" value="$(var profile)" />
+        <param name="rgb_camera.color_profile" value="$(var profile)" /> 
+        
         <param name="enable_infra1" value="false"/>
         <param name="enable_infra2" value="false"/>
         <param name="enable_color" value="true"/>
-        <param name="rgb_camera.color_profile" value="$(var profile)" />
+        
         <param name="decimation_filter.enable" value="true"/>
         <param name="publish_tf" value="true"/>
         <param name="tf_publish_rate" value="0.0"/> 
@@ -71,29 +78,19 @@
       <arg name="camera_name" value ="d455_back" />
       <arg name="camera_namespace" value ="" />
       <arg name="base_frame_id" value ="link" />
-
-
       <arg name="initial_reset"            value="$(var initial_reset)"/>
-
       <arg name="pointcloud.enable"        value="false"/>
       <arg name="enable_sync"              value="true"/>
       <arg name="align_depth.enable"              value="true"/>
-
       <arg name="enable_depth"             value="true"/>
       <arg name="depth_module.depth_profile" value="$(var profile)" />
-
       <arg name="enable_color"             value="true"/>
       <arg name="rgb_camera.color_profile" value="$(var profile)" />
-
       <arg name="decimation_filter.enable" value="true"/>
-
       <arg name="publish_tf"               value="true"/>
       <arg name="tf_publish_rate"          value="0"/>
-
       <arg name="clip_distance"            value="-1"/>
-
-
-  <arg name="width"                    value="424"/>
+      <arg name="width"                    value="424"/>
       <arg name="height"                   value="240"/>
       <arg name="output_width"             value="424"/>
       <arg name="output_height"            value="240"/>
@@ -104,10 +101,8 @@
     <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
       <arg name="camera_frame" value="d455_back_link" />
       <arg name="camera_topic" value="color/image_raw"/>
-
       <arg name="use_sim_time" value="false"/>
     </include>
-
 
     <node pkg="isaac_ros_image_proc" exec="rectify_node" name="color_rectify_color">
     <param name="output_width" value="$(var output_width)" />
