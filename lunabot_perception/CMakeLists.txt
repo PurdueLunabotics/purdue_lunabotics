@@ -21,6 +21,7 @@ find_package(image_transport REQUIRED)
 find_package(image_geometry REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(visualization_msgs REQUIRED)
+find_package(rtabmap_msgs REQUIRED)
 
 
 # Install launch files
@@ -50,6 +51,7 @@ ament_target_dependencies(bbox_mask_node
   tf2_geometry_msgs
   geometry_msgs
   visualization_msgs
+  rtabmap_msgs
 )
 
 

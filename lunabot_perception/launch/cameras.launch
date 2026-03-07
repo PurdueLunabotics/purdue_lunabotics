@@ -82,9 +82,15 @@
       <!-- <param name="max_depth"                     value="$(var max_depth)"/> -->
     </node>
 
-    <node pkg="lunabot_perception" exec='bbox_mask_node' name="bbox_mask_node" respawn="true">
-      <remap to="aligned_depth_to_color/camera_info" from="camera_info"/> 
-      <remap to="aligned_depth_to_color/image_raw" from="image_raw"/> 
+    <node pkg="rtabmap_sync" exec="rgbd_sync" respawn="true">
+      <remap from="rgb/image" to="color/image_raw" />
+      <remap from="depth/image" to="aligned_depth_to_color/image_raw" />
+      <remap from="rgb/camera_info" to="color/camera_info" />
+    </node>
+
+    <node pkg="lunabot_perception" exec='bbox_mask_node' respawn="true">
+      <remap to="rgbd_image" from="image_raw"/> 
+      <param name="map_frame" value="$(var ns/)map" />
     </node>
     
   </group>
@@ -137,6 +143,17 @@
       <param name="noise_filter_radius"           value="$(var noise_filter_radius)"/>
       <param name="max_depth"                     value="$(var max_depth)"/>
     </node>
+
+    <node pkg="rtabmap_sync" exec="rgbd_sync" respawn="true">
+      <remap from="rgb/image" to="color/image_raw" />
+      <remap from="depth/image" to="aligned_depth_to_color/image_raw" />
+      <remap from="rgb/camera_info" to="color/camera_info" />
+    </node>
+
+    <node pkg="lunabot_perception" exec='bbox_mask_node' respawn="true">
+      <remap to="rgbd_image" from="image_raw"/> 
+      <param name="map_frame" value="$(var ns/)map" />
+    </node>
   </group>
 
   <group if="$(eval '\'3\' in $(var cams)')">
@@ -187,6 +204,17 @@
       <param name="noise_filter_radius"           value="$(var noise_filter_radius)"/>
       <param name="max_depth"                     value="$(var max_depth)"/>
     </node>
+
+    <node pkg="rtabmap_sync" exec="rgbd_sync" respawn="true">
+      <remap from="rgb/image" to="color/image_raw" />
+      <remap from="depth/image" to="aligned_depth_to_color/image_raw" />
+      <remap from="rgb/camera_info" to="color/camera_info" />
+    </node>
+
+    <node pkg="lunabot_perception" exec='bbox_mask_node' respawn="true">
+      <remap to="rgbd_image" from="image_raw"/> 
+      <param name="map_frame" value="$(var ns/)map" />
+    </node>
   </group>
 
   <group if="$(eval '\'4\' in $(var cams)')">
@@ -236,6 +264,17 @@
       <param name="voxel_size"                    value="$(var voxel_size)"/>
       <param name="noise_filter_radius"           value="$(var noise_filter_radius)"/>
       <param name="max_depth"                     value="$(var max_depth)"/>
+    </node>
+
+    <node pkg="rtabmap_sync" exec="rgbd_sync" respawn="true">
+      <remap from="rgb/image" to="color/image_raw" />
+      <remap from="depth/image" to="aligned_depth_to_color/image_raw" />
+      <remap from="rgb/camera_info" to="color/camera_info" />
+    </node>
+
+    <node pkg="lunabot_perception" exec='bbox_mask_node' respawn="true">
+      <remap to="rgbd_image" from="image_raw"/> 
+      <param name="map_frame" value="$(var ns/)map" />
     </node>
   </group>
 
