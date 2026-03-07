@@ -103,7 +103,7 @@ class FindLinkup(Traverse):
     # helper functions ===========================================================================
 
     def find_linkup(self):
-        print("finding linkup")
+        # print("finding linkup")
         self.goal.header.stamp = self.manager.get_clock().now().to_msg()
 
         self.find_segment(self.start_pose)
@@ -162,7 +162,7 @@ class FindLinkup(Traverse):
                 short_vector = (vector / np.linalg.norm(vector)) * self.MIN_SEGMENT_LENGTH
                 short_segment = [main_target, main_target + short_vector]
 
-            print(f"short vec: {short_segment}")
+            # print(f"short vec: {short_segment}")
 
             # update after finding shorter segment
             main_target = short_segment[0]
@@ -178,7 +178,7 @@ class FindLinkup(Traverse):
 
             self.visualize_line_segment(linkup_segment, self.linkup_line_pub)
 
-            print("visualizing shit")
+            # print("visualizing shit")
             self.visualize_line_segment(short_segment, self.short_seg_pub, b=1.0)
         else:
             linkup.main_target = Point()
@@ -234,38 +234,11 @@ class FindLinkup(Traverse):
                             p1_half = p1 - intersection
                             p1_norm = np.linalg.norm(p1_half)
 
-                            half_seg_len = self.MIN_SEGMENT_LENGTH / 2
-
-                            print(f"int -> prev: {prev_norm}")
-                            print(f"int -> p1: {p1_norm}")
-
-                            prev_unit = prev_half / prev_norm
                             p1_unit = p1_half / p1_norm
 
                             # adjust other waypoint
                             p1_len = self.MIN_SEGMENT_LENGTH - prev_norm
                             linkup_segment[1] = intersection + p1_len * p1_unit
-
-                            # # one of the following conditions must be true
-                            # if prev_norm <= half_seg_len:
-                            #     # linkup_segment[0] = intersection + half_seg_len * prev_unit
-
-                            #     # adjust other waypoint
-                            #     p1_len = self.MIN_SEGMENT_LENGTH - prev_norm
-                            #     linkup_segment[1] = intersection + p1_len * p1_unit
-
-                            # elif p1_norm >= half_seg_len:
-                            #     # linkup_segment[1] = intersection + half_seg_len * p1_unit
-
-                            #     # adjust other waypoint
-                            #     prev_len = self.MIN_SEGMENT_LENGTH - p1_len
-                            #     linkup_segment[0] = intersection + prev_len * prev_unit
-
-                            # else:
-                            #     linkup_segment[0] = intersection + half_seg_len * prev_unit
-                            #     linkup_segment[1] = intersection + half_seg_len * p1_unit
-
-                            print(f"linkup: {linkup_segment}")
                             break
                         
                         # if exc crossing edge is not viable, check neighbor on berm side
