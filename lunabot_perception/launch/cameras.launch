@@ -18,7 +18,7 @@
   <arg name="voxel_size" default="0.01"/> <arg name="noise_filter_radius" default="0.1"/> <arg name="max_depth" default="3.0"/> <group if="$(var front)">
     <push_ros_namespace namespace="d455_front"/>
 
-      <node pkg="realsense2_camera" exec="realsense2_camera_node" name="d455_front" output="screen">
+      <node pkg="realsense2_camera" exec="realsense2_camera_node" name="d455_front">
         <param name="serial_no" value="$(var serial_no_d455_front)"/>
         <param name="initial_reset" value="false"/>
         <param name="pointcloud.enable" value="false"/>
