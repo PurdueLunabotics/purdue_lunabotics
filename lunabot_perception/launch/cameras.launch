@@ -8,7 +8,7 @@
   <arg name="output_width"                      default="640"/>
   <arg name="output_height"                     default="480"/>
 
-  <arg name="initial_reset"                   default="false"/>
+  <arg name="initial_reset"                   default="true"/>
 
   <arg name="front"                           default="true"/>
   <arg name="back"                           default="false"/>
