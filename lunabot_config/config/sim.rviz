@@ -6,7 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /TF1/Status1
         - /TF1/Frames1
         - /Map1
         - /PointCloud21
@@ -34,7 +33,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2
+    SyncSource: ""
 Visualization Manager:
   Class: ""
   Displays:
@@ -79,12 +78,6 @@ Visualization Manager:
           Value: true
         excavation:
           Value: true
-        left_back:
-          Value: true
-        left_front:
-          Value: true
-        map:
-          Value: true
         middle_link:
           Value: true
         mini/base_link:
@@ -101,57 +94,15 @@ Visualization Manager:
           Value: false
         mini/d455_front_rgb_link:
           Value: false
-        mini/left_back:
-          Value: false
-        mini/left_front:
-          Value: false
-        mini/map:
-          Value: false
         mini/middle_link:
           Value: false
-        mini/odom:
-          Value: false
-        mini/right_back:
-          Value: false
-        mini/right_front:
-          Value: false
-        odom:
-          Value: true
-        right_back:
-          Value: true
-        right_front:
-          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        map:
-          odom:
-            base_link:
-              d455_back_link:
-                d455_back_depth_link:
-                  {}
-                d455_back_rgb_link:
-                  {}
-              deposition_apriltag_link:
-                {}
-              left_back:
-                {}
-              left_front:
-                {}
-              middle_link:
-                excavation:
-                  d455_front_link:
-                    d455_front_depth_link:
-                      {}
-                    d455_front_rgb_link:
-                      {}
-              right_back:
-                {}
-              right_front:
-                {}
+        {}
       Update Interval: 0
       Value: true
     - Alpha: 0.699999988079071
@@ -498,5 +449,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1034
-  X: 769
-  Y: 42
+  X: 737
+  Y: 10

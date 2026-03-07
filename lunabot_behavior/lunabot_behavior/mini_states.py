@@ -1,6 +1,9 @@
+#!/usr/bin/env python3
+
 from enum import Enum
 from approach_berm_state import ApproachBerm
 from deposit_state import Deposit
+from align_state import AlignToMainBotState
 from separate_main_state import SeparateMain
 from retreat_berm_state import RetreatBerm
 from state import Events, State
@@ -37,7 +40,7 @@ class MiniStates(Enum):
     MOVE_TO_STAGING_STALL = State()
     MOVE_TO_STAGING_NO_PATH = State()
 
-    ALIGN_TO_MAIN = State()
+    ALIGN_TO_MAIN = AlignToMainBotState()
     ALIGN_TO_MAIN_STALL = State()
     
     APPROACH_MAIN = State()
@@ -110,7 +113,7 @@ class MiniStates(Enum):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = StateManager(MiniStates, MiniStates.FIND_LINKUP, Events, Event)
+    minimal_subscriber = StateManager(MiniStates, MiniStates.ALIGN_TO_MAIN, Events, Event)
 
     rclpy.spin(minimal_subscriber)
 

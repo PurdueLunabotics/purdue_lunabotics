@@ -2,9 +2,13 @@
 
 from rclpy.node import Node
 from std_msgs.msg import UInt8
+from enum import Enum
+from state import Events, State
+from typing import Type
+from lunabot_msgs.msg import Event
 
 class StateManager(Node):
-    def __init__(self, states, initial_state, events, event_type):
+    def __init__(self, states: Type[Enum], initial_state: Enum, events: Type[Events], event_type: Type[Event]):
         super().__init__("state_manager")
 
         for state in states:
@@ -14,6 +18,7 @@ class StateManager(Node):
         self.events = events
         self.state = initial_state
         self.event_sub = self.create_subscription(event_type, "events", self.event_cb, 10)
+        self.state.value.start()
         self.timer = self.create_timer(0.1, self.periodic)
         self.get_logger().info(f"starting at state {self.state}")
 
