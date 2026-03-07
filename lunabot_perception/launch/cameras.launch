@@ -35,6 +35,8 @@
         <param name="depth_module.infra_profile" value="$(var profile)" />
         <param name="rgb_camera.color_profile" value="$(var profile)" /> 
         
+        <param name="rgb_camera.color_format" value="BGR8"/>
+        
         <param name="enable_infra1" value="false"/>
         <param name="enable_infra2" value="false"/>
         <param name="enable_color" value="true"/>
@@ -52,8 +54,6 @@
         <remap from="image_raw" to="/d455_front/d455_front/color/image_raw" />
         <remap from="camera_info" to="/d455_front/d455_front/color/camera_info" />
         <remap from="image_rect" to="/d455_front/d455_front/color/image_rect_color" />
-        
-        <remap from="camera_info_rect" to="/d455_front/d455_front/color/camera_info_rect" />
       </composable_node>
 
       <composable_node pkg="isaac_ros_depth_image_proc" plugin="nvidia::isaac_ros::depth_image_proc::PointCloudXyzNode" name="point_cloud_isaac">
@@ -66,8 +66,7 @@
         <param name="size" value="0.162"/> 
         <param name="max_tags" value="64"/>
         <remap from="image" to="/d455_front/d455_front/color/image_rect_color" />
-        
-        <remap from="camera_info" to="/d455_front/d455_front/color/camera_info_rect" />
+        <remap from="camera_info" to="/d455_front/d455_front/color/camera_info" />
         <remap from="tag_detections" to="/d455_front/tag_detections" />
       </composable_node>
 
@@ -89,6 +88,7 @@
       <arg name="depth_module.depth_profile" value="$(var profile)" />
       <arg name="enable_color"             value="true"/>
       <arg name="rgb_camera.color_profile" value="$(var profile)" />
+      <arg name="rgb_camera.color_format" value="BGR8"/>
       <arg name="decimation_filter.enable" value="true"/>
       <arg name="publish_tf"               value="true"/>
       <arg name="tf_publish_rate"          value="0"/>
