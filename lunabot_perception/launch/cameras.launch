@@ -27,20 +27,17 @@
         <param name="serial_no" value="$(var serial_no_d455_front)"/>
         <param name="initial_reset" value="$(var initial_reset)"/>
         <param name="pointcloud.enable" value="false"/>
-        <param name="enable_sync" value="true"/>
+        
+        <param name="enable_sync" value="false"/>
+        
         <param name="align_depth.enable" value="true"/>
         <param name="enable_depth" value="true"/>
-        
         <param name="depth_module.depth_profile" value="$(var profile)" />
         <param name="depth_module.infra_profile" value="$(var profile)" />
         <param name="rgb_camera.color_profile" value="$(var profile)" /> 
-        
-        <param name="rgb_camera.color_format" value="BGR8"/>
-        
         <param name="enable_infra1" value="false"/>
         <param name="enable_infra2" value="false"/>
         <param name="enable_color" value="true"/>
-        
         <param name="decimation_filter.enable" value="true"/>
         <param name="publish_tf" value="true"/>
         <param name="tf_publish_rate" value="0.0"/> 
@@ -48,12 +45,19 @@
 
     <node_container pkg="rclcpp_components" exec="component_container_mt" name="front_camera_container" namespace="">
       
+      <composable_node pkg="isaac_ros_image_proc" plugin="nvidia::isaac_ros::image_proc::ImageFormatConverterNode" name="image_format_converter">
+        <param name="encoding_desired" value="bgr8" />
+        <remap from="image_raw" to="/d455_front/d455_front/color/image_raw" />
+        <remap from="image" to="/d455_front/d455_front/color/image_bgr8" />
+      </composable_node>
+
       <composable_node pkg="isaac_ros_image_proc" plugin="nvidia::isaac_ros::image_proc::RectifyNode" name="color_rectify_color">
         <param name="output_width" value="$(var output_width)" />
         <param name="output_height" value="$(var output_height)" />
-        <remap from="image_raw" to="/d455_front/d455_front/color/image_raw" />
+        <remap from="image_raw" to="/d455_front/d455_front/color/image_bgr8" />
         <remap from="camera_info" to="/d455_front/d455_front/color/camera_info" />
         <remap from="image_rect" to="/d455_front/d455_front/color/image_rect_color" />
+        <remap from="camera_info_rect" to="/d455_front/d455_front/color/camera_info_rect" />
       </composable_node>
 
       <composable_node pkg="isaac_ros_depth_image_proc" plugin="nvidia::isaac_ros::depth_image_proc::PointCloudXyzNode" name="point_cloud_isaac">
@@ -66,7 +70,7 @@
         <param name="size" value="0.162"/> 
         <param name="max_tags" value="64"/>
         <remap from="image" to="/d455_front/d455_front/color/image_rect_color" />
-        <remap from="camera_info" to="/d455_front/d455_front/color/camera_info" />
+        <remap from="camera_info" to="/d455_front/d455_front/color/camera_info_rect" />
         <remap from="tag_detections" to="/d455_front/tag_detections" />
       </composable_node>
 
@@ -82,13 +86,12 @@
       <arg name="base_frame_id" value ="link" />
       <arg name="initial_reset"            value="$(var initial_reset)"/>
       <arg name="pointcloud.enable"        value="false"/>
-      <arg name="enable_sync"              value="true"/>
+      <arg name="enable_sync"              value="false"/>
       <arg name="align_depth.enable"              value="true"/>
       <arg name="enable_depth"             value="true"/>
       <arg name="depth_module.depth_profile" value="$(var profile)" />
       <arg name="enable_color"             value="true"/>
       <arg name="rgb_camera.color_profile" value="$(var profile)" />
-      <arg name="rgb_camera.color_format" value="BGR8"/>
       <arg name="decimation_filter.enable" value="true"/>
       <arg name="publish_tf"               value="true"/>
       <arg name="tf_publish_rate"          value="0"/>
@@ -103,14 +106,20 @@
 
     <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
       <arg name="camera_frame" value="d455_back_link" />
-      <arg name="camera_topic" value="color/image_raw"/>
+      <arg name="camera_topic" value="color/image_rect_color"/>
       <arg name="use_sim_time" value="false"/>
     </include>
 
-    <node pkg="isaac_ros_image_proc" exec="rectify_node" name="color_rectify_color">
-    <param name="output_width" value="$(var output_width)" />
-    <param name="output_height" value="$(var output_height)" />
+    <node pkg="isaac_ros_image_proc" exec="image_format_converter_node" name="format_converter_back">
+       <param name="encoding_desired" value="bgr8" />
        <remap from="image_raw" to="color/image_raw" />
+       <remap from="image" to="color/image_bgr8" />
+    </node>
+
+    <node pkg="isaac_ros_image_proc" exec="rectify_node" name="color_rectify_color">
+       <param name="output_width" value="$(var output_width)" />
+       <param name="output_height" value="$(var output_height)" />
+       <remap from="image_raw" to="color/image_bgr8" />
        <remap from="camera_info" to="color/camera_info" />
        <remap from="image_rect" to="color/image_rect_color" />
     </node>
