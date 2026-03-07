@@ -18,6 +18,7 @@ class StateManager(Node):
         self.states = states
         self.events = events
         self.state = initial_state
+        self.stopped = False
         self.event_sub = self.create_subscription(Event, "events", self.event_cb, 10)
         self.timer = self.create_timer(0.1, self.periodic)
         self.get_logger().info(f"starting at state {self.state}")
@@ -37,7 +38,12 @@ class StateManager(Node):
             self.state.value.start()
 
     def periodic(self):
-        event = self.state.value.periodic()
+        if not self.stopped:
+            event = self.state.value.periodic()
 
-        if event is not None:
-            self.process_event(event)
+            if event is not None:
+                self.process_event(event)
+
+    def stop_current_state(self):
+        self.state.value.exit()
+        self.stopped = True

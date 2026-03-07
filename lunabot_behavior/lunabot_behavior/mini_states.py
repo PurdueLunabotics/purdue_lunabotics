@@ -119,14 +119,15 @@ class MiniStates(Enum):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = StateManager(MiniStates, MiniStates.FIND_LINKUP, Events, Event)
+    manager = StateManager(MiniStates, MiniStates.FIND_LINKUP, Events, Event)
 
-    rclpy.spin(minimal_subscriber)
+    rclpy.spin(manager)
 
+    manager.stop_current_state()
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    minimal_subscriber.destroy_node()
+    manager.destroy_node()
     rclpy.shutdown()
 
 
