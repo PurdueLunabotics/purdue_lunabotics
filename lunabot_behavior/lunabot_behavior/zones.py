@@ -1,100 +1,99 @@
+#!/usr/bin/env python3
+
 import rclpy
 
 from geometry_msgs.msg import Point
-from visualization_msgs.msg import Marker
-from rcl_interfaces.msg import ParameterDescriptor, ParameterType
 from lunabot_msgs.msg import Zone
+from visualization_msgs.msg import Marker
+import time
 
 from rclpy.node import Node
 
-import time
+import numpy as np
 
 # zone geometries - based on guidebook orientations (all measurements in meters)
-START_OFFSET_X = 2.44
-START_OFFSET_Y = 1.5
-START_LENGTH_X = 2
-START_LENGTH_Y = 2
+class ZoneMeasurements:
+    START_OFFSET_X = 2.44
+    START_OFFSET_Y = 1.5
+    START_LENGTH_X = 2
+    START_LENGTH_Y = 2
 
-EXC_OFFSET_X = 2.19
-EXC_OFFSET_Y = 0
-EXC_LENGTH_X = 2.5
-EXC_LENGTH_Y = 5
+    EXC_OFFSET_X = 2.19
+    EXC_OFFSET_Y = 0
+    EXC_LENGTH_X = 2.5
+    EXC_LENGTH_Y = 5
 
-BERM_OFFSET_X = -1.94
-BERM_OFFSET_Y = 1.9
-BERM_LENGTH_X = 1.7
-BERM_LENGTH_Y = 0.8
+    BERM_OFFSET_X = -1.94
+    BERM_OFFSET_Y = 1.9
+    BERM_LENGTH_X = 1.7
+    BERM_LENGTH_Y = 0.8
+
+def make_zone(offset_x, offset_y, length_x, length_y):
+    z = Zone()
+
+    z.v1 = Point() # top right
+    z.v1.x = offset_x + (length_x / 2)
+    z.v1.y = offset_y + (length_y / 2)
+
+    z.v2 = Point() # bottom right
+    z.v2.x = offset_x + (length_x / 2)
+    z.v2.y = offset_y - (length_y / 2)
+
+    z.v3 = Point() # bottom left
+    z.v3.x = offset_x - (length_x / 2)
+    z.v3.y = offset_y - (length_y / 2)
+
+    z.v4 = Point() # top left
+    z.v4.x = offset_x - (length_x / 2)
+    z.v4.y = offset_y + (length_y / 2)
+
+    return z
+
+start_zone = make_zone(
+    ZoneMeasurements.START_OFFSET_X,
+    ZoneMeasurements.START_OFFSET_Y,
+    ZoneMeasurements.START_LENGTH_X,
+    ZoneMeasurements.START_LENGTH_Y)
+
+exc_zone = make_zone(
+    ZoneMeasurements.EXC_OFFSET_X,
+    ZoneMeasurements.EXC_OFFSET_Y,
+    ZoneMeasurements.EXC_LENGTH_X,
+    ZoneMeasurements.EXC_LENGTH_Y)
+
+berm_zone = make_zone(
+    ZoneMeasurements.BERM_OFFSET_X,
+    ZoneMeasurements.BERM_OFFSET_Y,
+    ZoneMeasurements.BERM_LENGTH_X,
+    ZoneMeasurements.BERM_LENGTH_Y)
+
+# TODO: replace with actual point to line calculation
+def get_distance_from_start(p: np.array):
+    start_center = np.array([ZoneMeasurements.START_OFFSET_X, ZoneMeasurements.START_OFFSET_Y])
+    return np.linalg.norm(p - start_center)
+
+def get_distance_from_exc(p: np.array):
+    start_center = np.array([ZoneMeasurements.EXC_OFFSET_X, ZoneMeasurements.EXC_OFFSET_Y])
+    return np.linalg.norm(p - start_center)
+
+def get_distance_from_berm(p: np.array):
+    start_center = np.array([ZoneMeasurements.BERM_OFFSET_X, ZoneMeasurements.BERM_OFFSET_Y])
+    return np.linalg.norm(p - start_center)
 
 class ZonesNode(Node):
     def __init__(self):
         super().__init__("zones_node")
+    
+        self.exc_zone_marker_pub = self.create_publisher(Marker, "exc_zone_marker", 10)
+        self.berm_zone_marker_pub = self.create_publisher(Marker, "berm_zone_marker", 10)
+        self.start_zone_marker_pub = self.create_publisher(Marker, "start_zone_marker", 10)
 
-        self.declare_parameter("sim", True, ParameterDescriptor(type = ParameterType.PARAMETER_BOOL))
+        self.exc_zone_pub = self.create_publisher(Zone, "exc_zone", 10)
+        self.berm_zone_pub = self.create_publisher(Zone, "berm_zone", 10)
+        self.start_zone_pub = self.create_publisher(Zone, "start_zone", 10)
 
-        self.exc_zone_marker_pub = self.create_publisher(Marker, "/exc_zone_marker", 10)
-        self.berm_zone_marker_pub = self.create_publisher(Marker, "/berm_zone_marker", 10)
-        self.start_zone_marker_pub = self.create_publisher(Marker, "/start_zone_marker", 10)
-
-        self.exc_zone_pub = self.create_publisher(Zone, "/exc_zone", 10)
-        self.berm_zone_pub = self.create_publisher(Zone, "/berm_zone", 10)
-        self.start_zone_pub = self.create_publisher(Zone, "/start_zone", 10)
-        
-        # self.exc_zone_pub = self.create_publisher(lunabot_msgs.Zone, "/exc_zone", 10)
-
-        # self.create_subscription(AprilTagDetectionArray, "/d455_back/detections", self.apriltag_callback, 1)
-
-        # self.START_APRILTAG_ID = 11
-
-        self.exc_zone = None
-        self.berm_zone = None
-        self.start_zone = None
-
-        # self.is_sim = self.get_parameter("sim").get_parameter_value().bool_value
         self.start_time = time.perf_counter_ns()
-
-        self.start_zone = self.make_zone(
-            START_OFFSET_X,
-            START_OFFSET_Y,
-            START_LENGTH_X,
-            START_LENGTH_Y)
-        
-        self.exc_zone = self.make_zone(
-            EXC_OFFSET_X,
-            EXC_OFFSET_Y,
-            EXC_LENGTH_X,
-            EXC_LENGTH_Y)
-        
-        self.berm_zone = self.make_zone(
-            BERM_OFFSET_X,
-            BERM_OFFSET_Y,
-            BERM_LENGTH_X,
-            BERM_LENGTH_Y)
-
-
-        # transform we're looking for is from base link back to map
-        # self.from_frame_rel = f"{ns}base_link"
-        # self.to_frame_rel = f"{ns}map"
-
-    def make_zone(self, offset_x, offset_y, length_x, length_y):
-        z = Zone()
-
-        z.v1 = Point()
-        z.v1.x = offset_x + (length_x / 2)
-        z.v1.y = offset_y + (length_y / 2)
-
-        z.v2 = Point()
-        z.v2.x = offset_x + (length_x / 2)
-        z.v2.y = offset_y - (length_y / 2)
-
-        z.v3 = Point()
-        z.v3.x = offset_x - (length_x / 2)
-        z.v3.y = offset_y - (length_y / 2)
-
-        z.v4 = Point()
-        z.v4.x = offset_x - (length_x / 2)
-        z.v4.y = offset_y + (length_y / 2)
-
-        return z
+        self.create_timer(1 / 30, self.mainloop)
 
     def visualize_zone(self, zone: Zone, publisher: rclpy.publisher.Publisher, id=0, color=(1.0, 0.0, 0.0, 1.0)):
         """
@@ -155,31 +154,24 @@ class ZonesNode(Node):
         publisher.publish(zone_marker)
 
     def mainloop(self):
-        # rate = self.create_rate(30) # 30 hz
-        while rclpy.ok():
-            # zone = Zone((1.0, 2.0), (2.0, 2.0), (1.0, 1.0), (2.0, 1.0))
+        if rclpy.ok():
+            if (exc_zone is not None):
+                self.visualize_zone(exc_zone, self.exc_zone_marker_pub)
+                self.exc_zone_pub.publish(exc_zone)
 
-            if (self.exc_zone is not None):
-                self.visualize_zone(self.exc_zone, self.exc_zone_marker_pub)
-                self.exc_zone_pub.publish(self.exc_zone)
+            if (berm_zone is not None):
+                self.visualize_zone(berm_zone, self.berm_zone_marker_pub)
+                self.berm_zone_pub.publish(berm_zone)
 
-            if (self.berm_zone is not None):
-                self.visualize_zone(self.berm_zone, self.berm_zone_marker_pub)
-                self.berm_zone_pub.publish(self.berm_zone)
-
-            if (self.start_zone is not None):
-                self.visualize_zone(self.start_zone, self.start_zone_marker_pub)
-                self.start_zone_pub.publish(self.start_zone)
-            # print("published zone")
-
-            # rate.sleep()
+            if (start_zone is not None):
+                self.visualize_zone(start_zone, self.start_zone_marker_pub)
+                self.start_zone_pub.publish(start_zone)
 
 def main():
     rclpy.init()
     zones_node = ZonesNode()
 
-    # print("starting")
-    zones_node.mainloop()
+    rclpy.spin(zones_node)
 
     zones_node.destroy_node()
     rclpy.shutdown()

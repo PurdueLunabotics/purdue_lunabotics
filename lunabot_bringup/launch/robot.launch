@@ -6,6 +6,7 @@
 
     <!-- Type of Robot Args -->
     <arg name="robot_num" default="0"/>
+
     <let name="ns" if="$(eval '$(var robot_num) == 1')" value="mini"/>
     <let name="ns" if="$(eval '$(var robot_num) == 0')" value=""/>
     <arg name="sim" default="false"/>
@@ -25,6 +26,12 @@
 
     <let name="starting_x" if="$(eval '$(var robot_num) == 1')" value="1.5"/>
     <let name="starting_x" if="$(eval '$(var robot_num) == 0')" value="2.5"/>
+
+    <arg name="entity_name" if="$(eval '$(var robot_num) == 0')" default="dummy_bot"/>
+    <arg name="entity_name" if="$(eval '$(var robot_num) == 1')" default="mini_bot"/>
+
+    <let name="entity_name" if="$(eval '$(var robot_num) == 1')" value="mini_bot"/>
+    <let name="entity_name" if="$(eval '$(var robot_num) == 0')" value="dummy_bot"/>
 
 
     <!-- What to Launch Args -->
@@ -114,7 +121,7 @@
     <node if="$(var sim)" name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true">
             <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
     </node>
-    <node if="$(var sim)" pkg="controller_manager" exec="spawner" args="-p $(find-pkg-share lunabot_config)/config/sim_controller.yaml velocity_controller excavation_controller"/>
+    <node if="$(var sim)" pkg="controller_manager" exec="spawner" args="-p $(find-pkg-share lunabot_config)/config/sim_controller.yaml velocity_controller"/>
     <node pkg="lunabot_slam" exec="map_base_node.py">
         <remap from="odom" to="$(var /ns)/rtabmap/odom"/>
         <remap from="position" to="$(var /ns)/position"/>
@@ -153,7 +160,16 @@
 
         </node>
 
-        <node pkg="lunabot_slam" exec="sim_odom.py" if="$(var odom_from_sim)"/>
+        <node pkg="lunabot_slam" exec="sim_odom.py" if="$(var odom_from_sim)">
+        </node>
+        <node pkg="lunabot_perception" exec="apriltag_combine.py">
+            <remap from="detections"         to="rtabmap/apriltag/detections"/>
+            <param name="input_topics" value="d455_back/detections;d455_front/detections" value-sep=";"/>
+        </node>
+
+        <!-- <node name="stall_detection_node" pkg="lunabot_control" exec="stall_detection_node" output="screen" respawn="true">
+            <param name="~waitTime" value="2"/> 
+        </node> -->
 
         <push_ros_namespace namespace="rtabmap"/>
 
@@ -224,14 +240,15 @@
             <param name="GridGlobal/OccupancyThr" value="'0.5'"/> <!-- Threshold for occupancy -->
             
             <param name="Kp/MaxFeatures"          value="$(var rtabmap_max_features)"/>
+            <param name="Marker/Priors"           value="'11 2.5 2.5 0.4 1.57 1.57 0|7 3.4 1.8 0.4 1.57 0 -1.57'"/>
+            <param name="Optimizer/PriorsIgnored" value="'false'"/>
             
             <param name="database_path"           value="~/.ros/$(var ns)rtabmap.db"/>
 
         </node>
-
-        <node name="zones_node" pkg="lunabot_behavior" exec="zones" output="screen" respawn="false" />
     </group>
 
+    <node name="zones_node" pkg="lunabot_behavior" exec="zones" output="screen"/>
 
     <group>
         <node name="planner_server" pkg="nav2_planner" exec="planner_server" output="screen" respawn="true">
@@ -251,13 +268,12 @@
         </node>
 
         <node name="point_to_point_node" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="false" >
-            <param name="use_sim_time" value="$(var sim)"/>
             <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
 
             <remap from="odom" to="position"/>
             <remap from="global_path" to="nav_path"/>
             <remap from="backwards" to="traversal/backwards"/>
-            <remap from="traversal_enabled" to="behavior/traversal_enabled"/>
+            <remap from="traversal_enabled" to="traversal/enabled"/>
 
             <remap from="cmd_vel" to="cmd_vel"/>
         </node>

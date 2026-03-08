@@ -4,13 +4,16 @@
   <name>lunabot_behavior</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="xlr9.chitiveli@gmail.com">root</maintainer>
+  <maintainer email="lunabot@purdue.edu">root</maintainer>
   <license>Apache-2.0</license>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
   <test_depend>python3-pytest</test_depend>
+
+  <depend>shapely</depend>
+  <depend>rclpy</depend>
 
   <export>
     <build_type>ament_python</build_type>

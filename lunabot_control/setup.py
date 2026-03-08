@@ -26,6 +26,7 @@ setup(
         'effort_factory_node = lunabot_control.effort_factory:main',
         'manual_controller_node = lunabot_control.manual_controller:main',
         'drivetrain_controller_node = lunabot_control.drivetrain_controller:main',
+        'stall_detection_node = lunabot_control.stall_detector:main',
     ],
 },
 )

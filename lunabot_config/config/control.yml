@@ -5,13 +5,13 @@ point_to_point_node:
       p: 5.0
       i: 0.0
       d: 0.0
-      max_speed: 60.0
+      max_output: 1.0
       tolerance: 10.0
     linear:
       p: 3.0
       i: 0.0
       d: 0.0
-      max_speed: 0.3
+      max_output: 0.3
       tolerance: 0.2
 
 differential_drive_controller_node:
@@ -26,6 +26,7 @@ differential_drive_controller_node:
 drivetrain_controller_node:
   ros__parameters:
     gearbox_ratio: 50.0
+    do_excavation: true
 
 
 mini:
@@ -36,13 +37,13 @@ mini:
         p: 5.0
         i: 0.0
         d: 0.0
-        max_speed: 60.0
+        max_output: 1.0
         tolerance: 10.0
       linear:
         p: 3.0
         i: 0.0
         d: 0.0
-        max_speed: 1.0
+        max_output: 1.0
         tolerance: 0.2
 
   differential_drive_controller_node:
@@ -57,3 +58,4 @@ mini:
   drivetrain_controller_node:
     ros__parameters:
       gearbox_ratio: 10.0
+      do_excavation: false

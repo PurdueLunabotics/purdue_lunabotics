@@ -4,7 +4,7 @@ from rclpy.node import Node
 import threading
 import rclpy
 
-from lunabot_msgs.msg import RobotEffort 
+from lunabot_msgs.msg import RobotEffort, RobotStall 
 from std_msgs.msg import Int8, Int32, Bool
 
 

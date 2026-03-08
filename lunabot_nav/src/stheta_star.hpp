@@ -15,6 +15,8 @@ struct Options {
   double traversal_cost;
   double node_cost;
   double costmap_exponential;
+  double max_goal_adjustment_meters; // max distance it will go in a line
+  double remapping_cost_change_percent;
 };
 
 struct Coord {
@@ -74,6 +76,7 @@ class SThetaStar {
     bool isBlocked(Coord coord);
     bool hasLineOfSight(Coord initial, Coord end, double &cost);
     double calculatePathCost(PathMsg path);
+    PoseStampedMsg moveGoal(PoseStampedMsg start, PoseStampedMsg goal);
 };
 
 #endif

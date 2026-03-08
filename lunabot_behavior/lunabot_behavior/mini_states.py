@@ -1,44 +1,53 @@
 #!/usr/bin/env python3
 
 from enum import Enum
-from approach_berm_state import ApproachBerm
-from deposit_state import Deposit
-from align_state import AlignToMainBotState
-from separate_main_state import SeparateMain
-from retreat_berm_state import RetreatBerm
-from state import Events, State
-import rclpy
 from state_manager import StateManager
 from lunabot_msgs.msg import Event
-from align_to_angle_state import AlignToAngleState
+from geometry_msgs.msg import PoseStamped
+from lunabot_msgs.msg import Event
+
+from lunabot_behavior.states.align_to_angle import AlignToAngle
+from lunabot_behavior.states.separate_main import SeparateMain
+from lunabot_behavior.states.traverse_to_berm import TraverseToBerm
+from lunabot_behavior.states.traverse import NoPath, Traverse, Stall
+from lunabot_behavior.states.deposit import Deposit
+from lunabot_behavior.states.approach_berm import ApproachBerm
+from lunabot_behavior.states.retreat_berm import RetreatBerm
+from lunabot_behavior.states.find_linkup import FindLinkup
+from lunabot_behavior.states.align_to_main_bot import AlignToMainBotState
+
+from lunabot_behavior.state import Events, State
+from lunabot_behavior.state_manager import StateManager
+
+import rclpy
 
 class MiniStates(Enum):
     INIT = State()
     INIT_STALL = State()
     
-    FIND_LINKUP = State()
-    FIND_LINKUP_STALL = State()
-    FIND_LINKUP_NO_PATH = State()
+    FIND_LINKUP = FindLinkup()
+    FIND_LINKUP_STALL = Stall()
+    FIND_LINKUP_NO_PATH = NoPath()
 
-    TRAVERSE_TO_BERM = State()
-    TRAVERSE_TO_BERM_STALL = State()
-    TRAVERSE_TO_BERM_NO_PATH = State()
+    TRAVERSE_TO_BERM = TraverseToBerm(False)
+    TRAVERSE_TO_BERM_STALL = Stall()
+    TRAVERSE_TO_BERM_NO_PATH = NoPath()
 
-    ALIGN_TO_BERM = AlignToAngleState(180)
-    ALIGN_TO_BERM_STALL = State()
+    ALIGN_TO_BERM = AlignToAngle(270)
+    ALIGN_TO_BERM_STALL = Stall()
     
     APPROACH_BERM = ApproachBerm()
-    APPROACH_BERM_STALL = State()
+    APPROACH_BERM_STALL = Stall()
     
     RETREAT_BERM = RetreatBerm()
-    RETREAT_BERM_STALL = State()
+    RETREAT_BERM_STALL = Stall()
 
     DEPOSIT = Deposit()
     DEPOSIT_STALL = State()
 
-    MOVE_TO_STAGING = State()
-    MOVE_TO_STAGING_STALL = State()
-    MOVE_TO_STAGING_NO_PATH = State()
+    MOVE_TO_STAGING = Traverse(PoseStamped(), False)
+    MOVE_TO_STAGING_STALL = Stall()
+    MOVE_TO_STAGING_NO_PATH = NoPath()
 
     ALIGN_TO_MAIN = AlignToMainBotState()
     ALIGN_TO_MAIN_STALL = State()
@@ -49,7 +58,7 @@ class MiniStates(Enum):
     COLLECT_REGOLITH = State()
 
     SEPARATE_FROM_MAIN = SeparateMain()
-    SEPARATE_FROM_MAIN_STALL = State()
+    SEPARATE_FROM_MAIN_STALL = Stall()
 
     @staticmethod
     def get_transition(state, event: Events):
@@ -57,7 +66,6 @@ class MiniStates(Enum):
             (MiniStates.INIT, Events.SUCCESS): MiniStates.FIND_LINKUP,
             (MiniStates.INIT, Events.STALL): MiniStates.INIT_STALL,
             (MiniStates.INIT_STALL, Events.SUCCESS): MiniStates.INIT,
-            
             
             (MiniStates.FIND_LINKUP, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
             (MiniStates.FIND_LINKUP, Events.STALL): MiniStates.FIND_LINKUP_STALL,
@@ -101,7 +109,7 @@ class MiniStates(Enum):
             (MiniStates.APPROACH_MAIN, Events.STALL): MiniStates.APPROACH_MAIN_STALL,
             (MiniStates.APPROACH_MAIN_STALL, Events.SUCCESS): MiniStates.APPROACH_MAIN,
             
-            (MiniStates.COLLECT_REGOLITH, Events.SUCCESS): MiniStates.SEPARATE_FROM_MAIN,
+            (MiniStates.COLLECT_REGOLITH, Events.PROCEED): MiniStates.SEPARATE_FROM_MAIN,
 
             (MiniStates.SEPARATE_FROM_MAIN, Events.SUCCESS): MiniStates.TRAVERSE_TO_BERM,
             (MiniStates.SEPARATE_FROM_MAIN, Events.STALL): MiniStates.SEPARATE_FROM_MAIN_STALL,
@@ -113,14 +121,15 @@ class MiniStates(Enum):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = StateManager(MiniStates, MiniStates.ALIGN_TO_MAIN, Events, Event)
+    manager = StateManager(MiniStates, MiniStates.ALIGN_TO_MAIN, Events, Event)
 
-    rclpy.spin(minimal_subscriber)
+    rclpy.spin(manager)
 
+    manager.stop_current_state()
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    minimal_subscriber.destroy_node()
+    manager.destroy_node()
     rclpy.shutdown()
 
 

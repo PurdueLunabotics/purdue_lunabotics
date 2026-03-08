@@ -1,0 +1,2 @@
+geometry_msgs/Point main_target
+geometry_msgs/Point mini_target

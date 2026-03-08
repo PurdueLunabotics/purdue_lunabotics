@@ -1,5 +1,6 @@
 from enum import Enum, auto
 from rclpy.node import Node
+from rclpy.task import Future
 from lunabot_msgs.msg import Event
 
 class Events(Enum):
@@ -12,9 +13,10 @@ class Events(Enum):
     NO_PATH = Event.NO_PATH
     STUCK = Event.STUCK
     ARRIVED = Event.ARRIVED
+    PROCEED = Event.PROCEED
 
 class State:
-    def setup(self, manager: Node):
+    def setup(self, manager: Node) -> Future | None:
         pass
     
     def start(self):

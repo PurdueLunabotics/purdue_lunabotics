@@ -15,6 +15,9 @@ Panels:
         - /Marker1
         - /RobotModel1
         - /RobotModel1/Description Topic1
+        - /Marker5
+        - /Marker5/Topic1
+        - /Path2
       Splitter Ratio: 0.5
     Tree Height: 434
   - Class: rviz_common/Selection
@@ -96,13 +99,50 @@ Visualization Manager:
           Value: false
         mini/middle_link:
           Value: false
+        mini/odom:
+          Value: false
+        odom:
+          Value: true
+        right_back:
+          Value: true
+        right_front:
+          Value: true
+        tag36h11:11:
+          Value: true
+        tag36h11:7:
+          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        {}
+        map:
+          odom:
+            base_link:
+              d455_back_link:
+                d455_back_depth_link:
+                  {}
+                d455_back_rgb_link:
+                  tag36h11:11:
+                    {}
+              deposition_apriltag_link:
+                {}
+              left_back:
+                {}
+              left_front:
+                {}
+              middle_link:
+                excavation:
+                  d455_front_link:
+                    d455_front_depth_link:
+                      {}
+                    d455_front_rgb_link:
+                      {}
+              right_back:
+                {}
+              right_front:
+                {}
       Update Interval: 0
       Value: true
     - Alpha: 0.699999988079071
@@ -384,6 +424,73 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /exc_zone_marker
+      Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Marker
+      Namespaces:
+        zones: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /start_zone_marker
+      Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Marker
+      Namespaces:
+        line_segment: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /linkup_segment
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 255; 0; 0
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.029999999329447746
+      Name: Path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /linkup_path
+      Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Marker
+      Namespaces:
+        line_segment: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /exc_edge
       Value: true
   Enabled: true
   Global Options:
