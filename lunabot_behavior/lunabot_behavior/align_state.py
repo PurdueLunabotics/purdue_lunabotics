@@ -4,7 +4,7 @@ import rclpy
 import rclpy.time
 from rclpy.duration import Duration
 from rclpy.time import Time
-from geometry_msgs.msg import Twist, PoseStamped
+from geometry_msgs.msg import Twist, PoseStamped, Point
 from visualization_msgs.msg import Marker
 from apriltag_msgs.msg import AprilTagDetectionArray
 from tf_transformations import euler_from_quaternion
@@ -56,7 +56,7 @@ class AlignToMainBotState(State):
 
   def setup(self, manager: Node):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "/mini/cmd_vel", 10)
-    self.visual_publisher = manager.create_publisher(Marker, "alignGoal", 10)
+    self.visual_publisher = manager.create_publisher(Marker, "/mini/align_goal", 10)
     manager.create_subscription(PoseStamped, "/mini/position", self.odom_callback, 10)
     self.node = manager
 
@@ -92,6 +92,7 @@ class AlignToMainBotState(State):
   def periodic(self):
 
     if (self.internal_state == 'search'):
+      # spin in circle until you see main bot's apriltag
 
       if (self.isApriltagPresent()):
         self.internal_state = 'align'
@@ -102,9 +103,12 @@ class AlignToMainBotState(State):
       self.publish_angular_velocity(self.SEARCH_SPEED)
 
     elif (self.internal_state == 'align'):
+      # Align to face where the apriltag is
+
       if (self.isApriltagPresent()):
 
         try:
+          # get where the apriltag is
           transform = self.tf_buffer.lookup_transform("mini/map", "main_deposition", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
 
           xDiff = self.robot_pose[0] - transform.transform.translation.x
@@ -116,9 +120,11 @@ class AlignToMainBotState(State):
           error = goal_angle - current_angle
           error = (error + np.pi) % (2 * np.pi) - np.pi
 
+          # if aligned, increment a counter. At the threshold, alignment is done
           if (abs(error) < self.ANGULAR_ALIGN_THRESHOLD):
             self.success_count +=1
             if (self.success_count >= self.SUCCESS_THRESHOLD):
+              self.remove_marker()
               return Events.SUCCESS
           else:
             self.success_count = 0
@@ -126,16 +132,17 @@ class AlignToMainBotState(State):
           velocity = self.runPID(error)
           self.publish_angular_velocity(velocity)
 
-          self.visualize_transform(transform)
+          self.visualize_alignment(transform)
 
         except Exception as e:
           pass
           # print("waiting on transform...", e)
       else:
+        # if we can't see apriltag in 'align' mode enough times in a row, then we lost it, go back to searching
         self.lost_count+=1
         
         if (self.lost_count >= self.LOST_APRILTAG_THRESHOLD):
-          self.node.get_logger().info("Behavior: Align to main bot: lost tag, searching")
+          self.node.get_logger().info("Behavior: Aligns to main bot: lost tag, searching")
           self.internal_state = 'search'
           self.lost_count = 0
           return None
@@ -212,6 +219,37 @@ class AlignToMainBotState(State):
 
     self.visual_publisher.publish(marker)
 
+  def visualize_alignment(self, transform: TransformStamped):
+    marker = Marker()
+    marker.header.frame_id = "mini/map"
+    marker.header.stamp = self.node.get_clock().now().to_msg()
+    marker.id = 3681
+    marker.ns = "align"
+    marker.type = Marker.LINE_STRIP
+    marker.action = Marker.ADD
+
+    start = Point(x=self.robot_pose[0], y=self.robot_pose[1], z=0.3)
+    end = Point(x=transform.transform.translation.x, y=transform.transform.translation.y, z=transform.transform.translation.z)
+
+    marker.points.append(start)
+    marker.points.append(end)
+
+    marker.color.r = 0.95
+    marker.color.g = 0.8
+    marker.color.b = 0.0
+    marker.color.a = 0.9
+    marker.scale.x = 0.035
+    self.visual_publisher.publish(marker)
+  
+  def remove_marker(self):
+    marker = Marker()
+    marker.header.frame_id = "mini/map"
+    marker.header.stamp = self.node.get_clock().now().to_msg()
+    marker.id = 3681
+    marker.ns = "align"
+    marker.type = Marker.LINE_STRIP
+    marker.action = Marker.DELETE
+    self.visual_publisher.publish(marker)
   
   def exit(self):
     # stop moving
