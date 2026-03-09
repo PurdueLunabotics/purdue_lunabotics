@@ -18,6 +18,7 @@ from lunabot_behavior.states.retreat_berm import RetreatBerm
 from lunabot_behavior.states.traverse_to_linkup import TraverseToLinkup
 from lunabot_behavior.states.trench import Trench
 from lunabot_behavior.states.align_to_linkup import AlignToLinkup
+from lunabot_behavior.states.main_wait_for_mini_align import MainWaitForAlignState
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -62,6 +63,10 @@ class MainStates(Enum):
 
     ALIGN_TO_LINKUP = AlignToLinkup()
     ALIGN_TO_LINKUP_STALL = State()
+
+    WAIT_FOR_MINI_ALIGN = MainWaitForAlignState()
+
+    ALIGN_TO_MINI = State()
 
     WAIT_FOR_DIVERGE = State() # This will stay as State(), no logic needed
 
@@ -137,6 +142,8 @@ class MainStates(Enum):
             (MainStates.ALIGN_TO_LINKUP, Events.STALL): MainStates.RETREAT_TRENCH_STALL,
             (MainStates.ALIGN_TO_LINKUP_STALL, Events.SUCCESS): MainStates.ALIGN_TO_LINKUP,
 
+            (MainStates.WAIT_FOR_MINI_ALIGN, Events.SUCCESS): MainStates.ALIGN_TO_MINI,
+
             (MainStates.DEPOSIT, Events.SUCCESS): MainStates.WAIT_FOR_DIVERGE,
             (MainStates.DEPOSIT, Events.STALL): MainStates.DEPOSIT_STALL,
             (MainStates.DEPOSIT_STALL, Events.SUCCESS): MainStates.DEPOSIT,
@@ -167,7 +174,7 @@ class MainStates(Enum):
 def main(args=None):
     rclpy.init(args=args)
 
-    manager = StateManager(MainStates, MainStates.PLUNGE_ACT, Events, Event)
+    manager = StateManager(MainStates, MainStates.WAIT_FOR_MINI_ALIGN, Events, Event)
 
     rclpy.spin(manager)
 

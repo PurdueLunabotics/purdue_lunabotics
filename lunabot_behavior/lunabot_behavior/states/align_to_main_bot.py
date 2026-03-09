@@ -17,6 +17,7 @@ DEPOSITION_APRILTAG_ID = 368
 
 class AlignToMainBotState(State):
   def __init__(self):
+
     # (x, y, theta)
     self.robot_pose = None
 
@@ -56,6 +57,7 @@ class AlignToMainBotState(State):
   def setup(self, manager: Node):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "/mini/cmd_vel", 10)
     self.visual_publisher = manager.create_publisher(Marker, "/mini/align_goal", 10)
+    self.apriltag_offset_publisher = manager.create_publisher(TransformStamped, "/behavior/mini_apriltag_offset", 10)
     manager.create_subscription(PoseStamped, "/mini/position", self.odom_callback, 10)
     self.node = manager
 
@@ -110,6 +112,9 @@ class AlignToMainBotState(State):
           # get where the apriltag is
           transform = self.tf_buffer.lookup_transform("mini/map", "main_deposition", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
 
+          # get the transform from yourself to the apriltag (this will be passed to the next state, and to main bot)
+          offsetTransform = self.tf_buffer.lookup_transform("mini/base_link", "main_deposition", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
+
           xDiff = self.robot_pose[0] - transform.transform.translation.x
           yDiff = self.robot_pose[1] - transform.transform.translation.y
 
@@ -122,9 +127,13 @@ class AlignToMainBotState(State):
           # if aligned, increment a counter. At the threshold, alignment is done
           if (abs(error) < self.ANGULAR_ALIGN_THRESHOLD):
             self.success_count +=1
+
+            # if aligned, return success for next state, and the offset from mini to the apriltag (used by main bot)
             if (self.success_count >= self.SUCCESS_THRESHOLD):
               self.remove_marker()
+              self.publish_offset_transform(offsetTransform)
               return Events.SUCCESS
+            
           else:
             self.success_count = 0
 
@@ -249,6 +258,10 @@ class AlignToMainBotState(State):
     marker.type = Marker.LINE_STRIP
     marker.action = Marker.DELETE
     self.visual_publisher.publish(marker)
+
+  def publish_offset_transform(self, transform: TransformStamped):
+    for i in range(5):
+      self.apriltag_offset_publisher.publish(transform)
   
   def exit(self):
     # stop moving
