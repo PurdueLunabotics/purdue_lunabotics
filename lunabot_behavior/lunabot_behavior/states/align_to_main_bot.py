@@ -47,7 +47,7 @@ class AlignToMainBotState(State):
 
     self.SEARCH_SPEED = 0.6 # rad/s
 
-    # in rad, how aligned before it retunrs success
+    # in rad, how aligned before it returns success
     self.ANGULAR_ALIGN_THRESHOLD = 0.1
     # how many times we have been well aligned
     self.success_count = 0
