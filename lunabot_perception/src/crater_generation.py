@@ -13,7 +13,10 @@ from sensor_msgs.msg import PointCloud2
 from sensor_msgs_py import point_cloud2 # actually allows to read the point clouds
 # import open3d as o3d
 import numpy as np
-from sklearn import datasets, linear_model
+from sklearn import linear_model
+
+import linear_regressor
+from ransac import LinearRegressor , RANSAC, square_error_loss, mean_square_error
 
 import hough
 
@@ -29,7 +32,6 @@ class CraterGeneration(Node):
         self.ground = PointCloud2()
         
         
-        # if you don't remember to change this I am disappointed in you
         self.crater_publisher = self.create_publisher(
             PointCloud2, "crater", 10
         )
@@ -38,10 +40,6 @@ class CraterGeneration(Node):
             PointCloud2, "ground_plane", 10
         )
         
-        # self.pointcloud_subscriber = self.create_subscription(
-        #     PointCloud2, "d455_front/points", self.set_points,  10
-        # )
-        
         
         self.pointcloud_subscriber = self.create_subscription(
             PointCloud2, "/rtabmap/cloud_obstacles", self.set_points,  10
@@ -49,19 +47,30 @@ class CraterGeneration(Node):
         self.ground_subscriber = self.create_subscription(
             PointCloud2, "/rtabmap/cloud_ground", self.set_ground, 10
         )
+        
+        
+        # only for bags
+        # self.pointcloud_subscriber = self.create_subscription(
+        #     PointCloud2, "/rtabmap/obstacles", self.set_points,  10
+        # )
+        # self.ground_subscriber = self.create_subscription(
+        #     PointCloud2, "/rtabmap/ground", self.set_ground, 10
+        # )
 
 
         # i truly hope this isn't needed for my sanity
-        #self.create_timer(2, self.plane_generation)
-        self.create_timer(1, self.estimate_crater)
+        self.create_timer(2, self.plane_generation)
+        # self.create_timer(1, self.estimate_crater)
         
         
         
     def plane_generation(self):
         ground_trainxy = []
         ground_trainz = []
+        plane_pointcloud = []
         
-        self.get_logger().info(f"{self.get_clock().now()}")
+        self.get_logger().info(f"1{self.get_clock().now()}")
+        print("help me")
         stahp = False
         
         try:
@@ -69,31 +78,40 @@ class CraterGeneration(Node):
             for p in ground: 
                 ground_trainxy.append([p[0], p[1]]) 
                 ground_trainz.append([p[2]])
-                print(f"{p[0]}, {p[1]}, {p[2]}")
+                #self.get_logger().info(f"{p[0]}, {p[1]}, {p[2]}")
         except Exception as inst:
             self.get_logger().info(f"{inst}")
             self.get_logger().warn("Failed to read planes")
             stahp = True
         
-        if(not(stahp)):
-            self.get_logger().info(f"{self.get_clock().now()}")
-        
-            ransac = linear_model.RANSACRegressor(max_trials = 1, stop_probability = 0.9)
-        
-            self.get_logger().info(f"{self.get_clock().now()}")
+        if(not stahp):
+            try:
+                #self.get_logger().info(f"{ground_trainz}")
+                self.get_logger().info(f"2{self.get_clock().now()}")
 
-            ransac.fit(ground_trainxy, ground_trainz)
+                regressor = RANSAC(model=LinearRegressor(), loss=square_error_loss, metric=mean_square_error)
+            
+                self.get_logger().info(f"3{self.get_clock().now()}")
+
+            
+                regressor.fit(ground_trainxy, ground_trainz)
+            except Exception as inst:
+                self.get_logger().info(f"{inst}")
+                self.get_logger().info(f"it killed itself")
         
-            self.get_logger().info(f"{self.get_clock().now()}")
+            self.get_logger().info(f"4{self.get_clock().now()}")
         
             # the plane equation
-            z = lambda x,y: (-ransac.estimator_.intercept_ - ransac.estimator_.coef_[0]*x - ransac.estimator_.coef_[1]*y) / ransac.estimator_.coef_[2]
-        
-        self.get_logger().info(f"{self.get_clock().now()}")
-        
-        plane_pointcloud = [ground_trainxy[:,0], ground_trainxy[:,1], z(ground_trainxy[:,0], ground_trainxy[:,1])]
-        self.get_logger().warn("it do thing")
-        
+            self.get_logger().info(f"5{self.get_clock().now()}")
+            
+            plane_pointcloud = [ground_trainxy[:][0], ground_trainxy[:][1], regressor.predict(ground_trainxy)]
+            self.get_logger().warn("it do thing")
+            self.get_logger().warn("pointcloud")
+            self.get_logger().warn(f"{plane_pointcloud}")
+            
+        else: 
+            print("failed to read pointcloud")
+            
         header = Header()
         t = self.get_clock().now()
         header.stamp = t.to_msg()
