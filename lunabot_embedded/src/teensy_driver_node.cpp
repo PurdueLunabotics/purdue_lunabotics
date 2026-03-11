@@ -26,6 +26,8 @@ extern "C" {
 using namespace std;
 
 #define BUF_SIZE 64
+#define PA01_PULSES_PER_INCH 533
+
 
 class TeensyDriverNode : public rclcpp::Node {
   private:
@@ -106,6 +108,8 @@ class TeensyDriverNode : public rclcpp::Node {
       state_msg.drive_right_vel = state.drive_right_vel;
       state_msg.exc_torque = state.exc_torque;
       state_msg.exc_vel = state.exc_vel;
+      state_msg.act_left_pos = state.act_left_pos / PA01_PULSES_PER_INCH;
+      state_msg.act_right_pos = state.act_right_pos / PA01_PULSES_PER_INCH;
 
       state_pub->publish(state_msg);
     }
@@ -117,6 +121,7 @@ class TeensyDriverNode : public rclcpp::Node {
       effort.excavate = msg.excavate;
       effort.deposit = msg.deposit;
       effort.should_reset = msg.should_reset;
+      effort.should_zero_act_pos = msg.should_zero_act_pos;
     }
 
     void color_cb(const std_msgs::msg::Int32 &msg) { effort.led_color = msg.data; }

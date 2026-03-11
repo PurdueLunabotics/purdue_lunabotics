@@ -9,13 +9,10 @@
 #include <Sabertooth.h>
 #include <Wire.h>
 #include <Encoder.h>
-#include <HX711.h>
 #include <RobotMsgs.pb.h>
 #include <StepperLib.hpp>
 #include <FastLED.h>
 #include "robot.hpp"
-
-#define UWBSerial Serial8
 
 enum MotorDir { CW = HIGH,
                 CCW = LOW };
@@ -48,18 +45,6 @@ private:
 
   static ADS1119Configuration configuration;
   static ADS1119 ads1;
-};
-
-class M5Stack_UWB_Trncvr {
-public:
-  M5Stack_UWB_Trncvr() {};
-  static void init();
-  static float read_uwb(uint8_t id);
-  static void transfer();
-
-private:
-  static constexpr int NUM_UWB_TAGS = 3;
-  volatile static float recv_buffer_[NUM_UWB_TAGS];
 };
 
 class Led_Strip {
@@ -118,20 +103,17 @@ private:
   volatile static bool is_disable[4];
 };
 
-class HX711_Bus {
+class Encoder_Bus {
 public:
-  HX711_Bus() {};
-  static void init();
-  static float read_scale(uint8_t id);
+  Encoder_Bus() {};
+  static void init(uint8_t is_top);
+  static long read(uint8_t id);
 
 private:
-  static constexpr int NUM_SENSORS = 2;
-  static constexpr int PIN_LIST[NUM_SENSORS * 2] = {27, 26, 29, 28};
-  static constexpr int ZERO_POINT[NUM_SENSORS] = {-140125, -140125}; //{8143500.0f, 8143500.0f};
-  static constexpr float SCALE_CALIBRATION[NUM_SENSORS] = {20120.0f,
-                                                           20120.0f}; // TODO, calibrate these
+  static constexpr int NUM_ACTUATORS = 2;
+  static constexpr int PIN_LIST[NUM_ACTUATORS * 2] = {27, 26, 29, 28};
 
-  static HX711 encs[NUM_SENSORS];
+  static Encoder encs[NUM_ACTUATORS];
 };
 
 #endif

@@ -1,4 +1,11 @@
 #include "interfaces.hpp"
+#include "ADS1119.h"
+#include "wiring.h"
+
+#define PA01_PULSES_PER_INCH 152
+#define PA01_STROKE_LENGTH_INCHES 8
+#define INVALID_ID 255
+#define INCHES_PER_METER 39.3701
 
 // Sabertooth MC Interfacing
 
@@ -44,7 +51,7 @@ void ADS1119_Current_Bus::init_ads1119() {
 }
 
 float ADS1119_Current_Bus::read(uint8_t mux) {
-  //ports are zero and 
+  //ports are zero and
   ads1.selectChannel(mux);
   return ADS1119_Current_Bus::adc_to_current_31A(ads1.readVoltage());
 }
@@ -52,66 +59,6 @@ float ADS1119_Current_Bus::read(uint8_t mux) {
 float ADS1119_Current_Bus::adc_to_current_31A(float adc_value, float adc_fsr, float vcc) {
   float vout = adc_value / pow(2, 2) * adc_fsr;
   return 73.3 * (vout / vcc) - 37.52;
-}
-
-volatile float M5Stack_UWB_Trncvr::recv_buffer_[NUM_UWB_TAGS] = {0};
-
-float M5Stack_UWB_Trncvr::read_uwb(uint8_t id) {
-  noInterrupts();
-  float data = recv_buffer_[id];
-  interrupts();
-  return data;
-}
-
-void M5Stack_UWB_Trncvr::init() {
-  UWBSerial.begin(115200);
-
-  // serial 2 setup as tag on bot (does dist calc)
-  for (int b = 0; b < 2; b++) { // Repeat twice to stabilize the connection
-    delay(50);
-    UWBSerial.write("AT+anchor_tag=0\r\n"); // Set up the Tag
-    delay(50);
-    UWBSerial.write("AT+interval=5\r\n");  // Set the calculation precision,
-                                           // the larger the response is, the
-                                           // slower it will be
-    delay(50);                             // 设置计算精度，越大响应越慢
-    UWBSerial.write("AT+switchdis=1\r\n"); // Began to distance 开始测距
-    delay(50);
-    if (b == 0) {
-      UWBSerial.write("AT+RST\r\n"); // RESET 复位
-    }
-  }
-  if (UWBSerial.available()) {
-    delay(3);
-  }
-}
-
-void M5Stack_UWB_Trncvr::transfer() {
-  if (UWBSerial.available()) {
-    // Read the original input
-    String originalInput = UWBSerial.readStringUntil('\n');
-    originalInput.trim();
-
-    // Check if the message starts with "anX:" where X is a digit
-    if (originalInput.startsWith("an") && isdigit(originalInput.charAt(2)) &&
-        originalInput.charAt(3) == ':') {
-      // Extract sensor number
-      int sensorNumber = originalInput.charAt(2) - '0';
-
-      // Find the index of the colon
-      int colonIndex = originalInput.indexOf(':');
-
-      // Extract the value part and trim spaces
-      String valueString = originalInput.substring(colonIndex + 1);
-      valueString.trim();
-
-      // Convert the trimmed string to a float
-      float num = valueString.toFloat();
-
-      // Assign the values to d0, d1, or d2 based on sensor number
-      M5Stack_UWB_Trncvr::recv_buffer_[sensorNumber] = num;
-    }
-  }
 }
 
 long KillSwitchRelay::kill_time;
@@ -211,15 +158,15 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
 
 CRGB Led_Strip::all_led[Led_Strip::NUM_LEDS];
 
-void Led_Strip::init() { 
+void Led_Strip::init() {
   FastLED.addLeds<WS2812B, 6, GRB>(Led_Strip::all_led, Led_Strip::NUM_LEDS);
-  FastLED.setBrightness(Led_Strip::BRIGHTNESS); 
+  FastLED.setBrightness(Led_Strip::BRIGHTNESS);
 }
 
-void Led_Strip::set_color(int32_t color_in) { 
+void Led_Strip::set_color(int32_t color_in) {
   CRGB color_choice;
 
-  switch (color_in) { 
+  switch (color_in) {
   case 0:
     color_choice = CRGB::Black;
     break;
@@ -255,41 +202,25 @@ void Led_Strip::set_color(int32_t color_in) {
   FastLED.show();
 }
 
-
-HX711 HX711_Bus::encs[NUM_SENSORS] = {
-    HX711(),
-    HX711(),
+Encoder Encoder_Bus::encs[NUM_ACTUATORS] = {
+    Encoder(PIN_LIST[0], PIN_LIST[1]),
+    Encoder(PIN_LIST[2], PIN_LIST[3]),
 };
 
-void HX711_Bus::init() {
-  for (int i = 0; i < NUM_SENSORS; i++) {
-    encs[i].set_raw_mode();
-    encs[i].begin(PIN_LIST[i * 2], PIN_LIST[i * 2 + 1]);
-    if (encs[i].is_ready()) {
-       encs[i].tare(3);
+void Encoder_Bus::init(uint8_t option) {
+  for (int i = 0; i < NUM_ACTUATORS; i++) {
+    if (option) {
+        encs[i].write(0);
     } else {
-      encs[i].set_offset(ZERO_POINT[i]);
+        encs[i].write(PA01_PULSES_PER_INCH * PA01_STROKE_LENGTH_INCHES);
     }
-    encs[i].set_gain(HX711_CHANNEL_A_GAIN_128);
-    encs[i].set_scale(SCALE_CALIBRATION[i]);
   }
 }
 
-float HX711_Bus::read_scale(uint8_t id) {
-  if (encs[id].is_ready()) {
-    // since we could start with weight on the load cell, manually subtract zero point instead of
-    // taring
-    // .read() returns raw value
-    // .get_value(times) gets offset but not scaled
-    // .get_units(times) gets offset and scaled
-    // times does nothing in raw mode (as we are)
-    float val = encs[id].get_units(1); 
-    // if load cell is not returning any data, but HX711 is connected
-    if (val == 0)
-      return -1;
-    return val;
-  } else {
-    return -1;
+long Encoder_Bus::read(uint8_t id) {
+  // returns the count since last read, and resets the count to 0
+  if (id != 1 && id != 0) {
+      return INVALID_ID;
   }
-  FastLED.show();
+  return encs[id].read();
 }

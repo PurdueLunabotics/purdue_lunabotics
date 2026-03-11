@@ -1,3 +1,4 @@
+#include "interfaces.hpp"
 #include <robot.hpp>
 
 // sensor wire documentation 2022-2023:
@@ -11,24 +12,33 @@ namespace actuation {
 
 Sabertooth_MotorCtrl act_right_mtr{&MC1, STMotor::M1};
 Sabertooth_MotorCtrl act_left_mtr{&MC1, STMotor::M2};
+Encoder_Bus enc_bus;
 
 constexpr uint8_t ACT_RIGHT_CURR_MUX = 0;
 constexpr uint8_t ACT_LEFT_CURR_MUX = 2;
 
-void update(float &act_right_curr) {
+void update(float &act_right_curr, float &lin_enc_0, float &lin_enc_1) {
   act_right_curr = ADS1119_Current_Bus::read(ACT_RIGHT_CURR_MUX);
+  lin_enc_0 = enc_bus.read(0);
+  lin_enc_1 = enc_bus.read(1);
 }
 
-void cb(int8_t lin_act_volt) {
+void cb(int8_t lin_act_volt, uint8_t should_zero_act_pos, uint8_t is_top) {
   act_left_mtr.write(-lin_act_volt);
   act_right_mtr.write(lin_act_volt);
+  if (should_zero_act_pos) { // maybe need an argument to specify the actuator
+    if (is_top) {
+        enc_bus.init(1); // zeros the actuator position (TOP)
+    }
+    enc_bus.init(0); // zeros the actuator position (BOTTOM)
+  }
 }
 
 } // namespace actuation
 
 namespace drivetrain {
-StepperMotor left_drive_mtr(LEFT_DRIVE_MOTOR_ID);
-StepperMotor right_drive_mtr(RIGHT_DRIVE_MOTOR_ID);
+StepperMotor left_drive_mtr(LEFT_DRIVE_MOTOR_ID, ISV2);
+StepperMotor right_drive_mtr(RIGHT_DRIVE_MOTOR_ID, ISV2);
 
 void begin() {
   left_drive_mtr.begin();
@@ -65,28 +75,6 @@ void cb(int32_t left_drive_rpm, int32_t right_drive_rpm, bool should_reset) {
 
 } // namespace drivetrain
 
-namespace uwb {
-void update(float &d0, float &d1, float &d2) {
-  d0 = M5Stack_UWB_Trncvr::read_uwb(0);
-  d1 = M5Stack_UWB_Trncvr::read_uwb(1);
-  d2 = M5Stack_UWB_Trncvr::read_uwb(2);
-}
-} // namespace uwb
-
-namespace load_cell {
-void update(float &d0) {
-  float val1 = HX711_Bus::read_scale(0);
-  float val2 = HX711_Bus::read_scale(1);
-  if (val1 != -1 && val2 != -1) {
-    d0 = val1 + val2;
-  } else if (val1 != -1) {
-    d0 = val1;
-  } else if (val2 != -1) {
-    d0 = val2;
-  }
-}
-} // namespace load_cell
-
 namespace LEDs {
   void cb(int32_t color) {
     Led_Strip::set_color(color);
@@ -94,7 +82,7 @@ namespace LEDs {
 }
 
 namespace excavation {
-StepperMotor exc_mtr(EXC_MOTOR_ID);
+StepperMotor exc_mtr(EXC_MOTOR_ID, ISV2);
 
 void begin() {
   exc_mtr.begin();
@@ -120,7 +108,7 @@ void cb(int32_t speed_rpm, bool should_reset) {
 } // namespace excavation
 
 namespace deposition {
-StepperMotor dep_mtr(DEP_MOTOR_ID);
+StepperMotor dep_mtr(DEP_MOTOR_ID, ISV2);
 
 void begin() {
   dep_mtr.begin();
