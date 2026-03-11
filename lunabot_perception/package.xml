@@ -15,7 +15,6 @@
   <depend>image_proc</depend>
   <depend>rtabmap_util</depend>
   <depend>apriltag_ros</depend>
-  <depend>sklearn</depend>
 
   <!-- Used for launch files -->
   <exec_depend>ros2launch</exec_depend> 
