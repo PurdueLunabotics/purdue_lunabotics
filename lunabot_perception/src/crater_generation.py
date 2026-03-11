@@ -84,19 +84,19 @@ class CraterGeneration(Node):
             stahp = True
         
         if(not stahp):
-            try:
+            # try:
                 #self.get_logger().info(f"{ground_trainz}")
-                self.get_logger().info(f"2{self.get_clock().now()}")
+            self.get_logger().info(f"2{self.get_clock().now()}")
 
-                regressor = RANSAC(model=LinearRegressor(), loss=square_error_loss, metric=mean_square_error)
-            
-                self.get_logger().info(f"3{self.get_clock().now()}")
+            regressor = RANSAC(model=LinearRegressor(), loss=square_error_loss, metric=mean_square_error)
+        
+            self.get_logger().info(f"3{self.get_clock().now()}")
 
-            
-                regressor.fit(ground_trainxy, ground_trainz)
-            except Exception as inst:
-                self.get_logger().info(f"{inst}")
-                self.get_logger().info(f"it killed itself")
+        
+            regressor.fit(ground_trainxy, ground_trainz)
+            # except Exception as inst:
+            #     self.get_logger().info(f"{inst}")
+            #     self.get_logger().info(f"it killed itself")
         
             self.get_logger().info(f"4{self.get_clock().now()}")
         

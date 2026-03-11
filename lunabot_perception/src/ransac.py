@@ -19,51 +19,53 @@ class RANSAC:
         self.best_error = np.inf
 
     def fit(self, X, y):
-        try:
-            X = np.array(X)
-            y = np.array(y)
-            print(y)
-            print(f"x dimensions: {X.shape}")
-            print(f"y dimensions: {y.shape}")
-            print(f"fit iterations: {self.k}")
-            for _ in range(self.k):
-                
-                ids = rng.permutation(X.shape[0])
+        # try:
+        X = np.array(X)
+        y = np.array(y)
+        print(y)
+        print(f"x dimensions: {X.shape}")
+        print(f"y dimensions: {y.shape}")
+        print(f"fit iterations: {self.k}")
+        for _ in range(self.k):
+            
+            ids = rng.permutation(X.shape[0])
 
-                maybe_inliers = ids[: self.n]
-                print(f"x: {X.head()}")
-                print(f"y: {y[maybe_inliers]}")
-                print(f"mi: {maybe_inliers}")
-                print(f"x: {X[maybe_inliers]}")
-                print(f"weeeeeeeeeee")
-                
-                print("oops")
-                maybe_model = copy(self.model).fit(X[maybe_inliers], y[maybe_inliers])
+            maybe_inliers = ids[: self.n]
+            # print(f"x: {X.head()}")
+            print(f"y: {y[maybe_inliers]}")
+            print(f"mi: {maybe_inliers}")
+            print(f"x: {X[maybe_inliers]}")
+            print(f"weeeeeeeeeee")
+            
+            maybe_model = copy(self.model).fit(X[maybe_inliers], y[maybe_inliers])
 
-                thresholded = (
-                    self.loss(y[ids][self.n :], maybe_model.predict(X[ids][self.n :]))
-                    < self.t
+            thresholded = (
+                self.loss(y[ids][self.n :], maybe_model.predict(X[ids][self.n :]))
+                < self.t
+            )
+
+            inlier_ids = ids[self.n :][np.flatnonzero(thresholded).flatten()]
+
+            if inlier_ids.size > self.d:
+                inlier_points = np.hstack([maybe_inliers, inlier_ids])
+                better_model = copy(self.model).fit(X[inlier_points], y[inlier_points])
+
+                this_error = self.metric(
+                    y[inlier_points], better_model.predict(X[inlier_points])
                 )
 
-                inlier_ids = ids[self.n :][np.flatnonzero(thresholded).flatten()]
+                if this_error < self.best_error:
+                    self.best_error = this_error
+                    self.best_fit = better_model
+                print("oops")
 
-                if inlier_ids.size > self.d:
-                    inlier_points = np.hstack([maybe_inliers, inlier_ids])
-                    better_model = copy(self.model).fit(X[inlier_points], y[inlier_points])
-
-                    this_error = self.metric(
-                        y[inlier_points], better_model.predict(X[inlier_points])
-                    )
-
-                    if this_error < self.best_error:
-                        self.best_error = this_error
-                        self.best_fit = better_model
-
-            return self
-        except Exception as e:
-            print(f"Error: {e}")
+        return self
+        # except Exception as e:
+        #     print(f"Error: {e}")
 
     def predict(self, X: np.ndarray):
+        if (type(X) != np.ndarray):
+            X = np.array(X)
         return self.best_fit.predict(X)
 
 def square_error_loss(y_true: np.ndarray, y_pred: np.ndarray):
@@ -71,7 +73,7 @@ def square_error_loss(y_true: np.ndarray, y_pred: np.ndarray):
 
 
 def mean_square_error(y_true: np.ndarray, y_pred: np.ndarray):
-    return np.sum(square_error_loss(y_true, y_pred)) / len(y_true)[0]
+    return np.sum(square_error_loss(y_true, y_pred)) / len(y_true)
 
 class LinearRegressor:
     def __init__(self):
