@@ -102,8 +102,10 @@ class CraterGeneration(Node):
         
             # the plane equation
             self.get_logger().info(f"5{self.get_clock().now()}")
-            
-            plane_pointcloud = [ground_trainxy[:][0], ground_trainxy[:][1], regressor.predict(ground_trainxy)]
+            pred_z = regressor.predict(ground_trainxy)
+            if (len(ground_trainxy[:][0]) == len(pred_z)):
+                for p in range(len(ground_trainxy[:][0])):
+                    plane_pointcloud.append((ground_trainxy[p][0], ground_trainxy[p][1], pred_z[p]))
             self.get_logger().warn("it do thing")
             self.get_logger().warn("pointcloud")
             self.get_logger().warn(f"{plane_pointcloud}")
