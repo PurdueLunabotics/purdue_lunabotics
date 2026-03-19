@@ -27,64 +27,74 @@ import math
 
 class MainStates(Enum):
     
-    INIT = State()
-    INIT_STALL = State()
+    # ===== INIT SECTION (1) =====
+    INIT = (State(), 10)
+    INIT_STALL = (State(), 19)
     
-    STARTING_PLUNGE = Plunge()
-    STARTING_PLUNGE_STALL = State()
+    STARTING_PLUNGE = (Plunge(), 11)
+    STARTING_PLUNGE_STALL = (State(), 19)
     
-    STARTING_RAISE = Raise()
-    STARTING_RAISE_STALL = State()
+    STARTING_RAISE = (Raise(), 12)
+    STARTING_RAISE_STALL = (State(), 19)
     
-    WAIT_FOR_LINKUP = State() # This will stay as State(), no logic needed
+    WAIT_FOR_LINKUP = (State(), 13) # This will stay as State(), no logic needed
     
-    TRAVERSE_TO_LINKUP = TraverseToLinkup(True, True)
-    TRAVERSE_TO_LINKUP_STALL = Stall()
-    TRAVERSE_TO_LINKUP_NO_PATH = NoPath()
+    TRAVERSE_TO_LINKUP = (TraverseToLinkup(True, True), 14)
+    TRAVERSE_TO_LINKUP_STALL = (Stall(), 19)
+    TRAVERSE_TO_LINKUP_NO_PATH = (NoPath(), 18)
     
-    ALIGN_TO_TRENCH = AlignTrench()
-    ALIGN_TO_TRENCH_STALL = State()
+    # ===== EXCAVATION SECTION (5) =====
     
-    APPROACH_TRENCH = ApproachTrench()
-    APPROACH_TRENCH_STALL = Stall()
+    ALIGN_TO_TRENCH = (AlignTrench(), 50)
+    ALIGN_TO_TRENCH_STALL = (State(), 59)
     
-    PLUNGE_ACT = Plunge()
-    PLUNGE_ACT_STALL = State()
+    APPROACH_TRENCH = (ApproachTrench(), 51)
+    APPROACH_TRENCH_STALL = (Stall(), 59)
     
-    TRENCH = Trench()
-    TRENCH_STALL = State()
+    PLUNGE_ACT = (Plunge(), 52)
+    PLUNGE_ACT_STALL = (State(), 59)
     
-    RAISE_ACT = Raise()
-    RAISE_ACT_STALL = State()
+    TRENCH = (Trench(), 53)
+    TRENCH_STALL = (State(), 59)
+    
+    RAISE_ACT = (Raise(), 54)
+    RAISE_ACT_STALL = (State(), 59)
 
-    RETREAT_TRENCH = RetreatTrench()
-    RETREAT_TRENCH_STALL = Stall()
-
-    ALIGN_TO_LINKUP = AlignToLinkup()
-    ALIGN_TO_LINKUP_STALL = State()
-
-    WAIT_FOR_DIVERGE = State() # This will stay as State(), no logic needed
-
-    TRAVERSE_TO_BERM = TraverseToBerm(True)
-    TRAVERSE_TO_BERM_STALL = Stall()
-    TRAVERSE_TO_BERM_NO_PATH = NoPath()
-
-    ALIGN_TO_BERM = AlignToAngle(270)
-    ALIGN_TO_BERM_STALL = Stall()
+    RETREAT_TRENCH = (RetreatTrench(), 55)
+    RETREAT_TRENCH_STALL = (Stall(), 59)
     
-    APPROACH_BERM = ApproachBerm()
-    APPROACH_BERM_STALL = Stall()
-    
-    DEPOSIT = Deposit(True)
-    DEPOSIT_STALL = State()
-    
-    DEPOSIT_BERM = Deposit()
-    DEPOSIT_BERM_STALL = State()
-    
-    RETREAT_BERM = RetreatBerm()
-    RETREAT_BERM_STALL = Stall()
+    # ===== LINKUP SECTION (2) =====
 
-    IDLE = State()
+    ALIGN_TO_LINKUP = (AlignToLinkup(), 20)
+    ALIGN_TO_LINKUP_STALL = (State(), 29)
+
+    DEPOSIT = (Deposit(True), 21)
+    DEPOSIT_STALL = (State(), 29)
+    
+    WAIT_FOR_DIVERGE = (State(), 22) # This will stay as State(), no logic needed
+
+    # ===== SINGLE ROBOT TRAVERSAL SECTION (3) =====
+
+    TRAVERSE_TO_BERM = (TraverseToBerm(True), 30)
+    TRAVERSE_TO_BERM_STALL = (Stall(), 39)
+    TRAVERSE_TO_BERM_NO_PATH = (NoPath(), 38)
+
+    ALIGN_TO_BERM = (AlignToAngle(270), 31)
+    ALIGN_TO_BERM_STALL = (Stall(), 39)
+    
+    APPROACH_BERM = (ApproachBerm(), 32)
+    APPROACH_BERM_STALL = (Stall(), 39)
+    
+    # ===== SINGLE ROBOT DEPOSIT SECTION (4) =====
+    
+    
+    DEPOSIT_BERM = (Deposit(), 40)
+    DEPOSIT_BERM_STALL = (State(), 49)
+    
+    RETREAT_BERM = (RetreatBerm(), 41)
+    RETREAT_BERM_STALL = (Stall(), 49)
+
+    IDLE = (State(), 99)
 
     @staticmethod
     def get_transition(state, event: Events):

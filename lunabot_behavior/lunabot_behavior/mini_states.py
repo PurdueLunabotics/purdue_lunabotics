@@ -4,6 +4,7 @@ from lunabot_msgs.msg import Event
 from geometry_msgs.msg import PoseStamped
 from lunabot_msgs.msg import Event
 
+from lunabot_behavior.states.collect import Collect
 from lunabot_behavior.states.align_to_angle import AlignToAngle
 from lunabot_behavior.states.separate_main import SeparateMain
 from lunabot_behavior.states.traverse_to_berm import TraverseToBerm
@@ -19,43 +20,50 @@ from lunabot_behavior.state_manager import StateManager
 import rclpy
 
 class MiniStates(Enum):
-    INIT = State()
-    INIT_STALL = State()
+    # ===== INIT SECTION (1) =====
+    INIT = (State(), 10)
+    INIT_STALL = (State(), 19)
     
-    FIND_LINKUP = FindLinkup()
-    FIND_LINKUP_STALL = Stall()
-    FIND_LINKUP_NO_PATH = NoPath()
-
-    TRAVERSE_TO_BERM = TraverseToBerm(False)
-    TRAVERSE_TO_BERM_STALL = Stall()
-    TRAVERSE_TO_BERM_NO_PATH = NoPath()
-
-    ALIGN_TO_BERM = AlignToAngle(270)
-    ALIGN_TO_BERM_STALL = Stall()
+    FIND_LINKUP = (FindLinkup(), 11)
+    FIND_LINKUP_STALL = (Stall(), 19)
+    FIND_LINKUP_NO_PATH = (NoPath(), 18)
     
-    APPROACH_BERM = ApproachBerm()
-    APPROACH_BERM_STALL = Stall()
+    # ===== LINKUP SECTION (2) =====
+    ALIGN_TO_MAIN = (State(), 20)
+    ALIGN_TO_MAIN_STALL = (State(), 29)
     
-    RETREAT_BERM = RetreatBerm()
-    RETREAT_BERM_STALL = Stall()
+    APPROACH_MAIN = (State(), 21)
+    APPROACH_MAIN_STALL = (State(), 29)
 
-    DEPOSIT = Deposit()
-    DEPOSIT_STALL = State()
+    COLLECT_REGOLITH = (Collect(), 22)
+    COLLECT_REGOLITH_STALL = (State(), 29)
 
-    MOVE_TO_STAGING = Traverse(PoseStamped(), False)
-    MOVE_TO_STAGING_STALL = Stall()
-    MOVE_TO_STAGING_NO_PATH = NoPath()
-
-    ALIGN_TO_MAIN = State()
-    ALIGN_TO_MAIN_STALL = State()
+    SEPARATE_FROM_MAIN = (SeparateMain(), 23)
+    SEPARATE_FROM_MAIN_STALL = (Stall(), 29)
     
-    APPROACH_MAIN = State()
-    APPROACH_MAIN_STALL = State()
+    # ===== TRAVERSAL SECTION (3) =====
 
-    COLLECT_REGOLITH = State()
+    TRAVERSE_TO_BERM = (TraverseToBerm(False), 30)
+    TRAVERSE_TO_BERM_STALL = (Stall(), 39)
+    TRAVERSE_TO_BERM_NO_PATH = (NoPath(), 38)
 
-    SEPARATE_FROM_MAIN = SeparateMain()
-    SEPARATE_FROM_MAIN_STALL = Stall()
+    ALIGN_TO_BERM = (AlignToAngle(270), 31)
+    ALIGN_TO_BERM_STALL = (Stall(), 39)
+    
+    MOVE_TO_STAGING = (Traverse(PoseStamped(), False), 32)
+    MOVE_TO_STAGING_STALL = (Stall(), 39)
+    MOVE_TO_STAGING_NO_PATH = (NoPath(), 38)
+    # ===== DEPOSIT SECTION (4) =====
+    
+    APPROACH_BERM = (ApproachBerm(), 40)
+    APPROACH_BERM_STALL = (Stall(), 49)
+    
+    DEPOSIT = (Deposit(), 41)
+    DEPOSIT_STALL = (State(), 49)
+
+    RETREAT_BERM = (RetreatBerm(), 42)
+    RETREAT_BERM_STALL = (Stall(), 49)
+    
 
     @staticmethod
     def get_transition(state, event: Events):
@@ -108,6 +116,8 @@ class MiniStates(Enum):
             (MiniStates.APPROACH_MAIN_STALL, Events.SUCCESS): MiniStates.APPROACH_MAIN,
             
             (MiniStates.COLLECT_REGOLITH, Events.PROCEED): MiniStates.SEPARATE_FROM_MAIN,
+            (MiniStates.COLLECT_REGOLITH, Events.STALL): MiniStates.COLLECT_REGOLITH_STALL,
+            (MiniStates.COLLECT_REGOLITH_STALL, Events.SUCCESS): MiniStates.COLLECT_REGOLITH,
 
             (MiniStates.SEPARATE_FROM_MAIN, Events.SUCCESS): MiniStates.TRAVERSE_TO_BERM,
             (MiniStates.SEPARATE_FROM_MAIN, Events.STALL): MiniStates.SEPARATE_FROM_MAIN_STALL,

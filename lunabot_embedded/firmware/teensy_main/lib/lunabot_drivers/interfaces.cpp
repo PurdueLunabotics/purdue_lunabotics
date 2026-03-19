@@ -164,40 +164,97 @@ void Led_Strip::init() {
 }
 
 void Led_Strip::set_color(int32_t color_in) {
-  CRGB color_choice;
+  CRGB color_choice1;
+  CRGB color_choice2;
+  int size1 = NUM_LEDS / 2;
 
-  switch (color_in) {
+  int color1 = color_in % 10
+  int color2 = color_in / 10
+
+  //minor color
+  switch (color_1) {
   case 0:
-    color_choice = CRGB::Black;
+    color_choice1 = CRGB::Black;
     break;
   case 1:
-    color_choice = CRGB::Red;
+    color_choice1 = CRGB::Yellow;
     break;
   case 2:
-    color_choice = CRGB::Green;
+    color_choice1 = CRGB::Green;
     break;
   case 3:
-    color_choice = CRGB::Blue;
+    color_choice1 = CRGB::Blue;
     break;
   case 4:
-    color_choice = CRGB::White;
+    color_choice1 = CRGB::Magenta;
     break;
   case 5:
-    color_choice = CRGB::Yellow;
+    color_choice1 = CRGB::White;
     break;
-  case 6:
-    color_choice = CRGB::Aqua;
+  case 8:
+    //NO PATH
+    color_choice1 = CRGB::Orange;
     break;
-  case 7:
-    color_choice = CRGB::Magenta;
+  case 9:
+    //STALL
+    color_choice1 = CRGB::Red;
     break;
   default:
-    color_choice = CRGB::Black;
+    color_choice1 = CRGB::Black;
     break;
   }
-
-  for (int i = 0; i < NUM_LEDS; ++i) {
-    Led_Strip::all_led[i] = color_choice;
+  //major color
+  switch (color_2) {
+  case 0:
+    color_choice2 = CRGB::Black;
+    break;
+  case 1:
+    //INIT
+    color_choice2 = CRGB::Green;
+    break;
+  case 2:
+    //LINKUP
+    color_choice2 = CRGB::Gold;
+    break;
+  case 3:
+    //Traversal
+    color_choice2 = CRGB::Blue;
+    break;
+  case 4:
+    //DEPOSIT
+    color_choice2 = CRGB::Magenta;
+    break;
+  case 5:
+    //EXCAVATE
+    color_choice2 = CRGB::White;
+    break;
+  case 9:
+    //MAJOR ERROR
+    color_choice2 = CRGB::Red;
+    break;
+  default:
+    color_choice2 = CRGB::Black;
+    break;
+  }
+  if (color_in == 1) {
+    int h = 0
+    int s = 255
+    int v = 255
+    for (int i = 0; i < NUM_LEDS; ++i) {
+      h += 255.0/NUM_LEDS
+      if (h > 255) {
+        h = 0
+      }
+      Led_Strip::all_led[i] = hsv2rgb_rainbow(CHSV(h, s, v))
+    }
+  }
+  else {
+    for (int i = 0; i < size1; ++i) {
+      Led_Strip::all_led[i] = color_choice1;
+    }
+    for (int i = size1; i < NUM_LEDS; ++i) {
+      Led_Strip::all_led[i] = color_choice2;
+    }
   }
   FastLED.show();
 }

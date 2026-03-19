@@ -16,6 +16,7 @@ class Events(Enum):
     PROCEED = Event.PROCEED
 
 class State:
+    led_color = 0
     def setup(self, manager: Node) -> Future | None:
         pass
     
