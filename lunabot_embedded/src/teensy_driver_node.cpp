@@ -119,7 +119,7 @@ class TeensyDriverNode : public rclcpp::Node {
 
       sensor_msgs::msg::JointState joint_state_msg;
 
-      joint_state_msg.name.push_back("excavation_joint");
+      joint_state_msg.name.push_back("excavation_jointstate");
       joint_state_msg.position.push_back((double) state_msg.act_left_pos);
       joint_state_msg.velocity.push_back((double) 0.0); // does not apply
       joint_state_msg.effort.push_back((double) 0.0); // does not apply
