@@ -8,6 +8,10 @@ import rclpy
 # find whatever is below the ground plane and cluster them
 # do circle regression off of some points above a certain layer
 
+# find the point where the planes overlap????
+# find normal vector there
+# do the rotation of planes crap with the normal vectors ????
+
 from std_msgs.msg import Int8, Int32, Bool, Header
 from sensor_msgs.msg import PointCloud2
 from sensor_msgs_py import point_cloud2 # actually allows to read the point clouds
@@ -15,7 +19,9 @@ from sensor_msgs_py import point_cloud2 # actually allows to read the point clou
 import numpy as np
 
 import linear_regressor
-from ransac import LinearRegressor , RANSAC, square_error_loss, mean_square_error
+# from ransac import LinearRegressor , RANSAC, square_error_loss, mean_square_error
+
+from sklearn.linear_model import RANSACRegressor
 
 import hough
 
@@ -88,7 +94,10 @@ class CraterGeneration(Node):
                 #self.get_logger().info(f"{ground_trainz}")
             self.get_logger().info(f"2{self.get_clock().now()}")
 
-            regressor = RANSAC(model=LinearRegressor(), loss=square_error_loss, metric=mean_square_error)
+            regressor = RANSACRegressor()
+
+            
+            #regressor = RANSAC(model=LinearRegressor(), loss=square_error_loss, metric=mean_square_error)
         
             self.get_logger().info(f"3{self.get_clock().now()}")
 
@@ -103,12 +112,16 @@ class CraterGeneration(Node):
             # the plane equation
             self.get_logger().info(f"5{self.get_clock().now()}")
             pred_z = regressor.predict(ground_trainxy)
-            if (len(ground_trainxy[:][0]) == len(pred_z)):
-                for p in range(len(ground_trainxy[:][0])):
+
+            # self.get_logger().info(f"{len(pred_z)}")
+
+            # self.get_logger().info(f"{len(ground_trainxy)}")
+            if (len(ground_trainxy) == len(pred_z)):
+                for p in range(len(ground_trainxy)):
                     plane_pointcloud.append((ground_trainxy[p][0], ground_trainxy[p][1], pred_z[p]))
             self.get_logger().warn("it do thing")
             self.get_logger().warn("pointcloud")
-            self.get_logger().warn(f"{plane_pointcloud}")
+            # self.get_logger().warn(f"{plane_pointcloud}")
             
         else: 
             print("failed to read pointcloud")
