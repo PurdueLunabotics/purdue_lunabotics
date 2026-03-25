@@ -11,14 +11,15 @@ find_package(ament_cmake REQUIRED) # build tool for C++
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(lunabot_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 add_executable(teensy_driver_node
   src/teensy_driver_node.cpp
   src/hid.c
-  src/pb_common.c 
-  src/pb_encode.c 
-  src/pb_decode.c 
-  src/RobotMsgs.pb.c) 
+  src/pb_common.c
+  src/pb_encode.c
+  src/pb_decode.c
+  src/RobotMsgs.pb.c)
 
 target_link_libraries(teensy_driver_node usb)
 
@@ -27,7 +28,7 @@ target_include_directories(teensy_driver_node
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
     "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
 
-ament_target_dependencies(teensy_driver_node rclcpp std_msgs lunabot_msgs )
+ament_target_dependencies(teensy_driver_node rclcpp std_msgs lunabot_msgs sensor_msgs)
 
 install(TARGETS
   teensy_driver_node
