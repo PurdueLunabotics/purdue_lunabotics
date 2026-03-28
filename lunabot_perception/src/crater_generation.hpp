@@ -33,7 +33,9 @@ class CraterCostmap{
 
     void onFootprintChanged();
 
-    bool isClearable() {return false;}
+    bool isClearable() {
+        return false;
+    }
 
     private:
     double last_min_x_, last_min_y_, last_max_x_, last_max_y_;

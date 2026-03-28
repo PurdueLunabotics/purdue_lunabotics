@@ -18,7 +18,6 @@ from sensor_msgs_py import point_cloud2 # actually allows to read the point clou
 # import open3d as o3d
 import numpy as np
 
-import linear_regressor
 # from ransac import LinearRegressor , RANSAC, square_error_loss, mean_square_error
 
 from sklearn.linear_model import RANSACRegressor
@@ -64,7 +63,6 @@ class CraterGeneration(Node):
         # )
 
 
-        # i truly hope this isn't needed for my sanity
         self.create_timer(2, self.plane_generation)
         self.create_timer(1, self.estimate_crater)
         

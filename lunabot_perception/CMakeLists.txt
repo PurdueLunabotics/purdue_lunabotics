@@ -23,8 +23,6 @@ install(PROGRAMS
   src/crater_generation.py
   src/hough.py
   src/hough_transform.py
-  src/ransac.py
-  src/linear_regressor.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

@@ -1,4 +1,5 @@
 // not used right now, for costmap layer
+#include nav2_costmap_2d
 
 namespace nav2_crater_costmap_plugin
 {
@@ -9,7 +10,15 @@ CraterCostmap::CraterCostmap()
   last_max_x_(std::numeric_limits<float>::max()),
   last_max_y_(std::numeric_limits<float>::max())
 {
+}
 
+void CraterCostmap::onInitialize(){
+    need_recalculation_ = false;
+    current_ = true;
+}
+
+void CraterCostmap::onFootprintChanged(){
+    need_recalculation_ = true;
 }
 
 void CraterCostmap::updateCosts(
@@ -17,17 +26,7 @@ void CraterCostmap::updateCosts(
   int max_i,
   int max_j)
 {
-
-    unsigned int size_x = Costmap2D.getSizeInCellsX(), size_y = Costmap2D.getSizeInCellsY();
-
-    min_i = std::max(0, min_i);
-    min_j = std::max(0, min_j);
-    max_i = std::min(static_cast<int>(size_x), max_i);
-    max_j = std::min(static_cast<int>(size_y), max_j);
-
-    int craterLayer;
-
-    updateWithAddition()
+    CostmapLayer.updateWithAddition(master_grid, min_i, min_j, max_i, max_j)
 } 
 
 }
