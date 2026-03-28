@@ -121,6 +121,7 @@ class AlignToMainBotState(State):
           baselink_in_apriltag_frame.position.y = baselink_to_apriltag_transform.transform.translation.y
           baselink_in_apriltag_frame.position.z = baselink_to_apriltag_transform.transform.translation.z
 
+          # translate base link to mini/map frame
           baselink_in_minimap_frame = do_transform_pose(baselink_in_apriltag_frame, apriltag_to_minimap_transform)
 
           # get the transform of the minibot in the apriltag frame (this will be passed to the next state, and to main bot)
@@ -211,31 +212,6 @@ class AlignToMainBotState(State):
 
     self.cmd_vel_publisher.publish(vel)
 
-  def visualize_transform(self, transform: TransformStamped):
-    marker = Marker()
-    marker.header.frame_id = "mini/map"
-    marker.header.stamp = self.node.get_clock().now().to_msg()
-    marker.id = 368
-    marker.type = Marker.ARROW
-    marker.action = Marker.ADD
-
-    marker.pose.position.x = transform.transform.translation.x
-    marker.pose.position.y = transform.transform.translation.y
-    marker.pose.position.z = transform.transform.translation.z
-    marker.pose.orientation.x = transform.transform.rotation.x
-    marker.pose.orientation.y = transform.transform.rotation.y
-    marker.pose.orientation.z = transform.transform.rotation.z
-    marker.pose.orientation.w = transform.transform.rotation.w
-
-    marker.color.r = 1.0
-    marker.color.g = 1.0
-    marker.color.b = 0.0
-    marker.color.a = 1.0  
-    marker.scale.x = 0.3
-    marker.scale.y = 0.02
-    marker.scale.z = 0.02
-
-    self.visual_publisher.publish(marker)
 
   def visualize_alignment(self, main_bot_pose: Pose):
     marker = Marker()
