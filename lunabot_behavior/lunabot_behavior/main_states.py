@@ -18,7 +18,7 @@ from lunabot_behavior.states.retreat_berm import RetreatBerm
 from lunabot_behavior.states.traverse_to_linkup import TraverseToLinkup
 from lunabot_behavior.states.trench import Trench
 from lunabot_behavior.states.align_to_linkup import AlignToLinkup
-from lunabot_behavior.states.init import SetupMap
+from lunabot_behavior.states.init import InitRetreat, SetupMap
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -29,7 +29,8 @@ import math
 class MainStates(Enum):
     
     # ===== INIT SECTION (1) =====
-    INIT = (SetupMap(True), 10)
+    INIT_MAP = (SetupMap(True), 10)
+    INIT_MOVE = (InitRetreat(True), 10)
     INIT_STALL = (State(), 19)
     
     STARTING_PLUNGE = (Plunge(), 11)
@@ -100,9 +101,10 @@ class MainStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
-            (MainStates.INIT, Events.SUCCESS): MainStates.STARTING_PLUNGE,
-            (MainStates.INIT, Events.STALL): MainStates.INIT_STALL,
-            (MainStates.INIT_STALL, Events.SUCCESS): MainStates.INIT,
+            (MainStates.INIT_MAP, Events.SUCCESS): MainStates.INIT_MOVE,
+            (MainStates.INIT_MOVE, Events.SUCCESS): MainStates.STARTING_PLUNGE,
+            (MainStates.INIT_MOVE, Events.STALL): MainStates.INIT_STALL,
+            (MainStates.INIT_STALL, Events.SUCCESS): MainStates.INIT_MOVE,
             
             (MainStates.STARTING_PLUNGE, Events.SUCCESS): MainStates.STARTING_RAISE,
             (MainStates.STARTING_PLUNGE, Events.STALL): MainStates.STARTING_PLUNGE_STALL,
@@ -178,7 +180,7 @@ class MainStates(Enum):
 def main(args=None):
     rclpy.init(args=args)
 
-    manager = StateManager(MainStates, MainStates.INIT, Events, Event)
+    manager = StateManager(MainStates, MainStates.INIT_MAP, Events, Event)
 
     try:
         rclpy.spin(manager)
