@@ -1,4 +1,4 @@
-/**:
+/*:
   apriltag:                 # node name
     ros__parameters:
       image_transport: raw  # image format: "raw" or "compressed"
@@ -10,4 +10,17 @@
       tag:
         ids:    [368, 7, 11]         # tag IDs for which to publish transform
         frames: [main_deposition, tag36h11:7, tag36h11:11]   # frame names
+        sizes:  [0.12192, 0.1905, 0.1905]     # tag-specific edge size, overrides the default 'size'
+/mini/*:
+  apriltag:                 # node name
+    ros__parameters:
+      image_transport: raw  # image format: "raw" or "compressed"
+      family: 36h11         # tag family name: 16h5, 25h9, 36h11
+      size: .1905             # default tag edge size in meter
+  
+  # (optional) list of tags
+    # If defined, 'frames' and 'sizes' must have the same length as 'ids'.
+      tag:
+        ids:    [368, 7, 11]         # tag IDs for which to publish transform
+        frames: [main_deposition, tag36h11:107, tag36h11:111]   # frame names
         sizes:  [0.12192, 0.1905, 0.1905]     # tag-specific edge size, overrides the default 'size'
