@@ -15,6 +15,8 @@ extern Sabertooth MC3; // bottom
 
 #define LEFT_DRIVE_MOTOR_ID 0x05 // TODO RJN - set these ids on robot
 #define RIGHT_DRIVE_MOTOR_ID 0x06
+#define DEP_MOTOR_ID 0x07
+#define MOTOR_NOT_IN_USE 0x10
 
 namespace actuation {
 void cb(int8_t, uint8_t, uint8_t);
