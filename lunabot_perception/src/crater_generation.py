@@ -35,6 +35,7 @@ class CraterGeneration(Node):
         rclpy.get_global_executor().add_node(self)
         self.pointCloud = PointCloud2()
         self.ground = PointCloud2()
+        self.ground_planes = PointCloud2()
         
         
         self.crater_publisher = self.create_publisher(
@@ -65,7 +66,7 @@ class CraterGeneration(Node):
 
         # i truly hope this isn't needed for my sanity
         self.create_timer(2, self.plane_generation)
-        # self.create_timer(1, self.estimate_crater)
+        self.create_timer(1, self.estimate_crater)
         
         
         
@@ -132,6 +133,7 @@ class CraterGeneration(Node):
         header.frame_id = "map"
         pc2 = point_cloud2.create_cloud_xyz32(header, plane_pointcloud)
 
+        self.ground_planes = pc2
         self.plane_publisher.publish(pc2)
 
 
@@ -151,11 +153,11 @@ class CraterGeneration(Node):
             did_read = False
         # get average height of ground
         # find points below average height of ground in obstacles
-        self.get_logger().info(f"{len(self.ground.data)}")
+        self.get_logger().info(f"{len(self.ground_planes.data)}")
         
         ground_vals = []
         try:
-            ground = point_cloud2.read_points(self.ground, field_names = ("x", "y", "z"), skip_nans=True)
+            ground = point_cloud2.read_points(self.ground_planes, field_names = ("x", "y", "z"), skip_nans=True)
             for p in ground: 
                 ground_vals.append([p[0], p[1], p[2]]) 
             ground_height = np.mean(ground_vals, axis = 0)[2]
@@ -170,7 +172,7 @@ class CraterGeneration(Node):
         crater_vals = []
         if(did_read):
             for p in obst:
-                if(p[2]<ground_height-0.01):
+                if(p[2]<ground_height-0.02):
                     crater_vals.append(p[:-1])
                     
             
