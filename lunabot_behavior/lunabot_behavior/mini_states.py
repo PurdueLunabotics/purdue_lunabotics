@@ -12,7 +12,7 @@ from lunabot_behavior.states.deposit import Deposit
 from lunabot_behavior.states.approach_berm import ApproachBerm
 from lunabot_behavior.states.retreat_berm import RetreatBerm
 from lunabot_behavior.states.find_linkup import FindLinkup
-from lunabot_behavior.states.init import SetupMap
+from lunabot_behavior.states.init import InitRetreat, SetupMap
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -21,7 +21,8 @@ import rclpy
 
 class MiniStates(Enum):
     # ===== INIT SECTION (1) =====
-    INIT = (SetupMap(False), 10)
+    INIT_MAP = (SetupMap(False), 10)
+    INIT_MOVE = (InitRetreat(False), 10)
     INIT_STALL = (State(), 19)
     
     FIND_LINKUP = (FindLinkup(), 11)
@@ -68,9 +69,10 @@ class MiniStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
-            (MiniStates.INIT, Events.SUCCESS): MiniStates.FIND_LINKUP,
-            (MiniStates.INIT, Events.STALL): MiniStates.INIT_STALL,
-            (MiniStates.INIT_STALL, Events.SUCCESS): MiniStates.INIT,
+            (MiniStates.INIT_MAP, Events.SUCCESS): MiniStates.INIT_MOVE,
+            (MiniStates.INIT_MOVE, Events.SUCCESS): MiniStates.FIND_LINKUP,
+            (MiniStates.INIT_MOVE, Events.STALL): MiniStates.INIT_STALL,
+            (MiniStates.INIT_STALL, Events.SUCCESS): MiniStates.INIT_MOVE,
             
             
             (MiniStates.FIND_LINKUP, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
@@ -129,7 +131,7 @@ class MiniStates(Enum):
 def main(args=None):
     rclpy.init(args=args)
 
-    manager = StateManager(MiniStates, MiniStates.INIT, Events, Event)
+    manager = StateManager(MiniStates, MiniStates.INIT_MAP, Events, Event)
 
     try:
         rclpy.spin(manager)
