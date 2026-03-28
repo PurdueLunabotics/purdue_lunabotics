@@ -40,9 +40,9 @@ def generate_launch_description():
                             # 'arena_nasa.world'
 
                             # DUPAGE LOW RES WORLD DIR
-                            'low_resolution',
-                            'artemis',
-                            'artemis_arena.world'
+                            'high_resolution',
+                            'ucf',
+                            'ucf_arena.world'
                         ])
 
     gzserver_cmd = IncludeLaunchDescription(
