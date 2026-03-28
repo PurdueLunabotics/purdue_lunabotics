@@ -12,7 +12,7 @@ class StateManager(Node):
 
         for state in states:
             self.get_logger().info(f"starting state: {state}")
-            state.value.setup(self)
+            state.value[0].setup(self)
 
         self.get_logger().info("started all states")
         self.states = states
