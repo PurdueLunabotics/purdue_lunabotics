@@ -154,6 +154,10 @@
         <node pkg="lunabot_slam" exec="sim_odom.py" if="$(var odom_from_sim)">
         </node>
 
+        <node name="stall_detection_node" pkg="lunabot_control" exec="stall_detection_node" output="screen" respawn="true">
+            <param name="~waitTime" value="2"/>
+        </node>
+
         <push_ros_namespace namespace="rtabmap"/>
 
         <!-- Odometry -->
