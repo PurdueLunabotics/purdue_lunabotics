@@ -17,6 +17,7 @@ from lunabot_behavior.states.retreat_berm import RetreatBerm
 from lunabot_behavior.states.find_linkup import FindLinkup
 from lunabot_behavior.states.align_to_main_bot import AlignToMainBotState
 from lunabot_behavior.states.mini_wait_for_main_align import MiniWaitForAlignState
+from lunabot_behavior.states.approach_main import ApproachMainState
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -56,7 +57,7 @@ class MiniStates(Enum):
 
     WAIT_FOR_MAIN_ALIGN = MiniWaitForAlignState()
     
-    APPROACH_MAIN = State()
+    APPROACH_MAIN = ApproachMainState()
     APPROACH_MAIN_STALL = State()
 
     COLLECT_REGOLITH = State()
@@ -108,6 +109,8 @@ class MiniStates(Enum):
             (MiniStates.ALIGN_TO_MAIN, Events.SUCCESS): MiniStates.WAIT_FOR_MAIN_ALIGN,
             (MiniStates.ALIGN_TO_MAIN, Events.STALL): MiniStates.ALIGN_TO_MAIN_STALL,
             (MiniStates.ALIGN_TO_MAIN_STALL, Events.SUCCESS): MiniStates.ALIGN_TO_MAIN,
+
+            (MiniStates.WAIT_FOR_MAIN_ALIGN, Events.SUCCESS): MiniStates.APPROACH_MAIN,
 
             (MiniStates.APPROACH_MAIN, Events.SUCCESS): MiniStates.COLLECT_REGOLITH,
             (MiniStates.APPROACH_MAIN, Events.STALL): MiniStates.APPROACH_MAIN_STALL,

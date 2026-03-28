@@ -16,7 +16,7 @@ import math
 
 DEPOSITION_APRILTAG_ID = 368
 
-class AlignToMainBotState(State):
+class ApproachMainState(State):
   def __init__(self):
 
     # (x, y, theta)
@@ -29,7 +29,7 @@ class AlignToMainBotState(State):
 
     self.node: Node = None
 
-    # PID for angular alignment
+    # PID for linear alignment
     self.P = 1
     self.I = 0
     self.D = 0
@@ -38,31 +38,26 @@ class AlignToMainBotState(State):
     self.total_error = 0
     self.last_time = None
 
-    # Search = look for apriltag, Align = align to target
-    self.internal_state: Literal['search', 'align'] = 'search'
-
     # how many times we've lost apriltag.
     self.lost_count = 0
-    # how many times we tolerate before going to 'search' mode
+    # how many times we tolerate before giving up
     self.LOST_APRILTAG_THRESHOLD = 15
 
-    self.SEARCH_SPEED = 0.6 # rad/s
-
-    # in rad, how aligned before it returns success
-    self.ANGULAR_ALIGN_THRESHOLD = 0.1
-    # how many times we have been well aligned
+    # in meters, what distance between robots we are looking for
+    self.DISTANCE_GOAL = 0.12
+    # in meters, how close to this goal we need to get before returning success
+    self.GOAL_THRESHOLD = 0.01
+    # how many times we have been aligned
     self.success_count = 0
     # how many times in a row before we're sure
     self.SUCCESS_THRESHOLD = 30
 
   def setup(self, manager: Node):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "/mini/cmd_vel", 10)
-    self.visual_publisher = manager.create_publisher(Marker, "/mini/align_goal", 10)
-    self.apriltag_offset_publisher = manager.create_publisher(TransformStamped, "/behavior/mini_apriltag_offset", 10)
+    self.visual_publisher = manager.create_publisher(Marker, "/mini/approach_visual", 10)
     manager.create_subscription(PoseStamped, "/mini/position", self.odom_callback, 10)
-    self.node = manager
-
     manager.create_subscription(AprilTagDetectionArray, "/mini/d455_back/detections", self.apriltag_callback, 10)
+    self.node = manager
 
     self.tf_listener = TransformListener(self.tf_buffer, manager)
   
@@ -84,8 +79,7 @@ class AlignToMainBotState(State):
     self.apriltag_detections = msg
     
   def start(self):
-    self.node.get_logger().info("Behavior: Align to main bot: starting search" )
-    self.internal_state = 'search'
+    self.node.get_logger().info("Behavior: Approaching main bot" )
     self.apriltag_detections = None
     self.resetPID()
     self.lost_count = 0
@@ -93,79 +87,40 @@ class AlignToMainBotState(State):
   
   def periodic(self):
 
-    if (self.internal_state == 'search'):
-      # spin in circle until you see main bot's apriltag
-
-      if (self.isApriltagPresent()):
-        self.internal_state = 'align'
-        self.success_count = 0
-        self.node.get_logger().info("Behavior: Align to main bot: starting align")
-        return None
-
-      self.publish_angular_velocity(self.SEARCH_SPEED)
-
-    elif (self.internal_state == 'align'):
-      # Align to face where the apriltag is
-
-      if (self.isApriltagPresent()):
+    if (self.isApriltagPresent()):
+        # print(self.apriltag_detections)
 
         try:
-          # get where the apriltag is
-          apriltag_to_minimap_transform = self.tf_buffer.lookup_transform("mini/map", "main_deposition", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
+            apriltag_in_camera_frame = self.tf_buffer.lookup_transform("mini/d455_back_rgb_link", "main_deposition", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
 
-          # get base-link in apriltag frame
-          baselink_to_apriltag_transform = self.tf_buffer.lookup_transform("deposition_apriltag_optical_frame","base_link", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
+            distance = apriltag_in_camera_frame.transform.translation.z 
+            print(distance)
 
-          baselink_in_apriltag_frame = Pose()
-          baselink_in_apriltag_frame.position.x = baselink_to_apriltag_transform.transform.translation.x
-          baselink_in_apriltag_frame.position.y = baselink_to_apriltag_transform.transform.translation.y
-          baselink_in_apriltag_frame.position.z = baselink_to_apriltag_transform.transform.translation.z
+            error = self.DISTANCE_GOAL - distance
 
-          # translate base link to mini/map frame
-          baselink_in_minimap_frame = do_transform_pose(baselink_in_apriltag_frame, apriltag_to_minimap_transform)
-
-          # get the transform of the minibot in the apriltag frame (this will be passed to the next state, and to main bot)
-          mini_in_apriltag_frame_transform = self.tf_buffer.lookup_transform("main_deposition", "mini/base_link",  rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
-
-          xDiff = self.robot_pose[0] - baselink_in_minimap_frame.position.x
-          yDiff = self.robot_pose[1] - baselink_in_minimap_frame.position.y
-
-          goal_angle = math.atan2(yDiff, xDiff)
-          current_angle = self.robot_pose[2]
-
-          error = goal_angle - current_angle
-          error = (error + np.pi) % (2 * np.pi) - np.pi
-
-          # if aligned, increment a counter. At the threshold, alignment is done
-          if (abs(error) < self.ANGULAR_ALIGN_THRESHOLD):
-            self.success_count +=1
+            # if aligned, increment a counter. at the threshold, alignment is done
+            if (abs(error) < self.GOAL_THRESHOLD):
+                self.success_count += 1
 
             # if aligned, return success for next state, and the offset from mini to the apriltag (used by main bot)
             if (self.success_count >= self.SUCCESS_THRESHOLD):
-              self.remove_marker()
-              self.publish_offset_transform(mini_in_apriltag_frame_transform)
-              return Events.SUCCESS
+                self.remove_marker()
+                return Events.SUCCESS
             
-          else:
-            self.success_count = 0
-
-          velocity = self.runPID(error)
-          self.publish_angular_velocity(velocity)
-
-          self.visualize_alignment(baselink_in_minimap_frame)
+            velocity = self.runPID(error)
+            self.publish_linear_velocity(velocity)
 
         except Exception as e:
           pass
-          # self.node.get_logger().info(f"{e}")
-      else:
-        # if we can't see apriltag in 'align' mode enough times in a row, then we lost it, go back to searching
-        self.lost_count+=1
-        
-        if (self.lost_count >= self.LOST_APRILTAG_THRESHOLD):
-          self.node.get_logger().info("Behavior: Align to main bot: lost tag, searching")
-          self.internal_state = 'search'
-          self.lost_count = 0
-          return None
+    
+    else:
+      # if we can't see apriltag enough times in a row, exit this node. for now, assume success
+      self.lost_count+=1
+
+      if (self.lost_count >= self.LOST_APRILTAG_THRESHOLD):
+        self.lost_count = 0
+        self.node.get_logger().info("Behavior: Exiting approach due to LOST apriltag!")
+        return Events.SUCCESS
 
     return None
   
@@ -205,9 +160,9 @@ class AlignToMainBotState(State):
     self.last_error = None
     self.last_time = None
 
-  def publish_angular_velocity(self, velocity: float):
+  def publish_linear_velocity(self, velocity: float):
     vel = Twist()
-    vel.angular.z = velocity
+    vel.linear.x = velocity
 
     self.cmd_vel_publisher.publish(vel)
 
@@ -244,9 +199,6 @@ class AlignToMainBotState(State):
     marker.action = Marker.DELETE
     self.visual_publisher.publish(marker)
 
-  def publish_offset_transform(self, transform: TransformStamped):
-    for i in range(5):
-      self.apriltag_offset_publisher.publish(transform)
   
   def exit(self):
     # stop moving

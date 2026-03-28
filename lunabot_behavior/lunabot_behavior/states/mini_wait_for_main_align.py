@@ -3,6 +3,7 @@ from rclpy.node import Node
 from rclpy.task import Future
 import rclpy
 from geometry_msgs.msg import TransformStamped
+from std_msgs.msg import Bool
 
 class MiniWaitForAlignState(State):
     def __init__(self):
@@ -14,10 +15,15 @@ class MiniWaitForAlignState(State):
     def setup(self, manager: Node) -> Future | None:
         self.offset_publisher = manager.create_publisher(TransformStamped, "/behavior/mini_apriltag_offset", 10)
         manager.create_subscription(TransformStamped, "/behavior/mini_apriltag_offset", self.transform_callback, 10)
+        manager.create_subscription(Bool, "/behavior/main_aligned", self.align_msg_callback, 10)
         self.node = manager
     
     def transform_callback(self, msg: TransformStamped):
         self.transform = msg
+
+    def align_msg_callback(self, msg: Bool):
+        if (msg.data == True):
+            self.received_aligned_msg = True
 
     def start(self):
         self.received_aligned_msg = False

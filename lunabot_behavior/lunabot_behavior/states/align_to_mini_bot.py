@@ -7,6 +7,7 @@ from rclpy.time import Time
 from geometry_msgs.msg import Twist, PoseStamped, Point, Pose
 from visualization_msgs.msg import Marker
 from apriltag_msgs.msg import AprilTagDetectionArray
+from std_msgs.msg import Bool
 from tf_transformations import euler_from_quaternion
 from tf2_geometry_msgs import do_transform_pose
 from tf2_ros import Buffer, TransformListener, TransformStamped
@@ -50,6 +51,7 @@ class AlignToMiniBotState(State):
   def setup(self, manager: Node):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "/cmd_vel", 10)
     self.visual_publisher = manager.create_publisher(Marker, "/align_goal", 10)
+    self.aligned_msg_publisher = manager.create_publisher(Bool, "/behavior/main_aligned", 10)
     manager.create_subscription(PoseStamped, "/position", self.odom_callback, 10)
     manager.create_subscription(TransformStamped, "/behavior/mini_apriltag_offset", self.transform_callback, 10)
     self.node = manager
@@ -122,9 +124,10 @@ class AlignToMiniBotState(State):
       if (abs(error) < self.ANGULAR_ALIGN_THRESHOLD):
         self.success_count +=1
 
-        # if aligned, return success for next state, and the offset from mini to the apriltag (used by main bot)
+        # if aligned, return success for next state, and publish the 'aligned' msg for the mini bot
         if (self.success_count >= self.SUCCESS_THRESHOLD):
           self.remove_marker()
+          self.publish_aligned_msg()
           return Events.SUCCESS
           
       else:
@@ -168,6 +171,13 @@ class AlignToMiniBotState(State):
     vel.angular.z = velocity
 
     self.cmd_vel_publisher.publish(vel)
+  
+  def publish_aligned_msg(self):
+    msg = Bool()
+    msg.data = True
+
+    for i in range(10):
+      self.aligned_msg_publisher.publish(msg)
 
   def visualize_alignment(self, mini_pose: Pose):
     marker = Marker()
