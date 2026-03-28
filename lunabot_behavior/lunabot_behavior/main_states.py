@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from enum import Enum
+import sys
 
 from geometry_msgs.msg import PoseStamped
 from lunabot_msgs.msg import Event
@@ -19,6 +20,7 @@ from lunabot_behavior.states.traverse_to_linkup import TraverseToLinkup
 from lunabot_behavior.states.trench import Trench
 from lunabot_behavior.states.align_to_linkup import AlignToLinkup
 from lunabot_behavior.states.main_wait_for_mini_align import MainWaitForAlignState
+from lunabot_behavior.states.align_to_mini_bot import AlignToMiniBotState
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -66,7 +68,9 @@ class MainStates(Enum):
 
     WAIT_FOR_MINI_ALIGN = MainWaitForAlignState()
 
-    ALIGN_TO_MINI = State()
+    ALIGN_TO_MINI = AlignToMiniBotState()
+
+    WAIT_FOR_APPROACH = State()
 
     WAIT_FOR_DIVERGE = State() # This will stay as State(), no logic needed
 
@@ -144,6 +148,8 @@ class MainStates(Enum):
 
             (MainStates.WAIT_FOR_MINI_ALIGN, Events.SUCCESS): MainStates.ALIGN_TO_MINI,
 
+            (MainStates.ALIGN_TO_MINI, Events.SUCCESS): MainStates.WAIT_FOR_APPROACH,
+
             (MainStates.DEPOSIT, Events.SUCCESS): MainStates.WAIT_FOR_DIVERGE,
             (MainStates.DEPOSIT, Events.STALL): MainStates.DEPOSIT_STALL,
             (MainStates.DEPOSIT_STALL, Events.SUCCESS): MainStates.DEPOSIT,
@@ -172,7 +178,7 @@ class MainStates(Enum):
         return transitions.get((state, event), None)
 
 def main(args=None):
-    rclpy.init(args=args)
+    rclpy.init(args=sys.argv)
 
     manager = StateManager(MainStates, MainStates.WAIT_FOR_MINI_ALIGN, Events, Event)
 

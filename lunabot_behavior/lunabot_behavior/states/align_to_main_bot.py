@@ -4,11 +4,12 @@ import rclpy
 import rclpy.time
 from rclpy.duration import Duration
 from rclpy.time import Time
-from geometry_msgs.msg import Twist, PoseStamped, Point
+from geometry_msgs.msg import Twist, PoseStamped, Point, Pose
 from visualization_msgs.msg import Marker
 from apriltag_msgs.msg import AprilTagDetectionArray
 from tf_transformations import euler_from_quaternion
 from tf2_ros import Buffer, TransformListener, TransformStamped
+from tf2_geometry_msgs import do_transform_pose
 from typing import Literal
 import numpy as np
 import math
@@ -83,7 +84,7 @@ class AlignToMainBotState(State):
     self.apriltag_detections = msg
     
   def start(self):
-    self.node.get_logger().info("Behavior: Align to main bot: starting search", )
+    self.node.get_logger().info("Behavior: Align to main bot: starting search" )
     self.internal_state = 'search'
     self.apriltag_detections = None
     self.resetPID()
@@ -110,13 +111,24 @@ class AlignToMainBotState(State):
 
         try:
           # get where the apriltag is
-          transform = self.tf_buffer.lookup_transform("mini/map", "main_deposition", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
+          apriltag_to_minimap_transform = self.tf_buffer.lookup_transform("mini/map", "main_deposition", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
 
-          # get the transform from yourself to the apriltag (this will be passed to the next state, and to main bot)
-          offsetTransform = self.tf_buffer.lookup_transform("mini/base_link", "main_deposition", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
+          # get base-link in apriltag frame
+          baselink_to_apriltag_transform = self.tf_buffer.lookup_transform("deposition_apriltag_optical_frame","base_link", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
 
-          xDiff = self.robot_pose[0] - transform.transform.translation.x
-          yDiff = self.robot_pose[1] - transform.transform.translation.y
+          baselink_in_apriltag_frame = Pose()
+          baselink_in_apriltag_frame.position.x = baselink_to_apriltag_transform.transform.translation.x
+          baselink_in_apriltag_frame.position.y = baselink_to_apriltag_transform.transform.translation.y
+          baselink_in_apriltag_frame.position.z = baselink_to_apriltag_transform.transform.translation.z
+
+          baselink_in_minimap_frame = do_transform_pose(baselink_in_apriltag_frame, apriltag_to_minimap_transform)
+
+          # get the transform of the minibot in the apriltag frame (this will be passed to the next state, and to main bot)
+          mini_in_apriltag_frame_transform = self.tf_buffer.lookup_transform("main_deposition", "mini/base_link",  rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
+
+          self.node.get_logger().info(f"self.robot pose {self.robot_pose}")
+          xDiff = self.robot_pose[0] - baselink_in_minimap_frame.position.x
+          yDiff = self.robot_pose[1] - baselink_in_minimap_frame.position.y
 
           goal_angle = math.atan2(yDiff, xDiff)
           current_angle = self.robot_pose[2]
@@ -131,7 +143,7 @@ class AlignToMainBotState(State):
             # if aligned, return success for next state, and the offset from mini to the apriltag (used by main bot)
             if (self.success_count >= self.SUCCESS_THRESHOLD):
               self.remove_marker()
-              self.publish_offset_transform(offsetTransform)
+              self.publish_offset_transform(mini_in_apriltag_frame_transform)
               return Events.SUCCESS
             
           else:
@@ -140,11 +152,11 @@ class AlignToMainBotState(State):
           velocity = self.runPID(error)
           self.publish_angular_velocity(velocity)
 
-          self.visualize_alignment(transform)
+          self.visualize_alignment(baselink_in_minimap_frame)
 
         except Exception as e:
-          pass
-          # print("waiting on transform...", e)
+          # pass
+          self.node.get_logger().info(f"{e}")
       else:
         # if we can't see apriltag in 'align' mode enough times in a row, then we lost it, go back to searching
         self.lost_count+=1
@@ -201,14 +213,12 @@ class AlignToMainBotState(State):
 
   def visualize_transform(self, transform: TransformStamped):
     marker = Marker()
-    # Set the frame
     marker.header.frame_id = "mini/map"
     marker.header.stamp = self.node.get_clock().now().to_msg()
     marker.id = 368
     marker.type = Marker.ARROW
     marker.action = Marker.ADD
 
-    # Set the position of the point
     marker.pose.position.x = transform.transform.translation.x
     marker.pose.position.y = transform.transform.translation.y
     marker.pose.position.z = transform.transform.translation.z
@@ -227,7 +237,7 @@ class AlignToMainBotState(State):
 
     self.visual_publisher.publish(marker)
 
-  def visualize_alignment(self, transform: TransformStamped):
+  def visualize_alignment(self, main_bot_pose: Pose):
     marker = Marker()
     marker.header.frame_id = "mini/map"
     marker.header.stamp = self.node.get_clock().now().to_msg()
@@ -237,7 +247,7 @@ class AlignToMainBotState(State):
     marker.action = Marker.ADD
 
     start = Point(x=self.robot_pose[0], y=self.robot_pose[1], z=0.3)
-    end = Point(x=transform.transform.translation.x, y=transform.transform.translation.y, z=transform.transform.translation.z)
+    end = Point(x=main_bot_pose.position.x, y=main_bot_pose.position.y, z=main_bot_pose.position.z)
 
     marker.points.append(start)
     marker.points.append(end)
@@ -267,9 +277,4 @@ class AlignToMainBotState(State):
     # stop moving
     self.cmd_vel_publisher.publish(Twist())
 
-    # delete marker
-    marker = Marker()
-    marker.action = Marker.DELETE
-    marker.id = 368
-    self.visual_publisher.publish(marker)
     

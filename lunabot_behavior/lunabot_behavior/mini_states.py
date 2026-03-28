@@ -5,6 +5,7 @@ from state_manager import StateManager
 from lunabot_msgs.msg import Event
 from geometry_msgs.msg import PoseStamped
 from lunabot_msgs.msg import Event
+import sys
 
 from lunabot_behavior.states.align_to_angle import AlignToAngle
 from lunabot_behavior.states.separate_main import SeparateMain
@@ -122,7 +123,7 @@ class MiniStates(Enum):
         return transitions.get((state, event), None)
 
 def main(args=None):
-    rclpy.init(args=args)
+    rclpy.init(args=sys.argv)
 
     manager = StateManager(MiniStates, MiniStates.ALIGN_TO_MAIN, Events, Event)
 

@@ -13,7 +13,7 @@ class StateManager(Node):
         super().__init__("state_manager")
 
         for state in states:
-            # self.get_logger().info(f"starting state: {state}")
+            self.get_logger().info(f"starting state: {state}")
             state.value.setup(self)
 
         self.get_logger().info("started all states")
