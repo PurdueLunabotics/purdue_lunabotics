@@ -36,6 +36,7 @@ class CraterGeneration(Node):
         self.pointCloud = PointCloud2()
         self.ground = PointCloud2()
         self.ground_planes = PointCloud2()
+        self.coeff = []
         
         
         self.crater_publisher = self.create_publisher(
@@ -45,7 +46,6 @@ class CraterGeneration(Node):
         self.plane_publisher = self.create_publisher(
             PointCloud2, "ground_plane", 10
         )
-        
         
         self.pointcloud_subscriber = self.create_subscription(
             PointCloud2, "/rtabmap/cloud_obstacles", self.set_points,  10
@@ -111,7 +111,9 @@ class CraterGeneration(Node):
             self.get_logger().info(f"4{self.get_clock().now()}")
         
             # the plane equation
-            self.get_logger().info(f"5{self.get_clock().now()}")
+            self.get_logger().info(f"5{regressor.estimator_.coef_}")
+            self.get_logger().info(f"5{regressor.estimator_.intercept_}")
+            self.coeff = [regressor.estimator_.coef_[0][0],regressor.estimator_.coef_[0][1], regressor.estimator_.intercept_[0]]
             pred_z = regressor.predict(ground_trainxy)
 
             # self.get_logger().info(f"{len(pred_z)}")
@@ -160,10 +162,10 @@ class CraterGeneration(Node):
             ground = point_cloud2.read_points(self.ground_planes, field_names = ("x", "y", "z"), skip_nans=True)
             for p in ground: 
                 ground_vals.append([p[0], p[1], p[2]]) 
-            ground_height = np.mean(ground_vals, axis = 0)[2]
-        
+
+            
             # self.get_logger().info(values)
-            self.get_logger().info(f"{ground_height}")
+            # self.get_logger().info(f"{ground_height}")
         except Exception as inst:
             self.get_logger().info(f"{inst}")
             self.get_logger().warn("Failed to read")
@@ -172,11 +174,11 @@ class CraterGeneration(Node):
         crater_vals = []
         if(did_read):
             for p in obst:
-                if(p[2]<ground_height-0.02):
+                if (self.coeff[0]*p[0]+self.coeff[1]*p[1]+self.coeff[2] > p[2] + 0.06):
+                # if(p[2]<ground_height-0.02):
                     crater_vals.append(p[:-1])
+                    self.get_logger().info(f"{p}")
                     
-            
-            
             # self.get_logger().info(f"{craternp}")
             # initial guess for the ring center and radius (if no previous info about those, increase uncertainty accordingly)
             guessed_cx = 0
@@ -223,7 +225,7 @@ class CraterGeneration(Node):
                         
                         
                     def dont_remove(j):
-                        return(((j[0]<hough_cx-hough_r-0.05) or (j[0]>hough_cx+hough_r+0.05)) or ((j[1]<hough_cy-hough_r-0.05) or (j[1]>hough_cy+hough_r+0.05)))
+                        return(((j[0]<hough_cx-hough_r-0.075) or (j[0]>hough_cx+hough_r+0.075)) or ((j[1]<hough_cy-hough_r-0.075) or (j[1]>hough_cy+hough_r+0.075)))
                     
                     crater_vals = list(filter(dont_remove, crater_vals))
                     
