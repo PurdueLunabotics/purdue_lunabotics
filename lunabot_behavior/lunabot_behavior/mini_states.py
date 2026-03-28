@@ -131,9 +131,11 @@ def main(args=None):
 
     manager = StateManager(MiniStates, MiniStates.INIT, Events, Event)
 
-    rclpy.spin(manager)
+    try:
+        rclpy.spin(manager)
+    finally:
+        manager.stop_current_state()
 
-    manager.stop_current_state()
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)

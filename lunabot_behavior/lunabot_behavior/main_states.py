@@ -180,9 +180,10 @@ def main(args=None):
 
     manager = StateManager(MainStates, MainStates.INIT, Events, Event)
 
-    rclpy.spin(manager)
-
-    manager.stop_current_state()
+    try:
+        rclpy.spin(manager)
+    finally:
+        manager.stop_current_state()
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
