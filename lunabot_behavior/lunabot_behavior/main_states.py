@@ -18,6 +18,7 @@ from lunabot_behavior.states.retreat_berm import RetreatBerm
 from lunabot_behavior.states.traverse_to_linkup import TraverseToLinkup
 from lunabot_behavior.states.trench import Trench
 from lunabot_behavior.states.align_to_linkup import AlignToLinkup
+from lunabot_behavior.states.init import SetupMap
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -28,7 +29,7 @@ import math
 class MainStates(Enum):
     
     # ===== INIT SECTION (1) =====
-    INIT = (State(), 10)
+    INIT = (SetupMap(True), 10)
     INIT_STALL = (State(), 19)
     
     STARTING_PLUNGE = (Plunge(), 11)
@@ -177,7 +178,7 @@ class MainStates(Enum):
 def main(args=None):
     rclpy.init(args=args)
 
-    manager = StateManager(MainStates, MainStates.PLUNGE_ACT, Events, Event)
+    manager = StateManager(MainStates, MainStates.INIT, Events, Event)
 
     rclpy.spin(manager)
 
