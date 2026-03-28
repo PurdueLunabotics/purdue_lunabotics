@@ -277,6 +277,14 @@
     <child link="deposition_apriltag_link"/>
   </joint>
 
+  <link name="deposition_apriltag_optical_frame"></link>
+
+  <joint name="deposition_apriltag_optical_joint" type="fixed">
+    <origin rpy="1.57 0.0 1.57" xyz="0.0 0.0 0.0"/>
+    <parent link="deposition_apriltag_link"/>
+    <child link="deposition_apriltag_optical_frame"/>
+  </joint>
+
   <!-- Back Camera -->
   <link name="d455_back_link">
     <inertial>
