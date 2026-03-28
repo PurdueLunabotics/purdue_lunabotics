@@ -122,8 +122,7 @@ class CraterGeneration(Node):
             self.get_logger().warn("it do thing")
             self.get_logger().warn("pointcloud")
             # self.get_logger().warn(f"{plane_pointcloud}")
-            
-            
+
         else: 
             print("failed to read pointcloud")
             
