@@ -83,6 +83,11 @@ def get_distance_from_berm(p: np.array):
 class ZonesNode(Node):
     def __init__(self):
         super().__init__("zones_node")
+
+        ns = self.get_namespace().lstrip('/')
+        self.frame = "map"
+        if len(ns) != 0:
+            self.frame = f"{ns}/{self.frame}"
     
         self.exc_zone_marker_pub = self.create_publisher(Marker, "exc_zone_marker", 10)
         self.berm_zone_marker_pub = self.create_publisher(Marker, "berm_zone_marker", 10)
@@ -93,7 +98,7 @@ class ZonesNode(Node):
         self.start_zone_pub = self.create_publisher(Zone, "start_zone", 10)
 
         self.start_time = time.perf_counter_ns()
-        self.create_timer(1 / 30, self.mainloop)
+        self.create_timer(1 / 1.0, self.mainloop)
 
     def visualize_zone(self, zone: Zone, publisher: rclpy.publisher.Publisher, id=0, color=(1.0, 0.0, 0.0, 1.0)):
         """
@@ -109,7 +114,7 @@ class ZonesNode(Node):
         duration = time.perf_counter_ns() - self.start_time
 
         zone_marker.header.stamp = rclpy.time.Time(nanoseconds=duration).to_msg()
-        zone_marker.header.frame_id = "map"
+        zone_marker.header.frame_id = self.frame
 
         zone_marker.ns = "zones"
         zone_marker.id = id
