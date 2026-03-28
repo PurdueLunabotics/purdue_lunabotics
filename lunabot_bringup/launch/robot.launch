@@ -27,8 +27,8 @@
     <let name="starting_x" if="$(eval '$(var robot_num) == 1')" value="1.5"/>
     <let name="starting_x" if="$(eval '$(var robot_num) == 0')" value="2.5"/>
 
-    <let name="starting_yaw" if="$(eval '$(var robot_num) == 1')" value="1.57"/>
-    <let name="starting_yaw" if="$(eval '$(var robot_num) == 0')" value="4.71"/>
+    <let name="starting_yaw" if="$(eval '$(var robot_num) == 1')" value="0"/>
+    <let name="starting_yaw" if="$(eval '$(var robot_num) == 0')" value="0"/>
 
     <arg name="entity_name" if="$(eval '$(var robot_num) == 0')" default="dummy_bot"/>
     <arg name="entity_name" if="$(eval '$(var robot_num) == 1')" default="mini_bot"/>
