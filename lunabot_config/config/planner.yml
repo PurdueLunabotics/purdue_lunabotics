@@ -1,6 +1,8 @@
 global_costmap:
   global_costmap:
     ros__parameters:
+      height: 5
+      width: 5
       publish_frequency: 30.0
       global_frame: "map"
       robot_base_frame: "base_link"
