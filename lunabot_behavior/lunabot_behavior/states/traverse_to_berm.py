@@ -19,3 +19,11 @@ class TraverseToBerm(Traverse):
         pose.pose.orientation.z = z
         pose.pose.orientation.w = w
         super().__init__(pose, backwards)
+
+    def setup(self, manager):
+        ns = manager.get_namespace().lstrip('/')
+        self.frame = "map"
+        if len(ns) != 0:
+            self.frame = f"{ns}/{self.frame}"
+        self.goal.header.frame_id = self.frame
+        super().setup(manager)

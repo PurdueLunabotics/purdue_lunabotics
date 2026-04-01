@@ -49,6 +49,7 @@ class SetupMap(State):
       self.can_see_main_bot = True
 
   def periodic(self):
+    self.manager.get_logger().info(f"SetupMap: can see main: {self.can_see_main_bot}, dir: {direction}")
     if self.can_see_main_bot and self.is_main and (direction == Direction.NORTH or direction == Direction.EAST):
       mini_detections = self.detections["mini/d455_front_rgb_link"]
       mini_detections.header.frame_id = "deposition_apriltag_optical_frame"

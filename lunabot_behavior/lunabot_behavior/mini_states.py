@@ -5,6 +5,7 @@ from lunabot_msgs.msg import Event
 
 from lunabot_behavior.states.collect import Collect
 from lunabot_behavior.states.align_to_angle import AlignToAngle
+from lunabot_behavior.states.proceed import Proceed
 from lunabot_behavior.states.separate_main import SeparateMain
 from lunabot_behavior.states.traverse_to_berm import TraverseToBerm
 from lunabot_behavior.states.traverse import NoPath, Traverse, Stall
@@ -19,6 +20,8 @@ from lunabot_behavior.state_manager import StateManager
 
 import rclpy
 
+from lunabot_behavior.states.traverse_to_linkup import TraverseToLinkup
+
 class MiniStates(Enum):
     # ===== INIT SECTION (1) =====
     INIT_MAP = (SetupMap(False), 10)
@@ -28,6 +31,7 @@ class MiniStates(Enum):
     FIND_LINKUP = (FindLinkup(), 11)
     FIND_LINKUP_STALL = (Stall(), 19)
     FIND_LINKUP_NO_PATH = (NoPath(), 18)
+    SEND_FOUND_LINKUP = (Proceed(False), 11)
     
     # ===== LINKUP SECTION (2) =====
     ALIGN_TO_MAIN = (State(), 20)
@@ -51,7 +55,7 @@ class MiniStates(Enum):
     ALIGN_TO_BERM = (AlignToAngle(270), 31)
     ALIGN_TO_BERM_STALL = (Stall(), 39)
     
-    MOVE_TO_STAGING = (Traverse(PoseStamped(), False), 32)
+    MOVE_TO_STAGING = (TraverseToLinkup(False, False), 32)
     MOVE_TO_STAGING_STALL = (Stall(), 39)
     MOVE_TO_STAGING_NO_PATH = (NoPath(), 38)
     # ===== DEPOSIT SECTION (4) =====
@@ -75,11 +79,12 @@ class MiniStates(Enum):
             (MiniStates.INIT_STALL, Events.SUCCESS): MiniStates.INIT_MOVE,
             
             
-            (MiniStates.FIND_LINKUP, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
+            (MiniStates.FIND_LINKUP, Events.SUCCESS): MiniStates.SEND_FOUND_LINKUP,
             (MiniStates.FIND_LINKUP, Events.STALL): MiniStates.FIND_LINKUP_STALL,
             (MiniStates.FIND_LINKUP, Events.NO_PATH): MiniStates.FIND_LINKUP_NO_PATH,
             (MiniStates.FIND_LINKUP_STALL, Events.SUCCESS): MiniStates.FIND_LINKUP,
             (MiniStates.FIND_LINKUP_NO_PATH, Events.SUCCESS): MiniStates.FIND_LINKUP,
+            (MiniStates.SEND_FOUND_LINKUP, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
 
             (MiniStates.TRAVERSE_TO_BERM, Events.SUCCESS): MiniStates.ALIGN_TO_BERM,
             (MiniStates.TRAVERSE_TO_BERM, Events.STALL): MiniStates.TRAVERSE_TO_BERM_STALL,

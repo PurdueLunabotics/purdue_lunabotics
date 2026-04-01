@@ -2,6 +2,7 @@
 
 from geometry_msgs.msg import PoseStamped, Point
 from lunabot_msgs.msg import Linkup
+from rclpy.qos import QoSDurabilityPolicy, QoSProfile
 from visualization_msgs.msg import Marker
 from nav_msgs.msg import Path
 
@@ -22,7 +23,6 @@ from shapely.geometry import LineString
 class FindLinkup(Traverse):
     def __init__(self):
         self.goal = PoseStamped()
-        self.goal.header.frame_id = "map"
         self.goal.pose.position.x = ZoneMeasurements.BERM_OFFSET_X
         self.goal.pose.position.y = 0.0
 
@@ -32,7 +32,6 @@ class FindLinkup(Traverse):
 
         # planning target for action server call
         self.start_pose = PoseStamped()
-        self.start_pose.header.frame_id = "map"
         self.start_pose.pose.position.x = ZoneMeasurements.START_OFFSET_X
         self.start_pose.pose.position.y = ZoneMeasurements.START_OFFSET_Y
         self.start_vec = point_from_pose_2d(self.start_pose)
@@ -50,20 +49,28 @@ class FindLinkup(Traverse):
         self.linkup_found = False
 
     def setup(self, manager: Node):
+        ns = manager.get_namespace().lstrip('/')
+        self.frame = "map"
+        if len(ns) != 0:
+            self.frame = f"{ns}/{self.frame}"
+        self.start_pose.header.frame_id = self.frame
+        self.goal.header.frame_id = self.frame
+
         self.goal_pub = manager.create_publisher(PoseStamped, "goal", 10)
         self.backwards_pub = manager.create_publisher(Bool, "traversal/backwards", 10)
         self.enabled_pub = manager.create_publisher(Bool, "traversal/enabled", 10)
-        self.linkup_pub = manager.create_publisher(Linkup, "linkup_pos", 10)
-        self.path_publisher = manager.create_publisher(Path, "linkup_path", 10)
-        self.linkup_line_pub = manager.create_publisher(Marker, "linkup_segment", 10)
-        self.exc_edge_pub = manager.create_publisher(Marker, "exc_edge", 10)
-        self.short_seg_pub = manager.create_publisher(Marker, "short_segment", 10)
+        self.linkup_pub = manager.create_publisher(Linkup, "/linkup_pos", QoSProfile(durability = QoSDurabilityPolicy.TRANSIENT_LOCAL, depth = 10))
+        self.path_publisher = manager.create_publisher(Path, "/linkup_path", 10)
+        self.linkup_line_pub = manager.create_publisher(Marker, "/linkup_segment", 10)
+        self.exc_edge_pub = manager.create_publisher(Marker, "/exc_edge", 10)
+        self.short_seg_pub = manager.create_publisher(Marker, "/short_segment", 10)
 
         self.odom_sub = manager.create_subscription(PoseStamped, "position", self.odom_cb, 10)
 
         self.odom = None
         self.tolerance = 1.0 # wider tolerance is ok - finding linkup isn't an exact science
         self.logger = manager.get_logger()
+        self.finding = False
 
         self.path_client = ActionClient(manager, ComputePathToPose, "compute_path_to_pose")
 
@@ -77,7 +84,8 @@ class FindLinkup(Traverse):
         if self.linkup_found:
             return Events.SUCCESS
 
-        if self.odom is not None and np.linalg.norm(self.odom - self.goal_vec) <= self.tolerance:
+        if self.odom is not None and np.linalg.norm(self.odom - self.goal_vec) <= self.tolerance and not self.finding:
+            self.finding = True
             self.find_linkup() # find the linkup thingamabob
 
         return None
@@ -274,7 +282,7 @@ class FindLinkup(Traverse):
     
     def visualize_line_segment(self, segment: list[np.array], publisher, r=1.0, g=0.0, b=0.0):
         marker = Marker()
-        marker.header.frame_id = "map"
+        marker.header.frame_id = self.frame
         marker.header.stamp = self.manager.get_clock().now().to_msg()
 
         marker.ns = "line_segment"
