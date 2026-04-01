@@ -432,7 +432,7 @@
     </model>
 
     <model name='tag_36_11_00007'>
-      <pose>3.4 1.8 0.4 0 -1.58 0</pose>
+      <pose>3.4 1.8 0.2 0 -1.58 0</pose>
       <static>1</static>
       <link name='link'>
         <visual name='tag_36_11_00007'>
@@ -464,7 +464,7 @@
     </model>
 
     <model name='tag_36_11_00011'>
-      <pose>2.5 2.5 0.4 1.58 0 0</pose>
+      <pose>2.5 2.5 0.2 1.58 0 0</pose>
       <static>1</static>
       <link name='link'>
         <visual name='tag_36_11_00011'>
@@ -492,6 +492,34 @@
             </box>
           </geometry>
         </collision>
+      </link>
+    </model>
+
+    <model name="box_1m">
+      <static>true</static>
+      <pose>0 1.5 0 0 0 0</pose>
+
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.5 1.5 1</size>
+            </box>
+          </geometry>
+        </collision>
+
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 1.5 1</size>
+            </box>
+          </geometry>
+
+          <material>
+            <ambient>0.7 0.7 0.7 1</ambient>
+            <diffuse>0.7 0.7 0.7 1</diffuse>
+          </material>
+        </visual>
       </link>
     </model>
   </world>

@@ -27,72 +27,72 @@ import rclpy
 
 class SingleStates(Enum):
     
-    INIT = State()
-    INIT_STALL = State()
+    INIT = (State(), 0)
+    INIT_STALL = (State(), 0)
     
-    FIND_LINKUP = FindLinkup()
-    FIND_LINKUP_STALL = Stall()
-    FIND_LINKUP_NO_PATH = NoPath()
+    FIND_LINKUP = (FindLinkup(), 0)
+    FIND_LINKUP_STALL = (Stall(), 0)
+    FIND_LINKUP_NO_PATH = (NoPath(), 0)
     
-    STARTING_PLUNGE = Plunge()
-    STARTING_PLUNGE_STALL = State()
+    STARTING_PLUNGE = (Plunge(), 0)
+    STARTING_PLUNGE_STALL = (State(), 0)
     
-    STARTING_RAISE = Raise()
-    STARTING_RAISE_STALL = State()
+    STARTING_RAISE = (Raise(), 0)
+    STARTING_RAISE_STALL = (State(), 0)
     
-    WAIT_FOR_LINKUP = State() # This will stay as State(), no logic needed
+    WAIT_FOR_LINKUP = (State(), 0) # This will stay as State(), no logic needed
     
-    TRAVERSE_TO_LINKUP = TraverseToLinkup(True, False)
-    TRAVERSE_TO_LINKUP_STALL = Stall()
-    TRAVERSE_TO_LINKUP_NO_PATH = NoPath()
+    TRAVERSE_TO_LINKUP = (TraverseToLinkup(True, False), 0)
+    TRAVERSE_TO_LINKUP_STALL = (Stall(), 0)
+    TRAVERSE_TO_LINKUP_NO_PATH = (NoPath(), 0)
     
-    TRAVERSE_TO_LINKUP_BACKWARDS = TraverseToLinkup(True, True)
-    TRAVERSE_TO_LINKUP_BACKWARDS_STALL = Stall()
-    TRAVERSE_TO_LINKUP_BACKWARDS_NO_PATH = NoPath()
+    TRAVERSE_TO_LINKUP_BACKWARDS = (TraverseToLinkup(True, True), 0)
+    TRAVERSE_TO_LINKUP_BACKWARDS_STALL = (Stall(), 0)
+    TRAVERSE_TO_LINKUP_BACKWARDS_NO_PATH = (NoPath(), 0)
     
-    ALIGN_TO_TRENCH = AlignTrench()
-    ALIGN_TO_TRENCH_STALL = State()
+    ALIGN_TO_TRENCH = (AlignTrench(), 0)
+    ALIGN_TO_TRENCH_STALL = (State(), 0)
     
-    APPROACH_TRENCH = ApproachTrench()
-    APPROACH_TRENCH_STALL = State()
+    APPROACH_TRENCH = (ApproachTrench(), 0)
+    APPROACH_TRENCH_STALL = (State(), 0)
     
-    PLUNGE_ACT = Plunge()
-    PLUNGE_ACT_STALL = State()
+    PLUNGE_ACT = (Plunge(), 0)
+    PLUNGE_ACT_STALL = (State(), 0)
     
-    TRENCH = Trench()
-    TRENCH_STALL = State()
+    TRENCH = (Trench(), 0)
+    TRENCH_STALL = (State(), 0)
     
-    RAISE_ACT = Raise()
-    RAISE_ACT_STALL = State()
+    RAISE_ACT = (Raise(), 0)
+    RAISE_ACT_STALL = (State(), 0)
     
-    RETREAT_TRENCH = RetreatTrench()
-    RETREAT_TRENCH_STALL = Stall()
+    RETREAT_TRENCH = (RetreatTrench(), 0)
+    RETREAT_TRENCH_STALL = (Stall(), 0)
 
-    ALIGN_TO_LINKUP = AlignToLinkup()
-    ALIGN_TO_LINKUP_STALL = State()
+    ALIGN_TO_LINKUP = (AlignToLinkup(), 0)
+    ALIGN_TO_LINKUP_STALL = (State(), 0)
 
-    WAIT_FOR_DIVERGE = State() # This will stay as State(), no logic needed
+    WAIT_FOR_DIVERGE = (State(), 0) # This will stay as State(), no logic needed
 
-    TRAVERSE_TO_BERM = TraverseToBerm(True)
-    TRAVERSE_TO_BERM_STALL = Stall()
-    TRAVERSE_TO_BERM_NO_PATH = NoPath()
+    TRAVERSE_TO_BERM = (TraverseToBerm(True), 0)
+    TRAVERSE_TO_BERM_STALL = (Stall(), 0)
+    TRAVERSE_TO_BERM_NO_PATH = (NoPath(), 0)
 
-    ALIGN_TO_BERM = AlignToAngle(270)
-    ALIGN_TO_BERM_STALL = Stall()
+    ALIGN_TO_BERM = (AlignToAngle(270), 0)
+    ALIGN_TO_BERM_STALL = (Stall(), 0)
     
-    APPROACH_BERM = ApproachBerm()
-    APPROACH_BERM_STALL = Stall()
+    APPROACH_BERM = (ApproachBerm(), 0)
+    APPROACH_BERM_STALL = (Stall(), 0)
     
-    DEPOSIT = Deposit(True)
-    DEPOSIT_STALL = State()
+    DEPOSIT = (Deposit(True), 0)
+    DEPOSIT_STALL = (State(), 0)
     
-    DEPOSIT_BERM = Deposit()
-    DEPOSIT_BERM_STALL = State()
+    DEPOSIT_BERM = (Deposit(), 0)
+    DEPOSIT_BERM_STALL = (State(), 0)
     
-    RETREAT_BERM = RetreatBerm()
-    RETREAT_BERM_STALL = Stall()
+    RETREAT_BERM = (RetreatBerm(), 0)
+    RETREAT_BERM_STALL = (Stall(), 0)
 
-    IDLE = State()
+    IDLE = (State(), 0)
 
     @staticmethod
     def get_transition(state, event: Events):
@@ -179,7 +179,7 @@ class SingleStates(Enum):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = StateManager(SingleStates, SingleStates.STARTING_PLUNGE, Events, Event)
+    minimal_subscriber = StateManager(SingleStates, SingleStates.FIND_LINKUP, Events, Event)
 
     rclpy.spin(minimal_subscriber)
 

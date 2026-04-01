@@ -27,9 +27,9 @@ class Drive(State):
         self.linear_pid = ParameterizedPIDController(f"{self.name}.linear", manager, kp=1.0, max_output=0.01)
         self.odom = None
         self.position = (0, 0)
-#       while self.odom == None:
-#            rclpy.spin_once(manager)
-#            time.sleep(0.25)
+        # while self.odom == None:
+        #     rclpy.spin_once(manager)
+        #     time.sleep(0.25)
 
     def odom_cb(self, pose: PoseStamped):
         self.odom = pose

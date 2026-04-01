@@ -26,7 +26,8 @@
 
     <let name="starting_x" if="$(eval '$(var robot_num) == 1')" value="1.5"/>
     <let name="starting_x" if="$(eval '$(var robot_num) == 0')" value="2.5"/>
-
+    <let name="starting_y" if="$(eval '$(var robot_num) == 1')" value="1.75"/>
+    <let name="starting_y" if="$(eval '$(var robot_num) == 0')" value="1.75"/>
     <let name="starting_yaw" if="$(eval '$(var robot_num) == 1')" value="0"/>
     <let name="starting_yaw" if="$(eval '$(var robot_num) == 0')" value="0"/>
 
@@ -165,14 +166,17 @@
 
         <node pkg="lunabot_slam" exec="sim_odom.py" if="$(var odom_from_sim)">
         </node>
+        <let name="id_offset" if="$(eval '$(var robot_num) == 1')" value="100"/>
+        <let name="id_offset" if="$(eval '$(var robot_num) == 0')" value="0"/>
         <node pkg="lunabot_perception" exec="apriltag_combine.py">
             <remap from="detections"         to="rtabmap/apriltag/detections"/>
             <param name="input_topics" value="d455_back/detections;d455_front/detections" value-sep=";"/>
+            <param name="id_offset" value="$(var id_offset)"/>
         </node>
 
-        <!-- <node name="stall_detection_node" pkg="lunabot_control" exec="stall_detection_node" output="screen" respawn="true">
+        <node name="stall_detection_node" pkg="lunabot_control" exec="stall_detection_node" output="screen" respawn="true" unless="$(var sim)">
             <param name="~waitTime" value="2"/> 
-        </node> -->
+        </node> 
 
         <push_ros_namespace namespace="rtabmap"/>
 
@@ -238,12 +242,12 @@
             <param name="Grid/FromDepth"          value="'false'"/> <!-- occupancy grid from lidar -->
             
             <param name="GridGlobal/Eroded"       value="'true'" /> <!-- TODO: Figure out what this does? -->
-            <param name="GridGlobal/FootprintRadius" value="'0.75'" /> <!-- Clear obstacles within this radius -->
-            <param name="GridGlobal/MinSize"      value="'1.0'"/> <!-- Minimum map size (m) -->
+            <param name="GridGlobal/FootprintRadius" value="'0.375'" /> <!-- Clear obstacles within this radius -->
+            <param name="GridGlobal/MinSize"      value="'10.0'"/> <!-- Minimum map size (m) -->
             <param name="GridGlobal/OccupancyThr" value="'0.5'"/> <!-- Threshold for occupancy -->
             
             <param name="Kp/MaxFeatures"          value="$(var rtabmap_max_features)"/>
-            <param name="Marker/Priors"           value="'11 2.5 2.5 0.4 1.57 1.57 0|7 3.4 1.8 0.4 1.57 0 -1.57'"/>
+            <param name="Marker/Priors"           value="'11 2.5 2.5 0.2 1.57 1.57 0|7 3.4 1.8 0.2 1.57 0 -1.57|111 2.5 2.5 0.2 1.57 1.57 0|107 3.4 1.8 0.2 1.57 0 -1.57'"/>
             <param name="Optimizer/PriorsIgnored" value="'false'"/>
             
             <param name="database_path"           value="~/.ros/$(var ns)rtabmap.db"/>
@@ -283,7 +287,7 @@
     </group>
 
     <group if="$(var sim)">
-        <node exec="create" pkg="ros_gz_sim" args="--topic $(var entity_name)/robot_description --name $(var entity_name) -x $(var starting_x) -y 1.75 -z 0.0 -Y $(var starting_yaw)"/>
+        <node exec="create" pkg="ros_gz_sim" args="--topic $(var entity_name)/robot_description --name $(var entity_name) -x $(var starting_x) -y $(var starting_y) -z 0.0 -Y $(var starting_yaw)"/>
 
         <node name="image_bridge_cam_1_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_1_name)/color/image_raw"                  if="$(eval '\'1\' in $(var cams)')"/>
         <node name="image_bridge_cam_1_depth" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_1_name)/aligned_depth_to_color/image_raw" if="$(eval '\'1\' in $(var cams)')"/>

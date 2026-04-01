@@ -23,6 +23,7 @@ from lunabot_behavior.states.main_wait_for_mini_align import MainWaitForAlignSta
 from lunabot_behavior.states.align_to_mini_bot import AlignToMiniBotState
 from lunabot_behavior.states.wait_for_approach import WaitForApproachState
 from lunabot_behavior.states.wait_for_diverge import WaitForDivergeState
+from lunabot_behavior.states.init import InitRetreat, SetupMap
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -33,7 +34,8 @@ import math
 class MainStates(Enum):
     
     # ===== INIT SECTION (1) =====
-    INIT = (State(), 10)
+    INIT_MAP = (SetupMap(True), 10)
+    INIT_MOVE = (InitRetreat(True), 10)
     INIT_STALL = (State(), 19)
     
     STARTING_PLUNGE = (Plunge(), 11)
@@ -110,9 +112,10 @@ class MainStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
-            (MainStates.INIT, Events.SUCCESS): MainStates.STARTING_PLUNGE,
-            (MainStates.INIT, Events.STALL): MainStates.INIT_STALL,
-            (MainStates.INIT_STALL, Events.SUCCESS): MainStates.INIT,
+            (MainStates.INIT_MAP, Events.SUCCESS): MainStates.INIT_MOVE,
+            (MainStates.INIT_MOVE, Events.SUCCESS): MainStates.STARTING_PLUNGE,
+            (MainStates.INIT_MOVE, Events.STALL): MainStates.INIT_STALL,
+            (MainStates.INIT_STALL, Events.SUCCESS): MainStates.INIT_MOVE,
             
             (MainStates.STARTING_PLUNGE, Events.SUCCESS): MainStates.STARTING_RAISE,
             (MainStates.STARTING_PLUNGE, Events.STALL): MainStates.STARTING_PLUNGE_STALL,
@@ -196,9 +199,10 @@ def main(args=None):
 
     manager = StateManager(MainStates, MainStates.WAIT_FOR_MINI_ALIGN, Events, Event)
 
-    rclpy.spin(manager)
-
-    manager.stop_current_state()
+    try:
+        rclpy.spin(manager)
+    finally:
+        manager.stop_current_state()
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically

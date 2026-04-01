@@ -8,18 +8,16 @@ Panels:
         - /Status1
         - /TF1/Frames1
         - /Map1
-        - /PointCloud21
-        - /PointCloud22
-        - /Path1
-        - /Pose1
-        - /Marker1
-        - /RobotModel1
         - /RobotModel1/Description Topic1
+        - /Marker2
+        - /Marker3
+        - /Marker4
         - /Marker5
-        - /Marker5/Topic1
-        - /Path2
+        - /Marker6
+        - /Marker6/Topic1
+        - /Marker7
       Splitter Ratio: 0.5
-    Tree Height: 434
+    Tree Height: 364
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -141,6 +139,8 @@ Visualization Manager:
                   {}
                 d455_back_rgb_link:
                   tag36h11:11:
+                    {}
+                  tag36h11:7:
                     {}
               deposition_apriltag_link:
                 deposition_apriltag_optical_frame:
@@ -470,8 +470,21 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /linkup_segment
+        Value: /short_segment
       Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: false
+      Name: Marker
+      Namespaces:
+        {}
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /linkup_segment
+      Value: false
     - Alpha: 1
       Buffer Length: 1
       Class: rviz_default_plugins/Path
