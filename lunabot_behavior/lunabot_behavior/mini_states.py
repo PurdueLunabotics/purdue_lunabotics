@@ -8,7 +8,7 @@ from lunabot_msgs.msg import Event
 import sys
 
 from lunabot_behavior.states.align_to_angle import AlignToAngle
-from lunabot_behavior.states.separate_main import SeparateMain
+from lunabot_behavior.states.separate_from_main import SeparateFromMainState
 from lunabot_behavior.states.traverse_to_berm import TraverseToBerm
 from lunabot_behavior.states.traverse import NoPath, Traverse, Stall
 from lunabot_behavior.states.deposit import Deposit
@@ -18,6 +18,7 @@ from lunabot_behavior.states.find_linkup import FindLinkup
 from lunabot_behavior.states.align_to_main_bot import AlignToMainBotState
 from lunabot_behavior.states.mini_wait_for_main_align import MiniWaitForAlignState
 from lunabot_behavior.states.approach_main import ApproachMainState
+from lunabot_behavior.states.collect import CollectRegolithState
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -60,9 +61,9 @@ class MiniStates(Enum):
     APPROACH_MAIN = ApproachMainState()
     APPROACH_MAIN_STALL = State()
 
-    COLLECT_REGOLITH = State()
+    COLLECT_REGOLITH = CollectRegolithState()
 
-    SEPARATE_FROM_MAIN = SeparateMain()
+    SEPARATE_FROM_MAIN = SeparateFromMainState()
     SEPARATE_FROM_MAIN_STALL = Stall()
 
     @staticmethod
@@ -116,7 +117,7 @@ class MiniStates(Enum):
             (MiniStates.APPROACH_MAIN, Events.STALL): MiniStates.APPROACH_MAIN_STALL,
             (MiniStates.APPROACH_MAIN_STALL, Events.SUCCESS): MiniStates.APPROACH_MAIN,
             
-            (MiniStates.COLLECT_REGOLITH, Events.PROCEED): MiniStates.SEPARATE_FROM_MAIN,
+            (MiniStates.COLLECT_REGOLITH, Events.SUCCESS): MiniStates.SEPARATE_FROM_MAIN,
 
             (MiniStates.SEPARATE_FROM_MAIN, Events.SUCCESS): MiniStates.TRAVERSE_TO_BERM,
             (MiniStates.SEPARATE_FROM_MAIN, Events.STALL): MiniStates.SEPARATE_FROM_MAIN_STALL,

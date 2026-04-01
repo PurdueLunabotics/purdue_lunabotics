@@ -21,6 +21,8 @@ from lunabot_behavior.states.trench import Trench
 from lunabot_behavior.states.align_to_linkup import AlignToLinkup
 from lunabot_behavior.states.main_wait_for_mini_align import MainWaitForAlignState
 from lunabot_behavior.states.align_to_mini_bot import AlignToMiniBotState
+from lunabot_behavior.states.wait_for_approach import WaitForApproachState
+from lunabot_behavior.states.wait_for_diverge import WaitForDivergeState
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -70,9 +72,9 @@ class MainStates(Enum):
 
     ALIGN_TO_MINI = AlignToMiniBotState()
 
-    WAIT_FOR_APPROACH = State()
+    WAIT_FOR_APPROACH = WaitForApproachState()
 
-    WAIT_FOR_DIVERGE = State() # This will stay as State(), no logic needed
+    WAIT_FOR_DIVERGE = WaitForDivergeState()
 
     TRAVERSE_TO_BERM = TraverseToBerm(True)
     TRAVERSE_TO_BERM_STALL = Stall()
@@ -84,7 +86,7 @@ class MainStates(Enum):
     APPROACH_BERM = ApproachBerm()
     APPROACH_BERM_STALL = Stall()
     
-    DEPOSIT = Deposit(True)
+    DEPOSIT = Deposit(transfer=True)
     DEPOSIT_STALL = State()
     
     DEPOSIT_BERM = Deposit()
@@ -150,11 +152,13 @@ class MainStates(Enum):
 
             (MainStates.ALIGN_TO_MINI, Events.SUCCESS): MainStates.WAIT_FOR_APPROACH,
 
+            (MainStates.WAIT_FOR_APPROACH, Events.SUCCESS): MainStates.DEPOSIT,
+
             (MainStates.DEPOSIT, Events.SUCCESS): MainStates.WAIT_FOR_DIVERGE,
             (MainStates.DEPOSIT, Events.STALL): MainStates.DEPOSIT_STALL,
             (MainStates.DEPOSIT_STALL, Events.SUCCESS): MainStates.DEPOSIT,
             
-            (MainStates.WAIT_FOR_DIVERGE, Events.PROCEED): MainStates.ALIGN_TO_TRENCH,
+            (MainStates.WAIT_FOR_DIVERGE, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
 
             # in case minibot is indisposed and big bot has to make full cycles
             (MainStates.TRAVERSE_TO_BERM, Events.ARRIVED): MainStates.ALIGN_TO_BERM,

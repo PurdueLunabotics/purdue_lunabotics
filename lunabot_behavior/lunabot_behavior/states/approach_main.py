@@ -5,6 +5,7 @@ import rclpy.time
 from rclpy.duration import Duration
 from rclpy.time import Time
 from geometry_msgs.msg import Twist, PoseStamped, Point, Pose
+from std_msgs.msg import Bool
 from visualization_msgs.msg import Marker
 from apriltag_msgs.msg import AprilTagDetectionArray
 from tf_transformations import euler_from_quaternion
@@ -55,6 +56,7 @@ class ApproachMainState(State):
   def setup(self, manager: Node):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "/mini/cmd_vel", 10)
     self.visual_publisher = manager.create_publisher(Marker, "/mini/approach_visual", 10)
+    self.aligned_msg_publisher = manager.create_publisher(Bool, "/behavior/mini_aligned", 10)
     manager.create_subscription(PoseStamped, "/mini/position", self.odom_callback, 10)
     manager.create_subscription(AprilTagDetectionArray, "/mini/d455_back/detections", self.apriltag_callback, 10)
     self.node = manager
@@ -94,7 +96,6 @@ class ApproachMainState(State):
             apriltag_in_camera_frame = self.tf_buffer.lookup_transform("mini/d455_back_rgb_link", "main_deposition", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
 
             distance = apriltag_in_camera_frame.transform.translation.z 
-            print(distance)
 
             error = self.DISTANCE_GOAL - distance
 
@@ -105,6 +106,7 @@ class ApproachMainState(State):
             # if aligned, return success for next state, and the offset from mini to the apriltag (used by main bot)
             if (self.success_count >= self.SUCCESS_THRESHOLD):
                 self.remove_marker()
+                self.publish_aligned_msg()
                 return Events.SUCCESS
             
             velocity = self.runPID(error)
@@ -120,6 +122,7 @@ class ApproachMainState(State):
       if (self.lost_count >= self.LOST_APRILTAG_THRESHOLD):
         self.lost_count = 0
         self.node.get_logger().info("Behavior: Exiting approach due to LOST apriltag!")
+        self.publish_aligned_msg()
         return Events.SUCCESS
 
     return None
@@ -165,6 +168,13 @@ class ApproachMainState(State):
     vel.linear.x = velocity
 
     self.cmd_vel_publisher.publish(vel)
+
+  def publish_aligned_msg(self):
+    msg = Bool()
+    msg.data=True
+
+    for i in range(10):
+      self.aligned_msg_publisher.publish(msg)
 
 
   def visualize_alignment(self, main_bot_pose: Pose):
