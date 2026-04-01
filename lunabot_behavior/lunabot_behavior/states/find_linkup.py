@@ -150,8 +150,8 @@ class FindLinkup(Traverse):
                 p1_dist -= get_distance_from_berm(linkup_segment[0])
                 p2_dist -= get_distance_from_berm(linkup_segment[1])
 
-            main_target = linkup_segment[0] if p1_dist < p2_dist else linkup_segment[1]
-            mini_target = linkup_segment[0] if p1_dist > p2_dist else linkup_segment[1]
+            main_target = linkup_segment[0] if linkup_segment[0][0] > linkup_segment[1][0] else linkup_segment[1]
+            mini_target = linkup_segment[0] if linkup_segment[0][0] <= linkup_segment[1][0] else linkup_segment[1]
 
             vector = mini_target - main_target
             
