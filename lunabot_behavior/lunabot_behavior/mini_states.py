@@ -26,45 +26,50 @@ from lunabot_behavior.state_manager import StateManager
 import rclpy
 
 class MiniStates(Enum):
-    INIT = State()
-    INIT_STALL = State()
+    # ===== INIT SECTION (1) =====
+    INIT = (State(), 10)
+    INIT_STALL = (State(), 19)
     
-    FIND_LINKUP = FindLinkup()
-    FIND_LINKUP_STALL = Stall()
-    FIND_LINKUP_NO_PATH = NoPath()
-
-    TRAVERSE_TO_BERM = TraverseToBerm(False)
-    TRAVERSE_TO_BERM_STALL = Stall()
-    TRAVERSE_TO_BERM_NO_PATH = NoPath()
-
-    ALIGN_TO_BERM = AlignToAngle(270)
-    ALIGN_TO_BERM_STALL = Stall()
+    FIND_LINKUP = (FindLinkup(), 11)
+    FIND_LINKUP_STALL = (Stall(), 19)
+    FIND_LINKUP_NO_PATH = (NoPath(), 18)
     
-    APPROACH_BERM = ApproachBerm()
-    APPROACH_BERM_STALL = Stall()
+    # ===== LINKUP SECTION (2) =====
+    ALIGN_TO_MAIN = (AlignToMainBotState(), 29)
+    ALIGN_TO_MAIN_STALL = (State(), 29)
+
+    WAIT_FOR_MAIN_ALIGN = (MiniWaitForAlignState(), 0)
     
-    RETREAT_BERM = RetreatBerm()
-    RETREAT_BERM_STALL = Stall()
+    APPROACH_MAIN = (ApproachMainState(),21)
+    APPROACH_MAIN_STALL = (State(), 29)
 
-    DEPOSIT = Deposit()
-    DEPOSIT_STALL = State()
+    COLLECT_REGOLITH = (CollectRegolithState(), 22)
 
-    MOVE_TO_STAGING = Traverse(PoseStamped(), False)
-    MOVE_TO_STAGING_STALL = Stall()
-    MOVE_TO_STAGING_NO_PATH = NoPath()
+    SEPARATE_FROM_MAIN = (SeparateFromMainState(),23)
+    SEPARATE_FROM_MAIN_STALL = (Stall(),29)
 
-    ALIGN_TO_MAIN = AlignToMainBotState()
-    ALIGN_TO_MAIN_STALL = State()
+    # ===== TRAVERSAL SECTION (3) =====
 
-    WAIT_FOR_MAIN_ALIGN = MiniWaitForAlignState()
+    TRAVERSE_TO_BERM = (TraverseToBerm(False), 30)
+    TRAVERSE_TO_BERM_STALL = (Stall(), 39)
+    TRAVERSE_TO_BERM_NO_PATH = (NoPath(), 38)
+
+    ALIGN_TO_BERM = (AlignToAngle(270), 31)
+    ALIGN_TO_BERM_STALL = (Stall(), 39)
     
-    APPROACH_MAIN = ApproachMainState()
-    APPROACH_MAIN_STALL = State()
+    MOVE_TO_STAGING = (Traverse(PoseStamped(), False), 32)
+    MOVE_TO_STAGING_STALL = (Stall(), 39)
+    MOVE_TO_STAGING_NO_PATH = (NoPath(), 38)
+    # ===== DEPOSIT SECTION (4) =====
+    
+    APPROACH_BERM = (ApproachBerm(), 40)
+    APPROACH_BERM_STALL = (Stall(), 49)
+    
+    DEPOSIT = (Deposit(), 41)
+    DEPOSIT_STALL = (State(), 49)
 
-    COLLECT_REGOLITH = CollectRegolithState()
-
-    SEPARATE_FROM_MAIN = SeparateFromMainState()
-    SEPARATE_FROM_MAIN_STALL = Stall()
+    RETREAT_BERM = (RetreatBerm(), 42)
+    RETREAT_BERM_STALL = (Stall(), 49)
 
     @staticmethod
     def get_transition(state, event: Events):

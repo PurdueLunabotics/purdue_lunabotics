@@ -105,7 +105,7 @@ class ManualController(Node):
         self.last_joy = Joy()
         self.last_joy.buttons = [0,0,0,0,0,0,0,0,0,0,0]
 
-        self.led_publisher = self.create_publisher(Int32, "led_color", 10);
+        self.led_publisher = self.create_publisher(Int32, "led_color", 10)
 
         self.driving_mode = "Forwards"
         
@@ -230,8 +230,8 @@ class ManualController(Node):
     def loop(self):
         if self.publish and not self.autonomy:
             color = Int32()
-            color.data = 3
-            self.set_color(color) # Blue for manual control
+            color.data = 1
+            self.set_color(color) # Rainbow for manual control
             self.effort_publisher.publish(self.effort_msg)
 
     def stop(self):
