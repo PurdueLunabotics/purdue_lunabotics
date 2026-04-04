@@ -173,8 +173,8 @@ class FindLinkup(Traverse):
             # print(f"short vec: {short_segment}")
 
             # update after finding shorter segment
-            main_target = short_segment[0]
-            mini_target = short_segment[1]
+            main_target = short_segment[0] if short_segment[0][0] > short_segment[1][0] else short_segment[1]
+            mini_target = short_segment[0] if short_segment[0][0] <= short_segment[1][0] else short_segment[1]
 
             linkup.main_target = Point()
             linkup.main_target.x = main_target[0]
