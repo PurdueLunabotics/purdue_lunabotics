@@ -6,6 +6,8 @@ from geometry_msgs.msg import PoseStamped
 from lunabot_msgs.msg import Event
 import sys
 
+from lunabot_config.led_colors import LedColor
+
 from lunabot_behavior.states.align_to_angle import AlignToAngle
 from lunabot_behavior.states.separate_from_main import SeparateFromMainState
 from lunabot_behavior.states.proceed import Proceed
@@ -30,51 +32,51 @@ from lunabot_behavior.states.traverse_to_linkup import TraverseToLinkup
 
 class MiniStates(Enum):
     # ===== INIT SECTION (1) =====
-    INIT_MAP = (SetupMap(False), 10)
-    INIT_MOVE = (InitRetreat(False), 10)
-    INIT_STALL = (State(), 19)
+    INIT_MAP = (SetupMap(False), (LedColor.GREEN, LedColor.ORANGE))
+    INIT_MOVE = (InitRetreat(False), (LedColor.GREEN, LedColor.YELLOW))
+    INIT_STALL = (State(), (LedColor.GREEN, LedColor.RED))
     
-    FIND_LINKUP = (FindLinkup(), 11)
-    FIND_LINKUP_STALL = (Stall(), 19)
-    FIND_LINKUP_NO_PATH = (NoPath(), 18)
-    SEND_FOUND_LINKUP = (Proceed(False), 11)
+    FIND_LINKUP = (FindLinkup(), (LedColor.GREEN, LedColor.GREEN))
+    FIND_LINKUP_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
+    FIND_LINKUP_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.RED, LedColor.ORANGE))
+    SEND_FOUND_LINKUP = (Proceed(False), (LedColor.GREEN, LedColor.BLUE))
     
     # ===== LINKUP SECTION (2) =====
-    ALIGN_TO_MAIN = (AlignToMainBotState(), 29)
-    ALIGN_TO_MAIN_STALL = (State(), 29)
+    ALIGN_TO_MAIN = (AlignToMainBotState(), (LedColor.YELLOW, LedColor.ORANGE))
+    ALIGN_TO_MAIN_STALL = (State(), (LedColor.YELLOW, LedColor.RED))
 
-    WAIT_FOR_MAIN_ALIGN = (MiniWaitForAlignState(), 0)
+    WAIT_FOR_MAIN_ALIGN = (MiniWaitForAlignState(), (LedColor.YELLOW, LedColor.YELLOW))
     
-    APPROACH_MAIN = (ApproachMainState(),21)
-    APPROACH_MAIN_STALL = (State(), 29)
+    APPROACH_MAIN = (ApproachMainState(),(LedColor.YELLOW, LedColor.GREEN))
+    APPROACH_MAIN_STALL = (State(), (LedColor.YELLOW, LedColor.RED))
 
-    COLLECT_REGOLITH = (CollectRegolithState(), 22)
+    COLLECT_REGOLITH = (CollectRegolithState(), (LedColor.YELLOW, LedColor.BLUE))
 
-    SEPARATE_FROM_MAIN = (SeparateFromMainState(),23)
-    SEPARATE_FROM_MAIN_STALL = (Stall(),29)
+    SEPARATE_FROM_MAIN = (SeparateFromMainState(), (LedColor.YELLOW, LedColor.MAGENTA))
+    SEPARATE_FROM_MAIN_STALL = (Stall(), (LedColor.YELLOW, LedColor.RED))
 
     # ===== TRAVERSAL SECTION (3) =====
 
-    TRAVERSE_TO_BERM = (TraverseToBerm(False), 30)
-    TRAVERSE_TO_BERM_STALL = (Stall(), 39)
-    TRAVERSE_TO_BERM_NO_PATH = (NoPath(), 38)
+    TRAVERSE_TO_BERM = (TraverseToBerm(False), (LedColor.BLUE, LedColor.ORANGE))
+    TRAVERSE_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
+    TRAVERSE_TO_BERM_NO_PATH = (NoPath(), (LedColor.BLUE, LedColor.RED, LedColor.ORANGE))
 
-    ALIGN_TO_BERM = (AlignToAngle(270), 31)
-    ALIGN_TO_BERM_STALL = (Stall(), 39)
+    ALIGN_TO_BERM = (AlignToAngle(270), (LedColor.BLUE, LedColor.YELLOW))
+    ALIGN_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
-    MOVE_TO_STAGING = (TraverseToLinkup(False, False), 32)
-    MOVE_TO_STAGING_STALL = (Stall(), 39)
-    MOVE_TO_STAGING_NO_PATH = (NoPath(), 38)
+    MOVE_TO_STAGING = (TraverseToLinkup(False, False), (LedColor.BLUE, LedColor.GREEN))
+    MOVE_TO_STAGING_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
+    MOVE_TO_STAGING_NO_PATH = (NoPath(), (LedColor.BLUE, LedColor.RED, LedColor.ORANGE))
     # ===== DEPOSIT SECTION (4) =====
     
-    APPROACH_BERM = (ApproachBerm(), 40)
-    APPROACH_BERM_STALL = (Stall(), 49)
+    APPROACH_BERM = (ApproachBerm(), (LedColor.MAGENTA, LedColor.ORANGE))
+    APPROACH_BERM_STALL = (Stall(), (LedColor.MAGENTA, LedColor.RED))
     
-    DEPOSIT = (Deposit(), 41)
-    DEPOSIT_STALL = (State(), 49)
+    DEPOSIT = (Deposit(), (LedColor.MAGENTA, LedColor.YELLOW))
+    DEPOSIT_STALL = (State(), (LedColor.MAGENTA, LedColor.RED))
 
-    RETREAT_BERM = (RetreatBerm(), 42)
-    RETREAT_BERM_STALL = (Stall(), 49)
+    RETREAT_BERM = (RetreatBerm(), (LedColor.MAGENTA, LedColor.GREEN))
+    RETREAT_BERM_STALL = (Stall(), (LedColor.MAGENTA, LedColor.RED))
 
     @staticmethod
     def get_transition(state, event: Events):

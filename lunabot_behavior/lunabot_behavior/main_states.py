@@ -6,6 +6,8 @@ import sys
 from geometry_msgs.msg import PoseStamped
 from lunabot_msgs.msg import Event
 
+from lunabot_config.led_colors import LedColor
+
 from lunabot_behavior.states.approach_trench import ApproachTrench, RetreatTrench
 from lunabot_behavior.states.align_trench import AlignTrench
 from lunabot_behavior.states.align_to_angle import AlignToAngle
@@ -34,80 +36,80 @@ import math
 class MainStates(Enum):
     
     # ===== INIT SECTION (1) =====
-    INIT_MAP = (SetupMap(True), 10)
-    INIT_MOVE = (InitRetreat(True), 10)
-    INIT_STALL = (State(), 19)
+    INIT_MAP = (SetupMap(True), (LedColor.GREEN, LedColor.ORANGE))
+    INIT_MOVE = (InitRetreat(True), (LedColor.GREEN, LedColor.YELLOW))
+    INIT_STALL = (State(), (LedColor.GREEN, LedColor.RED))
     
-    STARTING_PLUNGE = (Plunge(), 11)
-    STARTING_PLUNGE_STALL = (State(), 19)
+    STARTING_PLUNGE = (Plunge(), (LedColor.GREEN, LedColor.GREEN))
+    STARTING_PLUNGE_STALL = (State(), (LedColor.GREEN, LedColor.RED))
     
-    STARTING_RAISE = (Raise(), 12)
-    STARTING_RAISE_STALL = (State(), 19)
+    STARTING_RAISE = (Raise(), (LedColor.GREEN, LedColor.BLUE))
+    STARTING_RAISE_STALL = (State(), (LedColor.GREEN, LedColor.RED))
     
-    WAIT_FOR_LINKUP = (State(), 13) # This will stay as State(), no logic needed
+    WAIT_FOR_LINKUP = (State(), (LedColor.GREEN, LedColor.MAGENTA)) # This will stay as State(), no logic needed
     
-    TRAVERSE_TO_LINKUP = (TraverseToLinkup(True, True), 14)
-    TRAVERSE_TO_LINKUP_STALL = (Stall(), 19)
-    TRAVERSE_TO_LINKUP_NO_PATH = (NoPath(), 18)
+    TRAVERSE_TO_LINKUP = (TraverseToLinkup(True, True), (LedColor.GREEN, LedColor.WHITE))
+    TRAVERSE_TO_LINKUP_STALL =  (Stall(), (LedColor.GREEN, LedColor.RED))
+    TRAVERSE_TO_LINKUP_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.RED, LedColor.ORANGE))
     
     # ===== EXCAVATION SECTION (5) =====
     
-    ALIGN_TO_TRENCH = (AlignTrench(), 50)
-    ALIGN_TO_TRENCH_STALL = (State(), 59)
+    ALIGN_TO_TRENCH = (AlignTrench(), (LedColor.WHITE, LedColor.ORANGE))
+    ALIGN_TO_TRENCH_STALL = (State(), (LedColor.WHITE, LedColor.RED))
     
-    APPROACH_TRENCH = (ApproachTrench(), 51)
-    APPROACH_TRENCH_STALL = (Stall(), 59)
+    APPROACH_TRENCH = (ApproachTrench(), (LedColor.WHITE, LedColor.YELLOW))
+    APPROACH_TRENCH_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
     
-    PLUNGE_ACT = (Plunge(), 52)
-    PLUNGE_ACT_STALL = (State(), 59)
+    PLUNGE_ACT = (Plunge(), (LedColor.WHITE, LedColor.GREEN))
+    PLUNGE_ACT_STALL = (State(), (LedColor.WHITE, LedColor.RED))
     
-    TRENCH = (Trench(), 53)
-    TRENCH_STALL = (State(), 59)
+    TRENCH = (Trench(), (LedColor.WHITE, LedColor.BLUE))
+    TRENCH_STALL = (State(), (LedColor.WHITE, LedColor.RED))
     
-    RAISE_ACT = (Raise(), 54)
-    RAISE_ACT_STALL = (State(), 59)
+    RAISE_ACT = (Raise(), (LedColor.WHITE, LedColor.MAGENTA))
+    RAISE_ACT_STALL = (State(), (LedColor.WHITE, LedColor.RED))
 
-    RETREAT_TRENCH = (RetreatTrench(), 55)
-    RETREAT_TRENCH_STALL = (Stall(), 59)
+    RETREAT_TRENCH = (RetreatTrench(), (LedColor.WHITE, LedColor.WHITE))
+    RETREAT_TRENCH_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
 
     # ===== LINKUP SECTION (2) =====
 
-    ALIGN_TO_LINKUP = (AlignToLinkup(), 20)
-    ALIGN_TO_LINKUP_STALL = (State(), 29)
+    ALIGN_TO_LINKUP = (AlignToLinkup(), (LedColor.YELLOW, LedColor.ORANGE))
+    ALIGN_TO_LINKUP_STALL = (State(), (LedColor.YELLOW, LedColor.RED))
 
-    WAIT_FOR_MINI_ALIGN = (MainWaitForAlignState(),0)
+    WAIT_FOR_MINI_ALIGN = (MainWaitForAlignState(), (LedColor.YELLOW, LedColor.YELLOW))
 
-    ALIGN_TO_MINI = (AlignToMiniBotState(),0)
+    ALIGN_TO_MINI = (AlignToMiniBotState(), (LedColor.YELLOW, LedColor.GREEN))
 
-    WAIT_FOR_APPROACH = (WaitForApproachState(),0)
+    WAIT_FOR_APPROACH = (WaitForApproachState(), (LedColor.YELLOW, LedColor.BLUE))
 
-    DEPOSIT = (Deposit(transfer=True), 21)
-    DEPOSIT_STALL = (State(),29)
+    DEPOSIT = (Deposit(transfer=True), (LedColor.YELLOW, LedColor.MAGENTA))
+    DEPOSIT_STALL = (State(), (LedColor.YELLOW, LedColor.RED))
 
-    WAIT_FOR_DIVERGE = (WaitForDivergeState(),22)
+    WAIT_FOR_DIVERGE = (WaitForDivergeState(), (LedColor.YELLOW, LedColor.WHITE))
 
     # ===== SINGLE ROBOT TRAVERSAL SECTION (3) =====
 
-    TRAVERSE_TO_BERM = (TraverseToBerm(True), 30)
-    TRAVERSE_TO_BERM_STALL = (Stall(), 39)
-    TRAVERSE_TO_BERM_NO_PATH = (NoPath(), 38)
+    TRAVERSE_TO_BERM = (TraverseToBerm(True), (LedColor.BLUE, LedColor.ORANGE))
+    TRAVERSE_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
+    TRAVERSE_TO_BERM_NO_PATH = (NoPath(), (LedColor.BLUE, LedColor.RED, LedColor.ORANGE))
 
-    ALIGN_TO_BERM = (AlignToAngle(270), 31)
-    ALIGN_TO_BERM_STALL = (Stall(), 39)
+    ALIGN_TO_BERM = (AlignToAngle(270), (LedColor.BLUE, LedColor.YELLOW))
+    ALIGN_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
-    APPROACH_BERM = (ApproachBerm(), 32)
-    APPROACH_BERM_STALL = (Stall(), 39)
+    APPROACH_BERM = (ApproachBerm(), (LedColor.BLUE, LedColor.GREEN))
+    APPROACH_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
     # ===== SINGLE ROBOT DEPOSIT SECTION (4) =====
     
     
-    DEPOSIT_BERM = (Deposit(), 40)
-    DEPOSIT_BERM_STALL = (State(), 49)
+    DEPOSIT_BERM = (Deposit(), (LedColor.MAGENTA, LedColor.ORANGE))
+    DEPOSIT_BERM_STALL = (State(), (LedColor.MAGENTA, LedColor.RED))
     
-    RETREAT_BERM = (RetreatBerm(), 41)
-    RETREAT_BERM_STALL = (Stall(), 49)
+    RETREAT_BERM = (RetreatBerm(), (LedColor.MAGENTA, LedColor.YELLOW))
+    RETREAT_BERM_STALL = (Stall(), (LedColor.MAGENTA, LedColor.RED))
 
-    IDLE = (State(), 99)
+    IDLE = (State(), (LedColor.RED, LedColor.RED))
 
     @staticmethod
     def get_transition(state, event: Events):

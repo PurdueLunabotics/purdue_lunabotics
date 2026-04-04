@@ -8,6 +8,8 @@ from lunabot_behavior.state import Events
 from typing import Type
 from lunabot_msgs.msg import Event
 
+from lunabot_config.led_colors import colorsToInteger, LedColor
+
 class StateManager(Node):
     def __init__(self, states: Type[Enum], initial_state: Enum, events: Type[Events], event_type: Type[Event]):
         super().__init__("state_manager")
@@ -21,12 +23,17 @@ class StateManager(Node):
         self.events = events
         self.state = initial_state
         self.stopped = False
+
         self.event_sub = self.create_subscription(event_type, "events", self.event_cb, 10)
         self.led_pub = self.create_publisher(Int32, "led_color", 10)
+
         self.timer = self.create_timer(0.1, self.periodic)
+
         self.get_logger().info(f"starting at state {self.state}")
         self.state.value[0].start()
-        self.led_pub.publish(Int32(data=self.state.value[1]))
+        
+        colors = self.state.value[1]
+        self.led_pub.publish(Int32(data = colorsToInteger(colors)))
 
 
     def event_cb(self, event: UInt8):
@@ -41,7 +48,9 @@ class StateManager(Node):
             self.state.value[0].exit()
             self.state = next_state
             self.state.value[0].start()
-            self.led_pub.publish(Int32(data=self.state.value[1]))
+
+            colors = self.state.value[1]
+            self.led_pub.publish(Int32(data = colorsToInteger(colors)))
 
     def periodic(self):
         if not self.stopped:
@@ -53,4 +62,4 @@ class StateManager(Node):
     def stop_current_state(self):
         self.state.value[0].exit()
         self.stopped = True
-        self.led_pub.publish(Int32(data=0))
+        self.led_pub.publish(Int32(data= colorsToInteger(LedColor.OFF)))

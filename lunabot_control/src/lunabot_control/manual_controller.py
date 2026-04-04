@@ -6,6 +6,7 @@ from rclpy.node import Node
 from rclpy.parameter import Parameter
 from sensor_msgs.msg import Joy
 from lunabot_msgs.msg import RobotEffort
+from lunabot_config.led_colors import LedColor, colorsToInteger
 
 from std_msgs.msg import Int32, Bool
 
@@ -130,8 +131,8 @@ class ManualController(Node):
     def _autonomy_cb(self, autonomy: Bool):
         self.autonomy = autonomy.data
 
-    def set_color(self, new_color: Int32):
-        self.led_publisher.publish(new_color);
+    def set_color(self, new_color: LedColor):
+        self.led_publisher.publish(Int32(data = colorsToInteger(new_color)));
 
     def joy_callback(self, joy):
         # X button: Switch between driving forwards and backwards'
@@ -229,9 +230,7 @@ class ManualController(Node):
 
     def loop(self):
         if self.publish and not self.autonomy:
-            color = Int32()
-            color.data = 1
-            self.set_color(color) # Rainbow for manual control
+            self.set_color(LedColor.RAINBOW) # Rainbow for manual control
             self.effort_publisher.publish(self.effort_msg)
 
     def stop(self):

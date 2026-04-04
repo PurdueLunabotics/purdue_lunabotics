@@ -164,98 +164,99 @@ void Led_Strip::init() {
 }
 
 void Led_Strip::set_color(int32_t color_in) {
-  CRGB color_choice1;
-  CRGB color_choice2;
-  int size1 = NUM_LEDS / 2;
 
-  int color1 = color_in % 10
-  int color2 = color_in / 10
+  int MAX_DIGITS = 3; // how many digits are allowed in this integer (each digit is one color)
 
-  //minor color
-  switch (color_1) {
-  case 0:
-    color_choice1 = CRGB::Black;
-    break;
-  case 1:
-    color_choice1 = CRGB::Yellow;
-    break;
-  case 2:
-    color_choice1 = CRGB::Green;
-    break;
-  case 3:
-    color_choice1 = CRGB::Blue;
-    break;
-  case 4:
-    color_choice1 = CRGB::Magenta;
-    break;
-  case 5:
-    color_choice1 = CRGB::White;
-    break;
-  case 8:
-    //NO PATH
-    color_choice1 = CRGB::Orange;
-    break;
-  case 9:
-    //STALL
-    color_choice1 = CRGB::Red;
-    break;
-  default:
-    color_choice1 = CRGB::Black;
-    break;
+  CRGB RAINBOW_MAGIC_WORD = 0xDEDEDE;
+
+  int digits[MAX_DIGITS] = {0};
+
+  int nonzero_digits = 0; // how many digits are actually holding a color
+  for (int i = 0; i < MAX_DIGITS; i++) {
+    digits[i] = color_in % 10;
+    color_in /= 10;
+
+    if (digits[i] != 0) {
+      nonzero_digits++;
+    }
   }
-  //major color
-  switch (color_2) {
-  case 0:
-    color_choice2 = CRGB::Black;
-    break;
-  case 1:
-    //INIT
-    color_choice2 = CRGB::Green;
-    break;
-  case 2:
-    //LINKUP
-    color_choice2 = CRGB::Gold;
-    break;
-  case 3:
-    //Traversal
-    color_choice2 = CRGB::Blue;
-    break;
-  case 4:
-    //DEPOSIT
-    color_choice2 = CRGB::Magenta;
-    break;
-  case 5:
-    //EXCAVATE
-    color_choice2 = CRGB::White;
-    break;
-  case 9:
-    //MAJOR ERROR
-    color_choice2 = CRGB::Red;
-    break;
-  default:
-    color_choice2 = CRGB::Black;
-    break;
+
+  // if we get all zeroes, label it as one color (0 / OFF)
+  if (nonzero_digits == 0) {
+    nonzero_digits = 1;
   }
-  if (color_in == 1) {
-    int h = 0
-    int s = 255
-    int v = 255
-    for (int i = 0; i < NUM_LEDS; ++i) {
-      h += 255.0/NUM_LEDS
-      if (h > 255) {
-        h = 0
+
+  CRGB colors[MAX_DIGITS];
+
+  // fill in the array of colors with CRGB data
+  for (int i = 0; i < nonzero_digits; i++) {
+    CRGB color;
+    switch(digits[i]) {
+      case 0:
+        color = CRGB::Black;
+        break;
+      case 1:
+        color = CRGB::Red;
+        break;
+      case 2:
+        color = CRGB::Orange;
+        break;
+      case 3:
+        color = CRGB::Yellow;
+        break;
+      case 4:
+        color = CRGB::Green;
+        break;
+      case 5:
+        color = CRGB::Blue;
+        break;
+      case 6:
+        color = CRGB::Magenta;
+        break;
+      case 7:
+        color = CRGB::White;
+        break;
+      case 8:
+        color = RAINBOW_MAGIC_WORD;
+        break;
+      default:
+        color = CRGB::Black;
+        break;
+    }
+    colors[i] = color;
+  }
+
+
+  int group_size = NUM_LEDS / nonzero_digits;
+  int current_LED = 0;
+  for (int i = 0; i < nonzero_digits; i++) {
+    for (int j = 0; j < group_size; j++) {
+
+      if (current_LED >= NUM_LEDS) {
+        break;
       }
-      Led_Strip::all_led[i] = hsv2rgb_rainbow(CHSV(h, s, v))
+
+      Led_Strip::all_led[current_LED] = colors[i];
+
+      // TODO: check if this works
+      if (colors[i] == RAINBOW_MAGIC_WORD) {
+        int h = 0;
+        int s = 255;
+        int v = 255;
+
+        h = ((float) j / group_size) * 255;
+
+        CHSV hsv(h, s, v);
+        CRGB color;
+        hsv2rgb_rainbow(hsv, color);
+        Led_Strip::all_led[current_LED] = color;
+      }
+
+      current_LED++;
+
     }
   }
-  else {
-    for (int i = 0; i < size1; ++i) {
-      Led_Strip::all_led[i] = color_choice1;
-    }
-    for (int i = size1; i < NUM_LEDS; ++i) {
-      Led_Strip::all_led[i] = color_choice2;
-    }
-  }
+
   FastLED.show();
 }
 
