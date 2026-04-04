@@ -31,6 +31,8 @@ class Nav2Bridge : public rclcpp::Node {
   PoseStampedMsg odom;
   bool has_odom = false;
 
+  bool is_planning = false;
+
   public:
     Nav2Bridge() : rclcpp::Node("nav2_bridge_node") {
       odom_sub = create_subscription<PoseStampedMsg>("position", 10, [this] (PoseStampedMsg value) {
@@ -51,9 +53,12 @@ class Nav2Bridge : public rclcpp::Node {
 
   private:
     void plan_path() {
-      if (!has_goal || !has_odom) {
+      // wait for earlier thing to finish
+      if (!has_goal || !has_odom || is_planning) {
         return;
       }
+
+      is_planning = true;
 
       if (!action_compute->wait_for_action_server()) {
         RCLCPP_WARN(get_logger(), "Action server not ready yet");
@@ -82,6 +87,7 @@ class Nav2Bridge : public rclcpp::Node {
           failed.data = false;
           failed_pub->publish(failed);
         }
+        is_planning = false;
       };
 
       action_compute->async_send_goal(goal, options);

@@ -333,6 +333,10 @@ PoseStampedMsg SThetaStar::moveGoal(PoseStampedMsg start, PoseStampedMsg goal) {
     this->costmap->worldToMapEnforceBounds(start.pose.position.x, start.pose.position.y, x, y);
     Coord end = {x, y};
 
+    if (initial.x == end.x && initial.y == end.y) {
+      return goal;
+    }
+
     Coord current = initial;
     int distance_x = abs(initial.x - end.x);
     int distance_y = abs(initial.y - end.y);
