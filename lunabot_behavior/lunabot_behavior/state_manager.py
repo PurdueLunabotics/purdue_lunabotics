@@ -2,12 +2,14 @@
 
 from rclpy import Future
 from rclpy.node import Node
-from std_msgs.msg import Int32, UInt8
+from std_msgs.msg import UInt8, Int32
+from enum import Enum
+from state import Events
+from typing import Type
 from lunabot_msgs.msg import Event
 
-
 class StateManager(Node):
-    def __init__(self, states, initial_state, events, event_type):
+    def __init__(self, states: Type[Enum], initial_state: Enum, events: Type[Events], event_type: Type[Event]):
         super().__init__("state_manager")
 
         for state in states:
@@ -19,7 +21,7 @@ class StateManager(Node):
         self.events = events
         self.state = initial_state
         self.stopped = False
-        self.event_sub = self.create_subscription(Event, "events", self.event_cb, 10)
+        self.event_sub = self.create_subscription(event_type, "events", self.event_cb, 10)
         self.led_pub = self.create_publisher(Int32, "led_color", 10)
         self.timer = self.create_timer(0.1, self.periodic)
         self.get_logger().info(f"starting at state {self.state}")

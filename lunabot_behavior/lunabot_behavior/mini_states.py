@@ -1,18 +1,24 @@
+#!/usr/bin/env python3
+
 from enum import Enum
 from lunabot_msgs.msg import Event
 from geometry_msgs.msg import PoseStamped
 from lunabot_msgs.msg import Event
+import sys
 
-from lunabot_behavior.states.collect import Collect
 from lunabot_behavior.states.align_to_angle import AlignToAngle
+from lunabot_behavior.states.separate_from_main import SeparateFromMainState
 from lunabot_behavior.states.proceed import Proceed
-from lunabot_behavior.states.separate_main import SeparateMain
 from lunabot_behavior.states.traverse_to_berm import TraverseToBerm
 from lunabot_behavior.states.traverse import NoPath, Traverse, Stall
 from lunabot_behavior.states.deposit import Deposit
 from lunabot_behavior.states.approach_berm import ApproachBerm
 from lunabot_behavior.states.retreat_berm import RetreatBerm
 from lunabot_behavior.states.find_linkup import FindLinkup
+from lunabot_behavior.states.align_to_main_bot import AlignToMainBotState
+from lunabot_behavior.states.mini_wait_for_main_align import MiniWaitForAlignState
+from lunabot_behavior.states.approach_main import ApproachMainState
+from lunabot_behavior.states.collect import CollectRegolithState
 from lunabot_behavior.states.init import InitRetreat, SetupMap
 
 from lunabot_behavior.state import Events, State
@@ -34,18 +40,19 @@ class MiniStates(Enum):
     SEND_FOUND_LINKUP = (Proceed(False), 11)
     
     # ===== LINKUP SECTION (2) =====
-    ALIGN_TO_MAIN = (State(), 20)
+    ALIGN_TO_MAIN = (AlignToMainBotState(), 29)
     ALIGN_TO_MAIN_STALL = (State(), 29)
+
+    WAIT_FOR_MAIN_ALIGN = (MiniWaitForAlignState(), 0)
     
-    APPROACH_MAIN = (State(), 21)
+    APPROACH_MAIN = (ApproachMainState(),21)
     APPROACH_MAIN_STALL = (State(), 29)
 
-    COLLECT_REGOLITH = (Collect(), 22)
-    COLLECT_REGOLITH_STALL = (State(), 29)
+    COLLECT_REGOLITH = (CollectRegolithState(), 22)
 
-    SEPARATE_FROM_MAIN = (SeparateMain(), 23)
-    SEPARATE_FROM_MAIN_STALL = (Stall(), 29)
-    
+    SEPARATE_FROM_MAIN = (SeparateFromMainState(),23)
+    SEPARATE_FROM_MAIN_STALL = (Stall(),29)
+
     # ===== TRAVERSAL SECTION (3) =====
 
     TRAVERSE_TO_BERM = (TraverseToBerm(False), 30)
@@ -68,7 +75,6 @@ class MiniStates(Enum):
 
     RETREAT_BERM = (RetreatBerm(), 42)
     RETREAT_BERM_STALL = (Stall(), 49)
-    
 
     @staticmethod
     def get_transition(state, event: Events):
@@ -114,17 +120,17 @@ class MiniStates(Enum):
             (MiniStates.MOVE_TO_STAGING_STALL, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
             (MiniStates.MOVE_TO_STAGING_NO_PATH, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
 
-            (MiniStates.ALIGN_TO_MAIN, Events.SUCCESS): MiniStates.APPROACH_MAIN,
+            (MiniStates.ALIGN_TO_MAIN, Events.SUCCESS): MiniStates.WAIT_FOR_MAIN_ALIGN,
             (MiniStates.ALIGN_TO_MAIN, Events.STALL): MiniStates.ALIGN_TO_MAIN_STALL,
             (MiniStates.ALIGN_TO_MAIN_STALL, Events.SUCCESS): MiniStates.ALIGN_TO_MAIN,
+
+            (MiniStates.WAIT_FOR_MAIN_ALIGN, Events.SUCCESS): MiniStates.APPROACH_MAIN,
 
             (MiniStates.APPROACH_MAIN, Events.SUCCESS): MiniStates.COLLECT_REGOLITH,
             (MiniStates.APPROACH_MAIN, Events.STALL): MiniStates.APPROACH_MAIN_STALL,
             (MiniStates.APPROACH_MAIN_STALL, Events.SUCCESS): MiniStates.APPROACH_MAIN,
             
-            (MiniStates.COLLECT_REGOLITH, Events.PROCEED): MiniStates.SEPARATE_FROM_MAIN,
-            (MiniStates.COLLECT_REGOLITH, Events.STALL): MiniStates.COLLECT_REGOLITH_STALL,
-            (MiniStates.COLLECT_REGOLITH_STALL, Events.SUCCESS): MiniStates.COLLECT_REGOLITH,
+            (MiniStates.COLLECT_REGOLITH, Events.SUCCESS): MiniStates.SEPARATE_FROM_MAIN,
 
             (MiniStates.SEPARATE_FROM_MAIN, Events.SUCCESS): MiniStates.TRAVERSE_TO_BERM,
             (MiniStates.SEPARATE_FROM_MAIN, Events.STALL): MiniStates.SEPARATE_FROM_MAIN_STALL,
@@ -133,8 +139,8 @@ class MiniStates(Enum):
 
         return transitions.get((state, event), None)
 
-def main(args=None):
-    rclpy.init(args=args)
+def main():
+    rclpy.init(args=sys.argv)
 
     manager = StateManager(MiniStates, MiniStates.INIT_MAP, Events, Event)
 

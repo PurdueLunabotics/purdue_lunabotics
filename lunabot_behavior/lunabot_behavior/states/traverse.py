@@ -69,15 +69,15 @@ class NoPath(State):
         self.logger = manager.get_logger()
         self.manager = manager
 
-        self.logger.info("[No Path]: Waiting for costmap service")
+        # self.logger.info("[No Path]: Waiting for costmap service")
         self.costmap_get_params_service.wait_for_service()
         self.costmap_set_params_service.wait_for_service()
-        self.logger.info("[No Path]: Waiting for rtabmap service")
+        # self.logger.info("[No Path]: Waiting for rtabmap service")
         self.rtabmap_reset_service.wait_for_service()
 
         get_request = GetParameters.Request(names = ["robot_radius"])
         fut = self.costmap_get_params_service.call_async(get_request)
-        self.logger.info(f"[No Path]: fut: {fut.result()}")
+        # self.logger.info(f"[No Path]: fut: {fut.result()}")
         fut.add_done_callback(self.radius_cb)
 
     def failed_cb(self, value: Bool):
@@ -96,7 +96,7 @@ class NoPath(State):
 
     def radius_cb(self, future: rclpy.Future):
         get_response: GetParameters.Response = future.result()
-        self.logger.info(f"[No Path]: got radius: {get_response.values[0].double_value}")
+        # self.logger.info(f"[No Path]: got radius: {get_response.values[0].double_value}")
         self.initial_radius = get_response.values[0].double_value
 
     def periodic(self):

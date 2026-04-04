@@ -24,12 +24,12 @@
     <let name="ns_" if="$(eval 'len(\'$(var ns)\') > 0')" value="$(var ns)_"/>
     <let name="ns_" unless="$(eval 'len(\'$(var ns)\') > 0')" value=""/>
 
-    <let name="starting_x" if="$(eval '$(var robot_num) == 1')" value="2.75"/>
-    <let name="starting_x" if="$(eval '$(var robot_num) == 0')" value="2.0"/>
+    <let name="starting_x" if="$(eval '$(var robot_num) == 1')" value="1.5"/>
+    <let name="starting_x" if="$(eval '$(var robot_num) == 0')" value="2.5"/>
     <let name="starting_y" if="$(eval '$(var robot_num) == 1')" value="1.75"/>
     <let name="starting_y" if="$(eval '$(var robot_num) == 0')" value="1.75"/>
-    <let name="starting_yaw" if="$(eval '$(var robot_num) == 1')" value="0"/>
-    <let name="starting_yaw" if="$(eval '$(var robot_num) == 0')" value="3.14159"/>
+    <let name="starting_yaw" if="$(eval '$(var robot_num) == 1')" value="3.14159"/>
+    <let name="starting_yaw" if="$(eval '$(var robot_num) == 0')" value="0"/>
 
     <arg name="entity_name" if="$(eval '$(var robot_num) == 0')" default="dummy_bot"/>
     <arg name="entity_name" if="$(eval '$(var robot_num) == 1')" default="mini_bot"/>
@@ -176,7 +176,7 @@
 
         <node name="stall_detection_node" pkg="lunabot_control" exec="stall_detection_node" output="screen" respawn="true" unless="$(var sim)">
             <param name="~waitTime" value="2"/> 
-        </node>
+        </node> 
 
         <push_ros_namespace namespace="rtabmap"/>
 
