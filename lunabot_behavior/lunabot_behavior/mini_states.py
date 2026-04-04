@@ -139,7 +139,7 @@ class MiniStates(Enum):
 
         return transitions.get((state, event), None)
 
-def main(args=None):
+def main():
     rclpy.init(args=sys.argv)
 
     manager = StateManager(MiniStates, MiniStates.INIT_MAP, Events, Event)
