@@ -272,7 +272,7 @@
 
 
   <joint name="deposition_apriltag_joint" type="fixed">
-    <origin rpy="0.0 -0.34 3.14" xyz="-0.381 0.0 0.5"/>
+    <origin rpy="0.0 -0.34 3.14" xyz="-0.381 0.0 0.55"/>
     <parent link="base_link"/>
     <child link="deposition_apriltag_link"/>
   </joint>
