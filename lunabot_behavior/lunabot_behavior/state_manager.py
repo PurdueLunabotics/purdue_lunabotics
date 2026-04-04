@@ -4,7 +4,7 @@ from rclpy import Future
 from rclpy.node import Node
 from std_msgs.msg import UInt8, Int32
 from enum import Enum
-from state import Events, State
+from lunabot_behavior.state import Events, State
 from typing import Type
 from lunabot_msgs.msg import Event
 
