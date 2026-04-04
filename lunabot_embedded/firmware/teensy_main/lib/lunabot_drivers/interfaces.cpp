@@ -159,7 +159,7 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
 CRGB Led_Strip::all_led[Led_Strip::NUM_LEDS];
 
 void Led_Strip::init() {
-  FastLED.addLeds<WS2812B, 6, GRB>(Led_Strip::all_led, Led_Strip::NUM_LEDS);
+  FastLED.addLeds<WS2812B, 4, GRB>(Led_Strip::all_led, Led_Strip::NUM_LEDS);
   FastLED.setBrightness(Led_Strip::BRIGHTNESS);
 }
 
@@ -168,11 +168,11 @@ void Led_Strip::set_color(int32_t color_in) {
   CRGB color_choice2;
   int size1 = NUM_LEDS / 2;
 
-  int color1 = color_in % 10
-  int color2 = color_in / 10
+  int color1 = color_in % 10;
+  int color2 = color_in / 10;
 
   //minor color
-  switch (color_1) {
+  switch (color1) {
   case 0:
     color_choice1 = CRGB::Black;
     break;
@@ -204,7 +204,7 @@ void Led_Strip::set_color(int32_t color_in) {
     break;
   }
   //major color
-  switch (color_2) {
+  switch (color2) {
   case 0:
     color_choice2 = CRGB::Black;
     break;
@@ -237,15 +237,15 @@ void Led_Strip::set_color(int32_t color_in) {
     break;
   }
   if (color_in == 1) {
-    int h = 0
-    int s = 255
-    int v = 255
+    int h = 0;
+    int s = 255;
+    int v = 255;
     for (int i = 0; i < NUM_LEDS; ++i) {
-      h += 255.0/NUM_LEDS
+      h += 255.0/NUM_LEDS;
       if (h > 255) {
-        h = 0
+        h = 0;
       }
-      Led_Strip::all_led[i] = hsv2rgb_rainbow(CHSV(h, s, v))
+      hsv2rgb_rainbow(CHSV(h, s, v), (Led_Strip::all_led[i]));
     }
   }
   else {

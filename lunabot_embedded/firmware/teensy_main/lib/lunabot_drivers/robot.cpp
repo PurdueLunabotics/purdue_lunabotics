@@ -108,7 +108,7 @@ void cb(int32_t speed_rpm, bool should_reset) {
 } // namespace excavation
 
 namespace deposition {
-StepperMotor dep_mtr(DEP_MOTOR_ID, ISV2);
+StepperMotor dep_mtr(DEP_MOTOR_ID, BLD305S);
 
 void begin() {
   dep_mtr.begin();
