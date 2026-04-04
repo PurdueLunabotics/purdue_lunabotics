@@ -1,10 +1,11 @@
+
 import math
 from builtin_interfaces.msg import Time
 from geometry_msgs.msg import PoseStamped
 from lunabot_behavior.states.traverse import Traverse
 from tf_transformations import quaternion_from_euler
 from lunabot_behavior import zones
-from std_srvs/srv import Empty
+from std_srvs.srv import Empty
 
 class TraverseToBerm(Traverse):
     def __init__(self, backwards: bool):
@@ -21,9 +22,10 @@ class TraverseToBerm(Traverse):
         pose.pose.orientation.w = w
         super().__init__(pose, backwards)
 
-        // RTAB-Map Pausing
+        # RTAB-Map Pausing
         self._freeze_map_client = self.create_client(Empty, '/rtabmap/rtabmap/pause')
-        freeze_map()
+        self.freeze_map()
+
     def freeze_map(self):
         if not self._freeze_map_client.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('The RTAB pause service is NOT AVAILABLE =_=. We will have to make do without...')
@@ -38,3 +40,10 @@ class TraverseToBerm(Traverse):
         else:
             self.get_logger().error('RTAB Mapping failed. :(')
         
+    def setup(self, manager):
+        ns = manager.get_namespace().lstrip('/')
+        self.frame = "map"
+        if len(ns) != 0:
+            self.frame = f"{ns}/{self.frame}"
+        self.goal.header.frame_id = self.frame
+        super().setup(manager)

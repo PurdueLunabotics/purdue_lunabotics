@@ -272,9 +272,17 @@
 
 
   <joint name="deposition_apriltag_joint" type="fixed">
-    <origin rpy="0.0 -0.34 3.14" xyz="-0.381 0.0 0.5"/>
+    <origin rpy="0.0 -0.34 3.14" xyz="-0.381 0.0 0.55"/>
     <parent link="base_link"/>
     <child link="deposition_apriltag_link"/>
+  </joint>
+
+  <link name="deposition_apriltag_optical_frame"></link>
+
+  <joint name="deposition_apriltag_optical_joint" type="fixed">
+    <origin rpy="1.57 0.0 1.57" xyz="0.0 0.0 0.0"/>
+    <parent link="deposition_apriltag_link"/>
+    <child link="deposition_apriltag_optical_frame"/>
   </joint>
 
   <!-- Back Camera -->
@@ -417,7 +425,7 @@
   </link>  
 
   <joint name="d455_front_joint" type="fixed">
-    <origin rpy="0 2.5 0" xyz="0.3 0.17 0.0"/>
+    <origin rpy="0 2.5 0" xyz="0.3 -0.17 0.0"/>
     <parent link="excavation"/>
     <child link="d455_front_link"/>
     <axis xyz="0 0 1"/>

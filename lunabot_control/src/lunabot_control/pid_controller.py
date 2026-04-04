@@ -122,7 +122,7 @@ class ParameterizedPIDController(PIDController):
                          min_output = node.get_parameter(f"{name}.min_output").get_parameter_value().double_value)
 
 
-        node.get_logger().info(f"kp = {node.get_parameter(f'{name}.p').get_parameter_value()}")
+        # node.get_logger().info(f"kp = {node.get_parameter(f'{name}.p').get_parameter_value()}")
 
         node.add_on_set_parameters_callback(self.parameter_cb)
 

@@ -37,6 +37,7 @@ class RetreatTrench(Drive):
     self.num_cycles = 7 # cycles before stepping forward
     self.distance_step = 0.5 # meters
     self.counter = 0
+    self.target_distance = self.distance_step
   
   def start(self):
     super().start()
