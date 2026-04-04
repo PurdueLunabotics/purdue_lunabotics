@@ -24,7 +24,7 @@ class Drive(State):
         self.logger = manager.get_logger()
         self.cmd_vel_pub = manager.create_publisher(Twist, "cmd_vel", 10)
         self.odom_sub = manager.create_subscription(PoseStamped, "position", self.odom_cb, 1)
-        self.linear_pid = ParameterizedPIDController(f"{self.name}.linear", manager, kp=1.0, max_output=0.01)
+        self.linear_pid = ParameterizedPIDController(f"{self.name}.linear", manager, kp=1.0, max_output=0.1)
         self.odom = None
         self.position = (0, 0)
         # while self.odom == None:
