@@ -127,7 +127,7 @@ class MainStates(Enum):
             
             (MainStates.WAIT_FOR_LINKUP, Events.PROCEED): MainStates.TRAVERSE_TO_LINKUP,
                         
-            (MainStates.TRAVERSE_TO_LINKUP, Events.SUCCESS): MainStates.IDLE, # TODO: Go to link up
+            (MainStates.TRAVERSE_TO_LINKUP, Events.SUCCESS): MainStates.ALIGN_TO_LINKUP, # TODO: Go to link up
             (MainStates.TRAVERSE_TO_LINKUP, Events.STALL): MainStates.TRAVERSE_TO_LINKUP_STALL,
             (MainStates.TRAVERSE_TO_LINKUP, Events.NO_PATH): MainStates.TRAVERSE_TO_LINKUP_NO_PATH,
             (MainStates.TRAVERSE_TO_LINKUP_NO_PATH, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
@@ -157,7 +157,7 @@ class MainStates(Enum):
             (MainStates.RETREAT_TRENCH, Events.STALL): MainStates.RETREAT_TRENCH_STALL,
             (MainStates.RETREAT_TRENCH_STALL, Events.SUCCESS): MainStates.RETREAT_TRENCH,
 
-            (MainStates.ALIGN_TO_LINKUP, Events.SUCCESS): MainStates.IDLE, # TODO: Go to linkup
+            (MainStates.ALIGN_TO_LINKUP, Events.SUCCESS): MainStates.WAIT_FOR_MINI_ALIGN, # TODO: Go to linkup
             (MainStates.ALIGN_TO_LINKUP, Events.STALL): MainStates.RETREAT_TRENCH_STALL,
             (MainStates.ALIGN_TO_LINKUP_STALL, Events.SUCCESS): MainStates.ALIGN_TO_LINKUP,
 
@@ -174,7 +174,7 @@ class MainStates(Enum):
             (MainStates.WAIT_FOR_DIVERGE, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
 
             # in case minibot is indisposed and big bot has to make full cycles
-            (MainStates.TRAVERSE_TO_BERM, Events.ARRIVED): MainStates.ALIGN_TO_BERM,
+            (MainStates.TRAVERSE_TO_BERM, Events.SUCCESS): MainStates.ALIGN_TO_BERM,
             (MainStates.TRAVERSE_TO_BERM, Events.STALL): MainStates.TRAVERSE_TO_BERM_STALL,
             (MainStates.TRAVERSE_TO_BERM, Events.NO_PATH): MainStates.TRAVERSE_TO_BERM_NO_PATH,
             (MainStates.TRAVERSE_TO_BERM_STALL, Events.SUCCESS): MainStates.TRAVERSE_TO_BERM,
@@ -197,7 +197,7 @@ class MainStates(Enum):
 def main(args=None):
     rclpy.init(args=sys.argv)
 
-    manager = StateManager(MainStates, MainStates.WAIT_FOR_MINI_ALIGN, Events, Event)
+    manager = StateManager(MainStates, MainStates.INIT_MAP, Events, Event)
 
     try:
         rclpy.spin(manager)

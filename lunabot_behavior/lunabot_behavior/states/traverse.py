@@ -27,8 +27,9 @@ class Traverse(State):
         self.goal_pub = manager.create_publisher(PoseStamped, "goal", 10)
         self.backwards_pub = manager.create_publisher(Bool, "traversal/backwards", 10)
         self.enabled_pub = manager.create_publisher(Bool, "traversal/enabled", 10)
+        self.odom_sub = manager.create_subscription(PoseStamped, "position", self.odom_cb, 10)
         self.odom = None
-        self.tolerance = 0.1
+        self.tolerance = 0.2
         self.logger = manager.get_logger()
 
     def odom_cb(self, pose: PoseStamped):
@@ -44,6 +45,10 @@ class Traverse(State):
 
     def periodic(self) -> None | Events:
         self.publish_everything()
+        dist = math.sqrt((self.odom.pose.position.x - self.goal.pose.position.x) ** 2 + (self.odom.pose.position.y - self.goal.pose.position.y) ** 2)
+        self.logger.info(f"[Traverse]: distance {dist}")
+        if self.odom != None and dist < self.tolerance:
+            return Events.SUCCESS
         return None
 
     def exit(self):

@@ -142,7 +142,7 @@ class MiniStates(Enum):
 def main(args=None):
     rclpy.init(args=sys.argv)
 
-    manager = StateManager(MiniStates, MiniStates.ALIGN_TO_MAIN, Events, Event)
+    manager = StateManager(MiniStates, MiniStates.INIT_MAP, Events, Event)
 
     try:
         rclpy.spin(manager)
