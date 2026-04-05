@@ -38,8 +38,8 @@ void cb(int8_t lin_act_volt, uint8_t should_zero_act_pos, uint8_t is_top) {
 } // namespace actuation
 
 namespace drivetrain {
-StepperMotor left_drive_mtr(LEFT_DRIVE_MOTOR_ID, BLD305S);
-StepperMotor right_drive_mtr(RIGHT_DRIVE_MOTOR_ID, BLD305S);
+StepperMotor left_drive_mtr(LEFT_DRIVE_MOTOR_ID, ISV2);
+StepperMotor right_drive_mtr(RIGHT_DRIVE_MOTOR_ID, ISV2);
 
 void begin() {
   left_drive_mtr.begin();
@@ -83,7 +83,7 @@ namespace LEDs {
 }
 
 namespace excavation {
-StepperMotor exc_mtr(EXC_MOTOR_ID, ISV2);
+StepperMotor exc_mtr(MOTOR_NOT_IN_USE, ISV2);
 
 void begin() {
   exc_mtr.begin();

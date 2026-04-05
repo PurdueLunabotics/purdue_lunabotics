@@ -10,6 +10,7 @@
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>
   <depend>lunabot_msgs</depend>
+  <depend>sensor_msgs</depend>
 
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
 

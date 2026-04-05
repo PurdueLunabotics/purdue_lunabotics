@@ -274,11 +274,10 @@ void Encoder_Bus::init(uint8_t option) {
   }
 }
 
-float Encoder_Bus::read(uint8_t id) {
+long Encoder_Bus::read(uint8_t id) {
   // returns the count since last read, and resets the count to 0
   if (id != 1 && id != 0) {
       return INVALID_ID;
   }
-  float val = (float) encs[id].read() / PA01_PULSES_PER_INCH;
-  return val;
+  return encs[id].read();
 }
