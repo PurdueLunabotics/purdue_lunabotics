@@ -27,6 +27,7 @@ import shapely.geometry as shp
 
 import rclpy
 import sys
+import random
 
 LETHAL_COST = 252
 
@@ -187,8 +188,8 @@ class FindLinkup(Traverse):
         costmap: Costmap = result.map
 
         padding = 0.4
-        num_points = 15
-        num_iterations = 70
+        num_points = 30
+        num_iterations = 60
         length = self.excavation_edge.length - padding * 2
         offset = length / num_points
         points = (self.excavation_edge.interpolate(offset * i + padding) for i in range(0, num_points))
@@ -224,7 +225,18 @@ class FindLinkup(Traverse):
                         (shp.Point(pos.x, pos.y), angle - 0.1),
                         (shp.Point(pos.x, pos.y), angle)]
 
-        return min(alternatives, key=lambda alt: self.evaluate_point(costmap, alt[0], alt[1]))
+        min = None
+        min_alts = []
+
+        for pos, angle in alternatives:
+            cost = self.evaluate_point(costmap, pos, angle)
+            if min == None or cost < min:
+                min = cost
+                min_alts = [(pos, angle)]
+            elif min == cost:
+                min_alts.append((pos, angle))
+
+        return random.choice(min_alts)
 
     def iterate_point(self, costmap: Costmap, pos: shp.Point, angle: float, num_iterations: int, id):
         self.show_line(pos, angle, id)
