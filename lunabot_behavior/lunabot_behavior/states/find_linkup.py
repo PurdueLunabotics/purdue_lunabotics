@@ -79,8 +79,8 @@ def line_cost(costmap: Costmap, a: shp.Point, b: shp.Point):
             if int(target_y) != current[1]:
                 current = (current[0], current[1] + y_increment)
 
-            if is_blocked(costmap, current[0], current[1]):
-                return inf
+            # if is_blocked(costmap, current[0], current[1]):
+            #     return inf
 
             cost += get_traversal_cost(costmap, current[0], current[1])
     else:
@@ -90,8 +90,8 @@ def line_cost(costmap: Costmap, a: shp.Point, b: shp.Point):
             if int(target_x) != current[0]:
                 current = (current[0] + x_increment, current[1])
 
-            if is_blocked(costmap, current[0], current[1]):
-                return inf
+            # if is_blocked(costmap, current[0], current[1]):
+            #     return inf
 
             cost += get_traversal_cost(costmap, current[0], current[1])
 
@@ -147,7 +147,6 @@ class FindLinkup(Traverse):
         self.costmap_client = manager.create_client(GetCostmap, "global_costmap/get_costmap")
 
         self.manager = manager
-        self.clear()
 
     def odom_cb(self, pose: PoseStamped):
         self.odom = point_from_pose_2d(pose)
@@ -183,15 +182,15 @@ class FindLinkup(Traverse):
         costmap: Costmap = result.map
 
         padding = 0.4
-        num_points = 30
-        num_iterations = 60
+        num_points = 20
+        num_iterations = 100
         length = self.excavation_edge.length - padding * 2
         offset = length / num_points
         points = (self.excavation_edge.interpolate(offset * i + padding) for i in range(0, num_points))
         iterated_points = (self.iterate_point(costmap, point, 0, num_iterations, id) for id, point in enumerate(points))
 
         pos, angle = min(iterated_points, key=lambda alt: self.evaluate_point(costmap, alt[0], alt[1]))
-        self.show_line(pos, angle, num_points, 1.0, 1.0, 1.0, 0.1)
+        self.show_line(pos, angle, num_points, "final", 1.0, 1.0, 1.0, 0.1)
 
         linkup = Linkup()
         linkup.main_target.x = pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
@@ -234,59 +233,22 @@ class FindLinkup(Traverse):
         return random.choice(min_alts)
 
     def iterate_point(self, costmap: Costmap, pos: shp.Point, angle: float, num_iterations: int, id):
-        self.show_line(pos, angle, id)
+        self.show_line(pos, angle, id, "intermediate")
         for _ in range(0, num_iterations):
             pos, angle = self.iterate_point_once(costmap, pos, angle)
             cost = self.evaluate_point(costmap, pos, angle)/5.0
-            self.show_line(pos, angle, id, action=Marker.MODIFY, r=0.0 if cost > 1.0 else cost, g=1.0 if not math.isinf(cost) and cost > 1.0 else 0.0, b=1.0 if math.isinf(cost) else 0.0)
+            self.show_line(pos, angle, id, "intermediate", action=Marker.MODIFY, r=0.0 if cost > 1.0 else cost, g=1.0 if not math.isinf(cost) and cost > 1.0 else 0.0, b=1.0 if math.isinf(cost) else 0.0)
 
         return pos, angle
 
     # VISUALIZATION HELPERS ==========================================================================
 
-    def clear(self):
+    def show_line(self, pos: shp.Point, angle: float, id, ns, r=1.0, g=0.0, b=0.0, width=0.05, action=Marker.ADD):
         marker = Marker()
         marker.header.frame_id = self.frame
         marker.header.stamp = self.manager.get_clock().now().to_msg()
 
-        marker.ns = "line_segment"
-        marker.action = Marker.DELETEALL
-
-        self.marker_pub.publish(marker)
-
-    def show_points(self, points: list[tuple[float, float]], id, r=1.0, g=0.0, b=0.0, action=Marker.ADD):
-        marker = Marker()
-        marker.header.frame_id = self.frame
-        marker.header.stamp = self.manager.get_clock().now().to_msg()
-
-        marker.ns = "points"
-        marker.id = id
-        marker.type = Marker.POINTS
-        marker.action = action
-
-        # Line width
-        marker.scale.x = 0.05
-        marker.scale.y = 0.05
-
-        # Color (RGBA)
-        marker.color.r = r
-        marker.color.g = g
-        marker.color.b = b
-        marker.color.a = 1.0
-
-        # Identity pose
-        marker.pose.orientation.w = 1.0
-
-        marker.points = [Point(x = point[0], y = point[1]) for point in points]
-
-        self.marker_pub.publish(marker)
-
-    def show_line(self, pos: shp.Point, angle: float, id, r=1.0, g=0.0, b=0.0, width=0.05, action=Marker.ADD):
-        marker = Marker()
-        marker.header.frame_id = self.frame
-        marker.header.stamp = self.manager.get_clock().now().to_msg()
-
-        marker.ns = "line_segment"
+        marker.ns = ns
         marker.id = id
         marker.type = Marker.LINE_STRIP
         marker.action = action
