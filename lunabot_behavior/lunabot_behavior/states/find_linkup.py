@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 
+from math import inf
+import math
 from geometry_msgs.msg import PoseStamped, Point
 from lunabot_msgs.msg import Linkup
+from nav2_msgs.msg import Costmap
 from rclpy.qos import QoSDurabilityPolicy, QoSProfile
 from visualization_msgs.msg import Marker
 from nav_msgs.msg import Path
@@ -16,9 +19,82 @@ from lunabot_behavior.util import point_from_pose_2d
 
 from rclpy.action import ActionClient
 from nav2_msgs.action import ComputePathToPose
+from nav2_msgs.srv import GetCostmap
 
 import numpy as np
 from shapely.geometry import LineString
+import shapely.geometry as shp
+
+import rclpy
+import sys
+
+LETHAL_COST = 252
+
+def world_to_map(costmap: Costmap, x: float, y: float):
+    resolution = costmap.metadata.resolution
+    origin_pos = costmap.metadata.origin.position
+    return (int((x - origin_pos.x) / resolution), int((y - origin_pos.y) / resolution))
+
+def map_to_world(costmap: Costmap, x: float, y: float) -> tuple[float, float]:
+    resolution = costmap.metadata.resolution
+    origin_pos = costmap.metadata.origin.position
+    return (x * resolution + origin_pos.x, y * resolution + origin_pos.y)
+
+def get_cost(costmap: Costmap, x: int, y: int) -> float:
+    return 26.0 + 0.9 * int(costmap.data[x + y * costmap.metadata.size_x])
+
+def is_blocked(costmap: Costmap, x: int, y: int) -> bool:
+    return costmap.data[x + y * costmap.metadata.size_x] >= LETHAL_COST
+
+def get_traversal_cost(costmap: Costmap, x: int, y: int):
+  curr_cost = get_cost(costmap, x, y)
+  return (curr_cost / LETHAL_COST) ** 2
+
+def line_cost(costmap: Costmap, a: shp.Point, b: shp.Point):
+    initial = world_to_map(costmap, a.x, a.y)
+    end = world_to_map(costmap, b.x, b.y)
+    current = initial
+    distance_x = abs(initial[0] - end[0])
+    distance_y = abs(initial[1] - end[1])
+
+    divisor = np.gcd(distance_x, distance_y)
+    dx = (end[0] - initial[0]) / divisor
+    dy = (end[1] - initial[1]) / divisor
+
+    x_increment = 0;
+    if distance_x != 0:
+        x_increment = int((end[0] - current[0]) / distance_x);
+
+    y_increment = 0;
+    if distance_y != 0:
+        y_increment = int((end[1] - current[1]) / distance_y);
+
+    cost = 0.0
+
+    if distance_x > distance_y:
+        while current[0] != end[0]:
+            current = (current[0] + x_increment, current[1])
+            target_y = dy * (current[0] - initial[0]) / dx + initial[1];
+            if int(target_y) != current[1]:
+                current = (current[0], current[1] + y_increment)
+
+            if is_blocked(costmap, current[0], current[1]):
+                return inf
+
+            cost += get_traversal_cost(costmap, current[0], current[1])
+    else:
+        while current[1] != end[1]:
+            current = (current[0], current[1] + y_increment)
+            target_x = dx * (current[1] - initial[1]) / dy + initial[0];
+            if int(target_x) != current[0]:
+                current = (current[0] + x_increment, current[1])
+
+            if is_blocked(costmap, current[0], current[1]):
+                return inf
+
+            cost += get_traversal_cost(costmap, current[0], current[1])
+
+    return cost
 
 class FindLinkup(Traverse):
     def __init__(self):
@@ -59,19 +135,18 @@ class FindLinkup(Traverse):
         super().setup(manager)
 
         self.linkup_pub = manager.create_publisher(Linkup, "/linkup_pos", QoSProfile(durability = QoSDurabilityPolicy.TRANSIENT_LOCAL, depth = 10))
-        self.path_publisher = manager.create_publisher(Path, "/linkup_path", 10)
-        self.linkup_line_pub = manager.create_publisher(Marker, "/linkup_segment", 10)
-        self.exc_edge_pub = manager.create_publisher(Marker, "/exc_edge", 10)
-        self.short_seg_pub = manager.create_publisher(Marker, "/short_segment", 10)
+        self.marker_pub = manager.create_publisher(Marker, "/linkup_marker", 10)
 
         self.odom = None
-        self.tolerance = 1.0 # wider tolerance is ok - finding linkup isn't an exact science
+        self.tolerance = 2.0 # wider tolerance is ok - finding linkup isn't an exact science
         self.logger = manager.get_logger()
         self.finding = False
 
         self.path_client = ActionClient(manager, ComputePathToPose, "compute_path_to_pose")
+        self.costmap_client = manager.create_client(GetCostmap, "global_costmap/get_costmap")
 
         self.manager = manager
+        self.clear()
 
     def odom_cb(self, pose: PoseStamped):
         self.odom = point_from_pose_2d(pose)
@@ -95,184 +170,91 @@ class FindLinkup(Traverse):
         # print("finding linkup")
         self.goal.header.stamp = self.manager.get_clock().now().to_msg()
 
-        self.find_segment(self.start_pose)
+        self.costmap_client.wait_for_service()
+        self.costmap_client.call_async(GetCostmap.Request()).add_done_callback(self.costmap_cb)
 
-    def find_segment(self, end: PoseStamped):
-        goal_msg = ComputePathToPose.Goal()
-        goal_msg.start = self.start_pose
-        goal_msg.goal = end
+        # self.find_segment(self.start_pose)
 
-        self.path_client.wait_for_server()
-
-        self.future = self.path_client.send_goal_async(goal_msg)
-        self.future.add_done_callback(self.get_path_cb)
-
-    def get_path_cb(self, future: Future):
-        goal_handle = future.result()
-        if not goal_handle.accepted:
+    def costmap_cb(self, future: Future):
+        result = future.result()
+        if result == None:
             return
-        
-        self._get_result_future = goal_handle.get_result_async()
-        self._get_result_future.add_done_callback(self.get_result_callback)
-    
-    def get_result_callback(self, future):
-        path = future.result().result.path
-        self.path_publisher.publish(path)
+        costmap: Costmap = result.map
 
-        # actually determine linkup segment
-        segment = self.linkup_seg_from_path(path)
-        self.visualize_line_segment(segment, self.linkup_line_pub)
-        self.visualize_line_segment([self.exc_p1, self.exc_p2], self.exc_edge_pub, g=1.0)
+        padding = 0.4
+        num_points = 15
+        num_iterations = 70
+        length = self.excavation_edge.length - padding * 2
+        offset = length / num_points
+        points = (self.excavation_edge.interpolate(offset * i + padding) for i in range(0, num_points))
+        iterated_points = (self.iterate_point(costmap, point, 0, num_iterations, id) for id, point in enumerate(points))
+
+        pos, angle = min(iterated_points, key=lambda alt: self.evaluate_point(costmap, alt[0], alt[1]))
+        self.show_line(pos, angle, num_points, 1.0, 1.0, 1.0, 0.1)
+
+        linkup = Linkup()
+        linkup.main_target.x = pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
+        linkup.main_target.y = pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
+        linkup.mini_target.x = pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
+        linkup.mini_target.y = pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
+
+        self.linkup_pub.publish(linkup)
         self.linkup_found = True
 
-        # publish result
-        linkup_msg = self.build_linkup_msg(segment)
-        self.linkup_pub.publish(linkup_msg)
+    def evaluate_point(self, costmap: Costmap, pos: shp.Point, angle: float):
+        if pos.distance(self.excavation_edge) > self.MIN_SEGMENT_LENGTH / 4:
+            return inf
 
-    def build_linkup_msg(self, linkup_segment: list[np.array]):
-        linkup = Linkup()
-        if linkup_segment is not None:
-            # main target should be closer to exc (low dist), mini target closer to berm (high dist)
-            p1_dist = get_distance_from_exc(linkup_segment[0])
-            p2_dist = get_distance_from_exc(linkup_segment[1])
-            if (p1_dist == p2_dist): # tiebreaker - subtract distance to berm
-                p1_dist -= get_distance_from_berm(linkup_segment[0])
-                p2_dist -= get_distance_from_berm(linkup_segment[1])
+        a = shp.Point(pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
+        b = shp.Point(pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
 
-            main_target = linkup_segment[0] if linkup_segment[0][0] > linkup_segment[1][0] else linkup_segment[1]
-            mini_target = linkup_segment[0] if linkup_segment[0][0] <= linkup_segment[1][0] else linkup_segment[1]
+        return line_cost(costmap, a, b)
 
-            vector = mini_target - main_target
-            
-            norm = np.linalg.norm(vector)
-            short_vector = vector
-            short_segment = linkup_segment
-            if norm > self.MIN_SEGMENT_LENGTH:
-                short_vector = (vector / np.linalg.norm(vector)) * self.MIN_SEGMENT_LENGTH
-                short_segment = [main_target, main_target + short_vector]
+    def iterate_point_once(self, costmap: Costmap, pos: shp.Point, angle: float):
+        alternatives = [(shp.Point(pos.x + costmap.metadata.resolution, pos.y), angle),
+                        (shp.Point(pos.x - costmap.metadata.resolution, pos.y), angle),
+                        (shp.Point(pos.x, pos.y + costmap.metadata.resolution), angle),
+                        (shp.Point(pos.x, pos.y - costmap.metadata.resolution), angle),
+                        (shp.Point(pos.x, pos.y), angle + 0.1),
+                        (shp.Point(pos.x, pos.y), angle - 0.1),
+                        (shp.Point(pos.x, pos.y), angle)]
 
-            # print(f"short vec: {short_segment}")
+        return min(alternatives, key=lambda alt: self.evaluate_point(costmap, alt[0], alt[1]))
 
-            # update after finding shorter segment
-            main_target = short_segment[0] if short_segment[0][0] > short_segment[1][0] else short_segment[1]
-            mini_target = short_segment[0] if short_segment[0][0] <= short_segment[1][0] else short_segment[1]
+    def iterate_point(self, costmap: Costmap, pos: shp.Point, angle: float, num_iterations: int, id):
+        self.show_line(pos, angle, id)
+        for _ in range(0, num_iterations):
+            pos, angle = self.iterate_point_once(costmap, pos, angle)
+            cost = self.evaluate_point(costmap, pos, angle)/5.0
+            self.show_line(pos, angle, id, action=Marker.MODIFY, r=0.0 if cost > 1.0 else cost, g=1.0 if not math.isinf(cost) and cost > 1.0 else 0.0, b=1.0 if math.isinf(cost) else 0.0)
 
-            linkup.main_target = Point()
-            linkup.main_target.x = main_target[0]
-            linkup.main_target.y = main_target[1]
+        return pos, angle
 
-            linkup.mini_target = Point()
-            linkup.mini_target.x = mini_target[0]
-            linkup.mini_target.y = mini_target[1]
-
-            self.visualize_line_segment(linkup_segment, self.linkup_line_pub)
-
-            # print("visualizing shit")
-            self.visualize_line_segment(short_segment, self.short_seg_pub, b=1.0)
-        else:
-            linkup.main_target = Point()
-            linkup.mini_target = Point()
-
-        return linkup
-
-    def crosses_exc_edge(self, segment: list[np.array]):
-        segment_shape = LineString(segment)
-
-        intersection_geom = self.excavation_edge.intersection(segment_shape)
-        # print(f"intersection: {list(intersection_geom.coords)}")
-        is_valid_intersection = not intersection_geom.is_empty # assumes the cross is a point
-        # self.visualize_line_segment(segment, self.linkup_line_publisher, g=1.0)
-
-        return is_valid_intersection
-    
-    def get_exc_edge_intersection(self, segment: list[np.array]) -> np.array:
-        segment_shape = LineString(segment)
-
-        intersection_geom = self.excavation_edge.intersection(segment_shape)
-        return np.array(list(intersection_geom.coords)[0])
-    
-    def linkup_seg_from_path(self, path=Path) -> list[np.array]:
-        if path is not None:
-            # self.get_logger().info("finding linkup")
-
-            prev_waypoint: np.array = None
-            linkup_segment = None
-
-            poses: list[PoseStamped] = path.poses
-
-            for i, waypoint in enumerate(poses): # determine which segments have enough length
-                p1 = point_from_pose_2d(waypoint)
-
-                if prev_waypoint is not None:
-                    segment = [p1, prev_waypoint]
-                    is_crossing_edge = self.crosses_exc_edge(segment)
-
-                    if is_crossing_edge:
-                        # determine whether current segment is what we're looking for
-                        dist = np.linalg.norm(p1 - prev_waypoint)
-                        if dist >= self.MIN_SEGMENT_LENGTH:
-                            # self.get_logger().info("crossing edge")
-                            linkup_segment = [prev_waypoint, p1]
-
-                            # get subsegment of linkup - ONLY IF EDGE CROSSING EXC IS VALID
-                            intersection = self.get_exc_edge_intersection(linkup_segment)
-                            
-                            prev_half = prev_waypoint - intersection
-                            prev_norm = np.linalg.norm(prev_half)
-
-                            p1_half = p1 - intersection
-                            p1_norm = np.linalg.norm(p1_half)
-
-                            p1_unit = p1_half / p1_norm
-
-                            # adjust other waypoint
-                            p1_len = self.MIN_SEGMENT_LENGTH - prev_norm
-                            linkup_segment[1] = intersection + p1_len * p1_unit
-                            break
-                        
-                        # if exc crossing edge is not viable, check neighbor on berm side
-                        if i >= 2:
-                            prev_segment = [point_from_pose_2d(poses[i-2]), prev_waypoint]
-                            if self.is_viable_segment(prev_segment, self.MIN_SEGMENT_LENGTH):
-                                linkup_segment = prev_segment
-                                break
-
-                        # otherwise check neighbor on excavation side
-                        # don't actually
-                        # if i < len(poses) - 1:
-                        #     next_segment = [p1, point_from_pose_2d(poses[i+1])]
-                        #     if self.is_viable_segment(next_segment, self.MIN_SEGMENT_LENGTH):
-                        #         linkup_segment = next_segment
-                        #         break
-
-                        # no linkup option found
-                        break
-
-                prev_waypoint = p1
-
-            return linkup_segment
-
-        # can't do anything if path doesn't exist
-        return None
-    
-    def is_viable_segment(self, segment: list[np.array], min_segment_len):
-        dist = np.linalg.norm(segment[0] - segment[1])
-        return dist >= min_segment_len
-    
     # VISUALIZATION HELPERS ==========================================================================
-    
-    def visualize_line_segment(self, segment: list[np.array], publisher, r=1.0, g=0.0, b=0.0):
+
+    def clear(self):
         marker = Marker()
         marker.header.frame_id = self.frame
         marker.header.stamp = self.manager.get_clock().now().to_msg()
 
         marker.ns = "line_segment"
-        marker.id = 0
-        marker.type = Marker.LINE_STRIP
-        marker.action = Marker.ADD
+        marker.action = Marker.DELETEALL
+
+        self.marker_pub.publish(marker)
+
+    def show_points(self, points: list[tuple[float, float]], id, r=1.0, g=0.0, b=0.0, action=Marker.ADD):
+        marker = Marker()
+        marker.header.frame_id = self.frame
+        marker.header.stamp = self.manager.get_clock().now().to_msg()
+
+        marker.ns = "points"
+        marker.id = id
+        marker.type = Marker.POINTS
+        marker.action = action
 
         # Line width
-        marker.scale.x = 0.1
+        marker.scale.x = 0.05
+        marker.scale.y = 0.05
 
         # Color (RGBA)
         marker.color.r = r
@@ -283,11 +265,49 @@ class FindLinkup(Traverse):
         # Identity pose
         marker.pose.orientation.w = 1.0
 
-        # Convert numpy points → geometry_msgs/Point
-        for p in segment:
-            point = Point()
-            point.x = float(p[0])
-            point.y = float(p[1])
-            marker.points.append(point)
+        marker.points = [Point(x = point[0], y = point[1]) for point in points]
 
-        publisher.publish(marker)
+        self.marker_pub.publish(marker)
+
+    def show_line(self, pos: shp.Point, angle: float, id, r=1.0, g=0.0, b=0.0, width=0.05, action=Marker.ADD):
+        marker = Marker()
+        marker.header.frame_id = self.frame
+        marker.header.stamp = self.manager.get_clock().now().to_msg()
+
+        marker.ns = "line_segment"
+        marker.id = id
+        marker.type = Marker.LINE_STRIP
+        marker.action = action
+
+        # Line width
+        marker.scale.x = width
+
+        # Color (RGBA)
+        marker.color.r = r
+        marker.color.g = g
+        marker.color.b = b
+        marker.color.a = 1.0
+
+        # Identity pose
+        marker.pose.orientation.w = 1.0
+
+        a = Point(x = pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, y = pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
+        b = Point(x = pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, y = pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
+
+        marker.points = [a, b]
+
+        self.marker_pub.publish(marker)
+
+def main():
+    rclpy.init(args=sys.argv)
+
+    node = Node("linkup_test_node")
+
+    find_linkup = FindLinkup()
+    find_linkup.setup(node)
+    find_linkup.find_linkup()
+
+    rclpy.spin(node)
+
+    node.destroy_node()
+    rclpy.shutdown()
