@@ -1,38 +1,64 @@
 <?xml version="1.0"?>
 <launch>
-  <executable cmd="mkdir $HOME/bags"/>
   <arg name="exp_name" default="exp" />
-  <executable cmd="ros2 bag record -o ~/bags/$(var exp_name) 
+  <let name="current_time" value="$(eval '__import__(\'datetime\').datetime.now().strftime(\'%Y-%m-%d-%H-%M-%S\')')" />
+  <let name="home_dir" value="$(eval '__import__(\'os\').path.expanduser(\'~\')')"/>
 
-  /goal /maps/costmap_node/global_costmap/costmap /nav/global_path 
+  <executable cmd="ros2 bag record -o $(var home_dir)/bags/$(var exp_name)-$(var current_time) 
+
+  /autonomy 
+  /led_color
   
-  /cmd_vel /rtabmap/odom /tf /tf_static /effort /sensors /errors /imu 
-
-  /d455_back/camera/color/image_rect_color /d455_back/camera/color/tag_detections 
-  /d455_back/camera/aligned_depth_to_color/image_raw /d455_back/camera/aligned_depth_to_color/camera_info 
-  /d455_back/camera/color/camera_info /d455_back/camera/points 
-
-  /d455_front/camera/color/image_rect_color /d455_front/camera/color/tag_detections
-  /d455_front/camera/aligned_depth_to_color/image_raw /d455_front/camera/aligned_depth_to_color/camera_info 
-  /d455_front/camera/color/camera_info /d455_front/camera/points 
-
-  /d435_left/camera/color/image_rect_color /d435_left/camera/color/tag_detections
-  /d435_left/camera/color/camera_info
-
-  /d435_right/camera/color/image_rect_color /d435_right/camera/color/tag_detections
-  /d435_right/camera/color/camera_info
+  /berm_zone /berm_zone_marker /exc_zone /exc_zone_marker
+  /start_zone /start_zone_marker
   
+  /cmd_vel /effort /goal
+
+  /events 
+  /nav/failed
+  /nav_path
+
+  /dummy_bot/joint_states /dummy_bot/robot_description
+
+  /d455_back/aligned_depth_to_color/camera_info
+  /d455_back/algined_depth_to_color/image_raw
+  /d455_back/color/camera_info
+  /d455_back/color/image_raw
+  /d455_back/detections
+  /d455_back/points
+
+  /d455_front/aligned_depth_to_color/camera_info
+  /d455_front/algined_depth_to_color/image_raw
+  /d455_front/color/camera_info
+  /d455_front/color/image_raw
+  /d455_front/detections
+  /d455_front/points
+
   /pointcloud/depth_combined_cloud
-  /cloud_map
+  /position
+  /ptp/angle_target
+  /ptp/angular_disparity
+  /ptp/log
+  /ptp/pid_angular
+  /ptp/pid_linear
+  /ptp/robot_state
+  /ptp/target_pose
 
-  /usb_cam/tag_detections /usb_cam/image_color 
+  /rtabmap/apriltag/detections
+  /rtabmap/cloud_ground
+  /rtabmap/cloud_map
+  /rtabmap/cloud_obstacles
+  /rtabmap/octomap_grid
+  /rtabmap/odom
+  /rtabmap/tag_detections
 
-  /mining_zone /apriltag_visual /berm_zone
+  /sensors
+  /stalled
   
-  /ptp/log /ptp/target_pose /ptp/current_target /ptp/robot_state 
-  /ptp/line_path /ptp/angular_disparity /ptp/linear_disparity /ptp/heading /ptp/angle_target /ptp/pid_linear /ptp/pid_angular
-
-  /purePursuit/controller_vel /purePursuit/target_vel /purePursuit/slip_vec /purePursuit/final_vel /purePursuit/heading_err
+  /rosout
+  /tf
+  /tf_static
+  
   "
     output="screen" />
 </launch>
