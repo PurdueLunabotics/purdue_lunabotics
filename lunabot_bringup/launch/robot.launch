@@ -34,8 +34,8 @@
     <arg name="entity_name" if="$(eval '$(var robot_num) == 0')" default="dummy_bot"/>
     <arg name="entity_name" if="$(eval '$(var robot_num) == 1')" default="mini_bot"/>
 
-    <let name="entity_name" if="$(eval '$(var robot_num) == 1')" value="mini_bot"/>
-    <let name="entity_name" if="$(eval '$(var robot_num) == 0')" value="dummy_bot"/>
+    <!-- <let name="entity_name" if="$(eval '$(var robot_num) == 1')" value="mini_bot"/>
+    <let name="entity_name" if="$(eval '$(var robot_num) == 0')" value="dummy_bot"/> -->
 
 
     <!-- What to Launch Args -->
@@ -53,8 +53,9 @@
 
     <let name="cam_1_name"              value="d455_front"/>
     <let name="cam_2_name"              value="d455_back"/>
-    <let name="cam_3_name"              value="d455_front"/>
-    <let name="cam_4_name"              value="d455_back"/>
+
+    <let name="cam_3_name"              value="mini_d455_front"/>
+    <let name="cam_4_name"              value="mini_d455_back"/>
     <!-- Main -->
     <arg name="cams"                    default="'12'"      if="$(eval '$(var robot_num) == 0')"/> <!-- Camera numbers -->
     <arg name="odom_cam_name"           default="$(var cam_2_name)"  if="$(eval '$(var robot_num) == 0')"/>

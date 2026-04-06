@@ -20,7 +20,7 @@ class StallDetector(Node):
         self.stall_publisher = self.create_publisher(RobotStall, "stalled", 10)
         self.event_publisher = self.create_publisher(Event, "events", 10)
         self.effort = None
-        self.stall = RobotStall
+        self.stall = RobotStall()
         self.stallCounter = {'left':0,
                              'right':0,
                              'exc':0}

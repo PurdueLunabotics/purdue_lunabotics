@@ -19,22 +19,18 @@ uint8_t buffer[64];
 uint8_t flags = 0;
 
 void ctrl() {
-  actuation::cb(effort.lin_act, effort.should_zero_act_pos, effort.is_top);
   drivetrain::cb(effort.left_drive, effort.right_drive, effort.should_reset);
   deposition::cb(effort.deposit, effort.should_reset);
-  excavation::cb(effort.excavate, effort.should_reset);
   LEDs::cb(effort.led_color);
   if (effort.should_reset) digitalWrite(9, HIGH); // RELAY ALWAYS ON
   else digitalWrite(9, HIGH); // RELAY ALWAYS ON
 }
 
 void send() {
-  actuation::update(state.act_right_curr, state.act_left_pos, state.act_right_pos);
   drivetrain::update(state.drive_left_curr, state.drive_right_curr, state.drive_left_torque,
                      state.drive_right_torque, state.drive_left_vel, state.drive_right_vel);
   deposition::update(state.dep_curr);
 
-  excavation::update(state.exc_curr, state.exc_torque, state.exc_vel);
 
   /*
   Serial.print("Raw: ");

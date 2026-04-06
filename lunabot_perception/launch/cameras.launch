@@ -7,19 +7,21 @@
   <!-- Type of Camera Args -->
   <arg name="sim"                           default="false"/>
 
-  <let name="serial_no_cam_4"               value="'_053122251286'"/>
+  <let name="serial_no_cam_1"               value="'_053122251286'"/>
   <arg name="cam_1_name"                    default="d455_front"/>
-  <let name="serial_no_cam_1"               value="'141222070808'"/>
+  <let name="serial_no_cam_2"               value="'141222070808'"/>
   <arg name="cam_2_name"                    default="d455_back"/>
-  <let name="serial_no_cam_3"               value="'_053122251335'"/>
-  <arg name="cam_3_name"                    default="d455_front"/>
-  <let name="serial_no_cam_2"               value="'939622074382'"/>
-  <arg name="cam_4_name"                    default="d455_back"/>
+
+  <let name="serial_no_cam_3"               value="'339222072367'"/>
+  <arg name="cam_3_name"                    default="mini_d455_front"/>
+  <let name="serial_no_cam_4"               value="'939622074382'"/>
+  <arg name="cam_4_name"                    default="mini_d455_back"/>
+
   <arg name="cams"                          default="''"/>
 
   <arg name="pointcloud"                      default="$(eval 'len($(var cams)) > 1')" />
 
-  <arg name="profile"                         default="424x240x15"/>
+  <arg name="profile"                         default="848x480x30"/>
   <let name="initial_reset"                   value="true"/>
   <let name="decimation"                      value="4"/> 
   <let name="voxel_size"                      value="0.01"/> <!--meters-->
@@ -56,9 +58,9 @@
         <arg name="decimation_filter.enable"      value="true"/>
 
         <arg name="publish_tf"                    value="true"/>
-        <arg name="tf_publish_rate"               value="0"/>
+        <arg name="tf_publish_rate"               value="0.0"/>
 
-        <arg name="clip_distance"                 value="-1"/>
+        <arg name="clip_distance"                 value="-1.0"/>
       </include>
     </group>
     <push_ros_namespace namespace="$(var cam_1_name)"/>
@@ -106,9 +108,9 @@
         <arg name="decimation_filter.enable"      value="true"/>
 
         <arg name="publish_tf"                    value="true"/>
-        <arg name="tf_publish_rate"               value="0"/>
+        <arg name="tf_publish_rate"               value="0.0"/>
 
-        <arg name="clip_distance"                 value="-1"/>
+        <arg name="clip_distance"                 value="-1.0"/>
       </include>
     </group>
     <push_ros_namespace namespace="$(var cam_2_name)"/>
@@ -156,9 +158,9 @@
         <arg name="decimation_filter.enable"      value="true"/>
 
         <arg name="publish_tf"                    value="true"/>
-        <arg name="tf_publish_rate"               value="0"/>
+        <arg name="tf_publish_rate"               value="0.0"/>
 
-        <arg name="clip_distance"                 value="-1"/>
+        <arg name="clip_distance"                 value="-1.0"/>
       </include>
     </group>
     <push_ros_namespace namespace="$(var cam_3_name)"/>
@@ -206,9 +208,9 @@
         <arg name="decimation_filter.enable"      value="true"/>
 
         <arg name="publish_tf"                    value="true"/>
-        <arg name="tf_publish_rate"               value="0"/>
+        <arg name="tf_publish_rate"               value="0.0"/>
 
-        <arg name="clip_distance"                 value="-1"/>
+        <arg name="clip_distance"                 value="-1.0"/>
       </include>
     </group>
     <push_ros_namespace namespace="$(var cam_4_name)"/>
