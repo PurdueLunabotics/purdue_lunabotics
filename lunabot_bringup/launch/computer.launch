@@ -2,7 +2,14 @@
 <launch>
     <arg name="foxglove" default="true"  />
     <arg name="exp_name" default="" />
+    <arg name="robot_num" default="0" />
 
+    <let name="ns" if="$(eval '$(var robot_num) == 1')" value="mini"/>
+    <let name="ns" if="$(eval '$(var robot_num) == 0')" value=""/>
+    
+    <push_ros_namespace if="$(eval 'len(\'$(var ns)\') > 0')" namespace="$(var ns)"/>
+
+    
     <include if="$(var foxglove)" file="$(find-pkg-share foxglove_bridge)/launch/foxglove_bridge_launch.xml" />
 
     <group>
