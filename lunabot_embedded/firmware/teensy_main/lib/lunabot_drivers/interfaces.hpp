@@ -54,7 +54,7 @@ public:
   static void set_color(int32_t);
 
 private:
-  static constexpr int NUM_LEDS = 60;
+  static constexpr int NUM_LEDS = 90;
   static constexpr int BRIGHTNESS = 200; // 0 -> 255
   static CRGB all_led[NUM_LEDS];
 };
@@ -107,7 +107,7 @@ class Encoder_Bus {
 public:
   Encoder_Bus() {};
   static void init(uint8_t is_top);
-  static float read(uint8_t id);
+  static long read(uint8_t id);
 
 private:
   static constexpr int NUM_ACTUATORS = 2;

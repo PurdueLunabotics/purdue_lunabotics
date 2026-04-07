@@ -159,7 +159,7 @@ void KillSwitchRelay::logic(RobotEffort &effort) {
 CRGB Led_Strip::all_led[Led_Strip::NUM_LEDS];
 
 void Led_Strip::init() {
-  FastLED.addLeds<WS2812B, 6, GRB>(Led_Strip::all_led, Led_Strip::NUM_LEDS);
+  FastLED.addLeds<WS2812B, 4, GRB>(Led_Strip::all_led, Led_Strip::NUM_LEDS);
   FastLED.setBrightness(Led_Strip::BRIGHTNESS);
 }
 
@@ -275,11 +275,10 @@ void Encoder_Bus::init(uint8_t option) {
   }
 }
 
-float Encoder_Bus::read(uint8_t id) {
+long Encoder_Bus::read(uint8_t id) {
   // returns the count since last read, and resets the count to 0
   if (id != 1 && id != 0) {
       return INVALID_ID;
   }
-  float val = (float) encs[id].read() / PA01_PULSES_PER_INCH;
-  return val;
+  return encs[id].read();
 }

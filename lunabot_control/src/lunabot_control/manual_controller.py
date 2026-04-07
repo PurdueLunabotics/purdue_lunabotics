@@ -20,7 +20,7 @@ import numpy as np
 2 X
 3 Y
 4 LB
-5 RB
+5 RB 
 6 back (view button)
 7 start
 8 power
@@ -96,8 +96,8 @@ class ManualController(Node):
         self.declare_parameter("~max_speed", 3000.0);
 
         self.autonomy = True
-        self._autonomy_sub = self.create_subscription(Bool, "/autonomy", self._autonomy_cb, 1)
-        self._autonomy_pub = self.create_publisher(Bool, "/autonomy", 10)
+        self._autonomy_sub = self.create_subscription(Bool, "autonomy", self._autonomy_cb, 1)
+        self._autonomy_pub = self.create_publisher(Bool, "autonomy", 10)
 
         self.joy_subscriber = self.create_subscription(Joy, "joy", self.joy_callback, 1)
         self.effort_publisher = self.create_publisher(RobotEffort, "effort", 10)
@@ -119,7 +119,7 @@ class ManualController(Node):
         self.latched_excavation_speed = 0
         self.excavation_is_latched = False
 
-        self.DEPOSITION_SPEED = 3000 #TODO RJN - this speed
+        self.DEPOSITION_SPEED = 3000 
         self.ACTUATE_SPEED = 0.8 # percentage of max power
         self.EXCAVATION_SPEED = 3000 
 
