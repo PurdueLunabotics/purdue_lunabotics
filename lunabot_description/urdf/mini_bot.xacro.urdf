@@ -348,7 +348,7 @@
   </link>  
 
   <joint name="mini_d455_front_joint" type="fixed">
-    <origin rpy="0 0.5 0" xyz="0.18939 0.16173 0.428"/>
+    <origin rpy="${pi} 0.523599 0" xyz="0.18939 0.16173 0.428"/>
     <parent link="mini/middle_link"/>
     <child link="mini_d455_front_link"/>
     <axis xyz="0 0 1"/>

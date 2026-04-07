@@ -19,7 +19,7 @@ import numpy as np
 2 X
 3 Y
 4 LB
-5 RB
+5 RB 
 6 back (view button)
 7 start
 8 power
