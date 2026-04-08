@@ -19,7 +19,7 @@ def colorsToInteger(colors: tuple[LedColor] | LedColor):
         return colors.value
 
     if (len(colors) > 5):
-        print("Led Colors: Sequences of length greater than 3 are not supported")
+        print("Led Colors: Sequences of length greater than 5 are not supported")
         return 0
     
     packedInt = 0
