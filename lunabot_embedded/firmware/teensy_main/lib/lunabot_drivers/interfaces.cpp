@@ -165,7 +165,7 @@ void Led_Strip::init() {
 
 void Led_Strip::set_color(int32_t color_in) {
 
-  int MAX_DIGITS = 3; // how many digits are allowed in this integer (each digit is one color)
+  int MAX_DIGITS = 5; // how many digits are allowed in this integer (each digit is one color)
 
   CRGB RAINBOW_MAGIC_WORD = 0xDEDEDE;
 
