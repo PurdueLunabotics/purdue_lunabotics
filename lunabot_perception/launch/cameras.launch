@@ -59,6 +59,7 @@
 
         <arg name="publish_tf"                    value="true"/>
         <arg name="tf_publish_rate"               value="0.0"/>
+        <arg name="tf_prefix"                     value="$(var ns/)"/>
 
         <arg name="clip_distance"                 value="-1.0"/>
       </include>
@@ -109,6 +110,7 @@
 
         <arg name="publish_tf"                    value="true"/>
         <arg name="tf_publish_rate"               value="0.0"/>
+        <arg name="tf_prefix"                     value="$(var ns/)"/>
 
         <arg name="clip_distance"                 value="-1.0"/>
       </include>
@@ -159,6 +161,7 @@
 
         <arg name="publish_tf"                    value="true"/>
         <arg name="tf_publish_rate"               value="0.0"/>
+        <arg name="tf_prefix"                     value="$(var ns/)"/>
 
         <arg name="clip_distance"                 value="-1.0"/>
       </include>
@@ -209,6 +212,7 @@
 
         <arg name="publish_tf"                    value="true"/>
         <arg name="tf_publish_rate"               value="0.0"/>
+        <arg name="tf_prefix"                     value="$(var ns/)"/>
 
         <arg name="clip_distance"                 value="-1.0"/>
       </include>
