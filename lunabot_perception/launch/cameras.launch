@@ -13,9 +13,9 @@
   <arg name="cam_2_name"                    default="d455_back"/>
 
   <let name="serial_no_cam_3"               value="'339222072367'"/>
-  <arg name="cam_3_name"                    default="mini_d455_front"/>
+  <arg name="cam_3_name"                    default="d455_front"/>
   <let name="serial_no_cam_4"               value="'939622074382'"/>
-  <arg name="cam_4_name"                    default="mini_d455_back"/>
+  <arg name="cam_4_name"                    default="d455_back"/>
 
   <arg name="cams"                          default="''"/>
 

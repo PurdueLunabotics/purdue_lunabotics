@@ -3,9 +3,9 @@
   <material name="silver">
     <color rgba="0.75 0.75 0.75 1"/>
   </material>
-  <link name="mini/base_link"/>
+  <link name="base_link"/>
 
-  <link name="mini/middle_link">
+  <link name="middle_link">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <mass value="50.0"/>
@@ -34,14 +34,14 @@
     </collision>
   </link>
 
-  <joint name="mini/mid_joint" type="fixed">
+  <joint name="mid_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0.0 0 0.15"/>
-    <parent link="mini/base_link"/>
-    <child link="mini/middle_link"/>
+    <parent link="base_link"/>
+    <child link="middle_link"/>
   </joint>
 
   <!-- left front -->
-  <link name="mini/left_front">
+  <link name="left_front">
     <inertial>
       <origin xyz="0 0 0"/>
       <mass value="5.0"/>
@@ -75,15 +75,15 @@
     </collision>
   </link>
 
-  <joint name="mini/left_front_rev" type="continuous">
+  <joint name="left_front_rev" type="continuous">
     <origin rpy="0 0 0" xyz="0.0532 0.305 0.03"/>
-    <parent link="mini/base_link"/>
-    <child link="mini/left_front"/>
+    <parent link="base_link"/>
+    <child link="left_front"/>
     <axis xyz="0 1 0"/>
   </joint>
 
   <!-- left back -->
-  <link name="mini/left_back">
+  <link name="left_back">
     <inertial>
       <origin xyz="0 0 0"/>
       <mass value="5.0"/>
@@ -117,15 +117,15 @@
     </collision>
   </link>
 
-  <joint name="mini/left_back_rev" type="continuous">
+  <joint name="left_back_rev" type="continuous">
     <origin rpy="0 0 0" xyz="-0.2008 0.305 0.03"/>
-    <parent link="mini/base_link"/>
-    <child link="mini/left_back"/>
+    <parent link="base_link"/>
+    <child link="left_back"/>
     <axis xyz="0 1 0"/>
   </joint>
 
   <!-- right front -->
-  <link name="mini/right_front">
+  <link name="right_front">
     <inertial>
       <origin xyz="0 0 0"/>
       <mass value="5.0"/>
@@ -159,15 +159,15 @@
     </collision>
   </link>
 
-  <joint name="mini/right_front_rev" type="continuous">
+  <joint name="right_front_rev" type="continuous">
     <origin rpy="0 0 0" xyz="0.0532 -0.305 0.03"/>
-    <parent link="mini/base_link"/>
-    <child link="mini/right_front"/>
+    <parent link="base_link"/>
+    <child link="right_front"/>
     <axis xyz="0 1 0"/>
   </joint>
 
   <!-- right back -->
-  <link name="mini/right_back">
+  <link name="right_back">
     <inertial>
       <origin xyz="0 0 0"/>
       <mass value="5.0"/>
@@ -201,16 +201,16 @@
     </collision>
   </link>
 
-  <joint name="mini/right_back_rev" type="continuous">
+  <joint name="right_back_rev" type="continuous">
     <origin rpy="0 0 0" xyz="-0.2008 -0.305 0.03"/>
-    <parent link="mini/base_link"/>
-    <child link="mini/right_back"/>
+    <parent link="base_link"/>
+    <child link="right_back"/>
     <axis xyz="0 1 0"/>
   </joint>
 
 
   <!-- Back Camera -->
-  <link name="mini_d455_back_link">
+  <link name="d455_back_link">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <inertia 
@@ -237,45 +237,45 @@
     </visual>
   </link>
 
-  <link name="mini_d455_back_rgb_link">
+  <link name="d455_back_rgb_link">
   </link>
-  <link name="mini_d455_back_depth_link">
+  <link name="d455_back_depth_link">
   </link>  
 
-  <joint name="mini_d455_back_joint" type="fixed">
+  <joint name="d455_back_joint" type="fixed">
     <origin rpy="0 0 ${pi}" xyz="-0.155 0 0.42953"/>
-    <parent link="mini/middle_link"/>
-    <child link="mini_d455_back_link"/>
+    <parent link="middle_link"/>
+    <child link="d455_back_link"/>
     <axis xyz="0 0 1"/>
   </joint>
 
-  <joint name="mini_d455_back_rgb_joint" type="fixed">
+  <joint name="d455_back_rgb_joint" type="fixed">
     <!-- these values have to be these values otherwise the gazebo camera
         image won't be aligned properly with the frame it is supposedly
         originating from -->
     <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
-    <parent link="mini_d455_back_link"/>
-    <child link="mini_d455_back_rgb_link"/>
+    <parent link="d455_back_link"/>
+    <child link="d455_back_rgb_link"/>
   </joint>
 
-  <joint name="mini_d455_back_depth_joint" type="fixed">
+  <joint name="d455_back_depth_joint" type="fixed">
     <!-- these values have to be these values otherwise the gazebo camera
         image won't be aligned properly with the frame it is supposedly
         originating from -->
     <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
-    <parent link="mini_d455_back_link"/>
-    <child link="mini_d455_back_depth_link"/>
+    <parent link="d455_back_link"/>
+    <child link="d455_back_depth_link"/>
   </joint>
 
-  <gazebo reference="mini_d455_back_link">
-    <sensor name="mini_d455_back_rgb" type="camera">
+  <gazebo reference="d455_back_link">
+    <sensor name="d455_back_rgb" type="camera">
       <always_on>1</always_on>
       <visualize>false</visualize>
       <update_rate>15</update_rate>
-      <topic>mini/mini_d455_back/color/image_raw</topic>
-      <gz_frame_id>mini/mini_d455_back_rgb_link</gz_frame_id>
-      <camera name="mini_d455_back_rgb">
-        <camera_info_topic>mini/mini_d455_back/color/camera_info</camera_info_topic>
+      <topic>mini/d455_back/color/image_raw</topic>
+      <gz_frame_id>mini/d455_back_rgb_link</gz_frame_id>
+      <camera name="d455_back_rgb">
+        <camera_info_topic>mini/d455_back/color/camera_info</camera_info_topic>
         <horizontal_fov>1.50098</horizontal_fov>
         <image>
           <width>424</width>
@@ -290,15 +290,15 @@
     </sensor>
   </gazebo>
 
-  <gazebo reference="mini_d455_back_link">
-    <sensor name="mini_d455_back_depth" type="depth_camera">
+  <gazebo reference="d455_back_link">
+    <sensor name="d455_back_depth" type="depth_camera">
       <always_on>1</always_on>
       <visualize>false</visualize>
       <update_rate>15</update_rate>
-      <topic>mini/mini_d455_back/aligned_depth_to_color/image_raw</topic>
-      <gz_frame_id>mini/mini_d455_back_depth_link</gz_frame_id>
-      <camera name="mini_d455_back_depth">
-        <camera_info_topic>mini/mini_d455_back/aligned_depth_to_color/camera_info</camera_info_topic>
+      <topic>mini/d455_back/aligned_depth_to_color/image_raw</topic>
+      <gz_frame_id>mini/d455_back_depth_link</gz_frame_id>
+      <camera name="d455_back_depth">
+        <camera_info_topic>mini/d455_back/aligned_depth_to_color/camera_info</camera_info_topic>
         <horizontal_fov>1.50098</horizontal_fov>
         <image>
           <width>424</width>
@@ -315,7 +315,7 @@
 
   <!-- Front Camera -->
 
-  <link name="mini_d455_front_link">
+  <link name="d455_front_link">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <inertia 
@@ -342,45 +342,45 @@
     </visual>
   </link>
 
-  <link name="mini_d455_front_rgb_link">
+  <link name="d455_front_rgb_link">
   </link>
-  <link name="mini_d455_front_depth_link">
+  <link name="d455_front_depth_link">
   </link>  
 
-  <joint name="mini_d455_front_joint" type="fixed">
+  <joint name="d455_front_joint" type="fixed">
     <origin rpy="${pi} 0.523599 0" xyz="0.18939 0.16173 0.428"/>
-    <parent link="mini/middle_link"/>
-    <child link="mini_d455_front_link"/>
+    <parent link="middle_link"/>
+    <child link="d455_front_link"/>
     <axis xyz="0 0 1"/>
   </joint>
 
-  <joint name="mini_d455_front_rgb_joint" type="fixed">
+  <joint name="d455_front_rgb_joint" type="fixed">
     <!-- these values have to be these values otherwise the gazebo camera
         image won't be aligned properly with the frame it is supposedly
         originating from -->
     <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
-    <parent link="mini_d455_front_link"/>
-    <child link="mini_d455_front_rgb_link"/>
+    <parent link="d455_front_link"/>
+    <child link="d455_front_rgb_link"/>
   </joint>
 
-  <joint name="mini_d455_front_depth_joint" type="fixed">
+  <joint name="d455_front_depth_joint" type="fixed">
     <!-- these values have to be these values otherwise the gazebo camera
         image won't be aligned properly with the frame it is supposedly
         originating from -->
     <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
-    <parent link="mini_d455_front_link"/>
-    <child link="mini_d455_front_depth_link"/>
+    <parent link="d455_front_link"/>
+    <child link="d455_front_depth_link"/>
   </joint>
 
-  <gazebo reference="mini_d455_front_link">
-    <sensor name="mini_d455_front_rgb" type="camera">
+  <gazebo reference="d455_front_link">
+    <sensor name="d455_front_rgb" type="camera">
       <always_on>1</always_on>
       <visualize>false</visualize>
       <update_rate>15</update_rate>
-      <topic>mini/mini_d455_front/color/image_raw</topic>
-      <gz_frame_id>mini/mini_d455_front_rgb_link</gz_frame_id>
-      <camera name="mini_d455_front_rgb">
-        <camera_info_topic>mini/mini_d455_front/color/camera_info</camera_info_topic>
+      <topic>mini/d455_front/color/image_raw</topic>
+      <gz_frame_id>mini/d455_front_rgb_link</gz_frame_id>
+      <camera name="d455_front_rgb">
+        <camera_info_topic>mini/d455_front/color/camera_info</camera_info_topic>
         <horizontal_fov>1.50098</horizontal_fov>
         <image>
           <width>424</width>
@@ -395,15 +395,15 @@
     </sensor>
   </gazebo>
 
-  <gazebo reference="mini_d455_front_link">
-    <sensor name="mini_d455_front_depth" type="depth_camera">
+  <gazebo reference="d455_front_link">
+    <sensor name="d455_front_depth" type="depth_camera">
       <always_on>1</always_on>
       <visualize>false</visualize>
       <update_rate>15</update_rate>
-      <topic>mini/mini_d455_front/aligned_depth_to_color/image_raw</topic>
-      <gz_frame_id>mini/mini_d455_front_depth_link</gz_frame_id>
-      <camera name="mini_d455_front_depth">
-        <camera_info_topic>mini/mini_d455_front/aligned_depth_to_color/camera_info</camera_info_topic>
+      <topic>mini/d455_front/aligned_depth_to_color/image_raw</topic>
+      <gz_frame_id>mini/d455_front_depth_link</gz_frame_id>
+      <camera name="d455_front_depth">
+        <camera_info_topic>mini/d455_front/aligned_depth_to_color/camera_info</camera_info_topic>
         <horizontal_fov>1.50098</horizontal_fov>
         <image>
           <width>424</width>
@@ -422,7 +422,7 @@
     <hardware>
       <plugin>gz_ros2_control/GazeboSimSystem</plugin>
     </hardware>
-    <joint name="mini/left_front_rev">
+    <joint name="left_front_rev">
       <command_interface name="velocity">
         <param name="min">-15</param>
         <param name="max">15</param>
@@ -433,7 +433,7 @@
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
-    <joint name="mini/left_back_rev">
+    <joint name="left_back_rev">
       <command_interface name="velocity">
         <param name="min">-15</param>
         <param name="max">15</param>
@@ -444,7 +444,7 @@
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
-    <joint name="mini/right_front_rev">
+    <joint name="right_front_rev">
       <command_interface name="velocity">
         <param name="min">-15</param>
         <param name="max">15</param>
@@ -455,7 +455,7 @@
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
-    <joint name="mini/right_back_rev">
+    <joint name="right_back_rev">
       <command_interface name="velocity">
         <param name="min">-15</param>
         <param name="max">15</param>
@@ -480,10 +480,10 @@
 
     <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
         <topic>mini/joint_states</topic>
-        <joint_name>mini/left_front_rev</joint_name>
-        <joint_name>mini/left_back_rev</joint_name>
-        <joint_name>mini/right_front_rev</joint_name>
-        <joint_name>mini/right_back_rev</joint_name>
+        <joint_name>left_front_rev</joint_name>
+        <joint_name>left_back_rev</joint_name>
+        <joint_name>right_front_rev</joint_name>
+        <joint_name>right_back_rev</joint_name>
     </plugin>
 
     <plugin
