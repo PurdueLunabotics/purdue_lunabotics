@@ -14,7 +14,7 @@ from lunabot_behavior.states.traverse import NoPath, Traverse, Stall
 from lunabot_behavior.states.deposit import Deposit
 from lunabot_behavior.states.approach_berm import ApproachBerm
 from lunabot_behavior.states.retreat_berm import RetreatBerm
-from lunabot_behavior.states.find_linkup import FindLinkup
+from lunabot_behavior.states.find_linkup_secondary import FindLinkupSecondary
 from lunabot_behavior.states.align_to_main_bot import AlignToMainBotState
 from lunabot_behavior.states.mini_wait_for_main_align import MiniWaitForAlignState
 from lunabot_behavior.states.approach_main import ApproachMainState
@@ -34,7 +34,12 @@ class MiniStates(Enum):
     INIT_MOVE = (InitRetreat(False), 10)
     INIT_STALL = (State(), 19)
     
-    FIND_LINKUP = (FindLinkup(), 11)
+    FIND_LINKUP = (FindLinkupPrimary(), 11)
+    FIND_LINKUP_STALL = (Stall(), 19)
+    FIND_LINKUP_NO_PATH = (NoPath(), 18)
+    SEND_FOUND_LINKUP = (Proceed(False), 11)
+
+    FIND_LINKUP_SECONDARY = (FindLinkupSecondary(), 11)
     FIND_LINKUP_STALL = (Stall(), 19)
     FIND_LINKUP_NO_PATH = (NoPath(), 18)
     SEND_FOUND_LINKUP = (Proceed(False), 11)
