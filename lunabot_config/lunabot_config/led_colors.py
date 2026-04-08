@@ -28,7 +28,5 @@ def colorsToInteger(colors: tuple[LedColor] | LedColor):
         packedInt += color.value * digitMult
         digitMult *= 10
 
-    print(f"COOL MESSAGE HERE!!!!!!!!!\n\n{packedInt}\n\n")
-
     return packedInt
         
