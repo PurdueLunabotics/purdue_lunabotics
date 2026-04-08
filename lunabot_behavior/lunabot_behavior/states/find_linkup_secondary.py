@@ -20,7 +20,7 @@ from nav2_msgs.action import ComputePathToPose
 import numpy as np
 from shapely.geometry import LineString
 
-class FindLinkup(Traverse):
+class FindLinkupSecondary(Traverse):
     def __init__(self):
         self.goal = PoseStamped()
         self.goal.pose.position.x = ZoneMeasurements.BERM_OFFSET_X

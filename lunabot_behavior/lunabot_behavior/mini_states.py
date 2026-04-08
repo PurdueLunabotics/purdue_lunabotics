@@ -16,7 +16,7 @@ from lunabot_behavior.states.traverse import NoPath, Traverse, Stall
 from lunabot_behavior.states.deposit import Deposit
 from lunabot_behavior.states.approach_berm import ApproachBerm
 from lunabot_behavior.states.retreat_berm import RetreatBerm
-from lunabot_behavior.states.find_linkup import FindLinkup
+from lunabot_behavior.states.find_linkup_secondary import FindLinkupSecondary
 from lunabot_behavior.states.align_to_main_bot import AlignToMainBotState
 from lunabot_behavior.states.mini_wait_for_main_align import MiniWaitForAlignState
 from lunabot_behavior.states.approach_main import ApproachMainState
@@ -36,7 +36,12 @@ class MiniStates(Enum):
     INIT_MOVE = (InitRetreat(False), (LedColor.GREEN, LedColor.YELLOW))
     INIT_STALL = (State(), (LedColor.GREEN, LedColor.RED))
     
-    FIND_LINKUP = (FindLinkup(), (LedColor.GREEN, LedColor.GREEN))
+    FIND_LINKUP = (FindLinkupPrimary(), (LedColor.GREEN, LedColor.GREEN))
+    FIND_LINKUP_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
+    FIND_LINKUP_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.RED, LedColor.ORANGE))
+    SEND_FOUND_LINKUP = (Proceed(False), (LedColor.GREEN, LedColor.BLUE))
+
+    FIND_LINKUP_SECONDARY = (FindLinkupSecondary(), (LedColor.GREEN, LedColor.GREEN))
     FIND_LINKUP_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
     FIND_LINKUP_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.RED, LedColor.ORANGE))
     SEND_FOUND_LINKUP = (Proceed(False), (LedColor.GREEN, LedColor.BLUE))
