@@ -87,7 +87,9 @@ class ManualController(Node):
     - X button: Switch between forwards and backwards driving
         - Forwards is defined as leading with excavation
     - B button: Deposition (spin auger)
-    - Start button: Stop the robot while held
+    - Start button: Stop the robot while held, set autonomy false
+    - Left Bumper: Switch between 0.25 and 1.0 driving speed
+    - Right Bumper: Turn on/off publishing control
     """
 
     def __init__(self, **kwargs):

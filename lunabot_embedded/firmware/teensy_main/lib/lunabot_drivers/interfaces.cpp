@@ -61,100 +61,6 @@ float ADS1119_Current_Bus::adc_to_current_31A(float adc_value, float adc_fsr, fl
   return 73.3 * (vout / vcc) - 37.52;
 }
 
-long KillSwitchRelay::kill_time;
-bool KillSwitchRelay::dead;
-
-void KillSwitchRelay::init() {
-  pinMode(kill_pin, OUTPUT);
-  KillSwitchRelay::dead = false;
-  reset();
-  KillSwitchRelay::kill_time = millis();
-}
-
-void KillSwitchRelay::reset() {
-  digitalWrite(kill_pin, HIGH);
-  KillSwitchRelay::dead = false;
-}
-
-void KillSwitchRelay::kill() {
-  digitalWrite(kill_pin, LOW);
-  KillSwitchRelay::kill_time = millis();
-  KillSwitchRelay::dead = true;
-}
-
-void KillSwitchRelay::disable_motor(int id, RobotEffort &effort) {
-  switch (id) {
-  case 0:
-    effort.excavate = 0;
-    break;
-  case 1:
-    effort.deposit = 0;
-    break;
-  case 2:
-    effort.left_drive = 0;
-    break;
-  case 3:
-    effort.right_drive = 0;
-    break;
-  default:
-    return;
-  }
-}
-
-// exc, dep, drive_L, drive_R
-volatile int KillSwitchRelay::cutoff_buffer[4] = {0};
-volatile int KillSwitchRelay::disable_counter[4] = {0};
-volatile bool KillSwitchRelay::is_disable[4] = {false};
-
-void KillSwitchRelay::logic(RobotEffort &effort) {
-  /*
-  if (KillSwitchRelay::dead && millis() - KillSwitchRelay::kill_time >= relay_dead_time) {
-    reset();
-  } */
-
-  float exc_curr = ADS1119_Current_Bus::adc_to_current_31A(excavation::update_curr());
-  float dep_curr = ADS1119_Current_Bus::adc_to_current_31A(deposition::update_curr());
-  float drive_left_curr = ADS1119_Current_Bus::adc_to_current_31A(drivetrain::update_curr_left());
-  float drive_right_curr = ADS1119_Current_Bus::adc_to_current_31A(drivetrain::update_curr_right());
-
-  if (exc_curr >= exdep_kill_curr) {
-    cutoff_buffer[0] += cutoff_increase;
-  }
-  if (dep_curr >= exdep_kill_curr) {
-    cutoff_buffer[1] += cutoff_increase;
-  }
-  if (drive_left_curr >= drive_kill_curr) {
-    cutoff_buffer[2] += cutoff_increase;
-  }
-  if (drive_right_curr >= drive_kill_curr) {
-    cutoff_buffer[3] += cutoff_increase;
-  }
-
-  for (int i = 0; i < 4; ++i) {
-    cutoff_buffer[i] -= cutoff_decay;
-    if (cutoff_buffer[i] < 0) {
-      cutoff_buffer[i] = 0;
-    }
-    if (is_disable[i]) {
-      if (cutoff_buffer[i] >= reset_thresh) {
-        disable_motor(i, effort);
-      } else {
-        is_disable[i] = false;
-      }
-    } else {
-      if (cutoff_buffer[i] >= cutoff_thresh) {
-        disable_motor(i, effort);
-        is_disable[i] = true;
-        disable_counter[i] += 1;
-      }
-    }
-
-    if (disable_counter[i] >= kill_thresh) {
-      disable_counter[i] = 0;
-      kill();
-    }
-  }
-}
 
 CRGB Led_Strip::all_led[Led_Strip::NUM_LEDS];
 
@@ -163,7 +69,7 @@ void Led_Strip::init() {
   FastLED.setBrightness(Led_Strip::BRIGHTNESS);
 }
 
-void Led_Strip::set_color(int32_t color_in) {
+void Led_Strip::set_color(int32_t color_in, uint8_t counter) {
 
   int MAX_DIGITS = 5; // how many digits are allowed in this integer (each digit is one color)
 
@@ -240,11 +146,11 @@ void Led_Strip::set_color(int32_t color_in) {
 
       // TODO: check if this works
       if (colors[i] == RAINBOW_MAGIC_WORD) {
-        int h = 0;
+        uint8_t h = counter;
         int s = 255;
         int v = 255;
 
-        h = ((float) j / group_size) * 255;
+        h += (int) (((float) j / group_size) * 255);
 
         CHSV hsv(h, s, v);
         CRGB color;

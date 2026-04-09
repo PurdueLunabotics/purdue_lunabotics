@@ -14,6 +14,7 @@
 RobotSensors state = RobotSensors_init_zero;
 RobotEffort effort = RobotEffort_init_zero;
 size_t effort_msg_size;
+uint8_t counter = 0;
 
 uint8_t buffer[64];
 uint8_t flags = 0;
@@ -23,7 +24,7 @@ void ctrl() {
   drivetrain::cb(effort.left_drive, effort.right_drive, effort.should_reset);
   deposition::cb(effort.deposit, effort.should_reset);
   excavation::cb(effort.excavate, effort.should_reset);
-  LEDs::cb(effort.led_color);
+  LEDs::cb(effort.led_color, counter);
   if (effort.should_reset) digitalWrite(9, HIGH); // RELAY ALWAYS ON
   else digitalWrite(9, HIGH); // RELAY ALWAYS ON
 }
@@ -96,7 +97,9 @@ void loop() {
     ms_until_ctrl = 0;
     // TODO, add timer if robot effort not changing for too long, exit?
     // KillSwitchRelay::logic(effort);
+    counter += 1;
     ctrl();
+
   }
 
   if (ms_until_send > TX_PERIOD) {
