@@ -119,8 +119,8 @@
         <arg name="exp_name" value="$(var exp_name)" />
     </include>
 
-    <node if="$(var sim)" name="manual_controller_node" pkg="lunabot_control" exec="manual_controller_node" output="screen" respawn="true">
-    </node>
+    <!-- <node if="$(var sim)" name="manual_controller_node" pkg="lunabot_control" exec="manual_controller_node" output="screen" respawn="true">
+    </node> -->
 
     <node if="$(var sim)" name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true">
             <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>

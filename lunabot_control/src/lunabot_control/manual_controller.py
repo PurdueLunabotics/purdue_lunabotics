@@ -109,6 +109,7 @@ class ManualController(Node):
         self.last_joy.buttons = [0,0,0,0,0,0,0,0,0,0,0]
 
         self.led_publisher = self.create_publisher(Int32, "led_color", 10)
+        self.curr_color = LedColor.RAINBOW
 
         self.driving_mode = "Forwards"
         
@@ -165,6 +166,7 @@ class ManualController(Node):
             self.stop()
             self.get_logger().info("Manual Control: Stopped")
         else:
+            self.curr_color = LedColor.RAINBOW
             effort_msg = RobotEffort()
 
             effort_msg.left_drive = 0
@@ -232,7 +234,7 @@ class ManualController(Node):
 
     def loop(self):
         if self.publish and not self.autonomy:
-            self.set_color(LedColor.RAINBOW) # Rainbow for manual control
+            self.set_color(self.curr_color) # Rainbow for manual control
             self.effort_publisher.publish(self.effort_msg)
 
     def stop(self):
@@ -241,6 +243,7 @@ class ManualController(Node):
         self.effort_msg.excavate = 0
         self.effort_msg.lin_act = 0
         self.effort_msg.deposit = 0
+        self.curr_color = LedColor.RED
 
         self._exc_latch_val = 0
         self._exc_latch = True
@@ -250,15 +253,14 @@ class ManualController(Node):
         autonomy_msg.data = False
         self._autonomy_pub.publish(autonomy_msg)
 
-
-def spin_in_background():
-    executor = rclpy.get_global_executor()
-    try:
-        executor.spin()
-    except Exception:
-        pass
-
 def main():
     rclpy.init()
     controller = ManualController()
-    rclpy.spin(controller)
+    try:
+        rclpy.spin(controller)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        controller.stop()
+        controller.destroy_node()
+        rclpy.shutdown()

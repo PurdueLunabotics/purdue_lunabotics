@@ -77,7 +77,7 @@ class FindLinkup(Traverse):
         self.odom = point_from_pose_2d(pose)
 
     def periodic(self) -> None | Events:
-        self.periodic()
+        super().publish_everything()
 
         if self.linkup_found:
             return Events.SUCCESS

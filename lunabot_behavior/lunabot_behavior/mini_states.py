@@ -8,6 +8,7 @@ import sys
 
 from lunabot_config.led_colors import LedColor
 
+from lunabot_behavior.states.find_linkup import FindLinkup
 from lunabot_behavior.states.align_to_angle import AlignToAngle
 from lunabot_behavior.states.separate_from_main import SeparateFromMainState
 from lunabot_behavior.states.proceed import Proceed
@@ -36,15 +37,14 @@ class MiniStates(Enum):
     INIT_MOVE = (InitRetreat(False), (LedColor.GREEN, LedColor.YELLOW))
     INIT_STALL = (State(), (LedColor.GREEN, LedColor.RED))
     
-    FIND_LINKUP = (FindLinkupPrimary(), (LedColor.GREEN, LedColor.GREEN))
+    FIND_LINKUP = (FindLinkup(), (LedColor.GREEN, LedColor.GREEN))
     FIND_LINKUP_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
     FIND_LINKUP_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.RED, LedColor.ORANGE))
     SEND_FOUND_LINKUP = (Proceed(False), (LedColor.GREEN, LedColor.BLUE))
 
     FIND_LINKUP_SECONDARY = (FindLinkupSecondary(), (LedColor.GREEN, LedColor.GREEN))
-    FIND_LINKUP_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
-    FIND_LINKUP_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.RED, LedColor.ORANGE))
-    SEND_FOUND_LINKUP = (Proceed(False), (LedColor.GREEN, LedColor.BLUE))
+    FIND_LINKUP_SECONDARY_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
+    FIND_LINKUP_SECONDARY_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.RED, LedColor.ORANGE))
     
     # ===== LINKUP SECTION (2) =====
     ALIGN_TO_MAIN = (AlignToMainBotState(), (LedColor.YELLOW, LedColor.ORANGE))
@@ -62,14 +62,14 @@ class MiniStates(Enum):
 
     # ===== TRAVERSAL SECTION (3) =====
 
-    TRAVERSE_TO_BERM = (TraverseToBerm(False), (LedColor.BLUE, LedColor.ORANGE))
+    TRAVERSE_TO_BERM = (TraverseToBerm(True), (LedColor.BLUE, LedColor.ORANGE))
     TRAVERSE_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     TRAVERSE_TO_BERM_NO_PATH = (NoPath(), (LedColor.BLUE, LedColor.RED, LedColor.ORANGE))
 
     ALIGN_TO_BERM = (AlignToAngle(270), (LedColor.BLUE, LedColor.YELLOW))
     ALIGN_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
-    MOVE_TO_STAGING = (TraverseToLinkup(False, False), (LedColor.BLUE, LedColor.GREEN))
+    MOVE_TO_STAGING = (TraverseToLinkup(False, True), (LedColor.BLUE, LedColor.GREEN))
     MOVE_TO_STAGING_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     MOVE_TO_STAGING_NO_PATH = (NoPath(), (LedColor.BLUE, LedColor.RED, LedColor.ORANGE))
     # ===== DEPOSIT SECTION (4) =====
