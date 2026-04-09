@@ -71,7 +71,7 @@ void Led_Strip::init() {
 
 void Led_Strip::set_color(int32_t color_in, uint8_t counter) {
 
-  int MAX_DIGITS = 5; // how many digits are allowed in this integer (each digit is one color)
+  int MAX_DIGITS = 9; // how many digits are allowed in this integer (each digit is one color)
 
   CRGB RAINBOW_MAGIC_WORD = 0xDEDEDE;
 
@@ -105,24 +105,27 @@ void Led_Strip::set_color(int32_t color_in, uint8_t counter) {
         color = CRGB::Red;
         break;
       case 2:
-        color = CRGB::Orange;
+        color = 0xFF5000; // Orange but better
         break;
       case 3:
-        color = CRGB::Yellow;
+        color = CRGB::Gold;
         break;
       case 4:
         color = CRGB::Green;
         break;
       case 5:
-        color = CRGB::Blue;
+        color = 0x00FF4F; // Teal
         break;
       case 6:
-        color = CRGB::Magenta;
+        color = CRGB::Blue;
         break;
       case 7:
-        color = CRGB::White;
+        color = CRGB::Magenta;
         break;
       case 8:
+        color = CRGB::White;
+        break;
+      case 9:
         color = RAINBOW_MAGIC_WORD;
         break;
       default:

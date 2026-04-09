@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="exp_name" default="exp_mini" />
+  <arg name="exp_name" default="exp" />
   <let name="current_time" value="$(eval '__import__(\'datetime\').datetime.now().strftime(\'%Y-%m-%d-%H-%M-%S\')')" />
   <let name="home_dir" value="$(eval '__import__(\'os\').path.expanduser(\'~\')')"/>
 
-  <executable cmd="ros2 bag record -o $(var home_dir)/bags/$(var exp_name)-$(var current_time)
+  <executable cmd="ros2 bag record -o $(var home_dir)/bags/mini-$(var exp_name)-$(var current_time)
 
   /mini/autonomy 
   /mini/led_color

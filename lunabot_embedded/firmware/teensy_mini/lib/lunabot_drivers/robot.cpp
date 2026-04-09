@@ -46,8 +46,8 @@ void cb(int32_t left_drive_rpm, int32_t right_drive_rpm, bool should_reset) {
 } // namespace drivetrain
 
 namespace LEDs {
-  void cb(int32_t color) {
-    Led_Strip::set_color(color);
+  void cb(int32_t color, uint8_t counter) {
+    Led_Strip::set_color(color,counter);
   }
 }
 

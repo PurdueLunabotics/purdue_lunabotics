@@ -6,10 +6,11 @@ class LedColor(Enum):
     ORANGE = 2
     YELLOW = 3
     GREEN = 4
-    BLUE = 5
-    MAGENTA = 6
-    WHITE = 7
-    RAINBOW = 8
+    TEAL = 5
+    BLUE = 6
+    MAGENTA = 7
+    WHITE = 8
+    RAINBOW = 9
 
 def colorsToInteger(colors: tuple[LedColor] | LedColor):
     # pack color sequence into an integer. Each digit is a color, 10 possible options

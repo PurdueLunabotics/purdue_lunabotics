@@ -18,7 +18,7 @@ float update_curr_right();
 } // namespace drivetrain
 
 namespace LEDs {
-void cb(int32_t);
+void cb(int32_t, uint8_t);
 }
 
 namespace deposition {

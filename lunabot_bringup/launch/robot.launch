@@ -115,7 +115,7 @@
     </include>
         
 
-    <include if="$(var record)" file="$(find-pkg-share lunabot_bringup)/launch/record.launch">
+    <include if="$(var record)" file="$(find-pkg-share lunabot_bringup)/launch/$(var ns_)record.launch">
         <arg name="exp_name" value="$(var exp_name)" />
     </include>
 

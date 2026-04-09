@@ -1,0 +1,38 @@
+
+<?xml version="1.0"?>
+<launch>
+  <arg name="exp_name" default="exp_mini" />
+  <let name="current_time" value="$(eval '__import__(\'datetime\').datetime.now().strftime(\'%Y-%m-%d-%H-%M-%S\')')" />
+  <let name="home_dir" value="$(eval '__import__(\'os\').path.expanduser(\'~\')')"/>
+
+  <executable cmd="ros2 bag record -o $(var home_dir)/bags/simple-mini-$(var exp_name)-$(var current_time)
+
+  /mini/autonomy 
+  /mini/led_color
+  
+  /mini/berm_zone /mini/berm_zone_marker 
+  /mini/exc_zone /mini/exc_zone_marker
+  /mini/start_zone /mini/start_zone_marker
+  
+  /mini/cmd_vel /mini/effort /mini/goal
+
+  /mini/events 
+  /mini/nav/failed
+  /mini/nav_path
+
+  /mini/mini_bot/joint_states /mini/mini_bot/robot_description
+
+  /mini/position
+
+  /mini/rtabmap/odom
+
+  /mini/sensors
+  /mini/stalled
+  
+  /rosout
+  /tf
+  /tf_static
+  
+  "
+    output="screen" />
+</launch>

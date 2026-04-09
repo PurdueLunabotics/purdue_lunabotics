@@ -51,11 +51,11 @@ class Led_Strip {
 public:
   Led_Strip() {};
   static void init();
-  static void set_color(int32_t);
+  static void set_color(int32_t, uint8_t);
 
 private:
   static constexpr int NUM_LEDS = 90;
-  static constexpr int BRIGHTNESS = 200; // 0 -> 255
+  static constexpr int BRIGHTNESS = 255; // 0 -> 255
   static CRGB all_led[NUM_LEDS];
 };
 
