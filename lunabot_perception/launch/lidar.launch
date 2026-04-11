@@ -11,9 +11,9 @@
     <param name="lidar_ip" value="192.168.1.62"/>
     <param name="local_port" value="6201"/>
     <param name="local_ip" value="192.168.1.2"/>
-    <param name="cloud_frame" value="lidar_link"/>
+    <param name="cloud_frame" value="mini/lidar_link"/>
     <param name="cloud_topic" value="unilidar/cloud"/>
-    <param name="imu_frame" value="unilidar_imu"/>
+    <param name="imu_frame" value="mini/unilidar_imu"/>
     <param name="imu_topic" value="unilidar/imu"/>
   </node>
 
@@ -23,7 +23,7 @@
       <remap from="cloud" to="unilidar/cloud"/>
       <remap from="odom" to="odom"/>
       <remap from="assembled_cloud" to="lidar_assembled_cloud"/>  
-      <param name="fixed_frame_id"  value="lidar_link"/>     
+      <param name="fixed_frame_id"  value="mini/lidar_link"/>     
       <param name="circular_buffer" value="true"/> <!-- remove oldest instead of waiting for entirely new clouds -->
       <param name="assembling_time" value="2.0"/> <!-- Seconds -->
       <param name="range_max"       value="5.0"/> <!-- Meters -->

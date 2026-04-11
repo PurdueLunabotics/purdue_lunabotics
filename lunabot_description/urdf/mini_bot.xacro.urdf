@@ -127,8 +127,8 @@
   </link>
 
   <joint name="lidar_mid_joint" type="fixed">
-    <origin rpy="0 ${-pi/2} 0" xyz="0.18939 -0.51 0.44"/>
-    <parent link="base_link"/>
+    <origin rpy="0 ${-pi/2} ${pi}" xyz="0.16939 -0.051 0.428"/>
+    <parent link="middle_link"/>
     <child link="lidar_mid_link"/>
     <axis xyz="0 0 1"/>
   </joint>
