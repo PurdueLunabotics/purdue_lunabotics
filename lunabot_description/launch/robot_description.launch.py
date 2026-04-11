@@ -51,6 +51,10 @@ def generate_launch_description():
             default_value='dummy_bot'
         ),
         DeclareLaunchArgument(
+            'sim',
+            default_value='false'
+        ),
+        DeclareLaunchArgument(
             'ns',
             default_value=''
         ),
