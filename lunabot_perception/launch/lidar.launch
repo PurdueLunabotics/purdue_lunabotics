@@ -1,0 +1,32 @@
+<launch>
+
+  <node pkg="unitree_lidar_ros2" exec="unitree_lidar_ros2_node" name="unitree_lidar_ros2_node" output="screen" >
+    <param name="initialize_type" value="2"/>
+    <param name="work_mode" value="5"/>
+    <param name="use_system_timestamp" value="true"/>
+    <param name="range_min" value="0.0"/>
+    <param name="range_max" value="100.0"/>
+    <param name="cloud_scan_num" value="18"/>
+    <param name="lidar_port" value="6101"/>
+    <param name="lidar_ip" value="192.168.1.62"/>
+    <param name="local_port" value="6201"/>
+    <param name="local_ip" value="192.168.1.2"/>
+    <param name="cloud_frame" value="lidar_link"/>
+    <param name="cloud_topic" value="unilidar/cloud"/>
+    <param name="imu_frame" value="unilidar_imu"/>
+    <param name="imu_topic" value="unilidar/imu"/>
+  </node>
+
+  <!-- <include file="$(find-pkg-share unitree_lidar_ros2)/launch/launch.py"/> -->
+  <!-- Assemble pointclouds over time-->
+    <node pkg="rtabmap_util" exec='point_cloud_assembler' name="point_cloud_assembler" respawn="true">
+      <remap from="cloud" to="unilidar/cloud"/>
+      <remap from="odom" to="odom"/>
+      <remap from="assembled_cloud" to="lidar_assembled_cloud"/>  
+      <param name="fixed_frame_id"  value="lidar_link"/>     
+      <param name="circular_buffer" value="true"/> <!-- remove oldest instead of waiting for entirely new clouds -->
+      <param name="assembling_time" value="2.0"/> <!-- Seconds -->
+      <param name="range_max"       value="5.0"/> <!-- Meters -->
+    </node>
+   
+</launch>
