@@ -194,7 +194,7 @@
         
 
         <let if="$(var lidar)" name="scan_cloud" value="$(var /ns)/lidar_combined_cloud"/>
-        <let unless="$(var lidar)" name="scan_cloud" value="$(var /ns)/$(var temp_cloud)"/>
+        <let unless="$(var lidar)" name="scan_cloud" value="$(var temp_cloud)"/>
 
         <node if="$(var lidar)" pkg="rtabmap_util" exec='point_cloud_aggregator' name="point_cloud_aggregator2" respawn="true">
             <remap from="cloud1" to="$(var temp_cloud)" />
