@@ -1,4 +1,4 @@
-// not used right now, for costmap layer
+// I'm going to make so many memory leaks
 #include nav2_costmap_2d
 
 namespace nav2_crater_costmap_plugin

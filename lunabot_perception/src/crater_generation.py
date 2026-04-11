@@ -18,8 +18,6 @@ from sensor_msgs_py import point_cloud2 # actually allows to read the point clou
 # import open3d as o3d
 import numpy as np
 
-# from ransac import LinearRegressor , RANSAC, square_error_loss, mean_square_error
-
 from sklearn.linear_model import RANSACRegressor
 
 import hough

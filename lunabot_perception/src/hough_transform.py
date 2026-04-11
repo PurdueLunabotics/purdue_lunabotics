@@ -16,7 +16,6 @@ def hough_transform_ring (point_positions, cx_bin_centers,  cy_bin_centers, r_bi
     for i_cx in range(cx_max):
         for i_cy in range(cy_max):
             for i_r in range(r_max):
-                
                 contribution = sum_point_contributions(
                     point_positions, 
                     cx_bin_centers[i_cx],
