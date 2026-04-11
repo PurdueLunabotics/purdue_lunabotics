@@ -243,6 +243,7 @@ class ManualController(Node):
         self.effort_msg.excavate = 0
         self.effort_msg.lin_act = 0
         self.effort_msg.deposit = 0
+        self.effort_msg.should_reset = True
         self.curr_color = LedColor.RED
 
         self._exc_latch_val = 0

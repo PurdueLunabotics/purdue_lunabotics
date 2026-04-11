@@ -1,4 +1,3 @@
-
 <?xml version="1.0"?>
 <launch>
   <arg name="exp_name" default="exp_mini" />
