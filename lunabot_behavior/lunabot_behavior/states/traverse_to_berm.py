@@ -25,17 +25,20 @@ class TraverseToBerm(Traverse):
 
 
     def freeze_map(self):
-        if not self._freeze_map_client.wait_for_service(timeout_sec=1.0):
+        while not self._freeze_map_client.wait_for_service(timeout_sec=1.0):
             self.manager.get_logger().info('The RTAB pause service is NOT AVAILABLE =_=. We will have to make do without...')
             return
             
         self.req = Empty.Request()
         out = self._freeze_map_client.call(self.req)
-        
-        if out != None:
-            self.manager.get_logger().info('RTAB Mapping is paused. Hooray!')
-        else:
-            self.manager.get_logger().error('RTAB Mapping failed. :(')
+        self.future = self.__freeze_map_client.call_async(self.req)
+        rclpy.spin_until_future_complete(self, self.future)
+
+        print(self.future.result()
+        #if self.future.result() != None:
+        #    self.manager.get_logger().info('RTAB Mapping is paused. Hooray!')
+        #else:
+        #    self.manager.get_logger().error('RTAB Mapping failed. :(')
         
     def setup(self, manager):
         self._freeze_map_client = manager.create_client(Empty, '/rtabmap/rtabmap/pause')
