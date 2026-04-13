@@ -33,26 +33,28 @@ from lunabot_behavior.states.traverse_to_linkup import TraverseToLinkup
 
 class MiniStates(Enum):
     # ===== INIT SECTION (1) =====
-    INIT_MAP = (SetupMap(False), (LedColor.GREEN, LedColor.ORANGE))
-    INIT_MOVE = (InitRetreat(False), (LedColor.GREEN, LedColor.YELLOW))
+    INIT_MAP = (SetupMap(False), (LedColor.GREEN, LedColor.YELLOW))
+    INIT_WAIT = (State(), (LedColor.GREEN, LedColor.GREEN))
+    INIT_MOVE = (InitRetreat(False), (LedColor.GREEN, LedColor.TEAL))
     INIT_STALL = (State(), (LedColor.GREEN, LedColor.RED))
     
-    FIND_LINKUP = (FindLinkup(), (LedColor.GREEN, LedColor.GREEN))
+    FIND_LINKUP = (FindLinkup(), (LedColor.GREEN, LedColor.BLUE))
     FIND_LINKUP_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
-    FIND_LINKUP_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.RED, LedColor.ORANGE))
+    FIND_LINKUP_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
     SEND_FOUND_LINKUP = (Proceed(False), (LedColor.GREEN, LedColor.BLUE))
 
-    FIND_LINKUP_SECONDARY = (FindLinkupSecondary(), (LedColor.GREEN, LedColor.GREEN))
+    FIND_LINKUP_SECONDARY = (FindLinkupSecondary(), (LedColor.GREEN, LedColor.MAGENTA))
     FIND_LINKUP_SECONDARY_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
-    FIND_LINKUP_SECONDARY_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.RED, LedColor.ORANGE))
+    FIND_LINKUP_SECONDARY_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
     
     # ===== LINKUP SECTION (2) =====
-    ALIGN_TO_MAIN = (AlignToMainBotState(), (LedColor.YELLOW, LedColor.ORANGE))
+    
+    ALIGN_TO_MAIN = (AlignToMainBotState(), (LedColor.YELLOW, LedColor.YELLOW))
     ALIGN_TO_MAIN_STALL = (State(), (LedColor.YELLOW, LedColor.RED))
 
-    WAIT_FOR_MAIN_ALIGN = (MiniWaitForAlignState(), (LedColor.YELLOW, LedColor.YELLOW))
+    WAIT_FOR_MAIN_ALIGN = (MiniWaitForAlignState(), (LedColor.YELLOW, LedColor.GREEN))
     
-    APPROACH_MAIN = (ApproachMainState(),(LedColor.YELLOW, LedColor.GREEN))
+    APPROACH_MAIN = (ApproachMainState(),(LedColor.YELLOW, LedColor.TEAL))
     APPROACH_MAIN_STALL = (State(), (LedColor.YELLOW, LedColor.RED))
 
     COLLECT_REGOLITH = (CollectRegolithState(), (LedColor.YELLOW, LedColor.BLUE))
@@ -62,25 +64,25 @@ class MiniStates(Enum):
 
     # ===== TRAVERSAL SECTION (3) =====
 
-    TRAVERSE_TO_BERM = (TraverseToBerm(True), (LedColor.BLUE, LedColor.ORANGE))
+    TRAVERSE_TO_BERM = (TraverseToBerm(True), (LedColor.BLUE, LedColor.YELLOW))
     TRAVERSE_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
-    TRAVERSE_TO_BERM_NO_PATH = (NoPath(), (LedColor.BLUE, LedColor.RED, LedColor.ORANGE))
+    TRAVERSE_TO_BERM_NO_PATH = (NoPath(), (LedColor.BLUE, LedColor.ORANGE))
 
-    ALIGN_TO_BERM = (AlignToAngle(270), (LedColor.BLUE, LedColor.YELLOW))
+    ALIGN_TO_BERM = (AlignToAngle(270), (LedColor.BLUE, LedColor.GREEN))
     ALIGN_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
-    MOVE_TO_STAGING = (TraverseToLinkup(False, True), (LedColor.BLUE, LedColor.GREEN))
+    MOVE_TO_STAGING = (TraverseToLinkup(False, True), (LedColor.BLUE, LedColor.TEAL))
     MOVE_TO_STAGING_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
-    MOVE_TO_STAGING_NO_PATH = (NoPath(), (LedColor.BLUE, LedColor.RED, LedColor.ORANGE))
+    MOVE_TO_STAGING_NO_PATH = (NoPath(), (LedColor.BLUE, LedColor.ORANGE))
     # ===== DEPOSIT SECTION (4) =====
     
-    APPROACH_BERM = (ApproachBerm(), (LedColor.MAGENTA, LedColor.ORANGE))
+    APPROACH_BERM = (ApproachBerm(), (LedColor.MAGENTA, LedColor.YELLOW))
     APPROACH_BERM_STALL = (Stall(), (LedColor.MAGENTA, LedColor.RED))
     
-    DEPOSIT = (Deposit(), (LedColor.MAGENTA, LedColor.YELLOW))
+    DEPOSIT = (Deposit(), (LedColor.MAGENTA, LedColor.GREEN))
     DEPOSIT_STALL = (State(), (LedColor.MAGENTA, LedColor.RED))
 
-    RETREAT_BERM = (RetreatBerm(), (LedColor.MAGENTA, LedColor.GREEN))
+    RETREAT_BERM = (RetreatBerm(), (LedColor.MAGENTA, LedColor.TEAL))
     RETREAT_BERM_STALL = (Stall(), (LedColor.MAGENTA, LedColor.RED))
 
     @staticmethod

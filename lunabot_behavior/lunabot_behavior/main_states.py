@@ -36,31 +36,32 @@ import math
 class MainStates(Enum):
     
     # ===== INIT SECTION (1) =====
-    INIT_MAP = (SetupMap(True), (LedColor.GREEN, LedColor.ORANGE))
-    INIT_MOVE = (InitRetreat(True), (LedColor.GREEN, LedColor.YELLOW))
+    INIT_MAP = (SetupMap(True), (LedColor.GREEN, LedColor.YELLOW))
+    INIT_WAIT = (State(), (LedColor.GREEN, LedColor.GREEN)) # This will stay as State(), no logic needed
+    INIT_MOVE = (InitRetreat(True), (LedColor.GREEN, LedColor.TEAL))
     INIT_STALL = (State(), (LedColor.GREEN, LedColor.RED))
     
-    STARTING_PLUNGE = (Plunge(), (LedColor.GREEN, LedColor.GREEN))
+    STARTING_PLUNGE = (Plunge(), (LedColor.GREEN, LedColor.BLUE))
     STARTING_PLUNGE_STALL = (State(), (LedColor.GREEN, LedColor.RED))
     
-    STARTING_RAISE = (Raise(), (LedColor.GREEN, LedColor.BLUE))
+    STARTING_RAISE = (Raise(), (LedColor.GREEN, LedColor.MAGENTA))
     STARTING_RAISE_STALL = (State(), (LedColor.GREEN, LedColor.RED))
     
-    WAIT_FOR_LINKUP = (State(), (LedColor.GREEN, LedColor.MAGENTA)) # This will stay as State(), no logic needed
+    WAIT_FOR_LINKUP = (State(), (LedColor.GREEN, LedColor.GREEN)) # This will stay as State(), no logic needed
     
     TRAVERSE_TO_LINKUP = (TraverseToLinkup(True, True), (LedColor.GREEN, LedColor.WHITE))
     TRAVERSE_TO_LINKUP_STALL =  (Stall(), (LedColor.GREEN, LedColor.RED))
-    TRAVERSE_TO_LINKUP_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.RED, LedColor.ORANGE))
+    TRAVERSE_TO_LINKUP_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
     
     # ===== EXCAVATION SECTION (5) =====
     
-    ALIGN_TO_TRENCH = (AlignTrench(), (LedColor.WHITE, LedColor.ORANGE))
+    ALIGN_TO_TRENCH = (AlignTrench(), (LedColor.WHITE, LedColor.YELLOW))
     ALIGN_TO_TRENCH_STALL = (State(), (LedColor.WHITE, LedColor.RED))
     
-    APPROACH_TRENCH = (ApproachTrench(), (LedColor.WHITE, LedColor.YELLOW))
+    APPROACH_TRENCH = (ApproachTrench(), (LedColor.WHITE, LedColor.GREEN))
     APPROACH_TRENCH_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
     
-    PLUNGE_ACT = (Plunge(), (LedColor.WHITE, LedColor.GREEN))
+    PLUNGE_ACT = (Plunge(), (LedColor.WHITE, LedColor.TEAL))
     PLUNGE_ACT_STALL = (State(), (LedColor.WHITE, LedColor.RED))
     
     TRENCH = (Trench(), (LedColor.WHITE, LedColor.BLUE))
@@ -74,12 +75,12 @@ class MainStates(Enum):
 
     # ===== LINKUP SECTION (2) =====
 
-    ALIGN_TO_LINKUP = (AlignToLinkup(), (LedColor.YELLOW, LedColor.ORANGE))
+    ALIGN_TO_LINKUP = (AlignToLinkup(), (LedColor.YELLOW, LedColor.YELLOW))
     ALIGN_TO_LINKUP_STALL = (State(), (LedColor.YELLOW, LedColor.RED))
 
-    WAIT_FOR_MINI_ALIGN = (MainWaitForAlignState(), (LedColor.YELLOW, LedColor.YELLOW))
+    WAIT_FOR_MINI_ALIGN = (MainWaitForAlignState(), (LedColor.YELLOW, LedColor.GREEN))
 
-    ALIGN_TO_MINI = (AlignToMiniBotState(), (LedColor.YELLOW, LedColor.GREEN))
+    ALIGN_TO_MINI = (AlignToMiniBotState(), (LedColor.YELLOW, LedColor.TEAL))
 
     WAIT_FOR_APPROACH = (WaitForApproachState(), (LedColor.YELLOW, LedColor.BLUE))
 
@@ -90,23 +91,23 @@ class MainStates(Enum):
 
     # ===== SINGLE ROBOT TRAVERSAL SECTION (3) =====
 
-    TRAVERSE_TO_BERM = (TraverseToBerm(True), (LedColor.BLUE, LedColor.ORANGE))
+    TRAVERSE_TO_BERM = (TraverseToBerm(True), (LedColor.BLUE, LedColor.YELLOW))
     TRAVERSE_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
-    TRAVERSE_TO_BERM_NO_PATH = (NoPath(), (LedColor.BLUE, LedColor.RED, LedColor.ORANGE))
+    TRAVERSE_TO_BERM_NO_PATH = (NoPath(), (LedColor.BLUE, LedColor.ORANGE))
 
-    ALIGN_TO_BERM = (AlignToAngle(270), (LedColor.BLUE, LedColor.YELLOW))
+    ALIGN_TO_BERM = (AlignToAngle(270), (LedColor.BLUE, LedColor.GREEN))
     ALIGN_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
-    APPROACH_BERM = (ApproachBerm(), (LedColor.BLUE, LedColor.GREEN))
+    APPROACH_BERM = (ApproachBerm(), (LedColor.BLUE, LedColor.TEAL))
     APPROACH_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
     # ===== SINGLE ROBOT DEPOSIT SECTION (4) =====
     
     
-    DEPOSIT_BERM = (Deposit(), (LedColor.MAGENTA, LedColor.ORANGE))
+    DEPOSIT_BERM = (Deposit(), (LedColor.MAGENTA, LedColor.YELLOW))
     DEPOSIT_BERM_STALL = (State(), (LedColor.MAGENTA, LedColor.RED))
     
-    RETREAT_BERM = (RetreatBerm(), (LedColor.MAGENTA, LedColor.YELLOW))
+    RETREAT_BERM = (RetreatBerm(), (LedColor.MAGENTA, LedColor.GREEN))
     RETREAT_BERM_STALL = (Stall(), (LedColor.MAGENTA, LedColor.RED))
 
     IDLE = (State(), (LedColor.RED, LedColor.RED))
@@ -114,7 +115,9 @@ class MainStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
-            (MainStates.INIT_MAP, Events.SUCCESS): MainStates.INIT_MOVE,
+            (MainStates.INIT_MAP, Events.SUCCESS): MainStates.INIT_WAIT,
+            (MainStates.INIT_WAIT, Events.PROCEED): MainStates.INIT_MOVE,
+            
             (MainStates.INIT_MOVE, Events.SUCCESS): MainStates.STARTING_PLUNGE,
             (MainStates.INIT_MOVE, Events.STALL): MainStates.INIT_STALL,
             (MainStates.INIT_STALL, Events.SUCCESS): MainStates.INIT_MOVE,
