@@ -25,6 +25,7 @@ install(TARGETS
 
 install(PROGRAMS
   scripts/apriltag_combine.py
+  scripts/fallback_pointcloud_node.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

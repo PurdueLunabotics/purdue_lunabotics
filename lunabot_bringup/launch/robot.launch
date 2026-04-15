@@ -192,7 +192,7 @@
 
         
 
-        <let if="$(var lidar)" name="scan_cloud" value="$(var /ns)/lidar_combined_cloud"/>
+        <let if="$(var lidar)" name="scan_cloud" value="$(var /ns)/combined_cloud"/>
         <let unless="$(var lidar)" name="scan_cloud" value="$(var temp_cloud)"/>
 
         <node if="$(var lidar)" pkg="rtabmap_util" exec='point_cloud_aggregator' name="point_cloud_aggregator2" respawn="true">
@@ -203,6 +203,12 @@
             <param name="xyz_output" value="true"/>
             <param name="fixed_frame_id" value="$(var ns)base_link" />
             <param name="approx_sync" value="true"/>
+        </node>
+
+        <node if="$(var lidar)" pkg="lunabot_perception" exec="apriltag_combine.py">
+            <remap from="primary" to="lidar_assembled_cloud" />
+            <remap from="secondary" to="$(var temp_cloud)" />
+            <remap from="output" to="combined_cloud" />
         </node>
 
         <push_ros_namespace namespace="rtabmap"/>
