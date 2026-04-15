@@ -25,8 +25,13 @@
     </group>
 
     <!-- Launch rviz -->
-    <arg default="$(find-pkg-share lunabot_config)/config/sim.rviz" name="rvizconfig"/>
+    <arg default="$(find-pkg-share lunabot_config)/config/$(var ns_)sim.rviz" name="rvizconfig"/>
     <node args="-d $(var rvizconfig)" name="rviz2" pkg="rviz2" exec="rviz2"/>
+    
+    <!-- Launch small rosbag recorder-->
+    <include if="$(var record)" file="$(find-pkg-share lunabot_bringup)/launch/$(var ns_)record_small.launch">
+        <arg name="exp_name" value="$(var exp_name)" />
+    </include>
 
 
 </launch>

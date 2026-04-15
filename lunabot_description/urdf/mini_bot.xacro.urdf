@@ -117,6 +117,29 @@
     </collision>
   </link>
 
+  <!-- Lidar -->
+  <link name="lidar_mid_link">
+    
+  </link>
+
+  <link name="lidar_link">
+    
+  </link>
+
+  <joint name="lidar_mid_joint" type="fixed">
+    <origin rpy="0 ${-pi/2} ${pi}" xyz="0.16939 -0.051 0.428"/>
+    <parent link="middle_link"/>
+    <child link="lidar_mid_link"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <joint name="lidar_joint" type="fixed">
+    <origin rpy="0 0 ${pi*0.375}" xyz="0 0 0"/>
+    <parent link="lidar_mid_link"/>
+    <child link="lidar_link"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
   <joint name="left_back_rev" type="continuous">
     <origin rpy="0 0 0" xyz="-0.2008 0.305 0.03"/>
     <parent link="base_link"/>
@@ -348,7 +371,7 @@
   </link>  
 
   <joint name="d455_front_joint" type="fixed">
-    <origin rpy="${pi} 0.523599 0" xyz="0.18939 0.16173 0.428"/>
+    <origin rpy="0 0.523599 0" xyz="0.18939 0.16173 0.428"/>
     <parent link="middle_link"/>
     <child link="d455_front_link"/>
     <axis xyz="0 0 1"/>
