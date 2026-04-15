@@ -124,7 +124,7 @@ class ManualController(Node):
 
         self.DEPOSITION_SPEED = 3000 
         self.ACTUATE_SPEED = 0.8 # percentage of max power
-        self.EXCAVATION_SPEED = 3000 
+        self.EXCAVATION_SPEED = 500 
 
         self.publish = True
         self.timer = self.create_timer(1 / 20, self.loop)
@@ -244,6 +244,7 @@ class ManualController(Node):
         self.effort_msg.lin_act = 0
         self.effort_msg.deposit = 0
         self.curr_color = LedColor.RED
+        self.effort_msg.should_reset = True;
 
         self._exc_latch_val = 0
         self._exc_latch = True

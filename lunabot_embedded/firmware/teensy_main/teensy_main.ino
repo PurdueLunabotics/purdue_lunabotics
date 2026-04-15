@@ -6,7 +6,7 @@
 #include "robot.hpp"
 #include "interfaces.hpp"
 
-#define TX_PERIOD 300               // ms
+#define TX_PERIOD 500               // ms
 #define CTRL_PERIOD 2              // ms
 #define CURR_UPDATE_PERIOD 8       // ms
 #define STALE_EFFORT_PERIOD 1000   // ms
