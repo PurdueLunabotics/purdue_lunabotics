@@ -91,6 +91,9 @@ struct BLD305SControlCmds {
 // Optional default values for speed, acceleration, deceleration
 // speed in rpm
 // acceleration and deceleration in ms/1000 rpm
+
+//pwm implementation is cursed. I don't care. Sorry.
+// motorID is the pww_pin num, def_acceleration is the direction pin
 StepperMotor::StepperMotor(uint8_t MotorID, StepperLibMotorType motor_type, uint16_t def_acceleration, uint16_t def_deceleration) {
   this->MotorID = MotorID;
   this->motor_type = motor_type;
@@ -99,6 +102,10 @@ StepperMotor::StepperMotor(uint8_t MotorID, StepperLibMotorType motor_type, uint
 }
 
 void StepperMotor::begin() {
+  if (motor_type == PWM) {
+    digital_write(def_acceleration, HIGH);
+    return;
+  }
   modbus_begin();
   if (motor_type == ISV2) {
     write_register(ISV2Addrs.InternalEnable, ISV2ControlCmds.ENABLE);
@@ -127,8 +134,10 @@ void StepperMotor::write_estop() {
   }
   else if (motor_type == BLD305S) {
     write_register(BLD305SAddrs.MotorState, 3);
+    //Note: forBLD305S, you can set the motor state to stop.
+  } else if (motor_type == PWM) {
+    analog_write(MotorID, 0);
   }
-  //Note: forBLD305S, you can set the motor state to stop.
 }
 
 // clears errors
@@ -157,6 +166,14 @@ void StepperMotor::move_at_speed(int16_t speed) {
       write_register(BLD305SAddrs.MotorState, 1);
     }
     write_register(BLD305SAddrs.Set_Speed, abs(speed));
+  }
+  else if (motor_type == PWM) {
+    if (speed < 0) {
+      digitalWrite(def_acceleration, HIGH);
+    } else {
+      digitalWrite(def_acceleration, LOW);
+    }
+    analog_write(map(abs(speed), 0, 3000, 0, 255));
   }
 }
 
