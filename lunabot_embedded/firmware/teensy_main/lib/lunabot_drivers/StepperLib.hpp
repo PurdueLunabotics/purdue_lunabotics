@@ -6,6 +6,7 @@
 enum StepperLibMotorType {
     ISV2,
     BLD305S,
+    PWM
 };
 
 class StepperMotor {

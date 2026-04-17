@@ -20,7 +20,7 @@ extern Sabertooth MC3; // bottom
 
 namespace actuation {
 void cb(int8_t, uint8_t, uint8_t);
-void update(float &, float &, float &);
+void update(float &, int32_t &, int32_t &);
 } // namespace actuation
 
 namespace drivetrain {
