@@ -30,6 +30,6 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           push: true
-          tags: ghcr.io/PurdueLunabotics/development:latest
+          tags: ghcr.io/purduelunabotics/development:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
