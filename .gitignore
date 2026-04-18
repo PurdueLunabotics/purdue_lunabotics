@@ -181,3 +181,4 @@ install/
 build/
 debug/
 log/
+.devcontainer/devcontainer.json
