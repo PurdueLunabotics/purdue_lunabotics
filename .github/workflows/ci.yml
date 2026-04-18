@@ -30,7 +30,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           push: true
-          tags: ghcr.io/purduelunabotics/development:latest
+          tags: ghcr.io/purduelunabotics/development:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -38,7 +38,7 @@ jobs:
     name: Make sure the code builds
     needs: build-container
     runs-on: ubuntu-latest
-    container: ghcr.io/purduelunabotics/development:latest
+    container: ghcr.io/purduelunabotics/development:${{ github.sha }}
 
     steps:
       - name: Test building
