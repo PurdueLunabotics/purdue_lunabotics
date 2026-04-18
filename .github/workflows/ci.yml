@@ -43,4 +43,4 @@ jobs:
     steps:
       - name: Test building
         shell: bash
-        run: cd /luna_ws/ && colcon build
+        run: cd /luna_ws/ && source /opt/ros/humble/setup.bash && colcon build
