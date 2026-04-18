@@ -32,7 +32,6 @@ jobs:
           push: true
           tags: |
             ghcr.io/purduelunabotics/development:${{ github.sha }}
-            ghcr.io/purduelunabotics/development:${{ github.ref_name }}
             ghcr.io/purduelunabotics/development:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
