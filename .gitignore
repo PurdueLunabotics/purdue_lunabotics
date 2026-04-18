@@ -185,3 +185,4 @@ log/
 devcontainer.json
 
 /unilidar_sdk2
+*.db3
