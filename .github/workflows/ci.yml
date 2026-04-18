@@ -33,3 +33,13 @@ jobs:
           tags: ghcr.io/purduelunabotics/development:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  run-build:
+    name: Make sure the code builds
+    needs: build-container
+    runs-on: ubuntu-latest
+    container: ghcr.io/purduelunabotics/development:latest
+
+    steps:
+      - name: Test building
+        run: cd /luna_ws/ && colcon build
