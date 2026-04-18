@@ -181,3 +181,7 @@ install/
 build/
 debug/
 log/
+
+devcontainer.json
+
+/unilidar_sdk2
