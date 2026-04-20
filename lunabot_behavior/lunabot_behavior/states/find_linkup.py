@@ -71,6 +71,7 @@ def line_cost(costmap: Costmap, a: shp.Point, b: shp.Point):
         y_increment = int((end[1] - current[1]) / distance_y);
 
     cost = 0.0
+    blocked = False
 
     if distance_x > distance_y:
         while current[0] != end[0]:
@@ -79,8 +80,7 @@ def line_cost(costmap: Costmap, a: shp.Point, b: shp.Point):
             if int(target_y) != current[1]:
                 current = (current[0], current[1] + y_increment)
 
-            # if is_blocked(costmap, current[0], current[1]):
-            #     return inf
+            blocked = blocked or is_blocked(costmap, current[0], current[1])
 
             cost += get_traversal_cost(costmap, current[0], current[1])
     else:
@@ -90,12 +90,16 @@ def line_cost(costmap: Costmap, a: shp.Point, b: shp.Point):
             if int(target_x) != current[0]:
                 current = (current[0] + x_increment, current[1])
 
-            # if is_blocked(costmap, current[0], current[1]):
-            #     return inf
+            blocked = blocked or is_blocked(costmap, current[0], current[1])
 
             cost += get_traversal_cost(costmap, current[0], current[1])
 
-    return cost
+    return cost, blocked
+
+WAITING = 0
+FINDING_LINKUP = 1
+FOUND_LINKUP = 2
+FAILED = 3
 
 class FindLinkup(Traverse):
     def __init__(self):
@@ -123,7 +127,7 @@ class FindLinkup(Traverse):
         
         self.excavation_edge = LineString([self.exc_p1, self.exc_p2])
         
-        self.linkup_found = False
+        self.state = WAITING
 
     def setup(self, manager: Node):
         ns = manager.get_namespace().lstrip('/')
@@ -141,7 +145,6 @@ class FindLinkup(Traverse):
         self.odom = None
         self.tolerance = 2.0 # wider tolerance is ok - finding linkup isn't an exact science
         self.logger = manager.get_logger()
-        self.finding = False
 
         self.path_client = ActionClient(manager, ComputePathToPose, "compute_path_to_pose")
         self.costmap_client = manager.create_client(GetCostmap, "global_costmap/get_costmap")
@@ -154,11 +157,13 @@ class FindLinkup(Traverse):
     def periodic(self) -> None | Events:
         super().publish_everything()
 
-        if self.linkup_found:
+        if self.state == FOUND_LINKUP:
             return Events.SUCCESS
+        elif self.state == FAILED:
+            return Events.FAIL
 
-        if self.odom is not None and np.linalg.norm(self.odom - self.goal_vec) <= self.tolerance and not self.finding:
-            self.finding = True
+        if self.odom is not None and np.linalg.norm(self.odom - self.goal_vec) <= self.tolerance and self.state == WAITING:
+            self.state = FINDING_LINKUP
             self.find_linkup() # find the linkup thingamabob
 
         return None
@@ -201,9 +206,9 @@ class FindLinkup(Traverse):
         self.linkup_pub.publish(linkup)
         self.linkup_found = True
 
-    def evaluate_point(self, costmap: Costmap, pos: shp.Point, angle: float):
+    def evaluate_point(self, costmap: Costmap, pos: shp.Point, angle: float) -> tuple[float, bool]:
         if pos.distance(self.excavation_edge) > self.MIN_SEGMENT_LENGTH / 4:
-            return inf
+            return (inf, True)
 
         a = shp.Point(pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
         b = shp.Point(pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
@@ -236,7 +241,7 @@ class FindLinkup(Traverse):
         self.show_line(pos, angle, id, "intermediate")
         for _ in range(0, num_iterations):
             pos, angle = self.iterate_point_once(costmap, pos, angle)
-            cost = self.evaluate_point(costmap, pos, angle)/5.0
+            cost = self.evaluate_point(costmap, pos, angle)[0]/5.0
             self.show_line(pos, angle, id, "intermediate", action=Marker.MODIFY, r=0.0 if cost > 1.0 else cost, g=1.0 if not math.isinf(cost) and cost > 1.0 else 0.0, b=1.0 if math.isinf(cost) else 0.0)
 
         return pos, angle
