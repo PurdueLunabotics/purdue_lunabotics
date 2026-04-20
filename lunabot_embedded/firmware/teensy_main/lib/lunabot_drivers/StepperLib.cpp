@@ -10,6 +10,8 @@
 
 // TODO RJN - deal with alarms and error codes
 
+Adafruit_PWMServoDriver pwm_servo = Adafruit_PWMServoDriver(0x40);
+
 struct ISV2Addrs {                   // addrs of various motor params
   uint16_t ControlMode = 0x0003; // position or velocity control
   uint16_t Reset = 0x0033;       // reset alarms or the entire motor
@@ -103,7 +105,9 @@ StepperMotor::StepperMotor(uint8_t MotorID, StepperLibMotorType motor_type, uint
 
 void StepperMotor::begin() {
   if (motor_type == PWM) {
-    digital_write(def_acceleration, HIGH);
+    pwm_servo.begin();
+    pwm_servo.setPWMFreq(50);
+    pwm_servo.setPWM(15, 4096, 0);
     return;
   }
   modbus_begin();
@@ -136,7 +140,7 @@ void StepperMotor::write_estop() {
     write_register(BLD305SAddrs.MotorState, 3);
     //Note: forBLD305S, you can set the motor state to stop.
   } else if (motor_type == PWM) {
-    analog_write(MotorID, 0);
+    pwm_servo.setPWM(MotorID, 0, 4096);
   }
 }
 
@@ -169,11 +173,11 @@ void StepperMotor::move_at_speed(int16_t speed) {
   }
   else if (motor_type == PWM) {
     if (speed < 0) {
-      digitalWrite(def_acceleration, HIGH);
+      pwm_servo.setPWM(def_acceleration, 4096, 0);
     } else {
-      digitalWrite(def_acceleration, LOW);
+      pwm_servo.setPWM(def_acceleration, 0, 4096);
     }
-    analog_write(map(abs(speed), 0, 3000, 0, 255));
+    pwm_servo.setPWM(MotorID, 0, map(abs(speed), 0, 3000, 0, 4000));
   }
 }
 

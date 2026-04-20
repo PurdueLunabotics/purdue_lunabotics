@@ -62,10 +62,10 @@ float ADS1119_Current_Bus::adc_to_current_31A(float adc_value, float adc_fsr, fl
 }
 
 
-CRGB Led_Strip::all_led[Led_Strip::NUM_LEDS];
+CRGB Led_Strip::all_led[NUM_LEDS];
 
 void Led_Strip::init() {
-  FastLED.addLeds<WS2812B, 4, GRB>(Led_Strip::all_led, Led_Strip::NUM_LEDS);
+  FastLED.addLeds<WS2812B, 4, GRB>(Led_Strip::all_led, NUM_LEDS);
   FastLED.setBrightness(Led_Strip::BRIGHTNESS);
 }
 
