@@ -15,16 +15,15 @@ import rclpy
 # TODO: what happens if the node stalls? does the time reset? also should we do distance not time based?
 
 class Drive(State):
-    def __init__(self, target_distance: float, backwards: bool, name: str = "drive") -> None:
+    def __init__(self, target_distance: float, backwards: bool, speed: float) -> None:
         self.target_distance = target_distance
         self.backwards = backwards
-        self.name = name
+        self.speed = speed
 
     def setup(self, manager: Node):
         self.logger = manager.get_logger()
         self.cmd_vel_pub = manager.create_publisher(Twist, "cmd_vel", 10)
         self.odom_sub = manager.create_subscription(PoseStamped, "position", self.odom_cb, 1)
-        self.linear_pid = ParameterizedPIDController(f"{self.name}.linear", manager, kp=1.0, max_output=0.1)
         self.odom = None
         self.position = (0, 0)
         # while self.odom == None:
@@ -44,7 +43,7 @@ class Drive(State):
             return Events.SUCCESS
 
         output = Twist()
-        output.linear.x = self.linear_pid.calculate(distance, 0.1, self.target_distance) * (1 if not self.backwards else -1)
+        output.linear.x = -self.speed if self.backwards else self.speed
         self.cmd_vel_pub.publish(output)
 
     def exit(self):
@@ -52,7 +51,7 @@ class Drive(State):
 
 class Trench(Drive):
     def __init__(self) -> None:
-        super().__init__(0.5, False, "trench")
+        super().__init__(0.5, False, 0.01)
 
     def setup(self, manager: Node):
         super().setup(manager)

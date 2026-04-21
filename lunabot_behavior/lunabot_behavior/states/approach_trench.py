@@ -5,7 +5,7 @@ from lunabot_behavior.states.trench import Drive
 
 class ApproachTrench(Drive):
   def __init__(self) -> None:
-    super().__init__(0, False)
+    super().__init__(0, False, 0.1)
 
   def setup(self, manager: Node):
     super().setup(manager)
@@ -29,7 +29,7 @@ class ApproachTrench(Drive):
 
 class RetreatTrench(Drive):
   def __init__(self) -> None:
-    super().__init__(0, True)
+    super().__init__(0, True, 0.1)
 
   def setup(self, manager: Node):
     super().setup(manager)
