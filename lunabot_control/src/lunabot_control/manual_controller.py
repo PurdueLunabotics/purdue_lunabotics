@@ -124,6 +124,7 @@ class ManualController(Node):
 
         self.DEPOSITION_SPEED = 3000 
         self.ACTUATE_SPEED = 0.8 # percentage of max power
+        self.SERVO_POS = 500 # percentage of max power
         self.EXCAVATION_SPEED = 500 
 
         self.publish = True
@@ -223,6 +224,7 @@ class ManualController(Node):
             # Dpad up/down - control linear actuators
             effort_msg.lin_act = int(constrain(joy.axes[Axes.DPAD_VERTICAL.value]) * self.ACTUATE_SPEED)
 
+            effort_msg.dep_servo = int(joy.axes[Axes.DPAD_HORIZONTAL.value]+1 * self.SERVO_POS)/2
             # Deposition- B to go, view/select/back to move backwards
             if (joy.buttons[Buttons.B.value] == 1):
                 effort_msg.deposit = int(self.DEPOSITION_SPEED)

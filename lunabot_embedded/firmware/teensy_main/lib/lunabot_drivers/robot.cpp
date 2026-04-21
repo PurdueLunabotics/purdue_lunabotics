@@ -128,19 +128,15 @@ float update_curr() {
   return dep_mtr.read_current();
 }
 
-void cb(int32_t speed_rpm, bool should_reset) {
+void cb(int32_t speed_rpm, int32_t servo_pos, bool should_reset) {
   if (should_reset) {
     dep_mtr.clear_errors();
   } else {
     dep_mtr.move_at_speed(-speed_rpm);
   }
-  if (speed_rpm > 0) {
-    pwm_servo.setPWM(8, 0, 150);
-    pwm_servo.setPWM(9, 0, 150);
-  } else {
-    pwm_servo.setPWM(8, 0, 500);
-    pwm_servo.setPWM(9, 0, 500);
-  }
+  pwm_servo.setPWM(8, 0, servo_pos);
+  pwm_servo.setPWM(9, 0, servo_pos);
+
 }
 
 } // namespace deposition

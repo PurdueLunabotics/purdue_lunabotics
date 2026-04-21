@@ -32,6 +32,7 @@ typedef struct _RobotEffort {
     int32_t right_drive;
     int32_t excavate;
     int32_t deposit;
+    int32_t dep_servo;
     bool should_reset;
     int32_t led_color;
     bool should_zero_act_pos;
@@ -45,9 +46,9 @@ extern "C" {
 
 /* Initializer values for message structs */
 #define RobotSensors_init_default                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-#define RobotEffort_init_default                 {0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define RobotEffort_init_default                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 #define RobotSensors_init_zero                   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-#define RobotEffort_init_zero                    {0, 0, 0, 0, 0, 0, 1, 0, 0}
+#define RobotEffort_init_zero                    {0, 0, 0, 0, 0, 0, 0, 1, 0, 0}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define RobotSensors_act_right_curr_tag          1
@@ -68,10 +69,11 @@ extern "C" {
 #define RobotEffort_right_drive_tag              3
 #define RobotEffort_excavate_tag                 4
 #define RobotEffort_deposit_tag                  5
-#define RobotEffort_should_reset_tag             6
-#define RobotEffort_led_color_tag                7
-#define RobotEffort_should_zero_act_pos_tag      8
-#define RobotEffort_is_top_tag                   9
+#define RobotEffort_dep_servo_tag                6
+#define RobotEffort_should_reset_tag             7
+#define RobotEffort_led_color_tag                8
+#define RobotEffort_should_zero_act_pos_tag      9
+#define RobotEffort_is_top_tag                   10
 
 /* Struct field encoding specification for nanopb */
 #define RobotSensors_FIELDLIST(X, a) \
@@ -97,10 +99,11 @@ X(a, STATIC,   SINGULAR, SINT32,   left_drive,        2) \
 X(a, STATIC,   SINGULAR, SINT32,   right_drive,       3) \
 X(a, STATIC,   SINGULAR, SINT32,   excavate,          4) \
 X(a, STATIC,   SINGULAR, SINT32,   deposit,           5) \
-X(a, STATIC,   SINGULAR, BOOL,     should_reset,      6) \
-X(a, STATIC,   SINGULAR, SINT32,   led_color,         7) \
-X(a, STATIC,   SINGULAR, BOOL,     should_zero_act_pos,   8) \
-X(a, STATIC,   SINGULAR, BOOL,     is_top,            9)
+X(a, STATIC,   SINGULAR, SINT32,   dep_servo,         6) \
+X(a, STATIC,   SINGULAR, BOOL,     should_reset,      7) \
+X(a, STATIC,   SINGULAR, SINT32,   led_color,         8) \
+X(a, STATIC,   SINGULAR, BOOL,     should_zero_act_pos,   9) \
+X(a, STATIC,   SINGULAR, BOOL,     is_top,            10)
 #define RobotEffort_CALLBACK NULL
 #define RobotEffort_DEFAULT NULL
 
@@ -113,7 +116,7 @@ extern const pb_msgdesc_t RobotEffort_msg;
 
 /* Maximum encoded size of messages (where known) */
 #define ROBOTMSGS_PB_H_MAX_SIZE                  RobotSensors_size
-#define RobotEffort_size                         42
+#define RobotEffort_size                         46
 #define RobotSensors_size                        65
 
 #ifdef __cplusplus
