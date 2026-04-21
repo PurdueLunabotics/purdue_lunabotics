@@ -48,7 +48,7 @@ extern "C" {
 #define RobotSensors_init_default                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 #define RobotEffort_init_default                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 #define RobotSensors_init_zero                   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-#define RobotEffort_init_zero                    {0, 0, 0, 0, 0, 0, 0, 1, 0, 0}
+#define RobotEffort_init_zero                    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define RobotSensors_act_right_curr_tag          1
@@ -88,8 +88,8 @@ X(a, STATIC,   SINGULAR, FLOAT,    exc_torque,        8) \
 X(a, STATIC,   SINGULAR, FLOAT,    drive_left_vel,    9) \
 X(a, STATIC,   SINGULAR, FLOAT,    drive_right_vel,  10) \
 X(a, STATIC,   SINGULAR, FLOAT,    exc_vel,          11) \
-X(a, STATIC,   SINGULAR, SINT32,    act_left_pos,     12) \
-X(a, STATIC,   SINGULAR, SINT32,    act_right_pos,    13)
+X(a, STATIC,   SINGULAR, SINT32,   act_left_pos,     12) \
+X(a, STATIC,   SINGULAR, SINT32,   act_right_pos,    13)
 #define RobotSensors_CALLBACK NULL
 #define RobotSensors_DEFAULT NULL
 
@@ -103,7 +103,7 @@ X(a, STATIC,   SINGULAR, SINT32,   dep_servo,         6) \
 X(a, STATIC,   SINGULAR, BOOL,     should_reset,      7) \
 X(a, STATIC,   SINGULAR, SINT32,   led_color,         8) \
 X(a, STATIC,   SINGULAR, BOOL,     should_zero_act_pos,   9) \
-X(a, STATIC,   SINGULAR, BOOL,     is_top,            10)
+X(a, STATIC,   SINGULAR, BOOL,     is_top,           10)
 #define RobotEffort_CALLBACK NULL
 #define RobotEffort_DEFAULT NULL
 
@@ -116,8 +116,8 @@ extern const pb_msgdesc_t RobotEffort_msg;
 
 /* Maximum encoded size of messages (where known) */
 #define ROBOTMSGS_PB_H_MAX_SIZE                  RobotSensors_size
-#define RobotEffort_size                         46
-#define RobotSensors_size                        65
+#define RobotEffort_size                         48
+#define RobotSensors_size                        67
 
 #ifdef __cplusplus
 } /* extern "C" */
