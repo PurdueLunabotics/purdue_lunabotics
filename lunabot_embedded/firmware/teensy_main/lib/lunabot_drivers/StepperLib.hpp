@@ -2,11 +2,16 @@
 #define STEPPERLIB_H
 #include <Arduino.h>
 #include "ModbusLite.hpp"
+#include <Servo.h>
+#include "Adafruit_PWMServoDriver.h"
 
 enum StepperLibMotorType {
     ISV2,
     BLD305S,
+    PWM
 };
+
+extern Adafruit_PWMServoDriver pwm_servo;
 
 class StepperMotor {
 public:

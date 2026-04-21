@@ -6,7 +6,7 @@ from rclpy.qos import QoSDurabilityPolicy, QoSProfile
 from visualization_msgs.msg import Marker
 from nav_msgs.msg import Path
 
-from lunabot_behavior.state import Events
+from lunabot_behavior.state import Events, State
 from lunabot_behavior.states.traverse import Traverse
 from rclpy.node import Node
 from rclpy.task import Future
@@ -20,16 +20,8 @@ from nav2_msgs.action import ComputePathToPose
 import numpy as np
 from shapely.geometry import LineString
 
-class FindLinkupSecondary(Traverse):
+class FindLinkupSecondary(State):
     def __init__(self):
-        self.goal = PoseStamped()
-        self.goal.pose.position.x = ZoneMeasurements.BERM_OFFSET_X
-        self.goal.pose.position.y = 0.0
-
-        self.goal_vec = point_from_pose_2d(self.goal)
-
-        super().__init__(self.goal, False)
-
         # planning target for action server call
         self.start_pose = PoseStamped()
         self.start_pose.pose.position.x = ZoneMeasurements.START_OFFSET_X
@@ -54,7 +46,6 @@ class FindLinkupSecondary(Traverse):
         if len(ns) != 0:
             self.frame = f"{ns}/{self.frame}"
         self.start_pose.header.frame_id = self.frame
-        self.goal.header.frame_id = self.frame
 
         super().setup(manager)
 
@@ -67,7 +58,6 @@ class FindLinkupSecondary(Traverse):
         self.odom = None
         self.tolerance = 1.0 # wider tolerance is ok - finding linkup isn't an exact science
         self.logger = manager.get_logger()
-        self.finding = False
 
         self.path_client = ActionClient(manager, ComputePathToPose, "compute_path_to_pose")
 
@@ -76,15 +66,12 @@ class FindLinkupSecondary(Traverse):
     def odom_cb(self, pose: PoseStamped):
         self.odom = point_from_pose_2d(pose)
 
-    def periodic(self) -> None | Events:
-        super().periodic()
+    def start(self):
+        self.find_linkup()
 
+    def periodic(self) -> None | Events:
         if self.linkup_found:
             return Events.SUCCESS
-
-        if self.odom is not None and np.linalg.norm(self.odom - self.goal_vec) <= self.tolerance and not self.finding:
-            self.finding = True
-            self.find_linkup() # find the linkup thingamabob
 
         return None
 
@@ -92,9 +79,6 @@ class FindLinkupSecondary(Traverse):
     # helper functions ===========================================================================
 
     def find_linkup(self):
-        # print("finding linkup")
-        self.goal.header.stamp = self.manager.get_clock().now().to_msg()
-
         self.find_segment(self.start_pose)
 
     def find_segment(self, end: PoseStamped):

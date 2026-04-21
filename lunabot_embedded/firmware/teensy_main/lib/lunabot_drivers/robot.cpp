@@ -1,6 +1,8 @@
 #include "StepperLib.hpp"
 #include "interfaces.hpp"
 #include <robot.hpp>
+#include "main.hpp"
+
 
 // sensor wire documentation 2022-2023:
 // https://docs.google.com/spreadsheets/d/1eX79YtawJqBA8VePFFtKJT6RR21gvK4qH1DKJX_vJE0/edit#gid=0
@@ -18,8 +20,9 @@ Encoder_Bus enc_bus;
 constexpr uint8_t ACT_RIGHT_CURR_MUX = 0;
 constexpr uint8_t ACT_LEFT_CURR_MUX = 2;
 
-void update(float &act_right_curr, float &lin_enc_0, float &lin_enc_1) {
-  act_right_curr = ADS1119_Current_Bus::read(ACT_RIGHT_CURR_MUX);
+void update(float &act_right_curr, int32_t &lin_enc_0, int32_t &lin_enc_1) {
+  //act_right_curr = ADS1119_Current_Bus::read(ACT_RIGHT_CURR_MUX);
+  act_right_curr = -1;
   lin_enc_0 = enc_bus.read(0);
   lin_enc_1 = enc_bus.read(1);
 }
@@ -38,8 +41,9 @@ void cb(int8_t lin_act_volt, uint8_t should_zero_act_pos, uint8_t is_top) {
 } // namespace actuation
 
 namespace drivetrain {
-StepperMotor left_drive_mtr(LEFT_DRIVE_MOTOR_ID, BLD305S);
-StepperMotor right_drive_mtr(RIGHT_DRIVE_MOTOR_ID, BLD305S);
+
+StepperMotor left_drive_mtr(1, PWM, 5);
+StepperMotor right_drive_mtr(2, PWM, 6);
 
 void begin() {
   left_drive_mtr.begin();
@@ -74,11 +78,12 @@ void cb(int32_t left_drive_rpm, int32_t right_drive_rpm, bool should_reset) {
   }
 }
 
+
 } // namespace drivetrain
 
 namespace LEDs {
-  void cb(int32_t color) {
-    Led_Strip::set_color(color);
+  void cb(int32_t color, uint8_t counter) {
+    Led_Strip::set_color(color, counter);
   }
 }
 
@@ -109,7 +114,7 @@ void cb(int32_t speed_rpm, bool should_reset) {
 } // namespace excavation
 
 namespace deposition {
-StepperMotor dep_mtr(DEP_MOTOR_ID, BLD305S);
+StepperMotor dep_mtr(0, PWM, 4); //address on the i2c pwm generator
 
 void begin() {
   dep_mtr.begin();
@@ -128,6 +133,13 @@ void cb(int32_t speed_rpm, bool should_reset) {
     dep_mtr.clear_errors();
   } else {
     dep_mtr.move_at_speed(-speed_rpm);
+  }
+  if (speed_rpm > 0) {
+    pwm_servo.setPWM(8, 0, 150);
+    pwm_servo.setPWM(9, 0, 150);
+  } else {
+    pwm_servo.setPWM(8, 0, 500);
+    pwm_servo.setPWM(9, 0, 500);
   }
 }
 

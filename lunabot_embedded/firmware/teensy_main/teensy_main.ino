@@ -6,6 +6,8 @@
 #include "robot.hpp"
 #include "interfaces.hpp"
 
+#define PWM
+
 #define TX_PERIOD 500               // ms
 #define CTRL_PERIOD 2              // ms
 #define CURR_UPDATE_PERIOD 8       // ms
@@ -52,8 +54,7 @@ float last_effort;
 void setup() {
   // Serial.begin(115200);
   Sabertooth_MotorCtrl::init_serial(ST_SERIAL, ST_BAUD_RATE);
-
-  KillSwitchRelay::init();
+  
   Led_Strip::init();
   Encoder_Bus::init(0); // init to 0 since we are at start and not in a failure state
 

@@ -12,7 +12,7 @@
 #include <RobotMsgs.pb.h>
 #include <StepperLib.hpp>
 #include <FastLED.h>
-#include "robot.hpp"
+#include "main.hpp"
 
 enum MotorDir { CW = HIGH,
                 CCW = LOW };
@@ -52,9 +52,7 @@ public:
   Led_Strip() {};
   static void init();
   static void set_color(int32_t, uint8_t);
-
 private:
-  static constexpr int NUM_LEDS = 90;
   static constexpr int BRIGHTNESS = 255; // 0 -> 255
   static CRGB all_led[NUM_LEDS];
 };
@@ -67,7 +65,7 @@ public:
 
 private:
   static constexpr int NUM_ACTUATORS = 2;
-  static constexpr int PIN_LIST[NUM_ACTUATORS * 2] = {27, 26, 29, 28};
+  static constexpr int PIN_LIST[NUM_ACTUATORS * 2] = {6, 7, 8, 9};
 
   static Encoder encs[NUM_ACTUATORS];
 };
