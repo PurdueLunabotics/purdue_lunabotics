@@ -5,6 +5,7 @@ import rclpy
 from geometry_msgs.msg import Point
 from lunabot_msgs.msg import Zone
 from visualization_msgs.msg import Marker
+import shapely.geometry as shp
 import time
 
 from rclpy.node import Node
@@ -79,6 +80,12 @@ def get_distance_from_exc(p: np.array):
 def get_distance_from_berm(p: np.array):
     start_center = np.array([ZoneMeasurements.BERM_OFFSET_X, ZoneMeasurements.BERM_OFFSET_Y])
     return np.linalg.norm(p - start_center)
+
+def point_to_shapely(point: Point) -> shp.Point:
+    return shp.Point(point.x, point.y)
+
+def zone_to_poly(zone: Zone):
+    return shp.Polygon(shell=[point_to_shapely(zone.v1), point_to_shapely(zone.v2), point_to_shapely(zone.v3), point_to_shapely(zone.v4)])
 
 class ZonesNode(Node):
     def __init__(self):

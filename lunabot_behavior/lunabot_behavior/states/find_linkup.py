@@ -9,6 +9,7 @@ from rclpy.qos import QoSDurabilityPolicy, QoSProfile
 from visualization_msgs.msg import Marker
 from nav_msgs.msg import Path
 
+from lunabot_behavior import zones
 from lunabot_behavior.state import Events
 from lunabot_behavior.states.traverse import Traverse
 from rclpy.node import Node
@@ -36,10 +37,13 @@ def world_to_map(costmap: Costmap, x: float, y: float):
     origin_pos = costmap.metadata.origin.position
     return (int((x - origin_pos.x) / resolution), int((y - origin_pos.y) / resolution))
 
-def map_to_world(costmap: Costmap, x: float, y: float) -> tuple[float, float]:
+def map_to_world(costmap: Costmap, x: int, y: int) -> tuple[float, float]:
     resolution = costmap.metadata.resolution
     origin_pos = costmap.metadata.origin.position
     return (x * resolution + origin_pos.x, y * resolution + origin_pos.y)
+
+def is_in_costmap(costmap: Costmap, x: int, y: int) -> bool:
+    return x >= 0 and x < costmap.metadata.size_x and y >= 0 and y < costmap.metadata.size_y
 
 def get_cost(costmap: Costmap, x: int, y: int) -> float:
     return 26.0 + 0.9 * int(costmap.data[x + y * costmap.metadata.size_x])
@@ -51,12 +55,15 @@ def get_traversal_cost(costmap: Costmap, x: int, y: int):
   curr_cost = get_cost(costmap, x, y)
   return (curr_cost / LETHAL_COST) ** 2
 
-def line_cost(costmap: Costmap, a: shp.Point, b: shp.Point):
+def line_cost(costmap: Costmap, a: shp.Point, b: shp.Point) -> tuple[float, bool]:
     initial = world_to_map(costmap, a.x, a.y)
     end = world_to_map(costmap, b.x, b.y)
     current = initial
     distance_x = abs(initial[0] - end[0])
     distance_y = abs(initial[1] - end[1])
+
+    if not is_in_costmap(costmap, initial[0], initial[1]) or not is_in_costmap(costmap, end[0], end[1]):
+        return inf, True
 
     divisor = np.gcd(distance_x, distance_y)
     dx = (end[0] - initial[0]) / divisor
@@ -111,19 +118,13 @@ class FindLinkup(Traverse):
 
         super().__init__(self.goal, False)
 
-        # planning target for action server call
-        self.start_pose = PoseStamped()
-        self.start_pose.pose.position.x = ZoneMeasurements.START_OFFSET_X
-        self.start_pose.pose.position.y = ZoneMeasurements.START_OFFSET_Y
-        self.start_vec = point_from_pose_2d(self.start_pose)
-
         self.MIN_SEGMENT_LENGTH = 1.325
 
         # excavation edge for linkup
-        self.exc_p1 = np.array([ZoneMeasurements.EXC_OFFSET_X - (ZoneMeasurements.EXC_LENGTH_X / 2),
-                                ZoneMeasurements.EXC_OFFSET_Y + (ZoneMeasurements.EXC_LENGTH_Y / 2)])
-        self.exc_p2 = np.array([ZoneMeasurements.EXC_OFFSET_X - (ZoneMeasurements.EXC_LENGTH_X / 2),
-                                ZoneMeasurements.EXC_OFFSET_Y - (ZoneMeasurements.EXC_LENGTH_Y / 2)])
+        self.exc_p1 = [ZoneMeasurements.EXC_OFFSET_X - (ZoneMeasurements.EXC_LENGTH_X / 2),
+                                ZoneMeasurements.EXC_OFFSET_Y + (ZoneMeasurements.EXC_LENGTH_Y / 2)]
+        self.exc_p2 = [ZoneMeasurements.EXC_OFFSET_X - (ZoneMeasurements.EXC_LENGTH_X / 2),
+                                ZoneMeasurements.EXC_OFFSET_Y - (ZoneMeasurements.EXC_LENGTH_Y / 2)]
         
         self.excavation_edge = LineString([self.exc_p1, self.exc_p2])
         
@@ -134,7 +135,6 @@ class FindLinkup(Traverse):
         self.frame = "map"
         if len(ns) != 0:
             self.frame = f"{ns}/{self.frame}"
-        self.start_pose.header.frame_id = self.frame
         self.goal.header.frame_id = self.frame
 
         super().setup(manager)
@@ -202,9 +202,11 @@ class FindLinkup(Traverse):
         linkup.main_target.y = pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
         linkup.mini_target.x = pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
         linkup.mini_target.y = pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
+        linkup.exc_target.x = linkup.main_target.x
+        linkup.exc_target.y = linkup.main_target.y
 
         self.linkup_pub.publish(linkup)
-        self.linkup_found = True
+        self.state = FOUND_LINKUP
 
     def evaluate_point(self, costmap: Costmap, pos: shp.Point, angle: float) -> tuple[float, bool]:
         if pos.distance(self.excavation_edge) > self.MIN_SEGMENT_LENGTH / 4:
@@ -212,6 +214,9 @@ class FindLinkup(Traverse):
 
         a = shp.Point(pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
         b = shp.Point(pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
+
+        if not a.within(zones.zone_to_poly(zones.exc_zone)):
+            return (inf, True)
 
         return line_cost(costmap, a, b)
 
