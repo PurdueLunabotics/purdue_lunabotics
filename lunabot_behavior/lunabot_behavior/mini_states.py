@@ -88,7 +88,8 @@ class MiniStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
-            (MiniStates.INIT_MAP, Events.SUCCESS): MiniStates.INIT_MOVE,
+            (MiniStates.INIT_MAP, Events.SUCCESS): MiniStates.INIT_WAIT,
+            (MiniStates.INIT_WAIT, Events.PROCEED): MiniStates.INIT_MOVE,
             (MiniStates.INIT_MOVE, Events.SUCCESS): MiniStates.FIND_LINKUP,
             (MiniStates.INIT_MOVE, Events.STALL): MiniStates.INIT_STALL,
             (MiniStates.INIT_STALL, Events.SUCCESS): MiniStates.INIT_MOVE,
