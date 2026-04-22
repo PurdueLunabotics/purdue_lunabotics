@@ -42,8 +42,8 @@ void cb(int8_t lin_act_volt, uint8_t should_zero_act_pos, uint8_t is_top) {
 
 namespace drivetrain {
 
-StepperMotor left_drive_mtr(1, PWM, 5);
-StepperMotor right_drive_mtr(2, PWM, 6);
+StepperMotor left_drive_mtr(LEFT_DRIVE_MOTOR_ID, LEFT_DRIVE_MOTOR_TYPE, LEFT_DRIVE_MOTOR_DIR_PIN);
+StepperMotor right_drive_mtr(RIGHT_DRIVE_MOTOR_ID, RIGHT_DRIVE_MOTOR_TYPE, RIGHT_DRIVE_MOTOR_DIR_PIN);
 
 void begin() {
   left_drive_mtr.begin();
@@ -88,7 +88,7 @@ namespace LEDs {
 }
 
 namespace excavation {
-StepperMotor exc_mtr(EXC_MOTOR_ID, ISV2);
+StepperMotor exc_mtr(EXC_MOTOR_ID, EXC_MOTOR_TYPE);
 
 void begin() {
   exc_mtr.begin();
@@ -114,7 +114,7 @@ void cb(int32_t speed_rpm, bool should_reset) {
 } // namespace excavation
 
 namespace deposition {
-StepperMotor dep_mtr(0, PWM, 4); //address on the i2c pwm generator
+StepperMotor dep_mtr(DEP_MOTOR_ID, DEP_MOTOR_TYPE, DEP_MOTOR_DIR_PIN); //address on the i2c pwm generator
 
 void begin() {
   dep_mtr.begin();
