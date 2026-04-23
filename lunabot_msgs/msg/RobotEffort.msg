@@ -8,7 +8,7 @@ int32 right_drive
 int32 excavate
 # Deposition
 int32 deposit
-int32 dep_left_servo
+int32 dep_servo
 
 bool should_reset
 bool should_zero_act_pos
