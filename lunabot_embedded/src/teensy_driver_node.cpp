@@ -132,6 +132,7 @@ class TeensyDriverNode : public rclcpp::Node {
       effort.right_drive = msg.right_drive;
       effort.excavate = msg.excavate;
       effort.deposit = msg.deposit;
+      effort.dep_servo = msg.dep_servo;
       effort.should_reset = msg.should_reset;
       effort.should_zero_act_pos = msg.should_zero_act_pos;
     }

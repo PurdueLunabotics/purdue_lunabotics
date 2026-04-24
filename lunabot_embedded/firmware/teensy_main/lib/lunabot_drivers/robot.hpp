@@ -32,7 +32,7 @@ void cb(int32_t, uint8_t);
 
 namespace deposition {
 void begin();
-void cb(int32_t, bool);
+void cb(int32_t, int32_t, bool);
 void update(float &);
 float update_curr();
 } // namespace deposition

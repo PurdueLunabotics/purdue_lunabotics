@@ -48,7 +48,7 @@ extern "C" {
 #define RobotSensors_init_default                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 #define RobotEffort_init_default                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 #define RobotSensors_init_zero                   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-#define RobotEffort_init_zero                    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define RobotEffort_init_zero                    {0, 0, 0, 0, 0, 0, 0, 1, 0, 0}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define RobotSensors_act_right_curr_tag          1

@@ -24,7 +24,7 @@ uint8_t flags = 0;
 void ctrl() {
   actuation::cb(effort.lin_act, effort.should_zero_act_pos, effort.is_top);
   drivetrain::cb(effort.left_drive, effort.right_drive, effort.should_reset);
-  deposition::cb(effort.deposit, effort.should_reset);
+  deposition::cb(effort.deposit, effort.dep_servo, effort.should_reset);
   excavation::cb(effort.excavate, effort.should_reset);
   LEDs::cb(effort.led_color, counter);
   if (effort.should_reset) digitalWrite(9, HIGH); // RELAY ALWAYS ON
