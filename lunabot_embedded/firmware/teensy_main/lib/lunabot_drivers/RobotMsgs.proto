@@ -15,8 +15,8 @@ message RobotSensors {
   float drive_right_vel = 10;
   float exc_vel = 11;
 
-  float act_left_pos = 12;
-  float act_right_pos = 13;
+  sint32 act_left_pos = 12;
+  sint32 act_right_pos = 13;
 }
 
 message RobotEffort {
@@ -25,8 +25,9 @@ message RobotEffort {
   sint32 right_drive = 3;
   sint32 excavate = 4;
   sint32 deposit = 5;
-  bool should_reset = 6;
-  sint32 led_color = 7;
-  bool should_zero_act_pos = 8;
-  bool is_top = 9;
+  sint32 dep_servo = 6;
+  bool should_reset = 7;
+  sint32 led_color = 8;
+  bool should_zero_act_pos = 9;
+  bool is_top = 10;
 }
