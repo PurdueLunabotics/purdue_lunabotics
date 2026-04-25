@@ -96,6 +96,9 @@ class ManualController(Node):
         super().__init__('manual_controller_node', **kwargs)
 
         self.declare_parameter("~max_speed", 3000.0);
+        self.declare_parameter("robot_num", 0)
+
+        self.robot_num = self.get_parameter("robot_num").get_parameter_value().integer_value
 
         self.autonomy = True
         self._autonomy_sub = self.create_subscription(Bool, "autonomy", self._autonomy_cb, 1)
@@ -122,10 +125,12 @@ class ManualController(Node):
         self.latched_excavation_speed = 0
         self.excavation_is_latched = False
 
-        self.DEPOSITION_SPEED = -1500 
+        self.DEPOSITION_SPEED = -1500 if self.robot_num == 1 else 1500
         self.ACTUATE_SPEED = 0.8 # percentage of max power
         self.SERVO_POS = 500 # percentage of max power
         self.EXCAVATION_SPEED = 2000 
+
+        # self.get_logger().info(f"{self.robot_num} {self.DEPOSITION_SPEED}")
 
         self.publish = True
         self.timer = self.create_timer(1 / 20, self.loop)
@@ -224,10 +229,12 @@ class ManualController(Node):
             # Dpad up/down - control linear actuators
             effort_msg.lin_act = int(constrain(joy.axes[Axes.DPAD_VERTICAL.value]) * self.ACTUATE_SPEED)
 
+            # self.get_logger().info(f"{(joy.axes[Axes.DPAD_HORIZONTAL.value]+1)}")
             effort_msg.dep_servo = int(int((joy.axes[Axes.DPAD_HORIZONTAL.value]+1) * self.SERVO_POS)/2)
             # Deposition- B to go, view/select/back to move backwards
             if (joy.buttons[Buttons.B.value] == 1):
                 effort_msg.deposit = int(self.DEPOSITION_SPEED)
+                # effort_msg.dep_servo = int(int(2 * self.SERVO_POS)/2)
             elif (joy.buttons[Buttons.BACK.value] == 1):
                 effort_msg.deposit = int(-1 * self.DEPOSITION_SPEED)
 

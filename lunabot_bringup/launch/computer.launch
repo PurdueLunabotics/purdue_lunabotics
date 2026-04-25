@@ -18,6 +18,7 @@
 
     <group>
         <node name="manual_controller_node" pkg="lunabot_control" exec="manual_controller_node" output="screen" respawn="true" >
+            <param name="robot_num" value="$(var robot_num)"/>
         </node>
 
         <node name="joystick_node" pkg="joy" exec="joy_node" output="screen" respawn="true" >
