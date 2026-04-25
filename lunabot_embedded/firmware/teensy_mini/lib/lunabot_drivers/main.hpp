@@ -15,9 +15,9 @@
 #define EXC_MOTOR_ID 0x04
 #define EXC_MOTOR_TYPE ISV2
 
-#define DEP_MOTOR_ID 0x03
-#define DEP_MOTOR_TYPE BLD305S
+#define DEP_MOTOR_ID 0x00
+#define DEP_MOTOR_TYPE PWM
 #define DEP_MOTOR_DIR_PIN 0x04 //acceleration
 
-#define NUM_LEDS 203
+#define NUM_LEDS 90
 #endif

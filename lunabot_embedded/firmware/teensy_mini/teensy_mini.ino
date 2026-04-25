@@ -21,7 +21,7 @@ uint8_t flags = 0;
 
 void ctrl() {
   drivetrain::cb(effort.left_drive, effort.right_drive, effort.should_reset);
-  deposition::cb(effort.deposit, effort.should_reset);
+  deposition::cb(effort.deposit, effort.dep_servo, effort.should_reset);
   LEDs::cb(effort.led_color, counter);
   if (effort.should_reset) digitalWrite(9, HIGH); // RELAY ALWAYS ON
   else digitalWrite(9, HIGH); // RELAY ALWAYS ON

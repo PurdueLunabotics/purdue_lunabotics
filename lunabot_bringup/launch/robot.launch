@@ -42,7 +42,7 @@
 
     <!-- What to Launch Args -->
     <arg name="autonomy" default="true" />
-    <arg name="record" default="$(var real)" />
+    <arg name="record" default="false" />
     <arg name="slam" default="true" />
     <arg name="odom_from_sim" default="false" />
     <arg name="teensy" default="$(var real)" />
@@ -192,16 +192,16 @@
 
         
 
-        <let if="$(var lidar)" name="scan_cloud" value="$(var /ns)/combined_cloud"/>
+        <let if="$(var lidar)" name="scan_cloud" value="$(var /ns)/lidar_combined_cloud"/>
         <let unless="$(var lidar)" name="scan_cloud" value="$(var temp_cloud)"/>
 
         <node if="$(var lidar)" pkg="rtabmap_util" exec='point_cloud_aggregator' name="point_cloud_aggregator2" respawn="true">
             <remap from="cloud1" to="$(var temp_cloud)" />
             <remap from="cloud2" to="lidar_assembled_cloud" />
             <remap from="combined_cloud" to="lidar_combined_cloud"/>       
-            <param name="count" value="$(eval 'len($(var cams))')"/>
+            <param name="count" value="2"/>
             <param name="xyz_output" value="true"/>
-            <param name="fixed_frame_id" value="$(var ns)base_link" />
+            <param name="fixed_frame_id" value="$(var ns/)base_link" />
             <param name="approx_sync" value="true"/>
         </node>
 

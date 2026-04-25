@@ -68,7 +68,7 @@ class EffortFactory(Node):
     def set_deposition(self, deposition: Int32):
         self.deposition = deposition.data
         
-    def set_deposition(self, gate: Bool):
+    def set_gate(self, gate: Bool):
         if gate.data:
             self.dep_servo = self.DEP_SERVO_ON
         else:
