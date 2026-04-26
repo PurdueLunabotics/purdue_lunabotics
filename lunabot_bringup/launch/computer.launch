@@ -4,6 +4,7 @@
     <arg name="exp_name" default="exp" />
     <arg name="robot_num" default="0" />
     <arg name="record" default="false"/>
+    <arg name="rviz" default="false"/>
 
     <let name="ns" if="$(eval '$(var robot_num) == 1')" value="mini"/>
     <let name="ns" if="$(eval '$(var robot_num) == 0')" value=""/>
@@ -27,7 +28,7 @@
 
     <!-- Launch rviz -->
     <arg default="$(find-pkg-share lunabot_config)/config/$(var ns_)sim.rviz" name="rvizconfig"/>
-    <node args="-d $(var rvizconfig)" name="rviz2" pkg="rviz2" exec="rviz2"/>
+    <node if="$(var rviz)" args="-d $(var rvizconfig)" name="rviz2" pkg="rviz2" exec="rviz2"/>
     
     <!-- Launch small rosbag recorder-->
     <include if="$(var record)" file="$(find-pkg-share lunabot_bringup)/launch/$(var ns_)record_small.launch">
