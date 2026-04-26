@@ -205,11 +205,11 @@
             <param name="approx_sync" value="true"/>
         </node>
 
-        <node if="$(var lidar)" pkg="lunabot_perception" exec="fallback_pointcloud_node.py">
+        <!-- <node if="$(var lidar)" pkg="lunabot_perception" exec="fallback_pointcloud_node.py">
             <remap from="primary" to="lidar_assembled_cloud" />
             <remap from="secondary" to="$(var temp_cloud)" />
             <remap from="output" to="combined_cloud" />
-        </node>
+        </node> -->
 
         <push_ros_namespace namespace="rtabmap"/>
 

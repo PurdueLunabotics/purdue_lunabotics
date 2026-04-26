@@ -8,7 +8,7 @@
   # (optional) list of tags
     # If defined, 'frames' and 'sizes' must have the same length as 'ids'.
       tag:
-        ids:    [368, 7, 11]         # tag IDs for which to publish transform
+        ids:    [173, 7, 11]         # tag IDs for which to publish transform
         frames: ["main_deposition", "tag36h11:7", "tag36h11:11"]   # frame names
         sizes:  [0.12192, 0.1905, 0.1905]     # tag-specific edge size, overrides the default 'size'
 /mini/*:
@@ -21,6 +21,6 @@
   # (optional) list of tags
     # If defined, 'frames' and 'sizes' must have the same length as 'ids'.
       tag:
-        ids:    [368, 7, 11]         # tag IDs for which to publish transform
+        ids:    [173, 7, 11]         # tag IDs for which to publish transform
         frames: [main_deposition, tag36h11:107, tag36h11:111]   # frame names
-        sizes:  [0.12192, 0.1905, 0.1905]     # tag-specific edge size, overrides the default 'size'
+        sizes:  [0.09603, 0.1905, 0.1905]     # tag-specific edge size, overrides the default 'size'

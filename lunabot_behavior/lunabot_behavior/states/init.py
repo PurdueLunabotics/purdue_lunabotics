@@ -41,17 +41,17 @@ class SetupMap(State):
   def tag_cb(self, detections: AprilTagDetectionArray):
     global direction
     self.detections[detections.header.frame_id] = detections
-    if detections.header.frame_id == "d455_front_rgb_link" and len(detections.detections) > 0:
+    if "d455_front" in detections.header.frame_id and len(detections.detections) > 0:
       direction = Direction.SOUTH if detections.detections[0].id == 11 else Direction.WEST
-    elif detections.header.frame_id == "mini/d455_front_rgb_link" and len(detections.detections) > 0:
+    elif "mini/d455_front" in detections.header.frame_id and len(detections.detections) > 0:
       direction = Direction.NORTH if detections.detections[0].id == 11 else Direction.EAST
-    elif detections.header.frame_id == "mini/d455_back_rgb_link" and any(detection.id == 368 for detection in detections.detections):
+    elif "mini/d455_back" in detections.header.frame_id  and any(detection.id == 173 for detection in detections.detections):
       self.can_see_main_bot = True
 
   def periodic(self):
     self.manager.get_logger().info(f"SetupMap: can see main: {self.can_see_main_bot}, dir: {direction}")
     if self.can_see_main_bot and self.is_main and (direction == Direction.NORTH or direction == Direction.EAST):
-      mini_detections = self.detections["mini/d455_front_rgb_link"]
+      mini_detections = self.detections["mini/d455_front_color_optical_frame"]
       mini_detections.header.frame_id = "deposition_apriltag_optical_frame"
       try:
         main_to_tag = self.tf_buf.lookup_transform("main_deposition", "tag36h11:107" if direction == Direction.EAST else "tag36h11:111", Time())
@@ -63,7 +63,7 @@ class SetupMap(State):
         self.manager.get_logger().warn(f"failed to send detection: {e}")
         self.ready_time = None
     if self.can_see_main_bot and not self.is_main and (direction == Direction.SOUTH or direction == Direction.WEST):
-      main_detections = self.detections["d455_front_rgb_link"]
+      main_detections = self.detections["d455_front_color_optical_frame"]
       main_detections.header.frame_id = "main_deposition"
       main_detections.detections[0].id += 100
       try:
