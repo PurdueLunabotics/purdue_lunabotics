@@ -34,7 +34,7 @@ class TraverseToBerm(Traverse):
         self.future = self.__freeze_map_client.call_async(self.req)
         rclpy.spin_until_future_complete(self, self.future)
 
-        self.manager.get_logger().info(self.future.result()
+        self.manager.get_logger().info(self.future.result())
         #if self.future.result() != None:
         #    self.manager.get_logger().info('RTAB Mapping is paused. Hooray!')
         #else:
