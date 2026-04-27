@@ -135,7 +135,7 @@ void cb(int32_t speed_rpm, int32_t servo_pos, bool should_reset) {
     dep_mtr.move_at_speed(-speed_rpm);
   }
   pwm_servo.setPWM(8, 0, servo_pos);
-  pwm_servo.setPWM(9, 0, servo_pos);
+  pwm_servo.setPWM(9, 0, 750 - servo_pos);
 
 }
 
