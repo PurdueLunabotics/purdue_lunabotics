@@ -27,6 +27,10 @@ RUN apt install -y clang
 RUN cat <<EOF > ~/.bashrc
 source /opt/ros/humble/setup.bash
 source /luna_ws/install/setup.bash
+
+export GZ_SIM_RESOURCE_PATH=\$GZ_SIM_RESOURCE_PATH:\$(ros2 pkg prefix lunabot_sim)/share
+export ROS_DISCOVERY_SERVER="192.168.0.133:11811"
+export FASTRTPS_DEFAULT_PROFILES_FILE=/luna_ws/src/purdue_lunabotics/super_client_configuration_file.xml
 EOF
 
 RUN apt update -y && apt install -y \
