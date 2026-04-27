@@ -125,13 +125,8 @@ class ManualController(Node):
         self.latched_excavation_speed = 0
         self.excavation_is_latched = False
 
-<<<<<<< Updated upstream
         self.DEPOSITION_SPEED = -1500 if self.robot_num == 1 else 1500
         self.ACTUATE_SPEED = 0.8 # percentage of max power
-=======
-        self.DEPOSITION_SPEED = -1500 
-        self.ACTUATE_SPEED = 0.5 # percentage of max power
->>>>>>> Stashed changes
         self.SERVO_POS = 500 # percentage of max power
         self.EXCAVATION_SPEED = 2000 
 
