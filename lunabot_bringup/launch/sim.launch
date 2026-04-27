@@ -2,19 +2,14 @@
 <launch>
   <set_parameter name="use_sim_time" value="true" /> <!-- Use time from Gazebo (will break without this)-->
 
-  <arg name="two_bots" default="false"/>
-  <!-- Should we use Point To Point or Pure pursuit -->
-
+  <arg name="two_bots" default="true"/> 
   <arg name="gui" default="true"/>
-  <arg name="odom_from_sim" default="false" />
-
-  <executable cmd="pkill -9 ruby" />
-
+  <arg name="odom_from_sim" default="true" />
   
   <arg default="$(find-pkg-share lunabot_config)/config/sim.rviz" name="rvizconfig"/>
   <arg default="$(find-pkg-share lunabot_config)/config/mini_sim.rviz" name="minirvizconfig"/>
   <node args="-d $(var rvizconfig)" name="rviz" pkg="rviz2" exec="rviz2" />
-  <node if="$(var two_bots)" args="-d $(var minirvizconfig)" name="rviz" pkg="rviz2" exec="rviz2" />
+  <node if="$(var two_bots)" args="-d $(var minirvizconfig)" name="mini_rviz" pkg="rviz2" exec="rviz2" />
 
   <include if="$(var gui)" file="$(find-pkg-share lunabot_sim)/launch/gazebo.launch.py"/>
   <include unless="$(var gui)" file="$(find-pkg-share lunabot_sim)/launch/gazebo_no_gui.launch.py"/>

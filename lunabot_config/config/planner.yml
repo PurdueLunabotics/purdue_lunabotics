@@ -1,11 +1,13 @@
 global_costmap:
   global_costmap:
     ros__parameters:
+      height: 5
+      width: 5
       publish_frequency: 30.0
       global_frame: "map"
       robot_base_frame: "base_link"
-      robot_radius: 0.2
-      plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+      robot_radius: 0.4
+      plugins: ["static_layer","obstacle_layer" ,"denoise_layer", "inflation_layer"]
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_topic: "/rtabmap/octomap_grid"
@@ -20,6 +22,13 @@ global_costmap:
         pointcloud:
           topic: "/rtabmap/crater"
           data_type: "PointCloud2"
+        footprint_clearing_enabled: true
+      denoise_layer:
+        plugin: "nav2_costmap_2d::DenoiseLayer"
+        enabled: true
+        minimal_group_size: 2
+        group_connectivity_type: 4 # 4 is adjacent, 8 includes diagonals
+        footprint_clearing_enabled: true
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         enabled: true
@@ -27,6 +36,7 @@ global_costmap:
         cost_scaling_factor: 6.0
         inflate_unknown: true  # should treat unknown as obstacles (maybe change init values)
         inflate_around_unknown: true
+        footprint_clearing_enabled: true
 
 planner_server:
   ros__parameters:
@@ -39,13 +49,13 @@ mini:
     global_costmap:
       ros__parameters:
         publish_frequency: 30.0
-        global_frame: "minimap"
-        robot_base_frame: "minibase_link"
+        global_frame: "mini/map"
+        robot_base_frame: "mini/base_link"
         robot_radius: 0.2
-        plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+        plugins: ["static_layer", "obstacle_layer","denoise_layer", "inflation_layer"]
         static_layer:
           plugin: "nav2_costmap_2d::StaticLayer"
-          map_topic: "/mini/rtabmap/octomap_grid"
+          map_topic: "/mini/rtabmap/map"
           enabled: true
           map_subscribe_transient_local: false
           subscribe_to_updates: true
@@ -57,6 +67,11 @@ mini:
           pointclouds:
             topic: "rtabmap/crater"
             data_type: "PointCloud2"
+        denoise_layer:
+          plugin: "nav2_costmap_2d::DenoiseLayer"
+          enabled: true
+          minimal_group_size: 2
+          group_connectivity_type: 4 # 4 is adjacent, 8 includes diagonals
         inflation_layer:
           plugin: "nav2_costmap_2d::InflationLayer"
           enabled: true

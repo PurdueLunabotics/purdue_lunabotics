@@ -5,21 +5,23 @@
   <!-- ============================== -->
 
   <!-- Type of Camera Args -->
-  <arg name="sim"                             default="false"/>
+  <arg name="sim"                           default="false"/>
 
-  <let name="serial_no_cam_4"               value="'_053122251286'"/>
+  <let name="serial_no_cam_1"               value="'_053122251286'"/>
   <arg name="cam_1_name"                    default="d455_front"/>
-  <let name="serial_no_cam_1"               value="'141222070808'"/>
+  <let name="serial_no_cam_2"               value="'141222070808'"/>
   <arg name="cam_2_name"                    default="d455_back"/>
-  <let name="serial_no_cam_3"               value="'_053122251335'"/>
+
+  <let name="serial_no_cam_3"               value="'339222072367'"/>
   <arg name="cam_3_name"                    default="d455_front"/>
-  <let name="serial_no_cam_2"               value="'939622074382'"/>
+  <let name="serial_no_cam_4"               value="'939622074382'"/>
   <arg name="cam_4_name"                    default="d455_back"/>
+
   <arg name="cams"                          default="''"/>
 
   <arg name="pointcloud"                      default="$(eval 'len($(var cams)) > 1')" />
 
-  <arg name="profile"                         default="424x240x15"/>
+  <arg name="profile"                         default="848x480x30"/>
   <let name="initial_reset"                   value="true"/>
   <let name="decimation"                      value="4"/> 
   <let name="voxel_size"                      value="0.01"/> <!--meters-->
@@ -28,6 +30,8 @@
 
   <let name="/ns" if="$(eval 'len(\'$(var ns)\') > 0')" value="/$(var ns)"/>
   <let name="/ns" unless="$(eval 'len(\'$(var ns)\') > 0')" value=""/>
+  <let name="ns/" if="$(eval 'len(\'$(var ns)\') > 0')" value="$(var ns)/"/>
+  <let name="ns/" unless="$(eval 'len(\'$(var ns)\') > 0')" value=""/>
 
   <group if="$(eval '\'1\' in $(var cams)')">
     <group unless="$(var sim)">
@@ -54,9 +58,10 @@
         <arg name="decimation_filter.enable"      value="true"/>
 
         <arg name="publish_tf"                    value="true"/>
-        <arg name="tf_publish_rate"               value="0"/>
+        <arg name="tf_publish_rate"               value="0.0"/>
+        <arg name="tf_prefix"                     value="$(var ns/)"/>
 
-        <arg name="clip_distance"                 value="-1"/>
+        <arg name="clip_distance"                 value="-1.0"/>
       </include>
     </group>
     <push_ros_namespace namespace="$(var cam_1_name)"/>
@@ -104,9 +109,10 @@
         <arg name="decimation_filter.enable"      value="true"/>
 
         <arg name="publish_tf"                    value="true"/>
-        <arg name="tf_publish_rate"               value="0"/>
+        <arg name="tf_publish_rate"               value="0.0"/>
+        <arg name="tf_prefix"                     value="$(var ns/)"/>
 
-        <arg name="clip_distance"                 value="-1"/>
+        <arg name="clip_distance"                 value="-1.0"/>
       </include>
     </group>
     <push_ros_namespace namespace="$(var cam_2_name)"/>
@@ -154,9 +160,10 @@
         <arg name="decimation_filter.enable"      value="true"/>
 
         <arg name="publish_tf"                    value="true"/>
-        <arg name="tf_publish_rate"               value="0"/>
+        <arg name="tf_publish_rate"               value="0.0"/>
+        <arg name="tf_prefix"                     value="$(var ns/)"/>
 
-        <arg name="clip_distance"                 value="-1"/>
+        <arg name="clip_distance"                 value="-1.0"/>
       </include>
     </group>
     <push_ros_namespace namespace="$(var cam_3_name)"/>
@@ -204,9 +211,10 @@
         <arg name="decimation_filter.enable"      value="true"/>
 
         <arg name="publish_tf"                    value="true"/>
-        <arg name="tf_publish_rate"               value="0"/>
+        <arg name="tf_publish_rate"               value="0.0"/>
+        <arg name="tf_prefix"                     value="$(var ns/)"/>
 
-        <arg name="clip_distance"                 value="-1"/>
+        <arg name="clip_distance"                 value="-1.0"/>
       </include>
     </group>
     <push_ros_namespace namespace="$(var cam_4_name)"/>
@@ -231,17 +239,27 @@
 
   <group if="$(var pointcloud)">
     <push_ros_namespace namespace="pointcloud"/>
-
-    
     
     <!-- Aggregate pointclouds from each camera (if using multiple cameras)-->
-    <node pkg="rtabmap_util" exec='point_cloud_aggregator' name="point_cloud_aggregator" respawn="true">
+    <!-- <node pkg="rtabmap_util" exec='point_cloud_aggregator' name="point_cloud_aggregator" respawn="true">
       <remap from="cloud$(eval '$(var cams).find(\'1\')+1')" to="$(var /ns)/$(var cam_1_name)/points" />
       <remap from="cloud$(eval '$(var cams).find(\'2\')+1')" to="$(var /ns)/$(var cam_2_name)/points" />
       <remap from="cloud$(eval '$(var cams).find(\'3\')+1')" to="$(var /ns)/$(var cam_3_name)/points" />
       <remap from="cloud$(eval '$(var cams).find(\'4\')+1')" to="$(var /ns)/$(var cam_4_name)/points" />
       <remap from="combined_cloud" to="depth_combined_cloud"/>       
       <param name="count" value="$(eval 'len($(var cams))')"/>
+      <param name="xyz_output" value="true"/>
+      <param name="fixed_frame_id" value="$(var ns/)base_link" />
+      <param name="approx_sync" value="true"/>
+    </node> -->
+
+    <node pkg="rtabmap_util" exec='point_cloud_aggregator' name="point_cloud_aggregator" respawn="true">
+      <remap from="cloud1" to="$(var /ns)/$(var cam_1_name)/points" />
+      <remap from="cloud2" to="$(var /ns)/$(var cam_2_name)/points" />
+      <remap from="cloud3" to="$(var /ns)/$(var cam_3_name)/points" />
+      <remap from="cloud4" to="$(var /ns)/$(var cam_4_name)/points" />
+      <remap from="combined_cloud" to="depth_combined_cloud"/>       
+      <param name="count" value="2"/> 
       <param name="xyz_output" value="true"/>
       <param name="fixed_frame_id" value="$(var ns)base_link" />
       <param name="approx_sync" value="true"/>

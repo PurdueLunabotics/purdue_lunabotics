@@ -4,7 +4,7 @@ from rclpy.node import Node
 import threading
 import rclpy
 
-from lunabot_msgs.msg import RobotEffort 
+from lunabot_msgs.msg import RobotEffort, RobotStall 
 from std_msgs.msg import Int8, Int32, Bool
 
 
@@ -23,7 +23,11 @@ class EffortFactory(Node):
         self.right_drive = 0
         self.excavate = 0
         self.deposition = 0
+        self.dep_servo = 0
         self.should_reset = False
+        
+        self.DEP_SERVO_ON = 500
+        self.DEP_SERVO_OFF = 0
 
         self.autonomy = True
         self._autonomy_sub = self.create_subscription(Bool, "autonomy", self._autonomy_cb, 1)
@@ -37,6 +41,7 @@ class EffortFactory(Node):
         self.right_drive_subscriber = self.create_subscription(Int32, "right_drive", self.set_right_drive, 1)
         self.excavate_subscriber = self.create_subscription(Int32, "excavate", self.set_excavate, 1)
         self.deposition_subscriber = self.create_subscription(Int32, "deposition", self.set_deposition, 1)
+        self.gate_subscriber = self.create_subscription(Int32, "gate", self.set_gate, 1)
 
         rate = self.create_rate(50.0, self.get_clock())
 
@@ -62,6 +67,12 @@ class EffortFactory(Node):
 
     def set_deposition(self, deposition: Int32):
         self.deposition = deposition.data
+        
+    def set_gate(self, gate: Bool):
+        if gate.data:
+            self.dep_servo = self.DEP_SERVO_ON
+        else:
+            self.dep_servo = self.DEP_SERVO_OFF
 
     def publish_effort(self):
         # print("published effort")
@@ -70,6 +81,7 @@ class EffortFactory(Node):
         self.effort.right_drive = self.right_drive
         self.effort.excavate = self.excavate
         self.effort.deposit = self.deposition
+        self.effort.dep_servo = self.dep_servo
         self.effort.should_reset = self.should_reset
 
         self.effort_publisher.publish(self.effort)

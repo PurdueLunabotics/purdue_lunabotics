@@ -21,6 +21,7 @@ velocity_controller:
       - left_back_rev
       - right_front_rev
       - right_back_rev
+      - excavation_joint
 
 mini:
   velocity_controller:

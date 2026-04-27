@@ -9,3 +9,5 @@ float32 drive_left_vel
 float32 drive_right_vel
 float32 exc_torque
 float32 exc_vel
+float32 act_left_pos
+float32 act_right_pos

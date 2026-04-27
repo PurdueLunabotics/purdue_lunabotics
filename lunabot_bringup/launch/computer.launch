@@ -1,12 +1,25 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="foxglove" default="true"  />
-    <arg name="exp_name" default="" />
+    <arg name="foxglove" default="false"  />
+    <arg name="exp_name" default="exp" />
+    <arg name="robot_num" default="0" />
+    <arg name="record" default="false"/>
+    <arg name="rviz" default="false"/>
 
+    <let name="ns" if="$(eval '$(var robot_num) == 1')" value="mini"/>
+    <let name="ns" if="$(eval '$(var robot_num) == 0')" value=""/>
+
+    <let name="ns_" if="$(eval 'len(\'$(var ns)\') > 0')" value="$(var ns)_"/>
+    <let name="ns_" unless="$(eval 'len(\'$(var ns)\') > 0')" value=""/>
+    
+    <push_ros_namespace if="$(eval 'len(\'$(var ns)\') > 0')" namespace="$(var ns)"/>
+
+    
     <include if="$(var foxglove)" file="$(find-pkg-share foxglove_bridge)/launch/foxglove_bridge_launch.xml" />
 
     <group>
         <node name="manual_controller_node" pkg="lunabot_control" exec="manual_controller_node" output="screen" respawn="true" >
+            <param name="robot_num" value="$(var robot_num)"/>
         </node>
 
         <node name="joystick_node" pkg="joy" exec="joy_node" output="screen" respawn="true" >
@@ -14,12 +27,13 @@
     </group>
 
     <!-- Launch rviz -->
-    <arg default="$(find-pkg-share lunabot_config)/config/sim.rviz" name="rvizconfig"/>
-    <node args="-d $(var rvizconfig)" name="rviz2" pkg="rviz2" exec="rviz2"/>
+    <arg default="$(find-pkg-share lunabot_config)/config/$(var ns_)sim.rviz" name="rvizconfig"/>
+    <node if="$(var rviz)" args="-d $(var rvizconfig)" name="rviz2" pkg="rviz2" exec="rviz2"/>
     
     <!-- Launch small rosbag recorder-->
-    <include file="$(find-pkg-share lunabot_bringup)/launch/record_small.launch">
+    <include if="$(var record)" file="$(find-pkg-share lunabot_bringup)/launch/$(var ns_)record_small.launch">
         <arg name="exp_name" value="$(var exp_name)" />
     </include>
+
 
 </launch>

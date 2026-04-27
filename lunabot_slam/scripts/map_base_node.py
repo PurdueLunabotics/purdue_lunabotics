@@ -5,7 +5,7 @@ from rclpy.node import Node
 
 from std_msgs.msg import Header
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import PoseStamped, Point, Transform, Quaternion
+from geometry_msgs.msg import PoseStamped
 
 from tf2_ros.transform_listener import TransformListener
 import tf2_geometry_msgs
@@ -16,6 +16,8 @@ class MapBase(Node):
         super().__init__("map_base_node")
 
         ns = self.get_namespace().lstrip('/')
+        if len(ns) != 0:
+            ns = ns + '/';
 
         # transform we're looking for is from base link back to map
         self.from_frame_rel = f"{ns}base_link"

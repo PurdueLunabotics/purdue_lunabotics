@@ -6,6 +6,7 @@ from rclpy.node import Node
 from rclpy.parameter import Parameter
 from sensor_msgs.msg import Joy
 from lunabot_msgs.msg import RobotEffort
+from lunabot_config.led_colors import LedColor, colorsToInteger
 
 from std_msgs.msg import Int32, Bool
 
@@ -19,7 +20,7 @@ import numpy as np
 2 X
 3 Y
 4 LB
-5 RB
+5 RB 
 6 back (view button)
 7 start
 8 power
@@ -86,17 +87,22 @@ class ManualController(Node):
     - X button: Switch between forwards and backwards driving
         - Forwards is defined as leading with excavation
     - B button: Deposition (spin auger)
-    - Start button: Stop the robot while held
+    - Start button: Stop the robot while held, set autonomy false
+    - Left Bumper: Switch between 0.25 and 1.0 driving speed
+    - Right Bumper: Turn on/off publishing control
     """
 
     def __init__(self, **kwargs):
         super().__init__('manual_controller_node', **kwargs)
 
         self.declare_parameter("~max_speed", 3000.0);
+        self.declare_parameter("robot_num", 0)
+
+        self.robot_num = self.get_parameter("robot_num").get_parameter_value().integer_value
 
         self.autonomy = True
-        self._autonomy_sub = self.create_subscription(Bool, "/autonomy", self._autonomy_cb, 1)
-        self._autonomy_pub = self.create_publisher(Bool, "/autonomy", 10)
+        self._autonomy_sub = self.create_subscription(Bool, "autonomy", self._autonomy_cb, 1)
+        self._autonomy_pub = self.create_publisher(Bool, "autonomy", 10)
 
         self.joy_subscriber = self.create_subscription(Joy, "joy", self.joy_callback, 1)
         self.effort_publisher = self.create_publisher(RobotEffort, "effort", 10)
@@ -105,7 +111,8 @@ class ManualController(Node):
         self.last_joy = Joy()
         self.last_joy.buttons = [0,0,0,0,0,0,0,0,0,0,0]
 
-        self.led_publisher = self.create_publisher(Int32, "led_color", 10);
+        self.led_publisher = self.create_publisher(Int32, "led_color", 10)
+        self.curr_color = LedColor.RAINBOW
 
         self.driving_mode = "Forwards"
         
@@ -118,9 +125,12 @@ class ManualController(Node):
         self.latched_excavation_speed = 0
         self.excavation_is_latched = False
 
-        self.DEPOSITION_SPEED = 3000 #TODO RJN - this speed
+        self.DEPOSITION_SPEED = -1500 if self.robot_num == 1 else 1500
         self.ACTUATE_SPEED = 0.8 # percentage of max power
-        self.EXCAVATION_SPEED = 3000 
+        self.SERVO_POS = 500 # percentage of max power
+        self.EXCAVATION_SPEED = 2000 
+
+        # self.get_logger().info(f"{self.robot_num} {self.DEPOSITION_SPEED}")
 
         self.publish = True
         self.timer = self.create_timer(1 / 20, self.loop)
@@ -130,8 +140,8 @@ class ManualController(Node):
     def _autonomy_cb(self, autonomy: Bool):
         self.autonomy = autonomy.data
 
-    def set_color(self, new_color: Int32):
-        self.led_publisher.publish(new_color);
+    def set_color(self, new_color: LedColor):
+        self.led_publisher.publish(Int32(data = colorsToInteger(new_color)));
 
     def joy_callback(self, joy):
         # X button: Switch between driving forwards and backwards'
@@ -162,6 +172,7 @@ class ManualController(Node):
             self.stop()
             self.get_logger().info("Manual Control: Stopped")
         else:
+            self.curr_color = LedColor.RAINBOW
             effort_msg = RobotEffort()
 
             effort_msg.left_drive = 0
@@ -218,9 +229,12 @@ class ManualController(Node):
             # Dpad up/down - control linear actuators
             effort_msg.lin_act = int(constrain(joy.axes[Axes.DPAD_VERTICAL.value]) * self.ACTUATE_SPEED)
 
+            # self.get_logger().info(f"{(joy.axes[Axes.DPAD_HORIZONTAL.value]+1)}")
+            effort_msg.dep_servo = int(int((joy.axes[Axes.DPAD_HORIZONTAL.value]+1) * self.SERVO_POS)/2)
             # Deposition- B to go, view/select/back to move backwards
             if (joy.buttons[Buttons.B.value] == 1):
                 effort_msg.deposit = int(self.DEPOSITION_SPEED)
+                # effort_msg.dep_servo = int(int(2 * self.SERVO_POS)/2)
             elif (joy.buttons[Buttons.BACK.value] == 1):
                 effort_msg.deposit = int(-1 * self.DEPOSITION_SPEED)
 
@@ -229,9 +243,7 @@ class ManualController(Node):
 
     def loop(self):
         if self.publish and not self.autonomy:
-            color = Int32()
-            color.data = 3
-            self.set_color(color) # Blue for manual control
+            self.set_color(self.curr_color) # Rainbow for manual control
             self.effort_publisher.publish(self.effort_msg)
 
     def stop(self):
@@ -240,6 +252,9 @@ class ManualController(Node):
         self.effort_msg.excavate = 0
         self.effort_msg.lin_act = 0
         self.effort_msg.deposit = 0
+        self.effort_msg.should_reset = True
+        self.curr_color = LedColor.RED
+        self.effort_msg.should_reset = True;
 
         self._exc_latch_val = 0
         self._exc_latch = True
@@ -249,15 +264,14 @@ class ManualController(Node):
         autonomy_msg.data = False
         self._autonomy_pub.publish(autonomy_msg)
 
-
-def spin_in_background():
-    executor = rclpy.get_global_executor()
-    try:
-        executor.spin()
-    except Exception:
-        pass
-
 def main():
     rclpy.init()
     controller = ManualController()
-    rclpy.spin(controller)
+    try:
+        rclpy.spin(controller)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        controller.stop()
+        controller.destroy_node()
+        rclpy.shutdown()

@@ -6,6 +6,7 @@
 
     <!-- Type of Robot Args -->
     <arg name="robot_num" default="0"/>
+
     <let name="ns" if="$(eval '$(var robot_num) == 1')" value="mini"/>
     <let name="ns" if="$(eval '$(var robot_num) == 0')" value=""/>
     <arg name="sim" default="false"/>
@@ -16,18 +17,32 @@
     <!-- Add a slash before the ns if it is not empty -->
     <let name="/ns" if="$(eval 'len(\'$(var ns)\') > 0')" value="/$(var ns)"/>
     <let name="/ns" unless="$(eval 'len(\'$(var ns)\') > 0')" value=""/>
+    <let name="ns/" if="$(eval 'len(\'$(var ns)\') > 0')" value="$(var ns)/"/>
+    <let name="ns/" unless="$(eval 'len(\'$(var ns)\') > 0')" value=""/>
 
     <!-- Add an underscore after the ns if it is not empty -->
     <let name="ns_" if="$(eval 'len(\'$(var ns)\') > 0')" value="$(var ns)_"/>
     <let name="ns_" unless="$(eval 'len(\'$(var ns)\') > 0')" value=""/>
 
-    <let name="starting_x" if="$(eval '$(var robot_num) == 1')" value="1.5"/>
-    <let name="starting_x" if="$(eval '$(var robot_num) == 0')" value="2.5"/>
+    <let name="starting_x" if="$(eval '$(var robot_num) == 1')" value="2.75"/>
+    <let name="starting_x" if="$(eval '$(var robot_num) == 0')" value="2.0"/>
+    <let name="starting_y" if="$(eval '$(var robot_num) == 1')" value="1.75"/>
+    <let name="starting_y" if="$(eval '$(var robot_num) == 0')" value="1.75"/>
+    <let name="starting_yaw" if="$(eval '$(var robot_num) == 1')" value="0"/>
+    <let name="starting_yaw" if="$(eval '$(var robot_num) == 0')" value="3.14159"/>
 
+    <arg name="entity_name" if="$(eval '$(var robot_num) == 0')" default="dummy_bot"/>
+    <arg name="entity_name" if="$(eval '$(var robot_num) == 1')" default="mini_bot"/>
+
+    <!-- <let name="entity_name" if="$(eval '$(var robot_num) == 1')" value="mini_bot"/>
+    <let name="entity_name" if="$(eval '$(var robot_num) == 0')" value="dummy_bot"/> -->
+
+    <let name="entity_name" if="$(eval '$(var robot_num) == 1')" value="mini_bot"/>
+    <let name="entity_name" if="$(eval '$(var robot_num) == 0')" value="dummy_bot"/>
 
     <!-- What to Launch Args -->
     <arg name="autonomy" default="true" />
-    <arg name="record" default="$(var real)" />
+    <arg name="record" default="false" />
     <arg name="slam" default="true" />
     <arg name="odom_from_sim" default="false" />
     <arg name="teensy" default="$(var real)" />
@@ -37,6 +52,9 @@
 
     <!-- Camera Args -->
     <arg name="cameras" default="true" />
+    
+    <arg name="lidar" default="false" if="$(eval '$(var robot_num) == 0')"/>
+    <arg name="lidar" default="true" if="$(eval '$(var robot_num) == 1')"/>
 
     <let name="cam_1_name"              value="d455_front"/>
     <let name="cam_2_name"              value="d455_back"/>
@@ -67,7 +85,8 @@
     <let name="cam_4_topic"             value="" 
         unless="$(eval '\'4\' in $(var cams)')"/>
 
-    <arg name="pointcloud"                      default="$(eval 'len($(var cams)) > 1')" />
+    <arg name="pointcloud"        unless="$(var lidar)"        default="$(eval 'len($(var cams)) > 1')" />
+    <arg name="pointcloud"        if="$(var lidar)"        default="true" />
 
     <!-- Record Args -->
     <arg name="exp_name" default="exp" />
@@ -96,18 +115,20 @@
 
     <!-- Launch Cameras -->
     <include if="$(var cameras)" file="$(find-pkg-share lunabot_perception)/launch/cameras.launch">
-        <arg name="robot_num" value="$(var robot_num)"/>
         <arg name="ns" value="$(var ns)"/>
         <arg name="sim" value="$(var sim)"/>
     </include>
-        
 
-    <include if="$(var record)" file="$(find-pkg-share lunabot_bringup)/launch/record.launch">
+    <include if="$(var lidar)" file="$(find-pkg-share lunabot_perception)/launch/lidar.launch">
+
+    </include>        
+
+    <include if="$(var record)" file="$(find-pkg-share lunabot_bringup)/launch/$(var ns_)record.launch">
         <arg name="exp_name" value="$(var exp_name)" />
     </include>
 
-    <node if="$(var sim)" name="manual_controller_node" pkg="lunabot_control" exec="manual_controller_node" output="screen" respawn="true">
-    </node>
+    <!-- <node if="$(var sim)" name="manual_controller_node" pkg="lunabot_control" exec="manual_controller_node" output="screen" respawn="true">
+    </node> -->
 
     <node if="$(var sim)" name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true">
             <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
@@ -153,10 +174,42 @@
 
         <node pkg="lunabot_slam" exec="sim_odom.py" if="$(var odom_from_sim)">
         </node>
+        <let name="id_offset" if="$(eval '$(var robot_num) == 1')" value="100"/>
+        <let name="id_offset" if="$(eval '$(var robot_num) == 0')" value="0"/>
         <node pkg="lunabot_perception" exec="apriltag_combine.py">
             <remap from="detections"         to="rtabmap/apriltag/detections"/>
             <param name="input_topics" value="d455_back/detections;d455_front/detections" value-sep=";"/>
+            <param name="id_offset" value="$(var id_offset)"/>
         </node>
+
+        <node name="stall_detection_node" pkg="lunabot_control" exec="stall_detection_node" output="screen" respawn="true" unless="$(var sim)">
+            <param name="~waitTime" value="2"/> 
+        </node> 
+
+
+        <let if="$(var pointcloud)" name="temp_cloud" value="$(var /ns)/pointcloud/depth_combined_cloud"/>
+        <let unless="$(var pointcloud)" name="temp_cloud" value="$(var /ns)/$(var odom_cam_name)/points"/>
+
+        
+
+        <let if="$(var lidar)" name="scan_cloud" value="$(var /ns)/lidar_combined_cloud"/>
+        <let unless="$(var lidar)" name="scan_cloud" value="$(var temp_cloud)"/>
+
+        <node if="$(var lidar)" pkg="rtabmap_util" exec='point_cloud_aggregator' name="point_cloud_aggregator2" respawn="true">
+            <remap from="cloud1" to="$(var temp_cloud)" />
+            <remap from="cloud2" to="lidar_assembled_cloud" />
+            <remap from="combined_cloud" to="lidar_combined_cloud"/>       
+            <param name="count" value="2"/>
+            <param name="xyz_output" value="true"/>
+            <param name="fixed_frame_id" value="$(var ns/)base_link" />
+            <param name="approx_sync" value="true"/>
+        </node>
+
+        <!-- <node if="$(var lidar)" pkg="lunabot_perception" exec="fallback_pointcloud_node.py">
+            <remap from="primary" to="lidar_assembled_cloud" />
+            <remap from="secondary" to="$(var temp_cloud)" />
+            <remap from="output" to="combined_cloud" />
+        </node> -->
 
         <push_ros_namespace namespace="rtabmap"/>
 
@@ -165,14 +218,17 @@
             <param name="use_sim_time" value="$(var sim)"/>
             
             <param name="subscribe_depth"     value="true"/>
-            <param name="frame_id"            value="$(var ns)base_link"/>
-            <param name="odom_frame_id"            value="$(var ns)odom"/>
-            <param name="Odom/ResetCountdown" value="'1'"/>
+            <param name="frame_id"            value="$(var ns/)base_link"/>
+            <param name="odom_frame_id"            value="$(var ns/)odom"/>
 
+            <param name="Odom/ResetCountdown" value="'1'"/>
+            <param name="Odom/Holonomic" value="'false'"/> <!-- Not holonomic (stafe) robot -->
+            <param name="Rtabmap/ImagesAlreadyRectified" value="'false'"/> <!-- Rtabmap should rectify the image -->
 
             <remap from="depth/image"         to="$(var /ns)/$(var odom_cam_name)/aligned_depth_to_color/image_raw"/>
             <remap from="rgb/image"           to="$(var /ns)/$(var odom_cam_name)/color/image_raw"/>
             <remap from="rgb/camera_info"     to="$(var /ns)/$(var odom_cam_name)/color/camera_info"/>
+
         </node>
 
         <let if="$(var pointcloud)" name="scan_cloud" value="$(var /ns)/pointcloud/depth_combined_cloud"/>
@@ -188,8 +244,8 @@
         <node if="$(var slam)" name="rtabmap" pkg="rtabmap_slam" exec="rtabmap" output="screen" args="--delete_db_on_start" ros_args="--log-level WARN">
             <param name="use_sim_time" value="$(var sim)"/>
 
-            <param name="frame_id"                value="$(var ns)base_link"/>
-            <param name="map_frame_id"            value="$(var ns)map"/>
+            <param name="frame_id"                value="$(var ns/)base_link"/>
+            <param name="map_frame_id"            value="$(var ns/)map"/>
 
             <param name="subscribe_rgb"           value="true"/>
             <param name="subscribe_depth"         value="true"/>
@@ -214,10 +270,21 @@
             <param name="Grid/FootprintLength"    value="'1.0'"/>
             <param name="Grid/FootprintWidth"     value="'0.75'"/> 
             <param name="Grid/MaxGroundAngle"     value="'30'"/> <!-- 30 degree normal before marked as obstacle -->
+            <param name="Grid/MaxObstacleHeight"  value="'2.0'"/> <!-- points greater than 2m above are not obstacles -->
+            <param name="Grid/RangeMax"           value="'0.0'"/> <!-- don't cap range (do this in cameras.launch) -->
+            <param name="Grid/PreVoxelFiltering"  value="'false'"/> <!-- don't filter with voxels (do this in cameras.launch) -->
+            <param name="Grid/NormalK"            value="'20'" /> <!-- use the nearest 20 points to find ground normals -->
             <param name="Grid/3D"                 value="'true'"/> <!-- 3D occupancy grid -->
+            <param name="Grid/RayTracing"         value="'true'"/> <!-- Ray Trace to clear obstacles-->
             <param name="Grid/FromDepth"          value="'false'"/> <!-- occupancy grid from lidar -->
+            
+            <param name="GridGlobal/Eroded"       value="'true'" /> <!-- TODO: Figure out what this does? -->
+            <param name="GridGlobal/FootprintRadius" value="'0.375'" /> <!-- Clear obstacles within this radius -->
+            <param name="GridGlobal/MinSize"      value="'10.0'"/> <!-- Minimum map size (m) -->
+            <param name="GridGlobal/OccupancyThr" value="'0.5'"/> <!-- Threshold for occupancy -->
+            
             <param name="Kp/MaxFeatures"          value="$(var rtabmap_max_features)"/>
-            <param name="Marker/Priors"           value="'11 2.5 2.5 0.4 1.57 1.57 0|7 3.4 1.8 0.4 1.57 0 -1.57'"/>
+            <param name="Marker/Priors"           value="'11 2.5 2.5 0.2 1.57 1.57 0|7 3.4 1.8 0.2 1.57 0 -1.57|111 2.5 2.5 0.2 1.57 1.57 0|107 3.4 1.8 0.2 1.57 0 -1.57'"/>
             <param name="Optimizer/PriorsIgnored" value="'false'"/>
             
             <param name="database_path"           value="~/.ros/$(var ns)rtabmap.db"/>
@@ -225,6 +292,7 @@
         </node>
     </group>
 
+    <node name="zones_node" pkg="lunabot_behavior" exec="zones" output="screen"/>
 
     <group>
         <node name="planner_server" pkg="nav2_planner" exec="planner_server" output="screen" respawn="true">
@@ -244,29 +312,28 @@
         </node>
 
         <node name="point_to_point_node" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="false" >
-            <param name="use_sim_time" value="$(var sim)"/>
             <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
 
             <remap from="odom" to="position"/>
             <remap from="global_path" to="nav_path"/>
             <remap from="backwards" to="traversal/backwards"/>
-            <remap from="traversal_enabled" to="behavior/traversal_enabled"/>
+            <remap from="traversal_enabled" to="traversal/enabled"/>
 
             <remap from="cmd_vel" to="cmd_vel"/>
         </node>
     </group>
 
     <group if="$(var sim)">
-        <node exec="create" pkg="ros_gz_sim" args="--topic $(var entity_name)/robot_description --name $(var entity_name) -x $(var starting_x) -y 1.75
-            -z 0.0 -Y -1.570796327"/>
+        <node exec="create" pkg="ros_gz_sim" args="--topic $(var entity_name)/robot_description --name $(var entity_name) -x $(var starting_x) -y $(var starting_y) -z 0.0 -Y $(var starting_yaw)"/>
 
-        <node name="image_bridge_cam_1_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_1_name)/color/image_raw" if="$(eval '\'1\' in $(var cams)')"/>
+        <node name="image_bridge_cam_1_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_1_name)/color/image_raw"                  if="$(eval '\'1\' in $(var cams)')"/>
         <node name="image_bridge_cam_1_depth" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_1_name)/aligned_depth_to_color/image_raw" if="$(eval '\'1\' in $(var cams)')"/>
-        <node name="image_bridge_cam_2_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_2_name)/color/image_raw" if="$(eval '\'2\' in $(var cams)')"/>
+        <node name="image_bridge_cam_2_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_2_name)/color/image_raw"                  if="$(eval '\'2\' in $(var cams)')"/>
         <node name="image_bridge_cam_2_depth" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_2_name)/aligned_depth_to_color/image_raw" if="$(eval '\'2\' in $(var cams)')"/>
-        <node name="image_bridge_cam_3_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_3_name)/color/image_raw" if="$(eval '\'3\' in $(var cams)')"/>
+        <node name="image_bridge_cam_3_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_3_name)/color/image_raw"                  if="$(eval '\'3\' in $(var cams)')"/>
         <node name="image_bridge_cam_3_depth" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_3_name)/aligned_depth_to_color/image_raw" if="$(eval '\'3\' in $(var cams)')"/>
-        <node name="image_bridge_cam_4_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_4_name)/color/image_raw" if="$(eval '\'4\' in $(var cams)')"/>
+        <node name="image_bridge_cam_4_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_4_name)/color/image_raw"                  if="$(eval '\'4\' in $(var cams)')"/>
         <node name="image_bridge_cam_4_depth" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_4_name)/aligned_depth_to_color/image_raw" if="$(eval '\'4\' in $(var cams)')"/>
     </group>
+
 </launch>

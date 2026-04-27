@@ -10,6 +10,7 @@ class ApriltagCombine(Node):
 
         self.declare_parameter("input_topics", ["example"], ParameterDescriptor(type = ParameterType.PARAMETER_STRING_ARRAY))
         self.declare_parameter("input_tags", [11, 7], ParameterDescriptor(type = ParameterType.PARAMETER_INTEGER_ARRAY))
+        self.declare_parameter("id_offset", 0, ParameterDescriptor(type = ParameterType.PARAMETER_INTEGER))
 
         self.subs = [self.create_subscription(AprilTagDetectionArray, topic, self.detection_cb, 10)
                      for topic in self.get_parameter("input_topics").get_parameter_value().string_array_value]
@@ -17,7 +18,9 @@ class ApriltagCombine(Node):
         self.input_tags = self.get_parameter("input_tags").get_parameter_value().integer_array_value
 
     def detection_cb(self, detections: AprilTagDetectionArray):
-        detections.detections = list(filter(lambda detection: detection.id in self.input_tags, detections.detections))
+        detections.detections = [detection for detection in detections.detections if detection.id in self.input_tags]
+        for detection in detections.detections:
+            detection.id += self.get_parameter("id_offset").get_parameter_value().integer_value
         self.pub.publish(detections)
 
 def main():

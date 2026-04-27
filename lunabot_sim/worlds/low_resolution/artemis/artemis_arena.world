@@ -52,6 +52,12 @@
       <max_step_size>0.01</max_step_size>
       <real_time_factor>1</real_time_factor>
       <real_time_update_rate>100</real_time_update_rate>
+      <ode>
+        <constraints>
+          <erp>0.8</erp>
+          <contact_surface_layer>0.1</contact_surface_layer>
+        </constraints>
+      </ode>
     </physics>
 
     <gravity>0 0 -9.81</gravity>
@@ -89,8 +95,8 @@
           <surface>
             <friction>
               <ode>
-                <mu>0.8</mu>
-                <mu2>0.8</mu2>
+                <mu>1</mu>
+                <mu2>1</mu2>
               </ode>
             </friction>
           </surface>
@@ -426,7 +432,7 @@
     </model>
 
     <model name='tag_36_11_00007'>
-      <pose>3.4 1.8 0.4 0 -1.58 0</pose>
+      <pose>3.4 1.8 0.2 0 -1.58 0</pose>
       <static>1</static>
       <link name='link'>
         <visual name='tag_36_11_00007'>
@@ -458,7 +464,7 @@
     </model>
 
     <model name='tag_36_11_00011'>
-      <pose>2.5 2.5 0.4 1.58 0 0</pose>
+      <pose>2.5 2.5 0.2 1.58 0 0</pose>
       <static>1</static>
       <link name='link'>
         <visual name='tag_36_11_00011'>
@@ -486,6 +492,34 @@
             </box>
           </geometry>
         </collision>
+      </link>
+    </model>
+
+    <model name="box_1m">
+      <static>true</static>
+      <pose>0 1.5 0 0 0 0</pose>
+
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.5 1.5 1</size>
+            </box>
+          </geometry>
+        </collision>
+
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 1.5 1</size>
+            </box>
+          </geometry>
+
+          <material>
+            <ambient>0.7 0.7 0.7 1</ambient>
+            <diffuse>0.7 0.7 0.7 1</diffuse>
+          </material>
+        </visual>
       </link>
     </model>
   </world>

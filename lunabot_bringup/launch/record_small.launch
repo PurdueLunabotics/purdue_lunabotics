@@ -1,19 +1,36 @@
 <?xml version="1.0"?>
 <launch>
-  <executable cmd="mkdir ~/bags" output="screen"/>
-  <arg name="exp_name" default="exp" />
-  <executable cmd="ros2 bag record --repeat-latched -o ~/bags/simple-$(var exp_name) 
+  <arg name="exp_name" default="exp_mini" />
+  <let name="current_time" value="$(eval '__import__(\'datetime\').datetime.now().strftime(\'%Y-%m-%d-%H-%M-%S\')')" />
+  <let name="home_dir" value="$(eval '__import__(\'os\').path.expanduser(\'~\')')"/>
 
-  /goal /maps/costmap_node/global_costmap/costmap /nav/global_path 
+  <executable cmd="ros2 bag record -o $(var home_dir)/bags/simple-$(var exp_name)-$(var current_time)
+
+  /autonomy 
+  /led_color
   
-  /cmd_vel /rtabmap/odom /tf /tf_static /effort /sensors /errors /imu 
-
-  /mining_zone /apriltag_visual /berm_zone
+  /berm_zone /berm_zone_marker /exc_zone /exc_zone_marker
+  /start_zone /start_zone_marker
   
-  /ptp/log /ptp/target_pose /ptp/current_target /ptp/robot_state 
-  /ptp/line_path /ptp/angular_disparity /ptp/linear_disparity /ptp/heading /ptp/angle_target /ptp/pid_linear /ptp/pid_angular
+  /cmd_vel /effort /goal
 
-  /purePursuit/controller_vel /purePursuit/target_vel /purePursuit/slip_vec /purePursuit/final_vel /purePursuit/heading_err
+  /events 
+  /nav/failed
+  /nav_path
+
+  /dummy_bot/joint_states /dummy_bot/robot_description
+
+  /position
+
+  /rtabmap/odom
+
+  /sensors
+  /stalled
+  
+  /rosout
+  /tf
+  /tf_static
+  
   "
     output="screen" />
 </launch>
