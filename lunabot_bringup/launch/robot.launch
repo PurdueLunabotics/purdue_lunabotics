@@ -4,6 +4,7 @@
     <!-- ========= ARGUMENTS ========== -->
     <!-- ============================== -->
 
+
     <!-- Type of Robot Args -->
     <arg name="robot_num" default="0"/>
 
@@ -94,6 +95,8 @@
     <!-- ============================== -->
     <!-- ======= LAUNCH NODES ========= -->
     <!-- ============================== -->
+
+    <node unless="$(var sim)" pkg="rmw_zenoh_cpp" exec="rmw_zenohd" />
 
     <!-- Launch Teensy Driver -->
     <node if="$(var teensy)" name="teensy_driver" pkg="lunabot_embedded" exec="teensy_driver_node" 
