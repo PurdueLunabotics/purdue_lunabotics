@@ -22,6 +22,8 @@ RUN apt update -y && \
 
 RUN apt install -y ros-humble-desktop ros-dev-tools python3-colcon-common-extensions
 
+RUN apt install -y ros-humble-rmw-zenoh-cpp
+
 RUN apt install -y clang
 
 RUN cat <<EOF > ~/.bashrc
@@ -29,8 +31,9 @@ source /opt/ros/humble/setup.bash
 source /luna_ws/install/setup.bash
 
 export GZ_SIM_RESOURCE_PATH=\$GZ_SIM_RESOURCE_PATH:\$(ros2 pkg prefix lunabot_sim)/share
-export ROS_DISCOVERY_SERVER="192.168.0.133:11811"
-export FASTRTPS_DEFAULT_PROFILES_FILE=/luna_ws/src/purdue_lunabotics/super_client_configuration_file.xml
+export ZENOH_ROUTER_CHECK_ATTEMPTS=0
+export ZENOH_SESSION_CONFIG_URI="/luna_ws/src/purdue_lunabotics/session_config.json5"
+export RMW_IMPLEMENTATION=rmw_zenoh_cpp
 EOF
 
 RUN apt update -y && apt install -y \
