@@ -20,7 +20,7 @@ global_costmap:
       denoise_layer:
         plugin: "nav2_costmap_2d::DenoiseLayer"
         enabled: true
-        minimal_group_size: 2
+        minimal_group_size: 10
         group_connectivity_type: 4 # 4 is adjacent, 8 includes diagonals
         footprint_clearing_enabled: true
       inflation_layer:

@@ -5,20 +5,20 @@ point_to_point_node:
       p: 5.0
       i: 0.0
       d: 0.0
-      max_output: 1.0
+      max_output: 3.0
       tolerance: 10.0
     linear:
       p: 3.0
       i: 0.0
       d: 0.0
-      max_output: 0.3
+      max_output: 0.6
       tolerance: 0.2
 
 differential_drive_controller_node:
   ros__parameters:
     gearbox_ratio: 50.0
     hz: 20.0
-    max_speed: 1000
+    max_speed: 2000
     max_speed_percentage: 0.8
     wheel_diameter: 0.3429
     width: 0.5588
