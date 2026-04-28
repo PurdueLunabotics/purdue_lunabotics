@@ -33,16 +33,17 @@ class AlignToMiniBotState(State):
     self.node: Node = None
 
     # PID for angular alignment
-    self.P = 3
+    self.P = 7
     self.I = 0
     self.D = 1
+    self.max_output = 1
 
     self.last_error = None
     self.total_error = 0
     self.last_time = None
 
     # in rad, how aligned before it returns success
-    self.ANGULAR_ALIGN_THRESHOLD = 0.1
+    self.ANGULAR_ALIGN_THRESHOLD = 0.05
     # how many times we have been well aligned
     self.success_count = 0
     # how many times in a row before we're sure
@@ -159,7 +160,9 @@ class AlignToMiniBotState(State):
 
     self.total_error += error * dt
 
-    return self.P * error + change * self.D + self.total_error * self.I
+    output = self.P * error + change * self.D + self.total_error * self.I
+
+    return np.clip(output, -self.max_output, self.max_output)
 
   def resetPID(self):
     self.total_error = 0

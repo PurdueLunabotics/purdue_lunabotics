@@ -97,8 +97,10 @@ class ManualController(Node):
 
         self.declare_parameter("~max_speed", 3000.0);
         self.declare_parameter("robot_num", 0)
+        self.declare_parameter("dead_zone", 0.05)
 
         self.robot_num = self.get_parameter("robot_num").get_parameter_value().integer_value
+        self.dead_zone = self.get_parameter("dead_zone").get_parameter_value().double_value
 
         self.autonomy = True
         self._autonomy_sub = self.create_subscription(Bool, "autonomy", self._autonomy_cb, 1)
@@ -143,6 +145,12 @@ class ManualController(Node):
     def set_color(self, new_color: LedColor):
         self.led_publisher.publish(Int32(data = colorsToInteger(new_color)));
 
+    def apply_deadzone(self, value: float) -> float:
+        if abs(value) < self.dead_zone:
+            return 0
+        else:
+            return value
+
     def joy_callback(self, joy):
         # X button: Switch between driving forwards and backwards'
 
@@ -183,11 +191,11 @@ class ManualController(Node):
 
             # Set the drive effort to the left and right stick vertical axes (Tank Drive)
             if self.driving_mode == "Forwards":
-                effort_msg.left_drive = int(constrain_RPM(joy.axes[Axes.L_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier)
-                effort_msg.right_drive = int(constrain_RPM(joy.axes[Axes.R_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier)
+                effort_msg.left_drive = int(constrain_RPM(self.apply_deadzone(joy.axes[Axes.L_STICK_VERTICAL.value]), self._max_speed) * self.drive_speed_modifier)
+                effort_msg.right_drive = int(constrain_RPM(self.apply_deadzone(joy.axes[Axes.R_STICK_VERTICAL.value]), self._max_speed) * self.drive_speed_modifier)
             else:
-                effort_msg.left_drive = int(-1 * constrain_RPM(joy.axes[Axes.R_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier)
-                effort_msg.right_drive = int(-1 * constrain_RPM(joy.axes[Axes.L_STICK_VERTICAL.value], self._max_speed) * self.drive_speed_modifier)
+                effort_msg.left_drive = int(-1 * constrain_RPM(self.apply_deadzone(joy.axes[Axes.R_STICK_VERTICAL.value]), self._max_speed) * self.drive_speed_modifier)
+                effort_msg.right_drive = int(-1 * constrain_RPM(self.apply_deadzone(joy.axes[Axes.L_STICK_VERTICAL.value]), self._max_speed) * self.drive_speed_modifier)
 
 
             # If not latched, use the trigger axis to control the excavation speed. Otherwise, use the latched speed
@@ -198,17 +206,17 @@ class ManualController(Node):
 
                 # if the value is exactly 0, the joystick has not been properly started, so reset excavation to not move
 
-                if (joy.axes[Axes.RIGHT_TRIGGER.value] == 0):
+                if (self.apply_deadzone(joy.axes[Axes.RIGHT_TRIGGER.value]) == 0):
                     right_trigger_axis_normalized = 0
                     #print("normR")
                 else:
-                    right_trigger_axis_normalized = (-joy.axes[Axes.RIGHT_TRIGGER.value] + 1) / 2
+                    right_trigger_axis_normalized = (-self.apply_deadzone(joy.axes[Axes.RIGHT_TRIGGER.value]) + 1) / 2
 
-                if (joy.axes[Axes.LEFT_TRIGGER.value] == 0):
+                if (self.apply_deadzone(joy.axes[Axes.LEFT_TRIGGER.value]) == 0):
                     left_trigger_axis_normalized = 0
                     #print("norm")
                 else:
-                    left_trigger_axis_normalized = (-joy.axes[Axes.LEFT_TRIGGER.value] + 1) / 2
+                    left_trigger_axis_normalized = (-self.apply_deadzone(joy.axes[Axes.LEFT_TRIGGER.value]) + 1) / 2
 
                 # Take priority for right trigger. If it is nearly zero, use the left trigger instead
                 if (right_trigger_axis_normalized <= 0.01):
@@ -227,10 +235,10 @@ class ManualController(Node):
                     self.get_logger().info(f"Excavation Latched at {self.latched_excavation_speed}")
 
             # Dpad up/down - control linear actuators
-            effort_msg.lin_act = int(constrain(joy.axes[Axes.DPAD_VERTICAL.value]) * self.ACTUATE_SPEED)
+            effort_msg.lin_act = int(constrain(self.apply_deadzone(joy.axes[Axes.DPAD_VERTICAL.value])) * self.ACTUATE_SPEED)
 
             # self.get_logger().info(f"{(joy.axes[Axes.DPAD_HORIZONTAL.value]+1)}")
-            effort_msg.dep_servo = int(int((joy.axes[Axes.DPAD_HORIZONTAL.value]+1) * self.SERVO_POS)/2)
+            effort_msg.dep_servo = int(int((self.apply_deadzone(joy.axes[Axes.DPAD_HORIZONTAL.value])+1) * self.SERVO_POS)/2)
             # Deposition- B to go, view/select/back to move backwards
             if (joy.buttons[Buttons.B.value] == 1):
                 effort_msg.deposit = int(self.DEPOSITION_SPEED)

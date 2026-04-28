@@ -3,7 +3,7 @@ global_costmap:
     ros__parameters:
       height: 5
       width: 5
-      publish_frequency: 30.0
+      publish_frequency: 1.0
       global_frame: "map"
       robot_base_frame: "base_link"
       robot_radius: 0.4
@@ -26,7 +26,7 @@ global_costmap:
       denoise_layer:
         plugin: "nav2_costmap_2d::DenoiseLayer"
         enabled: true
-        minimal_group_size: 2
+        minimal_group_size: 10
         group_connectivity_type: 4 # 4 is adjacent, 8 includes diagonals
         footprint_clearing_enabled: true
       inflation_layer:
@@ -48,7 +48,7 @@ mini:
   global_costmap:
     global_costmap:
       ros__parameters:
-        publish_frequency: 30.0
+        publish_frequency: 1.0
         global_frame: "mini/map"
         robot_base_frame: "mini/base_link"
         robot_radius: 0.2
@@ -70,7 +70,7 @@ mini:
         denoise_layer:
           plugin: "nav2_costmap_2d::DenoiseLayer"
           enabled: true
-          minimal_group_size: 2
+          minimal_group_size: 10
           group_connectivity_type: 4 # 4 is adjacent, 8 includes diagonals
         inflation_layer:
           plugin: "nav2_costmap_2d::InflationLayer"

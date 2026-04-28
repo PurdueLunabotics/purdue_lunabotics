@@ -41,12 +41,12 @@ class SetupMap(State):
   def tag_cb(self, detections: AprilTagDetectionArray):
     global direction
     self.detections[detections.header.frame_id] = detections
-    if "d455_front" in detections.header.frame_id and len(detections.detections) > 0:
-      direction = Direction.SOUTH if detections.detections[0].id == 11 else Direction.WEST
-    elif "mini/d455_front" in detections.header.frame_id and len(detections.detections) > 0:
+    if "mini/d455_front" in detections.header.frame_id and len(detections.detections) > 0:
       direction = Direction.NORTH if detections.detections[0].id == 11 else Direction.EAST
     elif "mini/d455_back" in detections.header.frame_id  and any(detection.id == 173 for detection in detections.detections):
       self.can_see_main_bot = True
+    elif "d455_front" in detections.header.frame_id and len(detections.detections) > 0:
+      direction = Direction.SOUTH if detections.detections[0].id == 11 else Direction.WEST
 
   def periodic(self):
     self.manager.get_logger().info(f"SetupMap: can see main: {self.can_see_main_bot}, dir: {direction}")

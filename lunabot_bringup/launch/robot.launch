@@ -4,6 +4,7 @@
     <!-- ========= ARGUMENTS ========== -->
     <!-- ============================== -->
 
+
     <!-- Type of Robot Args -->
     <arg name="robot_num" default="0"/>
 
@@ -94,6 +95,8 @@
     <!-- ============================== -->
     <!-- ======= LAUNCH NODES ========= -->
     <!-- ============================== -->
+
+    <node unless="$(var sim)" pkg="rmw_zenoh_cpp" exec="rmw_zenohd" />
 
     <!-- Launch Teensy Driver -->
     <node if="$(var teensy)" name="teensy_driver" pkg="lunabot_embedded" exec="teensy_driver_node" 
@@ -269,18 +272,18 @@
             <param name="Grid/Sensor"             value="'0'"/> <!-- Only use point clouds-->
             <param name="Grid/FootprintLength"    value="'1.0'"/>
             <param name="Grid/FootprintWidth"     value="'0.75'"/> 
-            <param name="Grid/MaxGroundAngle"     value="'30'"/> <!-- 30 degree normal before marked as obstacle -->
+            <param name="Grid/MaxGroundAngle"     value="'40'"/> <!-- 30 degree normal before marked as obstacle -->
             <param name="Grid/MaxObstacleHeight"  value="'2.0'"/> <!-- points greater than 2m above are not obstacles -->
             <param name="Grid/RangeMax"           value="'0.0'"/> <!-- don't cap range (do this in cameras.launch) -->
             <param name="Grid/PreVoxelFiltering"  value="'false'"/> <!-- don't filter with voxels (do this in cameras.launch) -->
-            <param name="Grid/NormalK"            value="'20'" /> <!-- use the nearest 20 points to find ground normals -->
+            <param name="Grid/NormalK"            value="'30'" /> <!-- use the nearest 20 points to find ground normals -->
             <param name="Grid/3D"                 value="'true'"/> <!-- 3D occupancy grid -->
             <param name="Grid/RayTracing"         value="'true'"/> <!-- Ray Trace to clear obstacles-->
             <param name="Grid/FromDepth"          value="'false'"/> <!-- occupancy grid from lidar -->
             
             <param name="GridGlobal/Eroded"       value="'true'" /> <!-- TODO: Figure out what this does? -->
             <param name="GridGlobal/FootprintRadius" value="'0.375'" /> <!-- Clear obstacles within this radius -->
-            <param name="GridGlobal/MinSize"      value="'10.0'"/> <!-- Minimum map size (m) -->
+            <param name="GridGlobal/MinSize"      value="'5.0'"/> <!-- Minimum map size (m) -->
             <param name="GridGlobal/OccupancyThr" value="'0.5'"/> <!-- Threshold for occupancy -->
             
             <param name="Kp/MaxFeatures"          value="$(var rtabmap_max_features)"/>
