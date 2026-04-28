@@ -3,10 +3,11 @@ global_costmap:
     ros__parameters:
       height: 5
       width: 5
-      publish_frequency: 30.0
+      publish_frequency: 1.0
       global_frame: "map"
       robot_base_frame: "base_link"
       robot_radius: 0.4
+      always_send_full_costmap: false
       plugins: ["static_layer", "denoise_layer", "inflation_layer"]
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
@@ -41,10 +42,11 @@ mini:
   global_costmap:
     global_costmap:
       ros__parameters:
-        publish_frequency: 30.0
+        publish_frequency: 1.0
         global_frame: "mini/map"
         robot_base_frame: "mini/base_link"
         robot_radius: 0.2
+        always_send_full_costmap: false
         plugins: ["static_layer", "denoise_layer", "inflation_layer"]
         static_layer:
           plugin: "nav2_costmap_2d::StaticLayer"

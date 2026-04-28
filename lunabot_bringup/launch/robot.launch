@@ -275,7 +275,7 @@
             
             <param name="GridGlobal/Eroded"       value="'true'" /> <!-- TODO: Figure out what this does? -->
             <param name="GridGlobal/FootprintRadius" value="'0.375'" /> <!-- Clear obstacles within this radius -->
-            <param name="GridGlobal/MinSize"      value="'10.0'"/> <!-- Minimum map size (m) -->
+            <param name="GridGlobal/MinSize"      value="'5.0'"/> <!-- Minimum map size (m) -->
             <param name="GridGlobal/OccupancyThr" value="'0.5'"/> <!-- Threshold for occupancy -->
             
             <param name="Kp/MaxFeatures"          value="$(var rtabmap_max_features)"/>
