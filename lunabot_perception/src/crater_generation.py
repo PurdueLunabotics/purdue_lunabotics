@@ -45,10 +45,10 @@ class CraterGeneration(Node):
         )
         
         self.pointcloud_subscriber = self.create_subscription(
-            PointCloud2, "/rtabmap/cloud_obstacles", self.set_points,  10
+            PointCloud2, "rtabmap/cloud_obstacles", self.set_points,  10
         )
         self.ground_subscriber = self.create_subscription(
-            PointCloud2, "/rtabmap/cloud_ground", self.set_ground, 10
+            PointCloud2, "rtabmap/cloud_ground", self.set_ground, 10
         )
         
         

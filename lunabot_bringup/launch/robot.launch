@@ -238,6 +238,9 @@
         <let unless="$(var pointcloud)" name="scan_cloud" value="$(var /ns)/$(var odom_cam_name)/points"/>
         <node if="$(var pointcloud)" name="crater_generation_node" pkg="lunabot_perception" exec="crater_generation.py" respawn="true">
           <remap from="nav_path" to="nav_path"/>
+          <remap from="$(var /ns)/rtabmap/cloud_obstacles" to="/rtabmap/cloud_obstacles"/>
+          <remap from="$(var /ns)/rtabmap/cloud_ground" to="/rtabmap/cloud_ground"/>
+
           <param name="use_sim_time" value="$(var sim)"/>
         </node>
 
