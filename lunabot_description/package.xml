@@ -13,6 +13,7 @@
   <test_depend>ament_lint_common</test_depend>
 
   <depend>joint_state_publisher</depend>
+  <depend>robot_state_publisher</depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <build_depend>xacro</build_depend>

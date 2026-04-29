@@ -15,14 +15,15 @@ def launch_setup(context):
     package_description = "lunabot_description"
     robot_desc_path = os.path.join(get_package_share_directory(package_description), "urdf", xacro_file)
     ns = nsConfig.perform(context)
+    frame_ns = ns
     if (len(ns) > 0):
-        ns = "/" + ns
+        frame_ns = ns + "/"
     robot_state_publisher_node = Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
             name='robot_state_publisher',
             namespace=entity_name,
-        parameters=[{'frame_prefix': ns, 'use_sim_time': True, 'robot_description': Command(['xacro ', robot_desc_path, ' robot_name:=', entity_name])}],
+        parameters=[{'frame_prefix': frame_ns, 'use_sim_time': LaunchConfiguration('sim'), 'robot_description': Command(['xacro ', robot_desc_path, ' robot_name:=', entity_name])}],
         output="screen"
     )
 
@@ -31,7 +32,7 @@ def launch_setup(context):
             executable='joint_state_publisher',
             name='joint_state_publisher',
             namespace=entity_name,
-        parameters=[{'frame_prefix': ns, 'use_sim_time': True, 'robot_description': Command(['xacro ', robot_desc_path, ' robot_name:=', entity_name])}],
+            parameters=[{'frame_prefix': frame_ns, 'use_sim_time': LaunchConfiguration('sim'), 'robot_description': Command(['xacro ', robot_desc_path, ' robot_name:=', entity_name]), 'source_list': [f"{ns}/joint_states"]}],
         output="screen"
     )
     
@@ -48,6 +49,10 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'entity_name',
             default_value='dummy_bot'
+        ),
+        DeclareLaunchArgument(
+            'sim',
+            default_value='false'
         ),
         DeclareLaunchArgument(
             'ns',

@@ -92,7 +92,11 @@ int modbus_read_register(uint8_t ID, uint16_t addr, uint16_t num_to_read) {
 
   if (num_to_read == 1) {
     if (recv_size == 9) { // start + stop bits (2), device addr, func code, number of data bits, DATA [2], crc (2)
+      // ISV2 motors
       return buf_to_recv[4] * 0x100 + buf_to_recv[5];
+    } else if (recv_size == 8) {
+      // BLD motor controller
+      return buf_to_recv[3] * 0x100 + buf_to_recv[4];
     } else {
       Serial.print("Error reading from single register - size mismatch. ");
       Serial.println(recv_size);

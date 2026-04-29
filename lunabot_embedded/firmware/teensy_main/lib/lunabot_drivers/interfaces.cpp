@@ -1,4 +1,11 @@
 #include "interfaces.hpp"
+#include "ADS1119.h"
+#include "wiring.h"
+
+#define PA01_PULSES_PER_INCH 152
+#define PA01_STROKE_LENGTH_INCHES 8
+#define INVALID_ID 255
+#define INCHES_PER_METER 39.3701
 
 // Sabertooth MC Interfacing
 
@@ -44,7 +51,7 @@ void ADS1119_Current_Bus::init_ads1119() {
 }
 
 float ADS1119_Current_Bus::read(uint8_t mux) {
-  //ports are zero and 
+  //ports are zero and
   ads1.selectChannel(mux);
   return ADS1119_Current_Bus::adc_to_current_31A(ads1.readVoltage());
 }
@@ -54,242 +61,133 @@ float ADS1119_Current_Bus::adc_to_current_31A(float adc_value, float adc_fsr, fl
   return 73.3 * (vout / vcc) - 37.52;
 }
 
-volatile float M5Stack_UWB_Trncvr::recv_buffer_[NUM_UWB_TAGS] = {0};
 
-float M5Stack_UWB_Trncvr::read_uwb(uint8_t id) {
-  noInterrupts();
-  float data = recv_buffer_[id];
-  interrupts();
-  return data;
+CRGB Led_Strip::all_led[NUM_LEDS];
+
+void Led_Strip::init() {
+  FastLED.addLeds<WS2812B, 4, GRB>(Led_Strip::all_led, NUM_LEDS);
+  FastLED.setBrightness(Led_Strip::BRIGHTNESS);
 }
 
-void M5Stack_UWB_Trncvr::init() {
-  UWBSerial.begin(115200);
+void Led_Strip::set_color(int32_t color_in, uint8_t counter) {
 
-  // serial 2 setup as tag on bot (does dist calc)
-  for (int b = 0; b < 2; b++) { // Repeat twice to stabilize the connection
-    delay(50);
-    UWBSerial.write("AT+anchor_tag=0\r\n"); // Set up the Tag
-    delay(50);
-    UWBSerial.write("AT+interval=5\r\n");  // Set the calculation precision,
-                                           // the larger the response is, the
-                                           // slower it will be
-    delay(50);                             // 设置计算精度，越大响应越慢
-    UWBSerial.write("AT+switchdis=1\r\n"); // Began to distance 开始测距
-    delay(50);
-    if (b == 0) {
-      UWBSerial.write("AT+RST\r\n"); // RESET 复位
+  int MAX_DIGITS = 9; // how many digits are allowed in this integer (each digit is one color)
+
+  CRGB RAINBOW_MAGIC_WORD = 0xDEDEDE;
+
+  int digits[MAX_DIGITS] = {0};
+
+  int nonzero_digits = 0; // how many digits are actually holding a color
+  for (int i = 0; i < MAX_DIGITS; i++) {
+    digits[i] = color_in % 10;
+    color_in /= 10;
+
+    if (digits[i] != 0) {
+      nonzero_digits++;
     }
   }
-  if (UWBSerial.available()) {
-    delay(3);
+
+  // if we get all zeroes, label it as one color (0 / OFF)
+  if (nonzero_digits == 0) {
+    nonzero_digits = 1;
   }
-}
 
-void M5Stack_UWB_Trncvr::transfer() {
-  if (UWBSerial.available()) {
-    // Read the original input
-    String originalInput = UWBSerial.readStringUntil('\n');
-    originalInput.trim();
+  CRGB colors[MAX_DIGITS];
 
-    // Check if the message starts with "anX:" where X is a digit
-    if (originalInput.startsWith("an") && isdigit(originalInput.charAt(2)) &&
-        originalInput.charAt(3) == ':') {
-      // Extract sensor number
-      int sensorNumber = originalInput.charAt(2) - '0';
-
-      // Find the index of the colon
-      int colonIndex = originalInput.indexOf(':');
-
-      // Extract the value part and trim spaces
-      String valueString = originalInput.substring(colonIndex + 1);
-      valueString.trim();
-
-      // Convert the trimmed string to a float
-      float num = valueString.toFloat();
-
-      // Assign the values to d0, d1, or d2 based on sensor number
-      M5Stack_UWB_Trncvr::recv_buffer_[sensorNumber] = num;
+  // fill in the array of colors with CRGB data
+  for (int i = 0; i < nonzero_digits; i++) {
+    CRGB color;
+    switch(digits[i]) {
+      case 0:
+        color = CRGB::Black;
+        break;
+      case 1:
+        color = CRGB::Red;
+        break;
+      case 2:
+        color = 0xFF5000; // Orange but better
+        break;
+      case 3:
+        color = CRGB::Gold;
+        break;
+      case 4:
+        color = CRGB::Green;
+        break;
+      case 5:
+        color = 0x00FF4F; // Teal
+        break;
+      case 6:
+        color = CRGB::Blue;
+        break;
+      case 7:
+        color = CRGB::Magenta;
+        break;
+      case 8:
+        color = CRGB::White;
+        break;
+      case 9:
+        color = RAINBOW_MAGIC_WORD;
+        break;
+      default:
+        color = CRGB::Black;
+        break;
     }
-  }
-}
-
-long KillSwitchRelay::kill_time;
-bool KillSwitchRelay::dead;
-
-void KillSwitchRelay::init() {
-  pinMode(kill_pin, OUTPUT);
-  KillSwitchRelay::dead = false;
-  reset();
-  KillSwitchRelay::kill_time = millis();
-}
-
-void KillSwitchRelay::reset() {
-  digitalWrite(kill_pin, HIGH);
-  KillSwitchRelay::dead = false;
-}
-
-void KillSwitchRelay::kill() {
-  digitalWrite(kill_pin, LOW);
-  KillSwitchRelay::kill_time = millis();
-  KillSwitchRelay::dead = true;
-}
-
-void KillSwitchRelay::disable_motor(int id, RobotEffort &effort) {
-  switch (id) {
-  case 0:
-    effort.excavate = 0;
-    break;
-  case 1:
-    effort.deposit = 0;
-    break;
-  case 2:
-    effort.left_drive = 0;
-    break;
-  case 3:
-    effort.right_drive = 0;
-    break;
-  default:
-    return;
-  }
-}
-
-// exc, dep, drive_L, drive_R
-volatile int KillSwitchRelay::cutoff_buffer[4] = {0};
-volatile int KillSwitchRelay::disable_counter[4] = {0};
-volatile bool KillSwitchRelay::is_disable[4] = {false};
-
-void KillSwitchRelay::logic(RobotEffort &effort) {
-  /*
-  if (KillSwitchRelay::dead && millis() - KillSwitchRelay::kill_time >= relay_dead_time) {
-    reset();
-  } */
-
-  float exc_curr = ADS1119_Current_Bus::adc_to_current_31A(excavation::update_curr());
-  float dep_curr = ADS1119_Current_Bus::adc_to_current_31A(deposition::update_curr());
-  float drive_left_curr = ADS1119_Current_Bus::adc_to_current_31A(drivetrain::update_curr_left());
-  float drive_right_curr = ADS1119_Current_Bus::adc_to_current_31A(drivetrain::update_curr_right());
-
-  if (exc_curr >= exdep_kill_curr) {
-    cutoff_buffer[0] += cutoff_increase;
-  }
-  if (dep_curr >= exdep_kill_curr) {
-    cutoff_buffer[1] += cutoff_increase;
-  }
-  if (drive_left_curr >= drive_kill_curr) {
-    cutoff_buffer[2] += cutoff_increase;
-  }
-  if (drive_right_curr >= drive_kill_curr) {
-    cutoff_buffer[3] += cutoff_increase;
+    colors[i] = color;
   }
 
-  for (int i = 0; i < 4; ++i) {
-    cutoff_buffer[i] -= cutoff_decay;
-    if (cutoff_buffer[i] < 0) {
-      cutoff_buffer[i] = 0;
-    }
-    if (is_disable[i]) {
-      if (cutoff_buffer[i] >= reset_thresh) {
-        disable_motor(i, effort);
-      } else {
-        is_disable[i] = false;
+
+  int group_size = NUM_LEDS / nonzero_digits;
+  int current_LED = 0;
+  for (int i = 0; i < nonzero_digits; i++) {
+    for (int j = 0; j < group_size; j++) {
+
+      if (current_LED >= NUM_LEDS) {
+        break;
       }
-    } else {
-      if (cutoff_buffer[i] >= cutoff_thresh) {
-        disable_motor(i, effort);
-        is_disable[i] = true;
-        disable_counter[i] += 1;
+
+      Led_Strip::all_led[current_LED] = colors[i];
+
+      // TODO: check if this works
+      if (colors[i] == RAINBOW_MAGIC_WORD) {
+        uint8_t h = counter;
+        int s = 255;
+        int v = 255;
+
+        h += (int) (((float) j / group_size) * 255);
+
+        CHSV hsv(h, s, v);
+        CRGB color;
+        hsv2rgb_rainbow(hsv, color);
+        Led_Strip::all_led[current_LED] = color;
       }
-    }
 
-    if (disable_counter[i] >= kill_thresh) {
-      disable_counter[i] = 0;
-      kill();
+      current_LED++;
+
     }
   }
-}
 
-CRGB Led_Strip::all_led[Led_Strip::NUM_LEDS];
-
-void Led_Strip::init() { 
-  FastLED.addLeds<WS2812B, 6, GRB>(Led_Strip::all_led, Led_Strip::NUM_LEDS);
-  FastLED.setBrightness(Led_Strip::BRIGHTNESS); 
-}
-
-void Led_Strip::set_color(int32_t color_in) { 
-  CRGB color_choice;
-
-  switch (color_in) { 
-  case 0:
-    color_choice = CRGB::Black;
-    break;
-  case 1:
-    color_choice = CRGB::Red;
-    break;
-  case 2:
-    color_choice = CRGB::Green;
-    break;
-  case 3:
-    color_choice = CRGB::Blue;
-    break;
-  case 4:
-    color_choice = CRGB::White;
-    break;
-  case 5:
-    color_choice = CRGB::Yellow;
-    break;
-  case 6:
-    color_choice = CRGB::Aqua;
-    break;
-  case 7:
-    color_choice = CRGB::Magenta;
-    break;
-  default:
-    color_choice = CRGB::Black;
-    break;
-  }
-
-  for (int i = 0; i < NUM_LEDS; ++i) {
-    Led_Strip::all_led[i] = color_choice;
-  }
   FastLED.show();
 }
 
-
-HX711 HX711_Bus::encs[NUM_SENSORS] = {
-    HX711(),
-    HX711(),
+Encoder Encoder_Bus::encs[NUM_ACTUATORS] = {
+    Encoder(PIN_LIST[0], PIN_LIST[1]),
+    Encoder(PIN_LIST[2], PIN_LIST[3]),
 };
 
-void HX711_Bus::init() {
-  for (int i = 0; i < NUM_SENSORS; i++) {
-    encs[i].set_raw_mode();
-    encs[i].begin(PIN_LIST[i * 2], PIN_LIST[i * 2 + 1]);
-    if (encs[i].is_ready()) {
-       encs[i].tare(3);
+void Encoder_Bus::init(uint8_t option) {
+  for (int i = 0; i < NUM_ACTUATORS; i++) {
+    if (option) {
+        encs[i].write(0);
     } else {
-      encs[i].set_offset(ZERO_POINT[i]);
+        encs[i].write(PA01_PULSES_PER_INCH * PA01_STROKE_LENGTH_INCHES);
     }
-    encs[i].set_gain(HX711_CHANNEL_A_GAIN_128);
-    encs[i].set_scale(SCALE_CALIBRATION[i]);
   }
 }
 
-float HX711_Bus::read_scale(uint8_t id) {
-  if (encs[id].is_ready()) {
-    // since we could start with weight on the load cell, manually subtract zero point instead of
-    // taring
-    // .read() returns raw value
-    // .get_value(times) gets offset but not scaled
-    // .get_units(times) gets offset and scaled
-    // times does nothing in raw mode (as we are)
-    float val = encs[id].get_units(1); 
-    // if load cell is not returning any data, but HX711 is connected
-    if (val == 0)
-      return -1;
-    return val;
-  } else {
-    return -1;
+long Encoder_Bus::read(uint8_t id) {
+  // returns the count since last read, and resets the count to 0
+  if (id != 1 && id != 0) {
+      return INVALID_ID;
   }
-  FastLED.show();
+  return encs[id].read();
 }

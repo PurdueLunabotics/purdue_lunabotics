@@ -1,0 +1,1 @@
+ros2 topic pub --once /events lunabot_msgs/msg/Event data:\ 15\

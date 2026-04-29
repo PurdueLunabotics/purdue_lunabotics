@@ -12,7 +12,9 @@ class SimOdom(Node):
     def __init__(self):
         super().__init__("sim_odom_node")
 
-        self.ns = self.get_namespace().lstrip('/')
+        self.ns: str = self.get_namespace().lstrip('/')
+        if len(self.ns) != 0:
+            self.ns = self.ns + '/';
 
         self.odom_listener = self.create_subscription(PoseStamped, "gazebo/odom", self.__odom_callback, 10)
         self.odom_publisher = self.create_publisher(Odometry, "rtabmap/odom", 1)

@@ -14,13 +14,18 @@ find_package(ament_cmake REQUIRED)
 
 find_package(rosidl_default_generators REQUIRED) # required for building messages
 find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 # Generate message files
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/RobotEffort.msg"
   "msg/RobotSensors.msg"
+  "msg/Zone.msg"
+  "msg/Event.msg"
   "msg/RobotStall.msg"
-  DEPENDENCIES std_msgs
+  "msg/Linkup.msg"
+  "srv/FindLinkup.srv"
+  DEPENDENCIES std_msgs geometry_msgs
 )
 # Add any packages that above messages depend on in a list next to DEPENDENCIES.
 

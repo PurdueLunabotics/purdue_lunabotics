@@ -1,0 +1,4 @@
+---
+std_msgs/Bool success
+geometry_msgs/Point main_target
+geometry_msgs/Point mini_target

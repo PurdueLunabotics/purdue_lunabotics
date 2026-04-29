@@ -4,17 +4,24 @@ global_costmap:
       publish_frequency: 30.0
       global_frame: "map"
       robot_base_frame: "robot"
-      robot_radius: 0.2
-      plugins: ["static_layer", "inflation_layer"]
+      robot_radius: 0.25
+      plugins: ["static_layer", "denoise_layer", "inflation_layer"]
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
+      denoise_layer:
+        plugin: "nav2_costmap_2d::DenoiseLayer"
+        enabled: true
+        minimal_group_size: 2
+        group_connectivity_type: 4 # 4 is adjacent, 8 includes diagonals
+        footprint_clearing_enabled: true
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         enabled: true
-        inflation_radius: 1.5
-        cost_scaling_factor: 1.5
+        inflation_radius: 2.0
+        cost_scaling_factor: 6.0
         inflate_unknown: true  # should treat unknown as obstacles (maybe change init values)
         inflate_around_unknown: true
+        footprint_clearing_enabled: true
 
 planner_server:
   ros__parameters:

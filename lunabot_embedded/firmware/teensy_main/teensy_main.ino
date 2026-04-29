@@ -6,40 +6,38 @@
 #include "robot.hpp"
 #include "interfaces.hpp"
 
-#define TX_PERIOD 300               // ms
+#define PWM
+
+#define TX_PERIOD 500               // ms
 #define CTRL_PERIOD 2              // ms
-#define UWB_TRANSFER_PERIOD 10'000 // microsec
 #define CURR_UPDATE_PERIOD 8       // ms
 #define STALE_EFFORT_PERIOD 1000   // ms
 
 RobotSensors state = RobotSensors_init_zero;
 RobotEffort effort = RobotEffort_init_zero;
 size_t effort_msg_size;
+uint8_t counter = 0;
 
 uint8_t buffer[64];
 uint8_t flags = 0;
 
 void ctrl() {
-  actuation::cb(effort.lin_act);
+  actuation::cb(effort.lin_act, effort.should_zero_act_pos, effort.is_top);
   drivetrain::cb(effort.left_drive, effort.right_drive, effort.should_reset);
-  deposition::cb(effort.deposit, effort.should_reset);
+  deposition::cb(effort.deposit, effort.dep_servo, effort.should_reset);
   excavation::cb(effort.excavate, effort.should_reset);
-  LEDs::cb(effort.led_color);
+  LEDs::cb(effort.led_color, counter);
   if (effort.should_reset) digitalWrite(9, HIGH); // RELAY ALWAYS ON
   else digitalWrite(9, HIGH); // RELAY ALWAYS ON
 }
 
 void send() {
-  actuation::update(state.act_right_curr);
+  actuation::update(state.act_right_curr, state.act_left_pos, state.act_right_pos);
   drivetrain::update(state.drive_left_curr, state.drive_right_curr, state.drive_left_torque,
                      state.drive_right_torque, state.drive_left_vel, state.drive_right_vel);
   deposition::update(state.dep_curr);
 
   excavation::update(state.exc_curr, state.exc_torque, state.exc_vel);
-
-  uwb::update(state.uwb_dist_0, state.uwb_dist_1, state.uwb_dist_2);
-
-  load_cell::update(state.load_cell_weight);
 
   /*
   Serial.print("Raw: ");
@@ -51,21 +49,16 @@ void send() {
   pb_encode(&stream, RobotSensors_fields, &state);
 }
 
-IntervalTimer uwb_timer;
 float last_effort;
 
 void setup() {
   // Serial.begin(115200);
   Sabertooth_MotorCtrl::init_serial(ST_SERIAL, ST_BAUD_RATE);
-
-  M5Stack_UWB_Trncvr::init();
-  KillSwitchRelay::init();
+  
   Led_Strip::init();
-  HX711_Bus::init();
+  Encoder_Bus::init(0); // init to 0 since we are at start and not in a failure state
 
   ADS1119_Current_Bus::init_ads1119();
-
-  uwb_timer.begin(M5Stack_UWB_Trncvr::transfer, UWB_TRANSFER_PERIOD);
 
   drivetrain::begin();
   excavation::begin();
@@ -105,7 +98,9 @@ void loop() {
     ms_until_ctrl = 0;
     // TODO, add timer if robot effort not changing for too long, exit?
     // KillSwitchRelay::logic(effort);
+    counter += 1;
     ctrl();
+
   }
 
   if (ms_until_send > TX_PERIOD) {

@@ -1,4 +1,7 @@
 import numpy as np
+from rclpy.node import Node
+from rcl_interfaces.msg import SetParametersResult, ParameterDescriptor, ParameterType
+import rclpy
 
 
 class VelocityPIDController:
@@ -27,7 +30,6 @@ class VelocityPIDController:
         error_diff = (error - self.prev_error) / dt
         self.prev_error = error
         return self.setpoint * self.kf + error * self.kp + self.total_error * self.ki + error_diff * self.kd
-
 
 class PIDController:
     """
@@ -102,3 +104,40 @@ class PIDController:
             self.total_error = 0  # reset error sum to avoid messing with future control
 
         return output
+
+class ParameterizedPIDController(PIDController):
+    def __init__(self, name: str, node: Node, kp: float = 0.0, ki: float = 0.0, kd: float = 0.0, max_output: float = 1.0, min_output: float = 0.0):
+        self.name = name
+        if not node.has_parameter(f"{name}.p"):
+            node.declare_parameters("", [(f"{name}.p", kp, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
+                                         (f"{name}.i", ki, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
+                                         (f"{name}.d", kd, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
+                                         (f"{name}.max_output", max_output, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE)),
+                                         (f"{name}.min_output", min_output, ParameterDescriptor(type = ParameterType.PARAMETER_DOUBLE))])
+
+        super().__init__(kp = node.get_parameter(f"{name}.p").get_parameter_value().double_value,
+                         ki = node.get_parameter(f"{name}.i").get_parameter_value().double_value,
+                         kd = node.get_parameter(f"{name}.d").get_parameter_value().double_value,
+                         max_output = node.get_parameter(f"{name}.max_output").get_parameter_value().double_value,
+                         min_output = node.get_parameter(f"{name}.min_output").get_parameter_value().double_value)
+
+
+        # node.get_logger().info(f"kp = {node.get_parameter(f'{name}.p').get_parameter_value()}")
+
+        node.add_on_set_parameters_callback(self.parameter_cb)
+
+
+    def parameter_cb(self, params: list[rclpy.Parameter]):
+        for param in params:
+            if param.name == f"{self.name}.p":
+                self.kp = param.get_parameter_value().double_value
+            elif param.name == f"{self.name}.d":
+                self.kd = param.get_parameter_value().double_value
+            elif param.name == f"{self.name}.i":
+                self.ki = param.get_parameter_value().double_value
+            elif param.name == f"{self.name}.max_output":
+                self.max_output = param.get_parameter_value().double_value
+            elif param.name == f"{self.name}.min_output":
+                self.min_output = param.get_parameter_value().double_value
+
+        return SetParametersResult(successful = True)
