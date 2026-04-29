@@ -70,8 +70,8 @@ class CraterGeneration(Node):
         ground_trainz = []
         plane_pointcloud = []
         
-        self.get_logger().info(f"1{self.get_clock().now()}")
-        print("help me")
+        # self.get_logger().info(f"1{self.get_clock().now()}")
+        # print("help me")
         stahp = False
         
         try:
@@ -87,27 +87,27 @@ class CraterGeneration(Node):
         
         if(not stahp):
             # try:
-                #self.get_logger().info(f"{ground_trainz}")
-            self.get_logger().info(f"2{self.get_clock().now()}")
+            #     #self.get_logger().info(f"{ground_trainz}")
+            # self.get_logger().info(f"2{self.get_clock().now()}")
 
             regressor = RANSACRegressor()
 
             
-            #regressor = RANSAC(model=LinearRegressor(), loss=square_error_loss, metric=mean_square_error)
+            # #regressor = RANSAC(model=LinearRegressor(), loss=square_error_loss, metric=mean_square_error)
         
-            self.get_logger().info(f"3{self.get_clock().now()}")
+            # self.get_logger().info(f"3{self.get_clock().now()}")
 
         
-            regressor.fit(ground_trainxy, ground_trainz)
-            # except Exception as inst:
-            #     self.get_logger().info(f"{inst}")
-            #     self.get_logger().info(f"it killed itself")
+            # regressor.fit(ground_trainxy, ground_trainz)
+            # # except Exception as inst:
+            # #     self.get_logger().info(f"{inst}")
+            # #     self.get_logger().info(f"it killed itself")
         
-            self.get_logger().info(f"4{self.get_clock().now()}")
+            # self.get_logger().info(f"4{self.get_clock().now()}")
         
-            # the plane equation
-            self.get_logger().info(f"5{regressor.estimator_.coef_}")
-            self.get_logger().info(f"5{regressor.estimator_.intercept_}")
+            # # the plane equation
+            # self.get_logger().info(f"5{regressor.estimator_.coef_}")
+            # self.get_logger().info(f"5{regressor.estimator_.intercept_}")
             self.coeff = [regressor.estimator_.coef_[0][0],regressor.estimator_.coef_[0][1], regressor.estimator_.intercept_[0]]
             pred_z = regressor.predict(ground_trainxy)
 
@@ -117,8 +117,8 @@ class CraterGeneration(Node):
             if (len(ground_trainxy) == len(pred_z)):
                 for p in range(len(ground_trainxy)):
                     plane_pointcloud.append((ground_trainxy[p][0], ground_trainxy[p][1], pred_z[p]))
-            self.get_logger().warn("it do thing")
-            self.get_logger().warn("pointcloud")
+            # self.get_logger().warn("it do thing")
+            # self.get_logger().warn("pointcloud")
             # self.get_logger().warn(f"{plane_pointcloud}")
 
         else: 
@@ -151,7 +151,7 @@ class CraterGeneration(Node):
             did_read = False
         # get average height of ground
         # find points below average height of ground in obstacles
-        self.get_logger().info(f"{len(self.ground_planes.data)}")
+        # self.get_logger().info(f"{len(self.ground_planes.data)}")
         
         ground_vals = []
         try:
@@ -164,7 +164,7 @@ class CraterGeneration(Node):
             # self.get_logger().info(f"{ground_height}")
         except Exception as inst:
             self.get_logger().info(f"{inst}")
-            self.get_logger().warn("Failed to read")
+            self.get_logger().warn("Failed to read ground points")
             did_read = False
         
         crater_vals = []
@@ -173,7 +173,7 @@ class CraterGeneration(Node):
                 if (self.coeff[0]*p[0]+self.coeff[1]*p[1]+self.coeff[2] > p[2] + 0.06):
                 # if(p[2]<ground_height-0.02):
                     crater_vals.append(p[:-1])
-                    self.get_logger().info(f"{p}")
+                    # self.get_logger().info(f"{p}")
                     
             # self.get_logger().info(f"{craternp}")
             # initial guess for the ring center and radius (if no previous info about those, increase uncertainty accordingly)
@@ -199,16 +199,16 @@ class CraterGeneration(Node):
                     uncertainty_pos,uncertainty_r, epsilon
                     )
                 
-                try:
+                # try:
                     
-                    self.get_logger().warn(f"hough {hough_cx}")
-                    self.get_logger().warn(f"hough {hough_cy}")
-                    self.get_logger().warn(f"hough {hough_r}")
+                #     # self.get_logger().warn(f"hough {hough_cx}")
+                #     # self.get_logger().warn(f"hough {hough_cy}")
+                #     # self.get_logger().warn(f"hough {hough_r}")
                     
                     
-                except Exception as inst:
-                    self.get_logger().info(f"{inst}")   
-                    self.get_logger().warn("Not generating craters")
+                # except Exception as inst:
+                #     self.get_logger().info(f"{inst}")   
+                #     self.get_logger().warn("Not generating craters")
                     
             
                 # hough_r < 0.4 and
@@ -225,7 +225,7 @@ class CraterGeneration(Node):
                     
                     crater_vals = list(filter(dont_remove, crater_vals))
                     
-                    self.get_logger().info(f"{crater_vals}")
+                    # self.get_logger().info(f"{crater_vals}")
                 
             
             header = Header()
@@ -238,11 +238,11 @@ class CraterGeneration(Node):
         
         
     def set_points(self, points : PointCloud2):
-        self.get_logger().info("help me go]d")
+        # self.get_logger().info("help me go]d")
         self.pointCloud = points
         
     def set_ground(self, ground : PointCloud2):
-        self.get_logger().info("I hate it here")
+        # self.get_logger().info("I hate it here")
         self.ground = ground
 
 def main():
