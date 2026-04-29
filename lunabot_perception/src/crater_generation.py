@@ -51,7 +51,6 @@ class CraterGeneration(Node):
             PointCloud2, "rtabmap/cloud_ground", self.set_ground, 10
         )
         
-        
         # only for bags
         # self.pointcloud_subscriber = self.create_subscription(
         #     PointCloud2, "/rtabmap/obstacles", self.set_points,  10
@@ -147,6 +146,7 @@ class CraterGeneration(Node):
                 obst.append([p[0], p[1], p[2]]) 
         except Exception as inst:
             self.get_logger().info(f"{inst}")
+            self.get_logger().info(f"{self.pointcloud_subscriber.topic_name}")
             self.get_logger().info("first problem :D")
             did_read = False
         # get average height of ground
