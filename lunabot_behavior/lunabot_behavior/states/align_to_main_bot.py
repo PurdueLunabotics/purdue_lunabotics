@@ -14,7 +14,7 @@ from typing import Literal
 import numpy as np
 import math
 
-DEPOSITION_APRILTAG_ID = 173
+DEPOSITION_APRILTAG_ID = 126
 
 class AlignToMainBotState(State):
   def __init__(self):
