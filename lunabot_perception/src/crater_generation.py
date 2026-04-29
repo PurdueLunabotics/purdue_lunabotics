@@ -98,7 +98,7 @@ class CraterGeneration(Node):
             # self.get_logger().info(f"3{self.get_clock().now()}")
 
         
-            # regressor.fit(ground_trainxy, ground_trainz)
+            regressor.fit(ground_trainxy, ground_trainz)
             # # except Exception as inst:
             # #     self.get_logger().info(f"{inst}")
             # #     self.get_logger().info(f"it killed itself")
