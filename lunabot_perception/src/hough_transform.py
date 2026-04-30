@@ -47,7 +47,7 @@ def sum_point_contributions(
             ring_cx=cx, ring_cy=cy,
             point_x=point_x, point_y=point_y)
         point_contribution = apply_triangular_evaluation(
-            ring_radius=r, amplitude=1,
+            ring_radius=r, amplitude=5,
             r_point=r_point, hough_epsilon=hough_epsilon)
         total_amplitude += point_contribution
     return total_amplitude

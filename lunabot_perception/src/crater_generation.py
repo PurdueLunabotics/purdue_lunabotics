@@ -35,8 +35,16 @@ class CraterGeneration(Node):
         self.pointCloud = PointCloud2()
         self.ground = PointCloud2()
         self.ground_planes = PointCloud2()
+        self.craters = [[], [], [], []]
         self.coeff = []
         
+        ns = self.get_namespace().lstrip('/').split("/")[0]
+        self.get_logger().warn(ns)
+        if len(ns) != 0:
+            ns = ns + '/';
+
+        # transform we're looking for is from base link back to map
+        self.map_used = f"{ns}map"
         
         self.crater_publisher = self.create_publisher(
             PointCloud2, "crater", 10
@@ -131,7 +139,8 @@ class CraterGeneration(Node):
         header = Header()
         t = self.get_clock().now()
         header.stamp = t.to_msg()
-        header.frame_id = "mini/map"
+        self.get_logger().warn(self.map_used)
+        header.frame_id = self.map_used
         pc2 = point_cloud2.create_cloud_xyz32(header, plane_pointcloud)
 
         self.ground_planes = pc2
@@ -174,7 +183,7 @@ class CraterGeneration(Node):
         crater_vals = []
         if(did_read):
             for p in obst:
-                if (self.coeff[0]*p[0]+self.coeff[1]*p[1]+self.coeff[2] > p[2] + 0.06):
+                if (self.coeff[0]*p[0]+self.coeff[1]*p[1]+self.coeff[2] > p[2] + 0.10):
                 # if(p[2]<ground_height-0.02):
                     crater_vals.append(p[:-1])
                     # self.get_logger().info(f"{p}")
@@ -202,6 +211,7 @@ class CraterGeneration(Node):
                     guessed_cx, guessed_cy, guessed_r, craternp,
                     uncertainty_pos,uncertainty_r, epsilon
                     )
+                
                 
                 # try:
                     
@@ -235,7 +245,7 @@ class CraterGeneration(Node):
             header = Header()
             t = self.get_clock().now()
             header.stamp = t.to_msg()
-            header.frame_id = "map"
+            header.frame_id = self.map_used
             pc2 = point_cloud2.create_cloud_xyz32(header, crater_pointcloud)
 
             self.crater_publisher.publish(pc2)
