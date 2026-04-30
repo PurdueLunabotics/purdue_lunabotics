@@ -240,6 +240,7 @@
           <remap from="nav_path" to="nav_path"/>
           <remap from="rtabmap/cloud_obstacles" to="$(var /ns)/rtabmap/cloud_obstacles"/>
           <remap from="rtabmap/cloud_ground" to="$(var /ns)/rtabmap/cloud_ground"/>
+          <remap from="map" to="$(var /ns)/map"/>
 
           <param name="use_sim_time" value="$(var sim)"/>
         </node>

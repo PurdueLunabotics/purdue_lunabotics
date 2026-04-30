@@ -21,6 +21,8 @@ import numpy as np
 from sklearn.linear_model import RANSACRegressor
 
 import hough
+from tf2_ros import TransformBroadcaster
+
 
 class CraterGeneration(Node):
     """
@@ -50,6 +52,8 @@ class CraterGeneration(Node):
         self.ground_subscriber = self.create_subscription(
             PointCloud2, "rtabmap/cloud_ground", self.set_ground, 10
         )
+
+        
         
         # only for bags
         # self.pointcloud_subscriber = self.create_subscription(
@@ -116,10 +120,10 @@ class CraterGeneration(Node):
             # self.get_logger().info(f"{len(ground_trainxy)}")
             if (len(ground_trainxy) == len(pred_z)):
                 for p in range(len(ground_trainxy)):
-                    plane_pointcloud.append((ground_trainxy[p][0], ground_trainxy[p][1], pred_z[p]))
+                    plane_pointcloud.append([ground_trainxy[p][0], ground_trainxy[p][1], pred_z[p][0]])
             # self.get_logger().warn("it do thing")
             # self.get_logger().warn("pointcloud")
-            # self.get_logger().warn(f"{plane_pointcloud}")
+            self.get_logger().warn(f"{plane_pointcloud}")
 
         else: 
             print("failed to read pointcloud")
@@ -127,7 +131,7 @@ class CraterGeneration(Node):
         header = Header()
         t = self.get_clock().now()
         header.stamp = t.to_msg()
-        header.frame_id = "map"
+        header.frame_id = "mini/map"
         pc2 = point_cloud2.create_cloud_xyz32(header, plane_pointcloud)
 
         self.ground_planes = pc2
@@ -151,7 +155,7 @@ class CraterGeneration(Node):
             did_read = False
         # get average height of ground
         # find points below average height of ground in obstacles
-        # self.get_logger().info(f"{len(self.ground_planes.data)}")
+        self.get_logger().info(f"{len(self.ground_planes.data)}")
         
         ground_vals = []
         try:
