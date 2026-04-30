@@ -36,7 +36,7 @@ class AlignToMiniBotState(State):
     self.P = 7
     self.I = 0
     self.D = 1
-    self.max_output = 1
+    self.max_output = np.deg2rad(30)
 
     self.last_error = None
     self.total_error = 0

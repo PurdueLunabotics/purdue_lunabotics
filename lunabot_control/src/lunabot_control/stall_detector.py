@@ -34,7 +34,7 @@ class StallDetector(Node):
         if self.effort == None:
             return
         
-        if abs(msg.drive_left_vel) < 10 and abs(self.effort.left_drive) > 0:
+        if abs(msg.drive_left_vel) < 10 and abs(self.effort.left_drive) > 100:
             self.stallCounter['left'] += 1
         else:
             self.stallCounter['left'] = 0

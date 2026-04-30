@@ -37,6 +37,7 @@ class SetupMap(State):
     self.tf_buf = Buffer()
     self.tf_listener = TransformListener(self.tf_buf, self.manager)
     self.tf_broadcaster = TransformBroadcaster(self.manager)
+    self.has_reset = False
 
   def tag_cb(self, detections: AprilTagDetectionArray):
     global direction
@@ -80,8 +81,12 @@ class SetupMap(State):
     elif self.ready_time is None:
       self.ready_time = self.manager.get_clock().now()
 
-    if self.ready_time is not None and self.manager.get_clock().now() - self.ready_time > Duration(seconds=10):
+    if self.ready_time is not None and self.manager.get_clock().now() - self.ready_time > Duration(seconds=2) and not self.has_reset:
+      self.manager.get_logger().info("sending map reset")
       self.trigger_new_map_srv.call_async(Empty.Request())
+      self.has_reset = True
+
+    if self.ready_time is not None and self.manager.get_clock().now() - self.ready_time > Duration(seconds=10):
       return Events.SUCCESS
 
 class InitRetreat(State):
@@ -108,7 +113,7 @@ class InitRetreat(State):
       output = Twist()
       output.linear.x = 0.1
       self.cmd_vel_publisher.publish(output)
-      if self.manager.get_clock().now() - self.starting_time > Duration(seconds=10):
+      if self.manager.get_clock().now() - self.starting_time > Duration(seconds=20):
         self.ready_pub.publish(Bool(data = True))
         return Events.SUCCESS
     elif self.ready:
