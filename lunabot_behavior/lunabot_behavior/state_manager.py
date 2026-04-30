@@ -49,11 +49,11 @@ class StateManager(Node):
             self.state = next_state
             self.state.value[0].start()
 
-            colors = self.state.value[1]
-            self.led_pub.publish(Int32(data = colorsToInteger(colors)))
 
     def periodic(self):
         if not self.stopped:
+            colors = self.state.value[1]
+            self.led_pub.publish(Int32(data = colorsToInteger(colors)))
             event = self.state.value[0].periodic()
 
             if event is not None:
@@ -62,4 +62,4 @@ class StateManager(Node):
     def stop_current_state(self):
         self.state.value[0].exit()
         self.stopped = True
-        self.led_pub.publish(Int32(data= colorsToInteger(LedColor.OFF)))
+        self.led_pub.publish(Int32(data= colorsToInteger((LedColor.RED, LedColor.GREEN))))

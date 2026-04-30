@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from lunabot_config.led_colors import LedColor, colorsToInteger
 from rclpy.node import Node
 import threading
 import rclpy
@@ -42,13 +43,25 @@ class EffortFactory(Node):
         self.excavate_subscriber = self.create_subscription(Int32, "excavate", self.set_excavate, 1)
         self.deposition_subscriber = self.create_subscription(Int32, "deposition", self.set_deposition, 1)
         self.gate_subscriber = self.create_subscription(Bool, "gate", self.set_gate, 1)
+        self.led_publisher = self.create_publisher(Int32, "led_color", 10)
+        self.led_subscriber = self.create_subscription(Int32, "led_color", self.led_cb, 1)
+
 
         rate = self.create_rate(50.0, self.get_clock())
 
+        self.last_led_time = self.get_clock().now().seconds_nanoseconds()[0]
+        self.LED_TIMEOUT = 2
+
         while rclpy.ok():
             if (self.autonomy):
+                if self.get_clock().now().seconds_nanoseconds()[0] > self.last_led_time + self.LED_TIMEOUT:
+                    self.get_logger().warn("pub led")
+                    self.led_publisher.publish(Int32(data= colorsToInteger((LedColor.RED, LedColor.GREEN))))
                 self.publish_effort()
             rate.sleep()
+
+    def led_cb(self, led: Int32):
+        self.last_led_time = self.get_clock().now().seconds_nanoseconds()[0]
 
     def _autonomy_cb(self, autonomy: Bool):
         self.autonomy = autonomy.data
