@@ -28,7 +28,7 @@ class ApproachBerm(State):
     if linear_error < 0:
       return Events.SUCCESS
     else:
-      output.linear.x = -self.linear_speed
+      output.linear.x = self.linear_speed
     self.cmd_vel_publisher.publish(output)
     return None
   

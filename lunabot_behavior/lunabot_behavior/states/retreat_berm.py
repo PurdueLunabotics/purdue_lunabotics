@@ -16,7 +16,7 @@ class RetreatBerm(State):
   
   def periodic(self) -> None | Events:
     output = Twist()
-    output.linear.x = self.linear_speed
+    output.linear.x = -self.linear_speed
     self.cmd_vel_publisher.publish(output)
     if (self.start_time.seconds_nanoseconds()[0] + self.move_time < self.manager.get_clock().now().seconds_nanoseconds()[0]):
       return Events.SUCCESS

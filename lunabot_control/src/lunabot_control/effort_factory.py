@@ -26,8 +26,8 @@ class EffortFactory(Node):
         self.dep_servo = 0
         self.should_reset = False
         
-        self.DEP_SERVO_ON = 500
-        self.DEP_SERVO_OFF = 250
+        self.DEP_SERVO_ON = 250
+        self.DEP_SERVO_OFF = 500
 
         self.autonomy = True
         self._autonomy_sub = self.create_subscription(Bool, "autonomy", self._autonomy_cb, 1)

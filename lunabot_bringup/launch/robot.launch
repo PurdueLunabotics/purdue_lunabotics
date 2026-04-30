@@ -185,7 +185,6 @@
             <param name="id_offset" value="$(var id_offset)"/>
         </node>
 
-
         <let if="$(var pointcloud)" name="temp_cloud" value="$(var /ns)/pointcloud/depth_combined_cloud"/>
         <let unless="$(var pointcloud)" name="temp_cloud" value="$(var /ns)/$(var odom_cam_name)/points"/>
 
