@@ -272,7 +272,7 @@
 
 
   <joint name="deposition_apriltag_joint" type="fixed">
-    <origin rpy="0.0 -0.34 3.14" xyz="-0.381 0.0 0.55"/>
+    <origin rpy="0.0 -0.34 3.14" xyz="-0.381 -0.03 0.55"/>
     <parent link="base_link"/>
     <child link="deposition_apriltag_link"/>
   </joint>
@@ -283,6 +283,24 @@
     <origin rpy="1.57 0.0 1.57" xyz="0.0 0.0 0.0"/>
     <parent link="deposition_apriltag_link"/>
     <child link="deposition_apriltag_optical_frame"/>
+  </joint>
+
+  <link name="deposition_apriltag_small_link">
+  </link> 
+
+
+  <joint name="deposition_apriltag_small_joint" type="fixed">
+    <origin rpy="0.0 -0.34 3.14" xyz="-0.381 0.15 0.55"/>
+    <parent link="base_link"/>
+    <child link="deposition_apriltag_small_link"/>
+  </joint>
+
+  <link name="deposition_apriltag_small_optical_frame"></link>
+
+  <joint name="deposition_apriltag_small_optical_joint" type="fixed">
+    <origin rpy="1.57 0.0 1.57" xyz="0.0 0.0 0.0"/>
+    <parent link="deposition_apriltag_small_link"/>
+    <child link="deposition_apriltag_small_optical_frame"/>
   </joint>
   
   <!-- Back Camera -->

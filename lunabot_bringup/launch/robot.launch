@@ -63,7 +63,7 @@
     <let name="cam_4_name"              value="d455_back"/>
     <!-- Main -->
     <arg name="cams"                    default="'12'"      if="$(eval '$(var robot_num) == 0')"/> <!-- Camera numbers -->
-    <arg name="odom_cam_name"           default="$(var cam_2_name)"  if="$(eval '$(var robot_num) == 0')"/>
+    <arg name="odom_cam_name"           default="$(var cam_1_name)"  if="$(eval '$(var robot_num) == 0')"/>
 
     <!-- Mini -->
     <arg name="cams"                    default="'34'"      if="$(eval '$(var robot_num) == 1')"/> <!-- Camera numbers -->

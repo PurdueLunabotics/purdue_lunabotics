@@ -37,6 +37,7 @@ class SetupMap(State):
     self.tf_buf = Buffer()
     self.tf_listener = TransformListener(self.tf_buf, self.manager)
     self.tf_broadcaster = TransformBroadcaster(self.manager)
+    self.has_reset = False
 
   def tag_cb(self, detections: AprilTagDetectionArray):
     global direction
@@ -52,10 +53,10 @@ class SetupMap(State):
     self.manager.get_logger().info(f"SetupMap: can see main: {self.can_see_main_bot}, dir: {direction}")
     if self.can_see_main_bot and self.is_main and (direction == Direction.NORTH or direction == Direction.EAST):
       mini_detections = self.detections["mini/d455_front_color_optical_frame"]
-      mini_detections.header.frame_id = "deposition_apriltag_optical_frame"
+      mini_detections.header.frame_id = "deposition_apriltag_small_optical_frame"
       try:
-        main_to_tag = self.tf_buf.lookup_transform("main_deposition", "tag36h11:107" if direction == Direction.EAST else "tag36h11:111", Time())
-        main_to_tag.header.frame_id = "deposition_apriltag_optical_frame"
+        main_to_tag = self.tf_buf.lookup_transform("main_deposition_small", "tag36h11:107" if direction == Direction.EAST else "tag36h11:111", Time())
+        main_to_tag.header.frame_id = "deposition_apriltag_small_optical_frame"
         main_to_tag.child_frame_id = "tag36h11:7" if direction == Direction.EAST else "tag36h11:11"
         self.tf_broadcaster.sendTransform(main_to_tag)
         self.detections_pub.publish(mini_detections)
@@ -64,11 +65,11 @@ class SetupMap(State):
         self.ready_time = None
     if self.can_see_main_bot and not self.is_main and (direction == Direction.SOUTH or direction == Direction.WEST):
       main_detections = self.detections["d455_front_color_optical_frame"]
-      main_detections.header.frame_id = "main_deposition"
+      main_detections.header.frame_id = "main_deposition_small"
       main_detections.detections[0].id += 100
       try:
-        main_to_tag = self.tf_buf.lookup_transform("deposition_apriltag_optical_frame", "tag36h11:7" if direction == Direction.WEST else "tag36h11:11", Time())
-        main_to_tag.header.frame_id = "main_deposition"
+        main_to_tag = self.tf_buf.lookup_transform("deposition_apriltag_small_optical_frame", "tag36h11:7" if direction == Direction.WEST else "tag36h11:11", Time())
+        main_to_tag.header.frame_id = "main_deposition_small"
         main_to_tag.child_frame_id = "tag36h11:107" if direction == Direction.WEST else "tag36h11:111"
         self.tf_broadcaster.sendTransform(main_to_tag)
         self.detections_pub.publish(main_detections)
@@ -80,8 +81,12 @@ class SetupMap(State):
     elif self.ready_time is None:
       self.ready_time = self.manager.get_clock().now()
 
-    if self.ready_time is not None and self.manager.get_clock().now() - self.ready_time > Duration(seconds=10):
+    if self.ready_time is not None and self.manager.get_clock().now() - self.ready_time > Duration(seconds=2) and not self.has_reset:
+      self.manager.get_logger().info("sending map reset")
       self.trigger_new_map_srv.call_async(Empty.Request())
+      self.has_reset = True
+
+    if self.ready_time is not None and self.manager.get_clock().now() - self.ready_time > Duration(seconds=10):
       return Events.SUCCESS
 
 class InitRetreat(State):
@@ -108,7 +113,7 @@ class InitRetreat(State):
       output = Twist()
       output.linear.x = 0.1
       self.cmd_vel_publisher.publish(output)
-      if self.manager.get_clock().now() - self.starting_time > Duration(seconds=10):
+      if self.manager.get_clock().now() - self.starting_time > Duration(seconds=20):
         self.ready_pub.publish(Bool(data = True))
         return Events.SUCCESS
     elif self.ready:

@@ -15,7 +15,8 @@ import rclpy
 # TODO: what happens if the node stalls? does the time reset? also should we do distance not time based?
 
 class Drive(State):
-    def __init__(self, target_distance: float, backwards: bool, speed: float) -> None:
+    def __init__(self, target_distance: float, backwards: bool, speed: float, timeout: float=0.0) -> None:
+        self.timeout = timeout
         self.target_distance = target_distance
         self.backwards = backwards
         self.speed = speed
@@ -26,6 +27,8 @@ class Drive(State):
         self.odom_sub = manager.create_subscription(PoseStamped, "position", self.odom_cb, 1)
         self.odom = None
         self.position = (0, 0)
+        
+        self.manager = manager
         # while self.odom == None:
         #     rclpy.spin_once(manager)
         #     time.sleep(0.25)
@@ -35,11 +38,15 @@ class Drive(State):
         self.position = (pose.pose.position.x, pose.pose.position.y)
 
     def start(self):
+        self.start_time = self.manager.get_clock().now().nanoseconds / 1e9
         self.starting_pos = self.position
 
     def periodic(self) -> None | Events:
         distance = np.sqrt((self.position[0] - self.starting_pos[0])**2 + (self.position[1] - self.starting_pos[1])**2)
-        if abs(distance - self.target_distance) <= 0.1:
+        
+        time = self.manager.get_clock().now().nanoseconds / 1e9 # current time in seconds
+        is_timeout = self.timeout > 0.0 and time - self.start_time > self.timeout
+        if abs(distance - self.target_distance) <= 0.1 or is_timeout:
             return Events.SUCCESS
 
         output = Twist()
@@ -51,7 +58,7 @@ class Drive(State):
 
 class Trench(Drive):
     def __init__(self) -> None:
-        super().__init__(0.5, False, 0.01)
+        super().__init__(0.5, False, 0.05, timeout=30.0)
 
     def setup(self, manager: Node):
         super().setup(manager)

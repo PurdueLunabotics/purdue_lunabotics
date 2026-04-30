@@ -48,6 +48,8 @@ class MiniStates(Enum):
     FIND_LINKUP_SECONDARY_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
     
     # ===== LINKUP SECTION (2) =====
+
+    WAIT_FOR_ALIGN_AT_LINKUP = (State(), (LedColor.YELLOW, LedColor.YELLOW))
     
     ALIGN_TO_MAIN = (AlignToMainBotState(), (LedColor.YELLOW, LedColor.YELLOW))
     ALIGN_TO_MAIN_STALL = (State(), (LedColor.YELLOW, LedColor.RED))
@@ -64,11 +66,11 @@ class MiniStates(Enum):
 
     # ===== TRAVERSAL SECTION (3) =====
 
-    TRAVERSE_TO_BERM = (TraverseToBerm(True), (LedColor.BLUE, LedColor.YELLOW))
+    TRAVERSE_TO_BERM = (TraverseToBerm(False), (LedColor.BLUE, LedColor.YELLOW))
     TRAVERSE_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     TRAVERSE_TO_BERM_NO_PATH = (NoPath(), (LedColor.BLUE, LedColor.ORANGE))
 
-    ALIGN_TO_BERM = (AlignToAngle(270), (LedColor.BLUE, LedColor.GREEN))
+    ALIGN_TO_BERM = (AlignToAngle(90), (LedColor.BLUE, LedColor.GREEN))
     ALIGN_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
     MOVE_TO_STAGING = (TraverseToLinkup(False, True), (LedColor.BLUE, LedColor.TEAL))
@@ -124,11 +126,13 @@ class MiniStates(Enum):
             (MiniStates.RETREAT_BERM, Events.STALL): MiniStates.RETREAT_BERM_STALL,
             (MiniStates.RETREAT_BERM_STALL, Events.SUCCESS): MiniStates.RETREAT_BERM,
             
-            (MiniStates.MOVE_TO_STAGING, Events.SUCCESS): MiniStates.ALIGN_TO_MAIN,
+            (MiniStates.MOVE_TO_STAGING, Events.SUCCESS): MiniStates.WAIT_FOR_ALIGN_AT_LINKUP,
             (MiniStates.MOVE_TO_STAGING, Events.STALL): MiniStates.MOVE_TO_STAGING_STALL,
             (MiniStates.MOVE_TO_STAGING, Events.NO_PATH): MiniStates.MOVE_TO_STAGING_NO_PATH,
             (MiniStates.MOVE_TO_STAGING_STALL, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
             (MiniStates.MOVE_TO_STAGING_NO_PATH, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
+
+            (MiniStates.WAIT_FOR_ALIGN_AT_LINKUP, Events.PROCEED): MiniStates.ALIGN_TO_MAIN,
 
             (MiniStates.ALIGN_TO_MAIN, Events.SUCCESS): MiniStates.WAIT_FOR_MAIN_ALIGN,
             (MiniStates.ALIGN_TO_MAIN, Events.STALL): MiniStates.ALIGN_TO_MAIN_STALL,

@@ -14,7 +14,7 @@ from typing import Literal
 import numpy as np
 import math
 
-DEPOSITION_APRILTAG_ID = 173
+DEPOSITION_APRILTAG_ID = 126
 
 class AlignToMainBotState(State):
   def __init__(self):
@@ -31,7 +31,7 @@ class AlignToMainBotState(State):
 
     # PID for angular alignment
     self.P = 1
-    self.I = 0
+    self.I = 0.005
     self.D = 0
 
     self.last_error = None
@@ -49,7 +49,7 @@ class AlignToMainBotState(State):
     self.SEARCH_SPEED = 0.6 # rad/s
 
     # in rad, how aligned before it returns success
-    self.ANGULAR_ALIGN_THRESHOLD = 0.1
+    self.ANGULAR_ALIGN_THRESHOLD = 0.02
     # how many times we have been well aligned
     self.success_count = 0
     # how many times in a row before we're sure

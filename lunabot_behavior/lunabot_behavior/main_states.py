@@ -26,6 +26,8 @@ from lunabot_behavior.states.align_to_mini_bot import AlignToMiniBotState
 from lunabot_behavior.states.wait_for_approach import WaitForApproachState
 from lunabot_behavior.states.wait_for_diverge import WaitForDivergeState
 from lunabot_behavior.states.init import InitRetreat, SetupMap
+from lunabot_behavior.states.wait_for_linkup import WaitForLinkup
+from lunabot_behavior.states.proceed import Proceed
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -47,7 +49,7 @@ class MainStates(Enum):
     STARTING_RAISE = (Raise(), (LedColor.GREEN, LedColor.MAGENTA))
     STARTING_RAISE_STALL = (State(), (LedColor.GREEN, LedColor.RED))
     
-    WAIT_FOR_LINKUP = (State(), (LedColor.GREEN, LedColor.GREEN)) # This will stay as State(), no logic needed
+    WAIT_FOR_LINKUP = (WaitForLinkup(), (LedColor.GREEN, LedColor.GREEN)) # This will stay as State(), no logic needed.
     
     TRAVERSE_TO_LINKUP = (TraverseToLinkup(True, True), (LedColor.GREEN, LedColor.WHITE))
     TRAVERSE_TO_LINKUP_STALL =  (Stall(), (LedColor.GREEN, LedColor.RED))
@@ -77,6 +79,8 @@ class MainStates(Enum):
 
     ALIGN_TO_LINKUP = (AlignToLinkup(), (LedColor.YELLOW, LedColor.YELLOW))
     ALIGN_TO_LINKUP_STALL = (State(), (LedColor.YELLOW, LedColor.RED))
+
+    WAIT_FOR_MINI = (Proceed(True), (LedColor.YELLOW, LedColor.GREEN))
 
     WAIT_FOR_MINI_ALIGN = (MainWaitForAlignState(), (LedColor.YELLOW, LedColor.GREEN))
 
@@ -162,9 +166,11 @@ class MainStates(Enum):
             (MainStates.RETREAT_TRENCH, Events.STALL): MainStates.RETREAT_TRENCH_STALL,
             (MainStates.RETREAT_TRENCH_STALL, Events.SUCCESS): MainStates.RETREAT_TRENCH,
 
-            (MainStates.ALIGN_TO_LINKUP, Events.SUCCESS): MainStates.WAIT_FOR_MINI_ALIGN, # TODO: Go to linkup
+            (MainStates.ALIGN_TO_LINKUP, Events.SUCCESS): MainStates.WAIT_FOR_MINI,
             (MainStates.ALIGN_TO_LINKUP, Events.STALL): MainStates.RETREAT_TRENCH_STALL,
             (MainStates.ALIGN_TO_LINKUP_STALL, Events.SUCCESS): MainStates.ALIGN_TO_LINKUP,
+
+            (MainStates.WAIT_FOR_MINI, Events.SUCCESS): MainStates.WAIT_FOR_MINI_ALIGN,
 
             (MainStates.WAIT_FOR_MINI_ALIGN, Events.SUCCESS): MainStates.ALIGN_TO_MINI,
 

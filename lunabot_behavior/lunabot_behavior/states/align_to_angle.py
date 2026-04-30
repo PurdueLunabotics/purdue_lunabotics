@@ -14,7 +14,7 @@ class AlignToAngle(State):
     manager.create_subscription(PoseStamped, "position", self.odom_cb, 1)
     self.manager = manager
     self.robot_pose = (None, None, None)
-    self.angular_speed = np.deg2rad(60) #degrees/sec -> rad/sec
+    self.angular_speed = np.deg2rad(30) #degrees/sec -> rad/sec
     self.tolerance = np.deg2rad(3)
   
   def odom_cb(self, msg:PoseStamped):
