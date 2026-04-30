@@ -183,7 +183,7 @@ class CraterGeneration(Node):
         crater_vals = []
         if(did_read):
             for p in obst:
-                if (self.coeff[0]*p[0]+self.coeff[1]*p[1]+self.coeff[2] > p[2] + 0.10):
+                if (self.coeff[0]*p[0]+self.coeff[1]*p[1]+self.coeff[2] > p[2] + 0.06):
                 # if(p[2]<ground_height-0.02):
                     crater_vals.append(p[:-1])
                     # self.get_logger().info(f"{p}")
