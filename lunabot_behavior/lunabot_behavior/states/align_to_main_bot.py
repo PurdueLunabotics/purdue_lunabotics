@@ -30,8 +30,8 @@ class AlignToMainBotState(State):
     self.node: Node = None
 
     # PID for angular alignment
-    self.P = 1
-    self.I = 0.005
+    self.P = 1.5
+    self.I = 0.05
     self.D = 0
 
     self.last_error = None
