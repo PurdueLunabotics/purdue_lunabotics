@@ -206,20 +206,17 @@ class MainStates(Enum):
         return transitions.get((state, event), None)
 
 def main(args=None):
-    rclpy.init(args=sys.argv)
+    rclpy.init(args=sys.argv, signal_handler_options=rclpy.SignalHandlerOptions.NO)
 
     manager = StateManager(MainStates, MainStates.INIT_MAP, Events, Event)
 
     try:
         rclpy.spin(manager)
-    finally:
+    except KeyboardInterrupt:
         manager.stop_current_state()
-
-    # Destroy the node explicitly
-    # (optional - otherwise it will be done automatically
-    # when the garbage collector destroys the node object)
-    manager.destroy_node()
-    rclpy.shutdown()
+    finally:
+        manager.destroy_node()
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":

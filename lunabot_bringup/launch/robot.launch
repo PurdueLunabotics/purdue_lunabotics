@@ -68,6 +68,7 @@
     <!-- Mini -->
     <arg name="cams"                    default="'34'"      if="$(eval '$(var robot_num) == 1')"/> <!-- Camera numbers -->
     <arg name="odom_cam_name"           default="$(var cam_3_name)"  if="$(eval '$(var robot_num) == 1')"/>
+    <arg name="mapping_cam_name"           default="$(var cam_4_name)"  if="$(eval '$(var robot_num) == 1')"/>
 
     <let name="cam_1_topic"             value="$(var /ns)/$(var cam_1_name)/color/image_raw $(var /ns)/$(var cam_1_name)/depth/image_raw "
         if="$(eval '\'1\' in $(var cams)')"/>
@@ -87,7 +88,7 @@
         unless="$(eval '\'4\' in $(var cams)')"/>
 
     <arg name="pointcloud"        unless="$(var lidar)"        default="$(eval 'len($(var cams)) > 1')" />
-    <arg name="pointcloud"        if="$(var lidar)"        default="true" />
+    <arg name="pointcloud"        if="$(var lidar)"        default="false" />
 
     <!-- Record Args -->
     <arg name="exp_name" default="exp" />
@@ -120,6 +121,7 @@
     <include if="$(var cameras)" file="$(find-pkg-share lunabot_perception)/launch/cameras.launch">
         <arg name="ns" value="$(var ns)"/>
         <arg name="sim" value="$(var sim)"/>
+        <arg name="lidar" value="$(var lidar)"/>
     </include>
 
     <include if="$(var lidar)" file="$(find-pkg-share lunabot_perception)/launch/lidar.launch">
@@ -191,7 +193,7 @@
 
         
         <let if="$(var pointcloud)" name="temp_cloud" value="$(var /ns)/pointcloud/depth_combined_cloud"/>
-        <let unless="$(var pointcloud)" name="temp_cloud" value="$(var /ns)/$(var odom_cam_name)/points"/>
+        <let unless="$(var pointcloud)" name="temp_cloud" value="$(var /ns)/$(var mapping_cam_name)/points"/>
 
         
 
