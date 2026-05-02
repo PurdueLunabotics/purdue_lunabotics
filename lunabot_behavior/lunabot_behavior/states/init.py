@@ -15,6 +15,10 @@ class Direction(Enum):
 
 direction = None
 
+# sim id - 368
+# irl id = 173
+INIT_TAG_ID = 173
+
 class SetupMap(State):
   def __init__(self, is_main: bool):
     self.is_main = is_main
@@ -44,7 +48,7 @@ class SetupMap(State):
     self.detections[detections.header.frame_id] = detections
     if "mini/d455_front" in detections.header.frame_id and len(detections.detections) > 0:
       direction = Direction.NORTH if detections.detections[0].id == 11 else Direction.EAST
-    elif "mini/d455_back" in detections.header.frame_id  and any(detection.id == 173 for detection in detections.detections):
+    elif "mini/d455_back" in detections.header.frame_id  and any(detection.id == INIT_TAG_ID for detection in detections.detections):
       self.can_see_main_bot = True
     elif "d455_front" in detections.header.frame_id and len(detections.detections) > 0:
       direction = Direction.SOUTH if detections.detections[0].id == 11 else Direction.WEST

@@ -14,6 +14,9 @@ from typing import Literal
 import numpy as np
 import math
 
+# change for sim
+# sim apriltag - 368
+# irl tag - 126
 DEPOSITION_APRILTAG_ID = 126
 
 class AlignToMainBotState(State):
