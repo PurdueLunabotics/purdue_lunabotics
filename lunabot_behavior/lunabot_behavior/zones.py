@@ -14,20 +14,59 @@ import numpy as np
 
 # zone geometries - based on guidebook orientations (all measurements in meters)
 class ZoneMeasurements:
-    START_OFFSET_X = 2.44
+    # ----------------------
+    # KSC
+    # ----------------------
+    # START_OFFSET_X = 2.44
+    # START_OFFSET_Y = 1.5
+    # START_LENGTH_X = 2
+    # START_LENGTH_Y = 2
+
+    # EXC_OFFSET_X = 2.19
+    # EXC_OFFSET_Y = 0
+    # EXC_LENGTH_X = 2.5
+    # EXC_LENGTH_Y = 5
+
+    # BERM_OFFSET_X = -1.94
+    # BERM_OFFSET_Y = 1.9
+    # BERM_LENGTH_X = 1.5
+    # BERM_LENGTH_Y = 0.9
+
+    # ----------------------
+    # UCF bottom
+    # ----------------------
+    # START_OFFSET_X = 2.44
+    # START_OFFSET_Y = 1.5
+    # START_LENGTH_X = 2
+    # START_LENGTH_Y = 2
+
+    # EXC_OFFSET_X = 1.44
+    # EXC_OFFSET_Y = 0.22
+    # EXC_LENGTH_X = 4.0
+    # EXC_LENGTH_Y = 4.57
+
+    # BERM_OFFSET_X = -3.36
+    # BERM_OFFSET_Y = -1.07
+    # BERM_LENGTH_X = 1.5
+    # BERM_LENGTH_Y = 0.9
+
+    # ----------------------
+    # UCF top
+    # ----------------------
+    START_OFFSET_X = -2.44
     START_OFFSET_Y = 1.5
     START_LENGTH_X = 2
     START_LENGTH_Y = 2
 
-    EXC_OFFSET_X = 2.19
-    EXC_OFFSET_Y = 0
-    EXC_LENGTH_X = 2.5
-    EXC_LENGTH_Y = 5
+    EXC_OFFSET_X = -1.44
+    EXC_OFFSET_Y = 0.22
+    EXC_LENGTH_X = 4.0
+    EXC_LENGTH_Y = 4.57
 
-    BERM_OFFSET_X = -1.94
-    BERM_OFFSET_Y = 1.9
-    BERM_LENGTH_X = 1.7
-    BERM_LENGTH_Y = 0.8
+    BERM_OFFSET_X = 3.36
+    BERM_OFFSET_Y = -1.07
+    BERM_LENGTH_X = 1.5
+    BERM_LENGTH_Y = 0.9
 
 def make_zone(offset_x, offset_y, length_x, length_y):
     z = Zone()

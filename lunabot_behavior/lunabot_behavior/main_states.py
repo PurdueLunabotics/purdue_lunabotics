@@ -216,8 +216,7 @@ class MainStates(Enum):
 def main(args=None):
     rclpy.init(args=sys.argv, signal_handler_options=rclpy.SignalHandlerOptions.NO)
 
-    # INIT_MAP
-    manager = StateManager(MainStates, MainStates.WAIT_FOR_MINI, Events, Event)
+    manager = StateManager(MainStates, MainStates.INIT_MAP, Events, Event)
 
     try:
         rclpy.spin(manager)
