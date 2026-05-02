@@ -21,7 +21,9 @@ from lunabot_behavior.states.find_linkup_secondary import FindLinkupSecondary
 from lunabot_behavior.states.align_to_main_bot import AlignToMainBotState
 from lunabot_behavior.states.mini_wait_for_main_align import MiniWaitForAlignState
 from lunabot_behavior.states.approach_main import ApproachMainState
+from lunabot_behavior.states.wait_for_main_approach import WaitForMainApproachState
 from lunabot_behavior.states.collect import CollectRegolithState
+from lunabot_behavior.states.wait_for_main_diverge import WaitForMainDivergeState
 from lunabot_behavior.states.init import InitRetreat, SetupMap
 
 from lunabot_behavior.state import Events, State
@@ -56,13 +58,11 @@ class MiniStates(Enum):
 
     WAIT_FOR_MAIN_ALIGN = (MiniWaitForAlignState(), (LedColor.YELLOW, LedColor.GREEN))
     
-    APPROACH_MAIN = (ApproachMainState(),(LedColor.YELLOW, LedColor.TEAL))
-    APPROACH_MAIN_STALL = (State(), (LedColor.YELLOW, LedColor.RED))
+    WAIT_FOR_MAIN_APPROACH = (WaitForMainApproachState(),(LedColor.YELLOW, LedColor.TEAL))
 
     COLLECT_REGOLITH = (CollectRegolithState(), (LedColor.YELLOW, LedColor.BLUE))
 
-    SEPARATE_FROM_MAIN = (SeparateFromMainState(), (LedColor.YELLOW, LedColor.MAGENTA))
-    SEPARATE_FROM_MAIN_STALL = (Stall(), (LedColor.YELLOW, LedColor.RED))
+    WAIT_FOR_DIVERGE = (WaitForMainDivergeState(), (LedColor.YELLOW, LedColor.WHITE))
 
     # ===== TRAVERSAL SECTION (3) =====
 
@@ -138,17 +138,13 @@ class MiniStates(Enum):
             (MiniStates.ALIGN_TO_MAIN, Events.STALL): MiniStates.ALIGN_TO_MAIN_STALL,
             (MiniStates.ALIGN_TO_MAIN_STALL, Events.SUCCESS): MiniStates.ALIGN_TO_MAIN,
 
-            (MiniStates.WAIT_FOR_MAIN_ALIGN, Events.SUCCESS): MiniStates.APPROACH_MAIN,
+            (MiniStates.WAIT_FOR_MAIN_ALIGN, Events.SUCCESS): MiniStates.WAIT_FOR_MAIN_APPROACH,
 
-            (MiniStates.APPROACH_MAIN, Events.SUCCESS): MiniStates.COLLECT_REGOLITH,
-            (MiniStates.APPROACH_MAIN, Events.STALL): MiniStates.APPROACH_MAIN_STALL,
-            (MiniStates.APPROACH_MAIN_STALL, Events.SUCCESS): MiniStates.APPROACH_MAIN,
+            (MiniStates.WAIT_FOR_MAIN_APPROACH, Events.SUCCESS): MiniStates.COLLECT_REGOLITH,
             
-            (MiniStates.COLLECT_REGOLITH, Events.SUCCESS): MiniStates.SEPARATE_FROM_MAIN,
+            (MiniStates.COLLECT_REGOLITH, Events.SUCCESS): MiniStates.WAIT_FOR_DIVERGE,
 
-            (MiniStates.SEPARATE_FROM_MAIN, Events.SUCCESS): MiniStates.TRAVERSE_TO_BERM,
-            (MiniStates.SEPARATE_FROM_MAIN, Events.STALL): MiniStates.SEPARATE_FROM_MAIN_STALL,
-            (MiniStates.SEPARATE_FROM_MAIN_STALL, Events.SUCCESS): MiniStates.SEPARATE_FROM_MAIN
+            (MiniStates.WAIT_FOR_DIVERGE, Events.SUCCESS): MiniStates.TRAVERSE_TO_BERM,
         }
 
         return transitions.get((state, event), None)

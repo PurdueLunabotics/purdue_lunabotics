@@ -24,7 +24,9 @@ from lunabot_behavior.states.align_to_linkup import AlignToLinkup
 from lunabot_behavior.states.main_wait_for_mini_align import MainWaitForAlignState
 from lunabot_behavior.states.align_to_mini_bot import AlignToMiniBotState
 from lunabot_behavior.states.wait_for_approach import WaitForApproachState
+from lunabot_behavior.states.approach_mini import ApproachMiniState
 from lunabot_behavior.states.wait_for_diverge import WaitForDivergeState
+from lunabot_behavior.states.separate_from_mini import SeparateFromMiniState
 from lunabot_behavior.states.init import InitRetreat, SetupMap
 from lunabot_behavior.states.wait_for_linkup import WaitForLinkup
 from lunabot_behavior.states.proceed import Proceed
@@ -86,12 +88,14 @@ class MainStates(Enum):
 
     ALIGN_TO_MINI = (AlignToMiniBotState(), (LedColor.YELLOW, LedColor.TEAL))
 
-    WAIT_FOR_APPROACH = (WaitForApproachState(), (LedColor.YELLOW, LedColor.BLUE))
+    APPROACH_MINI = (ApproachMiniState(), (LedColor.YELLOW, LedColor.BLUE))
+    APPROACH_MINI_STALL = (State(), (LedColor.YELLOW, LedColor.RED))
 
     DEPOSIT = (Deposit(transfer=True), (LedColor.YELLOW, LedColor.MAGENTA))
     DEPOSIT_STALL = (State(), (LedColor.YELLOW, LedColor.RED))
 
-    WAIT_FOR_DIVERGE = (WaitForDivergeState(), (LedColor.YELLOW, LedColor.WHITE))
+    SEPARATE_FROM_MINI = (SeparateFromMiniState(), (LedColor.YELLOW, LedColor.MAGENTA))
+    SEPARATE_FROM_MINI_STALL = (Stall(), (LedColor.YELLOW, LedColor.RED))
 
     # ===== SINGLE ROBOT TRAVERSAL SECTION (3) =====
 
@@ -174,15 +178,19 @@ class MainStates(Enum):
 
             (MainStates.WAIT_FOR_MINI_ALIGN, Events.SUCCESS): MainStates.ALIGN_TO_MINI,
 
-            (MainStates.ALIGN_TO_MINI, Events.SUCCESS): MainStates.WAIT_FOR_APPROACH,
+            (MainStates.ALIGN_TO_MINI, Events.SUCCESS): MainStates.APPROACH_MINI,
 
-            (MainStates.WAIT_FOR_APPROACH, Events.SUCCESS): MainStates.DEPOSIT,
+            (MainStates.APPROACH_MINI, Events.SUCCESS): MainStates.DEPOSIT,
+            (MainStates.APPROACH_MINI, Events.STALL): MainStates.APPROACH_MINI_STALL,
+            (MainStates.APPROACH_MINI_STALL, Events.SUCCESS): MainStates.APPROACH_MINI,
 
-            (MainStates.DEPOSIT, Events.SUCCESS): MainStates.WAIT_FOR_DIVERGE,
+            (MainStates.DEPOSIT, Events.SUCCESS): MainStates.SEPARATE_FROM_MINI,
             (MainStates.DEPOSIT, Events.STALL): MainStates.DEPOSIT_STALL,
             (MainStates.DEPOSIT_STALL, Events.SUCCESS): MainStates.DEPOSIT,
             
-            (MainStates.WAIT_FOR_DIVERGE, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
+            (MainStates.SEPARATE_FROM_MINI, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
+            (MainStates.SEPARATE_FROM_MINI, Events.STALL): MainStates.SEPARATE_FROM_MINI_STALL,
+            (MainStates.SEPARATE_FROM_MINI_STALL, Events.SUCCESS): MainStates.SEPARATE_FROM_MINI,
 
             # in case minibot is indisposed and big bot has to make full cycles
             (MainStates.TRAVERSE_TO_BERM, Events.SUCCESS): MainStates.ALIGN_TO_BERM,
@@ -208,7 +216,8 @@ class MainStates(Enum):
 def main(args=None):
     rclpy.init(args=sys.argv, signal_handler_options=rclpy.SignalHandlerOptions.NO)
 
-    manager = StateManager(MainStates, MainStates.INIT_MAP, Events, Event)
+    # INIT_MAP
+    manager = StateManager(MainStates, MainStates.WAIT_FOR_MINI, Events, Event)
 
     try:
         rclpy.spin(manager)
