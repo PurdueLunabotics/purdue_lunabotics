@@ -7,7 +7,7 @@ global_costmap:
       global_frame: "map"
       robot_base_frame: "base_link"
       robot_radius: 0.4
-      plugins: ["static_layer","obstacle_layer" ,"denoise_layer", "inflation_layer"]
+      plugins: ["static_layer","denoise_layer", "obstacle_layer" , "inflation_layer"]
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_topic: "/rtabmap/octomap_grid"
@@ -53,7 +53,7 @@ mini:
         robot_base_frame: "mini/base_link"
         robot_radius: 0.3
         always_send_full_costmap: false
-        plugins: ["static_layer", "obstacle_layer","denoise_layer", "inflation_layer"]
+        plugins: ["static_layer", "denoise_layer", "obstacle_layer", "inflation_layer"]
         static_layer:
           plugin: "nav2_costmap_2d::StaticLayer"
           map_topic: "/mini/rtabmap/map"
@@ -65,8 +65,8 @@ mini:
           plugin: "nav2_costmap_2d::ObstacleLayer"
           observation_sources: pointcloud
           enabled: true
-          pointclouds:
-            topic: "rtabmap/crater"
+          pointcloud:
+            topic: "/mini/rtabmap/crater"
             data_type: "PointCloud2"
         denoise_layer:
           plugin: "nav2_costmap_2d::DenoiseLayer"

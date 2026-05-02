@@ -230,7 +230,7 @@ class CraterGeneration(Node):
                     
                 points_in = len(list(filter(remove,crater_vals)))
                 # hough_r < 0.4 and
-                if( hough_r > 0 and points_in > 7):
+                if( hough_r > 0 and points_in > 13):
                     self.get_logger().warn("god help")
                     for i in range(30):
                         x = hough_cx + hough_r * np.cos(i*12*2*np.pi/360)
