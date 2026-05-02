@@ -111,7 +111,6 @@ class MainStates(Enum):
     
     # ===== SINGLE ROBOT DEPOSIT SECTION (4) =====
     
-    
     DEPOSIT_BERM = (Deposit(), (LedColor.MAGENTA, LedColor.YELLOW))
     DEPOSIT_BERM_STALL = (State(), (LedColor.MAGENTA, LedColor.RED))
     
