@@ -42,8 +42,8 @@
     ///
     /// ROS setting: By default connect to the Zenoh router on localhost on port 7447.
     endpoints: [
-      "tcp/192.168.0.133:7447",
-      "tcp/192.168.0.111:7447"
+      "tcp/luna-minisforum.local:7447",
+      "tcp/robot2.local:7447"
     ],
 
     /// Global connect configuration,
