@@ -17,7 +17,8 @@ direction = None
 
 # sim id - 368
 # irl id = 173
-INIT_TAG_ID = 173
+INIT_TAG_ID_1 = 173
+INIT_TAG_ID_2 = 301
 
 class SetupMap(State):
   def __init__(self, is_main: bool):
@@ -47,11 +48,11 @@ class SetupMap(State):
     global direction
     self.detections[detections.header.frame_id] = detections
     if "mini/d455_front" in detections.header.frame_id and len(detections.detections) > 0:
-      direction = Direction.NORTH if detections.detections[0].id == 11 else Direction.EAST
-    elif "mini/d455_back" in detections.header.frame_id  and any(detection.id == INIT_TAG_ID for detection in detections.detections):
+      direction = Direction.NORTH if detections.detections[0].id == INIT_TAG_ID_2 else Direction.EAST
+    elif "mini/d455_back" in detections.header.frame_id  and any(detection.id == INIT_TAG_ID_1 for detection in detections.detections):
       self.can_see_main_bot = True
     elif "d455_front" in detections.header.frame_id and len(detections.detections) > 0:
-      direction = Direction.SOUTH if detections.detections[0].id == 11 else Direction.WEST
+      direction = Direction.SOUTH if detections.detections[0].id == INIT_TAG_ID_2 else Direction.WEST
 
   def periodic(self):
     self.manager.get_logger().info(f"SetupMap: can see main: {self.can_see_main_bot}, dir: {direction}")
