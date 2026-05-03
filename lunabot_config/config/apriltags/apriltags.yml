@@ -8,7 +8,7 @@
   # (optional) list of tags
     # If defined, 'frames' and 'sizes' must have the same length as 'ids'.
       tag: # 368 for sim, 126 IRL
-        ids:    [126, 7, 11, 173, 301]         # tag IDs for which to publish transform 
+        ids:    [126, 7, 301, 173, 301]         # tag IDs for which to publish transform 
         frames: ["main_deposition", "tag36h11:7", "tag36h11:11", "main_deposition_small", "init_tag_2"]   # frame names
         sizes:  [0.09603, 0.1905, 0.1905, 0.02, 0.145]     # tag-specific edge size, overrides the default 'size'
 /mini/*:
@@ -22,5 +22,5 @@
     # If defined, 'frames' and 'sizes' must have the same length as 'ids'.
       tag: # 368 for sim, 126 IRL
         ids:    [126, 7, 11, 173, 301]         # tag IDs for which to publish transform
-        frames: ["main_deposition", "tag36h11:107", "tag36h11:111", "main_deposition_small", "init_tag_2"]   # frame names
+        frames: ["main_deposition", "tag36h11:107", "tag36h11:111", "main_deposition_small", "init_tag_102"]   # frame names
         sizes:  [0.09603, 0.1905, 0.1905, 0.02, 0.145]     # tag-specific edge size, overrides the default 'size'
