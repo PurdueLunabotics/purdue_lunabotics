@@ -33,8 +33,8 @@ class AlignToMiniBotState(State):
     self.node: Node = None
 
     # PID for angular alignment
-    self.P = 7
-    self.I = 0
+    self.P = 10
+    self.I = 0.01
     self.D = 1
     self.max_output = np.deg2rad(30)
 

@@ -58,7 +58,7 @@ class Drive(State):
 
 class Trench(Drive):
     def __init__(self) -> None:
-        super().__init__(0.5, False, 0.05, timeout=30.0)
+        super().__init__(0.5, False, speed=0.1, timeout=30.0)
 
     def setup(self, manager: Node):
         super().setup(manager)
@@ -68,7 +68,7 @@ class Trench(Drive):
         self.excavation_pub = manager.create_publisher(Int32, "excavate", 10)
         self.dep_pub = manager.create_publisher(Int32, "deposition", 10)
 
-        self.EXCAVATION_SPEED = 1500 # rpm
+        self.EXCAVATION_SPEED = 2000 # rpm
         self.DEPOSITION_SPEED = 200 # rpm
 
     def start(self):
