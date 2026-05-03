@@ -279,7 +279,7 @@
             <param name="GridGlobal/OccupancyThr" value="'0.5'"/> <!-- Threshold for occupancy -->
             
             <param name="Kp/MaxFeatures"          value="$(var rtabmap_max_features)"/>
-            <param name="Marker/Priors"           value="'11 2.5 2.5 0.2 1.57 1.57 0|7 3.4 1.8 0.2 1.57 0 -1.57|111 2.5 2.5 0.2 1.57 1.57 0|107 3.4 1.8 0.2 1.57 0 -1.57'"/>
+            <param name="Marker/Priors"           value="'301 2.5 2.5 0.2 1.57 1.57 0|401 2.5 2.5 0.2 1.57 1.57 0'"/>
             <param name="Optimizer/PriorsIgnored" value="'false'"/>
             
             <param name="database_path"           value="~/.ros/$(var ns)rtabmap.db"/>

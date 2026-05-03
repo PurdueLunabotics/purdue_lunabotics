@@ -60,9 +60,9 @@ class SetupMap(State):
       mini_detections = self.detections["mini/d455_front_color_optical_frame"]
       mini_detections.header.frame_id = "deposition_apriltag_small_optical_frame"
       try:
-        main_to_tag = self.tf_buf.lookup_transform("main_deposition_small", "tag36h11:107" if direction == Direction.EAST else "init_tag_102", Time())
+        main_to_tag = self.tf_buf.lookup_transform("main_deposition_small", "tag36h11:107" if direction == Direction.EAST else "tag36h11:401", Time())
         main_to_tag.header.frame_id = "deposition_apriltag_small_optical_frame"
-        main_to_tag.child_frame_id = "tag36h11:7" if direction == Direction.EAST else "init_tag_2"
+        main_to_tag.child_frame_id = "tag36h11:7" if direction == Direction.EAST else "tag36h11:301"
         self.tf_broadcaster.sendTransform(main_to_tag)
         self.detections_pub.publish(mini_detections)
       except Exception as e:
@@ -73,9 +73,9 @@ class SetupMap(State):
       main_detections.header.frame_id = "main_deposition_small"
       main_detections.detections[0].id += 100
       try:
-        main_to_tag = self.tf_buf.lookup_transform("deposition_apriltag_small_optical_frame", "tag36h11:7" if direction == Direction.WEST else "init_tag_2", Time())
+        main_to_tag = self.tf_buf.lookup_transform("deposition_apriltag_small_optical_frame", "tag36h11:7" if direction == Direction.WEST else "tag36h11:301", Time())
         main_to_tag.header.frame_id = "main_deposition_small"
-        main_to_tag.child_frame_id = "tag36h11:107" if direction == Direction.WEST else "init_tag_102"
+        main_to_tag.child_frame_id = "tag36h11:107" if direction == Direction.WEST else "tag36h11:401"
         self.tf_broadcaster.sendTransform(main_to_tag)
         self.detections_pub.publish(main_detections)
       except Exception as e:
