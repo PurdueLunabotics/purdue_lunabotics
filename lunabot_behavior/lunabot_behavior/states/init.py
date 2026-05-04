@@ -118,7 +118,7 @@ class InitRetreat(State):
       output = Twist()
       output.linear.x = 0.2
       self.cmd_vel_publisher.publish(output)
-      if self.manager.get_clock().now() - self.starting_time > Duration(seconds=20):
+      if self.manager.get_clock().now() - self.starting_time > Duration(seconds=10):
         self.ready_pub.publish(Bool(data = True))
         return Events.SUCCESS
     elif self.ready:
