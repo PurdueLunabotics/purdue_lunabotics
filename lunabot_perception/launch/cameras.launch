@@ -8,6 +8,8 @@
   <arg name="sim"                           default="false"/>
   <arg name="lidar"                         default="false"/>
 
+  <arg name="robot_num"                     default="0" />
+
   <let name="serial_no_cam_1"               value="'141222070808'"/>
   <arg name="cam_1_name"                    default="d455_front"/>
   <let name="serial_no_cam_2"               value="'349622073231'"/>
@@ -22,7 +24,9 @@
 
   <arg name="pointcloud"                      default="$(eval '(len($(var cams)) > 1) and not $(var lidar)')" />
 
-  <arg name="profile"                         default="424x240x15"/>
+  <arg name="profile"                         default="424x240x15" if="$(eval '$(var robot_num) == 0')"/>
+  <arg name="profile"                         default="848x480x15" if="$(eval '$(var robot_num) == 1')"/>
+
   <let name="initial_reset"                   value="true"/>
   <let name="decimation"                      value="4"/> 
   <let name="voxel_size"                      value="0.01"/> <!--meters-->
