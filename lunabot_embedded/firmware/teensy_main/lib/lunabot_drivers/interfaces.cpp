@@ -46,7 +46,7 @@ void ADS1119_Current_Bus::init_ads1119() {
   Single Ended: 4 CHANNELS => AN0, AN1, AN2, AN3
   Differential: 3 CHANNELS => AN0-AN1, AN2-AN3, AN1-AN2,
   */
-  ads1.selectChannel(0); // select AN0 (single ended input mode)
+  ads1.selectChannel(2); // select AN0 (single ended input mode)
   ads1.reset();
 }
 

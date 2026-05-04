@@ -22,7 +22,7 @@
 
   <arg name="pointcloud"                      default="$(eval '(len($(var cams)) > 1) and not $(var lidar)')" />
 
-  <arg name="profile"                         default="848x480x30"/>
+  <arg name="profile"                         default="424x240x15"/>
   <let name="initial_reset"                   value="true"/>
   <let name="decimation"                      value="4"/> 
   <let name="voxel_size"                      value="0.01"/> <!--meters-->

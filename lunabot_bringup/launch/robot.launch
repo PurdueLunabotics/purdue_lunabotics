@@ -256,7 +256,8 @@
 
             <remap from="rgb/camera_info"         to="$(var /ns)/$(var odom_cam_name)/color/camera_info"/>
 
-            <param name="sync_queue_size"         value="10"/>
+            <param name="sync_queue_size"         value="100"/>
+            <param name="queue_size"         value="100"/>
             <param name="approx_sync"             value="true"/>
             <param name="map_always_update"       value="true"/>
 

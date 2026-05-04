@@ -17,7 +17,7 @@ direction = None
 
 # sim id - 368
 # irl id = 173
-INIT_TAG_ID_1 = 482
+INIT_TAG_ID_1 = 173
 INIT_TAG_ID_2 = 301
 
 class SetupMap(State):
@@ -116,7 +116,7 @@ class InitRetreat(State):
   def periodic(self):
     if self.is_moving:
       output = Twist()
-      output.linear.x = 0.1
+      output.linear.x = 0.2
       self.cmd_vel_publisher.publish(output)
       if self.manager.get_clock().now() - self.starting_time > Duration(seconds=20):
         self.ready_pub.publish(Bool(data = True))

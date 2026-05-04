@@ -17,12 +17,12 @@ Sabertooth_MotorCtrl act_right_mtr{&MC1, STMotor::M1};
 Sabertooth_MotorCtrl act_left_mtr{&MC1, STMotor::M2};
 Encoder_Bus enc_bus;
 
-constexpr uint8_t ACT_RIGHT_CURR_MUX = 0;
-constexpr uint8_t ACT_LEFT_CURR_MUX = 2;
+constexpr uint8_t ACT_RIGHT_CURR_MUX = 2;
+// constexpr uint8_t ACT_LEFT_CURR_MUX = 1;
 
 void update(float &act_right_curr, int32_t &lin_enc_0, int32_t &lin_enc_1) {
-  //act_right_curr = ADS1119_Current_Bus::read(ACT_RIGHT_CURR_MUX);
-  act_right_curr = -1;
+  act_right_curr = ADS1119_Current_Bus::read(ACT_RIGHT_CURR_MUX);
+  //act_right_curr = -1;
   lin_enc_0 = enc_bus.read(0);
   lin_enc_1 = enc_bus.read(1);
 }
