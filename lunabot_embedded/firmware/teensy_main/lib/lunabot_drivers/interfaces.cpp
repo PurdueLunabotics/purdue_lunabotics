@@ -32,14 +32,14 @@ ADS1119Configuration ADS1119_Current_Bus::configuration = {};
 ADS1119 ADS1119_Current_Bus::ads1 = ADS1119(ads1_addr);
 
 void ADS1119_Current_Bus::init_ads1119() {
-  configuration.mux = ADS1119MuxConfiguration::positiveAIN0negativeAIN1;
+  configuration.mux = ADS1119MuxConfiguration::positiveAIN1negativeGND;
   configuration.gain = ADS1119Configuration::Gain::one;
   configuration.dataRate = ADS1119Configuration::DataRate::sps20;
   configuration.conversionMode = ADS1119Configuration::ConversionMode::continuous;
   configuration.voltageReference = ADS1119Configuration::VoltageReferenceSource::external;
-  configuration.externalReferenceVoltage = 3.305;
+  configuration.externalReferenceVoltage = 3.29;
 
-    ads1.begin(&configuration);
+  ads1.begin(&configuration);
   /* Config ADS1119 Amux Input as Single Ended*/
   ads1.configADCSingleEnded();
   /* Select ADS1119 Channel
