@@ -34,15 +34,15 @@ class StallDetector(Node):
         if self.effort == None:
             return
         
-        if abs(msg.drive_left_vel) < 10 and abs(self.effort.left_drive) > 100:
+        if abs(msg.drive_left_vel) < 10 and msg.drive_left_vel != -1 and abs(self.effort.left_drive) > 100:
             self.stallCounter['left'] += 1
         else:
             self.stallCounter['left'] = 0
-        if abs(msg.drive_right_vel) < 10 and abs(self.effort.right_drive) > 100:
+        if abs(msg.drive_right_vel) < 10 and msg.drive_right_vel != -1 and abs(self.effort.right_drive) > 100:
             self.stallCounter['right'] += 1
         else:
             self.stallCounter['right'] = 0
-        if abs(msg.exc_vel) < 10 and abs(self.effort.excavate) > 100:
+        if abs(msg.exc_vel) < 10 and msg.exc_vel != -1 and abs(self.effort.excavate) > 100:
             self.stallCounter['exc'] += 1
         else:
             self.stallCounter['exc'] = 0
