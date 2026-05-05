@@ -45,7 +45,7 @@ class Raise(State):
         return None
             
     
-    def exit(self):
+    def exit(self, event):
         self.excavation_pub.publish(Int32(data = 0))
         self.linact_pub.publish(Int32(data = 0))
  

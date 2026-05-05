@@ -35,7 +35,7 @@ class SeparateFromMiniState(State):
       return Events.SUCCESS
     return None  
   
-  def exit(self):
+  def exit(self, event):
     self.cmd_vel_publisher.publish(Twist())
 
     msg = Bool()

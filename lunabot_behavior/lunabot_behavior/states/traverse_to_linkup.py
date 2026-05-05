@@ -40,5 +40,5 @@ class TraverseToLinkup(Traverse):
   def periodic(self):
     return super().periodic()
 
-  def exit(self):
-    super().exit()
+  def exit(self, event):
+    super().exit(event)

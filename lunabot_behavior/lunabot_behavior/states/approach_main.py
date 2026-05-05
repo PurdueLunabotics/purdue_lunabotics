@@ -214,7 +214,7 @@ class ApproachMainState(State):
     self.visual_publisher.publish(marker)
 
   
-  def exit(self):
+  def exit(self, event):
     # stop moving
     self.cmd_vel_publisher.publish(Twist())
 

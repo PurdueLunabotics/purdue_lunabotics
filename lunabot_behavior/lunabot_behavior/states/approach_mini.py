@@ -107,7 +107,7 @@ class ApproachMiniState(State):
 
       if (self.lost_count >= self.LOST_APRILTAG_THRESHOLD):
         self.lost_count = 0
-        self.node.get_logger().info("Behavior: Exiting approach due to LOST apriltag!")
+        self.node.get_logger().warn("Behavior: Exiting approach due to LOST apriltag!")
         self.publish_aligned_msg()
         return Events.SUCCESS
 
@@ -163,7 +163,7 @@ class ApproachMiniState(State):
       self.aligned_msg_publisher.publish(msg)
 
   
-  def exit(self):
+  def exit(self, event):
     # stop moving
     self.cmd_vel_publisher.publish(Twist())
 

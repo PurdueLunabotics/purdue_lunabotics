@@ -251,7 +251,7 @@ class AlignToMainBotState(State):
     for i in range(5):
       self.apriltag_offset_publisher.publish(transform)
   
-  def exit(self):
+  def exit(self, event):
     # stop moving
     self.cmd_vel_publisher.publish(Twist())
 

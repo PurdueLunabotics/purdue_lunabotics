@@ -54,6 +54,6 @@ class AlignToAngle(State):
     self.cmd_vel_publisher.publish(output)
     return None
   
-  def exit(self):
+  def exit(self, event):
     self.cmd_vel_publisher.publish(Twist())
     

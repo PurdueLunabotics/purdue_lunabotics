@@ -50,7 +50,7 @@ class StateManager(Node):
 
         if next_state is not None:
             self.get_logger().info(f"switching to state {next_state}")
-            self.state.value[0].exit()
+            self.state.value[0].exit(event)
             self.state = next_state
             self.state.value[0].start()
 
