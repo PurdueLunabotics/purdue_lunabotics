@@ -8,6 +8,7 @@ from lunabot_msgs.msg import Event
 
 from lunabot_config.led_colors import LedColor
 
+from lunabot_behavior.states.align_to_berm import AlignToBerm
 from lunabot_behavior.states.approach_trench import ApproachTrench, RetreatTrench
 from lunabot_behavior.states.align_trench import AlignTrench
 from lunabot_behavior.states.align_to_angle import AlignToAngle
@@ -103,7 +104,7 @@ class MainStates(Enum):
     TRAVERSE_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     TRAVERSE_TO_BERM_NO_PATH = (NoPath(), (LedColor.BLUE, LedColor.ORANGE))
 
-    ALIGN_TO_BERM = (AlignToAngle(270), (LedColor.BLUE, LedColor.GREEN))
+    ALIGN_TO_BERM = (AlignToBerm(True), (LedColor.BLUE, LedColor.GREEN))
     ALIGN_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
     APPROACH_BERM = (ApproachBerm(), (LedColor.BLUE, LedColor.TEAL))

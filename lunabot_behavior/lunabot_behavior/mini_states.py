@@ -8,6 +8,7 @@ import sys
 
 from lunabot_config.led_colors import LedColor
 
+from lunabot_behavior.states.align_to_berm import AlignToBerm
 from lunabot_behavior.states.find_linkup import FindLinkup
 from lunabot_behavior.states.align_to_angle import AlignToAngle
 from lunabot_behavior.states.separate_from_main import SeparateFromMainState
@@ -70,7 +71,7 @@ class MiniStates(Enum):
     TRAVERSE_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     TRAVERSE_TO_BERM_NO_PATH = (NoPath(), (LedColor.BLUE, LedColor.ORANGE))
 
-    ALIGN_TO_BERM = (AlignToAngle(90), (LedColor.BLUE, LedColor.GREEN))
+    ALIGN_TO_BERM = (AlignToBerm(), (LedColor.BLUE, LedColor.GREEN))
     ALIGN_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
     MOVE_TO_STAGING = (TraverseToLinkup(False, True), (LedColor.BLUE, LedColor.TEAL))

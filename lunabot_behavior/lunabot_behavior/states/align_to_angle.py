@@ -13,7 +13,7 @@ class AlignToAngle(State):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "cmd_vel", 10)
     manager.create_subscription(PoseStamped, "position", self.odom_cb, 1)
     self.manager = manager
-    self.robot_pose = (None, None, None)
+    self.robot_pose: None | tuple[float, float, float] = None
     self.angular_speed = np.deg2rad(30) #degrees/sec -> rad/sec
     self.tolerance = np.deg2rad(3)
   
@@ -36,7 +36,7 @@ class AlignToAngle(State):
     pass
   
   def periodic(self):
-    if self.robot_pose[0] == None:
+    if self.robot_pose is None:
       return None
     angular_error = self.robot_pose[2] - self.target_angle
     if angular_error > np.pi:
@@ -44,7 +44,7 @@ class AlignToAngle(State):
     elif angular_error < -np.pi:
       angular_error += 2 * np.pi
     
-    if self.robot_pose[2] != None and np.abs(angular_error) < self.tolerance:
+    if np.abs(angular_error) < self.tolerance:
       return Events.SUCCESS
     output = Twist()
     if angular_error < 0:

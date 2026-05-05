@@ -7,6 +7,7 @@ from lunabot_behavior.lunabot_behavior.states.wait_for_linkup import WaitForLink
 from lunabot_config.led_colors import LedColor
 from lunabot_msgs.msg import Event
 
+from lunabot_behavior.states.align_to_berm import AlignToBerm
 from lunabot_behavior.states.traverse_to_linkup import TraverseToLinkup
 from lunabot_behavior.states.align_to_linkup import AlignToLinkup
 from lunabot_behavior.states.find_linkup import FindLinkup
@@ -80,7 +81,7 @@ class SingleStates(Enum):
     TRAVERSE_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     TRAVERSE_TO_BERM_NO_PATH = (NoPath(), (LedColor.BLUE, LedColor.ORANGE))
 
-    ALIGN_TO_BERM = (AlignToAngle(270), (LedColor.BLUE, LedColor.GREEN))
+    ALIGN_TO_BERM = (AlignToBerm(True), (LedColor.BLUE, LedColor.GREEN))
     ALIGN_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
     APPROACH_BERM = (ApproachBerm(), (LedColor.BLUE, LedColor.TEAL))
