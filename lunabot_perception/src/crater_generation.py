@@ -131,7 +131,7 @@ class CraterGeneration(Node):
                     plane_pointcloud.append([ground_trainxy[p][0], ground_trainxy[p][1], pred_z[p][0]])
             # self.get_logger().warn("it do thing")
             # self.get_logger().warn("pointcloud")
-            self.get_logger().warn(f"{plane_pointcloud}")
+            # self.get_logger().warn(f"{plane_pointcloud}")
 
         else: 
             print("failed to read pointcloud")
@@ -159,12 +159,12 @@ class CraterGeneration(Node):
                 obst.append([p[0], p[1], p[2]]) 
         except Exception as inst:
             self.get_logger().info(f"{inst}")
-            self.get_logger().info(f"{self.pointcloud_subscriber.topic_name}")
+            #self.get_logger().info(f"{self.pointcloud_subscriber.topic_name}")
             self.get_logger().info("first problem :D")
             did_read = False
         # get average height of ground
         # find points below average height of ground in obstacles
-        self.get_logger().info(f"{len(self.ground_planes.data)}")
+        #self.get_logger().info(f"{len(self.ground_planes.data)}")
         
         ground_vals = []
         try:
@@ -231,7 +231,7 @@ class CraterGeneration(Node):
                 points_in = len(list(filter(remove,crater_vals)))
                 # hough_r < 0.4 and
                 if( hough_r > 0 and points_in > 13):
-                    self.get_logger().warn("god help")
+                    #self.get_logger().warn("god help")
                     for i in range(30):
                         x = hough_cx + hough_r * np.cos(i*12*2*np.pi/360)
                         y = hough_cy + hough_r * np.sin(i*12*2*np.pi/360)
