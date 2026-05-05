@@ -24,7 +24,9 @@ from lunabot_behavior.states.align_to_linkup import AlignToLinkup
 from lunabot_behavior.states.main_wait_for_mini_align import MainWaitForAlignState
 from lunabot_behavior.states.align_to_mini_bot import AlignToMiniBotState
 from lunabot_behavior.states.wait_for_approach import WaitForApproachState
+from lunabot_behavior.states.approach_mini import ApproachMiniState
 from lunabot_behavior.states.wait_for_diverge import WaitForDivergeState
+from lunabot_behavior.states.separate_from_mini import SeparateFromMiniState
 from lunabot_behavior.states.init import InitRetreat, SetupMap
 from lunabot_behavior.states.wait_for_linkup import WaitForLinkup
 from lunabot_behavior.states.proceed import Proceed
@@ -41,13 +43,13 @@ class MainStates(Enum):
     INIT_MAP = (SetupMap(True), (LedColor.GREEN, LedColor.YELLOW))
     INIT_WAIT = (State(), (LedColor.GREEN, LedColor.GREEN)) # This will stay as State(), no logic needed
     INIT_MOVE = (InitRetreat(True), (LedColor.GREEN, LedColor.TEAL))
-    INIT_STALL = (State(), (LedColor.GREEN, LedColor.RED))
+    INIT_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
     
     STARTING_PLUNGE = (Plunge(), (LedColor.GREEN, LedColor.BLUE))
-    STARTING_PLUNGE_STALL = (State(), (LedColor.GREEN, LedColor.RED))
+    STARTING_PLUNGE_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
     
     STARTING_RAISE = (Raise(), (LedColor.GREEN, LedColor.MAGENTA))
-    STARTING_RAISE_STALL = (State(), (LedColor.GREEN, LedColor.RED))
+    STARTING_RAISE_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
     
     WAIT_FOR_LINKUP = (WaitForLinkup(), (LedColor.GREEN, LedColor.GREEN)) # This will stay as State(), no logic needed.
     
@@ -58,19 +60,19 @@ class MainStates(Enum):
     # ===== EXCAVATION SECTION (5) =====
     
     ALIGN_TO_TRENCH = (AlignTrench(), (LedColor.WHITE, LedColor.YELLOW))
-    ALIGN_TO_TRENCH_STALL = (State(), (LedColor.WHITE, LedColor.RED))
+    ALIGN_TO_TRENCH_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
     
     APPROACH_TRENCH = (ApproachTrench(), (LedColor.WHITE, LedColor.GREEN))
     APPROACH_TRENCH_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
     
     PLUNGE_ACT = (Plunge(), (LedColor.WHITE, LedColor.TEAL))
-    PLUNGE_ACT_STALL = (State(), (LedColor.WHITE, LedColor.RED))
+    PLUNGE_ACT_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
     
     TRENCH = (Trench(), (LedColor.WHITE, LedColor.BLUE))
-    TRENCH_STALL = (State(), (LedColor.WHITE, LedColor.RED))
+    TRENCH_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
     
     RAISE_ACT = (Raise(), (LedColor.WHITE, LedColor.MAGENTA))
-    RAISE_ACT_STALL = (State(), (LedColor.WHITE, LedColor.RED))
+    RAISE_ACT_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
 
     RETREAT_TRENCH = (RetreatTrench(), (LedColor.WHITE, LedColor.WHITE))
     RETREAT_TRENCH_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
@@ -78,7 +80,7 @@ class MainStates(Enum):
     # ===== LINKUP SECTION (2) =====
 
     ALIGN_TO_LINKUP = (AlignToLinkup(), (LedColor.YELLOW, LedColor.YELLOW))
-    ALIGN_TO_LINKUP_STALL = (State(), (LedColor.YELLOW, LedColor.RED))
+    ALIGN_TO_LINKUP_STALL = (Stall(), (LedColor.YELLOW, LedColor.RED))
 
     WAIT_FOR_MINI = (Proceed(True), (LedColor.YELLOW, LedColor.GREEN))
 
@@ -86,12 +88,14 @@ class MainStates(Enum):
 
     ALIGN_TO_MINI = (AlignToMiniBotState(), (LedColor.YELLOW, LedColor.TEAL))
 
-    WAIT_FOR_APPROACH = (WaitForApproachState(), (LedColor.YELLOW, LedColor.BLUE))
+    APPROACH_MINI = (ApproachMiniState(), (LedColor.YELLOW, LedColor.BLUE))
+    APPROACH_MINI_STALL = (Stall(), (LedColor.YELLOW, LedColor.RED))
 
     DEPOSIT = (Deposit(transfer=True), (LedColor.YELLOW, LedColor.MAGENTA))
-    DEPOSIT_STALL = (State(), (LedColor.YELLOW, LedColor.RED))
+    DEPOSIT_STALL = (Stall(), (LedColor.YELLOW, LedColor.RED))
 
-    WAIT_FOR_DIVERGE = (WaitForDivergeState(), (LedColor.YELLOW, LedColor.WHITE))
+    SEPARATE_FROM_MINI = (SeparateFromMiniState(), (LedColor.YELLOW, LedColor.MAGENTA))
+    SEPARATE_FROM_MINI_STALL = (Stall(), (LedColor.YELLOW, LedColor.RED))
 
     # ===== SINGLE ROBOT TRAVERSAL SECTION (3) =====
 
@@ -107,9 +111,8 @@ class MainStates(Enum):
     
     # ===== SINGLE ROBOT DEPOSIT SECTION (4) =====
     
-    
     DEPOSIT_BERM = (Deposit(), (LedColor.MAGENTA, LedColor.YELLOW))
-    DEPOSIT_BERM_STALL = (State(), (LedColor.MAGENTA, LedColor.RED))
+    DEPOSIT_BERM_STALL = (Stall(), (LedColor.MAGENTA, LedColor.RED))
     
     RETREAT_BERM = (RetreatBerm(), (LedColor.MAGENTA, LedColor.GREEN))
     RETREAT_BERM_STALL = (Stall(), (LedColor.MAGENTA, LedColor.RED))
@@ -174,15 +177,19 @@ class MainStates(Enum):
 
             (MainStates.WAIT_FOR_MINI_ALIGN, Events.SUCCESS): MainStates.ALIGN_TO_MINI,
 
-            (MainStates.ALIGN_TO_MINI, Events.SUCCESS): MainStates.WAIT_FOR_APPROACH,
+            (MainStates.ALIGN_TO_MINI, Events.SUCCESS): MainStates.APPROACH_MINI,
 
-            (MainStates.WAIT_FOR_APPROACH, Events.SUCCESS): MainStates.DEPOSIT,
+            (MainStates.APPROACH_MINI, Events.SUCCESS): MainStates.DEPOSIT,
+            (MainStates.APPROACH_MINI, Events.STALL): MainStates.APPROACH_MINI_STALL,
+            (MainStates.APPROACH_MINI_STALL, Events.SUCCESS): MainStates.APPROACH_MINI,
 
-            (MainStates.DEPOSIT, Events.SUCCESS): MainStates.WAIT_FOR_DIVERGE,
+            (MainStates.DEPOSIT, Events.SUCCESS): MainStates.SEPARATE_FROM_MINI,
             (MainStates.DEPOSIT, Events.STALL): MainStates.DEPOSIT_STALL,
             (MainStates.DEPOSIT_STALL, Events.SUCCESS): MainStates.DEPOSIT,
             
-            (MainStates.WAIT_FOR_DIVERGE, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
+            (MainStates.SEPARATE_FROM_MINI, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
+            (MainStates.SEPARATE_FROM_MINI, Events.STALL): MainStates.SEPARATE_FROM_MINI_STALL,
+            (MainStates.SEPARATE_FROM_MINI_STALL, Events.SUCCESS): MainStates.SEPARATE_FROM_MINI,
 
             # in case minibot is indisposed and big bot has to make full cycles
             (MainStates.TRAVERSE_TO_BERM, Events.SUCCESS): MainStates.ALIGN_TO_BERM,

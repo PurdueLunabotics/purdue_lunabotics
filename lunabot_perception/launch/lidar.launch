@@ -6,7 +6,7 @@
     <param name="use_system_timestamp" value="true"/>
     <param name="range_min" value="0.0"/>
     <param name="range_max" value="100.0"/>
-    <param name="cloud_scan_num" value="18"/>
+    <param name="cloud_scan_num" value="1"/>
     <param name="lidar_port" value="6101"/>
     <param name="lidar_ip" value="192.168.1.62"/>
     <param name="local_port" value="6201"/>
@@ -23,7 +23,7 @@
       <remap from="cloud" to="unilidar/cloud"/>
       <remap from="odom" to="odom"/>
       <remap from="assembled_cloud" to="lidar_assembled_cloud"/>  
-      <param name="fixed_frame_id"  value="mini/lidar_link"/>     
+      <param name="fixed_frame_id"  value="mini/odom"/>     
       <param name="circular_buffer" value="true"/> <!-- remove oldest instead of waiting for entirely new clouds -->
       <param name="assembling_time" value="3.0"/> <!-- Seconds -->
       <param name="range_max"       value="5.0"/> <!-- Meters -->

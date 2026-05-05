@@ -14,6 +14,9 @@ from typing import Literal
 import numpy as np
 import math
 
+# change for sim
+# sim apriltag - 368
+# irl tag - 126
 DEPOSITION_APRILTAG_ID = 126
 
 class AlignToMainBotState(State):
@@ -30,8 +33,8 @@ class AlignToMainBotState(State):
     self.node: Node = None
 
     # PID for angular alignment
-    self.P = 1
-    self.I = 0.005
+    self.P = 1.5
+    self.I = 0.05
     self.D = 0
 
     self.last_error = None
@@ -248,7 +251,7 @@ class AlignToMainBotState(State):
     for i in range(5):
       self.apriltag_offset_publisher.publish(transform)
   
-  def exit(self):
+  def exit(self, event):
     # stop moving
     self.cmd_vel_publisher.publish(Twist())
 

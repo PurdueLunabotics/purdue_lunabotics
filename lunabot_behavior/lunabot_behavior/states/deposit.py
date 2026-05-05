@@ -35,7 +35,7 @@ class Deposit(State):
     
     return None  
   
-  def exit(self):
+  def exit(self, event):
     self.dep_pub.publish(Int32(data = 0))
     self.dep_gate_pub.publish(Bool(data = False))
 

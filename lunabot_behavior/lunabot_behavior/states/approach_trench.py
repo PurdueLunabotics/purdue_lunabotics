@@ -24,8 +24,8 @@ class ApproachTrench(Drive):
   def periodic(self) -> None | Events:
     return super().periodic()
   
-  def exit(self):
-    return super().exit()
+  def exit(self, event):
+    return super().exit(event)
 
 class RetreatTrench(Drive):
   def __init__(self) -> None:
@@ -49,5 +49,5 @@ class RetreatTrench(Drive):
   def periodic(self) -> None | Events:
     return super().periodic()
   
-  def exit(self):
-    return super().exit()
+  def exit(self, event):
+    return super().exit(event)

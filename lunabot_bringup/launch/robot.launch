@@ -122,6 +122,7 @@
         <arg name="ns" value="$(var ns)"/>
         <arg name="sim" value="$(var sim)"/>
         <arg name="lidar" value="$(var lidar)"/>
+        <arg name="robot_num" value="$(var robot_num)" />
     </include>
 
     <include if="$(var lidar)" file="$(find-pkg-share lunabot_perception)/launch/lidar.launch">
@@ -134,6 +135,9 @@
 
     <!-- <node if="$(var sim)" name="manual_controller_node" pkg="lunabot_control" exec="manual_controller_node" output="screen" respawn="true">
     </node> -->
+    <node unless="$(var sim)" name="stall_detection_node" pkg="lunabot_control" exec="stall_detection_node" output="screen" respawn="true">
+
+    </node>
 
     <node if="$(var sim)" name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true">
             <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
@@ -270,7 +274,8 @@
 
             <remap from="rgb/camera_info"         to="$(var /ns)/$(var odom_cam_name)/color/camera_info"/>
 
-            <param name="sync_queue_size"         value="10"/>
+            <param name="sync_queue_size"         value="100"/>
+            <param name="queue_size"         value="100"/>
             <param name="approx_sync"             value="true"/>
             <param name="map_always_update"       value="true"/>
 
@@ -293,7 +298,7 @@
             <param name="GridGlobal/OccupancyThr" value="'0.5'"/> <!-- Threshold for occupancy -->
             
             <param name="Kp/MaxFeatures"          value="$(var rtabmap_max_features)"/>
-            <param name="Marker/Priors"           value="'11 2.5 2.5 0.2 1.57 1.57 0|7 3.4 1.8 0.2 1.57 0 -1.57|111 2.5 2.5 0.2 1.57 1.57 0|107 3.4 1.8 0.2 1.57 0 -1.57'"/>
+            <param name="Marker/Priors"           value="'301 2.5 2.5 0.2 1.57 0 0|482 3.4 1.8 0.2 1.57 0 -1.57|401 2.5 2.5 0.2 1.57 0 0|582 3.4 1.8 0.2 1.57 0 -1.57'"/>
             <param name="Optimizer/PriorsIgnored" value="'false'"/>
             
             <param name="database_path"           value="~/.ros/$(var ns)rtabmap.db"/>

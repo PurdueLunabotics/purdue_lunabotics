@@ -5,9 +5,9 @@ from lunabot_behavior.state import State, Events
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
 
-class SeparateFromMainState(State):
+class SeparateFromMiniState(State):
   """
-  Minibot diverging from main bot after collecting regolith
+  Main diverging from mini bot after collecting regolith
   """
 
   def __init__(self):
@@ -15,8 +15,8 @@ class SeparateFromMainState(State):
     self.LINEAR_SPEED = 0.1 #m/s
 
   def setup(self, manager: Node):
-    self.cmd_vel_publisher = manager.create_publisher(Twist, "/mini/cmd_vel", 10)
-    self.diverged_msg_publisher = manager.create_publisher(Bool, "/behavior/mini_diverged", 10)
+    self.cmd_vel_publisher = manager.create_publisher(Twist, "/cmd_vel", 10)
+    self.diverged_msg_publisher = manager.create_publisher(Bool, "/behavior/main_diverged", 10)
 
     self.manager = manager
 

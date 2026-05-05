@@ -18,7 +18,7 @@ differential_drive_controller_node:
   ros__parameters:
     gearbox_ratio: 50.0
     hz: 20.0
-    max_speed: 2000
+    max_speed: 3000
     max_speed_percentage: 0.8
     wheel_diameter: 0.3429
     width: 0.5588

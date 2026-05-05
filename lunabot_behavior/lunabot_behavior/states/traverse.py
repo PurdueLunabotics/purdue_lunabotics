@@ -51,7 +51,7 @@ class Traverse(State):
             return Events.SUCCESS
         return None
 
-    def exit(self):
+    def exit(self, event):
         self.logger.info("[Traverse]: send disable")
         self.enabled_pub.publish(Bool(data = False))
 

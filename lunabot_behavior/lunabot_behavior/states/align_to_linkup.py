@@ -22,5 +22,5 @@ class AlignToLinkup(AlignToAngle):
   def periodic(self):
     return super().periodic()
 
-  def exit(self):
-    super().exit()
+  def exit(self, event):
+    super().exit(event)

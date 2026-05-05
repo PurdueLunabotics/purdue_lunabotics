@@ -25,5 +25,5 @@ class State:
     def periodic(self) -> None | Events:
         return None
 
-    def exit(self):
+    def exit(self, event):
         pass

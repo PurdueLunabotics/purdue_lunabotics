@@ -15,6 +15,11 @@ class Direction(Enum):
 
 direction = None
 
+# sim id - 368
+# irl id = 173
+INIT_TAG_ID_1 = 173
+INIT_TAG_ID_2 = 301
+
 class SetupMap(State):
   def __init__(self, is_main: bool):
     self.is_main = is_main
@@ -43,11 +48,11 @@ class SetupMap(State):
     global direction
     self.detections[detections.header.frame_id] = detections
     if "mini/d455_front" in detections.header.frame_id and len(detections.detections) > 0:
-      direction = Direction.NORTH if detections.detections[0].id == 11 else Direction.EAST
-    elif "mini/d455_back" in detections.header.frame_id  and any(detection.id == 173 for detection in detections.detections):
+      direction = Direction.NORTH if detections.detections[0].id == INIT_TAG_ID_2 else Direction.EAST
+    elif "mini/d455_back" in detections.header.frame_id  and any(detection.id == INIT_TAG_ID_1 for detection in detections.detections):
       self.can_see_main_bot = True
     elif "d455_front" in detections.header.frame_id and len(detections.detections) > 0:
-      direction = Direction.SOUTH if detections.detections[0].id == 11 else Direction.WEST
+      direction = Direction.SOUTH if detections.detections[0].id == INIT_TAG_ID_2 else Direction.WEST
 
   def periodic(self):
     self.manager.get_logger().info(f"SetupMap: can see main: {self.can_see_main_bot}, dir: {direction}")
@@ -55,9 +60,9 @@ class SetupMap(State):
       mini_detections = self.detections["mini/d455_front_color_optical_frame"]
       mini_detections.header.frame_id = "deposition_apriltag_small_optical_frame"
       try:
-        main_to_tag = self.tf_buf.lookup_transform("main_deposition_small", "tag36h11:107" if direction == Direction.EAST else "tag36h11:111", Time())
+        main_to_tag = self.tf_buf.lookup_transform("main_deposition_small", "tag36h11:582" if direction == Direction.EAST else "tag36h11:401", Time())
         main_to_tag.header.frame_id = "deposition_apriltag_small_optical_frame"
-        main_to_tag.child_frame_id = "tag36h11:7" if direction == Direction.EAST else "tag36h11:11"
+        main_to_tag.child_frame_id = "tag36h11:482" if direction == Direction.EAST else "tag36h11:301"
         self.tf_broadcaster.sendTransform(main_to_tag)
         self.detections_pub.publish(mini_detections)
       except Exception as e:
@@ -68,9 +73,9 @@ class SetupMap(State):
       main_detections.header.frame_id = "main_deposition_small"
       main_detections.detections[0].id += 100
       try:
-        main_to_tag = self.tf_buf.lookup_transform("deposition_apriltag_small_optical_frame", "tag36h11:7" if direction == Direction.WEST else "tag36h11:11", Time())
+        main_to_tag = self.tf_buf.lookup_transform("deposition_apriltag_small_optical_frame", "tag36h11:482" if direction == Direction.WEST else "tag36h11:301", Time())
         main_to_tag.header.frame_id = "main_deposition_small"
-        main_to_tag.child_frame_id = "tag36h11:107" if direction == Direction.WEST else "tag36h11:111"
+        main_to_tag.child_frame_id = "tag36h11:582" if direction == Direction.WEST else "tag36h11:401"
         self.tf_broadcaster.sendTransform(main_to_tag)
         self.detections_pub.publish(main_detections)
       except Exception as e:
@@ -99,6 +104,8 @@ class InitRetreat(State):
     self.ready_pub = manager.create_publisher(Bool, "/init/ready", 10)
     self.ready_sub = manager.create_subscription(Bool, "/init/ready", self.ready_cb, 10)
     self.ready = False
+    self.stalled = False
+    self.elapsed = 0
 
   def ready_cb(self, ready: Bool):
     self.ready = ready.data
@@ -107,17 +114,24 @@ class InitRetreat(State):
     self.is_moving = (self.is_main and (direction == Direction.NORTH or direction == Direction.EAST)) or\
       (not self.is_main and (direction == Direction.SOUTH or direction == Direction.WEST))
     self.starting_time = self.manager.get_clock().now()
+    self.duration = 10
+    if self.stalled:
+      self.duration -= self.elapsed
+      self.stalled = False
 
   def periodic(self):
     if self.is_moving:
       output = Twist()
-      output.linear.x = 0.1
+      output.linear.x = 0.2
       self.cmd_vel_publisher.publish(output)
-      if self.manager.get_clock().now() - self.starting_time > Duration(seconds=20):
+      if self.manager.get_clock().now() - self.starting_time > Duration(seconds=self.duration):
         self.ready_pub.publish(Bool(data = True))
         return Events.SUCCESS
     elif self.ready:
       return Events.SUCCESS
 
-  def exit(self):
+  def exit(self, event):
+    if event is Events.STALL:
+      self.stalled = True
+      self.elapsed = self.manager.get_clock().now().seconds_nanoseconds()[0] - self.starting_time.seconds_nanoseconds()[0]
     self.cmd_vel_publisher.publish(Twist())

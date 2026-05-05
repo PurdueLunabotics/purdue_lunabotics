@@ -25,5 +25,5 @@ class MainWaitForAlignState(State):
         
         return None
 
-    def exit(self):
+    def exit(self, event):
         pass

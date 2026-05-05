@@ -27,6 +27,7 @@ class Drive(State):
         self.odom_sub = manager.create_subscription(PoseStamped, "position", self.odom_cb, 1)
         self.odom = None
         self.position = (0, 0)
+        self.elapsed = 0
         
         self.manager = manager
         # while self.odom == None:
@@ -40,6 +41,9 @@ class Drive(State):
     def start(self):
         self.start_time = self.manager.get_clock().now().nanoseconds / 1e9
         self.starting_pos = self.position
+        if self.stalled:
+            self.timeout -= self.elapsed
+            self.stalled = False
 
     def periodic(self) -> None | Events:
         distance = np.sqrt((self.position[0] - self.starting_pos[0])**2 + (self.position[1] - self.starting_pos[1])**2)
@@ -53,12 +57,18 @@ class Drive(State):
         output.linear.x = -self.speed if self.backwards else self.speed
         self.cmd_vel_pub.publish(output)
 
-    def exit(self):
+    def exit(self, event):
         self.cmd_vel_pub.publish(Twist())
+        self.timeout += self.elapsed
+        if event is Events.STALL:
+            self.stalled = True
+            self.elapsed += self.manager.get_clock().now().nanoseconds / 1e9 - self.start_time
+        else:
+            self.elapsed = 0
 
 class Trench(Drive):
     def __init__(self) -> None:
-        super().__init__(0.5, False, 0.05, timeout=30.0)
+        super().__init__(0.5, False, speed=0.1, timeout=30.0)
 
     def setup(self, manager: Node):
         super().setup(manager)
@@ -68,7 +78,7 @@ class Trench(Drive):
         self.excavation_pub = manager.create_publisher(Int32, "excavate", 10)
         self.dep_pub = manager.create_publisher(Int32, "deposition", 10)
 
-        self.EXCAVATION_SPEED = 1500 # rpm
+        self.EXCAVATION_SPEED = 2000 # rpm
         self.DEPOSITION_SPEED = 200 # rpm
 
     def start(self):
@@ -80,7 +90,7 @@ class Trench(Drive):
 
         return super().periodic()
     
-    def exit(self):
+    def exit(self, event):
         self.excavation_pub.publish(Int32(data = 0))
         self.dep_pub.publish(Int32(data = 0))
-        super().exit()
+        super().exit(event)
