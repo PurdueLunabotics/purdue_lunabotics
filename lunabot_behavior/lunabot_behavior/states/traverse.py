@@ -44,10 +44,13 @@ class Traverse(State):
         self.publish_everything()
 
     def periodic(self) -> None | Events:
+        if self.odom is None:
+            self.logger.warn("[Traverse] no odom")
+            return None
         self.publish_everything()
         dist = math.sqrt((self.odom.pose.position.x - self.goal.pose.position.x) ** 2 + (self.odom.pose.position.y - self.goal.pose.position.y) ** 2)
-        self.logger.info(f"[Traverse]: distance {dist}")
-        if self.odom != None and dist < self.tolerance:
+        self.logger.debug(f"[Traverse]: distance {dist}")
+        if dist < self.tolerance:
             return Events.SUCCESS
         return None
 

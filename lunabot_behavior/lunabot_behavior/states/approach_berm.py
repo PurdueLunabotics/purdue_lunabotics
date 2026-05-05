@@ -3,6 +3,9 @@ from rclpy.node import Node
 from geometry_msgs.msg import Twist, PoseStamped
 
 class ApproachBerm(State):    
+  def __init__(self, backwards = False):
+    self.backwards = backwards
+
   def setup(self, manager:Node):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "cmd_vel", 10)
     manager.create_subscription(PoseStamped, "position", self.odom_cb, 1)
@@ -28,7 +31,7 @@ class ApproachBerm(State):
     if linear_error < 0:
       return Events.SUCCESS
     else:
-      output.linear.x = self.linear_speed
+      output.linear.x = self.linear_speed if not self.backwards else -self.linear_speed
     self.cmd_vel_publisher.publish(output)
     return None
   
