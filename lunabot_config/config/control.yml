@@ -37,7 +37,7 @@ mini:
         p: 5.0
         i: 0.0
         d: 0.0
-        max_output: 0.5
+        max_output: 0.2
         tolerance: 10.0
       linear:
         p: 3.0

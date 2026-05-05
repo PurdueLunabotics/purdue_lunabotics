@@ -21,13 +21,14 @@
   <!-- Assemble pointclouds over time-->
     <node pkg="rtabmap_util" exec='point_cloud_assembler' name="point_cloud_assembler" respawn="true">
       <remap from="cloud" to="unilidar/cloud"/>
-      <remap from="odom" to="odom"/>
+      <remap from="odom" to="/mini/rtabmap/odom"/>
       <remap from="assembled_cloud" to="lidar_assembled_cloud"/>  
       <param name="fixed_frame_id"  value="mini/odom"/>     
+      <param name="frame_id"  value="mini/lidar_link"/>     
       <param name="circular_buffer" value="true"/> <!-- remove oldest instead of waiting for entirely new clouds -->
       <param name="assembling_time" value="3.0"/> <!-- Seconds -->
       <param name="range_max"       value="5.0"/> <!-- Meters -->
-      <param name="range_min"       value="0.75"/> <!-- Meters -->
+      <param name="range_min"       value="0.3"/> <!-- Meters -->
     </node>
    
 </launch>

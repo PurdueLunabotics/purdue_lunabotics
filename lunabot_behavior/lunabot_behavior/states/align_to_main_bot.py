@@ -49,7 +49,7 @@ class AlignToMainBotState(State):
     # how many times we tolerate before going to 'search' mode
     self.LOST_APRILTAG_THRESHOLD = 15
 
-    self.SEARCH_SPEED = 0.6 # rad/s
+    self.SEARCH_SPEED = 0.3 # rad/s
 
     # in rad, how aligned before it returns success
     self.ANGULAR_ALIGN_THRESHOLD = 0.02

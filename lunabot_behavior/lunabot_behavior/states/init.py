@@ -95,8 +95,10 @@ class SetupMap(State):
       return Events.SUCCESS
 
 class InitRetreat(State):
-  def __init__(self, is_main: bool):
+  def __init__(self, is_main: bool, speed: float, duration: float):
     self.is_main = is_main
+    self.speed = speed
+    self.duration = duration
 
   def setup(self, manager):
     self.manager = manager
@@ -114,7 +116,6 @@ class InitRetreat(State):
     self.is_moving = (self.is_main and (direction == Direction.NORTH or direction == Direction.EAST)) or\
       (not self.is_main and (direction == Direction.SOUTH or direction == Direction.WEST))
     self.starting_time = self.manager.get_clock().now()
-    self.duration = 10
     if self.stalled:
       self.duration -= self.elapsed
       self.stalled = False
@@ -122,7 +123,7 @@ class InitRetreat(State):
   def periodic(self):
     if self.is_moving:
       output = Twist()
-      output.linear.x = 0.2
+      output.linear.x = self.speed
       self.cmd_vel_publisher.publish(output)
       if self.manager.get_clock().now() - self.starting_time > Duration(seconds=self.duration):
         self.ready_pub.publish(Bool(data = True))

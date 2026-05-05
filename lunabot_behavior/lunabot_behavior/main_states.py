@@ -43,7 +43,7 @@ class MainStates(Enum):
     # ===== INIT SECTION (1) =====
     INIT_MAP = (SetupMap(True), (LedColor.GREEN, LedColor.YELLOW))
     INIT_WAIT = (State(), (LedColor.GREEN, LedColor.GREEN)) # This will stay as State(), no logic needed
-    INIT_MOVE = (InitRetreat(True), (LedColor.GREEN, LedColor.TEAL))
+    INIT_MOVE = (InitRetreat(True, 0.1, 5.0), (LedColor.GREEN, LedColor.TEAL))
     INIT_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
     
     STARTING_PLUNGE = (Plunge(), (LedColor.GREEN, LedColor.BLUE))

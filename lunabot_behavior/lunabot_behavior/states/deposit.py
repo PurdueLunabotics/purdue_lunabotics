@@ -10,6 +10,7 @@ class Deposit(State):
     super().__init__()
     self.transfer = transfer
 
+
   def setup(self, manager: Node):
     self.dep_pub = manager.create_publisher(Int32, "deposition", 10)
     self.dep_gate_pub = manager.create_publisher(Bool, "gate", 10)
@@ -17,6 +18,7 @@ class Deposit(State):
     self.manager = manager
     self.GATE_TIME = 5 # seconds, how long gate takes to open
     self.DEPOSIT_TIME = 10 # seconds, inclusive of gate + deposit
+    self.DEPOSIT_SPEED = 1000
   
   def start(self):
     self.start_time = self.manager.get_clock().now()
@@ -28,7 +30,7 @@ class Deposit(State):
     self.dep_gate_pub.publish(Bool(data = True))
 
     if (elapsed_time > self.GATE_TIME):
-      self.dep_pub.publish(Int32(data = 1000))
+      self.dep_pub.publish(Int32(data = self.DEPOSIT_SPEED))
 
     if (elapsed_time > self.DEPOSIT_TIME):
       return Events.SUCCESS
