@@ -41,7 +41,7 @@ class CraterGeneration(Node):
         ns = self.get_namespace().lstrip('/').split("/")[0]
         self.get_logger().warn(ns)
         if len(ns) != 0:
-            ns = ns + '/';
+            ns = ns + '/'
 
         # transform we're looking for is from base link back to map
         self.map_used = f"{ns}map"
