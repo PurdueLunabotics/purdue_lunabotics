@@ -84,7 +84,7 @@ class SingleStates(Enum):
     ALIGN_TO_BERM = (AlignToBerm(True), (LedColor.BLUE, LedColor.GREEN))
     ALIGN_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
-    APPROACH_BERM = (ApproachBerm(), (LedColor.BLUE, LedColor.TEAL))
+    APPROACH_BERM = (ApproachBerm(True), (LedColor.BLUE, LedColor.TEAL))
     APPROACH_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
     DEPOSIT = (Deposit(transfer=True), (LedColor.YELLOW, LedColor.MAGENTA))
@@ -93,7 +93,7 @@ class SingleStates(Enum):
     DEPOSIT_BERM = (Deposit(), (LedColor.MAGENTA, LedColor.YELLOW))
     DEPOSIT_BERM_STALL = (Stall(), (LedColor.MAGENTA, LedColor.RED))
     
-    RETREAT_BERM = (RetreatBerm(), (LedColor.MAGENTA, LedColor.GREEN))
+    RETREAT_BERM = (RetreatBerm(False), (LedColor.MAGENTA, LedColor.GREEN))
     RETREAT_BERM_STALL = (Stall(), (LedColor.MAGENTA, LedColor.RED))
 
     IDLE = (State(), 0)

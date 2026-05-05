@@ -5,6 +5,9 @@ from lunabot_behavior.state import State, Events
 from geometry_msgs.msg import Twist
 
 class RetreatBerm(State):
+  def __init__(self, backwards = True):
+    self.backwards = backwards
+
   def setup(self, manager: Node):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "cmd_vel", 10)
     self.manager = manager
@@ -21,7 +24,7 @@ class RetreatBerm(State):
   
   def periodic(self) -> None | Events:
     output = Twist()
-    output.linear.x = -self.linear_speed
+    output.linear.x = -self.linear_speed if self.backwards else self.linear_speed
     self.cmd_vel_publisher.publish(output)
     if (self.start_time.seconds_nanoseconds()[0] + self.move_time < self.manager.get_clock().now().seconds_nanoseconds()[0]):
       return Events.SUCCESS

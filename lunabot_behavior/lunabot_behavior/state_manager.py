@@ -65,6 +65,6 @@ class StateManager(Node):
                 self.process_event(event)
 
     def stop_current_state(self):
-        self.state.value[0].exit()
+        self.state.value[0].exit(None)
         self.stopped = True
         self.led_pub.publish(Int32(data= colorsToInteger((LedColor.RED, LedColor.GREEN))))
