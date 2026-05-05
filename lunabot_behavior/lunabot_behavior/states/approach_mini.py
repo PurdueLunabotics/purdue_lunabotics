@@ -95,7 +95,7 @@ class ApproachMiniState(State):
                 return Events.SUCCESS
             
             velocity = self.runPID(error)
-            velocity = max(-0.2, min(velocity, 0.2))
+            velocity = max(-0.05, min(velocity, 0.05))
             self.publish_linear_velocity(velocity)
 
         except Exception as e:

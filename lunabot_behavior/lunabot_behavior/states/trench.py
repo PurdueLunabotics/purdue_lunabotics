@@ -20,6 +20,7 @@ class Drive(State):
         self.target_distance = target_distance
         self.backwards = backwards
         self.speed = speed
+        self.stalled = False
 
     def setup(self, manager: Node):
         self.logger = manager.get_logger()
