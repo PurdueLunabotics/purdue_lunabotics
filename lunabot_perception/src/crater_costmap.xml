@@ -1,5 +1,0 @@
-<library path="crater_costmap">
-    <class name="CraterCostmap" type="CraterCostmap" base_class_type="nav2_costmap_2d::Layer">
-        <description>Layer of costmap that adds full craters to avoid driving into them</description>
-    </class>
-</library>
