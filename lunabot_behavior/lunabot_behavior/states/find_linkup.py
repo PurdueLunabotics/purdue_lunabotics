@@ -2,6 +2,7 @@
 
 from math import inf
 import math
+from std_msgs.msg import Header
 from geometry_msgs.msg import PoseStamped, Point
 from lunabot_msgs.msg import Linkup
 from nav2_msgs.msg import Costmap
@@ -141,6 +142,7 @@ class FindLinkup(Traverse):
 
         self.linkup_pub = manager.create_publisher(Linkup, "/linkup_pos", QoSProfile(durability = QoSDurabilityPolicy.TRANSIENT_LOCAL, depth = 10))
         self.marker_pub = manager.create_publisher(Marker, "/linkup_marker", 10)
+        self.marker_pub.publish(Marker(action=Marker.DELETEALL, header=Header(frame_id=self.frame)))
 
         self.odom = None
         self.tolerance = 2.0 # wider tolerance is ok - finding linkup isn't an exact science
@@ -218,7 +220,9 @@ class FindLinkup(Traverse):
         if not a.within(zones.zone_to_poly(zones.exc_zone)):
             return (inf, True)
 
-        return line_cost(costmap, a, b)
+        cost, blocked = line_cost(costmap, a, b)
+
+        return cost + np.abs(angle) * 5, blocked
 
     def iterate_point_once(self, costmap: Costmap, pos: shp.Point, angle: float):
         alternatives = [(shp.Point(pos.x + costmap.metadata.resolution, pos.y), angle),
