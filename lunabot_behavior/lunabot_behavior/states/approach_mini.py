@@ -83,7 +83,6 @@ class ApproachMiniState(State):
 
     if (elapsed_time > self.TIMEOUT_TIME):
       # if we timeout, return success (assume we're done)
-      self.remove_marker()
       self.publish_aligned_msg()
       return Events.SUCCESS
 
@@ -103,7 +102,6 @@ class ApproachMiniState(State):
 
             # if aligned, return success for next state, and the transition message for the next state
             if (self.success_count >= self.SUCCESS_THRESHOLD):
-                self.remove_marker()
                 self.publish_aligned_msg()
                 return Events.SUCCESS
             
