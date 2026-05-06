@@ -103,14 +103,8 @@ class InitRetreat(State):
   def setup(self, manager):
     self.manager = manager
     self.cmd_vel_publisher = manager.create_publisher(Twist, "cmd_vel", 10)
-    self.ready_pub = manager.create_publisher(Bool, "/init/ready", 10)
-    self.ready_sub = manager.create_subscription(Bool, "/init/ready", self.ready_cb, 10)
-    self.ready = False
     self.stalled = False
     self.elapsed = 0
-
-  def ready_cb(self, ready: Bool):
-    self.ready = ready.data
 
   def start(self):
     self.is_moving = (self.is_main and (direction == Direction.NORTH or direction == Direction.EAST)) or\
@@ -126,9 +120,8 @@ class InitRetreat(State):
       output.linear.x = self.speed
       self.cmd_vel_publisher.publish(output)
       if self.manager.get_clock().now() - self.starting_time > Duration(seconds=self.duration):
-        self.ready_pub.publish(Bool(data = True))
         return Events.SUCCESS
-    elif self.ready:
+    else:
       return Events.SUCCESS
 
   def exit(self, event):

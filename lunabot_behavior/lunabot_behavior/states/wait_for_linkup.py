@@ -14,4 +14,4 @@ class WaitForLinkup(State):
 
     def periodic(self):
         if self.linkup_published:
-            return Events.PROCEED
+            return Events.SUCCESS
