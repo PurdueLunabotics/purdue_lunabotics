@@ -32,7 +32,7 @@ class ApproachMiniState(State):
 
     # PID for linear alignment
     self.P = 1
-    self.I = 0
+    self.I = 0.001
     self.D = 0
 
     self.last_error = None
@@ -53,6 +53,8 @@ class ApproachMiniState(State):
     # how many times in a row before we're sure
     self.SUCCESS_THRESHOLD = 30
 
+    self.TIMEOUT_TIME = 20 # in seconds, how long to wait before giving up and continuing
+
   def setup(self, manager: Node):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "/cmd_vel", 10)
     self.aligned_msg_publisher = manager.create_publisher(Bool, "/behavior/main_approached", 10)
@@ -71,8 +73,17 @@ class ApproachMiniState(State):
     self.resetPID()
     self.lost_count = 0
     self.success_count = 0
+
+    self.start_time = self.node.get_clock().now()
   
   def periodic(self):
+
+    elapsed_time = self.node.get_clock().now() - self.start_time
+    elapsed_time = elapsed_time.nanoseconds / 1_000_000_000  # convert to seconds
+
+    if (elapsed_time > self.TIMEOUT_TIME):
+      # if we timeout, return success (assume we're done)
+      return Events.SUCCESS
 
     if (self.isApriltagPresent()):
         # print(self.apriltag_detections)
