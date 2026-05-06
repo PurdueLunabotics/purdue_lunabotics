@@ -21,11 +21,11 @@ class Handshake(State):
       self.handshake_sub = manager.create_subscription(String, "/mini/handshake", self.handshake_cb, qos_profile)
 
   def handshake_cb(self, incoming_key: String):
-    if self.running and incoming_key == self.key:
+    if self.running and incoming_key.data == self.key:
       self.ready = True
 
   def periodic(self):
-    self.handshake_pub.publish(self.key)
+    self.handshake_pub.publish(String(data = self.key))
 
     if self.ready:
       return Events.SUCCESS

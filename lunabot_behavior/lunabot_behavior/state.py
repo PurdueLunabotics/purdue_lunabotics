@@ -7,6 +7,7 @@ class Events(Enum):
     # Interal
     SUCCESS = Event.SUCCESS
     FAIL = Event.FAIL
+    SUCCESS_AND_DONT_MINE = Event.SUCCESS_AND_DONT_MINE
 
     # External
     STALL = Event.STALL

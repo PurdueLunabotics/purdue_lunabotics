@@ -55,14 +55,14 @@ class MiniStates(Enum):
 
     WAIT_FOR_ALIGN_AT_LINKUP = (MiniWaitForFirstAlignState(), (LedColor.YELLOW, LedColor.YELLOW))
     
-    ALIGN_TO_MAIN = (AlignToMainBotState(), (LedColor.YELLOW, LedColor.YELLOW))
+    ALIGN_TO_MAIN = (AlignToMainBotState(), (LedColor.YELLOW, LedColor.GREEN))
     ALIGN_TO_MAIN_STALL = (State(), (LedColor.YELLOW, LedColor.RED))
 
-    WAIT_FOR_MAIN_ALIGN = (MiniWaitForAlignState(), (LedColor.YELLOW, LedColor.GREEN))
+    WAIT_FOR_MAIN_ALIGN = (MiniWaitForAlignState(), (LedColor.YELLOW, LedColor.TEAL))
     
-    WAIT_FOR_MAIN_APPROACH = (WaitForMainApproachState(),(LedColor.YELLOW, LedColor.TEAL))
+    WAIT_FOR_MAIN_APPROACH = (WaitForMainApproachState(),(LedColor.YELLOW, LedColor.BLUE))
 
-    COLLECT_REGOLITH = (CollectRegolithState(), (LedColor.YELLOW, LedColor.BLUE))
+    COLLECT_REGOLITH = (CollectRegolithState(), (LedColor.YELLOW, LedColor.MAGENTA))
 
     WAIT_FOR_DIVERGE = (WaitForMainDivergeState(), (LedColor.YELLOW, LedColor.WHITE))
 

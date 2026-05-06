@@ -56,7 +56,7 @@ class ApproachMainState(State):
     # how many times in a row before we're sure
     self.SUCCESS_THRESHOLD = 30
 
-    self.TIMEOUT_TIME = 20 # in seconds, how long until we give up
+    self.TIMEOUT_TIME = 30 # in seconds, how long until we give up
 
   def setup(self, manager: Node):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "/mini/cmd_vel", 10)

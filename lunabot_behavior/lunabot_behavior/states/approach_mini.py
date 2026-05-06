@@ -53,7 +53,7 @@ class ApproachMiniState(State):
     # how many times in a row before we're sure
     self.SUCCESS_THRESHOLD = 30
 
-    self.TIMEOUT_TIME = 20 # in seconds, how long to wait before giving up and continuing
+    self.TIMEOUT_TIME = 30 # in seconds, how long to wait before giving up and continuing
 
   def setup(self, manager: Node):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "/cmd_vel", 10)
@@ -83,6 +83,8 @@ class ApproachMiniState(State):
 
     if (elapsed_time > self.TIMEOUT_TIME):
       # if we timeout, return success (assume we're done)
+      self.remove_marker()
+      self.publish_aligned_msg()
       return Events.SUCCESS
 
     if (self.isApriltagPresent()):
