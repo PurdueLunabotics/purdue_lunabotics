@@ -58,6 +58,12 @@
         <arg name="enable_depth"                  value="true"/>
         <arg name="depth_module.depth_profile"    value="$(var profile)" />
 
+        <arg name="enable_infra"                  value="true"/>
+        <arg name="enable_infra1"                  value="true"/>
+        <arg name="enable_infra2"                  value="true"/>
+
+        <arg name="depth_module.infra_profile"    value="$(var profile)" />
+
         <arg name="enable_color"                  value="true"/>
         <arg name="rgb_camera.color_profile"      value="$(var profile)" />
 
@@ -108,6 +114,12 @@
 
         <arg name="enable_depth"                  value="true"/>
         <arg name="depth_module.depth_profile"    value="$(var profile)" />
+
+        <arg name="enable_infra"                  value="true"/>
+        <arg name="enable_infra1"                  value="true"/>
+        <arg name="enable_infra2"                  value="true"/>
+
+        <arg name="depth_module.infra_profile"    value="$(var profile)" />
 
         <arg name="enable_color"                  value="true"/>
         <arg name="rgb_camera.color_profile"      value="$(var profile)" />
@@ -160,6 +172,12 @@
         <arg name="enable_depth"                  value="true"/>
         <arg name="depth_module.depth_profile"    value="$(var profile)" />
 
+        <arg name="enable_infra"                  value="true"/>
+        <arg name="enable_infra1"                  value="true"/>
+        <arg name="enable_infra2"                  value="true"/>
+
+        <arg name="depth_module.infra_profile"    value="$(var profile)" />
+
         <arg name="enable_color"                  value="true"/>
         <arg name="rgb_camera.color_profile"      value="$(var profile)" />
 
@@ -210,6 +228,10 @@
 
         <arg name="enable_depth"                  value="true"/>
         <arg name="depth_module.depth_profile"    value="$(var profile)" />
+
+        <arg name="enable_infra"                  value="true"/>
+        <arg name="enable_infra1"                  value="true"/>
+        <arg name="enable_infra2"                  value="true"/>
 
         <arg name="enable_color"                  value="true"/>
         <arg name="rgb_camera.color_profile"      value="$(var profile)" />

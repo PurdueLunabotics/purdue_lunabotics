@@ -229,6 +229,7 @@
             <param name="subscribe_depth"     value="true"/>
             <param name="frame_id"            value="$(var ns/)base_link"/>
             <param name="odom_frame_id"            value="$(var ns/)odom"/>
+            <param name="publish_null_when_lost"            value="false"/>
 
             <param name="Odom/ResetCountdown" value="'1'"/>
             <param name="Odom/Holonomic" value="'false'"/> <!-- Not holonomic (stafe) robot -->
@@ -242,14 +243,6 @@
 
         <let if="$(var pointcloud)" name="scan_cloud" value="$(var /ns)/pointcloud/depth_combined_cloud"/>
         <let unless="$(var pointcloud)" name="scan_cloud" value="$(var /ns)/$(var odom_cam_name)/points"/>
-        <node name="crater_generation_node" pkg="lunabot_perception" exec="crater_generation.py" respawn="true">
-          <remap from="nav_path" to="nav_path"/>
-          <remap from="rtabmap/cloud_obstacles" to="$(var /ns)/rtabmap/cloud_obstacles"/>
-          <remap from="rtabmap/cloud_ground" to="$(var /ns)/rtabmap/cloud_ground"/>
-          <remap from="map" to="$(var /ns)/map"/>
-
-          <param name="use_sim_time" value="$(var sim)"/>
-        </node>
 
         <let name="rtabmap_max_features" value="'-1'" if="$(var odom_from_sim)"/>
         <let name="rtabmap_max_features" value="'500'" unless="$(var odom_from_sim)"/>
