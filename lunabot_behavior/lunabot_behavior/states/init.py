@@ -132,7 +132,10 @@ class InitRetreat(State):
       return Events.SUCCESS
 
   def exit(self, event):
+    self.duration += self.elapsed
     if event is Events.STALL:
       self.stalled = True
-      self.elapsed = self.manager.get_clock().now().seconds_nanoseconds()[0] - self.starting_time.seconds_nanoseconds()[0]
+      self.elapsed += self.manager.get_clock().now().seconds_nanoseconds()[0] - self.starting_time.seconds_nanoseconds()[0]
+    else:
+      self.elapsed = 0
     self.cmd_vel_publisher.publish(Twist())

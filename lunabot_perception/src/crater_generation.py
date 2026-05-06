@@ -39,7 +39,7 @@ class CraterGeneration(Node):
         self.coeff = []
         
         ns = self.get_namespace().lstrip('/').split("/")[0]
-        self.get_logger().warn(ns)
+        #self.get_logger().warn(ns)
         if len(ns) != 0:
             ns = ns + '/'
 
@@ -139,7 +139,7 @@ class CraterGeneration(Node):
         header = Header()
         t = self.get_clock().now()
         header.stamp = t.to_msg()
-        self.get_logger().warn(self.map_used)
+        #self.get_logger().warn(self.map_used)
         header.frame_id = self.map_used
         pc2 = point_cloud2.create_cloud_xyz32(header, plane_pointcloud)
 
@@ -180,10 +180,13 @@ class CraterGeneration(Node):
             self.get_logger().warn("Failed to read ground points")
             did_read = False
         
+        if(self.coeff == []):
+            did_read = False
+
         crater_vals = []
         if(did_read):
             for p in obst:
-                if (self.coeff[0]*p[0]+self.coeff[1]*p[1]+self.coeff[2] > p[2] + 0.06):
+                if (self.coeff[0]*p[0]+self.coeff[1]*p[1]+self.coeff[2] > p[2] + 0.09):
                 # if(p[2]<ground_height-0.02):
                     crater_vals.append(p[:-1])
                     # self.get_logger().info(f"{p}")

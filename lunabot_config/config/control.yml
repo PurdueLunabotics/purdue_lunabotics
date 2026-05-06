@@ -55,7 +55,7 @@ mini:
       max_speed_percentage: 0.8
       wheel_diameter: 0.0528
       width: 0.5588
-      pwm_to_velocity_factor: 1
+      pwm_to_velocity_factor: 1.0
 
   drivetrain_controller_node:
     ros__parameters:

@@ -16,9 +16,9 @@ class Deposit(State):
     self.dep_gate_pub = manager.create_publisher(Bool, "gate", 10)
     self.empty_msg_publisher = manager.create_publisher(Bool, "/behavior/main_empty", 10)
     self.manager = manager
-    self.GATE_TIME = 5 # seconds, how long gate takes to open
-    self.DEPOSIT_TIME = 10 # seconds, inclusive of gate + deposit
-    self.DEPOSIT_SPEED = 1000
+    self.GATE_TIME = 2 # seconds, how long gate takes to open
+    self.DEPOSIT_TIME = 20 # seconds, inclusive of gate + deposit
+    self.DEPOSIT_SPEED = 3000
   
   def start(self):
     self.start_time = self.manager.get_clock().now()

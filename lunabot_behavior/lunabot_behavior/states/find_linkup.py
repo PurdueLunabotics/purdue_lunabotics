@@ -128,6 +128,7 @@ class FindLinkup(Traverse):
                                 ZoneMeasurements.EXC_OFFSET_Y - (ZoneMeasurements.EXC_LENGTH_Y / 2)]
         
         self.excavation_edge = LineString([self.exc_p1, self.exc_p2])
+        self.padding = 0.4
         
         self.state = WAITING
 
@@ -188,12 +189,11 @@ class FindLinkup(Traverse):
             return
         costmap: Costmap = result.map
 
-        padding = 0.4
         num_points = 20
         num_iterations = 100
-        length = self.excavation_edge.length - padding * 2
+        length = self.excavation_edge.length - self.padding * 2
         offset = length / num_points
-        points = (self.excavation_edge.interpolate(offset * i + padding) for i in range(0, num_points))
+        points = (self.excavation_edge.interpolate(offset * i + self.padding) for i in range(0, num_points))
         iterated_points = (self.iterate_point(costmap, point, 0, num_iterations, id) for id, point in enumerate(points))
 
         pos, angle = min(iterated_points, key=lambda alt: self.evaluate_point(costmap, alt[0], alt[1]))
@@ -211,7 +211,7 @@ class FindLinkup(Traverse):
         self.state = FOUND_LINKUP
 
     def evaluate_point(self, costmap: Costmap, pos: shp.Point, angle: float) -> tuple[float, bool]:
-        if pos.distance(self.excavation_edge) > self.MIN_SEGMENT_LENGTH / 4:
+        if pos.distance(self.excavation_edge) > self.MIN_SEGMENT_LENGTH / 4 or pos.y > self.exc_p1[1] - self.padding or pos.y < self.exc_p2[1] + self.padding:
             return (inf, True)
 
         a = shp.Point(pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)

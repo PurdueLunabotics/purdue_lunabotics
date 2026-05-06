@@ -69,7 +69,7 @@ class Drive(State):
 
 class Trench(Drive):
     def __init__(self) -> None:
-        super().__init__(0.5, False, speed=0.1, timeout=30.0)
+        super().__init__(0.5, False, speed=0.03, timeout=30.0)
 
     def setup(self, manager: Node):
         super().setup(manager)

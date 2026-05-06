@@ -39,7 +39,7 @@ global_costmap:
       global_frame: "map"
       robot_base_frame: "base_link"
       static_layer:
-        map_topic: "/rtabmap/octomap_grid"
+        map_topic: "/rtabmap/map"
       obstacle_layer:
         crater:
           topic: "/rtabmap/crater"
@@ -57,7 +57,7 @@ mini:
         global_frame: "mini/map"
         robot_base_frame: "mini/base_link"
         static_layer:
-          map_topic: "/mini/rtabmap/octomap_grid"
+          map_topic: "/mini/rtabmap/map"
         obstacle_layer:
           crater:
             topic: "/mini/rtabmap/crater"
