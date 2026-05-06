@@ -228,7 +228,7 @@ class CraterGeneration(Node):
                 #     self.get_logger().warn("Not generating craters")
                 
                 def remove(j):
-                    return(((j[0]>hough_cx-hough_r-0.075) and (j[0]<hough_cx+hough_r+0.075)) and ((j[1]>hough_cy-hough_r-0.075) and (j[1]<hough_cy+hough_r+0.075)))
+                    return(((j[0]>hough_cx-hough_r-0.05) and (j[0]<hough_cx+hough_r+0.05)) and ((j[1]>hough_cy-hough_r-0.05) and (j[1]<hough_cy+hough_r+0.05)))
                     
                     
                 points_in = len(list(filter(remove,crater_vals)))
@@ -242,7 +242,7 @@ class CraterGeneration(Node):
                         
                         
                     def dont_remove(j):
-                        return(((j[0]<hough_cx-hough_r-0.075) or (j[0]>hough_cx+hough_r+0.075)) or ((j[1]<hough_cy-hough_r-0.075) or (j[1]>hough_cy+hough_r+0.075)))
+                        return(((j[0]<hough_cx-hough_r-0.09) or (j[0]>hough_cx+hough_r+0.09)) or ((j[1]<hough_cy-hough_r-0.09) or (j[1]>hough_cy+hough_r+0.09)))
                     
                     crater_vals = list(filter(dont_remove, crater_vals))
                     
