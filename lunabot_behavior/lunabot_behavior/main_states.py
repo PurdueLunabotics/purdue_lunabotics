@@ -8,6 +8,7 @@ from lunabot_msgs.msg import Event
 
 from lunabot_config.led_colors import LedColor
 
+from lunabot_behavior.states.handshake import Handshake
 from lunabot_behavior.states.align_to_berm import AlignToBerm
 from lunabot_behavior.states.approach_trench import ApproachTrench, RetreatTrench
 from lunabot_behavior.states.align_trench import AlignTrench
@@ -16,11 +17,12 @@ from lunabot_behavior.states.traverse_to_berm import TraverseToBerm
 from lunabot_behavior.states.traverse import NoPath, Traverse, Stall
 from lunabot_behavior.states.deposit import Deposit
 from lunabot_behavior.states.approach_berm import ApproachBerm
+from lunabot_behavior.states.main_wait_for_mini_gone import MainWaitForMiniGoneState
 from lunabot_behavior.states.plunge import Plunge
 from lunabot_behavior.states.raise_act import Raise
 from lunabot_behavior.states.retreat_berm import RetreatBerm
 from lunabot_behavior.states.traverse_to_linkup import TraverseToLinkup
-from lunabot_behavior.states.trench import Trench
+from lunabot_behavior.states.trench import Trench, Drive
 from lunabot_behavior.states.align_to_linkup import AlignToLinkup
 from lunabot_behavior.states.main_wait_for_mini_align import MainWaitForAlignState
 from lunabot_behavior.states.align_to_mini_bot import AlignToMiniBotState
@@ -46,6 +48,13 @@ class MainStates(Enum):
     INIT_MOVE = (InitRetreat(True, 0.1, 5.0), (LedColor.GREEN, LedColor.TEAL))
     INIT_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
     
+    WAIT_FOR_MINI_GONE = (MainWaitForMiniGoneState(), (LedColor.GREEN, LedColor.GREEN))
+
+    INIT_RETREAT = (Drive(0.5, True, 0.2, 10.0), (LedColor.GREEN, LedColor.TEAL))
+    INIT_RETREAT_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
+
+    LINKUP_HANDSHAKE = (Handshake(True, "linkup"), (LedColor.GREEN, LedColor.TEAL))
+
     STARTING_PLUNGE = (Plunge(), (LedColor.GREEN, LedColor.BLUE))
     STARTING_PLUNGE_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
     
@@ -93,7 +102,7 @@ class MainStates(Enum):
     DEPOSIT = (Deposit(transfer=True), (LedColor.YELLOW, LedColor.MAGENTA))
     DEPOSIT_STALL = (Stall(), (LedColor.YELLOW, LedColor.RED))
 
-    SEPARATE_FROM_MINI = (SeparateFromMiniState(), (LedColor.YELLOW, LedColor.MAGENTA))
+    SEPARATE_FROM_MINI = (SeparateFromMiniState(), (LedColor.YELLOW, LedColor.WHITE))
     SEPARATE_FROM_MINI_STALL = (Stall(), (LedColor.YELLOW, LedColor.RED))
 
     # ===== SINGLE ROBOT TRAVERSAL SECTION (3) =====
@@ -124,6 +133,7 @@ class MainStates(Enum):
             (MainStates.INIT_MAP, Events.SUCCESS): MainStates.INIT_WAIT,
             (MainStates.INIT_WAIT, Events.PROCEED): MainStates.INIT_MOVE,
             
+            (MainStates.INIT_MOVE, Events.SUCCESS_AND_DONT_MINE): MainStates.WAIT_FOR_MINI_GONE,
             (MainStates.INIT_MOVE, Events.SUCCESS): MainStates.STARTING_PLUNGE,
             (MainStates.INIT_MOVE, Events.STALL): MainStates.INIT_STALL,
             (MainStates.INIT_STALL, Events.SUCCESS): MainStates.INIT_MOVE,
@@ -131,12 +141,18 @@ class MainStates(Enum):
             (MainStates.STARTING_PLUNGE, Events.SUCCESS): MainStates.STARTING_RAISE,
             (MainStates.STARTING_PLUNGE, Events.STALL): MainStates.STARTING_PLUNGE_STALL,
             (MainStates.STARTING_PLUNGE_STALL, Events.SUCCESS): MainStates.STARTING_PLUNGE,
-            
-            (MainStates.STARTING_RAISE, Events.SUCCESS): MainStates.WAIT_FOR_LINKUP,
+
+            (MainStates.WAIT_FOR_MINI_GONE, Events.SUCCESS): MainStates.INIT_RETREAT,
+
+            (MainStates.INIT_RETREAT, Events.SUCCESS): MainStates.STARTING_PLUNGE,
+            (MainStates.INIT_RETREAT, Events.STALL): MainStates.INIT_RETREAT_STALL,
+            (MainStates.INIT_RETREAT_STALL, Events.SUCCESS): MainStates.INIT_RETREAT,
+
+            (MainStates.STARTING_RAISE, Events.SUCCESS): MainStates.LINKUP_HANDSHAKE,
             (MainStates.STARTING_RAISE, Events.STALL): MainStates.STARTING_RAISE_STALL,
             (MainStates.STARTING_RAISE_STALL, Events.SUCCESS): MainStates.STARTING_RAISE,
-            
-            (MainStates.WAIT_FOR_LINKUP, Events.PROCEED): MainStates.TRAVERSE_TO_LINKUP,
+
+            (MainStates.LINKUP_HANDSHAKE, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
                         
             (MainStates.TRAVERSE_TO_LINKUP, Events.SUCCESS): MainStates.ALIGN_TO_LINKUP, # TODO: Go to link up
             (MainStates.TRAVERSE_TO_LINKUP, Events.STALL): MainStates.TRAVERSE_TO_LINKUP_STALL,

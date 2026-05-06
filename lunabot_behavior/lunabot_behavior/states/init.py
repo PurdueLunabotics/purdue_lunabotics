@@ -127,8 +127,15 @@ class InitRetreat(State):
       self.cmd_vel_publisher.publish(output)
       if self.manager.get_clock().now() - self.starting_time > Duration(seconds=self.duration):
         self.ready_pub.publish(Bool(data = True))
+
+        if (direction == Direction.EAST and self.is_main):
+          return Events.SUCCESS_AND_DONT_MINE
+
         return Events.SUCCESS
     elif self.ready:
+      if (direction == Direction.EAST and self.is_main):
+        return Events.SUCCESS_AND_DONT_MINE
+      
       return Events.SUCCESS
 
   def exit(self, event):
