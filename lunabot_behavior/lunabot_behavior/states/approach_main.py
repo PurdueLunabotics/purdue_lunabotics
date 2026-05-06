@@ -101,6 +101,8 @@ class ApproachMainState(State):
 
     if (elapsed_time > self.TIMEOUT_TIME):
       # if we timeout, return success
+      self.remove_marker()
+      self.publish_aligned_msg()
       return Events.SUCCESS
 
     if (self.isApriltagPresent()):

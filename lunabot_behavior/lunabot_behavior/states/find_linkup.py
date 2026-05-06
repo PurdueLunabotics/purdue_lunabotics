@@ -9,12 +9,14 @@ from nav2_msgs.msg import Costmap
 from rclpy.qos import QoSDurabilityPolicy, QoSProfile
 from visualization_msgs.msg import Marker
 from nav_msgs.msg import Path
+from rtabmap_msgs.msg import OdomInfo
 
 from lunabot_behavior import zones
 from lunabot_behavior.state import Events
 from lunabot_behavior.states.traverse import Traverse
 from rclpy.node import Node
 from rclpy.task import Future
+from rclpy.time import Duration
 from std_msgs.msg import Bool
 from lunabot_behavior.zones import ZoneMeasurements, get_distance_from_exc, get_distance_from_berm
 from lunabot_behavior.util import point_from_pose_2d
@@ -151,11 +153,17 @@ class FindLinkup(Traverse):
 
         self.path_client = ActionClient(manager, ComputePathToPose, "compute_path_to_pose")
         self.costmap_client = manager.create_client(GetCostmap, "global_costmap/get_costmap")
+        self.odom_info_sub = manager.create_subscription(OdomInfo, "rtabmap/odom_info", self.odom_info_cb, 10)
+        self.lost_odom_time = None
 
         self.manager = manager
 
     def odom_cb(self, pose: PoseStamped):
         self.odom = point_from_pose_2d(pose)
+    
+    def odom_info_cb(self, info: OdomInfo):
+        if info.lost:
+            self.lost_odom_time = self.manager.get_clock().now()
 
     def periodic(self) -> None | Events:
         super().publish_everything()
@@ -165,7 +173,7 @@ class FindLinkup(Traverse):
         elif self.state == FAILED:
             return Events.FAIL
 
-        if self.odom is not None and np.linalg.norm(self.odom - self.goal_vec) <= self.tolerance and self.state == WAITING:
+        if self.odom is not None and np.linalg.norm(self.odom - self.goal_vec) <= self.tolerance and self.state == WAITING and (self.lost_odom_time is None or self.manager.get_clock().now() - self.lost_odom_time > Duration(seconds=30)):
             self.state = FINDING_LINKUP
             self.find_linkup() # find the linkup thingamabob
 
