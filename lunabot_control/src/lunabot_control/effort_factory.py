@@ -18,17 +18,17 @@ class EffortFactory(Node):
         super().__init__('effort_factory_node', **kwargs)
         rclpy.get_global_executor().add_node(self)
 
+        self.DEP_SERVO_CLOSED = 500
+        self.DEP_SERVO_OPEN = 250
+
         self.effort = RobotEffort()
         self.lin_act = 0
         self.left_drive = 0
         self.right_drive = 0
         self.excavate = 0
         self.deposition = 0
-        self.dep_servo = 0
+        self.dep_servo = self.DEP_SERVO_CLOSED
         self.should_reset = False
-        
-        self.DEP_SERVO_OFF = 250
-        self.DEP_SERVO_ON = 500
 
         self.autonomy = True
         self._autonomy_sub = self.create_subscription(Bool, "autonomy", self._autonomy_cb, 1)
@@ -82,10 +82,10 @@ class EffortFactory(Node):
         self.deposition = deposition.data
         
     def set_gate(self, gate: Bool):
-        if not gate.data:
-            self.dep_servo = self.DEP_SERVO_ON
+        if gate.data:
+            self.dep_servo = self.DEP_SERVO_OPEN
         else:
-            self.dep_servo = self.DEP_SERVO_OFF
+            self.dep_servo = self.DEP_SERVO_CLOSED
 
     def publish_effort(self):
         # print("published effort")
