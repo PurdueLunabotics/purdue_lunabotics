@@ -238,7 +238,7 @@ class ManualController(Node):
             effort_msg.lin_act = int(constrain(self.apply_deadzone(joy.axes[Axes.DPAD_VERTICAL.value])) * self.ACTUATE_SPEED)
 
             # self.get_logger().info(f"{(joy.axes[Axes.DPAD_HORIZONTAL.value]+1)}")
-            effort_msg.dep_servo = int(int((self.apply_deadzone(joy.axes[Axes.DPAD_HORIZONTAL.value])+1) * self.SERVO_POS)/2)
+            effort_msg.dep_servo = 750 - int(int((self.apply_deadzone(joy.axes[Axes.DPAD_HORIZONTAL.value])+1) * self.SERVO_POS)/2)
             # Deposition- B to go, view/select/back to move backwards
             if (joy.buttons[Buttons.B.value] == 1):
                 effort_msg.deposit = int(self.DEPOSITION_SPEED)
