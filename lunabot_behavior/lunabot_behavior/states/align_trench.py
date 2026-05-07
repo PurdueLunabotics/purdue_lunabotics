@@ -48,23 +48,30 @@ class AlignTrench(AlignToAngle):
     self.manager.get_logger().info(f"{self.valid_angles}")
     self.valid_angles_updated = False
 
+    self.called_costmap = False
+
     self.i = -1
 
   def start(self):
-    # self.manager.get_logger().info("starting")
-    if not self.valid_angles_updated:
-      if self.i == len(self.valid_angles) - 1:
+    if self.i == len(self.valid_angles) - 1:
         # update excavation approach distance
         self.exc_approach_dist += self.distance_step
         new_approach_dist = Parameter("exc_approach_dist", Parameter.Type.DOUBLE, self.exc_approach_dist)
         self.manager.set_parameters([new_approach_dist])
 
+        # check valid angles again, start with full set of angles in case mistaken obstacles were removed
+        self.valid_angles = np.arange(self.min_angle, self.max_angle, self.angle_step).tolist()
+        self.valid_angles_updated = False
+
+    # self.manager.get_logger().info("starting")
+    if not self.valid_angles_updated:
       self.marker_pub.publish(Marker(action=Marker.DELETEALL, header=Header(frame_id=self.frame_id)))
 
       # repopulate valid angles
-      self.valid_angles_updated = False
-      self.manager.get_logger().info("ALIGN TO TRENCH - determining safe trench angles")
-      self.request_costmap()
+      if not self.called_costmap:
+        self.manager.get_logger().info("ALIGN TO TRENCH - determining safe trench angles")
+        self.request_valid_angle_checks()
+        self.called_costmap = True
     else:
       self.i += 1
 
@@ -82,6 +89,12 @@ class AlignTrench(AlignToAngle):
       output = Twist()
       output.angular.z = 0.0
       self.cmd_vel_publisher.publish(output)
+
+      # repopulate valid angles
+      if not self.called_costmap:
+        self.manager.get_logger().info("ALIGN TO TRENCH - determining safe trench angles")
+        self.request_valid_angle_checks()
+        self.called_costmap = True
 
       return None
 
@@ -104,7 +117,7 @@ class AlignTrench(AlignToAngle):
 
     return angle
   
-  def request_costmap(self):
+  def request_valid_angle_checks(self):
     self.costmap_client.wait_for_service()
     self.costmap_client.call_async(GetCostmap.Request()).add_done_callback(self.costmap_cb)
 
@@ -128,6 +141,8 @@ class AlignTrench(AlignToAngle):
       self.manager.get_logger().info("ALIGN TO TRENCH - safe trench angles identified")
     else:
       self.manager.get_logger().info("Robot pose unknown, trying again...")
+
+    self.called_costmap = False
   
   def evaluate_angle(self, costmap: Costmap, target_angle: float, exc_approach_dist: float):
     a_x = self.robot_pose[0]
@@ -141,9 +156,9 @@ class AlignTrench(AlignToAngle):
     cost, blocked = CostmapUtil.line_cost(costmap, a, b, LETHAL_COST)
 
     if not blocked:
-      self.show_line(a, b, "good", int(np.rad2deg(target_angle)), r=0.0, g=1.0, b=0.0)
+      self.show_line(a, b, "good", int(np.rad2deg(target_angle)) + 360, r=0.0, g=1.0, b=0.0)
     else:
-      self.show_line(a, b, "bad", int(np.rad2deg(target_angle)), r=1.0, g=0.0, b=0.0)
+      self.show_line(a, b, "bad", int(np.rad2deg(target_angle)) + 360, r=1.0, g=0.0, b=0.0)
 
     return cost, blocked
 

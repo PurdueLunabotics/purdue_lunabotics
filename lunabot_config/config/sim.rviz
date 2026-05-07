@@ -15,7 +15,6 @@ Panels:
         - /Marker4
         - /Marker5
         - /Marker6
-        - /Marker6/Status1
         - /Marker6/Topic1
       Splitter Ratio: 0.5
     Tree Height: 291
@@ -35,7 +34,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: PointCloud2
 Visualization Manager:
   Class: ""
   Displays:
@@ -90,41 +89,9 @@ Visualization Manager:
           Value: true
         left_front:
           Value: true
-        main_deposition:
+        map:
           Value: true
         middle_link:
-          Value: true
-        mini/base_link:
-          Value: true
-        mini/d455_back_depth_link:
-          Value: true
-        mini/d455_back_link:
-          Value: true
-        mini/d455_back_rgb_link:
-          Value: true
-        mini/d455_front_depth_link:
-          Value: true
-        mini/d455_front_link:
-          Value: true
-        mini/d455_front_rgb_link:
-          Value: true
-        mini/left_back:
-          Value: true
-        mini/left_front:
-          Value: true
-        mini/lidar_link:
-          Value: true
-        mini/lidar_mid_link:
-          Value: true
-        mini/map:
-          Value: true
-        mini/middle_link:
-          Value: true
-        mini/odom:
-          Value: true
-        mini/right_back:
-          Value: true
-        mini/right_front:
           Value: true
         odom:
           Value: true
@@ -138,7 +105,35 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
-        {}
+        map:
+          odom:
+            base_link:
+              d455_back_link:
+                d455_back_depth_link:
+                  {}
+                d455_back_rgb_link:
+                  {}
+              deposition_apriltag_link:
+                deposition_apriltag_optical_frame:
+                  {}
+              deposition_apriltag_small_link:
+                deposition_apriltag_small_optical_frame:
+                  {}
+              left_back:
+                {}
+              left_front:
+                {}
+              middle_link:
+                excavation:
+                  d455_front_link:
+                    d455_front_depth_link:
+                      {}
+                    d455_front_rgb_link:
+                      {}
+              right_back:
+                {}
+              right_front:
+                {}
       Update Interval: 0
       Value: true
     - Alpha: 0.699999988079071
@@ -487,25 +482,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 6.814901828765869
+      Distance: 8.047654151916504
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.23937827348709106
-        Y: 0.029221277683973312
-        Z: 1.2579594850540161
+        X: -0.21471522748470306
+        Y: -0.373818576335907
+        Z: -0.16747017204761505
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.5597963333129883
+      Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.5604021549224854
+      Yaw: 1.560402274131775
     Saved: ~
 Window Geometry:
   Displays:

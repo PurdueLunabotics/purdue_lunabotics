@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
-  <node pkg="lunabot_behavior" exec="ex"/>
+  <arg name="align" default="false" />
+
+  <node pkg="lunabot_behavior" exec="ex" unless="$(var align)"/>
+  <node pkg="lunabot_behavior" exec="ex_align" if="$(var align)"/>
 </launch>
