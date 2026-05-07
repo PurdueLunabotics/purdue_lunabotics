@@ -19,6 +19,7 @@ import math
 # sim apriltag - 368
 # irl tag - 126
 DEPOSITION_APRILTAG_ID = 126
+MINI_DEP_APRILTAG_ID = 173
 
 class ApproachMiniState(State):
   def __init__(self):
@@ -53,6 +54,8 @@ class ApproachMiniState(State):
     # how many times in a row before we're sure
     self.SUCCESS_THRESHOLD = 30
 
+    self.MAX_SPEED = 0.25
+
     self.TIMEOUT_TIME = 30 # in seconds, how long to wait before giving up and continuing
 
   def setup(self, manager: Node):
@@ -86,11 +89,15 @@ class ApproachMiniState(State):
       self.publish_aligned_msg()
       return Events.SUCCESS
 
-    if (self.isApriltagPresent()):
+    apriltag_present, detections = self.isApriltagPresent()
+    if (apriltag_present):
         # print(self.apriltag_detections)
 
         try:
-            apriltag_in_camera_frame = self.tf_buffer.lookup_transform("mini/d455_back_rgb_link", "main_deposition", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
+            if (DEPOSITION_APRILTAG_ID in detections): # prioritize big tag
+              apriltag_in_camera_frame = self.tf_buffer.lookup_transform("mini/d455_back_rgb_link", "main_deposition", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
+            else:
+              apriltag_in_camera_frame = self.tf_buffer.lookup_transform("mini/d455_back_rgb_link", "main_deposition_small", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
 
             distance = apriltag_in_camera_frame.transform.translation.z 
 
@@ -106,7 +113,7 @@ class ApproachMiniState(State):
                 return Events.SUCCESS
             
             velocity = self.runPID(error)
-            velocity = max(-0.05, min(velocity, 0.05))
+            velocity = np.clip(velocity, -self.MAX_SPEED, self.MAX_SPEED)
             self.publish_linear_velocity(velocity)
 
         except Exception as e:
@@ -126,12 +133,15 @@ class ApproachMiniState(State):
   
   def isApriltagPresent(self):
     apriltag_present = False
+    detections = []
     if (self.apriltag_detections != None):
       for detection in self.apriltag_detections.detections:
-        if (detection.id == DEPOSITION_APRILTAG_ID):
+        if (detection.id == DEPOSITION_APRILTAG_ID or detection.id == MINI_DEP_APRILTAG_ID):
           apriltag_present = True
+          if (detection.id not in detections):
+            detections.append(detection.id)
 
-    return apriltag_present
+    return apriltag_present, detections
   
   def runPID(self, error: float):
 
