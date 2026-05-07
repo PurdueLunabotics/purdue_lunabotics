@@ -104,7 +104,7 @@
   <library_images>
   <!-- Apriltag number: 368 -->
     <image id="apriltag_png" name="apriltag_png">
-      <init_from>apriltag.png</init_from>
+      <init_from>apriltag_173.png</init_from>
     </image>
   </library_images>
   <library_effects>
