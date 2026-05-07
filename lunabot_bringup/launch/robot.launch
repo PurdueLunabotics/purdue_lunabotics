@@ -300,7 +300,8 @@
             
             <param name="Kp/MaxFeatures"          value="$(var rtabmap_max_features)"/>
             <param name="Rtabmap/DetectionRate"   value="'10'"/> <!--  Hz -->
-            <param name="Marker/Priors"           value="'301 2.5 2.5 0.2 1.57 0 0|482 3.4 1.8 0.2 1.57 0 -1.57|401 2.5 2.5 0.2 1.57 0 0|582 3.4 1.8 0.2 1.57 0 -1.57'"/>
+            <param name="Marker/Priors"           value="'301 2.44 2.5 0.2 1.57 0 0|482 3.44 1.8 0.2 1.57 0 -1.57|401 2.44 2.5 0.2 1.57 0 0|582 3.44 1.8 0.2 1.57 0 -1.57'"/>
+            <!-- Note these priors assume apriltags are ON the -->
             <param name="Optimizer/PriorsIgnored" value="'false'"/>
             
             <param name="database_path"           value="~/.ros/$(var ns)rtabmap.db"/>
