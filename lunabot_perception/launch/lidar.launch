@@ -26,9 +26,9 @@
       <param name="fixed_frame_id"  value="mini/odom"/>     
       <param name="frame_id"  value="mini/lidar_link"/>     
       <param name="circular_buffer" value="true"/> <!-- remove oldest instead of waiting for entirely new clouds -->
-      <param name="assembling_time" value="3.0"/> <!-- Seconds -->
+      <param name="assembling_time" value="10.0"/> <!-- Seconds -->
       <param name="range_max"       value="5.0"/> <!-- Meters -->
-      <param name="range_min"       value="0.3"/> <!-- Meters -->
+      <param name="range_min"       value="0.59"/> <!-- Meters -->
     </node>
    
 </launch>

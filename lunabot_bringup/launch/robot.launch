@@ -199,6 +199,14 @@
         <let if="$(var pointcloud)" name="temp_cloud" value="$(var /ns)/pointcloud/depth_combined_cloud"/>
         <let unless="$(var pointcloud)" name="temp_cloud" value="$(var /ns)/$(var mapping_cam_name)/points"/>
 
+        <node name="crater_generation_node" pkg="lunabot_perception" exec="crater_generation.py" respawn="true">
+          <remap from="nav_path" to="nav_path"/>
+          <remap from="rtabmap/cloud_obstacles" to="$(var /ns)/rtabmap/cloud_obstacles"/>
+          <remap from="rtabmap/cloud_ground" to="$(var /ns)/rtabmap/cloud_ground"/>
+          <remap from="map" to="$(var /ns)/map"/>
+
+          <param name="use_sim_time" value="$(var sim)"/>
+        </node>
         
 
         <let if="$(var lidar)" name="scan_cloud" value="$(var /ns)/lidar_combined_cloud"/>
@@ -241,12 +249,12 @@
 
         </node>
 
-        <let if="$(var pointcloud)" name="scan_cloud" value="$(var /ns)/pointcloud/depth_combined_cloud"/>
-        <let unless="$(var pointcloud)" name="scan_cloud" value="$(var /ns)/$(var odom_cam_name)/points"/>
-
         <let name="rtabmap_max_features" value="'-1'" if="$(var odom_from_sim)"/>
         <let name="rtabmap_max_features" value="'500'" unless="$(var odom_from_sim)"/>
-        
+
+        <let name="radius" value="'0.375'" if="$(eval '$(var robot_num) == 0')"/>
+        <let name="radius" value="'0.125'" if="$(eval '$(var robot_num) == 1')"/>
+
         <node if="$(var slam)" name="rtabmap" pkg="rtabmap_slam" exec="rtabmap" output="screen" args="--delete_db_on_start" ros_args="--log-level WARN">
             <param name="use_sim_time" value="$(var sim)"/>
 
@@ -291,6 +299,7 @@
             <param name="GridGlobal/OccupancyThr" value="'0.5'"/> <!-- Threshold for occupancy -->
             
             <param name="Kp/MaxFeatures"          value="$(var rtabmap_max_features)"/>
+            <param name="Rtabmap/DetectionRate"   value="'10'"/> <!--  Hz -->
             <param name="Marker/Priors"           value="'301 2.5 2.5 0.2 1.57 0 0|482 3.4 1.8 0.2 1.57 0 -1.57|401 2.5 2.5 0.2 1.57 0 0|582 3.4 1.8 0.2 1.57 0 -1.57'"/>
             <param name="Optimizer/PriorsIgnored" value="'false'"/>
             
