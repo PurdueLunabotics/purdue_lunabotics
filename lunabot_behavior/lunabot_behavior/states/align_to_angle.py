@@ -2,6 +2,7 @@ from lunabot_behavior.state import State, Events
 from rclpy.node import Node
 from geometry_msgs.msg import Twist, PoseStamped
 from tf_transformations import euler_from_quaternion
+from lunabot_control.pid_controller import ParameterizedPIDController
 import numpy as np
 
 
@@ -16,6 +17,7 @@ class AlignToAngle(State):
     self.robot_pose: None | tuple[float, float, float] = None
     self.angular_speed = np.deg2rad(30) #degrees/sec -> rad/sec
     self.tolerance = np.deg2rad(3)
+    self.pid = ParameterizedPIDController("angle", manager, kp=5.0, ki=0.0, kd=0.0, max_output=0.523)
   
   def odom_cb(self, msg:PoseStamped):
     angles = euler_from_quaternion(
@@ -46,11 +48,9 @@ class AlignToAngle(State):
     
     if np.abs(angular_error) < self.tolerance:
       return Events.SUCCESS
+
     output = Twist()
-    if angular_error < 0:
-      output.angular.z = self.angular_speed
-    else:
-      output.angular.z = -self.angular_speed
+    output.angular.z = self.pid.calculate(angular_error, 0.1, 0)
     self.cmd_vel_publisher.publish(output)
     return None
   
