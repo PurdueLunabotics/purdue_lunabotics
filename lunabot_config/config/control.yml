@@ -38,13 +38,13 @@ mini:
         p: 5.0
         i: 0.0
         d: 0.0
-        max_output: 0.2
+        max_output: 0.3
         tolerance: 10.0
       linear:
         p: 3.0
         i: 0.0
         d: 0.0
-        max_output: 0.15
+        max_output: 0.25
         tolerance: 0.2
 
   differential_drive_controller_node:
