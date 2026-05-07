@@ -14,6 +14,8 @@ import rclpy
 
 # TODO: what happens if the node stalls? does the time reset? also should we do distance not time based?
 
+LINEAR_TOLERANCE = 0.1
+
 class Drive(State):
     def __init__(self, target_distance: float, backwards: bool, speed: float, timeout: float=0.0) -> None:
         self.timeout = timeout
@@ -51,7 +53,7 @@ class Drive(State):
         
         time = self.manager.get_clock().now().nanoseconds / 1e9 # current time in seconds
         is_timeout = self.timeout > 0.0 and time - self.start_time > self.timeout
-        if abs(distance - self.target_distance) <= 0.1 or is_timeout:
+        if abs(distance - self.target_distance) <= LINEAR_TOLERANCE or is_timeout:
             return Events.SUCCESS
 
         output = Twist()
