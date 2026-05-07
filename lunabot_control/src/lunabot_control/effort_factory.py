@@ -55,7 +55,7 @@ class EffortFactory(Node):
         while rclpy.ok():
             if (self.autonomy):
                 if self.get_clock().now().seconds_nanoseconds()[0] > self.last_led_time + self.LED_TIMEOUT:
-                    self.get_logger().warn("pub led")
+                    # self.get_logger().warn("pub led")
                     self.led_publisher.publish(Int32(data= colorsToInteger((LedColor.RED, LedColor.GREEN))))
                 self.publish_effort()
             rate.sleep()
