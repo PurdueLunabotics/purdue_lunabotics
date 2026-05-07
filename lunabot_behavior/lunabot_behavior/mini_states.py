@@ -40,7 +40,7 @@ class MiniStates(Enum):
     # ===== INIT SECTION (1) =====
     INIT_MAP = (SetupMap(False), (LedColor.GREEN, LedColor.YELLOW))
     INIT_WAIT = (State(), (LedColor.GREEN, LedColor.GREEN))
-    INIT_MOVE = (InitRetreat(False, 0.2, 1.5), (LedColor.GREEN, LedColor.TEAL))
+    INIT_MOVE = (InitRetreat(False, 0.2, 1.7), (LedColor.GREEN, LedColor.TEAL))
     INIT_STALL = (State(), (LedColor.GREEN, LedColor.RED))
     
     FIND_LINKUP = (FindLinkup(), (LedColor.GREEN, LedColor.BLUE))
