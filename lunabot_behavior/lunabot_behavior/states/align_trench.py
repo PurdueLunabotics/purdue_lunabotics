@@ -30,8 +30,8 @@ class AlignTrench(AlignToAngle):
 
   def setup(self, manager: Node):
     super().setup(manager)
-    self.min_angle = self.base_angle + np.deg2rad(-60)
-    self.max_angle = self.base_angle + np.deg2rad(60)
+    self.min_angle = self.base_angle + np.deg2rad(-90)
+    self.max_angle = self.base_angle + np.deg2rad(90)
     self.angle_step = np.deg2rad(30)
     self.exc_approach_dist = 0.0
     self.distance_step = 0.5 # m - how far each excavation step proceeds
@@ -77,7 +77,7 @@ class AlignTrench(AlignToAngle):
   
       self.target_angle = self.valid_angles[self.i] % (2 * np.pi)
       self.manager.get_logger().info(f"{self.target_angle} {self.robot_pose[2]}")
-      return super().periodic() # TODO: return this
+      return super().periodic()
     else:
       output = Twist()
       output.angular.z = 0.0
