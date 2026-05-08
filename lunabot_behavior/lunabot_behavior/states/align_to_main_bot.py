@@ -101,6 +101,7 @@ class AlignToMainBotState(State):
 
       if (self.isApriltagPresent()):
         self.internal_state = 'align'
+        self.resetPID()
         self.success_count = 0
         self.node.get_logger().info("Behavior: Align to main bot: starting align")
         return None
