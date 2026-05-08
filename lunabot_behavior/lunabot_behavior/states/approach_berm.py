@@ -1,3 +1,4 @@
+from lunabot_behavior.zones import ZoneMeasurements
 from lunabot_behavior.state import State, Events
 from rclpy.node import Node
 from geometry_msgs.msg import Twist, PoseStamped
@@ -12,7 +13,7 @@ class ApproachBerm(State):
     self.manager = manager
     self.robot_pose = (None, None)
     self.linear_speed = 0.1 #m/s
-    self.target_y = 1.5
+    self.target_y = ZoneMeasurements.BERM_OFFSET_Y
   
   def odom_cb(self, msg:PoseStamped):
     self.robot_pose = (
@@ -26,9 +27,9 @@ class ApproachBerm(State):
   def periodic(self):
     if self.robot_pose[0] == None:
       return None
-    linear_error = self.target_y - self.robot_pose[1]
+    linear_error = abs(self.target_y - self.robot_pose[1])
     output = Twist()
-    if linear_error < 0:
+    if linear_error < 0.05:
       return Events.SUCCESS
     else:
       output.linear.x = self.linear_speed if not self.backwards else -self.linear_speed
