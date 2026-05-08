@@ -146,6 +146,7 @@ class MiniStates(Enum):
             (MiniStates.WAIT_FOR_MAIN_ALIGN, Events.SUCCESS): MiniStates.WAIT_FOR_MAIN_APPROACH,
 
             (MiniStates.WAIT_FOR_MAIN_APPROACH, Events.SUCCESS): MiniStates.COLLECT_REGOLITH,
+            (MiniStates.WAIT_FOR_MAIN_APPROACH, Events.NEED_REALIGN): MiniStates.ALIGN_TO_MAIN,
             
             (MiniStates.COLLECT_REGOLITH, Events.SUCCESS): MiniStates.WAIT_FOR_DIVERGE,
 
