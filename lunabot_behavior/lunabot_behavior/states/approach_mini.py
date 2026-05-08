@@ -19,6 +19,7 @@ import math
 # sim apriltag - 368
 # irl tag - 126
 DEPOSITION_APRILTAG_ID = 126
+MINI_DEP_APRILTAG_ID = 173
 
 class ApproachMiniState(State):
   def __init__(self):
@@ -28,7 +29,7 @@ class ApproachMiniState(State):
 
     self.apriltag_detections: AprilTagDetectionArray = None
 
-    self.node: Node = None
+    self.manager: Node = None
 
     # PID for linear alignment
     self.P = 1
@@ -45,7 +46,7 @@ class ApproachMiniState(State):
     self.LOST_APRILTAG_THRESHOLD = 15
 
     # in meters, what distance between robots we are looking for
-    self.DISTANCE_GOAL = 0.12
+    self.DISTANCE_GOAL = 0.13
     # in meters, how close to this goal we need to get before returning success
     self.GOAL_THRESHOLD = 0.01
     # how many times we have been aligned
@@ -53,13 +54,15 @@ class ApproachMiniState(State):
     # how many times in a row before we're sure
     self.SUCCESS_THRESHOLD = 30
 
-    self.TIMEOUT_TIME = 30 # in seconds, how long to wait before giving up and continuing
+    self.MAX_SPEED = 0.10
+
+    self.TIMEOUT_TIME = 30 # 30 # in seconds, how long to wait before giving up and continuing
 
   def setup(self, manager: Node):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "/cmd_vel", 10)
     self.aligned_msg_publisher = manager.create_publisher(Bool, "/behavior/main_approached", 10)
     manager.create_subscription(AprilTagDetectionArray, "/mini/d455_back/detections", self.apriltag_callback, 10)
-    self.node = manager
+    self.manager = manager
 
     self.tf_listener = TransformListener(self.tf_buffer, manager)
   
@@ -68,17 +71,17 @@ class ApproachMiniState(State):
     self.apriltag_detections = msg
     
   def start(self):
-    self.node.get_logger().info("Behavior: Approaching mini bot" )
+    self.manager.get_logger().info("Behavior: Approaching mini bot" )
     self.apriltag_detections = None
     self.resetPID()
     self.lost_count = 0
     self.success_count = 0
 
-    self.start_time = self.node.get_clock().now()
+    self.start_time = self.manager.get_clock().now()
   
   def periodic(self):
 
-    elapsed_time = self.node.get_clock().now() - self.start_time
+    elapsed_time = self.manager.get_clock().now() - self.start_time
     elapsed_time = elapsed_time.nanoseconds / 1_000_000_000  # convert to seconds
 
     if (elapsed_time > self.TIMEOUT_TIME):
@@ -86,13 +89,18 @@ class ApproachMiniState(State):
       self.publish_aligned_msg()
       return Events.SUCCESS
 
-    if (self.isApriltagPresent()):
+    apriltag_present, detections = self.isApriltagPresent()
+    if (apriltag_present):
         # print(self.apriltag_detections)
 
         try:
-            apriltag_in_camera_frame = self.tf_buffer.lookup_transform("mini/d455_back_rgb_link", "main_deposition", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
+            if (DEPOSITION_APRILTAG_ID in detections): # prioritize big tag
+              apriltag_in_camera_frame = self.tf_buffer.lookup_transform("mini/d455_back_rgb_link", "main_deposition", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
+            else:
+              apriltag_in_camera_frame = self.tf_buffer.lookup_transform("mini/d455_back_rgb_link", "main_deposition_small", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
 
-            distance = apriltag_in_camera_frame.transform.translation.z 
+            distance = apriltag_in_camera_frame.transform.translation.z
+            self.manager.get_logger().info(f"Distance: {distance}")
 
             error = self.DISTANCE_GOAL - distance
 
@@ -106,7 +114,7 @@ class ApproachMiniState(State):
                 return Events.SUCCESS
             
             velocity = self.runPID(error)
-            velocity = max(-0.05, min(velocity, 0.05))
+            velocity = np.clip(velocity, -self.MAX_SPEED, self.MAX_SPEED)
             self.publish_linear_velocity(velocity)
 
         except Exception as e:
@@ -118,7 +126,7 @@ class ApproachMiniState(State):
 
       if (self.lost_count >= self.LOST_APRILTAG_THRESHOLD):
         self.lost_count = 0
-        self.node.get_logger().warn("Behavior: Exiting approach due to LOST apriltag!")
+        self.manager.get_logger().warn("Behavior: Exiting approach due to LOST apriltag!")
         self.publish_aligned_msg()
         return Events.SUCCESS
 
@@ -126,17 +134,20 @@ class ApproachMiniState(State):
   
   def isApriltagPresent(self):
     apriltag_present = False
+    detections = []
     if (self.apriltag_detections != None):
       for detection in self.apriltag_detections.detections:
-        if (detection.id == DEPOSITION_APRILTAG_ID):
+        if (detection.id == DEPOSITION_APRILTAG_ID or detection.id == MINI_DEP_APRILTAG_ID):
           apriltag_present = True
+          if (detection.id not in detections):
+            detections.append(detection.id)
 
-    return apriltag_present
+    return apriltag_present, detections
   
   def runPID(self, error: float):
 
     if (self.last_time is not None):
-      dt = self.node.get_clock().now() - self.last_time
+      dt = self.manager.get_clock().now() - self.last_time
     else:
       dt = Duration(seconds=0)
     
@@ -149,7 +160,7 @@ class ApproachMiniState(State):
       change = 0
 
     self.last_error = error
-    self.last_time = self.node.get_clock().now()
+    self.last_time = self.manager.get_clock().now()
 
     self.total_error += error * dt
 

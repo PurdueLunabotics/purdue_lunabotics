@@ -51,6 +51,10 @@
   /rtabmap/octomap_grid
   /rtabmap/odom
   /rtabmap/tag_detections
+  /rtabmap/map
+
+  /global_costmap/costmap
+  /global_costmap/costmap_raw
 
   /sensors
   /stalled

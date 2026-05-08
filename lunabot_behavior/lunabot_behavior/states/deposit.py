@@ -18,6 +18,7 @@ class Deposit(State):
     self.manager = manager
     self.GATE_TIME = 2 # seconds, how long gate takes to open
     self.DEPOSIT_TIME = 20 # seconds, inclusive of gate + deposit
+    self.REVERSE_TIME = 20.5 # seconds, inclusive of gate + deposit + reverse
     self.DEPOSIT_SPEED = 3000
   
   def start(self):
@@ -29,10 +30,16 @@ class Deposit(State):
 
     self.dep_gate_pub.publish(Bool(data = True))
 
-    if (elapsed_time > self.GATE_TIME):
-      self.dep_pub.publish(Int32(data = self.DEPOSIT_SPEED))
+    dep_speed = 0
+    if (elapsed_time > self.GATE_TIME and elapsed_time < self.DEPOSIT_TIME): # start pushing material out
+      dep_speed = self.DEPOSIT_SPEED
 
-    if (elapsed_time > self.DEPOSIT_TIME):
+    if (elapsed_time > self.DEPOSIT_TIME): # reverse dep just slightly to pull flap in
+      dep_speed = -self.DEPOSIT_SPEED
+
+    self.dep_pub.publish(Int32(data = dep_speed))
+
+    if (elapsed_time > self.REVERSE_TIME):
       return Events.SUCCESS
     
     return None  

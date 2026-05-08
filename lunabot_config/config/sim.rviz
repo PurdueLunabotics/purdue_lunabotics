@@ -63,14 +63,50 @@ Visualization Manager:
         All Enabled: false
         base_link:
           Value: true
+        d455_back_aligned_depth_to_infra1_frame:
+          Value: true
+        d455_back_color_frame:
+          Value: true
+        d455_back_color_optical_frame:
+          Value: true
+        d455_back_depth_frame:
+          Value: true
         d455_back_depth_link:
           Value: false
+        d455_back_depth_optical_frame:
+          Value: true
+        d455_back_infra1_frame:
+          Value: true
+        d455_back_infra1_optical_frame:
+          Value: true
+        d455_back_infra2_frame:
+          Value: true
+        d455_back_infra2_optical_frame:
+          Value: true
         d455_back_link:
           Value: true
         d455_back_rgb_link:
           Value: false
+        d455_front_aligned_depth_to_infra1_frame:
+          Value: true
+        d455_front_color_frame:
+          Value: true
+        d455_front_color_optical_frame:
+          Value: true
+        d455_front_depth_frame:
+          Value: true
         d455_front_depth_link:
           Value: false
+        d455_front_depth_optical_frame:
+          Value: true
+        d455_front_infra1_frame:
+          Value: true
+        d455_front_infra1_optical_frame:
+          Value: true
+        d455_front_infra2_frame:
+          Value: true
+        d455_front_infra2_optical_frame:
+          Value: true
         d455_front_link:
           Value: true
         d455_front_rgb_link:
@@ -89,16 +125,97 @@ Visualization Manager:
           Value: true
         left_front:
           Value: true
+<<<<<<< HEAD
+=======
+        main_deposition_small:
+          Value: true
+>>>>>>> feature/behavior-integration
         map:
           Value: true
         middle_link:
           Value: true
+<<<<<<< HEAD
+=======
+        mini/base_link:
+          Value: true
+        mini/d455_back_aligned_depth_to_infra1_frame:
+          Value: true
+        mini/d455_back_color_frame:
+          Value: true
+        mini/d455_back_color_optical_frame:
+          Value: true
+        mini/d455_back_depth_frame:
+          Value: true
+        mini/d455_back_depth_link:
+          Value: true
+        mini/d455_back_depth_optical_frame:
+          Value: true
+        mini/d455_back_infra1_frame:
+          Value: true
+        mini/d455_back_infra1_optical_frame:
+          Value: true
+        mini/d455_back_infra2_frame:
+          Value: true
+        mini/d455_back_infra2_optical_frame:
+          Value: true
+        mini/d455_back_link:
+          Value: true
+        mini/d455_back_rgb_link:
+          Value: true
+        mini/d455_front_aligned_depth_to_infra1_frame:
+          Value: true
+        mini/d455_front_color_frame:
+          Value: true
+        mini/d455_front_color_optical_frame:
+          Value: true
+        mini/d455_front_depth_frame:
+          Value: true
+        mini/d455_front_depth_link:
+          Value: true
+        mini/d455_front_depth_optical_frame:
+          Value: true
+        mini/d455_front_infra1_frame:
+          Value: true
+        mini/d455_front_infra1_optical_frame:
+          Value: true
+        mini/d455_front_infra2_frame:
+          Value: true
+        mini/d455_front_infra2_optical_frame:
+          Value: true
+        mini/d455_front_link:
+          Value: true
+        mini/d455_front_rgb_link:
+          Value: true
+        mini/left_back:
+          Value: true
+        mini/left_front:
+          Value: true
+        mini/lidar_link:
+          Value: true
+        mini/lidar_mid_link:
+          Value: true
+        mini/map:
+          Value: true
+        mini/middle_link:
+          Value: true
+        mini/odom:
+          Value: true
+        mini/right_back:
+          Value: true
+        mini/right_front:
+          Value: true
+>>>>>>> feature/behavior-integration
         odom:
           Value: true
         right_back:
           Value: true
         right_front:
           Value: true
+<<<<<<< HEAD
+=======
+        tag36h11:482:
+          Value: true
+>>>>>>> feature/behavior-integration
       Marker Scale: 1
       Name: TF
       Show Arrows: true
@@ -109,8 +226,22 @@ Visualization Manager:
           odom:
             base_link:
               d455_back_link:
+                d455_back_aligned_depth_to_infra1_frame:
+                  d455_back_infra1_optical_frame:
+                    {}
+                d455_back_color_frame:
+                  d455_back_color_optical_frame:
+                    {}
+                d455_back_depth_frame:
+                  d455_back_depth_optical_frame:
+                    {}
                 d455_back_depth_link:
                   {}
+                d455_back_infra1_frame:
+                  {}
+                d455_back_infra2_frame:
+                  d455_back_infra2_optical_frame:
+                    {}
                 d455_back_rgb_link:
                   {}
               deposition_apriltag_link:
@@ -126,8 +257,23 @@ Visualization Manager:
               middle_link:
                 excavation:
                   d455_front_link:
+                    d455_front_aligned_depth_to_infra1_frame:
+                      d455_front_infra1_optical_frame:
+                        {}
+                    d455_front_color_frame:
+                      d455_front_color_optical_frame:
+                        tag36h11:482:
+                          {}
+                    d455_front_depth_frame:
+                      d455_front_depth_optical_frame:
+                        {}
                     d455_front_depth_link:
                       {}
+                    d455_front_infra1_frame:
+                      {}
+                    d455_front_infra2_frame:
+                      d455_front_infra2_optical_frame:
+                        {}
                     d455_front_rgb_link:
                       {}
               right_back:
@@ -508,7 +654,11 @@ Window Geometry:
   Height: 680
   Hide Left Dock: false
   Hide Right Dock: false
+<<<<<<< HEAD
   QMainWindow State: 000000ff00000000fd0000000400000000000001da000001eefc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006b00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c0061007900730100000044000001ee000000eb00fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f000002b4fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003b000002b4000000b900fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000043000000051fc0100000002fb0000000800540069006d0065010000000000000430000002d200fffffffb0000000800540069006d006501000000000000045000000000000000000000024f000001ee00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+=======
+  QMainWindow State: 000000ff00000000fd0000000400000000000001da00000276fc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006e00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000004700000276000000f100fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f000002b4fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003b000002b4000000c200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000053e00000051fc0100000002fb0000000800540069006d006501000000000000053e0000038100fffffffb0000000800540069006d006501000000000000045000000000000000000000035d0000027600000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+>>>>>>> feature/behavior-integration
   Selection:
     collapsed: false
   Time:
@@ -517,6 +667,12 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
+<<<<<<< HEAD
   Width: 1072
   X: 1176
   Y: 779
+=======
+  Width: 1342
+  X: 911
+  Y: 91
+>>>>>>> feature/behavior-integration

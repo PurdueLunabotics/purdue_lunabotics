@@ -3,7 +3,7 @@
 from enum import Enum
 
 from geometry_msgs.msg import PoseStamped
-from lunabot_behavior.lunabot_behavior.states.wait_for_linkup import WaitForLinkup
+from lunabot_behavior.states.wait_for_linkup import WaitForLinkup
 from lunabot_config.led_colors import LedColor
 from lunabot_msgs.msg import Event
 

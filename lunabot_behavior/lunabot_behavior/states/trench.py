@@ -82,7 +82,7 @@ class Trench(Drive):
         self.dep_pub = manager.create_publisher(Int32, "deposition", 10)
 
         self.EXCAVATION_SPEED = 2000 # rpm
-        self.DEPOSITION_SPEED = 200 # rpm
+        self.DEPOSITION_SPEED = 400 # rpm # TODO: tune
 
     def start(self):
         super().start()

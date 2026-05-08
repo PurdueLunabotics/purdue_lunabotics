@@ -33,7 +33,7 @@ class ZoneMeasurements:
     BERM_LENGTH_Y = 0.9
 
     # ----------------------
-    # UCF bottom
+    # UCF bottom (=guidebook) (=left from ingress)
     # ----------------------
     #START_OFFSET_X = 2.44
     #START_OFFSET_Y = 1.5
@@ -51,7 +51,7 @@ class ZoneMeasurements:
     #BERM_LENGTH_Y = 0.9
 
     # ----------------------
-    # UCF top
+    # UCF top (=guidebook mirrored) (=right from ingress)
     # ----------------------
     # START_OFFSET_X = -2.44
     # START_OFFSET_Y = 1.5
