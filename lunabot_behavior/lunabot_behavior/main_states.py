@@ -71,6 +71,9 @@ class MainStates(Enum):
     
     ALIGN_TO_TRENCH = (AlignTrench(), (LedColor.WHITE, LedColor.YELLOW))
     ALIGN_TO_TRENCH_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
+
+    JUST_PLUNGE = (Plunge(), (LedColor.WHITE, LedColor.TEAL))
+    JUST_PLUNGE_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
     
     APPROACH_TRENCH = (ApproachTrench(), (LedColor.WHITE, LedColor.GREEN))
     APPROACH_TRENCH_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
@@ -161,8 +164,13 @@ class MainStates(Enum):
             (MainStates.TRAVERSE_TO_LINKUP_STALL, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
 
             (MainStates.ALIGN_TO_TRENCH, Events.SUCCESS): MainStates.APPROACH_TRENCH,
+            (MainStates.ALIGN_TO_TRENCH, Events.NO_PATH): MainStates.JUST_PLUNGE,
             (MainStates.ALIGN_TO_TRENCH, Events.STALL): MainStates.ALIGN_TO_TRENCH_STALL,
             (MainStates.ALIGN_TO_TRENCH_STALL, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
+
+            (MainStates.JUST_PLUNGE, Events.STALL): MainStates.JUST_PLUNGE_STALL,
+            (MainStates.JUST_PLUNGE, Events.SUCCESS): MainStates.ALIGN_TO_LINKUP,
+            (MainStates.JUST_PLUNGE_STALL, Events.SUCCESS): MainStates.JUST_PLUNGE,
             
             (MainStates.APPROACH_TRENCH, Events.SUCCESS): MainStates.PLUNGE_ACT,
             (MainStates.APPROACH_TRENCH, Events.STALL): MainStates.APPROACH_TRENCH_STALL,
