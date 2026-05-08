@@ -57,7 +57,7 @@ class ApproachMainState(State):
     # how many times in a row before we're sure
     self.SUCCESS_THRESHOLD = 30
 
-    self.MAX_SPEED = 0.25
+    self.MAX_SPEED = 0.10
 
     self.TIMEOUT_TIME = 30 # in seconds, how long until we give up
 
@@ -153,11 +153,15 @@ class ApproachMainState(State):
   
   def isApriltagPresent(self):
     apriltag_present = False
+
     detections = []
+
     if (self.apriltag_detections != None):
       for detection in self.apriltag_detections.detections:
+
         if (detection.id == DEPOSITION_APRILTAG_ID or detection.id == MINI_DEP_APRILTAG_ID):
           apriltag_present = True
+          
           if (detection.id not in detections):
             detections.append(detection.id)
 
