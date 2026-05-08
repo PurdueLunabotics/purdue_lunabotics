@@ -431,20 +431,20 @@
       </link>
     </model>
 
-    <model name='tag_36_11_00007'>
+    <model name='tag_36_11_00482'>
       <pose>3.4 1.8 0.2 0 -1.58 0</pose>
       <static>1</static>
       <link name='link'>
-        <visual name='tag_36_11_00007'>
+        <visual name='tag_36_11_00482'>
           <geometry>
             <box>
-              <size>0.238125 0.238125 0.005</size>
+              <size>0.18125 0.18125 0.005</size>
             </box>
           </geometry>
           <material>
             <pbr>
               <metal>
-                <albedo_map>model://apriltags/tag_36_11_00007/materials/textures/tag_36_11_00007.png</albedo_map>
+                <albedo_map>model://apriltags/tag_36_11_00482/materials/textures/tag_36_11_00482.png</albedo_map>
               </metal>
             </pbr>
             <ambient>1.0 1.0 1.0 1.0</ambient>
@@ -453,30 +453,30 @@
             <emissive>0 0 0 1.0</emissive>
           </material>
         </visual>
-        <collision name='tag_36_11_00007_collision'>
+        <collision name='tag_36_11_00482_collision'>
           <geometry>
             <box>
-              <size>0.238125 0.238125 0.005</size>
+              <size>0.18125 0.18125 0.005</size>
             </box>
           </geometry>
         </collision>
       </link>
     </model>
 
-    <model name='tag_36_11_00011'>
-      <pose>2.5 2.5 0.2 1.58 0 0</pose>
+    <model name='tag_36_11_00301'>
+      <pose>2.5 2.5 0.2 3.14 -1.58 -1.58</pose>
       <static>1</static>
       <link name='link'>
-        <visual name='tag_36_11_00011'>
+        <visual name='tag_36_11_00301'>
           <geometry>
             <box>
-              <size>0.238125 0.238125 0.005</size>
+              <size>0.18125 0.18125 0.005</size>
             </box>
           </geometry>
           <material>
             <pbr>
               <metal>
-                <albedo_map>model://apriltags/tag_36_11_00011/materials/textures/tag_36_11_00011.png</albedo_map>
+                <albedo_map>model://apriltags/tag_36_11_00301/materials/textures/tag_36_11_00301.png</albedo_map>
               </metal>
             </pbr>
             <ambient>1.0 1.0 1.0 1.0</ambient>
@@ -485,10 +485,10 @@
             <emissive>0 0 0 1.0</emissive>
           </material>
         </visual>
-        <collision name='tag_36_11_00011_collision'>
+        <collision name='tag_36_11_00301_collision'>
           <geometry>
             <box>
-              <size>0.238125 0.238125 0.005</size>
+              <size>0.18125 0.18125 0.005</size>
             </box>
           </geometry>
         </collision>
