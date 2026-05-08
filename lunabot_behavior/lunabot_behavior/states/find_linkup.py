@@ -124,10 +124,17 @@ class FindLinkup(Traverse):
         self.MIN_SEGMENT_LENGTH = 1.325
 
         # excavation edge for linkup
-        self.exc_p1 = [ZoneMeasurements.EXC_OFFSET_X - (ZoneMeasurements.EXC_LENGTH_X / 2),
-                                ZoneMeasurements.EXC_OFFSET_Y + (ZoneMeasurements.EXC_LENGTH_Y / 2)]
-        self.exc_p2 = [ZoneMeasurements.EXC_OFFSET_X - (ZoneMeasurements.EXC_LENGTH_X / 2),
-                                ZoneMeasurements.EXC_OFFSET_Y - (ZoneMeasurements.EXC_LENGTH_Y / 2)]
+        self.is_mirrored = ZoneMeasurements.BERM_OFFSET_X > ZoneMeasurements.EXC_OFFSET_X
+        if not self.is_mirrored:
+            self.exc_p1 = [ZoneMeasurements.EXC_OFFSET_X - (ZoneMeasurements.EXC_LENGTH_X / 2),
+                                    ZoneMeasurements.EXC_OFFSET_Y + (ZoneMeasurements.EXC_LENGTH_Y / 2)]
+            self.exc_p2 = [ZoneMeasurements.EXC_OFFSET_X - (ZoneMeasurements.EXC_LENGTH_X / 2),
+                                    ZoneMeasurements.EXC_OFFSET_Y - (ZoneMeasurements.EXC_LENGTH_Y / 2)]
+        else:
+            self.exc_p1 = [ZoneMeasurements.EXC_OFFSET_X + (ZoneMeasurements.EXC_LENGTH_X / 2),
+                                    ZoneMeasurements.EXC_OFFSET_Y + (ZoneMeasurements.EXC_LENGTH_Y / 2)]
+            self.exc_p2 = [ZoneMeasurements.EXC_OFFSET_X + (ZoneMeasurements.EXC_LENGTH_X / 2),
+                                    ZoneMeasurements.EXC_OFFSET_Y - (ZoneMeasurements.EXC_LENGTH_Y / 2)]
         
         self.excavation_edge = LineString([self.exc_p1, self.exc_p2])
         self.padding = 0.4
@@ -208,10 +215,17 @@ class FindLinkup(Traverse):
         self.show_line(pos, angle, num_points, "final", 1.0, 1.0, 1.0, 0.1)
 
         linkup = Linkup()
-        linkup.main_target.x = pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
-        linkup.main_target.y = pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
-        linkup.mini_target.x = pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
-        linkup.mini_target.y = pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
+        if not self.is_mirrored:
+            linkup.main_target.x = pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
+            linkup.main_target.y = pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
+            linkup.mini_target.x = pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
+            linkup.mini_target.y = pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
+        else:
+            linkup.main_target.x = pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
+            linkup.main_target.y = pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
+            linkup.mini_target.x = pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
+            linkup.mini_target.y = pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
+
         linkup.exc_target.x = linkup.main_target.x
         linkup.exc_target.y = linkup.main_target.y
 
@@ -222,8 +236,12 @@ class FindLinkup(Traverse):
         if pos.distance(self.excavation_edge) > self.MIN_SEGMENT_LENGTH / 4 or pos.y > self.exc_p1[1] - self.padding or pos.y < self.exc_p2[1] + self.padding:
             return (inf, True)
 
-        a = shp.Point(pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
-        b = shp.Point(pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
+        if not self.is_mirrored:
+            a = shp.Point(pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
+            b = shp.Point(pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
+        else:
+            a = shp.Point(pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
+            b = shp.Point(pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
 
         if not a.within(zones.zone_to_poly(zones.exc_zone)):
             return (inf, True)

@@ -55,7 +55,7 @@
     <arg name="cameras" default="true" />
     
     <arg name="lidar" default="false" if="$(eval '$(var robot_num) == 0')"/>
-    <arg name="lidar" default="true" if="$(eval '$(var robot_num) == 1')"/>
+    <arg name="lidar" default="false" if="$(eval '$(var robot_num) == 1')"/>
 
     <let name="cam_1_name"              value="d455_front"/>
     <let name="cam_2_name"              value="d455_back"/>
@@ -305,10 +305,10 @@
             <!-- <param name="Marker/Priors"           value="'301 2.44 2.5 0.2 1.57 0 0|482 3.44 1.8 0.2 1.57 0 -1.57|401 2.44 2.5 0.2 1.57 0 0|582 3.44 1.8 0.2 1.57 0 -1.57'"/> -->
 
             <!-- UCF bottom (non-mirrored) priors -->
-            <param name="Marker/Priors"           value="'301 3.05 2.285 0.2 1.57 0 0|482 4.05 1.285 0.2 1.57 0 -1.57|401 3.05 2.285 0.2 1.57 0 0|582 4.05 1.285 0.2 1.57 0 -1.57'"/>
+            <!-- <param name="Marker/Priors"           value="'301 3.05 2.285 0.2 1.57 0 0|482 4.05 1.285 0.2 1.57 0 -1.57|401 3.05 2.285 0.2 1.57 0 0|582 4.05 1.285 0.2 1.57 0 -1.57'"/> -->
 
             <!-- UCF top (mirrored) priors -->
-            <!-- <param name="Marker/Priors"           value="'301 -3.05 2.285 0.2 1.57 0 0|482 -4.05 1.285 0.2 1.57 0 1.57|401 -3.05 2.285 0.2 1.57 0 0|582 -4.05 1.285 0.2 1.57 0 1.57'"/> -->
+            <param name="Marker/Priors"           value="'301 -3.05 2.285 0.2 1.57 0 0|482 -4.05 1.285 0.2 1.57 0 1.57|401 -3.05 2.285 0.2 1.57 0 0|582 -4.05 1.285 0.2 1.57 0 1.57'"/>
 
             <!-- Note these priors assume apriltags are ON the -->
             <param name="Optimizer/PriorsIgnored" value="'false'"/>

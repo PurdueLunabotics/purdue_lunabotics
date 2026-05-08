@@ -24,6 +24,7 @@ class WaitForMainApproachState(State):
     
     def start(self):
         self.received_aligned_msg = False
+        self.realign_msg = False
 
     def periodic(self) -> None | Events:
 
