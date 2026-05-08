@@ -61,6 +61,7 @@ class ApproachMiniState(State):
   def setup(self, manager: Node):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "/cmd_vel", 10)
     self.aligned_msg_publisher = manager.create_publisher(Bool, "/behavior/main_approached", 10)
+    self.realign_msg_publisher = manager.create_publisher(Bool, "/behavior/main_wants_realign", 10)
     manager.create_subscription(AprilTagDetectionArray, "/mini/d455_back/detections", self.apriltag_callback, 10)
     self.manager = manager
 
@@ -107,6 +108,14 @@ class ApproachMiniState(State):
             # if aligned, increment a counter. at the threshold, alignment is done
             if (abs(error) < self.GOAL_THRESHOLD):
                 self.success_count += 1
+
+            rotation_quaternion = apriltag_in_camera_frame.transform.rotation
+            (roll, pitch, yaw) = euler_from_quaternion([rotation_quaternion.x, rotation_quaternion.y, rotation_quaternion.z, rotation_quaternion.w])
+            if (abs(yaw) > 0.01):   #NOTE TEST THIS and find what we want to realign to 
+              # if we xxx, ask mini for a realign, and go to a waiting state
+              self.publish_realign_msg()
+              self.manager.get_logger().info("Behavior: Performing realign")
+              return Events.NEED_REALIGN
 
             # if aligned, return success for next state, and the transition message for the next state
             if (self.success_count >= self.SUCCESS_THRESHOLD):
@@ -184,6 +193,12 @@ class ApproachMiniState(State):
     for i in range(10):
       self.aligned_msg_publisher.publish(msg)
 
+  def publish_realign_msg(self):
+    msg = Bool()
+    msg.data=True
+
+    for i in range(10):
+      self.realign_msg_publisher.publish(msg)
   
   def exit(self, event):
     # stop moving

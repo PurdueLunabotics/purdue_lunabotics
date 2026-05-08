@@ -194,6 +194,7 @@ class MainStates(Enum):
 
             (MainStates.APPROACH_MINI, Events.SUCCESS): MainStates.DEPOSIT,
             (MainStates.APPROACH_MINI, Events.STALL): MainStates.APPROACH_MINI_STALL,
+            (MainStates.APPROACH_MINI, Events.NEED_REALIGN): MainStates.WAIT_FOR_MINI_ALIGN,
             (MainStates.APPROACH_MINI_STALL, Events.SUCCESS): MainStates.APPROACH_MINI,
 
             (MainStates.DEPOSIT, Events.SUCCESS): MainStates.SEPARATE_FROM_MINI,
