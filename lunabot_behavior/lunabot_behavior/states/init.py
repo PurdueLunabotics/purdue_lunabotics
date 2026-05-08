@@ -58,6 +58,7 @@ class SetupMap(State):
     self.manager.get_logger().info(f"SetupMap: can see main: {self.can_see_main_bot}, dir: {direction}")
     if self.can_see_main_bot and self.is_main and (direction == Direction.NORTH or direction == Direction.EAST):
       mini_detections = self.detections["mini/d455_front_color_optical_frame"]
+      # mini_detections = self.detections["mini/d455_front_rgb_link"]  # for sim
       mini_detections.header.frame_id = "deposition_apriltag_small_optical_frame"
       try:
         main_to_tag = self.tf_buf.lookup_transform("main_deposition_small", "tag36h11:582" if direction == Direction.EAST else "tag36h11:401", Time())
@@ -68,6 +69,7 @@ class SetupMap(State):
       except Exception as e:
         self.manager.get_logger().warn(f"failed to send detection: {e}")
         self.ready_time = None
+
     if self.can_see_main_bot and not self.is_main and (direction == Direction.SOUTH or direction == Direction.WEST):
       main_detections = self.detections["d455_front_color_optical_frame"]
       main_detections.header.frame_id = "main_deposition_small"
@@ -81,8 +83,10 @@ class SetupMap(State):
       except Exception as e:
         self.manager.get_logger().warn(f"failed to send detection: {e}")
         self.ready_time = None
+
     if not self.can_see_main_bot:
       self.ready_time = None
+
     elif self.ready_time is None:
       self.ready_time = self.manager.get_clock().now()
 
