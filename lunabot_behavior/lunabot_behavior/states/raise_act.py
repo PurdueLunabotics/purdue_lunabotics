@@ -16,7 +16,7 @@ class Raise(State):
         self.sensors = None
 
         # Constants  TODO: update these 
-        self.RAISE_TIME = 10  # seconds
+        self.RAISE_TIME = 10  # seconds TODO: change back
         self.MIN_TIME = 2
         self.EXCAVATION_SPEED = 2000 # rpm
         self.LIN_ACT_MAX_POWER = 127 # -127 - 127

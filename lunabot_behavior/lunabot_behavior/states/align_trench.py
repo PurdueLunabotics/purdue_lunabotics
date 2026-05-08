@@ -16,8 +16,8 @@ from lunabot_behavior.state import Events
 import shapely.geometry as shp
 import numpy as np
 
-LOOKAHEAD_DIST = 1.0 # m - how far the robot will go in its "trenching"
-LETHAL_COST = 252
+LOOKAHEAD_DIST = 1.0 # m - how far the robot will go in its "trenching" (to the tip of excavation)
+LETHAL_COST = 220
 
 class AlignTrench(AlignToAngle):
   # =========================
@@ -31,9 +31,9 @@ class AlignTrench(AlignToAngle):
   def setup(self, manager: Node):
     super().setup(manager)
     self.min_angle = self.base_angle + np.deg2rad(-90)
-    self.max_angle = self.base_angle + np.deg2rad(90)
+    self.max_angle = self.base_angle + np.deg2rad(90) + 0.01
     self.angle_step = np.deg2rad(30)
-    self.exc_approach_dist = 0.0
+    self.exc_approach_dist = 0.0  # keeps track of how far robot goes on angle before excavating
     self.distance_step = 0.5 # m - how far each excavation step proceeds
     self.frame_id = "map"
 
@@ -43,43 +43,38 @@ class AlignTrench(AlignToAngle):
     self.marker_pub.publish(Marker(action=Marker.DELETEALL, header=Header(frame_id=self.frame_id)))
 
     self.manager.declare_parameter("exc_approach_dist", self.exc_approach_dist)
+    self.manager.declare_parameter("exc_retreat_dist", self.exc_approach_dist)
 
     self.valid_angles = np.arange(self.min_angle, self.max_angle, self.angle_step).tolist()
-    self.manager.get_logger().info(f"{self.valid_angles}")
+    self.manager.get_logger().info(f"Angles: {[np.rad2deg(a) for a in self.valid_angles]}")
     self.valid_angles_updated = False
+
+    self.completed_angles = []  # gets reset on each increment of excavation approach dist
+
+    self.manager.get_logger().info(f"Base angle: {self.base_angle}")
 
     self.called_costmap = False
 
-    self.i = -1
+    self.no_paths = False
+
+    self.i = 0
 
   def start(self):
-    if self.i == len(self.valid_angles) - 1:
-        # update excavation approach distance
-        self.exc_approach_dist += self.distance_step
-        new_approach_dist = Parameter("exc_approach_dist", Parameter.Type.DOUBLE, self.exc_approach_dist)
-        self.manager.set_parameters([new_approach_dist])
+    # set the correct retreat distance
+    self.trenching_dist = self.manager.get_parameter("trenching_dist").get_parameter_value().double_value  # value set in trench.py for better readability
+    new_retreat_dist = Parameter("exc_retreat_dist", Parameter.Type.DOUBLE, self.exc_approach_dist + self.trenching_dist)
+    self.manager.set_parameters([new_retreat_dist])
 
-        # check valid angles again, start with full set of angles in case mistaken obstacles were removed
-        self.valid_angles = np.arange(self.min_angle, self.max_angle, self.angle_step).tolist()
-        self.valid_angles_updated = False
-
-    # self.manager.get_logger().info("starting")
-    if not self.valid_angles_updated:
-      self.marker_pub.publish(Marker(action=Marker.DELETEALL, header=Header(frame_id=self.frame_id)))
-
-      # repopulate valid angles
-      if not self.called_costmap:
-        self.manager.get_logger().info("ALIGN TO TRENCH - determining safe trench angles")
-        self.request_valid_angle_checks()
-        self.called_costmap = True
-    else:
-      self.i += 1
+    # check valid angles again, start with full set of angles in case mistaken obstacles were removed or robot is in a diff position
+    self.valid_angles = np.arange(self.min_angle, self.max_angle, self.angle_step).tolist()
+    self.marker_pub.publish(Marker(action=Marker.DELETEALL, header=Header(frame_id=self.frame_id)))
+    self.request_valid_angles()
 
   def periodic(self):
+    if (self.no_paths):
+      return Events.NO_PATH
+
     if (self.valid_angles_updated):
-      if len(self.valid_angles) == 0: # no safe angles found
-        return Events.NO_PATH
-      
       # self.manager.get_logger().info(f"{self.valid_angles}")
   
       self.target_angle = self.valid_angles[self.i] % (2 * np.pi)
@@ -91,12 +86,14 @@ class AlignTrench(AlignToAngle):
       self.cmd_vel_publisher.publish(output)
 
       # repopulate valid angles
-      if not self.called_costmap:
-        self.manager.get_logger().info("ALIGN TO TRENCH - determining safe trench angles")
-        self.request_valid_angle_checks()
-        self.called_costmap = True
+      self.request_valid_angles()
 
       return None
+    
+  def exit(self, event: Events):
+    super().exit(event)
+    if (event != Events.NO_PATH):
+      self.completed_angles.append(self.valid_angles[self.i])
 
   # ===============
   # helpers
@@ -110,16 +107,23 @@ class AlignTrench(AlignToAngle):
     exc_center = zones.zone_to_poly(zones.exc_zone).centroid
     berm_center = zones.zone_to_poly(zones.berm_zone).centroid
 
-    if (exc_center.x > berm_center.x):
+    if (exc_center.x > berm_center.x): # exc is left of the berm
       angle = np.deg2rad(0.0)
     else:
       angle = np.deg2rad(180.0)
 
     return angle
   
-  def request_valid_angle_checks(self):
-    self.costmap_client.wait_for_service()
-    self.costmap_client.call_async(GetCostmap.Request()).add_done_callback(self.costmap_cb)
+  def request_valid_angles(self):
+    if not self.called_costmap:
+      self.called_costmap = True
+      self.marker_pub.publish(Marker(action=Marker.DELETEALL, header=Header(frame_id=self.frame_id)))
+  
+      self.valid_angles_updated = False
+      self.valid_angles = np.arange(self.min_angle, self.max_angle, self.angle_step).tolist()
+      self.manager.get_logger().info("[ALIGN TO TRENCH] determining safe trench angles")
+      self.costmap_client.wait_for_service()
+      self.costmap_client.call_async(GetCostmap.Request()).add_done_callback(self.costmap_cb)
 
   def costmap_cb(self, future: Future):
     result = future.result()
@@ -135,14 +139,39 @@ class AlignTrench(AlignToAngle):
         if blocked:
           self.valid_angles.remove(angle)
 
-      self.valid_angles_updated = True
       self.i = 0
 
-      self.manager.get_logger().info("ALIGN TO TRENCH - safe trench angles identified")
+      self.manager.get_logger().info("[ALIGN TO TRENCH] safe trench angles identified")
+
+      if len(self.valid_angles) == 0:
+        self.no_paths = True
+        return
+
+      while self.i < len(self.valid_angles) and self.valid_angles[self.i] in self.completed_angles:
+        self.i += 1
+
+      if self.i == len(self.valid_angles): # all valid angles visited
+        self.manager.get_logger().info("[ALIGN TO TRENCH] all safe angles taken. incrementing approach distance")
+        self.increment_exc_dist()
+      else:
+        self.valid_angles_updated = True
+
     else:
       self.manager.get_logger().info("Robot pose unknown, trying again...")
 
     self.called_costmap = False
+
+  def increment_exc_dist(self):
+    # update excavation approach distance
+    self.exc_approach_dist += self.distance_step
+    new_approach_dist = Parameter("exc_approach_dist", Parameter.Type.DOUBLE, self.exc_approach_dist)
+    self.manager.set_parameters([new_approach_dist])
+
+    self.completed_angles = []
+
+    self.angle_step /= 2.0  # excavate between trenches farther away
+
+    self.request_valid_angles() # reevaluate safe options
   
   def evaluate_angle(self, costmap: Costmap, target_angle: float, exc_approach_dist: float):
     a_x = self.robot_pose[0]
@@ -189,4 +218,5 @@ class AlignTrench(AlignToAngle):
 
     marker.points = [p1m, p2m]
 
+    self.manager.get_logger().info(f"Marking segment with ID {id} | P1: {p1.x:2f},{p1.y:2f} | P2: {p2.x:2f},{p2.y:2f}")
     self.marker_pub.publish(marker)

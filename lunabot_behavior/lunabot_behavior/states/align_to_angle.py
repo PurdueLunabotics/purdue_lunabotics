@@ -6,9 +6,13 @@ from lunabot_control.pid_controller import ParameterizedPIDController
 import numpy as np
 
 
+MAIN_MAX_OUTPUT = 0.349
+MINI_MAX_OUTPUT = 0.3
+
 class AlignToAngle(State):
-  def __init__(self, angle, **kwargs):
+  def __init__(self, angle, is_main: bool=False):
     self.target_angle = np.deg2rad(angle) % (2 * np.pi)
+    self.max_output = MAIN_MAX_OUTPUT if is_main else MINI_MAX_OUTPUT
     
   def setup(self, manager:Node):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "cmd_vel", 10)
@@ -17,7 +21,7 @@ class AlignToAngle(State):
     self.robot_pose: None | tuple[float, float, float] = None
     self.angular_speed = np.deg2rad(30) #degrees/sec -> rad/sec
     self.tolerance = np.deg2rad(3)
-    self.pid = ParameterizedPIDController("angle", manager, kp=5.0, ki=0.0, kd=0.0, max_output=0.523)
+    self.pid = ParameterizedPIDController("angle", manager, kp=5.0, ki=0.0, kd=0.0, max_output=self.max_output)
   
   def odom_cb(self, msg:PoseStamped):
     angles = euler_from_quaternion(
