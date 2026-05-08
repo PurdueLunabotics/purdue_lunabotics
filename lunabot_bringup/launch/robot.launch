@@ -300,7 +300,13 @@
             
             <param name="Kp/MaxFeatures"          value="$(var rtabmap_max_features)"/>
             <param name="Rtabmap/DetectionRate"   value="'10'"/> <!--  Hz -->
+
+            <!-- KSC/UCF bottom priors -->
             <param name="Marker/Priors"           value="'301 2.44 2.5 0.2 1.57 0 0|482 3.44 1.8 0.2 1.57 0 -1.57|401 2.44 2.5 0.2 1.57 0 0|582 3.44 1.8 0.2 1.57 0 -1.57'"/>
+
+            <!-- UCF top (mirrored) priors -->
+            <param name="Marker/Priors"           value="'301 -2.44 2.5 0.2 1.57 0 0|482 -3.44 1.8 0.2 1.57 0 -1.57|401 -2.44 2.5 0.2 1.57 0 0|582 -3.44 1.8 0.2 1.57 0 -1.57'"/>
+
             <!-- Note these priors assume apriltags are ON the -->
             <param name="Optimizer/PriorsIgnored" value="'false'"/>
             
