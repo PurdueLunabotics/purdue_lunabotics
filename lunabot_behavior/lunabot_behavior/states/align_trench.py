@@ -165,7 +165,8 @@ class AlignTrench(AlignToAngle):
     # update excavation approach distance
     self.exc_approach_dist += self.distance_step
     new_approach_dist = Parameter("exc_approach_dist", Parameter.Type.DOUBLE, self.exc_approach_dist)
-    self.manager.set_parameters([new_approach_dist])
+    new_retreat_dist = Parameter("exc_retreat_dist", Parameter.Type.DOUBLE, self.exc_approach_dist + self.trenching_dist)
+    self.manager.set_parameters([new_approach_dist, new_retreat_dist])
 
     self.completed_angles = []
 
