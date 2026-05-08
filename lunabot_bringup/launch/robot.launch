@@ -284,7 +284,7 @@
             <param name="Grid/Sensor"             value="'0'"/> <!-- Only use point clouds-->
             <param name="Grid/FootprintLength"    value="'1.0'"/>
             <param name="Grid/FootprintWidth"     value="'0.75'"/> 
-            <param name="Grid/MaxGroundAngle"     value="'40'"/> <!-- 30 degree normal before marked as obstacle -->
+            <param name="Grid/MaxGroundAngle"     value="'30'"/> <!-- 30 degree normal before marked as obstacle -->
             <param name="Grid/MaxObstacleHeight"  value="'2.0'"/> <!-- points greater than 2m above are not obstacles -->
             <param name="Grid/RangeMax"           value="'0.0'"/> <!-- don't cap range (do this in cameras.launch) -->
             <param name="Grid/PreVoxelFiltering"  value="'false'"/> <!-- don't filter with voxels (do this in cameras.launch) -->
