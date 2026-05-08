@@ -56,7 +56,14 @@ class ApproachMiniState(State):
 
     self.MAX_SPEED = 0.10
 
-    self.TIMEOUT_TIME = 30 # 30 # in seconds, how long to wait before giving up and continuing
+    self.TIMEOUT_TIME = 30 # in seconds, how long to wait before giving up and continuing
+
+    self.SAFE_REALIGN_DISTANCE = 0.35 # in meters, how far we must be in order to realign safely
+    self.TARGET_HORIZONTAL_APRILTAG_DIST = 0.03 # in the camera's frame, target horizontal offset of the apriltag to be
+    self.HORIZONTAL_DIST_THRESHOLD = 0.02 # The tolerance for this horizontal error before it's a problem
+
+    self.horizontal_misalign_count = 0 # how many times we've been horizontally off
+    self.MISALIGN_COUNT_THRESHOLD = 20 # how many times before deciding to realign
 
   def setup(self, manager: Node):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "/cmd_vel", 10)
@@ -77,6 +84,7 @@ class ApproachMiniState(State):
     self.resetPID()
     self.lost_count = 0
     self.success_count = 0
+    self.horizontal_misalign_count = 0
 
     self.start_time = self.manager.get_clock().now()
   
@@ -88,6 +96,7 @@ class ApproachMiniState(State):
     if (elapsed_time > self.TIMEOUT_TIME):
       # if we timeout, return success (assume we're done)
       self.publish_aligned_msg()
+      self.manager.get_logger().warn("Behavior: Exiting approach due to Timeout!")
       return Events.SUCCESS
 
     apriltag_present, detections = self.isApriltagPresent()
@@ -101,7 +110,7 @@ class ApproachMiniState(State):
               apriltag_in_camera_frame = self.tf_buffer.lookup_transform("mini/d455_back_rgb_link", "main_deposition_small", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
 
             distance = apriltag_in_camera_frame.transform.translation.z
-            self.manager.get_logger().info(f"Distance: {distance}")
+            # self.manager.get_logger().info(f"Distance: {distance}")
 
             error = self.DISTANCE_GOAL - distance
 
@@ -109,18 +118,26 @@ class ApproachMiniState(State):
             if (abs(error) < self.GOAL_THRESHOLD):
                 self.success_count += 1
 
-            rotation_quaternion = apriltag_in_camera_frame.transform.rotation
-            (roll, pitch, yaw) = euler_from_quaternion([rotation_quaternion.x, rotation_quaternion.y, rotation_quaternion.z, rotation_quaternion.w])
-            if (abs(yaw) > 0.01):   #NOTE TEST THIS and find what we want to realign to 
-              # if we xxx, ask mini for a realign, and go to a waiting state
-              self.publish_realign_msg()
-              self.manager.get_logger().info("Behavior: Performing realign")
-              return Events.NEED_REALIGN
-
             # if aligned, return success for next state, and the transition message for the next state
             if (self.success_count >= self.SUCCESS_THRESHOLD):
                 self.publish_aligned_msg()
                 return Events.SUCCESS
+
+            # if the apriltag misaligns horizontally, ask for a realign
+            horizontal_pos = apriltag_in_camera_frame.transform.translation.x
+            horizontal_error = abs(self.TARGET_HORIZONTAL_APRILTAG_DIST - horizontal_pos)
+            if (horizontal_error > self.HORIZONTAL_DIST_THRESHOLD and distance > self.SAFE_REALIGN_DISTANCE):
+              self.horizontal_misalign_count += 1
+            else:
+              self.horizontal_misalign_count = 0
+
+            # self.manager.get_logger().info(f"count: {self.horizontal_misalign_count} dist: {distance}")
+            if (distance > self.SAFE_REALIGN_DISTANCE and self.horizontal_misalign_count > self.MISALIGN_COUNT_THRESHOLD):
+              # if we are far enough, and are misaligned, ask mini for a realign, and go to a waiting state
+              self.publish_realign_msg()
+              self.horizontal_misalign_count = 0
+              self.manager.get_logger().info("Behavior: Performing realign")
+              return Events.NEED_REALIGN
             
             velocity = self.runPID(error)
             velocity = np.clip(velocity, -self.MAX_SPEED, self.MAX_SPEED)
