@@ -45,6 +45,9 @@ class MainStates(Enum):
     # ===== INIT SECTION (1) =====
     INIT_MAP = (SetupMap(True), (LedColor.GREEN, LedColor.YELLOW))
     INIT_WAIT = (State(), (LedColor.GREEN, LedColor.GREEN)) # This will stay as State(), no logic needed
+
+    INIT_RAISE = (Raise(run_exc=False), (LedColor.GREEN, LedColor.TEAL))
+
     INIT_MOVE = (InitRetreat(True, 0.1, 5.0), (LedColor.GREEN, LedColor.TEAL))
     INIT_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
     INIT_OBSTACLES = (SetupObstacles(True), (LedColor.GREEN, LedColor.BLUE))
@@ -136,7 +139,9 @@ class MainStates(Enum):
         transitions = {
             (MainStates.INIT_MAP, Events.SUCCESS): MainStates.INIT_OBSTACLES,
             (MainStates.INIT_OBSTACLES, Events.SUCCESS): MainStates.INIT_WAIT,
-            (MainStates.INIT_WAIT, Events.PROCEED): MainStates.INIT_MOVE,
+            (MainStates.INIT_WAIT, Events.PROCEED): MainStates.INIT_RAISE,
+
+            (MainStates.INIT_RAISE, Events.SUCCESS): MainStates.INIT_MOVE,
             
             (MainStates.INIT_MOVE, Events.SUCCESS_AND_DONT_MINE): MainStates.WAIT_FOR_MINI_GONE,
             (MainStates.INIT_MOVE, Events.SUCCESS): MainStates.STARTING_PLUNGE,
