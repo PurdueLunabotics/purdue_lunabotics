@@ -130,7 +130,8 @@ class InitRetreat(State):
       output.linear.x = self.speed
       self.cmd_vel_publisher.publish(output)
       if self.manager.get_clock().now() - self.starting_time > Duration(seconds=self.duration):
-        self.ready_pub.publish(Bool(data = True))
+        for i in range(10):
+          self.ready_pub.publish(Bool(data = True))
 
         if (direction == Direction.EAST and self.is_main):
           return Events.SUCCESS_AND_DONT_MINE
