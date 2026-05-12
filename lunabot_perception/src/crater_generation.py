@@ -44,7 +44,7 @@ class CraterGeneration(Node):
             ns = ns + '/'
 
         # transform we're looking for is from base link back to map
-        self.map_used = f"/mini/map"
+        self.map_used = f"{ns}map"
         
         self.crater_publisher = self.create_publisher(
             PointCloud2, "crater", 10
@@ -55,14 +55,12 @@ class CraterGeneration(Node):
         )
         
         self.pointcloud_subscriber = self.create_subscription(
-            PointCloud2, "mini/rtabmap/cloud_obstacles", self.set_points,  10
+            PointCloud2, "rtabmap/cloud_obstacles", self.set_points,  10
         )
         self.ground_subscriber = self.create_subscription(
-            PointCloud2, "mini/rtabmap/cloud_ground", self.set_ground, 10
+            PointCloud2, "rtabmap/cloud_ground", self.set_ground, 10
         )
-        self.cratervals_publisher = self.create_publisher(
-            PointCloud2, "crater_vals", 10
-        )
+        
 
         self.costmap_client = self.create_client(GetCostmap, "global_costmap/get_costmap")
         self.costmap = Costmap()
@@ -182,7 +180,7 @@ class CraterGeneration(Node):
             did_read = False
         # get average height of ground
         # find points below average height of ground in obstacles
-        self.get_logger().info(f"{len(self.ground_planes.data)}")
+        # self.get_logger().info(f"{len(self.ground_planes.data)}")
         
         ground_vals = []
         try:
@@ -202,27 +200,26 @@ class CraterGeneration(Node):
             did_read = False
 
         crater_vals = []
-        crater_check = []
         if(did_read):
             for p in obst:
                 if ((self.coeff[0]*p[0]+self.coeff[1]*p[1]+self.coeff[2]) > p[2] + 0.09): # and self.is_blocked(self.costmap, p[0], p[1], 252)):
                 # if(p[2]<ground_height-0.02):
                     crater_vals.append(p[:-1])
-                    crater_check.append(p)
+                    
                     # self.get_logger().info(f"{p}")
             
-            if len(crater_vals) != 0:
-                header = Header()
-                t = self.get_clock().now()
-                header.stamp = t.to_msg()
-                header.frame_id = self.map_used
-                pc2 = point_cloud2.create_cloud_xyz32(header, crater_check)
+            # if len(crater_vals) != 0:
+            #     header = Header()
+            #     t = self.get_clock().now()
+            #     header.stamp = t.to_msg()
+            #     header.frame_id = self.map_used
+            #     pc2 = point_cloud2.create_cloud_xyz32(header, crater_check)
 
-                self.cratervals_publisher.publish(pc2)
+            #     self.cratervals_publisher.publish(pc2)
                     
             # self.get_logger().info(f"{craternp}")
             # initial guess for the ring center and radius (if no previous info about those, increase uncertainty accordingly)
-            guessed_cx = -0.5
+            guessed_cx = 0
             guessed_cy = 0
             guessed_r = 0.2
 
@@ -247,9 +244,9 @@ class CraterGeneration(Node):
                 
                 # try:
                     
-                self.get_logger().warn(f"hough {hough_cx}")
-                self.get_logger().warn(f"hough {hough_cy}")
-                self.get_logger().warn(f"hough {hough_r}")
+                # self.get_logger().warn(f"hough {hough_cx}")
+                # self.get_logger().warn(f"hough {hough_cy}")
+                # self.get_logger().warn(f"hough {hough_r}")
                     
                     
                 # except Exception as inst:
