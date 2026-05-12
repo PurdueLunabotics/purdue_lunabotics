@@ -13,10 +13,14 @@
       transform_tolerance: 0.1
     obstacle_layer:
       plugin: "nav2_costmap_2d::ObstacleLayer"
-      observation_sources: crater
+      observation_sources: "crater behavior"
       enabled: true
       crater:
         data_type: "PointCloud2"
+        obstacle_max_range: 10.0
+      behavior:
+        data_type: "PointCloud2"
+        obstacle_max_range: 10.0
       footprint_clearing_enabled: true
     denoise_layer:
       plugin: "nav2_costmap_2d::DenoiseLayer"
@@ -43,6 +47,8 @@ global_costmap:
       obstacle_layer:
         crater:
           topic: "/rtabmap/crater"
+        behavior:
+          topic: "/obstacle"
 
 planner_server:
   ros__parameters:
@@ -61,6 +67,8 @@ mini:
         obstacle_layer:
           crater:
             topic: "/mini/rtabmap/crater"
+          behavior:
+            topic: "/mini/obstacle"
 
   planner_server:
     ros__parameters:

@@ -30,7 +30,7 @@ from lunabot_behavior.states.wait_for_approach import WaitForApproachState
 from lunabot_behavior.states.approach_mini import ApproachMiniState
 from lunabot_behavior.states.wait_for_diverge import WaitForDivergeState
 from lunabot_behavior.states.separate_from_mini import SeparateFromMiniState
-from lunabot_behavior.states.init import InitRetreat, SetupMap
+from lunabot_behavior.states.init import InitRetreat, SetupMap, SetupObstacles
 from lunabot_behavior.states.wait_for_linkup import WaitForLinkup
 from lunabot_behavior.states.proceed import Proceed
 
@@ -47,6 +47,7 @@ class MainStates(Enum):
     INIT_WAIT = (State(), (LedColor.GREEN, LedColor.GREEN)) # This will stay as State(), no logic needed
     INIT_MOVE = (InitRetreat(True, 0.1, 5.0), (LedColor.GREEN, LedColor.TEAL))
     INIT_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
+    INIT_OBSTACLES = (SetupObstacles(True), (LedColor.GREEN, LedColor.BLUE))
     
     WAIT_FOR_MINI_GONE = (MainWaitForMiniGoneState(), (LedColor.GREEN, LedColor.GREEN))
 
@@ -133,7 +134,8 @@ class MainStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
-            (MainStates.INIT_MAP, Events.SUCCESS): MainStates.INIT_WAIT,
+            (MainStates.INIT_MAP, Events.SUCCESS): MainStates.INIT_OBSTACLES,
+            (MainStates.INIT_OBSTACLES, Events.SUCCESS): MainStates.INIT_WAIT,
             (MainStates.INIT_WAIT, Events.PROCEED): MainStates.INIT_MOVE,
             
             (MainStates.INIT_MOVE, Events.SUCCESS_AND_DONT_MINE): MainStates.WAIT_FOR_MINI_GONE,
