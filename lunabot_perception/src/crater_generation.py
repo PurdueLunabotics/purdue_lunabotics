@@ -180,7 +180,7 @@ class CraterGeneration(Node):
             did_read = False
         # get average height of ground
         # find points below average height of ground in obstacles
-        self.get_logger().info(f"{len(self.ground_planes.data)}")
+        # self.get_logger().info(f"{len(self.ground_planes.data)}")
         
         ground_vals = []
         try:
@@ -219,7 +219,7 @@ class CraterGeneration(Node):
                     
             # self.get_logger().info(f"{craternp}")
             # initial guess for the ring center and radius (if no previous info about those, increase uncertainty accordingly)
-            guessed_cx = -0.5
+            guessed_cx = 0
             guessed_cy = 0
             guessed_r = 0.2
 
@@ -244,9 +244,9 @@ class CraterGeneration(Node):
                 
                 # try:
                     
-                self.get_logger().warn(f"hough {hough_cx}")
-                self.get_logger().warn(f"hough {hough_cy}")
-                self.get_logger().warn(f"hough {hough_r}")
+                # self.get_logger().warn(f"hough {hough_cx}")
+                # self.get_logger().warn(f"hough {hough_cy}")
+                # self.get_logger().warn(f"hough {hough_r}")
                     
                     
                 # except Exception as inst:
