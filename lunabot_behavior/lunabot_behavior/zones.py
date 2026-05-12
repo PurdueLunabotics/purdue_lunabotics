@@ -12,6 +12,12 @@ from rclpy.node import Node
 
 import numpy as np
 
+def point_to_shapely(point: Point) -> shp.Point:
+    return shp.Point(point.x, point.y)
+
+def zone_to_poly(zone: Zone):
+    return shp.Polygon(shell=[point_to_shapely(zone.v1), point_to_shapely(zone.v2), point_to_shapely(zone.v3), point_to_shapely(zone.v4)])
+
 # zone geometries - based on guidebook orientations (all measurements in meters)
 class ZoneMeasurements:
     # ----------------------
@@ -107,6 +113,8 @@ berm_zone = make_zone(
     ZoneMeasurements.BERM_LENGTH_X,
     ZoneMeasurements.BERM_LENGTH_Y)
 
+bounding_box = shp.MultiPolygon([zone_to_poly(start_zone), zone_to_poly(exc_zone), zone_to_poly(berm_zone)]).bounds
+
 # TODO: replace with actual point to line calculation
 def get_distance_from_start(p: np.array):
     start_center = np.array([ZoneMeasurements.START_OFFSET_X, ZoneMeasurements.START_OFFSET_Y])
@@ -119,12 +127,6 @@ def get_distance_from_exc(p: np.array):
 def get_distance_from_berm(p: np.array):
     start_center = np.array([ZoneMeasurements.BERM_OFFSET_X, ZoneMeasurements.BERM_OFFSET_Y])
     return np.linalg.norm(p - start_center)
-
-def point_to_shapely(point: Point) -> shp.Point:
-    return shp.Point(point.x, point.y)
-
-def zone_to_poly(zone: Zone):
-    return shp.Polygon(shell=[point_to_shapely(zone.v1), point_to_shapely(zone.v2), point_to_shapely(zone.v3), point_to_shapely(zone.v4)])
 
 class ZonesNode(Node):
     def __init__(self):

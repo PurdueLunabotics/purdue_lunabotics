@@ -27,7 +27,7 @@ from lunabot_behavior.states.approach_main import ApproachMainState
 from lunabot_behavior.states.wait_for_main_approach import WaitForMainApproachState
 from lunabot_behavior.states.collect import CollectRegolithState
 from lunabot_behavior.states.wait_for_main_diverge import WaitForMainDivergeState
-from lunabot_behavior.states.init import InitRetreat, SetupMap
+from lunabot_behavior.states.init import InitRetreat, SetupMap, SetupObstacles
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -42,6 +42,7 @@ class MiniStates(Enum):
     INIT_WAIT = (State(), (LedColor.GREEN, LedColor.GREEN))
     INIT_MOVE = (InitRetreat(False, 0.2, 1.7), (LedColor.GREEN, LedColor.TEAL))
     INIT_STALL = (State(), (LedColor.GREEN, LedColor.RED))
+    INIT_OBSTACLES = (SetupObstacles(False), (LedColor.GREEN, LedColor.BLUE))
     
     FIND_LINKUP = (FindLinkup(), (LedColor.GREEN, LedColor.BLUE))
     FIND_LINKUP_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
@@ -96,9 +97,10 @@ class MiniStates(Enum):
         transitions = {
             (MiniStates.INIT_MAP, Events.SUCCESS): MiniStates.INIT_WAIT,
             (MiniStates.INIT_WAIT, Events.PROCEED): MiniStates.INIT_MOVE,
-            (MiniStates.INIT_MOVE, Events.SUCCESS): MiniStates.FIND_LINKUP,
+            (MiniStates.INIT_MOVE, Events.SUCCESS): MiniStates.INIT_OBSTACLES,
             (MiniStates.INIT_MOVE, Events.STALL): MiniStates.INIT_STALL,
             (MiniStates.INIT_STALL, Events.SUCCESS): MiniStates.INIT_MOVE,
+            (MiniStates.INIT_OBSTACLES, Events.SUCCESS): MiniStates.FIND_LINKUP,
             
             
             (MiniStates.FIND_LINKUP, Events.SUCCESS): MiniStates.LINKUP_HANDSHAKE,
