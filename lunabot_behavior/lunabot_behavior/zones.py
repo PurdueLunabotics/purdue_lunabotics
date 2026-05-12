@@ -23,20 +23,20 @@ class ZoneMeasurements:
     # ----------------------
     # KSC
     # ----------------------
-    START_OFFSET_X = 2.44
-    START_OFFSET_Y = 1.5
-    START_LENGTH_X = 2
-    START_LENGTH_Y = 2
+    # START_OFFSET_X = 2.44
+    # START_OFFSET_Y = 1.5
+    # START_LENGTH_X = 2
+    # START_LENGTH_Y = 2
 
-    EXC_OFFSET_X = 2.19
-    EXC_OFFSET_Y = 0
-    EXC_LENGTH_X = 2.5
-    EXC_LENGTH_Y = 5
+    # EXC_OFFSET_X = 2.19
+    # EXC_OFFSET_Y = 0
+    # EXC_LENGTH_X = 2.5
+    # EXC_LENGTH_Y = 5
 
-    BERM_OFFSET_X = -1.94
-    BERM_OFFSET_Y = 1.9
-    BERM_LENGTH_X = 1.5
-    BERM_LENGTH_Y = 0.9
+    # BERM_OFFSET_X = -1.94
+    # BERM_OFFSET_Y = 1.9
+    # BERM_LENGTH_X = 1.5
+    # BERM_LENGTH_Y = 0.9
 
     # ----------------------
     # UCF bottom (=guidebook) (=left from ingress)
@@ -59,20 +59,20 @@ class ZoneMeasurements:
     # ----------------------
     # UCF top (=guidebook mirrored) (=right from ingress)
     # ----------------------
-    # START_OFFSET_X = -3.05
-    # START_OFFSET_Y = 1.285
-    # START_LENGTH_X = 2
-    # START_LENGTH_Y = 2
+    START_OFFSET_X = -3.05
+    START_OFFSET_Y = 1.285
+    START_LENGTH_X = 2
+    START_LENGTH_Y = 2
 
-    # EXC_OFFSET_X = -2
-    # EXC_OFFSET_Y = 0
-    # EXC_LENGTH_X = 4.0
-    # EXC_LENGTH_Y = 4.57
+    EXC_OFFSET_X = -2
+    EXC_OFFSET_Y = 0
+    EXC_LENGTH_X = 4.0
+    EXC_LENGTH_Y = 4.57
 
-    # BERM_OFFSET_X = 2.75
-    # BERM_OFFSET_Y = -1.285
-    # BERM_LENGTH_X = 1.5
-    # BERM_LENGTH_Y = 0.9
+    BERM_OFFSET_X = 2.75
+    BERM_OFFSET_Y = -1.285
+    BERM_LENGTH_X = 1.5
+    BERM_LENGTH_Y = 0.9
 
 def make_zone(offset_x, offset_y, length_x, length_y):
     z = Zone()
