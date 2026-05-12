@@ -44,7 +44,7 @@ class CraterGeneration(Node):
             ns = ns + '/'
 
         # transform we're looking for is from base link back to map
-        self.map_used = f"{ns}map"
+        self.map_used = f"mini/map"
         
         self.crater_publisher = self.create_publisher(
             PointCloud2, "crater", 10
@@ -55,10 +55,10 @@ class CraterGeneration(Node):
         )
         
         self.pointcloud_subscriber = self.create_subscription(
-            PointCloud2, "rtabmap/cloud_obstacles", self.set_points,  10
+            PointCloud2, "mini/rtabmap/cloud_obstacles", self.set_points,  10
         )
         self.ground_subscriber = self.create_subscription(
-            PointCloud2, "rtabmap/cloud_ground", self.set_ground, 10
+            PointCloud2, "mini/rtabmap/cloud_ground", self.set_ground, 10
         )
         
 
@@ -259,12 +259,21 @@ class CraterGeneration(Node):
                     
                 points_in = len(list(filter(remove,crater_vals)))
                 # hough_r < 0.4 and
-                if( hough_r > 0 and points_in > 9):
+                if(hough_r > 0 and points_in > 9):
                     #self.get_logger().warn("god help")
-                    for i in range(30):
-                        x = hough_cx + hough_r * np.cos(i*12*2*np.pi/360)
-                        y = hough_cy + hough_r * np.sin(i*12*2*np.pi/360)
-                        crater_pointcloud.append([x, y, 0])
+                    i = np.linspace(0,30,30)
+                    x = hough_cx + hough_r * np.cos(i*12*2*np.pi/360)
+                    y = hough_cy + hough_r * np.sin(i*12*2*np.pi/360)
+                    
+                    # self.get_logger().info(f"{np.stack((x,y,np.linspace(0,0,30)), axis= -1)}")
+                    # self.get_logger().info(f"{crater_pointcloud}")
+                    if  len(crater_pointcloud) == 0:
+                        crater_pointcloud = np.stack((x,y,np.linspace(0,0,30)), axis= -1)
+                        # self.get_logger().info(f"trying my best {crater_pointcloud}")
+                    else:
+                        crater_pointcloud = np.concatenate((crater_pointcloud, np.stack((x,y,np.linspace(0,0,30)), axis= -1)))
+                        # self.get_logger().info(f"can you work pls {crater_pointcloud}")
+
                         
                         
                     def dont_remove(j):
