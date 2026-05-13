@@ -30,6 +30,8 @@ setup(
             "find_linkup = lunabot_behavior.states.find_linkup:main",
             "main = lunabot_behavior.main_states:main",
             "mini = lunabot_behavior.mini_states:main",
+            "linkup_main = lunabot_behavior.linkup_main_states:main",
+            "linkup_mini = lunabot_behavior.linkup_mini_states:main",
             "dep = lunabot_behavior.dep_only_states:main",
             "ex = lunabot_behavior.ex_only_states:main",
             "ex_align = lunabot_behavior.ex_align_states:main",
