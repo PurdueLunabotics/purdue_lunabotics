@@ -9,7 +9,7 @@ import sys
 from lunabot_config.led_colors import LedColor
 
 from lunabot_behavior.states.align_to_berm import AlignToBerm
-from lunabot_behavior.states.find_linkup import FindLinkup
+from lunabot_behavior.states.find_linkup import FindLinkup, TraverseToMiddle
 from lunabot_behavior.states.handshake import Handshake
 from lunabot_behavior.states.align_to_angle import AlignToAngle
 from lunabot_behavior.states.separate_from_main import SeparateFromMainState
@@ -43,16 +43,20 @@ class MiniStates(Enum):
     INIT_MOVE = (InitRetreat(False, 0.2, 1.7), (LedColor.GREEN, LedColor.TEAL))
     INIT_STALL = (State(), (LedColor.GREEN, LedColor.RED))
     INIT_OBSTACLES = (SetupObstacles(False), (LedColor.GREEN, LedColor.BLUE))
+
+    GO_TO_MIDDLE = (TraverseToMiddle(), (LedColor.GREEN, LedColor.BLUE))
+    GO_TO_MIDDLE_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
+    GO_TO_MIDDLE_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
     
-    FIND_LINKUP = (FindLinkup(), (LedColor.GREEN, LedColor.BLUE))
-    FIND_LINKUP_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
-    FIND_LINKUP_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
+    FIND_LINKUP = (FindLinkup(), (LedColor.GREEN, LedColor.YELLOW))
+
+    CHECKOUT_LINKUP = (TraverseToLinkup(False, False), (LedColor.GREEN, LedColor.GREEN))
+    CHECKOUT_LINKUP_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
+    CHECKOUT_LINKUP_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
+
+    FIND_LINKUP_AGAIN = (FindLinkup(), (LedColor.GREEN, LedColor.YELLOW))
 
     LINKUP_HANDSHAKE = (Handshake(False, "linkup"), (LedColor.GREEN, LedColor.BLUE))
-
-    FIND_LINKUP_SECONDARY = (FindLinkupSecondary(), (LedColor.GREEN, LedColor.MAGENTA))
-    FIND_LINKUP_SECONDARY_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
-    FIND_LINKUP_SECONDARY_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
     
     # ===== LINKUP SECTION (2) =====
 
@@ -100,14 +104,24 @@ class MiniStates(Enum):
             (MiniStates.INIT_MOVE, Events.SUCCESS): MiniStates.INIT_OBSTACLES,
             (MiniStates.INIT_MOVE, Events.STALL): MiniStates.INIT_STALL,
             (MiniStates.INIT_STALL, Events.SUCCESS): MiniStates.INIT_MOVE,
-            (MiniStates.INIT_OBSTACLES, Events.SUCCESS): MiniStates.FIND_LINKUP,
+            (MiniStates.INIT_OBSTACLES, Events.SUCCESS): MiniStates.GO_TO_MIDDLE,
             
             
-            (MiniStates.FIND_LINKUP, Events.SUCCESS): MiniStates.LINKUP_HANDSHAKE,
-            (MiniStates.FIND_LINKUP, Events.STALL): MiniStates.FIND_LINKUP_STALL,
-            (MiniStates.FIND_LINKUP, Events.NO_PATH): MiniStates.FIND_LINKUP_NO_PATH,
-            (MiniStates.FIND_LINKUP_STALL, Events.SUCCESS): MiniStates.FIND_LINKUP,
-            (MiniStates.FIND_LINKUP_NO_PATH, Events.SUCCESS): MiniStates.FIND_LINKUP,
+            (MiniStates.GO_TO_MIDDLE, Events.SUCCESS): MiniStates.FIND_LINKUP,
+            (MiniStates.GO_TO_MIDDLE, Events.STALL): MiniStates.GO_TO_MIDDLE_STALL,
+            (MiniStates.GO_TO_MIDDLE, Events.NO_PATH): MiniStates.GO_TO_MIDDLE_NO_PATH,
+            (MiniStates.GO_TO_MIDDLE_STALL, Events.SUCCESS): MiniStates.GO_TO_MIDDLE,
+            (MiniStates.GO_TO_MIDDLE_NO_PATH, Events.SUCCESS): MiniStates.GO_TO_MIDDLE,
+
+            (MiniStates.FIND_LINKUP, Events.SUCCESS): MiniStates.CHECKOUT_LINKUP,
+
+            (MiniStates.CHECKOUT_LINKUP, Events.SUCCESS): MiniStates.FIND_LINKUP_AGAIN,
+            (MiniStates.CHECKOUT_LINKUP, Events.STALL): MiniStates.CHECKOUT_LINKUP_STALL,
+            (MiniStates.CHECKOUT_LINKUP, Events.NO_PATH): MiniStates.CHECKOUT_LINKUP_NO_PATH,
+            (MiniStates.CHECKOUT_LINKUP_STALL, Events.SUCCESS): MiniStates.CHECKOUT_LINKUP,
+            (MiniStates.CHECKOUT_LINKUP_NO_PATH, Events.SUCCESS): MiniStates.CHECKOUT_LINKUP,
+
+            (MiniStates.FIND_LINKUP_AGAIN, Events.SUCCESS): MiniStates.LINKUP_HANDSHAKE,
 
             (MiniStates.LINKUP_HANDSHAKE, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
 

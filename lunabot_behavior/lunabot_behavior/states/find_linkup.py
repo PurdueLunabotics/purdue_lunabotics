@@ -12,7 +12,7 @@ from nav_msgs.msg import Path
 from rtabmap_msgs.msg import OdomInfo
 
 from lunabot_behavior import zones
-from lunabot_behavior.state import Events
+from lunabot_behavior.state import Events, State
 from lunabot_behavior.states.traverse import Traverse
 from rclpy.node import Node
 from rclpy.task import Future
@@ -111,16 +111,16 @@ FINDING_LINKUP = 1
 FOUND_LINKUP = 2
 FAILED = 3
 
-class FindLinkup(Traverse):
+class TraverseToMiddle(Traverse):
     def __init__(self):
         self.goal = PoseStamped()
         self.goal.pose.position.x = ZoneMeasurements.BERM_OFFSET_X
         self.goal.pose.position.y = 0.0
 
-        self.goal_vec = point_from_pose_2d(self.goal)
-
         super().__init__(self.goal, False)
 
+class FindLinkup(State):
+    def __init__(self):
         self.MIN_SEGMENT_LENGTH = 1.325
 
         # excavation edge for linkup
@@ -138,15 +138,12 @@ class FindLinkup(Traverse):
         
         self.excavation_edge = LineString([self.exc_p1, self.exc_p2])
         self.padding = 0.4
-        
-        self.state = WAITING
 
     def setup(self, manager: Node):
         ns = manager.get_namespace().lstrip('/')
         self.frame = "map"
         if len(ns) != 0:
             self.frame = f"{ns}/{self.frame}"
-        self.goal.header.frame_id = self.frame
 
         super().setup(manager)
 
@@ -154,49 +151,28 @@ class FindLinkup(Traverse):
         self.marker_pub = manager.create_publisher(Marker, "/linkup_marker", 10)
         self.marker_pub.publish(Marker(action=Marker.DELETEALL, header=Header(frame_id=self.frame)))
 
-        self.odom = None
-        self.tolerance = 2.0 # wider tolerance is ok - finding linkup isn't an exact science
         self.logger = manager.get_logger()
 
-        self.path_client = ActionClient(manager, ComputePathToPose, "compute_path_to_pose")
         self.costmap_client = manager.create_client(GetCostmap, "global_costmap/get_costmap")
-        self.odom_info_sub = manager.create_subscription(OdomInfo, "rtabmap/odom_info", self.odom_info_cb, 10)
-        self.lost_odom_time = None
 
         self.manager = manager
 
-    def odom_cb(self, pose: PoseStamped):
-        self.odom = point_from_pose_2d(pose)
-    
-    def odom_info_cb(self, info: OdomInfo):
-        if info.lost:
-            self.lost_odom_time = self.manager.get_clock().now()
+    def start(self):
+        self.find_linkup()
 
     def periodic(self) -> None | Events:
-        super().publish_everything()
-
         if self.state == FOUND_LINKUP:
             return Events.SUCCESS
         elif self.state == FAILED:
             return Events.FAIL
-
-        if self.odom is not None and np.linalg.norm(self.odom - self.goal_vec) <= self.tolerance and self.state == WAITING and (self.lost_odom_time is None or self.manager.get_clock().now() - self.lost_odom_time > Duration(seconds=30)):
-            self.state = FINDING_LINKUP
-            self.find_linkup() # find the linkup thingamabob
-
         return None
 
 
     # helper functions ===========================================================================
 
     def find_linkup(self):
-        # print("finding linkup")
-        self.goal.header.stamp = self.manager.get_clock().now().to_msg()
-
         self.costmap_client.wait_for_service()
         self.costmap_client.call_async(GetCostmap.Request()).add_done_callback(self.costmap_cb)
-
-        # self.find_segment(self.start_pose)
 
     def costmap_cb(self, future: Future):
         result = future.result()
