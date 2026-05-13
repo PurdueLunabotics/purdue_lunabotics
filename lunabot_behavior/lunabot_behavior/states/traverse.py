@@ -34,6 +34,7 @@ class Traverse(State):
         self.last_pose: None | PoseStamped = None
         self.tolerance = 0.2
         self.logger = manager.get_logger()
+        self.manager = manager
 
     def path_cb(self, path: Path):
         self.last_pose = path.poses[-1] # type: ignore
@@ -48,6 +49,7 @@ class Traverse(State):
     
     def start(self):
         self.publish_everything()
+        self.start_time = self.manager.get_clock().now()
 
     def periodic(self) -> None | Events:
         if self.odom is None or self.last_pose is None:
@@ -56,7 +58,8 @@ class Traverse(State):
         self.publish_everything()
         dist = math.sqrt((self.odom.pose.position.x - self.last_pose.pose.position.x) ** 2 + (self.odom.pose.position.y - self.last_pose.pose.position.y) ** 2)
         self.logger.debug(f"[Traverse]: distance {dist}")
-        if dist < self.tolerance:
+        elapsed = self.manager.get_clock().now() - self.start_time
+        if dist < self.tolerance and elapsed > Duration(seconds=5):
             return Events.SUCCESS
         return None
 

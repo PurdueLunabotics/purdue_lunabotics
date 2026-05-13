@@ -119,6 +119,15 @@ class TraverseToMiddle(Traverse):
 
         super().__init__(self.goal, False)
 
+    def setup(self, manager):
+        ns = manager.get_namespace().lstrip('/')
+        self.frame = "map"
+        if len(ns) != 0:
+            self.frame = f"{ns}/{self.frame}"
+        self.goal.header.frame_id = self.frame
+        super().setup(manager)
+
+
 class FindLinkup(State):
     def __init__(self):
         self.MIN_SEGMENT_LENGTH = 1.325
@@ -158,6 +167,7 @@ class FindLinkup(State):
         self.manager = manager
 
     def start(self):
+        self.state = WAITING
         self.find_linkup()
 
     def periodic(self) -> None | Events:
@@ -169,6 +179,19 @@ class FindLinkup(State):
 
 
     # helper functions ===========================================================================
+
+    def line_to_ends(self, pos: shp.Point, angle: float, length: float | None = None) -> tuple[shp.Point, shp.Point]:
+        if length is None:
+            length = self.MIN_SEGMENT_LENGTH
+
+        if not self.is_mirrored:
+            a = shp.Point(pos.x + np.cos(angle) * length / 2, pos.y + np.sin(angle) * length / 2)
+            b = shp.Point(pos.x - np.cos(angle) * length / 2, pos.y - np.sin(angle) * length / 2)
+        else:
+            a = shp.Point(pos.x - np.cos(angle) * length / 2, pos.y + np.sin(angle) * length / 2)
+            b = shp.Point(pos.x + np.cos(angle) * length / 2, pos.y - np.sin(angle) * length / 2)
+
+        return (a, b)
 
     def find_linkup(self):
         self.costmap_client.wait_for_service()
@@ -191,16 +214,11 @@ class FindLinkup(State):
         self.show_line(pos, angle, num_points, "final", 1.0, 1.0, 1.0, 0.1)
 
         linkup = Linkup()
-        if not self.is_mirrored:
-            linkup.main_target.x = pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
-            linkup.main_target.y = pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
-            linkup.mini_target.x = pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
-            linkup.mini_target.y = pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
-        else:
-            linkup.main_target.x = pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
-            linkup.main_target.y = pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
-            linkup.mini_target.x = pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
-            linkup.mini_target.y = pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
+        a, b = self.line_to_ends(pos, angle)
+        linkup.main_target.x = a.x
+        linkup.main_target.y = a.y
+        linkup.mini_target.x = b.x
+        linkup.mini_target.y = b.y
 
         linkup.exc_target.x = linkup.main_target.x
         linkup.exc_target.y = linkup.main_target.y
@@ -213,12 +231,9 @@ class FindLinkup(State):
         if pos.distance(self.excavation_edge) > self.MIN_SEGMENT_LENGTH / 4 or pos.y > self.exc_p1[1] - self.padding or pos.y < self.exc_p2[1] + self.padding:
             return (inf, True)
 
-        if not self.is_mirrored:
-            a = shp.Point(pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
-            b = shp.Point(pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
-        else:
-            a = shp.Point(pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
-            b = shp.Point(pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
+        eval_length = self.MIN_SEGMENT_LENGTH * 2.0
+
+        a, b = self.line_to_ends(pos, angle, eval_length)
 
         if not a.within(zones.zone_to_poly(zones.exc_zone)):
             return (inf, True)
@@ -282,10 +297,9 @@ class FindLinkup(State):
         # Identity pose
         marker.pose.orientation.w = 1.0
 
-        a = Point(x = pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, y = pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
-        b = Point(x = pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, y = pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
+        start, end = self.line_to_ends(pos, angle, eval_length)
 
-        marker.points = [a, b]
+        marker.points = [Point(x = start.x, y = start.y), Point(x = end.x, y = end.y)]
 
         self.marker_pub.publish(marker)
 
