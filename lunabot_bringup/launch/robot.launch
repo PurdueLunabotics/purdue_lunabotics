@@ -125,7 +125,9 @@
         <arg name="robot_num" value="$(var robot_num)" />
     </include>
 
-    <include if="$(eval '$(var robot_num) == 1')" file="$(find-pkg-share lunabot_perception)/launch/lidar.launch">
+    <arg name="should_run_lidar" default="$(eval '($(var robot_num) == 1) and not $(var sim)')" />
+
+    <include if="$(var should_run_lidar)" file="$(find-pkg-share lunabot_perception)/launch/lidar.launch">
 
     </include>        
 
