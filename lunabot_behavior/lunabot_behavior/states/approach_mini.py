@@ -112,10 +112,10 @@ class ApproachMiniState(State):
             distance = apriltag_in_camera_frame.transform.translation.z
             self.manager.get_logger().info(f"Approach Distance: {distance}")
 
-            error = self.DISTANCE_GOAL - distance
+            error = distance - self.DISTANCE_GOAL
 
             # if aligned, increment a counter. at the threshold, alignment is done
-            if (abs(error) < self.GOAL_THRESHOLD):
+            if (error < self.GOAL_THRESHOLD):
                 self.success_count += 1
 
             # if aligned, return success for next state, and the transition message for the next state
@@ -139,7 +139,7 @@ class ApproachMiniState(State):
               self.manager.get_logger().info("Behavior: Performing realign")
               return Events.NEED_REALIGN
             
-            velocity = self.runPID(error)
+            velocity = self.runPID(-error)
             velocity = np.clip(velocity, -self.MAX_SPEED, self.MAX_SPEED)
             self.publish_linear_velocity(velocity)
 
