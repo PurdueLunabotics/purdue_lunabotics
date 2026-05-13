@@ -78,13 +78,14 @@ class SetupMap(State):
   def periodic(self):
     self.manager.get_logger().info(f"SetupMap: can see main: {self.can_see_main_bot}, dir: {direction}")
     if self.can_see_main_bot and self.is_main and (direction == Direction.NORTH or direction == Direction.EAST):
-      # mini_detections = self.detections["mini/d455_front_color_optical_frame"]
-      mini_detections = self.detections["mini/d455_front_rgb_link"]  # for sim
+      mini_detections = self.detections["mini/d455_front_color_optical_frame"]
+      # mini_detections = self.detections["mini/d455_front_rgb_link"]  # for sim
       mini_detections.header.frame_id = "deposition_apriltag_small_optical_frame"
       try:
         main_to_tag = self.tf_buf.lookup_transform("main_deposition_small", "tag36h11:582" if direction == Direction.EAST else "tag36h11:401", Time())
         main_to_tag.header.frame_id = "deposition_apriltag_small_optical_frame"
         main_to_tag.child_frame_id = "tag36h11:482" if direction == Direction.EAST else "tag36h11:301"
+        main_to_tag.header.stamp = self.manager.get_clock().now().to_msg()
         self.tf_broadcaster.sendTransform(main_to_tag)
         self.detections_pub.publish(mini_detections)
       except Exception as e:
@@ -99,6 +100,7 @@ class SetupMap(State):
         main_to_tag = self.tf_buf.lookup_transform("deposition_apriltag_small_optical_frame", "tag36h11:482" if direction == Direction.WEST else "tag36h11:301", Time())
         main_to_tag.header.frame_id = "main_deposition_small"
         main_to_tag.child_frame_id = "tag36h11:582" if direction == Direction.WEST else "tag36h11:401"
+        main_to_tag.header.stamp = self.manager.get_clock().now().to_msg()
         self.tf_broadcaster.sendTransform(main_to_tag)
         self.detections_pub.publish(main_detections)
       except Exception as e:

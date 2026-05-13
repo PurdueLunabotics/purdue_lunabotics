@@ -125,11 +125,10 @@
         <arg name="robot_num" value="$(var robot_num)" />
     </include>
 
-    <arg name="should_run_lidar" default="$(eval '($(var robot_num) == 1) and not $(var sim)')" />
 
-    <include if="$(var should_run_lidar)" file="$(find-pkg-share lunabot_perception)/launch/lidar.launch">
-
-    </include>        
+    <group unless="$(var sim)">
+        <include if="$(eval '($(var robot_num) == 1)')" file="$(find-pkg-share lunabot_perception)/launch/lidar.launch"></include>        
+    </group>
 
     <include if="$(var record)" file="$(find-pkg-share lunabot_bringup)/launch/$(var ns_)record.launch">
         <arg name="exp_name" value="$(var exp_name)" />
@@ -307,10 +306,10 @@
             <!-- <param name="Marker/Priors"           value="'301 2.44 2.5 0.2 1.57 0 0|482 3.44 1.8 0.2 1.57 0 -1.57|421 3.44 1.04 0.4 1.57 0 -1.57|401 2.44 2.5 0.2 1.57 0 0|582 3.44 1.8 0.2 1.57 0 -1.57|521 3.44 1.04 0.4 1.57 0 -1.57|'"/> -->
 
             <!-- UCF bottom (non-mirrored) priors -->
-            <!-- <param name="Marker/Priors"           value="'301 3.05 2.285 0.2 1.57 0 0|482 4.05 1.285 0.2 1.57 0 -1.57|421 4.05 0.525 0.4 1.57 0 -1.57|401 3.05 2.285 0.2 1.57 0 0|582 4.05 1.285 0.2 1.57 0 -1.57|521 4.05 0.525 0.4 1.57 0 -1.57'"/> -->
+            <param name="Marker/Priors"           value="'301 3.05 2.285 0.2 1.57 0 0|482 4.05 1.285 0.2 1.57 0 -1.57|421 4.05 0.525 0.4 1.57 0 -1.57|401 3.05 2.285 0.2 1.57 0 0|582 4.05 1.285 0.2 1.57 0 -1.57|521 4.05 0.525 0.4 1.57 0 -1.57'"/>
 
             <!-- UCF top (mirrored) priors -->
-            <param name="Marker/Priors"           value="'301 -3.05 2.285 0.2 1.57 0 0|482 -4.05 1.285 0.2 1.57 0 1.57|421 -4.05 0.525 0.4 1.57 0 1.57|401 -3.05 2.285 0.2 1.57 0 0|582 -4.05 1.285 0.2 1.57 0 1.57|521 -4.05 0.525 0.4 1.57 0 1.57|'"/>
+            <!-- <param name="Marker/Priors"           value="'301 -3.05 2.285 0.2 1.57 0 0|482 -4.05 1.285 0.2 1.57 0 1.57|421 -4.05 0.525 0.4 1.57 0 1.57|401 -3.05 2.285 0.2 1.57 0 0|582 -4.05 1.285 0.2 1.57 0 1.57|521 -4.05 0.525 0.4 1.57 0 1.57|'"/> -->
 
             <!-- Note these priors assume apriltags are ON the -->
             <param name="Optimizer/PriorsIgnored" value="'false'"/>
