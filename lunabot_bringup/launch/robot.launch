@@ -43,7 +43,7 @@
 
     <!-- What to Launch Args -->
     <arg name="autonomy" default="true" />
-    <arg name="record" default="false" />
+    <arg name="record" default="true" />
     <arg name="slam" default="true" />
     <arg name="odom_from_sim" default="false" />
     <arg name="teensy" default="$(var real)" />
@@ -125,7 +125,7 @@
         <arg name="robot_num" value="$(var robot_num)" />
     </include>
 
-    <include if="$(var lidar)" file="$(find-pkg-share lunabot_perception)/launch/lidar.launch">
+    <include if="$(eval '$(var robot_num) == 1')" file="$(find-pkg-share lunabot_perception)/launch/lidar.launch">
 
     </include>        
 

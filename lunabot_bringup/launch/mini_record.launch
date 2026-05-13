@@ -23,6 +23,8 @@
 
   /mini/d455_back/aligned_depth_to_color/camera_info
   /mini/d455_back/algined_depth_to_color/image_raw
+  /mini/d455_back/depth/camera_info
+  /mini/d455_back/depth/image_raw
   /mini/d455_back/color/camera_info
   /mini/d455_back/color/image_raw
   /mini/d455_back/detections
@@ -30,6 +32,8 @@
 
   /mini/d455_front/aligned_depth_to_color/camera_info
   /mini/d455_front/algined_depth_to_color/image_raw
+  /mini/d455_back/depth/camera_info
+  /mini/d455_back/depth/image_raw
   /mini/d455_front/color/camera_info
   /mini/d455_front/color/image_raw
   /mini/d455_front/detections
@@ -52,6 +56,10 @@
   /mini/rtabmap/octomap_grid
   /mini/rtabmap/odom
   /mini/rtabmap/tag_detections
+
+  /mini/unilidar/cloud
+  /mini/unilidar/imu
+  /mini/lidar_assembled_cloud
 
   /mini/sensors
   /mini/stalled
