@@ -125,11 +125,10 @@
         <arg name="robot_num" value="$(var robot_num)" />
     </include>
 
-    <arg name="should_run_lidar" default="$(eval '($(var robot_num) == 1) and not $(var sim)')" />
 
-    <include if="$(var should_run_lidar)" file="$(find-pkg-share lunabot_perception)/launch/lidar.launch">
-
-    </include>        
+    <group unless="$(var sim)">
+        <include if="$(eval '($(var robot_num) == 1)')" file="$(find-pkg-share lunabot_perception)/launch/lidar.launch"></include>        
+    </group>
 
     <include if="$(var record)" file="$(find-pkg-share lunabot_bringup)/launch/$(var ns_)record.launch">
         <arg name="exp_name" value="$(var exp_name)" />

@@ -86,7 +86,7 @@ class MiniStates(Enum):
     APPROACH_BERM = (ApproachBerm(), (LedColor.MAGENTA, LedColor.YELLOW))
     APPROACH_BERM_STALL = (Stall(), (LedColor.MAGENTA, LedColor.RED))
     
-    DEPOSIT = (Deposit(), (LedColor.MAGENTA, LedColor.GREEN))
+    DEPOSIT = (Deposit(is_main=False), (LedColor.MAGENTA, LedColor.GREEN))
     DEPOSIT_STALL = (State(), (LedColor.MAGENTA, LedColor.RED))
 
     RETREAT_BERM = (RetreatBerm(), (LedColor.MAGENTA, LedColor.TEAL))
