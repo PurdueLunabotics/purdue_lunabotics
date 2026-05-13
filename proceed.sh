@@ -1,1 +1,1 @@
-ros2 topic pub --once /events lunabot_msgs/msg/Event data:\ 15\
+ros2 topic pub -r 4 events lunabot_msgs/msg/Event data:\ 15\
