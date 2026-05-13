@@ -56,6 +56,10 @@
   /mini/rtabmap/octomap_grid
   /mini/rtabmap/odom
   /mini/rtabmap/tag_detections
+  /mini/rtabmap/map
+
+  /mini/global_costmap/costmap
+  /mini/global_costmap/costmap_updates
 
   /mini/unilidar/cloud
   /mini/unilidar/imu

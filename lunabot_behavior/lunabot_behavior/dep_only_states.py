@@ -7,11 +7,12 @@ from lunabot_msgs.msg import Event
 
 from lunabot_config.led_colors import LedColor
 
-from lunabot_behavior.states.align_to_angle import AlignToAngle
+from lunabot_behavior.states.align_to_berm import AlignToBerm
 from lunabot_behavior.states.traverse import Stall
 from lunabot_behavior.states.deposit import Deposit
 from lunabot_behavior.states.approach_berm import ApproachBerm
 from lunabot_behavior.states.retreat_berm import RetreatBerm
+from lunabot_behavior.states.fullstop import Stop
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -20,7 +21,7 @@ import rclpy
 
 class MainStates(Enum):
 
-    ALIGN_TO_BERM = (AlignToAngle(270), (LedColor.BLUE, LedColor.GREEN))
+    ALIGN_TO_BERM = (AlignToBerm(), (LedColor.BLUE, LedColor.GREEN))
     ALIGN_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
     APPROACH_BERM = (ApproachBerm(), (LedColor.BLUE, LedColor.TEAL))
@@ -36,6 +37,8 @@ class MainStates(Enum):
 
     IDLE = (State(), (LedColor.RED, LedColor.RED))
 
+    STOP = (Stop(), (LedColor.RED, LedColor.GREEN))
+
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
@@ -46,7 +49,7 @@ class MainStates(Enum):
             (MainStates.DEPOSIT_BERM, Events.STALL): MainStates.DEPOSIT_BERM_STALL,
             (MainStates.DEPOSIT_BERM_STALL, Events.SUCCESS): MainStates.DEPOSIT_BERM,
             
-            (MainStates.RETREAT_BERM, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
+            (MainStates.RETREAT_BERM, Events.SUCCESS): MainStates.STOP,
             (MainStates.RETREAT_BERM, Events.STALL): MainStates.RETREAT_BERM_STALL,
             (MainStates.RETREAT_BERM_STALL, Events.SUCCESS): MainStates.RETREAT_BERM,
         }
@@ -56,7 +59,7 @@ class MainStates(Enum):
 def main(args=None):
     rclpy.init(args=sys.argv, signal_handler_options=rclpy.SignalHandlerOptions.NO)
 
-    manager = StateManager(MainStates, MainStates.INIT_MAP, Events, Event)
+    manager = StateManager(MainStates, MainStates.ALIGN_TO_BERM, Events, Event)
 
     try:
         rclpy.spin(manager)

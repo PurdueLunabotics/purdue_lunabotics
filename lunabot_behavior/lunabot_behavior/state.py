@@ -8,6 +8,7 @@ class Events(Enum):
     SUCCESS = Event.SUCCESS
     FAIL = Event.FAIL
     SUCCESS_AND_DONT_MINE = Event.SUCCESS_AND_DONT_MINE
+    NEED_REALIGN = Event.NEED_REALIGN
 
     # External
     STALL = Event.STALL

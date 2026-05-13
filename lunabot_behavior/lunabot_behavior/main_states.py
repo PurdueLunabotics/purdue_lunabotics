@@ -30,7 +30,7 @@ from lunabot_behavior.states.wait_for_approach import WaitForApproachState
 from lunabot_behavior.states.approach_mini import ApproachMiniState
 from lunabot_behavior.states.wait_for_diverge import WaitForDivergeState
 from lunabot_behavior.states.separate_from_mini import SeparateFromMiniState
-from lunabot_behavior.states.init import InitRetreat, SetupMap
+from lunabot_behavior.states.init import InitRetreat, SetupMap, SetupObstacles
 from lunabot_behavior.states.wait_for_linkup import WaitForLinkup
 from lunabot_behavior.states.proceed import Proceed
 
@@ -45,8 +45,12 @@ class MainStates(Enum):
     # ===== INIT SECTION (1) =====
     INIT_MAP = (SetupMap(True), (LedColor.GREEN, LedColor.YELLOW))
     INIT_WAIT = (State(), (LedColor.GREEN, LedColor.GREEN)) # This will stay as State(), no logic needed
+
+    INIT_RAISE = (Raise(run_exc=False), (LedColor.GREEN, LedColor.TEAL))
+
     INIT_MOVE = (InitRetreat(True, 0.1, 5.0), (LedColor.GREEN, LedColor.TEAL))
     INIT_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
+    INIT_OBSTACLES = (SetupObstacles(True), (LedColor.GREEN, LedColor.BLUE))
     
     WAIT_FOR_MINI_GONE = (MainWaitForMiniGoneState(), (LedColor.GREEN, LedColor.GREEN))
 
@@ -71,6 +75,9 @@ class MainStates(Enum):
     
     ALIGN_TO_TRENCH = (AlignTrench(), (LedColor.WHITE, LedColor.YELLOW))
     ALIGN_TO_TRENCH_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
+
+    JUST_PLUNGE = (Plunge(), (LedColor.WHITE, LedColor.TEAL))
+    JUST_PLUNGE_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
     
     APPROACH_TRENCH = (ApproachTrench(), (LedColor.WHITE, LedColor.GREEN))
     APPROACH_TRENCH_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
@@ -130,8 +137,11 @@ class MainStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
-            (MainStates.INIT_MAP, Events.SUCCESS): MainStates.INIT_WAIT,
-            (MainStates.INIT_WAIT, Events.PROCEED): MainStates.INIT_MOVE,
+            (MainStates.INIT_MAP, Events.SUCCESS): MainStates.INIT_OBSTACLES,
+            (MainStates.INIT_OBSTACLES, Events.SUCCESS): MainStates.INIT_WAIT,
+            (MainStates.INIT_WAIT, Events.PROCEED): MainStates.INIT_RAISE,
+
+            (MainStates.INIT_RAISE, Events.SUCCESS): MainStates.INIT_MOVE,
             
             (MainStates.INIT_MOVE, Events.SUCCESS_AND_DONT_MINE): MainStates.WAIT_FOR_MINI_GONE,
             (MainStates.INIT_MOVE, Events.SUCCESS): MainStates.STARTING_PLUNGE,
@@ -161,8 +171,13 @@ class MainStates(Enum):
             (MainStates.TRAVERSE_TO_LINKUP_STALL, Events.SUCCESS): MainStates.TRAVERSE_TO_LINKUP,
 
             (MainStates.ALIGN_TO_TRENCH, Events.SUCCESS): MainStates.APPROACH_TRENCH,
+            (MainStates.ALIGN_TO_TRENCH, Events.NO_PATH): MainStates.JUST_PLUNGE,
             (MainStates.ALIGN_TO_TRENCH, Events.STALL): MainStates.ALIGN_TO_TRENCH_STALL,
             (MainStates.ALIGN_TO_TRENCH_STALL, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
+
+            (MainStates.JUST_PLUNGE, Events.STALL): MainStates.JUST_PLUNGE_STALL,
+            (MainStates.JUST_PLUNGE, Events.SUCCESS): MainStates.ALIGN_TO_LINKUP,
+            (MainStates.JUST_PLUNGE_STALL, Events.SUCCESS): MainStates.JUST_PLUNGE,
             
             (MainStates.APPROACH_TRENCH, Events.SUCCESS): MainStates.PLUNGE_ACT,
             (MainStates.APPROACH_TRENCH, Events.STALL): MainStates.APPROACH_TRENCH_STALL,
@@ -194,6 +209,7 @@ class MainStates(Enum):
 
             (MainStates.APPROACH_MINI, Events.SUCCESS): MainStates.DEPOSIT,
             (MainStates.APPROACH_MINI, Events.STALL): MainStates.APPROACH_MINI_STALL,
+            (MainStates.APPROACH_MINI, Events.NEED_REALIGN): MainStates.WAIT_FOR_MINI_ALIGN,
             (MainStates.APPROACH_MINI_STALL, Events.SUCCESS): MainStates.APPROACH_MINI,
 
             (MainStates.DEPOSIT, Events.SUCCESS): MainStates.SEPARATE_FROM_MINI,

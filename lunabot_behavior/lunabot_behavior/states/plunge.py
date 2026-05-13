@@ -16,7 +16,7 @@ class Plunge(State):
         self.sensors = None
 
         # Constants (in meters)  TODO: update these 
-        self.PLUNGE_TIME = 30  # seconds
+        self.PLUNGE_TIME = 30  # seconds TODO: change back to 30s
         self.MIN_TIME = 2  # seconds
         self.EXCAVATION_SPEED = 2000 # rpm
         self.LIN_ACT_MAX_POWER = -32 # -127 - 127

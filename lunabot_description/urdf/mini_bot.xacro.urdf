@@ -266,8 +266,8 @@
   </link>  
 
   <joint name="d455_back_joint" type="fixed">
-    <origin rpy="0 0 ${pi}" xyz="-0.155 0 0.42953"/>
-    <parent link="middle_link"/>
+    <origin rpy="0 0 ${pi}" xyz="-0.155 0 0.51"/>
+    <parent link="base_link"/>
     <child link="d455_back_link"/>
     <axis xyz="0 0 1"/>
   </joint>
@@ -371,8 +371,8 @@
   </link>  
 
   <joint name="d455_front_joint" type="fixed">
-    <origin rpy="0 0.523599 0" xyz="0.18939 0.16173 0.428"/>
-    <parent link="middle_link"/>
+    <origin rpy="0 0.523599 0" xyz="0.18939 0.16173 0.52"/>
+    <parent link="base_link"/>
     <child link="d455_front_link"/>
     <axis xyz="0 0 1"/>
   </joint>

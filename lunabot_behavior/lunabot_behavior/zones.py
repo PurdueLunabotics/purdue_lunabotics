@@ -12,61 +12,67 @@ from rclpy.node import Node
 
 import numpy as np
 
+def point_to_shapely(point: Point) -> shp.Point:
+    return shp.Point(point.x, point.y)
+
+def zone_to_poly(zone: Zone):
+    return shp.Polygon(shell=[point_to_shapely(zone.v1), point_to_shapely(zone.v2), point_to_shapely(zone.v3), point_to_shapely(zone.v4)])
+
 # zone geometries - based on guidebook orientations (all measurements in meters)
 class ZoneMeasurements:
     # ----------------------
     # KSC
     # ----------------------
-    START_OFFSET_X = 2.44
-    START_OFFSET_Y = 1.5
-    START_LENGTH_X = 2
-    START_LENGTH_Y = 2
-
-    EXC_OFFSET_X = 2.19
-    EXC_OFFSET_Y = 0
-    EXC_LENGTH_X = 2.5
-    EXC_LENGTH_Y = 5
-
-    BERM_OFFSET_X = -1.94
-    BERM_OFFSET_Y = 1.9
-    BERM_LENGTH_X = 1.5
-    BERM_LENGTH_Y = 0.9
-
-    # ----------------------
-    # UCF bottom
-    # ----------------------
-    #START_OFFSET_X = 2.44
-    #START_OFFSET_Y = 1.5
-    #START_LENGTH_X = 2
-    #START_LENGTH_Y = 2
-
-    #EXC_OFFSET_X = 1.44
-    #EXC_OFFSET_Y = 0.22
-    #EXC_LENGTH_X = 4.0
-    #EXC_LENGTH_Y = 4.57
-
-    #BERM_OFFSET_X = -3.36
-    #BERM_OFFSET_Y = -1.07
-    #BERM_LENGTH_X = 1.5
-    #BERM_LENGTH_Y = 0.9
-
-    # ----------------------
-    # UCF top
-    # ----------------------
-    # START_OFFSET_X = -2.44
+    # START_OFFSET_X = 2.44
     # START_OFFSET_Y = 1.5
     # START_LENGTH_X = 2
     # START_LENGTH_Y = 2
 
-    # EXC_OFFSET_X = -1.44
-    # EXC_OFFSET_Y = 0.22
+    # EXC_OFFSET_X = 2.19
+    # EXC_OFFSET_Y = 0
+    # EXC_LENGTH_X = 2.5
+    # EXC_LENGTH_Y = 5
+
+    # BERM_OFFSET_X = -1.94
+    # BERM_OFFSET_Y = 1.9
+    # BERM_LENGTH_X = 1.5
+    # BERM_LENGTH_Y = 0.9
+
+    # ----------------------
+    # UCF bottom (=guidebook) (=left from ingress)
+    # ----------------------
+    # START_OFFSET_X = 3.05
+    # START_OFFSET_Y = 1.285
+    # START_LENGTH_X = 2
+    # START_LENGTH_Y = 2
+
+    # EXC_OFFSET_X = 2
+    # EXC_OFFSET_Y = 0
     # EXC_LENGTH_X = 4.0
     # EXC_LENGTH_Y = 4.57
 
-    # BERM_OFFSET_X = 3.36
-    # BERM_OFFSET_Y = -1.07
+    # BERM_OFFSET_X = -2.75
+    # BERM_OFFSET_Y = -1.285
     # BERM_LENGTH_X = 1.5
     # BERM_LENGTH_Y = 0.9
+
+    # ----------------------
+    # UCF top (=guidebook mirrored) (=right from ingress)
+    # ----------------------
+    START_OFFSET_X = -3.05
+    START_OFFSET_Y = 1.285
+    START_LENGTH_X = 2
+    START_LENGTH_Y = 2
+
+    EXC_OFFSET_X = -2
+    EXC_OFFSET_Y = 0
+    EXC_LENGTH_X = 4.0
+    EXC_LENGTH_Y = 4.57
+
+    BERM_OFFSET_X = 2.75
+    BERM_OFFSET_Y = -1.285
+    BERM_LENGTH_X = 1.5
+    BERM_LENGTH_Y = 0.9
 
 def make_zone(offset_x, offset_y, length_x, length_y):
     z = Zone()
@@ -107,6 +113,8 @@ berm_zone = make_zone(
     ZoneMeasurements.BERM_LENGTH_X,
     ZoneMeasurements.BERM_LENGTH_Y)
 
+bounding_box = shp.MultiPolygon([zone_to_poly(start_zone), zone_to_poly(exc_zone), zone_to_poly(berm_zone)]).bounds
+
 # TODO: replace with actual point to line calculation
 def get_distance_from_start(p: np.array):
     start_center = np.array([ZoneMeasurements.START_OFFSET_X, ZoneMeasurements.START_OFFSET_Y])
@@ -119,12 +127,6 @@ def get_distance_from_exc(p: np.array):
 def get_distance_from_berm(p: np.array):
     start_center = np.array([ZoneMeasurements.BERM_OFFSET_X, ZoneMeasurements.BERM_OFFSET_Y])
     return np.linalg.norm(p - start_center)
-
-def point_to_shapely(point: Point) -> shp.Point:
-    return shp.Point(point.x, point.y)
-
-def zone_to_poly(zone: Zone):
-    return shp.Polygon(shell=[point_to_shapely(zone.v1), point_to_shapely(zone.v2), point_to_shapely(zone.v3), point_to_shapely(zone.v4)])
 
 class ZonesNode(Node):
     def __init__(self):

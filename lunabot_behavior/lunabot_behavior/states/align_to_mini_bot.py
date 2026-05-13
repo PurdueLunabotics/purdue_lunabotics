@@ -105,6 +105,7 @@ class AlignToMiniBotState(State):
         mini_in_apriltag_frame.orientation.w = self.mini_transform_offset.transform.rotation.w
 
         self.mini_pose = do_transform_pose(mini_in_apriltag_frame, transform)
+        self.resetPID()
       except Exception as e:
         # pass
         print("waiting for transform", e)

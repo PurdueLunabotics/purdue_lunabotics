@@ -55,7 +55,7 @@
     <arg name="cameras" default="true" />
     
     <arg name="lidar" default="false" if="$(eval '$(var robot_num) == 0')"/>
-    <arg name="lidar" default="true" if="$(eval '$(var robot_num) == 1')"/>
+    <arg name="lidar" default="false" if="$(eval '$(var robot_num) == 1')"/>
 
     <let name="cam_1_name"              value="d455_front"/>
     <let name="cam_2_name"              value="d455_back"/>
@@ -284,7 +284,7 @@
             <param name="Grid/Sensor"             value="'0'"/> <!-- Only use point clouds-->
             <param name="Grid/FootprintLength"    value="'1.0'"/>
             <param name="Grid/FootprintWidth"     value="'0.75'"/> 
-            <param name="Grid/MaxGroundAngle"     value="'40'"/> <!-- 30 degree normal before marked as obstacle -->
+            <param name="Grid/MaxGroundAngle"     value="'30'"/> <!-- 30 degree normal before marked as obstacle -->
             <param name="Grid/MaxObstacleHeight"  value="'2.0'"/> <!-- points greater than 2m above are not obstacles -->
             <param name="Grid/RangeMax"           value="'0.0'"/> <!-- don't cap range (do this in cameras.launch) -->
             <param name="Grid/PreVoxelFiltering"  value="'false'"/> <!-- don't filter with voxels (do this in cameras.launch) -->
@@ -300,7 +300,17 @@
             
             <param name="Kp/MaxFeatures"          value="$(var rtabmap_max_features)"/>
             <param name="Rtabmap/DetectionRate"   value="'10'"/> <!--  Hz -->
-            <param name="Marker/Priors"           value="'301 2.5 2.5 0.2 1.57 0 0|482 3.4 1.8 0.2 1.57 0 -1.57|401 2.5 2.5 0.2 1.57 0 0|582 3.4 1.8 0.2 1.57 0 -1.57'"/>
+
+            <!-- KSC -->
+            <!-- <param name="Marker/Priors"           value="'301 2.44 2.5 0.2 1.57 0 0|482 3.44 1.8 0.2 1.57 0 -1.57|421 3.44 1.04 0.4 1.57 0 -1.57|401 2.44 2.5 0.2 1.57 0 0|582 3.44 1.8 0.2 1.57 0 -1.57|521 3.44 1.04 0.4 1.57 0 -1.57|'"/> -->
+
+            <!-- UCF bottom (non-mirrored) priors -->
+            <!-- <param name="Marker/Priors"           value="'301 3.05 2.285 0.2 1.57 0 0|482 4.05 1.285 0.2 1.57 0 -1.57|421 4.05 0.525 0.4 1.57 0 -1.57|401 3.05 2.285 0.2 1.57 0 0|582 4.05 1.285 0.2 1.57 0 -1.57|521 4.05 0.525 0.4 1.57 0 -1.57'"/> -->
+
+            <!-- UCF top (mirrored) priors -->
+            <param name="Marker/Priors"           value="'301 -3.05 2.285 0.2 1.57 0 0|482 -4.05 1.285 0.2 1.57 0 1.57|421 -4.05 0.525 0.4 1.57 0 1.57|401 -3.05 2.285 0.2 1.57 0 0|582 -4.05 1.285 0.2 1.57 0 1.57|521 -4.05 0.525 0.4 1.57 0 1.57|'"/>
+
+            <!-- Note these priors assume apriltags are ON the -->
             <param name="Optimizer/PriorsIgnored" value="'false'"/>
             
             <param name="database_path"           value="~/.ros/$(var ns)rtabmap.db"/>

@@ -32,6 +32,7 @@ setup(
             "mini = lunabot_behavior.mini_states:main",
             "dep = lunabot_behavior.dep_only_states:main",
             "ex = lunabot_behavior.ex_only_states:main",
+            "ex_align = lunabot_behavior.ex_align_states:main",
             "single = lunabot_behavior.single_states:main",
         ],
     },

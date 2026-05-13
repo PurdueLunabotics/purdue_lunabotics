@@ -12,7 +12,9 @@ class MainWaitForMiniGoneState(State):
         self.position: PoseStamped = None
         self.node: Node = None
 
-        self.DIST_THRESHOLD = 2.5 # in meters, how far the main/mini separation has to be
+        self.DIST_THRESHOLD = 3 # in meters, how far the main/mini separation has to be
+
+        self.TIMEOUT = 30 # seconds
 
     def setup(self, manager: Node) -> Future | None:
         manager.create_subscription(PoseStamped, "/mini/position", self.mini_position_callback, 10)
@@ -30,7 +32,14 @@ class MainWaitForMiniGoneState(State):
         self.mini_position = None
         self.position = None
 
+        self.start_time = self.node.get_clock().now()
+
     def periodic(self) -> None | Events:
+        elapsed_time = self.node.get_clock().now() - self.start_time
+        elapsed_time = elapsed_time.nanoseconds / 1_000_000_000  # convert to seconds
+
+        if (elapsed_time > self.TIMEOUT):
+            return Events.SUCCESS
 
         if (self.mini_position is None or self.position is None):
             return None
@@ -45,7 +54,7 @@ class MainWaitForMiniGoneState(State):
                          (self.position.pose.position.y - self.mini_position.pose.position.y)**2 + 
                          (self.position.pose.position.x - self.mini_position.pose.position.z)**2)
         
-        self.node.get_logger().info(f"d:{dist}")
+        self.node.get_logger().info(f"distance between bots:{dist}/3")
         
         if (dist >= self.DIST_THRESHOLD):
             return Events.SUCCESS

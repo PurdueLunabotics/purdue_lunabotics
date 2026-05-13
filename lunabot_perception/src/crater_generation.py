@@ -8,11 +8,7 @@ import rclpy
 # find whatever is below the ground plane and cluster them
 # do circle regression off of some points above a certain layer
 
-# find the point where the planes overlap????
-# find normal vector there
-# do the rotation of planes crap with the normal vectors ????
-
-from std_msgs.msg import Int8, Int32, Bool, Header
+from std_msgs.msg import Header
 from sensor_msgs.msg import PointCloud2
 from sensor_msgs_py import point_cloud2 # actually allows to read the point clouds
 # import open3d as o3d
@@ -21,7 +17,11 @@ import numpy as np
 from sklearn.linear_model import RANSACRegressor
 
 import hough
-from tf2_ros import TransformBroadcaster
+
+# Disable these if costmap isn't worth it
+from nav2_msgs.srv import GetCostmap
+from nav2_msgs.msg import Costmap
+from rclpy.task import Future 
 
 
 class CraterGeneration(Node):
@@ -60,6 +60,11 @@ class CraterGeneration(Node):
         self.ground_subscriber = self.create_subscription(
             PointCloud2, "rtabmap/cloud_ground", self.set_ground, 10
         )
+        
+
+        self.costmap_client = self.create_client(GetCostmap, "global_costmap/get_costmap")
+        self.costmap = Costmap()
+        
 
         
         
@@ -72,10 +77,12 @@ class CraterGeneration(Node):
         # )
 
 
-        self.create_timer(2, self.plane_generation)
+        self.create_timer(1, self.plane_generation)
         self.create_timer(1, self.estimate_crater)
         
         
+    def is_blocked(costmap: Costmap, x: int, y: int, lethal_cost: float) -> bool:
+        return costmap.data[x + y * costmap.metadata.size_x] >= lethal_cost
         
     def plane_generation(self):
         ground_trainxy = []
@@ -95,6 +102,9 @@ class CraterGeneration(Node):
         except Exception as inst:
             self.get_logger().info(f"{inst}")
             self.get_logger().warn("Failed to read planes")
+            stahp = True
+
+        if len(ground_trainxy) == 0 or len(ground_trainz) == 0:
             stahp = True
         
         if(not stahp):
@@ -120,7 +130,7 @@ class CraterGeneration(Node):
             # # the plane equation
             # self.get_logger().info(f"5{regressor.estimator_.coef_}")
             # self.get_logger().info(f"5{regressor.estimator_.intercept_}")
-            self.coeff = [regressor.estimator_.coef_[0][0],regressor.estimator_.coef_[0][1], regressor.estimator_.intercept_[0]]
+            self.coeff = [regressor.estimator_.coef_[0][0],regressor.estimator_.coef_[0][1],regressor.estimator_.intercept_[0]]
             pred_z = regressor.predict(ground_trainxy)
 
             # self.get_logger().info(f"{len(pred_z)}")
@@ -147,9 +157,15 @@ class CraterGeneration(Node):
         self.plane_publisher.publish(pc2)
 
 
+        # self.costmap_client.wait_for_service()
+        # self.costmap_client.call_async(GetCostmap.Request()).add_done_callback(self.costmap_cb)
+
+
         
     def estimate_crater(self):
-    
+        # self.costmap_client.wait_for_service()
+        # self.costmap_client.call_async(GetCostmap.Request()).add_done_callback(self.costmap_cb)
+
         did_read = True
         obst = []
         try:
@@ -164,7 +180,7 @@ class CraterGeneration(Node):
             did_read = False
         # get average height of ground
         # find points below average height of ground in obstacles
-        #self.get_logger().info(f"{len(self.ground_planes.data)}")
+        # self.get_logger().info(f"{len(self.ground_planes.data)}")
         
         ground_vals = []
         try:
@@ -186,23 +202,33 @@ class CraterGeneration(Node):
         crater_vals = []
         if(did_read):
             for p in obst:
-                if (self.coeff[0]*p[0]+self.coeff[1]*p[1]+self.coeff[2] > p[2] + 0.09):
+                if ((self.coeff[0]*p[0]+self.coeff[1]*p[1]+self.coeff[2]) > p[2] + 0.09): # and self.is_blocked(self.costmap, p[0], p[1], 252)):
                 # if(p[2]<ground_height-0.02):
                     crater_vals.append(p[:-1])
+                    
                     # self.get_logger().info(f"{p}")
+            
+            # if len(crater_vals) != 0:
+            #     header = Header()
+            #     t = self.get_clock().now()
+            #     header.stamp = t.to_msg()
+            #     header.frame_id = self.map_used
+            #     pc2 = point_cloud2.create_cloud_xyz32(header, crater_check)
+
+            #     self.cratervals_publisher.publish(pc2)
                     
             # self.get_logger().info(f"{craternp}")
             # initial guess for the ring center and radius (if no previous info about those, increase uncertainty accordingly)
             guessed_cx = 0
             guessed_cy = 0
-            guessed_r = 0.3
+            guessed_r = 0.2
 
             # uncertainty of the initial guess
-            uncertainty_pos = 10
+            uncertainty_pos = 5
             uncertainty_r = 0.1
 
             # width where points can still be counted to be part of the ring
-            epsilon = 0.05
+            epsilon = 0.04
             
             crater_pointcloud = []
             
@@ -218,9 +244,9 @@ class CraterGeneration(Node):
                 
                 # try:
                     
-                #     # self.get_logger().warn(f"hough {hough_cx}")
-                #     # self.get_logger().warn(f"hough {hough_cy}")
-                #     # self.get_logger().warn(f"hough {hough_r}")
+                # self.get_logger().warn(f"hough {hough_cx}")
+                # self.get_logger().warn(f"hough {hough_cy}")
+                # self.get_logger().warn(f"hough {hough_r}")
                     
                     
                 # except Exception as inst:
@@ -228,12 +254,12 @@ class CraterGeneration(Node):
                 #     self.get_logger().warn("Not generating craters")
                 
                 def remove(j):
-                    return(((j[0]>hough_cx-hough_r-0.05) and (j[0]<hough_cx+hough_r+0.05)) and ((j[1]>hough_cy-hough_r-0.05) and (j[1]<hough_cy+hough_r+0.05)))
+                    return(((j[0]>hough_cx-hough_r-0.10) and (j[0]<hough_cx+hough_r+0.1)) and ((j[1]>hough_cy-hough_r-0.10) and (j[1]<hough_cy+hough_r+0.10)))
                     
                     
                 points_in = len(list(filter(remove,crater_vals)))
                 # hough_r < 0.4 and
-                if( hough_r > 0 and points_in > 13):
+                if( hough_r > 0 and points_in > 9):
                     #self.get_logger().warn("god help")
                     for i in range(30):
                         x = hough_cx + hough_r * np.cos(i*12*2*np.pi/360)
@@ -242,9 +268,17 @@ class CraterGeneration(Node):
                         
                         
                     def dont_remove(j):
-                        return(((j[0]<hough_cx-hough_r-0.09) or (j[0]>hough_cx+hough_r+0.09)) or ((j[1]<hough_cy-hough_r-0.09) or (j[1]>hough_cy+hough_r+0.09)))
+                        return(((j[0]<hough_cx-hough_r-0.25) or (j[0]>hough_cx+hough_r+0.25)) or ((j[1]<hough_cy-hough_r-0.25) or (j[1]>hough_cy+hough_r+0.25)))
                     
                     crater_vals = list(filter(dont_remove, crater_vals))
+
+                    header = Header()
+                    t = self.get_clock().now()
+                    header.stamp = t.to_msg()
+                    header.frame_id = self.map_used
+                    pc2 = point_cloud2.create_cloud_xyz32(header, crater_pointcloud)
+
+                    self.crater_publisher.publish(pc2)
                     
                     # self.get_logger().info(f"{crater_vals}")
                 
@@ -265,6 +299,13 @@ class CraterGeneration(Node):
     def set_ground(self, ground : PointCloud2):
         # self.get_logger().info("I hate it here")
         self.ground = ground
+
+    def check_denoise(self, future:Future):
+        result = future.result()
+        if result == None:
+            return
+        costmap: Costmap = result.map
+        
 
 def main():
     rclpy.init()
