@@ -205,7 +205,8 @@ class FindLinkup(State):
         linkup.exc_target.x = linkup.main_target.x
         linkup.exc_target.y = linkup.main_target.y
 
-        self.linkup_pub.publish(linkup)
+        for i in range(10):
+            self.linkup_pub.publish(linkup)
         self.state = FOUND_LINKUP
 
     def evaluate_point(self, costmap: Costmap, pos: shp.Point, angle: float) -> tuple[float, bool]:

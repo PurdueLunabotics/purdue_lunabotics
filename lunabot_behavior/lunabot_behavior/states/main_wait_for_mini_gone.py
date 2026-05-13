@@ -54,7 +54,7 @@ class MainWaitForMiniGoneState(State):
                          (self.position.pose.position.y - self.mini_position.pose.position.y)**2 + 
                          (self.position.pose.position.x - self.mini_position.pose.position.z)**2)
         
-        self.node.get_logger().info(f"distance between bots:{dist}/3")
+        self.node.get_logger().info(f"distance between bots:{dist}/{self.DIST_THRESHOLD}")
         
         if (dist >= self.DIST_THRESHOLD):
             return Events.SUCCESS
