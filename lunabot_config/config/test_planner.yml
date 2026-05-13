@@ -1,24 +1,38 @@
 global_costmap:
   global_costmap:
     ros__parameters:
-      publish_frequency: 30.0
+      height: 5
+      width: 5
+      publish_frequency: 1.0
+      robot_radius: 0.4
       global_frame: "map"
       robot_base_frame: "robot"
-      robot_radius: 0.25
-      plugins: ["static_layer", "denoise_layer", "inflation_layer"]
+      plugins: ["static_layer","denoise_layer", "obstacle_layer" , "inflation_layer"]
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        observation_sources: "crater behavior"
+        enabled: true
+        crater:
+          data_type: "PointCloud2"
+          obstacle_max_range: 10.0
+        behavior:
+          data_type: "PointCloud2"
+          obstacle_max_range: 10.0
+          topic: "/mini/obstacle"
+        footprint_clearing_enabled: true
       denoise_layer:
         plugin: "nav2_costmap_2d::DenoiseLayer"
         enabled: true
-        minimal_group_size: 2
-        group_connectivity_type: 4 # 4 is adjacent, 8 includes diagonals
+        minimal_group_size: 3
+        group_connectivity_type: 8 # 4 is adjacent, 8 includes diagonals
         footprint_clearing_enabled: true
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         enabled: true
-        inflation_radius: 2.0
-        cost_scaling_factor: 6.0
+        inflation_radius: 1.5
+        cost_scaling_factor: 3.0
         inflate_unknown: true  # should treat unknown as obstacles (maybe change init values)
         inflate_around_unknown: true
         footprint_clearing_enabled: true

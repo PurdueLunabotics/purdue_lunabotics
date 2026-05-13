@@ -2,10 +2,12 @@
 
 from math import inf
 import math
+from rclpy.action.client import ClientGoalHandle
 from std_msgs.msg import Header
 from geometry_msgs.msg import PoseStamped, Point
 from lunabot_msgs.msg import Linkup
 from nav2_msgs.msg import Costmap
+from nav_msgs.msg import Path
 from rclpy.qos import QoSDurabilityPolicy, QoSProfile
 from visualization_msgs.msg import Marker
 from nav_msgs.msg import Path
@@ -33,7 +35,7 @@ import rclpy
 import sys
 import random
 
-LETHAL_COST = 252
+LETHAL_COST = 150
 
 def world_to_map(costmap: Costmap, x: float, y: float):
     resolution = costmap.metadata.resolution
@@ -157,6 +159,8 @@ class FindLinkup(Traverse):
         self.odom = None
         self.tolerance = 2.0 # wider tolerance is ok - finding linkup isn't an exact science
         self.logger = manager.get_logger()
+        self.costmap: Costmap | None = None
+        self.path: Path | None = None
 
         self.path_client = ActionClient(manager, ComputePathToPose, "compute_path_to_pose")
         self.costmap_client = manager.create_client(GetCostmap, "global_costmap/get_costmap")
@@ -182,49 +186,92 @@ class FindLinkup(Traverse):
 
         if self.odom is not None and np.linalg.norm(self.odom - self.goal_vec) <= self.tolerance and self.state == WAITING and (self.lost_odom_time is None or self.manager.get_clock().now() - self.lost_odom_time > Duration(seconds=30)):
             self.state = FINDING_LINKUP
-            self.find_linkup() # find the linkup thingamabob
+            self.get_data_and_find_linkup()
 
         return None
 
-
-    # helper functions ===========================================================================
-
-    def find_linkup(self):
-        # print("finding linkup")
+    def get_data_and_find_linkup(self):
         self.goal.header.stamp = self.manager.get_clock().now().to_msg()
 
         self.costmap_client.wait_for_service()
+        self.path_client.wait_for_server()
+
+        goal = PoseStamped()
+        goal.header.stamp = self.manager.get_clock().now().to_msg()
+        goal.header.frame_id = self.frame
+        center = zones.zone_to_poly(zones.start_zone).centroid
+        goal.pose.position.x = center.x
+        goal.pose.position.y = center.y
+        goal.pose.position.z = 0.0
+
+        start = PoseStamped()
+        start.header.stamp = self.manager.get_clock().now().to_msg()
+        start.header.frame_id = self.frame
+        center = zones.zone_to_poly(zones.berm_zone).centroid
+        start.pose.position.x = center.x
+        start.pose.position.y = center.y
+        start.pose.position.z = 0.0
+
+        self.path_client.send_goal_async(ComputePathToPose.Goal(goal=goal, start=start, planner_id="GridBased", use_start=True)).add_done_callback(self.path_handle_cb)
         self.costmap_client.call_async(GetCostmap.Request()).add_done_callback(self.costmap_cb)
 
-        # self.find_segment(self.start_pose)
+    def path_handle_cb(self, future: Future):
+        result = future.result()
+        if result is None:
+            return
+        handle: ClientGoalHandle = result
+        handle.get_result_async().add_done_callback(self.path_cb)
+
+    def path_cb(self, future: Future):
+        result = future.result()
+        if result is None:
+            return
+        self.path = result.result.path
+        self.find_linkup()
 
     def costmap_cb(self, future: Future):
         result = future.result()
-        if result == None:
+        if result is None:
             return
-        costmap: Costmap = result.map
+        self.costmap = result.map
+        self.find_linkup()
 
-        num_points = 20
-        num_iterations = 100
-        length = self.excavation_edge.length - self.padding * 2
-        offset = length / num_points
-        points = (self.excavation_edge.interpolate(offset * i + self.padding) for i in range(0, num_points))
-        iterated_points = (self.iterate_point(costmap, point, 0, num_iterations, id) for id, point in enumerate(points))
+    # helper functions ===========================================================================
 
-        pos, angle = min(iterated_points, key=lambda alt: self.evaluate_point(costmap, alt[0], alt[1]))
-        self.show_line(pos, angle, num_points, "final", 1.0, 1.0, 1.0, 0.1)
+    def line_to_ends(self, pos: shp.Point, angle: float, length: float | None = None) -> tuple[shp.Point, shp.Point]:
+        if length is None:
+            length = self.MIN_SEGMENT_LENGTH
+
+        if not self.is_mirrored:
+            a = shp.Point(pos.x + np.cos(angle) * length / 2, pos.y + np.sin(angle) * length / 2)
+            b = shp.Point(pos.x - np.cos(angle) * length / 2, pos.y - np.sin(angle) * length / 2)
+        else:
+            a = shp.Point(pos.x - np.cos(angle) * length / 2, pos.y + np.sin(angle) * length / 2)
+            b = shp.Point(pos.x + np.cos(angle) * length / 2, pos.y - np.sin(angle) * length / 2)
+
+        return (a, b)
+
+    def find_linkup(self):
+        if self.costmap is None or self.path is None:
+            return
+
+        shp_path = shp.LineString([[pose.pose.position.x, pose.pose.position.y] for pose in self.path.poses])
+        self.show_path(shp_path, 100, "path")
+
+        pos: shp.Point = shp_path.intersection(self.excavation_edge) # type: ignore
+        print(pos)
+
+        num_iterations = 150
+        pos, angle = self.iterate_point(self.costmap, pos, 0, num_iterations, 0)
+
+        self.show_line(pos, angle, 1, "final", 1.0, 1.0, 1.0, 0.1)
 
         linkup = Linkup()
-        if not self.is_mirrored:
-            linkup.main_target.x = pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
-            linkup.main_target.y = pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
-            linkup.mini_target.x = pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
-            linkup.mini_target.y = pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
-        else:
-            linkup.main_target.x = pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
-            linkup.main_target.y = pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
-            linkup.mini_target.x = pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
-            linkup.mini_target.y = pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
+        a, b = self.line_to_ends(pos, angle)
+        linkup.main_target.x = a.x
+        linkup.main_target.y = a.y
+        linkup.mini_target.x = b.x
+        linkup.mini_target.y = b.y
 
         linkup.exc_target.x = linkup.main_target.x
         linkup.exc_target.y = linkup.main_target.y
@@ -236,27 +283,24 @@ class FindLinkup(Traverse):
         if pos.distance(self.excavation_edge) > self.MIN_SEGMENT_LENGTH / 4 or pos.y > self.exc_p1[1] - self.padding or pos.y < self.exc_p2[1] + self.padding:
             return (inf, True)
 
-        if not self.is_mirrored:
-            a = shp.Point(pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
-            b = shp.Point(pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
-        else:
-            a = shp.Point(pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
-            b = shp.Point(pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
+        eval_length = self.MIN_SEGMENT_LENGTH * 2.0
+
+        a, b = self.line_to_ends(pos, angle, eval_length)
 
         if not a.within(zones.zone_to_poly(zones.exc_zone)):
             return (inf, True)
 
         cost, blocked = line_cost(costmap, a, b)
 
-        return cost + np.abs(angle) * 5, blocked
+        return cost, blocked
 
     def iterate_point_once(self, costmap: Costmap, pos: shp.Point, angle: float):
         alternatives = [(shp.Point(pos.x + costmap.metadata.resolution, pos.y), angle),
                         (shp.Point(pos.x - costmap.metadata.resolution, pos.y), angle),
                         (shp.Point(pos.x, pos.y + costmap.metadata.resolution), angle),
                         (shp.Point(pos.x, pos.y - costmap.metadata.resolution), angle),
-                        (shp.Point(pos.x, pos.y), angle + 0.1),
-                        (shp.Point(pos.x, pos.y), angle - 0.1),
+                        (shp.Point(pos.x, pos.y), angle + 0.15),
+                        (shp.Point(pos.x, pos.y), angle - 0.15),
                         (shp.Point(pos.x, pos.y), angle)]
 
         min = None
@@ -283,7 +327,7 @@ class FindLinkup(Traverse):
 
     # VISUALIZATION HELPERS ==========================================================================
 
-    def show_line(self, pos: shp.Point, angle: float, id, ns, r=1.0, g=0.0, b=0.0, width=0.05, action=Marker.ADD):
+    def show_path(self, path: shp.LineString, id, ns, r=1.0, g=0.0, b=0.0, width=0.05, action=Marker.ADD):
         marker = Marker()
         marker.header.frame_id = self.frame
         marker.header.stamp = self.manager.get_clock().now().to_msg()
@@ -305,21 +349,30 @@ class FindLinkup(Traverse):
         # Identity pose
         marker.pose.orientation.w = 1.0
 
-        a = Point(x = pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, y = pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
-        b = Point(x = pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, y = pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
-
-        marker.points = [a, b]
+        marker.points = [Point(x = a[0], y = a[1]) for a in path.coords]
 
         self.marker_pub.publish(marker)
+
+    def show_line(self, pos: shp.Point, angle: float, id, ns, r=1.0, g=0.0, b=0.0, width=0.05, action=Marker.ADD):
+        eval_length = self.MIN_SEGMENT_LENGTH
+
+        start, end = self.line_to_ends(pos, angle, eval_length)
+
+        self.show_path(LineString([start, end]), id, ns, r, g, b, width, action)
 
 def main():
     rclpy.init(args=sys.argv)
 
     node = Node("linkup_test_node")
 
+    # costmap_client = node.create_client(GetCostmap, "global_costmap/get_costmap")
+    # fut = costmap_client.call_async(GetCostmap.Request())
+    # rclpy.spin_until_future_complete(node, fut)
+    # costmap = fut.result().map
+
     find_linkup = FindLinkup()
     find_linkup.setup(node)
-    find_linkup.find_linkup()
+    find_linkup.get_data_and_find_linkup()
 
     rclpy.spin(node)
 
