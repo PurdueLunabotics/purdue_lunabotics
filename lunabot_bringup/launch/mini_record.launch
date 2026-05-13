@@ -65,6 +65,9 @@
   /mini/unilidar/imu
   /mini/lidar_assembled_cloud
 
+  /mini/rtabmap/crater
+  /mini/rtabmap/ground_plane
+
   /mini/sensors
   /mini/stalled
   

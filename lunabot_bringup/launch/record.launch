@@ -22,6 +22,8 @@
 
   /d455_back/aligned_depth_to_color/camera_info
   /d455_back/algined_depth_to_color/image_raw
+  /d455_back/depth/camera_info
+  /d455_back/depth/image_raw
   /d455_back/color/camera_info
   /d455_back/color/image_raw
   /d455_back/detections
@@ -29,6 +31,8 @@
 
   /d455_front/aligned_depth_to_color/camera_info
   /d455_front/algined_depth_to_color/image_raw
+  /d455_front/depth/camera_info
+  /d455_front/depth/image_raw
   /d455_front/color/camera_info
   /d455_front/color/image_raw
   /d455_front/detections
@@ -52,6 +56,9 @@
   /rtabmap/odom
   /rtabmap/tag_detections
   /rtabmap/map
+
+  /rtabmap/crater
+  /rtabmap/ground_plane
 
   /global_costmap/costmap
   /global_costmap/costmap_raw
