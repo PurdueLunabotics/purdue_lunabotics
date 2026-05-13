@@ -44,9 +44,6 @@ class MainStates(Enum):
     
     # ===== LINKUP SECTION (2) =====
 
-    ALIGN_TO_LINKUP = (AlignToLinkup(), (LedColor.YELLOW, LedColor.YELLOW))
-    ALIGN_TO_LINKUP_STALL = (Stall(), (LedColor.YELLOW, LedColor.RED))
-
     WAIT_FOR_MINI_ALIGN = (MainWaitForAlignState(), (LedColor.YELLOW, LedColor.GREEN))
 
     ALIGN_TO_MINI = (AlignToMiniBotState(), (LedColor.YELLOW, LedColor.TEAL))
@@ -64,10 +61,6 @@ class MainStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
-  
-            (MainStates.ALIGN_TO_LINKUP, Events.SUCCESS): MainStates.WAIT_FOR_MINI_ALIGN,
-            (MainStates.ALIGN_TO_LINKUP, Events.STALL): MainStates.RETREAT_TRENCH_STALL,
-            (MainStates.ALIGN_TO_LINKUP_STALL, Events.SUCCESS): MainStates.ALIGN_TO_LINKUP,
 
             (MainStates.WAIT_FOR_MINI_ALIGN, Events.SUCCESS): MainStates.ALIGN_TO_MINI,
 
@@ -92,7 +85,7 @@ class MainStates(Enum):
 def main(args=None):
     rclpy.init(args=sys.argv, signal_handler_options=rclpy.SignalHandlerOptions.NO)
 
-    manager = StateManager(MainStates, MainStates.ALIGN_TO_LINKUP, Events, Event)
+    manager = StateManager(MainStates, MainStates.WAIT_FOR_MINI_ALIGN, Events, Event)
 
     try:
         rclpy.spin(manager)
