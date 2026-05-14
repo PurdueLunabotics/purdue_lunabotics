@@ -1,5 +1,6 @@
 import numpy as np
 from hough_transform import hough_transform_ring
+import time
 
 
 def get_bin_centers(
@@ -81,7 +82,9 @@ def hough_pointcloud(
     i = 0
     while i < max_iter:
         i += 1
+
         previous_ring_features = ring_features.copy()
+
         hough_cx, hough_cy, hough_r = advanced_guess_with_hough(
             ring_features['cx'], ring_features['cy'],
             ring_features['r'], point_cloud, uncertainty_pos, uncertainty_r, epsilon)
@@ -97,7 +100,7 @@ def hough_pointcloud(
             d_cx <= np.deg2rad(0.02) and
             d_cy <= np.deg2rad(0.02) and
             d_r <= np.deg2rad(0.01) and
-            i >= 6
+            i >= 3
         ):
             break
     return hough_cx, hough_cy, hough_r
