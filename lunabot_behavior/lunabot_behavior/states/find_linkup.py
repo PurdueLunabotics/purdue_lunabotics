@@ -297,7 +297,7 @@ class FindLinkup(State):
         # Identity pose
         marker.pose.orientation.w = 1.0
 
-        start, end = self.line_to_ends(pos, angle, eval_length)
+        start, end = self.line_to_ends(pos, angle, self.MIN_SEGMENT_LENGTH)
 
         marker.points = [Point(x = start.x, y = start.y), Point(x = end.x, y = end.y)]
 

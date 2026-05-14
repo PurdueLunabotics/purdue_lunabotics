@@ -59,7 +59,7 @@ class Traverse(State):
         dist = math.sqrt((self.odom.pose.position.x - self.last_pose.pose.position.x) ** 2 + (self.odom.pose.position.y - self.last_pose.pose.position.y) ** 2)
         self.logger.debug(f"[Traverse]: distance {dist}")
         elapsed = self.manager.get_clock().now() - self.start_time
-        if dist < self.tolerance and elapsed > Duration(seconds=5):
+        if dist < self.tolerance and elapsed > Duration(seconds=10):
             return Events.SUCCESS
         return None
 
