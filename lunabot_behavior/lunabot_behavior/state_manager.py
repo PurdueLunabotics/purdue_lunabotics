@@ -27,6 +27,7 @@ class StateManager(Node):
 
         self.event_sub = self.create_subscription(event_type, "events", self.event_cb, 10)
         self.autonomy_sub = self.create_subscription(Bool, "autonomy", self.autonomy_cb, 10)
+        self.autonomy_pub = self.create_publisher(Bool, "autonomy", 10)
         self.led_pub = self.create_publisher(Int32, "led_color", 10)
 
         self.timer = self.create_timer(0.1, self.periodic)
@@ -36,6 +37,8 @@ class StateManager(Node):
         
         colors = self.state.value[1]
         self.led_pub.publish(Int32(data = colorsToInteger(colors)))
+        
+        self.autonomy_pub.publish(Bool(data=True))
 
 
     def event_cb(self, event: UInt8):

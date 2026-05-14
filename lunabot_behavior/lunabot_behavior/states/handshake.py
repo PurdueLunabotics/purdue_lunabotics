@@ -25,7 +25,8 @@ class Handshake(State):
       self.ready = True
 
   def periodic(self):
-    self.handshake_pub.publish(String(data=self.key))
+    for _ in range(10):
+      self.handshake_pub.publish(String(data=self.key))
 
     if self.ready:
       return Events.SUCCESS

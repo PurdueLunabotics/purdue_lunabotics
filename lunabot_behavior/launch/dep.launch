@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
-  <node pkg="lunabot_behavior" exec="dep"/>
+  <arg name="robot_num" default="'0'" />
+  <push_ros_namespace namespace="mini" if="$(eval '($(var robot_num) == 1)')"/>
+  <node pkg="lunabot_behavior" exec="dep_main" if="$(eval '($(var robot_num) == 0)')"/>
+  <node pkg="lunabot_behavior" exec="dep_mini" if="$(eval '($(var robot_num) == 1)')"/>
 </launch>

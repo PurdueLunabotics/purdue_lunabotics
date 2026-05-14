@@ -1,11 +1,18 @@
 from rclpy.time import Duration
+from sensor_msgs.msg import PointCloud2
+from sensor_msgs_py import point_cloud2
+from std_msgs.msg import Bool, Header
 from std_msgs.msg import Bool
-from tf2_ros import Time, TransformBroadcaster, TransformListener, Buffer
+from tf2_ros import Time, TransformBroadcaster, TransformListener, Buffer, TransformStamped
 from lunabot_behavior.state import Events, State
+from lunabot_behavior.zones import bounding_box
 from apriltag_msgs.msg import AprilTagDetectionArray, AprilTagDetection
 from std_srvs.srv import Empty
 from enum import Enum, auto
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import PoseStamped, Twist
+import numpy as np
+import tf2_geometry_msgs
+import tf_transformations
 
 class Direction(Enum):
   NORTH = auto()
@@ -19,6 +26,20 @@ direction = None
 # irl id = 173
 INIT_TAG_ID_1 = 173
 INIT_TAG_ID_2 = 301
+
+def tf_to_matrix(tf: TransformStamped):
+  translation = tf_transformations.translation_matrix([
+    tf.transform.translation.x,
+    tf.transform.translation.y,
+    tf.transform.translation.z,
+  ])
+  rotation = tf_transformations.quaternion_matrix([
+    tf.transform.rotation.x,
+    tf.transform.rotation.y,
+    tf.transform.rotation.z,
+    tf.transform.rotation.w,
+  ])
+  return tf_transformations.concatenate_matrices(translation, rotation)
 
 class SetupMap(State):
   def __init__(self, is_main: bool):
@@ -64,6 +85,7 @@ class SetupMap(State):
         main_to_tag = self.tf_buf.lookup_transform("main_deposition_small", "tag36h11:582" if direction == Direction.EAST else "tag36h11:401", Time())
         main_to_tag.header.frame_id = "deposition_apriltag_small_optical_frame"
         main_to_tag.child_frame_id = "tag36h11:482" if direction == Direction.EAST else "tag36h11:301"
+        main_to_tag.header.stamp = self.manager.get_clock().now().to_msg()
         self.tf_broadcaster.sendTransform(main_to_tag)
         self.detections_pub.publish(mini_detections)
       except Exception as e:
@@ -78,6 +100,7 @@ class SetupMap(State):
         main_to_tag = self.tf_buf.lookup_transform("deposition_apriltag_small_optical_frame", "tag36h11:482" if direction == Direction.WEST else "tag36h11:301", Time())
         main_to_tag.header.frame_id = "main_deposition_small"
         main_to_tag.child_frame_id = "tag36h11:582" if direction == Direction.WEST else "tag36h11:401"
+        main_to_tag.header.stamp = self.manager.get_clock().now().to_msg()
         self.tf_broadcaster.sendTransform(main_to_tag)
         self.detections_pub.publish(main_detections)
       except Exception as e:
@@ -97,6 +120,73 @@ class SetupMap(State):
 
     if self.ready_time is not None and self.manager.get_clock().now() - self.ready_time > Duration(seconds=10):
       return Events.SUCCESS
+
+class SetupObstacles(State):
+  def __init__(self, is_main: bool):
+    self.is_main = is_main
+
+  def setup(self, manager):
+    self.manager = manager
+    ns = manager.get_namespace().lstrip('/')
+    if len(ns) != 0:
+        ns = ns + '/';
+    self.frame = f"{ns}map"
+    self.manager.get_logger().info(f"frame: {self.frame}")
+    self.obstacle_pub = manager.create_publisher(PointCloud2, "obstacle", 10)
+
+    self.tf_buf = Buffer()
+    self.tf_listener = TransformListener(self.tf_buf, self.manager)
+    self.tf_broadcaster = TransformBroadcaster(self.manager)
+    self.has_reset = False
+    self.attempts = 0
+
+  def periodic(self):
+    points = []
+
+    for y in np.arange(bounding_box[1], bounding_box[3], 0.03):
+      points.append([bounding_box[0], y, 0])
+      points.append([bounding_box[2], y, 0])
+
+    for x in np.arange(bounding_box[0], bounding_box[2], 0.03):
+      points.append([x, bounding_box[1], 0])
+      points.append([x, bounding_box[3], 0])
+
+    if self.is_main:
+      cloud = point_cloud2.create_cloud_xyz32(Header(frame_id=self.frame, stamp=self.manager.get_clock().now().to_msg()), points)
+      self.obstacle_pub.publish(cloud)
+      return Events.SUCCESS
+    else:
+      try:
+        map_to_main_tag_tf = tf_to_matrix(self.tf_buf.lookup_transform("mini/map", "main_deposition", Time()))
+        main_tag_to_base_tf = tf_to_matrix(self.tf_buf.lookup_transform("deposition_apriltag_optical_frame", "base_link", Time()))
+        tf_matrix = tf_transformations.concatenate_matrices(map_to_main_tag_tf, main_tag_to_base_tf)
+
+        WIDTH = 1.0
+        LENGTH = 0.7
+
+        point = np.zeros(4)
+        point[3] = 1.0
+
+        for y in np.arange(-LENGTH/2, LENGTH/2, 0.03):
+          for x in np.arange(-WIDTH/2, WIDTH/2, 0.03):
+            point[0] = x
+            point[1] = y
+            new_point = tf_matrix @ point
+            points.append([new_point[0], new_point[1], 0])
+
+        cloud = point_cloud2.create_cloud_xyz32(Header(frame_id="mini/map", stamp=self.manager.get_clock().now().to_msg()), points)
+        self.obstacle_pub.publish(cloud)
+
+        return Events.SUCCESS
+      except Exception as e:
+        self.manager.get_logger().warn(f"Failed to lookup transform: {e}")
+      finally:
+        self.attempts += 1
+
+    if self.attempts >= 5:
+      return Events.SUCCESS
+
+    return None
 
 class InitRetreat(State):
   def __init__(self, is_main: bool, speed: float, duration: float):
@@ -130,7 +220,8 @@ class InitRetreat(State):
       output.linear.x = self.speed
       self.cmd_vel_publisher.publish(output)
       if self.manager.get_clock().now() - self.starting_time > Duration(seconds=self.duration):
-        self.ready_pub.publish(Bool(data = True))
+        for i in range(10):
+          self.ready_pub.publish(Bool(data = True))
 
         if (direction == Direction.EAST and self.is_main):
           return Events.SUCCESS_AND_DONT_MINE

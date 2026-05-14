@@ -54,9 +54,9 @@ class ApproachMiniState(State):
     # how many times in a row before we're sure
     self.SUCCESS_THRESHOLD = 30
 
-    self.MAX_SPEED = 0.10
+    self.MAX_SPEED = 0.07
 
-    self.TIMEOUT_TIME = 30 # in seconds, how long to wait before giving up and continuing
+    self.TIMEOUT_TIME = 40 # in seconds, how long to wait before giving up and continuing
 
     self.SAFE_REALIGN_DISTANCE = 0.35 # in meters, how far we must be in order to realign safely
     self.TARGET_HORIZONTAL_APRILTAG_DIST = 0.03 # in the camera's frame, target horizontal offset of the apriltag to be
@@ -110,12 +110,12 @@ class ApproachMiniState(State):
               apriltag_in_camera_frame = self.tf_buffer.lookup_transform("mini/d455_back_rgb_link", "main_deposition_small", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
 
             distance = apriltag_in_camera_frame.transform.translation.z
-            # self.manager.get_logger().info(f"Distance: {distance}")
+            self.manager.get_logger().info(f"Approach Distance: {distance}")
 
-            error = self.DISTANCE_GOAL - distance
+            error = distance - self.DISTANCE_GOAL
 
             # if aligned, increment a counter. at the threshold, alignment is done
-            if (abs(error) < self.GOAL_THRESHOLD):
+            if (error < self.GOAL_THRESHOLD):
                 self.success_count += 1
 
             # if aligned, return success for next state, and the transition message for the next state
@@ -139,7 +139,7 @@ class ApproachMiniState(State):
               self.manager.get_logger().info("Behavior: Performing realign")
               return Events.NEED_REALIGN
             
-            velocity = self.runPID(error)
+            velocity = self.runPID(-error)
             velocity = np.clip(velocity, -self.MAX_SPEED, self.MAX_SPEED)
             self.publish_linear_velocity(velocity)
 

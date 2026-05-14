@@ -43,7 +43,7 @@
 
     <!-- What to Launch Args -->
     <arg name="autonomy" default="true" />
-    <arg name="record" default="false" />
+    <arg name="record" default="true" />
     <arg name="slam" default="true" />
     <arg name="odom_from_sim" default="false" />
     <arg name="teensy" default="$(var real)" />
@@ -125,9 +125,10 @@
         <arg name="robot_num" value="$(var robot_num)" />
     </include>
 
-    <include if="$(var lidar)" file="$(find-pkg-share lunabot_perception)/launch/lidar.launch">
 
-    </include>        
+    <group unless="$(var sim)">
+        <include if="$(eval '($(var robot_num) == 1)')" file="$(find-pkg-share lunabot_perception)/launch/lidar.launch"></include>        
+    </group>
 
     <include if="$(var record)" file="$(find-pkg-share lunabot_bringup)/launch/$(var ns_)record.launch">
         <arg name="exp_name" value="$(var exp_name)" />
@@ -282,8 +283,8 @@
 
             <!-- RTAB-Map's parameters -->
             <param name="Grid/Sensor"             value="'0'"/> <!-- Only use point clouds-->
-            <param name="Grid/FootprintLength"    value="'1.0'"/>
-            <param name="Grid/FootprintWidth"     value="'0.75'"/> 
+            <!-- <param name="Grid/FootprintLength"    value="'1.0'"/>
+            <param name="Grid/FootprintWidth"     value="'0.75'"/>  -->
             <param name="Grid/MaxGroundAngle"     value="'30'"/> <!-- 30 degree normal before marked as obstacle -->
             <param name="Grid/MaxObstacleHeight"  value="'2.0'"/> <!-- points greater than 2m above are not obstacles -->
             <param name="Grid/RangeMax"           value="'0.0'"/> <!-- don't cap range (do this in cameras.launch) -->
@@ -294,7 +295,7 @@
             <param name="Grid/FromDepth"          value="'false'"/> <!-- occupancy grid from lidar -->
             
             <param name="GridGlobal/Eroded"       value="'true'" /> <!-- TODO: Figure out what this does? -->
-            <param name="GridGlobal/FootprintRadius" value="'0.375'" /> <!-- Clear obstacles within this radius -->
+            <param name="GridGlobal/FootprintRadius" value="'$(var radius)'" /> <!-- Clear obstacles within this radius -->
             <param name="GridGlobal/MinSize"      value="'5.0'"/> <!-- Minimum map size (m) -->
             <param name="GridGlobal/OccupancyThr" value="'0.5'"/> <!-- Threshold for occupancy -->
             
@@ -302,13 +303,13 @@
             <param name="Rtabmap/DetectionRate"   value="'10'"/> <!--  Hz -->
 
             <!-- KSC -->
-            <param name="Marker/Priors"           value="'301 2.44 2.5 0.2 1.57 0 0|482 3.44 1.8 0.2 1.57 0 -1.57|401 2.44 2.5 0.2 1.57 0 0|582 3.44 1.8 0.2 1.57 0 -1.57'"/>
+            <!-- <param name="Marker/Priors"           value="'301 2.44 2.5 0.2 1.57 0 0|482 3.44 1.8 0.2 1.57 0 -1.57|421 3.44 1.04 0.4 1.57 0 -1.57|401 2.44 2.5 0.2 1.57 0 0|582 3.44 1.8 0.2 1.57 0 -1.57|521 3.44 1.04 0.4 1.57 0 -1.57|'"/> -->
 
             <!-- UCF bottom (non-mirrored) priors -->
-            <!-- <param name="Marker/Priors"           value="'301 3.05 2.285 0.2 1.57 0 0|482 4.05 1.285 0.2 1.57 0 -1.57|401 3.05 2.285 0.2 1.57 0 0|582 4.05 1.285 0.2 1.57 0 -1.57'"/> -->
+            <param name="Marker/Priors"           value="'301 3.05 2.285 0.2 1.57 0 0|482 4.05 1.285 0.2 1.57 0 -1.57|421 4.05 0.525 0.4 1.57 0 -1.57|401 3.05 2.285 0.2 1.57 0 0|582 4.05 1.285 0.2 1.57 0 -1.57|521 4.05 0.525 0.4 1.57 0 -1.57'"/>
 
             <!-- UCF top (mirrored) priors -->
-            <!-- <param name="Marker/Priors"           value="'301 -3.05 2.285 0.2 1.57 0 0|482 -4.05 1.285 0.2 1.57 0 1.57|401 -3.05 2.285 0.2 1.57 0 0|582 -4.05 1.285 0.2 1.57 0 1.57'"/> -->
+            <!-- <param name="Marker/Priors"           value="'301 -3.05 2.285 0.2 1.57 0 0|482 -4.05 1.285 0.2 1.57 0 1.57|421 -4.05 0.525 0.4 1.57 0 1.57|401 -3.05 2.285 0.2 1.57 0 0|582 -4.05 1.285 0.2 1.57 0 1.57|521 -4.05 0.525 0.4 1.57 0 1.57|'"/> -->
 
             <!-- Note these priors assume apriltags are ON the -->
             <param name="Optimizer/PriorsIgnored" value="'false'"/>

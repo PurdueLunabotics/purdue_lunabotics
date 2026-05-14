@@ -6,9 +6,10 @@ from std_msgs.msg import Int32, Bool
 from lunabot_msgs.msg import Event
 
 class Deposit(State):
-  def __init__(self, transfer=False):
+  def __init__(self, transfer=False, is_main=True):
     super().__init__()
     self.transfer = transfer
+    self.is_main = is_main
 
 
   def setup(self, manager: Node):
@@ -30,17 +31,19 @@ class Deposit(State):
 
     self.dep_gate_pub.publish(Bool(data = True))
 
+    # only reverse at the end if main
+    is_done = (elapsed_time > self.REVERSE_TIME and self.is_main) or (elapsed_time > self.DEPOSIT_TIME)
+    if (is_done):
+      return Events.SUCCESS
+
     dep_speed = 0
     if (elapsed_time > self.GATE_TIME and elapsed_time < self.DEPOSIT_TIME): # start pushing material out
       dep_speed = self.DEPOSIT_SPEED
 
-    if (elapsed_time > self.DEPOSIT_TIME): # reverse dep just slightly to pull flap in
+    if (elapsed_time > self.DEPOSIT_TIME) and self.is_main: # reverse dep just slightly to pull flap in
       dep_speed = -self.DEPOSIT_SPEED
 
     self.dep_pub.publish(Int32(data = dep_speed))
-
-    if (elapsed_time > self.REVERSE_TIME):
-      return Events.SUCCESS
     
     return None  
   

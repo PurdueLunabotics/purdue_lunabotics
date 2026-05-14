@@ -495,6 +495,38 @@
       </link>
     </model>
 
+    <model name='tag_36_11_00476'>
+      <pose>3.4 1.04 0.4 0 -1.58 0</pose>
+      <static>1</static>
+      <link name='link'>
+        <visual name='tag_36_11_00476'>
+          <geometry>
+            <box>
+              <size>0.5468 0.5468 0.005</size>
+            </box>
+          </geometry>
+          <material>
+            <pbr>
+              <metal>
+                <albedo_map>model://apriltags/tag_36_11_00476/materials/textures/tag_36_11_00476.png</albedo_map>
+              </metal>
+            </pbr>
+            <ambient>1.0 1.0 1.0 1.0</ambient>
+            <diffuse>1.0 1.0 1.0 1.0</diffuse>
+            <specular>1.0 1.0 1.0 1.0</specular>
+            <emissive>0 0 0 1.0</emissive>
+          </material>
+        </visual>
+        <collision name='tag_36_11_00476_collision'>
+          <geometry>
+            <box>
+              <size>0.5468 0.5468 0.005</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
     <model name="box_1m">
       <static>true</static>
       <pose>0 1.5 0 0 0 0</pose>
