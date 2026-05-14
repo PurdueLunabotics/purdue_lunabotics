@@ -65,6 +65,10 @@ class CraterGeneration(Node):
         self.ground_subscriber = self.create_subscription(
             PointCloud2, "mini/rtabmap/cloud_ground", self.set_ground, 10
         )
+
+        self.bounding_pub = self.create_publisher(
+            PointCloud2, "boundingkrill", 10
+        )
         
 
         self.costmap_client = self.create_client(GetCostmap, "global_costmap/get_costmap")
@@ -222,24 +226,38 @@ class CraterGeneration(Node):
             self.get_logger().warn(f"{bounding_box[2]}")
             self.get_logger().warn(f"{bounding_box[1]}")
             self.get_logger().warn(f"{bounding_box[3]}")
+            self.get_logger().warn(f"{np.mean(obst[:][0])}")
+            self.get_logger().warn(f"{np.mean(obst[:][1])}")
+
+            points = []
+
+            for y in np.arange(bounding_box[1]+0.05, bounding_box[3]+0.05, 0.03):
+                points.append([bounding_box[0], y, 0])
+                points.append([bounding_box[2], y, 0])
+
+            for x in np.arange(bounding_box[0], bounding_box[2], 0.03):
+                points.append([x, bounding_box[1], 0])
+                points.append([x, bounding_box[3], 0])
+            
+            cloud = point_cloud2.create_cloud_xyz32(Header(frame_id=self.map_used, stamp=self.get_clock().now().to_msg()), points)
+            self.bounding_pub.publish(cloud)
+
             for p in obst:
                 
-                if ((p[0]>bounding_box[0] and (p[0]<bounding_box[2]) and (p[1]>bounding_box[1] and p[1]<bounding_box[3]))): # and self.is_blocked(self.costmap, p[0], p[1], 252)):
+                if ((p[0]>bounding_box[0]+0.1 and (p[0]<bounding_box[2]-0.1) and (p[1]>bounding_box[1]+0.1 and p[1]<bounding_box[3]-0.1 ))): # and self.is_blocked(self.costmap, p[0], p[1], 252)):
                 # if(p[2]<ground_height-0.02):
                     crater_vals.append(p[:-1])
                 
                     crater_check.append(p)
                     
+                # else:
+                    # self.get_logger().info("found bad point")
                         
                     # self.get_logger().info(f"{p}")
             
             
             if len(crater_vals) != 0:
-                header = Header()
-                t = self.get_clock().now()
-                header.stamp = t.to_msg()
-                header.frame_id = self.map_used
-                pc2 = point_cloud2.create_cloud_xyz32(header, crater_check)
+                pc2 = point_cloud2.create_cloud_xyz32(Header(frame_id=self.map_used, stamp=self.get_clock().now().to_msg()), crater_check)
 
                 self.cratervals_publisher.publish(pc2)
                     
@@ -258,7 +276,7 @@ class CraterGeneration(Node):
             
             crater_pointcloud = []
             
-            for n in range(10):
+            for n in range(15):
                 
                 #self.get_logger().info(f"{self.get_clock().now()}")
 
@@ -289,7 +307,7 @@ class CraterGeneration(Node):
                     
                 points_in = len(list(filter(remove,crater_vals)))
                 # hough_r < 0.4 and
-                if(hough_r > 0 and points_in > 13):
+                if(hough_r > 0 and points_in > 13 and points_in < 100):
                     #self.get_logger().warn("god help")
                     i = np.linspace(0,30,30)
                     x = hough_cx + hough_r * np.cos(i*12*2*np.pi/360)
@@ -310,24 +328,13 @@ class CraterGeneration(Node):
                         return(((j[0]<hough_cx-hough_r-0.10) or (j[0]>hough_cx+hough_r+0.10)) or ((j[1]<hough_cy-hough_r-0.10) or (j[1]>hough_cy+hough_r+0.10)))
                     
                     crater_vals = list(filter(dont_remove, crater_vals))
-
-                    header = Header()
-                    t = self.get_clock().now()
-                    header.stamp = t.to_msg()
-                    header.frame_id = self.map_used
-                    pc2 = point_cloud2.create_cloud_xyz32(header, crater_pointcloud)
-
+                    pc2 = point_cloud2.create_cloud_xyz32(Header(frame_id=self.map_used, stamp=self.get_clock().now().to_msg()), crater_pointcloud)
                     self.crater_publisher.publish(pc2)
                     
                     # self.get_logger().info(f"{crater_vals}")
                 
             
-            header = Header()
-            t = self.get_clock().now()
-            header.stamp = t.to_msg()
-            header.frame_id = self.map_used
-            pc2 = point_cloud2.create_cloud_xyz32(header, crater_pointcloud)
-
+            pc2 = point_cloud2.create_cloud_xyz32(Header(frame_id=self.map_used, stamp=self.get_clock().now().to_msg()), crater_pointcloud)
             self.crater_publisher.publish(pc2)
         
         
