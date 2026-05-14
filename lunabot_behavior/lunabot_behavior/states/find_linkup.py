@@ -12,7 +12,7 @@ from nav_msgs.msg import Path
 from rtabmap_msgs.msg import OdomInfo
 
 from lunabot_behavior import zones
-from lunabot_behavior.state import Events
+from lunabot_behavior.state import Events, State
 from lunabot_behavior.states.traverse import Traverse
 from rclpy.node import Node
 from rclpy.task import Future
@@ -111,16 +111,25 @@ FINDING_LINKUP = 1
 FOUND_LINKUP = 2
 FAILED = 3
 
-class FindLinkup(Traverse):
+class TraverseToMiddle(Traverse):
     def __init__(self):
         self.goal = PoseStamped()
         self.goal.pose.position.x = ZoneMeasurements.BERM_OFFSET_X
         self.goal.pose.position.y = 0.0
 
-        self.goal_vec = point_from_pose_2d(self.goal)
-
         super().__init__(self.goal, False)
 
+    def setup(self, manager):
+        ns = manager.get_namespace().lstrip('/')
+        self.frame = "map"
+        if len(ns) != 0:
+            self.frame = f"{ns}/{self.frame}"
+        self.goal.header.frame_id = self.frame
+        super().setup(manager)
+
+
+class FindLinkup(State):
+    def __init__(self):
         self.MIN_SEGMENT_LENGTH = 1.325
 
         # excavation edge for linkup
@@ -138,15 +147,12 @@ class FindLinkup(Traverse):
         
         self.excavation_edge = LineString([self.exc_p1, self.exc_p2])
         self.padding = 0.4
-        
-        self.state = WAITING
 
     def setup(self, manager: Node):
         ns = manager.get_namespace().lstrip('/')
         self.frame = "map"
         if len(ns) != 0:
             self.frame = f"{ns}/{self.frame}"
-        self.goal.header.frame_id = self.frame
 
         super().setup(manager)
 
@@ -154,49 +160,42 @@ class FindLinkup(Traverse):
         self.marker_pub = manager.create_publisher(Marker, "/linkup_marker", 10)
         self.marker_pub.publish(Marker(action=Marker.DELETEALL, header=Header(frame_id=self.frame)))
 
-        self.odom = None
-        self.tolerance = 2.0 # wider tolerance is ok - finding linkup isn't an exact science
         self.logger = manager.get_logger()
 
-        self.path_client = ActionClient(manager, ComputePathToPose, "compute_path_to_pose")
         self.costmap_client = manager.create_client(GetCostmap, "global_costmap/get_costmap")
-        self.odom_info_sub = manager.create_subscription(OdomInfo, "rtabmap/odom_info", self.odom_info_cb, 10)
-        self.lost_odom_time = None
 
         self.manager = manager
 
-    def odom_cb(self, pose: PoseStamped):
-        self.odom = point_from_pose_2d(pose)
-    
-    def odom_info_cb(self, info: OdomInfo):
-        if info.lost:
-            self.lost_odom_time = self.manager.get_clock().now()
+    def start(self):
+        self.state = WAITING
+        self.find_linkup()
 
     def periodic(self) -> None | Events:
-        super().publish_everything()
-
         if self.state == FOUND_LINKUP:
             return Events.SUCCESS
         elif self.state == FAILED:
             return Events.FAIL
-
-        if self.odom is not None and np.linalg.norm(self.odom - self.goal_vec) <= self.tolerance and self.state == WAITING and (self.lost_odom_time is None or self.manager.get_clock().now() - self.lost_odom_time > Duration(seconds=30)):
-            self.state = FINDING_LINKUP
-            self.find_linkup() # find the linkup thingamabob
-
         return None
 
 
     # helper functions ===========================================================================
 
-    def find_linkup(self):
-        # print("finding linkup")
-        self.goal.header.stamp = self.manager.get_clock().now().to_msg()
+    def line_to_ends(self, pos: shp.Point, angle: float, length: float | None = None) -> tuple[shp.Point, shp.Point]:
+        if length is None:
+            length = self.MIN_SEGMENT_LENGTH
 
+        if not self.is_mirrored:
+            a = shp.Point(pos.x + np.cos(angle) * length / 2, pos.y + np.sin(angle) * length / 2)
+            b = shp.Point(pos.x - np.cos(angle) * length / 2, pos.y - np.sin(angle) * length / 2)
+        else:
+            a = shp.Point(pos.x - np.cos(angle) * length / 2, pos.y + np.sin(angle) * length / 2)
+            b = shp.Point(pos.x + np.cos(angle) * length / 2, pos.y - np.sin(angle) * length / 2)
+
+        return (a, b)
+
+    def find_linkup(self):
         self.costmap_client.wait_for_service()
         self.costmap_client.call_async(GetCostmap.Request()).add_done_callback(self.costmap_cb)
-
-        # self.find_segment(self.start_pose)
 
     def costmap_cb(self, future: Future):
         result = future.result()
@@ -215,16 +214,11 @@ class FindLinkup(Traverse):
         self.show_line(pos, angle, num_points, "final", 1.0, 1.0, 1.0, 0.1)
 
         linkup = Linkup()
-        if not self.is_mirrored:
-            linkup.main_target.x = pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
-            linkup.main_target.y = pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
-            linkup.mini_target.x = pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
-            linkup.mini_target.y = pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
-        else:
-            linkup.main_target.x = pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
-            linkup.main_target.y = pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
-            linkup.mini_target.x = pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2
-            linkup.mini_target.y = pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2
+        a, b = self.line_to_ends(pos, angle)
+        linkup.main_target.x = a.x
+        linkup.main_target.y = a.y
+        linkup.mini_target.x = b.x
+        linkup.mini_target.y = b.y
 
         linkup.exc_target.x = linkup.main_target.x
         linkup.exc_target.y = linkup.main_target.y
@@ -237,12 +231,9 @@ class FindLinkup(Traverse):
         if pos.distance(self.excavation_edge) > self.MIN_SEGMENT_LENGTH / 4 or pos.y > self.exc_p1[1] - self.padding or pos.y < self.exc_p2[1] + self.padding:
             return (inf, True)
 
-        if not self.is_mirrored:
-            a = shp.Point(pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
-            b = shp.Point(pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
-        else:
-            a = shp.Point(pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
-            b = shp.Point(pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
+        eval_length = self.MIN_SEGMENT_LENGTH * 2.0
+
+        a, b = self.line_to_ends(pos, angle, eval_length)
 
         if not a.within(zones.zone_to_poly(zones.exc_zone)):
             return (inf, True)
@@ -306,10 +297,9 @@ class FindLinkup(Traverse):
         # Identity pose
         marker.pose.orientation.w = 1.0
 
-        a = Point(x = pos.x + np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, y = pos.y + np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
-        b = Point(x = pos.x - np.cos(angle) * self.MIN_SEGMENT_LENGTH / 2, y = pos.y - np.sin(angle) * self.MIN_SEGMENT_LENGTH / 2)
+        start, end = self.line_to_ends(pos, angle, eval_length)
 
-        marker.points = [a, b]
+        marker.points = [Point(x = start.x, y = start.y), Point(x = end.x, y = end.y)]
 
         self.marker_pub.publish(marker)
 

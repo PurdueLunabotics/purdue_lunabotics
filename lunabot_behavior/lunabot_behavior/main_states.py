@@ -28,6 +28,7 @@ from lunabot_behavior.states.main_wait_for_mini_align import MainWaitForAlignSta
 from lunabot_behavior.states.align_to_mini_bot import AlignToMiniBotState
 from lunabot_behavior.states.wait_for_approach import WaitForApproachState
 from lunabot_behavior.states.approach_mini import ApproachMiniState
+from lunabot_behavior.states.drive_to_exc_target_main import DriveToMainExcTarget
 from lunabot_behavior.states.wait_for_diverge import WaitForDivergeState
 from lunabot_behavior.states.separate_from_mini import SeparateFromMiniState
 from lunabot_behavior.states.init import InitRetreat, SetupMap, SetupObstacles
@@ -111,6 +112,12 @@ class MainStates(Enum):
 
     SEPARATE_FROM_MINI = (SeparateFromMiniState(), (LedColor.YELLOW, LedColor.WHITE))
     SEPARATE_FROM_MINI_STALL = (Stall(), (LedColor.YELLOW, LedColor.RED))
+
+    ALIGN_TO_EXC_TARGET = (AlignToLinkup(), (LedColor.YELLOW, LedColor.YELLOW))
+    ALIGN_TO_EXC_TARGET_STALL = (Stall(), (LedColor.YELLOW, LedColor.RED))
+
+    DRIVE_TO_EXC_TARGET = (DriveToMainExcTarget(), (LedColor.YELLOW, LedColor.BLUE))
+    DRIVE_TO_EXC_TARGET_STALL = (Stall(), (LedColor.YELLOW, LedColor.RED))
 
     # ===== SINGLE ROBOT TRAVERSAL SECTION (3) =====
 
@@ -219,6 +226,14 @@ class MainStates(Enum):
             (MainStates.SEPARATE_FROM_MINI, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
             (MainStates.SEPARATE_FROM_MINI, Events.STALL): MainStates.SEPARATE_FROM_MINI_STALL,
             (MainStates.SEPARATE_FROM_MINI_STALL, Events.SUCCESS): MainStates.SEPARATE_FROM_MINI,
+
+            (MainStates.ALIGN_TO_EXC_TARGET, Events.SUCCESS): MainStates.DRIVE_TO_EXC_TARGET,
+            (MainStates.ALIGN_TO_EXC_TARGET, Events.STALL): MainStates.ALIGN_TO_EXC_TARGET_STALL,
+            (MainStates.ALIGN_TO_EXC_TARGET_STALL, Events.SUCCESS): MainStates.ALIGN_TO_EXC_TARGET,
+
+            (MainStates.DRIVE_TO_EXC_TARGET, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
+            (MainStates.DRIVE_TO_EXC_TARGET, Events.STALL): MainStates.DRIVE_TO_EXC_TARGET_STALL,
+            (MainStates.DRIVE_TO_EXC_TARGET_STALL, Events.SUCCESS): MainStates.DRIVE_TO_EXC_TARGET,
 
             # in case minibot is indisposed and big bot has to make full cycles
             (MainStates.TRAVERSE_TO_BERM, Events.SUCCESS): MainStates.ALIGN_TO_BERM,

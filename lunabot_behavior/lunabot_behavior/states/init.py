@@ -161,8 +161,8 @@ class SetupObstacles(State):
         main_tag_to_base_tf = tf_to_matrix(self.tf_buf.lookup_transform("deposition_apriltag_optical_frame", "base_link", Time()))
         tf_matrix = tf_transformations.concatenate_matrices(map_to_main_tag_tf, main_tag_to_base_tf)
 
-        WIDTH = 1.0
-        LENGTH = 0.7
+        WIDTH = 0.8
+        LENGTH = 0.5
 
         point = np.zeros(4)
         point[3] = 1.0
