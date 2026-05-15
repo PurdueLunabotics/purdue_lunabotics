@@ -185,8 +185,8 @@ class AlignTrench(AlignToAngle):
 
     cost, blocked = CostmapUtil.line_cost(costmap, a, b, LETHAL_COST)
 
-    if zones.zone_to_poly(zones.exc_zone).contains(a) or zones.zone_to_poly(zones.exc_zone).contains(b):
-      blocked = True
+    # if zones.zone_to_poly(zones.exc_zone).contains(a) or zones.zone_to_poly(zones.exc_zone).contains(b):
+    #   blocked = True
 
     if not blocked:
       self.show_line(a, b, "good", int(np.rad2deg(target_angle)) + 360, r=0.0, g=1.0, b=0.0)
