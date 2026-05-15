@@ -10,14 +10,14 @@ from lunabot_msgs.msg import Event
 from lunabot_behavior.states.align_to_berm import AlignToBerm
 from lunabot_behavior.states.traverse_to_linkup import TraverseToLinkup
 from lunabot_behavior.states.align_to_linkup import AlignToLinkup
-from lunabot_behavior.states.find_linkup import FindLinkup
+from lunabot_behavior.states.find_linkup import FindLinkup, TraverseToMiddle
 from lunabot_behavior.states.approach_trench import ApproachTrench, RetreatTrench
 from lunabot_behavior.states.align_trench import AlignTrench
 from lunabot_behavior.states.align_to_angle import AlignToAngle
 from lunabot_behavior.states.traverse_to_berm import TraverseToBerm
 from lunabot_behavior.states.traverse import NoPath, Traverse, Stall
 from lunabot_behavior.states.deposit import Deposit
-from lunabot_behavior.states.approach_berm import ApproachBerm
+from lunabot_behavior.states.approach_berm import ApproachBerm, ApproachBermBackwards
 from lunabot_behavior.states.plunge import Plunge
 from lunabot_behavior.states.raise_act import Raise
 from lunabot_behavior.states.retreat_berm import RetreatBerm
@@ -32,10 +32,12 @@ class SingleStates(Enum):
     
     INIT = (State(), (LedColor.GREEN, LedColor.YELLOW))
     INIT_STALL = (State(), (LedColor.GREEN, LedColor.RED))
+    INIT_RAISE = (Raise(False), (LedColor.GREEN, LedColor.GREEN))
     
     FIND_LINKUP = (FindLinkup(), (LedColor.GREEN, LedColor.BLUE))
-    FIND_LINKUP_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
-    FIND_LINKUP_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
+    TRAVERSE_TO_MIDDLE = (TraverseToMiddle(), (LedColor.GREEN, LedColor.BLUE))
+    TRAVERSE_TO_MIDDLE_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
+    TRAVERSE_TO_MIDDLE_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
     
     STARTING_PLUNGE = (Plunge(), (LedColor.GREEN, LedColor.BLUE))
     STARTING_PLUNGE_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
@@ -84,7 +86,7 @@ class SingleStates(Enum):
     ALIGN_TO_BERM = (AlignToBerm(True), (LedColor.BLUE, LedColor.GREEN))
     ALIGN_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
-    APPROACH_BERM = (ApproachBerm(True), (LedColor.BLUE, LedColor.TEAL))
+    APPROACH_BERM = (ApproachBermBackwards(True), (LedColor.BLUE, LedColor.TEAL))
     APPROACH_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
     DEPOSIT = (Deposit(transfer=True), (LedColor.YELLOW, LedColor.MAGENTA))
@@ -101,23 +103,26 @@ class SingleStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
-            (SingleStates.INIT, Events.SUCCESS): SingleStates.STARTING_PLUNGE,
+            (SingleStates.INIT, Events.SUCCESS): SingleStates.INIT_RAISE,
             (SingleStates.INIT, Events.STALL): SingleStates.INIT_STALL,
             (SingleStates.INIT_STALL, Events.SUCCESS): SingleStates.INIT,
+            (SingleStates.INIT_RAISE, Events.SUCCESS): SingleStates.STARTING_PLUNGE,
             
             (SingleStates.STARTING_PLUNGE, Events.SUCCESS): SingleStates.STARTING_RAISE,
             (SingleStates.STARTING_PLUNGE, Events.STALL): SingleStates.STARTING_PLUNGE_STALL,
             (SingleStates.STARTING_PLUNGE_STALL, Events.SUCCESS): SingleStates.STARTING_PLUNGE,
             
-            (SingleStates.STARTING_RAISE, Events.SUCCESS): SingleStates.FIND_LINKUP,
+            (SingleStates.STARTING_RAISE, Events.SUCCESS): SingleStates.TRAVERSE_TO_MIDDLE,
             (SingleStates.STARTING_RAISE, Events.STALL): SingleStates.STARTING_RAISE_STALL,
             (SingleStates.STARTING_RAISE_STALL, Events.SUCCESS): SingleStates.STARTING_RAISE,
                         
+            (SingleStates.TRAVERSE_TO_MIDDLE, Events.SUCCESS): SingleStates.FIND_LINKUP,
+            (SingleStates.TRAVERSE_TO_MIDDLE, Events.STALL): SingleStates.TRAVERSE_TO_MIDDLE_STALL,
+            (SingleStates.TRAVERSE_TO_MIDDLE, Events.NO_PATH): SingleStates.TRAVERSE_TO_MIDDLE_NO_PATH,
+            (SingleStates.TRAVERSE_TO_MIDDLE_STALL, Events.SUCCESS): SingleStates.TRAVERSE_TO_MIDDLE,
+            (SingleStates.TRAVERSE_TO_MIDDLE_NO_PATH, Events.SUCCESS): SingleStates.TRAVERSE_TO_MIDDLE,
+
             (SingleStates.FIND_LINKUP, Events.SUCCESS): SingleStates.TRAVERSE_TO_LINKUP,
-            (SingleStates.FIND_LINKUP, Events.STALL): SingleStates.FIND_LINKUP_STALL,
-            (SingleStates.FIND_LINKUP, Events.NO_PATH): SingleStates.FIND_LINKUP_NO_PATH,
-            (SingleStates.FIND_LINKUP_STALL, Events.SUCCESS): SingleStates.FIND_LINKUP,
-            (SingleStates.FIND_LINKUP_NO_PATH, Events.SUCCESS): SingleStates.FIND_LINKUP,
                         
             (SingleStates.TRAVERSE_TO_LINKUP, Events.SUCCESS): SingleStates.ALIGN_TO_TRENCH,
             (SingleStates.TRAVERSE_TO_LINKUP, Events.STALL): SingleStates.TRAVERSE_TO_LINKUP_STALL,
@@ -167,7 +172,7 @@ class SingleStates(Enum):
             (SingleStates.DEPOSIT_BERM, Events.STALL): SingleStates.DEPOSIT_BERM_STALL,
             (SingleStates.DEPOSIT_BERM_STALL, Events.SUCCESS): SingleStates.DEPOSIT_BERM,
             
-            (SingleStates.RETREAT_BERM, Events.SUCCESS): SingleStates.TRAVERSE_TO_LINKUP,
+            (SingleStates.RETREAT_BERM, Events.SUCCESS): SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS,
             (SingleStates.RETREAT_BERM, Events.STALL): SingleStates.RETREAT_BERM_STALL,
             (SingleStates.RETREAT_BERM_STALL, Events.SUCCESS): SingleStates.RETREAT_BERM,
             
@@ -183,7 +188,7 @@ class SingleStates(Enum):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = StateManager(SingleStates, SingleStates.FIND_LINKUP, Events, Event)
+    minimal_subscriber = StateManager(SingleStates, SingleStates.APPROACH_BERM, Events, Event)
 
     rclpy.spin(minimal_subscriber)
 

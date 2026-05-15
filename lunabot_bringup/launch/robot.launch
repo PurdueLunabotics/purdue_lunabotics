@@ -200,14 +200,14 @@
         <let if="$(var pointcloud)" name="temp_cloud" value="$(var /ns)/pointcloud/depth_combined_cloud"/>
         <let unless="$(var pointcloud)" name="temp_cloud" value="$(var /ns)/$(var mapping_cam_name)/points"/>
 
-        <node name="crater_generation_node" pkg="lunabot_perception" exec="crater_generation.py" respawn="true">
-          <remap from="nav_path" to="nav_path"/>
-          <remap from="rtabmap/cloud_obstacles" to="$(var /ns)/rtabmap/cloud_obstacles"/>
-          <remap from="rtabmap/cloud_ground" to="$(var /ns)/rtabmap/cloud_ground"/>
-          <remap from="map" to="$(var /ns)/map"/>
+        <!-- <node name="crater_generation_node" pkg="lunabot_perception" exec="crater_generation.py" respawn="true"> -->
+          <!-- <remap from="nav_path" to="nav_path"/> -->
+          <!-- <remap from="rtabmap/cloud_obstacles" to="$(var /ns)/rtabmap/cloud_obstacles"/> -->
+          <!-- <remap from="rtabmap/cloud_ground" to="$(var /ns)/rtabmap/cloud_ground"/> -->
+          <!-- <remap from="map" to="$(var /ns)/map"/> -->
 
-          <param name="use_sim_time" value="$(var sim)"/>
-        </node>
+          <!-- <param name="use_sim_time" value="$(var sim)"/> -->
+        <!-- </node> -->
         
 
         <let if="$(var lidar)" name="scan_cloud" value="$(var /ns)/lidar_combined_cloud"/>

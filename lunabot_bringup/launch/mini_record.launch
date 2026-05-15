@@ -22,7 +22,7 @@
   /mini/mini_bot/joint_states /mini/mini_bot/robot_description
 
   /mini/d455_back/aligned_depth_to_color/camera_info
-  /mini/d455_back/algined_depth_to_color/image_raw
+  /mini/d455_back/aligned_depth_to_color/image_raw
   /mini/d455_back/depth/camera_info
   /mini/d455_back/depth/image_raw
   /mini/d455_back/color/camera_info
@@ -31,7 +31,7 @@
   /mini/d455_back/points
 
   /mini/d455_front/aligned_depth_to_color/camera_info
-  /mini/d455_front/algined_depth_to_color/image_raw
+  /mini/d455_front/aligned_depth_to_color/image_raw
   /mini/d455_back/depth/camera_info
   /mini/d455_back/depth/image_raw
   /mini/d455_front/color/camera_info

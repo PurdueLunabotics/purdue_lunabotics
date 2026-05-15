@@ -223,7 +223,7 @@ class MainStates(Enum):
             (MainStates.DEPOSIT, Events.STALL): MainStates.DEPOSIT_STALL,
             (MainStates.DEPOSIT_STALL, Events.SUCCESS): MainStates.DEPOSIT,
             
-            (MainStates.SEPARATE_FROM_MINI, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
+            (MainStates.SEPARATE_FROM_MINI, Events.SUCCESS): MainStates.ALIGN_TO_EXC_TARGET,
             (MainStates.SEPARATE_FROM_MINI, Events.STALL): MainStates.SEPARATE_FROM_MINI_STALL,
             (MainStates.SEPARATE_FROM_MINI_STALL, Events.SUCCESS): MainStates.SEPARATE_FROM_MINI,
 

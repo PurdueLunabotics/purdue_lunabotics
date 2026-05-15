@@ -30,8 +30,8 @@ class AlignTrench(AlignToAngle):
 
   def setup(self, manager: Node):
     super().setup(manager)
-    self.min_angle = self.base_angle + np.deg2rad(-90)
-    self.max_angle = self.base_angle + np.deg2rad(90) + 0.01
+    self.min_angle = self.base_angle + np.deg2rad(-75)
+    self.max_angle = self.base_angle + np.deg2rad(75) + 0.01
     self.angle_step = np.deg2rad(30)
     self.exc_approach_dist = 0.0  # keeps track of how far robot goes on angle before excavating
     self.distance_step = 0.5 # m - how far each excavation step proceeds
@@ -185,8 +185,8 @@ class AlignTrench(AlignToAngle):
 
     cost, blocked = CostmapUtil.line_cost(costmap, a, b, LETHAL_COST)
 
-    if zones.zone_to_poly(zones.exc_zone).contains(a) or zones.zone_to_poly(zones.exc_zone).contains(b):
-      blocked = True
+    # if zones.zone_to_poly(zones.exc_zone).contains(a) or zones.zone_to_poly(zones.exc_zone).contains(b):
+    #   blocked = True
 
     if not blocked:
       self.show_line(a, b, "good", int(np.rad2deg(target_angle)) + 360, r=0.0, g=1.0, b=0.0)

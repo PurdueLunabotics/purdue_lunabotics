@@ -9,6 +9,7 @@ from lunabot_config.led_colors import LedColor
 
 from lunabot_behavior.states.plunge import Plunge
 from lunabot_behavior.states.raise_act import Raise
+from lunabot_behavior.states.fullstop import Stop
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -24,6 +25,8 @@ class MainStates(Enum):
     
     STARTING_RAISE = (Raise(), (LedColor.GREEN, LedColor.MAGENTA))
     STARTING_RAISE_STALL = (State(), (LedColor.GREEN, LedColor.RED))
+
+    STOP = (Stop(), (LedColor.RED, LedColor.GREEN))
     
     @staticmethod
     def get_transition(state, event: Events):
@@ -34,6 +37,7 @@ class MainStates(Enum):
             
             (MainStates.STARTING_RAISE, Events.STALL): MainStates.STARTING_RAISE_STALL,
             (MainStates.STARTING_RAISE_STALL, Events.SUCCESS): MainStates.STARTING_RAISE,
+            (MainStates.STARTING_RAISE, Events.SUCCESS): MainStates.STOP,
         }
 
         return transitions.get((state, event), None)
