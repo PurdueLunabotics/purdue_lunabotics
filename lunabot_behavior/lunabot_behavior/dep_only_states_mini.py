@@ -13,6 +13,7 @@ from lunabot_behavior.states.deposit import Deposit
 from lunabot_behavior.states.approach_berm import ApproachBerm
 from lunabot_behavior.states.retreat_berm import RetreatBerm
 from lunabot_behavior.states.fullstop import Stop
+from lunabot_behavior.states.trench import Drive
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -24,7 +25,7 @@ class MiniDepStates(Enum):
     ALIGN_TO_BERM = (AlignToBerm(), (LedColor.BLUE, LedColor.GREEN))
     ALIGN_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
-    APPROACH_BERM = (ApproachBerm(), (LedColor.BLUE, LedColor.TEAL))
+    APPROACH_BERM = (Drive(1000000, True, 0.1, timeout=10), (LedColor.BLUE, LedColor.TEAL))
     APPROACH_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
     # ===== SINGLE ROBOT DEPOSIT SECTION (4) =====
@@ -59,7 +60,7 @@ class MiniDepStates(Enum):
 def main(args=None):
     rclpy.init(args=sys.argv, signal_handler_options=rclpy.SignalHandlerOptions.NO)
 
-    manager = StateManager(MiniDepStates, MiniDepStates.ALIGN_TO_BERM, Events, Event)
+    manager = StateManager(MiniDepStates, MiniDepStates.APPROACH_BERM, Events, Event)
 
     try:
         rclpy.spin(manager)

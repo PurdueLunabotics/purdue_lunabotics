@@ -30,8 +30,8 @@ class AlignTrench(AlignToAngle):
 
   def setup(self, manager: Node):
     super().setup(manager)
-    self.min_angle = self.base_angle + np.deg2rad(-90)
-    self.max_angle = self.base_angle + np.deg2rad(90) + 0.01
+    self.min_angle = self.base_angle + np.deg2rad(-75)
+    self.max_angle = self.base_angle + np.deg2rad(75) + 0.01
     self.angle_step = np.deg2rad(30)
     self.exc_approach_dist = 0.0  # keeps track of how far robot goes on angle before excavating
     self.distance_step = 0.5 # m - how far each excavation step proceeds
