@@ -103,7 +103,7 @@ class SingleStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
-            (SingleStates.INIT, Events.SUCCESS): SingleStates.INIT_RAISE,
+            (SingleStates.INIT, Events.PROCEED): SingleStates.INIT_RAISE,
             (SingleStates.INIT, Events.STALL): SingleStates.INIT_STALL,
             (SingleStates.INIT_STALL, Events.SUCCESS): SingleStates.INIT,
             (SingleStates.INIT_RAISE, Events.SUCCESS): SingleStates.STARTING_PLUNGE,
@@ -188,7 +188,7 @@ class SingleStates(Enum):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = StateManager(SingleStates, SingleStates.APPROACH_BERM, Events, Event)
+    minimal_subscriber = StateManager(SingleStates, SingleStates.INIT_RAISE, Events, Event)
 
     rclpy.spin(minimal_subscriber)
 
