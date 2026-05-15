@@ -70,6 +70,9 @@
 
   /mini/sensors
   /mini/stalled
+
+  /linkup_marker
+  /linkup_pos
   
   /rosout
   /tf
