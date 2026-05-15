@@ -19,11 +19,12 @@ from sklearn.linear_model import RANSACRegressor
 import hough
 
 # Disable these if costmap isn't worth it
-from nav2_msgs.srv import GetCostmap
-from nav2_msgs.msg import Costmap
+from tf2_ros import Time, TransformBroadcaster, TransformListener, Buffer, TransformStamped
+from lunabot_behavior.states.init import tf_to_matrix
 from rclpy.task import Future 
 import time
-from lunabot_behavior.zones import bounding_box
+from lunabot_behavior.zones import bounding_box, ZoneMeasurements
+import tf_transformations
 
 class CraterGeneration(Node):
     """
@@ -70,9 +71,9 @@ class CraterGeneration(Node):
             PointCloud2, "boundingkrill", 10
         )
         
-
-        self.costmap_client = self.create_client(GetCostmap, "global_costmap/get_costmap")
-        self.costmap = Costmap()
+        self.tf_buf = Buffer()
+        self.tf_listener = TransformListener(self.tf_buf, self)
+        self.tf_broadcaster = TransformBroadcaster(self)
         
 
         
@@ -90,8 +91,6 @@ class CraterGeneration(Node):
         self.create_timer(1, self.estimate_crater)
         
         
-    def is_blocked(costmap: Costmap, x: int, y: int, lethal_cost: float) -> bool:
-        return costmap.data[x + y * costmap.metadata.size_x] >= lethal_cost
         
     def plane_generation(self):
         ground_trainxy = []
@@ -221,30 +220,32 @@ class CraterGeneration(Node):
             #         # self.get_logger().info(f"{p}")
 
 
+            start_zone = [ZoneMeasurements.START_OFFSET_X-ZoneMeasurements.START_LENGTH_X/2, ZoneMeasurements.START_OFFSET_Y-ZoneMeasurements.START_LENGTH_Y/2, ZoneMeasurements.START_OFFSET_X+ZoneMeasurements.START_LENGTH_X/2, ZoneMeasurements.START_OFFSET_Y+ZoneMeasurements.START_LENGTH_Y/2]
             
-            self.get_logger().warn(f"{bounding_box[0]}")
-            self.get_logger().warn(f"{bounding_box[2]}")
-            self.get_logger().warn(f"{bounding_box[1]}")
-            self.get_logger().warn(f"{bounding_box[3]}")
-            self.get_logger().warn(f"{np.mean(obst[:][0])}")
-            self.get_logger().warn(f"{np.mean(obst[:][1])}")
+            self.get_logger().warn(f"{start_zone[0]}")
+            self.get_logger().warn(f"{start_zone[2]}")
+            self.get_logger().warn(f"{start_zone[1]}")
+            self.get_logger().warn(f"{start_zone[3]}")
+            # self.get_logger().warn(f"{np.mean(obst[:][0])}")
+            # self.get_logger().warn(f"{np.mean(obst[:][1])}")
 
             points = []
 
-            for y in np.arange(bounding_box[1]+0.05, bounding_box[3]+0.05, 0.03):
-                points.append([bounding_box[0], y, 0])
-                points.append([bounding_box[2], y, 0])
+            for y in np.arange(start_zone[1]-0.1, start_zone[3], 0.03):
+                points.append([start_zone[0], y, 0])
+                points.append([start_zone[2], y, 0])
 
-            for x in np.arange(bounding_box[0], bounding_box[2], 0.03):
-                points.append([x, bounding_box[1], 0])
-                points.append([x, bounding_box[3], 0])
+            for x in np.arange(start_zone[0], start_zone[2], 0.03):
+                points.append([x, start_zone[1], 0])
+                points.append([x, start_zone[3], 0])
             
             cloud = point_cloud2.create_cloud_xyz32(Header(frame_id=self.map_used, stamp=self.get_clock().now().to_msg()), points)
             self.bounding_pub.publish(cloud)
 
+            is_mirrored = ZoneMeasurements.BERM_OFFSET_X > ZoneMeasurements.EXC_OFFSET_X
+
             for p in obst:
-                
-                if ((p[0]>bounding_box[0]+0.1 and (p[0]<bounding_box[2]-0.1) and (p[1]>bounding_box[1]+0.1 and p[1]<bounding_box[3]-0.1 ))): # and self.is_blocked(self.costmap, p[0], p[1], 252)):
+                if ((p[0]>bounding_box[0]-0.1+0.05 and (p[0]<bounding_box[2]-0.1-0.05) and (p[1]>bounding_box[1]-0.2+0.05 and p[1]<bounding_box[3]-0.2-0.05 )) and ((p[0]<start_zone[0] and  p[1]<start_zone[1] and not is_mirrored) or (p[0]>start_zone[0] and  p[1]<start_zone[1] and is_mirrored))): # and self.is_blocked(self.costmap, p[0], p[1], 252)):
                 # if(p[2]<ground_height-0.02):
                     crater_vals.append(p[:-1])
                 
@@ -255,6 +256,25 @@ class CraterGeneration(Node):
                         
                     # self.get_logger().info(f"{p}")
             
+            map_to_main_tag_tf = tf_to_matrix(self.tf_buf.lookup_transform("mini/map", "main_deposition", Time()))
+            main_tag_to_base_tf = tf_to_matrix(self.tf_buf.lookup_transform("deposition_apriltag_optical_frame", "base_link", Time()))
+            tf_matrix = tf_transformations.concatenate_matrices(map_to_main_tag_tf, main_tag_to_base_tf)
+
+
+            WIDTH = 1.0
+            LENGTH = 0.7
+
+            point = np.zeros(4)
+            point[3] = 1.0
+
+            main_box = []
+            
+            for y in np.arange(-LENGTH/2, LENGTH/2, 0.03):
+                for x in np.arange(-WIDTH/2, WIDTH/2, 0.03):
+                    point[0] = x
+                    point[1] = y
+                    new_point = tf_matrix @ point
+                    main_box.append([new_point[0], new_point[1], 0])
             
             if len(crater_vals) != 0:
                 pc2 = point_cloud2.create_cloud_xyz32(Header(frame_id=self.map_used, stamp=self.get_clock().now().to_msg()), crater_check)
@@ -265,7 +285,7 @@ class CraterGeneration(Node):
             # initial guess for the ring center and radius (if no previous info about those, increase uncertainty accordingly)
             guessed_cx = 0
             guessed_cy = 0
-            guessed_r = 0.2
+            guessed_r = 0.3
 
             # uncertainty of the initial guess
             uncertainty_pos = 5
@@ -276,6 +296,8 @@ class CraterGeneration(Node):
             
             crater_pointcloud = []
             
+
+            # is it better to increase and generate more obstacles, with the risk of having important obstacles be generated later?
             for n in range(15):
                 
                 #self.get_logger().info(f"{self.get_clock().now()}")
@@ -325,7 +347,7 @@ class CraterGeneration(Node):
                         
                         
                     def dont_remove(j):
-                        return(((j[0]<hough_cx-hough_r-0.10) or (j[0]>hough_cx+hough_r+0.10)) or ((j[1]<hough_cy-hough_r-0.10) or (j[1]>hough_cy+hough_r+0.10)))
+                        return(((j[0]<hough_cx-hough_r-0.25) or (j[0]>hough_cx+hough_r+0.25)) or ((j[1]<hough_cy-hough_r-0.25) or (j[1]>hough_cy+hough_r+0.25)))
                     
                     crater_vals = list(filter(dont_remove, crater_vals))
                     pc2 = point_cloud2.create_cloud_xyz32(Header(frame_id=self.map_used, stamp=self.get_clock().now().to_msg()), crater_pointcloud)
@@ -334,6 +356,11 @@ class CraterGeneration(Node):
                     # self.get_logger().info(f"{crater_vals}")
                 
             
+                if (points_in > 100):
+                    def dont_remove_walls(j):
+                        return(((j[0]<hough_cx-hough_r-0.3) or (j[0]>hough_cx+hough_r+0.3)) or ((j[1]<hough_cy-hough_r-0.3) or (j[1]>hough_cy+hough_r+0.3)))
+                    
+                    crater_vals = list(filter(dont_remove_walls, crater_vals))
             pc2 = point_cloud2.create_cloud_xyz32(Header(frame_id=self.map_used, stamp=self.get_clock().now().to_msg()), crater_pointcloud)
             self.crater_publisher.publish(pc2)
         
