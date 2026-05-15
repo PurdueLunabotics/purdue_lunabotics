@@ -11,7 +11,7 @@ class CollectRegolithState(State):
   
   def __init__(self):
     self.received_empty_msg = False
-    self.DEPOSIT_SPEED = 200
+    self.DEPOSIT_SPEED = 300
 
   def setup(self, manager: Node):
     self.dep_publisher = manager.create_publisher(Int32, "deposition", 10)
