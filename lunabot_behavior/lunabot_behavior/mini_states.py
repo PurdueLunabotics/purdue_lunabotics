@@ -28,6 +28,7 @@ from lunabot_behavior.states.wait_for_main_approach import WaitForMainApproachSt
 from lunabot_behavior.states.collect import CollectRegolithState
 from lunabot_behavior.states.wait_for_main_diverge import WaitForMainDivergeState
 from lunabot_behavior.states.init import InitRetreat, SetupMap, SetupObstacles
+from lunabot_behavior.states.fullstop import Stop
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -37,6 +38,8 @@ import rclpy
 from lunabot_behavior.states.traverse_to_linkup import TraverseToLinkup
 
 class MiniStates(Enum):
+    STOP = (Stop(), (LedColor.RED, LedColor.GREEN))
+
     # ===== INIT SECTION (1) =====
     INIT_MAP = (SetupMap(False), (LedColor.GREEN, LedColor.YELLOW))
     INIT_WAIT = (State(), (LedColor.GREEN, LedColor.GREEN))

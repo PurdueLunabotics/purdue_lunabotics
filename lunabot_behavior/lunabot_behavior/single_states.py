@@ -22,6 +22,7 @@ from lunabot_behavior.states.plunge import Plunge
 from lunabot_behavior.states.raise_act import Raise
 from lunabot_behavior.states.retreat_berm import RetreatBerm
 from lunabot_behavior.states.trench import Trench
+from lunabot_behavior.states.fullstop import Stop
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -30,7 +31,7 @@ import rclpy
 
 class SingleStates(Enum):
     
-    STOP = (State(), (LedColor.RED, LedColor.GREEN))
+    STOP = (Stop(), (LedColor.RED, LedColor.GREEN))
     
     INIT = (State(), (LedColor.GREEN, LedColor.YELLOW))
     INIT_STALL = (State(), (LedColor.GREEN, LedColor.RED))
