@@ -14,7 +14,7 @@ from rcl_interfaces.srv import SetParameters, GetParameters
 import math
 
 class Traverse(State):
-    def __init__(self, goal: PoseStamped, backwards: bool):
+    def __init__(self, goal: PoseStamped | None, backwards: bool):
         self.goal = goal
         self.backwards = backwards
 
@@ -43,7 +43,8 @@ class Traverse(State):
         self.odom = pose
 
     def publish_everything(self):
-        self.goal_pub.publish(self.goal)
+        if self.goal is not None:
+            self.goal_pub.publish(self.goal)
         self.backwards_pub.publish(Bool(data = self.backwards))
         self.enabled_pub.publish(Bool(data = True))
     
