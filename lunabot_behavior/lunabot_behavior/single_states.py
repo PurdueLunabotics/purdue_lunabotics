@@ -30,6 +30,8 @@ import rclpy
 
 class SingleStates(Enum):
     
+    STOP = (State(), (LedColor.RED, LedColor.GREEN))
+    
     INIT = (State(), (LedColor.GREEN, LedColor.YELLOW))
     INIT_STALL = (State(), (LedColor.GREEN, LedColor.RED))
     INIT_RAISE = (Raise(False), (LedColor.GREEN, LedColor.GREEN))
@@ -103,6 +105,8 @@ class SingleStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
+            (SingleStates.STOP, Events.SUCCESS): SingleStates.INIT,
+            
             (SingleStates.INIT, Events.SUCCESS): SingleStates.INIT_RAISE,
             (SingleStates.INIT, Events.STALL): SingleStates.INIT_STALL,
             (SingleStates.INIT_STALL, Events.SUCCESS): SingleStates.INIT,
@@ -188,7 +192,7 @@ class SingleStates(Enum):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = StateManager(SingleStates, SingleStates.APPROACH_BERM, Events, Event)
+    minimal_subscriber = StateManager(SingleStates, SingleStates.STOP, Events, Event)
 
     rclpy.spin(minimal_subscriber)
 

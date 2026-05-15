@@ -99,6 +99,8 @@ class MiniStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
+            (MiniStates.STOP, Events.SUCCESS): MiniStates.INIT_MAP,
+            
             (MiniStates.INIT_MAP, Events.SUCCESS): MiniStates.INIT_WAIT,
             (MiniStates.INIT_WAIT, Events.PROCEED): MiniStates.INIT_MOVE,
             (MiniStates.INIT_MOVE, Events.SUCCESS): MiniStates.INIT_OBSTACLES,
@@ -174,7 +176,7 @@ class MiniStates(Enum):
 def main():
     rclpy.init(args=sys.argv, signal_handler_options=rclpy.SignalHandlerOptions.NO)
 
-    manager = StateManager(MiniStates, MiniStates.INIT_MAP, Events, Event)
+    manager = StateManager(MiniStates, MiniStates.STOP, Events, Event)
 
     try:
         rclpy.spin(manager)

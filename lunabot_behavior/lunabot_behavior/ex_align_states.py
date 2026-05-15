@@ -46,10 +46,13 @@ class MainStates(Enum):
     RETREAT_TRENCH_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
 
     STOP = (Stop(), (LedColor.RED, LedColor.GREEN))
+    STOP_END = (Stop(), (LedColor.RED, LedColor.GREEN))
     
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
+            (MainStates.STOP, Events.SUCCESS): MainStates.ALIGN_TO_TRENCH,
+            
             (MainStates.ALIGN_TO_TRENCH, Events.SUCCESS): MainStates.APPROACH_TRENCH,
             (MainStates.ALIGN_TO_TRENCH, Events.STALL): MainStates.ALIGN_TO_TRENCH_STALL,
             (MainStates.ALIGN_TO_TRENCH, Events.NO_PATH): MainStates.JUST_PLUNGE,
@@ -75,7 +78,7 @@ class MainStates(Enum):
             (MainStates.RAISE_ACT, Events.STALL): MainStates.RAISE_ACT_STALL,
             (MainStates.RAISE_ACT_STALL, Events.SUCCESS): MainStates.RAISE_ACT,
 
-            (MainStates.RETREAT_TRENCH, Events.SUCCESS): MainStates.STOP,
+            (MainStates.RETREAT_TRENCH, Events.SUCCESS): MainStates.STOP_END,
             (MainStates.RETREAT_TRENCH, Events.STALL): MainStates.RETREAT_TRENCH_STALL,
             (MainStates.RETREAT_TRENCH_STALL, Events.SUCCESS): MainStates.RETREAT_TRENCH,
 
@@ -84,7 +87,7 @@ class MainStates(Enum):
             # ===================================================================
 
             (MainStates.JUST_PLUNGE, Events.STALL): MainStates.JUST_PLUNGE_STALL,
-            (MainStates.JUST_PLUNGE, Events.SUCCESS): MainStates.STOP,
+            (MainStates.JUST_PLUNGE, Events.SUCCESS): MainStates.STOP_END,
             (MainStates.JUST_PLUNGE_STALL, Events.SUCCESS): MainStates.JUST_PLUNGE,
         }
 
@@ -93,7 +96,7 @@ class MainStates(Enum):
 def main(args=None):
     rclpy.init(args=sys.argv, signal_handler_options=rclpy.SignalHandlerOptions.NO)
 
-    manager = StateManager(MainStates, MainStates.ALIGN_TO_TRENCH, Events, Event)
+    manager = StateManager(MainStates, MainStates.STOP, Events, Event)
 
     try:
         rclpy.spin(manager)
