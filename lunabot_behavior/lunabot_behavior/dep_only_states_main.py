@@ -20,11 +20,7 @@ from lunabot_behavior.state_manager import StateManager
 
 import rclpy
 
-class MainStates(Enum):
-
-    ALIGN_TO_BERM = (AlignToBerm(), (LedColor.BLUE, LedColor.GREEN))
-    ALIGN_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
-    
+class MainStates(Enum):   
     APPROACH_BERM = (Drive(1000000, True, 0.2, timeout=5), (LedColor.BLUE, LedColor.TEAL))
     APPROACH_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
@@ -39,18 +35,20 @@ class MainStates(Enum):
     IDLE = (State(), (LedColor.RED, LedColor.RED))
 
     STOP = (Stop(), (LedColor.RED, LedColor.GREEN))
+    STOP_END = (Stop(), (LedColor.RED, LedColor.GREEN))
 
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
-            (MainStates.ALIGN_TO_BERM, Events.SUCCESS): MainStates.APPROACH_BERM,
+            (MainStates.STOP, Events.SUCCESS): MainStates.APPROACH_BERM,
+            
             (MainStates.APPROACH_BERM, Events.SUCCESS): MainStates.DEPOSIT_BERM,
             
             (MainStates.DEPOSIT_BERM, Events.SUCCESS): MainStates.RETREAT_BERM,
             (MainStates.DEPOSIT_BERM, Events.STALL): MainStates.DEPOSIT_BERM_STALL,
             (MainStates.DEPOSIT_BERM_STALL, Events.SUCCESS): MainStates.DEPOSIT_BERM,
             
-            (MainStates.RETREAT_BERM, Events.SUCCESS): MainStates.STOP,
+            (MainStates.RETREAT_BERM, Events.SUCCESS): MainStates.STOP_END,
             (MainStates.RETREAT_BERM, Events.STALL): MainStates.RETREAT_BERM_STALL,
             (MainStates.RETREAT_BERM_STALL, Events.SUCCESS): MainStates.RETREAT_BERM,
         }
@@ -60,7 +58,7 @@ class MainStates(Enum):
 def main(args=None):
     rclpy.init(args=sys.argv, signal_handler_options=rclpy.SignalHandlerOptions.NO)
 
-    manager = StateManager(MainStates, MainStates.APPROACH_BERM, Events, Event)
+    manager = StateManager(MainStates, MainStates.STOP, Events, Event)
 
     try:
         rclpy.spin(manager)

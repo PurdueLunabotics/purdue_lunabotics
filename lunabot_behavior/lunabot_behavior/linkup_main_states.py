@@ -4,6 +4,7 @@ from enum import Enum
 import sys
 
 from geometry_msgs.msg import PoseStamped
+from lunabot_behavior.states.fullstop import Stop
 from lunabot_msgs.msg import Event
 
 from lunabot_config.led_colors import LedColor
@@ -42,6 +43,9 @@ import math
 
 class MainStates(Enum):
     
+    STOP = (Stop(), (LedColor.RED, LedColor.GREEN))
+    STOP_END = (Stop(), (LedColor.RED, LedColor.GREEN))
+    
     # ===== LINKUP SECTION (2) =====
 
     WAIT_FOR_MINI_ALIGN = (MainWaitForAlignState(), (LedColor.YELLOW, LedColor.GREEN))
@@ -61,6 +65,7 @@ class MainStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
+            (MainStates.STOP, Events.SUCCESS): MainStates.WAIT_FOR_MINI_ALIGN,
 
             (MainStates.WAIT_FOR_MINI_ALIGN, Events.SUCCESS): MainStates.ALIGN_TO_MINI,
 
@@ -75,7 +80,7 @@ class MainStates(Enum):
             (MainStates.DEPOSIT, Events.STALL): MainStates.DEPOSIT_STALL,
             (MainStates.DEPOSIT_STALL, Events.SUCCESS): MainStates.DEPOSIT,
             
-            (MainStates.SEPARATE_FROM_MINI, Events.SUCCESS): MainStates.IDLE,
+            (MainStates.SEPARATE_FROM_MINI, Events.SUCCESS): MainStates.STOP_END,
             (MainStates.SEPARATE_FROM_MINI, Events.STALL): MainStates.SEPARATE_FROM_MINI_STALL,
             (MainStates.SEPARATE_FROM_MINI_STALL, Events.SUCCESS): MainStates.SEPARATE_FROM_MINI,
         }
@@ -85,7 +90,7 @@ class MainStates(Enum):
 def main(args=None):
     rclpy.init(args=sys.argv, signal_handler_options=rclpy.SignalHandlerOptions.NO)
 
-    manager = StateManager(MainStates, MainStates.WAIT_FOR_MINI_ALIGN, Events, Event)
+    manager = StateManager(MainStates, MainStates.STOP, Events, Event)
 
     try:
         rclpy.spin(manager)

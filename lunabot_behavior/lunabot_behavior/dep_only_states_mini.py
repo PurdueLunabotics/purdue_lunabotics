@@ -22,8 +22,6 @@ import rclpy
 
 class MiniDepStates(Enum):
 
-    ALIGN_TO_BERM = (AlignToBerm(), (LedColor.BLUE, LedColor.GREEN))
-    ALIGN_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
     APPROACH_BERM = (Drive(1000000, True, 0.1, timeout=10), (LedColor.BLUE, LedColor.TEAL))
     APPROACH_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
@@ -39,10 +37,13 @@ class MiniDepStates(Enum):
     IDLE = (State(), (LedColor.RED, LedColor.RED))
 
     STOP = (Stop(), (LedColor.RED, LedColor.GREEN))
+    STOP_END = (Stop(), (LedColor.RED, LedColor.GREEN))
 
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
+            (MiniDepStates.STOP, Events.SUCCESS): MiniDepStates.APPROACH_BERM,
+
             (MiniDepStates.ALIGN_TO_BERM, Events.SUCCESS): MiniDepStates.APPROACH_BERM,
             (MiniDepStates.APPROACH_BERM, Events.SUCCESS): MiniDepStates.DEPOSIT_BERM,
             
@@ -50,7 +51,7 @@ class MiniDepStates(Enum):
             (MiniDepStates.DEPOSIT_BERM, Events.STALL): MiniDepStates.DEPOSIT_BERM_STALL,
             (MiniDepStates.DEPOSIT_BERM_STALL, Events.SUCCESS): MiniDepStates.DEPOSIT_BERM,
             
-            (MiniDepStates.RETREAT_BERM, Events.SUCCESS): MiniDepStates.STOP,
+            (MiniDepStates.RETREAT_BERM, Events.SUCCESS): MiniDepStates.STOP_END,
             (MiniDepStates.RETREAT_BERM, Events.STALL): MiniDepStates.RETREAT_BERM_STALL,
             (MiniDepStates.RETREAT_BERM_STALL, Events.SUCCESS): MiniDepStates.RETREAT_BERM,
         }
@@ -60,7 +61,7 @@ class MiniDepStates(Enum):
 def main(args=None):
     rclpy.init(args=sys.argv, signal_handler_options=rclpy.SignalHandlerOptions.NO)
 
-    manager = StateManager(MiniDepStates, MiniDepStates.APPROACH_BERM, Events, Event)
+    manager = StateManager(MiniDepStates, MiniDepStates.STOP, Events, Event)
 
     try:
         rclpy.spin(manager)
