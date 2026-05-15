@@ -97,11 +97,11 @@
     <!-- ======= LAUNCH NODES ========= -->
     <!-- ============================== -->
 
-    <node unless="$(var sim)" pkg="rmw_zenoh_cpp" exec="rmw_zenohd" />
+    <node unless="$(var sim)" pkg="rmw_zenoh_cpp" exec="rmw_zenohd" respawn="true"/>
 
     <!-- Launch Teensy Driver -->
     <node if="$(var teensy)" name="teensy_driver" pkg="lunabot_embedded" exec="teensy_driver_node" 
-            output="screen">        
+            output="screen" respawn="true">        
         <!-- Input -->
         <remap from="effort" to="effort"/>
         <remap from="led_color" to="led_color"/>
@@ -143,8 +143,8 @@
     <node if="$(var sim)" name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true">
             <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
     </node>
-    <node if="$(var sim)" pkg="controller_manager" exec="spawner" args="-p $(find-pkg-share lunabot_config)/config/sim_controller.yaml velocity_controller"/>
-    <node pkg="lunabot_slam" exec="map_base_node.py">
+    <node if="$(var sim)" respawn="true" pkg="controller_manager" exec="spawner" args="-p $(find-pkg-share lunabot_config)/config/sim_controller.yaml velocity_controller"/>
+    <node pkg="lunabot_slam" exec="map_base_node.py" respawn="true">
         <remap from="odom" to="$(var /ns)/rtabmap/odom"/>
         <remap from="position" to="$(var /ns)/position"/>
     </node>
@@ -182,11 +182,11 @@
 
         </node>
 
-        <node pkg="lunabot_slam" exec="sim_odom.py" if="$(var odom_from_sim)">
+        <node pkg="lunabot_slam" exec="sim_odom.py" if="$(var odom_from_sim)" respawn="true">
         </node>
         <let name="id_offset" if="$(eval '$(var robot_num) == 1')" value="100"/>
         <let name="id_offset" if="$(eval '$(var robot_num) == 0')" value="0"/>
-        <node pkg="lunabot_perception" exec="apriltag_combine.py">
+        <node pkg="lunabot_perception" exec="apriltag_combine.py" respawn="true">
             <remap from="detections"         to="rtabmap/apriltag/detections"/>
             <param name="input_topics" value="d455_back/detections;d455_front/detections" value-sep=";"/>
             <param name="id_offset" value="$(var id_offset)"/>
@@ -233,7 +233,7 @@
 
         <!-- Odometry -->
         <node pkg="rtabmap_odom" exec="rgbd_odometry" output="screen" name="rgbd_odometry" ros_args="--log-level WARN" unless="$(var odom_from_sim)">
-            <param name="use_sim_time" value="$(var sim)"/>
+            <param name="use_sim_time" value="$(var sim)" respawn="true"/>
             
             <param name="subscribe_depth"     value="true"/>
             <param name="frame_id"            value="$(var ns/)base_link"/>
