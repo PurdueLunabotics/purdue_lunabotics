@@ -31,14 +31,21 @@ class Traverse(State):
         self.enabled_pub = manager.create_publisher(Bool, "traversal/enabled", 10)
         self.odom_sub = manager.create_subscription(PoseStamped, "position", self.odom_cb, 10)
         self.path_sub = manager.create_subscription(Path, "nav_path", self.path_cb, 10)
+        self.path_timeout = manager.create_timer(1.5, self.path_timeout_cb)
+        self.path_timeout.cancel()
         self.odom = None
         self.last_pose: None | PoseStamped = None
-        # self.tolerance = 0.2
+        self.is_planner_alive = False
         self.logger = manager.get_logger()
         self.manager = manager
 
+    def path_timeout_cb(self):
+        self.is_planner_alive = False
+
     def path_cb(self, path: Path):
         self.last_pose = path.poses[-1] # type: ignore
+        self.path_timeout.reset()
+        self.is_planner_alive = True
 
     def odom_cb(self, pose: PoseStamped):
         self.odom = pose
@@ -50,10 +57,15 @@ class Traverse(State):
         self.enabled_pub.publish(Bool(data = True))
     
     def start(self):
+        self.path_timeout.reset()
         self.publish_everything()
         self.start_time = self.manager.get_clock().now()
 
     def periodic(self) -> None | Events:
+        if not self.is_planner_alive:
+            self.enabled_pub.publish(Bool(data = False))
+            self.goal_pub.publish(self.goal)
+
         if self.odom is None or self.last_pose is None:
             self.logger.warn("[Traverse] no odom or path")
             return None
@@ -66,6 +78,7 @@ class Traverse(State):
         return None
 
     def exit(self, event):
+        self.path_timeout.cancel()
         self.logger.info("[Traverse]: send disable")
         self.enabled_pub.publish(Bool(data = False))
 
