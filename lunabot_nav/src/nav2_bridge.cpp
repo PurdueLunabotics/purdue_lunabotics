@@ -8,6 +8,7 @@
 #include "nav_msgs/msg/odometry.hpp"
 #include "lunabot_msgs/msg/event.hpp"
 #include <chrono>
+#include <cstdlib>
 #include <rclcpp_action/client.hpp>
 
 using PoseStampedMsg = geometry_msgs::msg::PoseStamped;
@@ -30,6 +31,7 @@ class Nav2Bridge : public rclcpp::Node {
   bool has_goal = false;
   PoseStampedMsg odom;
   bool has_odom = false;
+  int plan_timeout = 0;
 
   bool is_planning = false;
 
@@ -53,11 +55,16 @@ class Nav2Bridge : public rclcpp::Node {
 
   private:
     void plan_path() {
+      if (plan_timeout > 3) {
+        std::exit(-1);
+      }
       // wait for earlier thing to finish
       if (!has_goal || !has_odom || is_planning) {
+        plan_timeout++;
         return;
       }
 
+      plan_timeout = 0;
       is_planning = true;
 
       if (!action_compute->wait_for_action_server()) {
