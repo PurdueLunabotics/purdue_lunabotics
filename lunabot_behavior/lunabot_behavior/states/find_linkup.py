@@ -117,7 +117,7 @@ class TraverseToMiddle(Traverse):
         self.goal.pose.position.x = ZoneMeasurements.BERM_OFFSET_X
         self.goal.pose.position.y = 0.0
 
-        super().__init__(self.goal, False)
+        super().__init__(self.goal, False, tolerance=1.0)
 
     def setup(self, manager):
         ns = manager.get_namespace().lstrip('/')
