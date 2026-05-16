@@ -14,9 +14,10 @@ from rcl_interfaces.srv import SetParameters, GetParameters
 import math
 
 class Traverse(State):
-    def __init__(self, goal: PoseStamped, backwards: bool):
+    def __init__(self, goal: PoseStamped | None, backwards: bool, tolerance: float=0.2):
         self.goal = goal
         self.backwards = backwards
+        self.tolerance = tolerance
 
     def set_goal(self, goal: PoseStamped):
         self.goal = goal
@@ -32,7 +33,7 @@ class Traverse(State):
         self.path_sub = manager.create_subscription(Path, "nav_path", self.path_cb, 10)
         self.odom = None
         self.last_pose: None | PoseStamped = None
-        self.tolerance = 0.2
+        # self.tolerance = 0.2
         self.logger = manager.get_logger()
         self.manager = manager
 
@@ -43,7 +44,8 @@ class Traverse(State):
         self.odom = pose
 
     def publish_everything(self):
-        self.goal_pub.publish(self.goal)
+        if self.goal is not None:
+            self.goal_pub.publish(self.goal)
         self.backwards_pub.publish(Bool(data = self.backwards))
         self.enabled_pub.publish(Bool(data = True))
     

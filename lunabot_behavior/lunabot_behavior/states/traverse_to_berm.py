@@ -3,7 +3,7 @@ from geometry_msgs.msg import PoseStamped
 from lunabot_behavior.states.traverse import Traverse
 from lunabot_behavior import zones
 
-TARGET_DIST_TO_BERM = 1.5
+TARGET_DIST_TO_BERM = 1.0
 
 class TraverseToBerm(Traverse):
     def __init__(self, backwards: bool):

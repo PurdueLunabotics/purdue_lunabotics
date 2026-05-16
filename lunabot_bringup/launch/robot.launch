@@ -143,7 +143,7 @@
     <node if="$(var sim)" name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true">
             <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
     </node>
-    <node if="$(var sim)" respawn="true" pkg="controller_manager" exec="spawner" args="-p $(find-pkg-share lunabot_config)/config/sim_controller.yaml velocity_controller"/>
+    <node if="$(var sim)" pkg="controller_manager" exec="spawner" args="-p $(find-pkg-share lunabot_config)/config/sim_controller.yaml velocity_controller"/>
     <node pkg="lunabot_slam" exec="map_base_node.py" respawn="true">
         <remap from="odom" to="$(var /ns)/rtabmap/odom"/>
         <remap from="position" to="$(var /ns)/position"/>
@@ -232,8 +232,8 @@
         <push_ros_namespace namespace="rtabmap"/>
 
         <!-- Odometry -->
-        <node pkg="rtabmap_odom" exec="rgbd_odometry" output="screen" name="rgbd_odometry" ros_args="--log-level WARN" unless="$(var odom_from_sim)">
-            <param name="use_sim_time" value="$(var sim)" respawn="true"/>
+        <node pkg="rtabmap_odom" exec="rgbd_odometry" output="screen" name="rgbd_odometry" ros_args="--log-level WARN" unless="$(var odom_from_sim)" respawn="true">
+            <param name="use_sim_time" value="$(var sim)"/>
             
             <param name="subscribe_depth"     value="true"/>
             <param name="frame_id"            value="$(var ns/)base_link"/>
@@ -338,7 +338,7 @@
           <param name="use_sim_time" value="$(var sim)"/>
         </node>
 
-        <node name="point_to_point_node" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="false" >
+        <node name="point_to_point_node" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="true" >
             <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
 
             <remap from="odom" to="position"/>

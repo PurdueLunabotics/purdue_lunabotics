@@ -28,6 +28,7 @@ from lunabot_behavior.states.wait_for_main_approach import WaitForMainApproachSt
 from lunabot_behavior.states.collect import CollectRegolithState
 from lunabot_behavior.states.wait_for_main_diverge import WaitForMainDivergeState
 from lunabot_behavior.states.init import InitRetreat, SetupMap, SetupObstacles
+from lunabot_behavior.states.fullstop import Stop
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -37,6 +38,8 @@ import rclpy
 from lunabot_behavior.states.traverse_to_linkup import TraverseToLinkup
 
 class MiniStates(Enum):
+    STOP = (Stop(), (LedColor.RED, LedColor.GREEN))
+
     # ===== INIT SECTION (1) =====
     INIT_MAP = (SetupMap(False), (LedColor.GREEN, LedColor.YELLOW))
     INIT_WAIT = (State(), (LedColor.GREEN, LedColor.GREEN))
@@ -127,6 +130,27 @@ class MiniStates(Enum):
 
             (MiniStates.LINKUP_HANDSHAKE, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
 
+            (MiniStates.MOVE_TO_STAGING, Events.SUCCESS): MiniStates.WAIT_FOR_ALIGN_AT_LINKUP,
+            (MiniStates.MOVE_TO_STAGING, Events.STALL): MiniStates.MOVE_TO_STAGING_STALL,
+            (MiniStates.MOVE_TO_STAGING, Events.NO_PATH): MiniStates.MOVE_TO_STAGING_NO_PATH,
+            (MiniStates.MOVE_TO_STAGING_STALL, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
+            (MiniStates.MOVE_TO_STAGING_NO_PATH, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
+
+            (MiniStates.WAIT_FOR_ALIGN_AT_LINKUP, Events.SUCCESS): MiniStates.ALIGN_TO_MAIN,
+
+            (MiniStates.ALIGN_TO_MAIN, Events.SUCCESS): MiniStates.WAIT_FOR_MAIN_ALIGN,
+            (MiniStates.ALIGN_TO_MAIN, Events.STALL): MiniStates.ALIGN_TO_MAIN_STALL,
+            (MiniStates.ALIGN_TO_MAIN_STALL, Events.SUCCESS): MiniStates.ALIGN_TO_MAIN,
+
+            (MiniStates.WAIT_FOR_MAIN_ALIGN, Events.SUCCESS): MiniStates.WAIT_FOR_MAIN_APPROACH,
+
+            (MiniStates.WAIT_FOR_MAIN_APPROACH, Events.SUCCESS): MiniStates.COLLECT_REGOLITH,
+            (MiniStates.WAIT_FOR_MAIN_APPROACH, Events.NEED_REALIGN): MiniStates.ALIGN_TO_MAIN,
+            
+            (MiniStates.COLLECT_REGOLITH, Events.SUCCESS): MiniStates.WAIT_FOR_DIVERGE,
+
+            (MiniStates.WAIT_FOR_DIVERGE, Events.SUCCESS): MiniStates.TRAVERSE_TO_BERM,
+
             (MiniStates.TRAVERSE_TO_BERM, Events.SUCCESS): MiniStates.ALIGN_TO_BERM,
             (MiniStates.TRAVERSE_TO_BERM, Events.STALL): MiniStates.TRAVERSE_TO_BERM_STALL,
             (MiniStates.TRAVERSE_TO_BERM, Events.NO_PATH): MiniStates.TRAVERSE_TO_BERM_NO_PATH,
@@ -148,27 +172,6 @@ class MiniStates(Enum):
             (MiniStates.RETREAT_BERM, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
             (MiniStates.RETREAT_BERM, Events.STALL): MiniStates.RETREAT_BERM_STALL,
             (MiniStates.RETREAT_BERM_STALL, Events.SUCCESS): MiniStates.RETREAT_BERM,
-            
-            (MiniStates.MOVE_TO_STAGING, Events.SUCCESS): MiniStates.WAIT_FOR_ALIGN_AT_LINKUP,
-            (MiniStates.MOVE_TO_STAGING, Events.STALL): MiniStates.MOVE_TO_STAGING_STALL,
-            (MiniStates.MOVE_TO_STAGING, Events.NO_PATH): MiniStates.MOVE_TO_STAGING_NO_PATH,
-            (MiniStates.MOVE_TO_STAGING_STALL, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
-            (MiniStates.MOVE_TO_STAGING_NO_PATH, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
-
-            (MiniStates.WAIT_FOR_ALIGN_AT_LINKUP, Events.SUCCESS): MiniStates.ALIGN_TO_MAIN,
-
-            (MiniStates.ALIGN_TO_MAIN, Events.SUCCESS): MiniStates.WAIT_FOR_MAIN_ALIGN,
-            (MiniStates.ALIGN_TO_MAIN, Events.STALL): MiniStates.ALIGN_TO_MAIN_STALL,
-            (MiniStates.ALIGN_TO_MAIN_STALL, Events.SUCCESS): MiniStates.ALIGN_TO_MAIN,
-
-            (MiniStates.WAIT_FOR_MAIN_ALIGN, Events.SUCCESS): MiniStates.WAIT_FOR_MAIN_APPROACH,
-
-            (MiniStates.WAIT_FOR_MAIN_APPROACH, Events.SUCCESS): MiniStates.COLLECT_REGOLITH,
-            (MiniStates.WAIT_FOR_MAIN_APPROACH, Events.NEED_REALIGN): MiniStates.ALIGN_TO_MAIN,
-            
-            (MiniStates.COLLECT_REGOLITH, Events.SUCCESS): MiniStates.WAIT_FOR_DIVERGE,
-
-            (MiniStates.WAIT_FOR_DIVERGE, Events.SUCCESS): MiniStates.TRAVERSE_TO_BERM,
         }
 
         return transitions.get((state, event), None)

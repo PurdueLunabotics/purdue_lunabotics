@@ -12,7 +12,7 @@ class Stop(State):
     self.exc_pub = manager.create_publisher(Int32, "excavate", 10)
     self.cmd_vel_pub = manager.create_publisher(Twist, "cmd_vel", 10)
     self.lin_act_pub = manager.create_publisher(Int32, "lin_act", 10)
-    self.traversal = manager.create_publisher(Int32, "traversal/enabled", 10)
+    self.traversal = manager.create_publisher(Bool, "traversal/enabled", 10)
 
   def start(self):
     self.stop()
