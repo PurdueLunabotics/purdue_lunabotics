@@ -61,12 +61,15 @@ class SingleStates(Enum):
     INIT_RETREAT_BERM = (RetreatBerm(False), (LedColor.MAGENTA, LedColor.GREEN))
     INIT_RETREAT_BERM_STALL = (Stall(), (LedColor.MAGENTA, LedColor.RED))
     
-    TRAVERSE_TO_EXC_ZONE = (TraverseToExc(), (LedColor.GREEN, LedColor.WHITE))
+    TRAVERSE_TO_EXC_ZONE = (TraverseToExc(True), (LedColor.GREEN, LedColor.WHITE))
     TRAVERSE_TO_EXC_ZONE_STALL =  (Stall(), (LedColor.GREEN, LedColor.RED))
     TRAVERSE_TO_EXC_ZONE_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
     
     ALIGN_TO_TRENCH = (AlignTrench(), (LedColor.WHITE, LedColor.YELLOW))
     ALIGN_TO_TRENCH_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
+
+    JUST_PLUNGE = (Plunge(), (LedColor.WHITE, LedColor.TEAL))
+    JUST_PLUNGE_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
     
     APPROACH_TRENCH = (ApproachTrench(), (LedColor.WHITE, LedColor.GREEN))
     APPROACH_TRENCH_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
@@ -145,8 +148,12 @@ class SingleStates(Enum):
             (SingleStates.TRAVERSE_TO_EXC_ZONE_STALL, Events.SUCCESS): SingleStates.TRAVERSE_TO_EXC_ZONE,
 
             (SingleStates.ALIGN_TO_TRENCH, Events.SUCCESS): SingleStates.APPROACH_TRENCH,
+            (SingleStates.ALIGN_TO_TRENCH, Events.NO_PATH): SingleStates.JUST_PLUNGE,
             (SingleStates.ALIGN_TO_TRENCH, Events.STALL): SingleStates.ALIGN_TO_TRENCH_STALL,
             (SingleStates.ALIGN_TO_TRENCH_STALL, Events.SUCCESS): SingleStates.ALIGN_TO_TRENCH,
+
+            (SingleStates.JUST_PLUNGE, Events.STALL): SingleStates.JUST_PLUNGE_STALL,
+            (SingleStates.JUST_PLUNGE, Events.SUCCESS): SingleStates.ALIGN_TO_LINKUP,
             
             (SingleStates.APPROACH_TRENCH, Events.SUCCESS): SingleStates.PLUNGE_ACT,
             (SingleStates.APPROACH_TRENCH, Events.STALL): SingleStates.APPROACH_TRENCH_STALL,
@@ -164,13 +171,9 @@ class SingleStates(Enum):
             (SingleStates.RAISE_ACT, Events.STALL): SingleStates.RAISE_ACT_STALL,
             (SingleStates.RAISE_ACT_STALL, Events.SUCCESS): SingleStates.RAISE_ACT,
             
-            (SingleStates.RETREAT_TRENCH, Events.SUCCESS): SingleStates.ALIGN_TO_LINKUP,
+            (SingleStates.RETREAT_TRENCH, Events.SUCCESS): SingleStates.TRAVERSE_TO_BERM,
             (SingleStates.RETREAT_TRENCH, Events.STALL): SingleStates.RETREAT_TRENCH_STALL,
             (SingleStates.RETREAT_TRENCH_STALL, Events.SUCCESS): SingleStates.RETREAT_TRENCH,
-
-            (SingleStates.ALIGN_TO_LINKUP, Events.SUCCESS): SingleStates.TRAVERSE_TO_BERM,
-            (SingleStates.ALIGN_TO_LINKUP, Events.STALL): SingleStates.RETREAT_TRENCH_STALL,
-            (SingleStates.ALIGN_TO_LINKUP_STALL, Events.SUCCESS): SingleStates.ALIGN_TO_LINKUP,
 
             (SingleStates.TRAVERSE_TO_BERM, Events.SUCCESS): SingleStates.ALIGN_TO_BERM,
             (SingleStates.TRAVERSE_TO_BERM, Events.STALL): SingleStates.TRAVERSE_TO_BERM_STALL,
