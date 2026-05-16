@@ -4,6 +4,7 @@ from enum import Enum
 import sys
 
 from geometry_msgs.msg import PoseStamped
+from lunabot_behavior.states.fullstop import Stop
 from lunabot_msgs.msg import Event
 
 from lunabot_config.led_colors import LedColor
@@ -42,6 +43,8 @@ import rclpy
 import math
 
 class MainStates(Enum):
+    
+    STOP = (Stop(), (LedColor.RED, LedColor.GREEN))
     
     # ===== INIT SECTION (1) =====
     INIT_MAP = (SetupMap(True), (LedColor.GREEN, LedColor.YELLOW))
@@ -144,6 +147,8 @@ class MainStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
+            (MainStates.STOP, Events.SUCCESS): MainStates.INIT_MAP,
+            
             (MainStates.INIT_MAP, Events.SUCCESS): MainStates.INIT_OBSTACLES,
             (MainStates.INIT_OBSTACLES, Events.SUCCESS): MainStates.INIT_WAIT,
             (MainStates.INIT_WAIT, Events.PROCEED): MainStates.INIT_RAISE,
@@ -259,7 +264,7 @@ class MainStates(Enum):
 def main(args=None):
     rclpy.init(args=sys.argv, signal_handler_options=rclpy.SignalHandlerOptions.NO)
 
-    manager = StateManager(MainStates, MainStates.INIT_MAP, Events, Event)
+    manager = StateManager(MainStates, MainStates.STOP, Events, Event)
 
     try:
         rclpy.spin(manager)

@@ -27,17 +27,20 @@ class MainStates(Enum):
     STARTING_RAISE_STALL = (State(), (LedColor.GREEN, LedColor.RED))
 
     STOP = (Stop(), (LedColor.RED, LedColor.GREEN))
+    STOP_END = (Stop(), (LedColor.RED, LedColor.GREEN))
     
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
+            (MainStates.STOP, Events.SUCCESS): MainStates.STARTING_PLUNGE,
+
             (MainStates.STARTING_PLUNGE, Events.SUCCESS): MainStates.STARTING_RAISE,
             (MainStates.STARTING_PLUNGE, Events.STALL): MainStates.STARTING_PLUNGE_STALL,
             (MainStates.STARTING_PLUNGE_STALL, Events.SUCCESS): MainStates.STARTING_PLUNGE,
             
             (MainStates.STARTING_RAISE, Events.STALL): MainStates.STARTING_RAISE_STALL,
             (MainStates.STARTING_RAISE_STALL, Events.SUCCESS): MainStates.STARTING_RAISE,
-            (MainStates.STARTING_RAISE, Events.SUCCESS): MainStates.STOP,
+            (MainStates.STARTING_RAISE, Events.SUCCESS): MainStates.STOP_END,
         }
 
         return transitions.get((state, event), None)
@@ -45,7 +48,7 @@ class MainStates(Enum):
 def main(args=None):
     rclpy.init(args=sys.argv, signal_handler_options=rclpy.SignalHandlerOptions.NO)
 
-    manager = StateManager(MainStates, MainStates.STARTING_PLUNGE, Events, Event)
+    manager = StateManager(MainStates, MainStates.STOP, Events, Event)
 
     try:
         rclpy.spin(manager)

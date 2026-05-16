@@ -4,6 +4,7 @@ from sensor_msgs_py import point_cloud2
 from std_msgs.msg import Bool, Header
 from std_msgs.msg import Bool
 from tf2_ros import Time, TransformBroadcaster, TransformListener, Buffer, TransformStamped
+from lunabot_behavior import zones
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.zones import bounding_box
 from apriltag_msgs.msg import AprilTagDetectionArray, AprilTagDetection
@@ -150,6 +151,16 @@ class SetupObstacles(State):
     for x in np.arange(bounding_box[0], bounding_box[2], 0.03):
       points.append([x, bounding_box[1], 0])
       points.append([x, bounding_box[3], 0])
+
+    berm_box = zones.zone_to_poly(zones.berm_zone).bounds
+
+    for y in np.arange(berm_box[1], berm_box[3], 0.03):
+      points.append([berm_box[0], y, 0])
+      points.append([berm_box[2], y, 0])
+
+    for x in np.arange(berm_box[0], berm_box[2], 0.03):
+      points.append([x, berm_box[1], 0])
+      points.append([x, berm_box[3], 0])
 
     if self.is_main:
       cloud = point_cloud2.create_cloud_xyz32(Header(frame_id=self.frame, stamp=self.manager.get_clock().now().to_msg()), points)

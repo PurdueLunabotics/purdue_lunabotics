@@ -22,6 +22,7 @@ from lunabot_behavior.states.plunge import Plunge
 from lunabot_behavior.states.raise_act import Raise
 from lunabot_behavior.states.retreat_berm import RetreatBerm
 from lunabot_behavior.states.trench import Trench
+from lunabot_behavior.states.fullstop import Stop
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -29,6 +30,8 @@ from lunabot_behavior.state_manager import StateManager
 import rclpy
 
 class SingleStates(Enum):
+    
+    STOP = (Stop(), (LedColor.RED, LedColor.GREEN))
     
     INIT = (State(), (LedColor.GREEN, LedColor.YELLOW))
     INIT_STALL = (State(), (LedColor.GREEN, LedColor.RED))
@@ -103,6 +106,8 @@ class SingleStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
+            (SingleStates.STOP, Events.SUCCESS): SingleStates.INIT,
+            
             (SingleStates.INIT, Events.SUCCESS): SingleStates.INIT_RAISE,
             (SingleStates.INIT, Events.STALL): SingleStates.INIT_STALL,
             (SingleStates.INIT_STALL, Events.SUCCESS): SingleStates.INIT,
@@ -188,7 +193,7 @@ class SingleStates(Enum):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = StateManager(SingleStates, SingleStates.APPROACH_BERM, Events, Event)
+    minimal_subscriber = StateManager(SingleStates, SingleStates.STOP, Events, Event)
 
     rclpy.spin(minimal_subscriber)
 

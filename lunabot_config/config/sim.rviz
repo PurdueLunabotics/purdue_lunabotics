@@ -15,6 +15,7 @@ Panels:
         - /Marker4
         - /Marker5
         - /Marker6
+        - /Marker6/Topic1
       Splitter Ratio: 0.5
     Tree Height: 421
   - Class: rviz_common/Selection
@@ -206,8 +207,6 @@ Visualization Manager:
           Value: true
         right_front:
           Value: true
-        tag36h11:301:
-          Value: true
         tag36h11:401:
           Value: true
         tag36h11:482:
@@ -249,8 +248,7 @@ Visualization Manager:
                   {}
               deposition_apriltag_small_link:
                 deposition_apriltag_small_optical_frame:
-                  tag36h11:482:
-                    {}
+                  {}
               left_back:
                 {}
               left_front:
@@ -263,7 +261,7 @@ Visualization Manager:
                         {}
                     d455_front_color_frame:
                       d455_front_color_optical_frame:
-                        tag36h11:301:
+                        tag36h11:482:
                           {}
                     d455_front_depth_frame:
                       d455_front_depth_optical_frame:
@@ -595,7 +593,7 @@ Visualization Manager:
       Namespaces:
         {}
       Topic:
-        Depth: 5
+        Depth: 20
         Durability Policy: Volatile
         Filter size: 10
         History Policy: Keep Last

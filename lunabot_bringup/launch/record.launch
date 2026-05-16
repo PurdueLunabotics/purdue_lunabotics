@@ -57,7 +57,10 @@
   /rtabmap/ground_plane
 
   /global_costmap/costmap
+  /global_costmap/costmap_updates
   /global_costmap/costmap_raw
+
+  /trench_marker
 
   /sensors
   /stalled

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from enum import Enum
+from lunabot_behavior.states.fullstop import Stop
 from lunabot_msgs.msg import Event
 from lunabot_msgs.msg import Event
 import sys
@@ -35,11 +36,13 @@ class MiniStates(Enum):
 
     WAIT_FOR_DIVERGE = (WaitForMainDivergeState(), (LedColor.YELLOW, LedColor.WHITE))
 
-    IDLE = (State(), (LedColor.RED, LedColor.YELLOW))
+    STOP = (Stop(), (LedColor.RED, LedColor.GREEN))
+    STOP_END = (Stop(), (LedColor.RED, LedColor.GREEN))
     
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
+            (MiniStates.STOP, Events.SUCCESS): MiniStates.ALIGN_TO_MAIN,
 
             (MiniStates.ALIGN_TO_MAIN, Events.SUCCESS): MiniStates.WAIT_FOR_MAIN_ALIGN,
             (MiniStates.ALIGN_TO_MAIN, Events.STALL): MiniStates.ALIGN_TO_MAIN_STALL,
@@ -52,7 +55,7 @@ class MiniStates(Enum):
             
             (MiniStates.COLLECT_REGOLITH, Events.SUCCESS): MiniStates.WAIT_FOR_DIVERGE,
 
-            (MiniStates.WAIT_FOR_DIVERGE, Events.SUCCESS): MiniStates.IDLE,
+            (MiniStates.WAIT_FOR_DIVERGE, Events.SUCCESS): MiniStates.STOP_END,
         }
 
         return transitions.get((state, event), None)
@@ -60,7 +63,7 @@ class MiniStates(Enum):
 def main():
     rclpy.init(args=sys.argv, signal_handler_options=rclpy.SignalHandlerOptions.NO)
 
-    manager = StateManager(MiniStates, MiniStates.ALIGN_TO_MAIN, Events, Event)
+    manager = StateManager(MiniStates, MiniStates.STOP, Events, Event)
 
     try:
         rclpy.spin(manager)
