@@ -15,6 +15,7 @@ from lunabot_behavior.states.approach_trench import ApproachTrench, RetreatTrenc
 from lunabot_behavior.states.align_trench import AlignTrench
 from lunabot_behavior.states.align_to_angle import AlignToAngle
 from lunabot_behavior.states.traverse_to_berm import TraverseToBerm
+from lunabot_behavior.states.traverse_to_exc import TraverseToExc
 from lunabot_behavior.states.traverse import NoPath, Traverse, Stall
 from lunabot_behavior.states.deposit import Deposit
 from lunabot_behavior.states.approach_berm import ApproachBerm, ApproachBermBackwards
@@ -35,41 +36,34 @@ class SingleStates(Enum):
     
     STOP = (Stop(), (LedColor.RED, LedColor.GREEN))
     
-    INIT = (State(), (LedColor.GREEN, LedColor.YELLOW))
-    INIT_STALL = (State(), (LedColor.GREEN, LedColor.RED))
     INIT_RAISE = (Raise(False), (LedColor.GREEN, LedColor.GREEN))
     INIT_OBSTACLES = (SetupObstacles(True), (LedColor.GREEN, LedColor.BLUE))
-
-    TRAVERSE_TO_MIDDLE = (TraverseToMiddle(), (LedColor.GREEN, LedColor.BLUE))
-    TRAVERSE_TO_MIDDLE_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
-    TRAVERSE_TO_MIDDLE_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
-
-    FIND_LINKUP = (FindLinkup(), (LedColor.GREEN, LedColor.BLUE))
-
-    CHECKOUT_LINKUP = (TraverseToLinkup(False, False, is_single=True), (LedColor.GREEN, LedColor.GREEN))
-    CHECKOUT_LINKUP_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
-    CHECKOUT_LINKUP_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
-
-    SPIN_MAPPING = (MappingSpin(), (LedColor.GREEN, LedColor.BLUE))
-    SPIN_MAPPING_STALL = (Stall(), (LedColor.GREEN, LedColor.BLUE))
-
-    FIND_LINKUP_AGAIN = (FindLinkup(), (LedColor.GREEN, LedColor.YELLOW))
     
     STARTING_PLUNGE = (Plunge(), (LedColor.GREEN, LedColor.BLUE))
     STARTING_PLUNGE_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
     
     STARTING_RAISE = (Raise(), (LedColor.GREEN, LedColor.MAGENTA))
     STARTING_RAISE_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
+
+    INIT_TRAVERSE_TO_BERM = (TraverseToBerm(True), (LedColor.BLUE, LedColor.YELLOW))
+    INIT_TRAVERSE_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
+    INIT_TRAVERSE_TO_BERM_NO_PATH = (NoPath(), (LedColor.BLUE, LedColor.ORANGE))
+
+    INIT_ALIGN_TO_BERM = (AlignToBerm(True), (LedColor.BLUE, LedColor.GREEN))
+    INIT_ALIGN_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
-    WAIT_FOR_LINKUP = (WaitForLinkup(), (LedColor.GREEN, LedColor.GREEN)) # This will stay as State(), no logic needed.
+    INIT_APPROACH_BERM = (ApproachBermBackwards(True), (LedColor.BLUE, LedColor.TEAL))
+    INIT_APPROACH_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
+
+    INIT_DEPOSIT_BERM = (Deposit(), (LedColor.MAGENTA, LedColor.YELLOW))
+    INIT_DEPOSIT_BERM_STALL = (Stall(), (LedColor.MAGENTA, LedColor.RED))
     
-    TRAVERSE_TO_LINKUP = (TraverseToLinkup(True, False), (LedColor.GREEN, LedColor.WHITE))
-    TRAVERSE_TO_LINKUP_STALL =  (Stall(), (LedColor.GREEN, LedColor.RED))
-    TRAVERSE_TO_LINKUP_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
+    INIT_RETREAT_BERM = (RetreatBerm(False), (LedColor.MAGENTA, LedColor.GREEN))
+    INIT_RETREAT_BERM_STALL = (Stall(), (LedColor.MAGENTA, LedColor.RED))
     
-    TRAVERSE_TO_LINKUP_BACKWARDS = (TraverseToLinkup(True, False), (LedColor.GREEN, LedColor.WHITE))
-    TRAVERSE_TO_LINKUP_BACKWARDS_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
-    TRAVERSE_TO_LINKUP_BACKWARDS_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
+    TRAVERSE_TO_EXC_ZONE = (TraverseToExc(), (LedColor.GREEN, LedColor.WHITE))
+    TRAVERSE_TO_EXC_ZONE_STALL =  (Stall(), (LedColor.GREEN, LedColor.RED))
+    TRAVERSE_TO_EXC_ZONE_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
     
     ALIGN_TO_TRENCH = (AlignTrench(), (LedColor.WHITE, LedColor.YELLOW))
     ALIGN_TO_TRENCH_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
@@ -92,8 +86,6 @@ class SingleStates(Enum):
     ALIGN_TO_LINKUP = (AlignToLinkup(), (LedColor.YELLOW, LedColor.YELLOW))
     ALIGN_TO_LINKUP_STALL = (Stall(), (LedColor.YELLOW, LedColor.RED))
 
-    WAIT_FOR_DIVERGE = (State(), 0) # This will stay as State(), no logic needed
-
     TRAVERSE_TO_BERM = (TraverseToBerm(True), (LedColor.BLUE, LedColor.YELLOW))
     TRAVERSE_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     TRAVERSE_TO_BERM_NO_PATH = (NoPath(), (LedColor.BLUE, LedColor.ORANGE))
@@ -103,9 +95,6 @@ class SingleStates(Enum):
     
     APPROACH_BERM = (ApproachBermBackwards(True), (LedColor.BLUE, LedColor.TEAL))
     APPROACH_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
-    
-    DEPOSIT = (Deposit(transfer=True), (LedColor.YELLOW, LedColor.MAGENTA))
-    DEPOSIT_STALL = (Stall(), (LedColor.YELLOW, LedColor.RED))
 
     DEPOSIT_BERM = (Deposit(), (LedColor.MAGENTA, LedColor.YELLOW))
     DEPOSIT_BERM_STALL = (Stall(), (LedColor.MAGENTA, LedColor.RED))
@@ -120,9 +109,6 @@ class SingleStates(Enum):
         transitions = {
             (SingleStates.STOP, Events.SUCCESS): SingleStates.INIT_OBSTACLES,
             
-            # (SingleStates.INIT, Events.SUCCESS): SingleStates.INIT_RAISE,
-            # (SingleStates.INIT, Events.STALL): SingleStates.INIT_STALL,
-            # (SingleStates.INIT_STALL, Events.SUCCESS): SingleStates.INIT,
             (SingleStates.INIT_OBSTACLES, Events.SUCCESS): SingleStates.INIT_RAISE,
             (SingleStates.INIT_RAISE, Events.SUCCESS): SingleStates.STARTING_PLUNGE,
             
@@ -130,35 +116,33 @@ class SingleStates(Enum):
             (SingleStates.STARTING_PLUNGE, Events.STALL): SingleStates.STARTING_PLUNGE_STALL,
             (SingleStates.STARTING_PLUNGE_STALL, Events.SUCCESS): SingleStates.STARTING_PLUNGE,
             
-            (SingleStates.STARTING_RAISE, Events.SUCCESS): SingleStates.TRAVERSE_TO_MIDDLE,
+            (SingleStates.STARTING_RAISE, Events.SUCCESS): SingleStates.INIT_TRAVERSE_TO_BERM,
             (SingleStates.STARTING_RAISE, Events.STALL): SingleStates.STARTING_RAISE_STALL,
             (SingleStates.STARTING_RAISE_STALL, Events.SUCCESS): SingleStates.STARTING_RAISE,
+
+            (SingleStates.INIT_TRAVERSE_TO_BERM, Events.SUCCESS): SingleStates.INIT_ALIGN_TO_BERM,
+            (SingleStates.INIT_TRAVERSE_TO_BERM, Events.STALL): SingleStates.INIT_TRAVERSE_TO_BERM_STALL,
+            (SingleStates.INIT_TRAVERSE_TO_BERM, Events.NO_PATH): SingleStates.INIT_TRAVERSE_TO_BERM_NO_PATH,
+            (SingleStates.INIT_TRAVERSE_TO_BERM_STALL, Events.SUCCESS): SingleStates.INIT_TRAVERSE_TO_BERM,
+            (SingleStates.INIT_TRAVERSE_TO_BERM_NO_PATH, Events.SUCCESS): SingleStates.INIT_TRAVERSE_TO_BERM,
+
+            (SingleStates.INIT_ALIGN_TO_BERM, Events.SUCCESS): SingleStates.INIT_APPROACH_BERM,
+            
+            (SingleStates.INIT_APPROACH_BERM, Events.SUCCESS): SingleStates.INIT_DEPOSIT_BERM,
+            
+            (SingleStates.INIT_DEPOSIT_BERM, Events.SUCCESS): SingleStates.INIT_RETREAT_BERM,
+            (SingleStates.INIT_DEPOSIT_BERM, Events.STALL): SingleStates.INIT_DEPOSIT_BERM_STALL,
+            (SingleStates.INIT_DEPOSIT_BERM_STALL, Events.SUCCESS): SingleStates.INIT_DEPOSIT_BERM,
+            
+            (SingleStates.INIT_RETREAT_BERM, Events.SUCCESS): SingleStates.TRAVERSE_TO_EXC_ZONE,
+            (SingleStates.INIT_RETREAT_BERM, Events.STALL): SingleStates.INIT_RETREAT_BERM_STALL,
+            (SingleStates.INIT_RETREAT_BERM_STALL, Events.SUCCESS): SingleStates.INIT_RETREAT_BERM,
                         
-            (SingleStates.TRAVERSE_TO_MIDDLE, Events.SUCCESS): SingleStates.FIND_LINKUP,
-            (SingleStates.TRAVERSE_TO_MIDDLE, Events.STALL): SingleStates.TRAVERSE_TO_MIDDLE_STALL,
-            (SingleStates.TRAVERSE_TO_MIDDLE, Events.NO_PATH): SingleStates.TRAVERSE_TO_MIDDLE_NO_PATH,
-            (SingleStates.TRAVERSE_TO_MIDDLE_STALL, Events.SUCCESS): SingleStates.TRAVERSE_TO_MIDDLE,
-            (SingleStates.TRAVERSE_TO_MIDDLE_NO_PATH, Events.SUCCESS): SingleStates.TRAVERSE_TO_MIDDLE,
-
-            (SingleStates.FIND_LINKUP, Events.SUCCESS): SingleStates.CHECKOUT_LINKUP,
-
-            (SingleStates.CHECKOUT_LINKUP, Events.SUCCESS): SingleStates.SPIN_MAPPING,
-            (SingleStates.CHECKOUT_LINKUP, Events.STALL): SingleStates.CHECKOUT_LINKUP_STALL,
-            (SingleStates.CHECKOUT_LINKUP, Events.NO_PATH): SingleStates.CHECKOUT_LINKUP_NO_PATH,
-            (SingleStates.CHECKOUT_LINKUP_STALL, Events.SUCCESS): SingleStates.CHECKOUT_LINKUP,
-            (SingleStates.CHECKOUT_LINKUP_NO_PATH, Events.SUCCESS): SingleStates.CHECKOUT_LINKUP,
-
-            (SingleStates.SPIN_MAPPING, Events.SUCCESS): SingleStates.FIND_LINKUP_AGAIN,
-            (SingleStates.SPIN_MAPPING, Events.STALL): SingleStates.SPIN_MAPPING_STALL,
-            (SingleStates.SPIN_MAPPING_STALL, Events.SUCCESS): SingleStates.SPIN_MAPPING,
-
-            (SingleStates.FIND_LINKUP_AGAIN, Events.SUCCESS): SingleStates.TRAVERSE_TO_LINKUP,
-                        
-            (SingleStates.TRAVERSE_TO_LINKUP, Events.SUCCESS): SingleStates.ALIGN_TO_TRENCH,
-            (SingleStates.TRAVERSE_TO_LINKUP, Events.STALL): SingleStates.TRAVERSE_TO_LINKUP_STALL,
-            (SingleStates.TRAVERSE_TO_LINKUP, Events.NO_PATH): SingleStates.TRAVERSE_TO_LINKUP_NO_PATH,
-            (SingleStates.TRAVERSE_TO_LINKUP_NO_PATH, Events.SUCCESS): SingleStates.TRAVERSE_TO_LINKUP,
-            (SingleStates.TRAVERSE_TO_LINKUP_STALL, Events.SUCCESS): SingleStates.TRAVERSE_TO_LINKUP,
+            (SingleStates.TRAVERSE_TO_EXC_ZONE, Events.SUCCESS): SingleStates.ALIGN_TO_TRENCH,
+            (SingleStates.TRAVERSE_TO_EXC_ZONE, Events.STALL): SingleStates.TRAVERSE_TO_EXC_ZONE_STALL,
+            (SingleStates.TRAVERSE_TO_EXC_ZONE, Events.NO_PATH): SingleStates.TRAVERSE_TO_EXC_ZONE_NO_PATH,
+            (SingleStates.TRAVERSE_TO_EXC_ZONE_NO_PATH, Events.SUCCESS): SingleStates.TRAVERSE_TO_EXC_ZONE,
+            (SingleStates.TRAVERSE_TO_EXC_ZONE_STALL, Events.SUCCESS): SingleStates.TRAVERSE_TO_EXC_ZONE,
 
             (SingleStates.ALIGN_TO_TRENCH, Events.SUCCESS): SingleStates.APPROACH_TRENCH,
             (SingleStates.ALIGN_TO_TRENCH, Events.STALL): SingleStates.ALIGN_TO_TRENCH_STALL,
@@ -184,7 +168,7 @@ class SingleStates(Enum):
             (SingleStates.RETREAT_TRENCH, Events.STALL): SingleStates.RETREAT_TRENCH_STALL,
             (SingleStates.RETREAT_TRENCH_STALL, Events.SUCCESS): SingleStates.RETREAT_TRENCH,
 
-            (SingleStates.ALIGN_TO_LINKUP, Events.SUCCESS): SingleStates.TRAVERSE_TO_BERM, # TODO: Go to linkup
+            (SingleStates.ALIGN_TO_LINKUP, Events.SUCCESS): SingleStates.TRAVERSE_TO_BERM,
             (SingleStates.ALIGN_TO_LINKUP, Events.STALL): SingleStates.RETREAT_TRENCH_STALL,
             (SingleStates.ALIGN_TO_LINKUP_STALL, Events.SUCCESS): SingleStates.ALIGN_TO_LINKUP,
 
@@ -202,15 +186,15 @@ class SingleStates(Enum):
             (SingleStates.DEPOSIT_BERM, Events.STALL): SingleStates.DEPOSIT_BERM_STALL,
             (SingleStates.DEPOSIT_BERM_STALL, Events.SUCCESS): SingleStates.DEPOSIT_BERM,
             
-            (SingleStates.RETREAT_BERM, Events.SUCCESS): SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS,
+            (SingleStates.RETREAT_BERM, Events.SUCCESS): SingleStates.TRAVERSE_TO_EXC_ZONE,
             (SingleStates.RETREAT_BERM, Events.STALL): SingleStates.RETREAT_BERM_STALL,
             (SingleStates.RETREAT_BERM_STALL, Events.SUCCESS): SingleStates.RETREAT_BERM,
-            
-            (SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS, Events.SUCCESS): SingleStates.ALIGN_TO_TRENCH,
-            (SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS, Events.STALL): SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS_STALL,
-            (SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS, Events.NO_PATH): SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS_NO_PATH,
-            (SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS_STALL, Events.SUCCESS): SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS,
-            (SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS_NO_PATH, Events.SUCCESS): SingleStates.TRAVERSE_TO_LINKUP_BACKWARDS,
+
+            (SingleStates.TRAVERSE_TO_EXC_ZONE, Events.SUCCESS): SingleStates.ALIGN_TO_TRENCH,
+            (SingleStates.TRAVERSE_TO_EXC_ZONE, Events.STALL): SingleStates.TRAVERSE_TO_EXC_ZONE_STALL,
+            (SingleStates.TRAVERSE_TO_EXC_ZONE, Events.NO_PATH): SingleStates.TRAVERSE_TO_EXC_ZONE_NO_PATH,
+            (SingleStates.TRAVERSE_TO_EXC_ZONE_NO_PATH, Events.SUCCESS): SingleStates.TRAVERSE_TO_EXC_ZONE,
+            (SingleStates.TRAVERSE_TO_EXC_ZONE_STALL, Events.SUCCESS): SingleStates.TRAVERSE_TO_EXC_ZONE,
         }
 
         return transitions.get((state, event), None)
