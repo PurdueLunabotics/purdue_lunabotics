@@ -7,10 +7,9 @@ from lunabot_msgs.msg import Linkup
 from tf_transformations import quaternion_from_euler
 
 class TraverseToLinkup(Traverse):
-  def __init__(self, is_main: bool, is_backwards: bool, is_single: bool=False):
+  def __init__(self, is_main: bool, is_backwards: bool):
     super().__init__(PoseStamped(), is_backwards)
     self.is_main = is_main
-    self.is_single = is_single
 
   def setup(self, manager: Node):
     self.linkup_sub = manager.create_subscription(Linkup, "/linkup_pos", self.linkup_cb, 10)
@@ -32,7 +31,7 @@ class TraverseToLinkup(Traverse):
       self.goal.pose.position.z = linkup.mini_target.z
 
     self.goal.pose.orientation.x, self.goal.pose.orientation.y, self.goal.pose.orientation.z, self.goal.pose.orientation.w = quaternion_from_euler(0, 0, atan2(self.y, self.x))
-    self.goal.header.frame_id = "map" if self.is_main or self.is_single else "mini/map"
+    self.goal.header.frame_id = "map" if self.is_main else "mini/map"
     self.goal.header.stamp = self.manager.get_clock().now().to_msg()
 
   def start(self):
