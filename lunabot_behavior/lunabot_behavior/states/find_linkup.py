@@ -234,8 +234,9 @@ class FindLinkup(State):
         eval_length = self.MIN_SEGMENT_LENGTH * 2.0
 
         a, b = self.line_to_ends(pos, angle, eval_length)
+        main_point, _ = self.line_to_ends(pos, angle, self.MIN_SEGMENT_LENGTH)
 
-        if not a.within(zones.zone_to_poly(zones.exc_zone)):
+        if not main_point.within(zones.zone_to_poly(zones.exc_zone).buffer(-0.25)):
             return (inf, True)
 
         cost, blocked = line_cost(costmap, a, b)
