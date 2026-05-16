@@ -68,7 +68,6 @@ class Nav2Bridge : public rclcpp::Node {
         return;
       }
 
-      plan_timeout = 0;
       is_planning = true;
 
       if (!action_compute->wait_for_action_server(std::chrono::seconds(1))) {

@@ -127,7 +127,7 @@
 
 
     <group unless="$(var sim)">
-        <include if="$(eval '($(var robot_num) == 1)')" file="$(find-pkg-share lunabot_perception)/launch/lidar.launch"></include>        
+        <!-- <include if="$(eval '($(var robot_num) == 1)')" file="$(find-pkg-share lunabot_perception)/launch/lidar.launch"></include>         -->
     </group>
 
     <include if="$(var record)" file="$(find-pkg-share lunabot_bringup)/launch/$(var ns_)record.launch">

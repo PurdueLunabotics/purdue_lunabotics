@@ -20,10 +20,8 @@ from lunabot_behavior.state_manager import StateManager
 
 import rclpy
 
-class MiniDepStates(Enum):
-
-    
-    APPROACH_BERM = (Drive(1000000, True, 0.1, timeout=10), (LedColor.BLUE, LedColor.TEAL))
+class MiniDepStates(Enum):    
+    APPROACH_BERM = (Drive(1000000, False, 0.1, timeout=10), (LedColor.BLUE, LedColor.TEAL))
     APPROACH_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
     
     # ===== SINGLE ROBOT DEPOSIT SECTION (4) =====
@@ -44,7 +42,6 @@ class MiniDepStates(Enum):
         transitions = {
             (MiniDepStates.STOP, Events.SUCCESS): MiniDepStates.APPROACH_BERM,
 
-            (MiniDepStates.ALIGN_TO_BERM, Events.SUCCESS): MiniDepStates.APPROACH_BERM,
             (MiniDepStates.APPROACH_BERM, Events.SUCCESS): MiniDepStates.DEPOSIT_BERM,
             
             (MiniDepStates.DEPOSIT_BERM, Events.SUCCESS): MiniDepStates.RETREAT_BERM,

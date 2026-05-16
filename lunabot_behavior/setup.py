@@ -37,7 +37,8 @@ setup(
             "ex = lunabot_behavior.ex_only_states:main",
             "ex_align = lunabot_behavior.ex_align_states:main",
             "single = lunabot_behavior.single_states:main",
-            "traversal = lunabot_behavior.traversal_states:main",
+            "traversal_main = lunabot_behavior.traversal_states_main:main",
+            "traversal_mini = lunabot_behavior.traversal_states_mini:main",
             "trench = lunabot_behavior.trench_states:main"
         ],
     },
