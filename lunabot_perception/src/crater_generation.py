@@ -246,8 +246,8 @@ class CraterGeneration(Node):
             is_mirrored = ZoneMeasurements.BERM_OFFSET_X > ZoneMeasurements.EXC_OFFSET_X
 
             # maybe do voxelization??? idk seems a bit late for that atp
-            #for h in np.linspace(min(obst, key=itemgetter(2))[2],max(obst, key=itemgetter(2))[2]):
-
+            groups = np.arange(min(obst, key=itemgetter(2))[2],max(obst, key=itemgetter(2))[2], 0.03)
+                
                 
 
             for p in obst:
@@ -299,8 +299,9 @@ class CraterGeneration(Node):
 
             # width where points can still be counted to be part of the ring
             epsilon = 0.04
-            if self.crater_clear_counter % 3 == 0 :
-                self.craters = []
+            
+            if self.crater_clear_counter > 3:
+                self.craters = self.craters[(5*30):]
             
 
             # is it better to increase and generate more obstacles, with the risk of having important obstacles be generated later?
