@@ -47,7 +47,7 @@ class CraterGeneration(Node):
             ns = ns + '/'
 
         # transform we're looking for is from base link back to map
-        self.map_used = f"mini/map"
+        self.map_used = f"{ns}/map"
         
         self.crater_publisher = self.create_publisher(
             PointCloud2, "crater", 10
@@ -62,19 +62,16 @@ class CraterGeneration(Node):
         )
         
         self.pointcloud_subscriber = self.create_subscription(
-            PointCloud2, "mini/rtabmap/cloud_obstacles", self.set_points,  10
+            PointCloud2, "rtabmap/cloud_obstacles", self.set_points,  10
         )
         self.ground_subscriber = self.create_subscription(
-            PointCloud2, "mini/rtabmap/cloud_ground", self.set_ground, 10
+            PointCloud2, "rtabmap/cloud_ground", self.set_ground, 10
         )
 
-        self.bounding_pub = self.create_publisher(
-            PointCloud2, "boundingkrill", 10
-        )
+        # self.bounding_pub = self.create_publisher(
+        #     PointCloud2, "boundingkrill", 10
+        # )
         
-        self.tf_buf = Buffer()
-        self.tf_listener = TransformListener(self.tf_buf, self)
-        self.tf_broadcaster = TransformBroadcaster(self)
         
         self.crater_clear_counter = 0
         
