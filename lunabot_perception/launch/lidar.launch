@@ -19,7 +19,7 @@
 
   <!-- <include file="$(find-pkg-share unitree_lidar_ros2)/launch/launch.py"/> -->
   <!-- Assemble pointclouds over time-->
-    <node pkg="rtabmap_util" exec='point_cloud_assembler' name="point_cloud_assembler" respawn="true">
+    <node pkg="rtabmap_util" exec='point_cloud_assembler' name="point_cloud_assembler" respawn="true" output="log">
       <remap from="cloud" to="unilidar/cloud"/>
       <remap from="odom" to="/mini/rtabmap/odom"/>
       <remap from="assembled_cloud" to="lidar_assembled_cloud"/>  
