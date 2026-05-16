@@ -223,30 +223,30 @@ class CraterGeneration(Node):
 
             start_zone = [ZoneMeasurements.START_OFFSET_X-ZoneMeasurements.START_LENGTH_X/2, ZoneMeasurements.START_OFFSET_Y-ZoneMeasurements.START_LENGTH_Y/2, ZoneMeasurements.START_OFFSET_X+ZoneMeasurements.START_LENGTH_X/2, ZoneMeasurements.START_OFFSET_Y+ZoneMeasurements.START_LENGTH_Y/2]
             
-            self.get_logger().warn(f"{start_zone[0]}")
-            self.get_logger().warn(f"{start_zone[2]}")
-            self.get_logger().warn(f"{start_zone[1]}")
-            self.get_logger().warn(f"{start_zone[3]}")
+            # self.get_logger().warn(f"{start_zone[0]}")
+            # self.get_logger().warn(f"{start_zone[2]}")
+            # self.get_logger().warn(f"{start_zone[1]}")
+            # self.get_logger().warn(f"{start_zone[3]}")
             # self.get_logger().warn(f"{np.mean(obst[:][0])}")
             # self.get_logger().warn(f"{np.mean(obst[:][1])}")
 
-            points = []
+            # points = []
 
-            for y in np.arange(bounding_box[1], bounding_box[3], 0.03):
-                points.append([bounding_box[0], y, 0])
-                points.append([bounding_box[2], y, 0])
+            # for y in np.arange(bounding_box[1], bounding_box[3], 0.03):
+            #     points.append([bounding_box[0], y, 0])
+            #     points.append([bounding_box[2], y, 0])
 
-            for x in np.arange(bounding_box[0], bounding_box[2], 0.03):
-                points.append([x, bounding_box[1], 0])
-                points.append([x, bounding_box[3], 0])
+            # for x in np.arange(bounding_box[0], bounding_box[2], 0.03):
+            #     points.append([x, bounding_box[1], 0])
+            #     points.append([x, bounding_box[3], 0])
             
-            cloud = point_cloud2.create_cloud_xyz32(Header(frame_id=self.map_used, stamp=self.get_clock().now().to_msg()), points)
-            self.bounding_pub.publish(cloud)
+            # cloud = point_cloud2.create_cloud_xyz32(Header(frame_id=self.map_used, stamp=self.get_clock().now().to_msg()), points)
+            # self.bounding_pub.publish(cloud)
 
             is_mirrored = ZoneMeasurements.BERM_OFFSET_X > ZoneMeasurements.EXC_OFFSET_X
 
             # maybe do voxelization??? idk seems a bit late for that atp
-            groups = np.arange(min(obst, key=itemgetter(2))[2],max(obst, key=itemgetter(2))[2], 0.03)
+            # groups = np.arange(min(obst, key=itemgetter(2))[2],max(obst, key=itemgetter(2))[2], 0.03)
                 
                 
 
@@ -282,10 +282,10 @@ class CraterGeneration(Node):
             #         new_point = tf_matrix @ point
             #         main_box.append([new_point[0], new_point[1], 0])
             
-            if len(crater_vals) != 0:
-                pc2 = point_cloud2.create_cloud_xyz32(Header(frame_id=self.map_used, stamp=self.get_clock().now().to_msg()), crater_check)
+            # if len(crater_vals) != 0:
+            #     pc2 = point_cloud2.create_cloud_xyz32(Header(frame_id=self.map_used, stamp=self.get_clock().now().to_msg()), crater_check)
 
-                self.cratervals_publisher.publish(pc2)
+            #     self.cratervals_publisher.publish(pc2)
                     
             # self.get_logger().info(f"{craternp}")
             # initial guess for the ring center and radius (if no previous info about those, increase uncertainty accordingly)
@@ -309,7 +309,7 @@ class CraterGeneration(Node):
                 
                 #self.get_logger().info(f"{self.get_clock().now()}")
 
-                print(f"starting time {time.time()}")
+                
                 craternp = np.array(crater_vals, dtype=object)
                 didRun = False
                 if crater_vals != []:
@@ -323,9 +323,9 @@ class CraterGeneration(Node):
                 if didRun:
                 # try:
                     
-                    self.get_logger().warn(f"hough {hough_cx}")
-                    self.get_logger().warn(f"hough {hough_cy}")
-                    self.get_logger().warn(f"hough {hough_r}")
+                    # self.get_logger().warn(f"hough {hough_cx}")
+                    # self.get_logger().warn(f"hough {hough_cy}")
+                    # self.get_logger().warn(f"hough {hough_r}")
                         
                         
                     #self.get_logger().info(f"3{self.get_clock().now()}")    
