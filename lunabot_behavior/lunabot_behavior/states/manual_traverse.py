@@ -3,8 +3,8 @@ from lunabot_behavior.state import Events
 from geometry_msgs.msg import PoseStamped
 
 class ManualTraverse(Traverse):
-  def __init__(self):
-    super().__init__(None, True)
+  def __init__(self, is_main: bool=True):
+    super().__init__(None, is_main)
 
   def setup(self, manager):
     super().setup(manager)

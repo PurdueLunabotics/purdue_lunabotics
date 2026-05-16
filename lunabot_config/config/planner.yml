@@ -55,6 +55,8 @@ planner_server:
     planner_plugins: ["GridBased"]
     GridBased:
       plugin: "SThetaStarPlanner"
+      remapping_cost_change_percent: 0.25
+      
 
 mini:
   global_costmap:
@@ -75,3 +77,4 @@ mini:
       planner_plugins: ["GridBased"]
       GridBased:
         plugin: "SThetaStarPlanner"
+        remapping_cost_change_percent: 0.25

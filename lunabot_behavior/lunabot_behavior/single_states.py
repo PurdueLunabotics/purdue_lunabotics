@@ -23,6 +23,7 @@ from lunabot_behavior.states.raise_act import Raise
 from lunabot_behavior.states.retreat_berm import RetreatBerm
 from lunabot_behavior.states.trench import Trench
 from lunabot_behavior.states.fullstop import Stop
+from lunabot_behavior.states.init import SetupObstacles
 from lunabot_behavior.states.mapping_spin import MappingSpin
 
 from lunabot_behavior.state import Events, State
@@ -37,6 +38,7 @@ class SingleStates(Enum):
     INIT = (State(), (LedColor.GREEN, LedColor.YELLOW))
     INIT_STALL = (State(), (LedColor.GREEN, LedColor.RED))
     INIT_RAISE = (Raise(False), (LedColor.GREEN, LedColor.GREEN))
+    INIT_OBSTACLES = (SetupObstacles(True), (LedColor.GREEN, LedColor.BLUE))
 
     TRAVERSE_TO_MIDDLE = (TraverseToMiddle(), (LedColor.GREEN, LedColor.BLUE))
     TRAVERSE_TO_MIDDLE_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
@@ -116,11 +118,12 @@ class SingleStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
-            (SingleStates.STOP, Events.SUCCESS): SingleStates.INIT_RAISE,
+            (SingleStates.STOP, Events.SUCCESS): SingleStates.INIT_OBSTACLES,
             
             # (SingleStates.INIT, Events.SUCCESS): SingleStates.INIT_RAISE,
             # (SingleStates.INIT, Events.STALL): SingleStates.INIT_STALL,
             # (SingleStates.INIT_STALL, Events.SUCCESS): SingleStates.INIT,
+            (SingleStates.INIT_OBSTACLES, Events.SUCCESS): SingleStates.INIT_RAISE,
             (SingleStates.INIT_RAISE, Events.SUCCESS): SingleStates.STARTING_PLUNGE,
             
             (SingleStates.STARTING_PLUNGE, Events.SUCCESS): SingleStates.STARTING_RAISE,
