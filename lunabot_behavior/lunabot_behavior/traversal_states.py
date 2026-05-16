@@ -7,7 +7,8 @@ import sys
 
 from lunabot_config.led_colors import LedColor
 
-from lunabot_behavior.states.traverse import NoPath, Stall, Traverse
+from lunabot_behavior.states.manual_traverse import ManualTraverse
+from lunabot_behavior.states.traverse import NoPath, Stall
 from lunabot_behavior.states.fullstop import Stop
 
 from lunabot_behavior.state import Events, State
@@ -17,7 +18,7 @@ import rclpy
 
 class States(Enum):
     INIT = (Stop(), (LedColor.GREEN, LedColor.BLUE))
-    TRAVERSE = (Traverse(None, True), (LedColor.GREEN, LedColor.BLUE))
+    TRAVERSE = (ManualTraverse(), (LedColor.GREEN, LedColor.BLUE))
     STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
     NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
     END = (Stop(), (LedColor.GREEN, LedColor.BLUE))
