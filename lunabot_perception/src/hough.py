@@ -94,13 +94,23 @@ def hough_pointcloud(
         d_cx, d_cy, d_r = compare_old_new(
             previous_ring_features, ring_features
         )
+
+        def remove(j):
+            return(((j[0]>hough_cx-hough_r-0.10) and (j[0]<hough_cx+hough_r+0.1)) and ((j[1]>hough_cy-hough_r-0.10) and (j[1]<hough_cy+hough_r+0.10)))
+                        
+                        
+        points_in = len(list(filter(remove,point_cloud)))
         uncertainty_pos /= 2
         uncertainty_r /= 2
         if (
             d_cx <= np.deg2rad(0.02) and
             d_cy <= np.deg2rad(0.02) and
             d_r <= np.deg2rad(0.01) and
-            i >= 3
+            i >= 6 and 
+            hough_r > 0.2 and
+            hough_r < 0.80 and
+            points_in > 11 and 
+            points_in < 100
         ):
             break
     return hough_cx, hough_cy, hough_r
