@@ -240,7 +240,7 @@ class FindLinkup(State):
 
         cost, blocked = line_cost(costmap, a, b)
 
-        return cost + np.abs(angle) * 5, blocked
+        return cost, blocked
 
     def iterate_point_once(self, costmap: Costmap, pos: shp.Point, angle: float):
         alternatives = [(shp.Point(pos.x + costmap.metadata.resolution, pos.y), angle),
