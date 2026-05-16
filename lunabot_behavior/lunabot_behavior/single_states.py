@@ -23,6 +23,7 @@ from lunabot_behavior.states.raise_act import Raise
 from lunabot_behavior.states.retreat_berm import RetreatBerm
 from lunabot_behavior.states.trench import Trench
 from lunabot_behavior.states.fullstop import Stop
+from lunabot_behavior.states.mapping_spin import MappingSpin
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -36,11 +37,21 @@ class SingleStates(Enum):
     INIT = (State(), (LedColor.GREEN, LedColor.YELLOW))
     INIT_STALL = (State(), (LedColor.GREEN, LedColor.RED))
     INIT_RAISE = (Raise(False), (LedColor.GREEN, LedColor.GREEN))
-    
-    FIND_LINKUP = (FindLinkup(), (LedColor.GREEN, LedColor.BLUE))
+
     TRAVERSE_TO_MIDDLE = (TraverseToMiddle(), (LedColor.GREEN, LedColor.BLUE))
     TRAVERSE_TO_MIDDLE_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
     TRAVERSE_TO_MIDDLE_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
+
+    FIND_LINKUP = (FindLinkup(), (LedColor.GREEN, LedColor.BLUE))
+
+    CHECKOUT_LINKUP = (TraverseToLinkup(False, False, is_single=True), (LedColor.GREEN, LedColor.GREEN))
+    CHECKOUT_LINKUP_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
+    CHECKOUT_LINKUP_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
+
+    SPIN_MAPPING = (MappingSpin(), (LedColor.GREEN, LedColor.BLUE))
+    SPIN_MAPPING_STALL = (Stall(), (LedColor.GREEN, LedColor.BLUE))
+
+    FIND_LINKUP_AGAIN = (FindLinkup(), (LedColor.GREEN, LedColor.YELLOW))
     
     STARTING_PLUNGE = (Plunge(), (LedColor.GREEN, LedColor.BLUE))
     STARTING_PLUNGE_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
@@ -57,7 +68,6 @@ class SingleStates(Enum):
     TRAVERSE_TO_LINKUP_BACKWARDS = (TraverseToLinkup(True, False), (LedColor.GREEN, LedColor.WHITE))
     TRAVERSE_TO_LINKUP_BACKWARDS_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
     TRAVERSE_TO_LINKUP_BACKWARDS_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
-    
     
     ALIGN_TO_TRENCH = (AlignTrench(), (LedColor.WHITE, LedColor.YELLOW))
     ALIGN_TO_TRENCH_STALL = (Stall(), (LedColor.WHITE, LedColor.RED))
@@ -106,11 +116,11 @@ class SingleStates(Enum):
     @staticmethod
     def get_transition(state, event: Events):
         transitions = {
-            (SingleStates.STOP, Events.SUCCESS): SingleStates.INIT,
+            (SingleStates.STOP, Events.SUCCESS): SingleStates.INIT_RAISE,
             
-            (SingleStates.INIT, Events.SUCCESS): SingleStates.INIT_RAISE,
-            (SingleStates.INIT, Events.STALL): SingleStates.INIT_STALL,
-            (SingleStates.INIT_STALL, Events.SUCCESS): SingleStates.INIT,
+            # (SingleStates.INIT, Events.SUCCESS): SingleStates.INIT_RAISE,
+            # (SingleStates.INIT, Events.STALL): SingleStates.INIT_STALL,
+            # (SingleStates.INIT_STALL, Events.SUCCESS): SingleStates.INIT,
             (SingleStates.INIT_RAISE, Events.SUCCESS): SingleStates.STARTING_PLUNGE,
             
             (SingleStates.STARTING_PLUNGE, Events.SUCCESS): SingleStates.STARTING_RAISE,
@@ -127,7 +137,19 @@ class SingleStates(Enum):
             (SingleStates.TRAVERSE_TO_MIDDLE_STALL, Events.SUCCESS): SingleStates.TRAVERSE_TO_MIDDLE,
             (SingleStates.TRAVERSE_TO_MIDDLE_NO_PATH, Events.SUCCESS): SingleStates.TRAVERSE_TO_MIDDLE,
 
-            (SingleStates.FIND_LINKUP, Events.SUCCESS): SingleStates.TRAVERSE_TO_LINKUP,
+            (SingleStates.FIND_LINKUP, Events.SUCCESS): SingleStates.CHECKOUT_LINKUP,
+
+            (SingleStates.CHECKOUT_LINKUP, Events.SUCCESS): SingleStates.SPIN_MAPPING,
+            (SingleStates.CHECKOUT_LINKUP, Events.STALL): SingleStates.CHECKOUT_LINKUP_STALL,
+            (SingleStates.CHECKOUT_LINKUP, Events.NO_PATH): SingleStates.CHECKOUT_LINKUP_NO_PATH,
+            (SingleStates.CHECKOUT_LINKUP_STALL, Events.SUCCESS): SingleStates.CHECKOUT_LINKUP,
+            (SingleStates.CHECKOUT_LINKUP_NO_PATH, Events.SUCCESS): SingleStates.CHECKOUT_LINKUP,
+
+            (SingleStates.SPIN_MAPPING, Events.SUCCESS): SingleStates.FIND_LINKUP_AGAIN,
+            (SingleStates.SPIN_MAPPING, Events.STALL): SingleStates.SPIN_MAPPING_STALL,
+            (SingleStates.SPIN_MAPPING_STALL, Events.SUCCESS): SingleStates.SPIN_MAPPING,
+
+            (SingleStates.FIND_LINKUP_AGAIN, Events.SUCCESS): SingleStates.TRAVERSE_TO_LINKUP,
                         
             (SingleStates.TRAVERSE_TO_LINKUP, Events.SUCCESS): SingleStates.ALIGN_TO_TRENCH,
             (SingleStates.TRAVERSE_TO_LINKUP, Events.STALL): SingleStates.TRAVERSE_TO_LINKUP_STALL,
