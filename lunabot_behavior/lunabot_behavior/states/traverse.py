@@ -64,7 +64,9 @@ class Traverse(State):
     def periodic(self) -> None | Events:
         if not self.is_planner_alive:
             self.enabled_pub.publish(Bool(data = False))
-            self.goal_pub.publish(self.goal)
+            if self.goal is not None:
+                self.goal_pub.publish(self.goal)
+            return
 
         if self.odom is None or self.last_pose is None:
             self.logger.warn("[Traverse] no odom or path")

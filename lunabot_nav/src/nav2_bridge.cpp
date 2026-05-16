@@ -31,7 +31,7 @@ class Nav2Bridge : public rclcpp::Node {
   bool has_goal = false;
   PoseStampedMsg odom;
   bool has_odom = false;
-  int plan_timeout = 0;
+  int num_missed = 0;
 
   bool is_planning = false;
 
@@ -55,20 +55,25 @@ class Nav2Bridge : public rclcpp::Node {
 
   private:
     void plan_path() {
-      if (plan_timeout > 3) {
+      if (num_missed > 5) {
         std::exit(-1);
       }
       // wait for earlier thing to finish
-      if (!has_goal || !has_odom || is_planning) {
-        plan_timeout++;
+      if (!has_goal || !has_odom) {
+        return;
+      }
+
+      if (is_planning) {
+        num_missed++;
         return;
       }
 
       plan_timeout = 0;
       is_planning = true;
 
-      if (!action_compute->wait_for_action_server()) {
+      if (!action_compute->wait_for_action_server(std::chrono::seconds(1))) {
         RCLCPP_WARN(get_logger(), "Action server not ready yet");
+        num_missed++;
         return;
       }
 
@@ -80,6 +85,7 @@ class Nav2Bridge : public rclcpp::Node {
 
       auto options = rclcpp_action::Client<ComputePathToPose>::SendGoalOptions();
       options.result_callback = [this] (rclcpp_action::ClientGoalHandle<ComputePathToPose>::WrappedResult result) {
+        this->num_missed = 0;
         if (result.code != rclcpp_action::ResultCode::SUCCEEDED) {
           RCLCPP_WARN(get_logger(), "Failed to compute pose");
           Event event;

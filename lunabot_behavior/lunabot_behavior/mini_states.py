@@ -29,6 +29,7 @@ from lunabot_behavior.states.collect import CollectRegolithState
 from lunabot_behavior.states.wait_for_main_diverge import WaitForMainDivergeState
 from lunabot_behavior.states.init import InitRetreat, SetupMap, SetupObstacles
 from lunabot_behavior.states.fullstop import Stop
+from lunabot_behavior.states.mapping_spin import MappingSpin
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -56,6 +57,9 @@ class MiniStates(Enum):
     CHECKOUT_LINKUP = (TraverseToLinkup(False, False), (LedColor.GREEN, LedColor.GREEN))
     CHECKOUT_LINKUP_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
     CHECKOUT_LINKUP_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
+
+    SPIN_MAPPING = (MappingSpin(), (LedColor.GREEN, LedColor.BLUE))
+    SPIN_MAPPING_STALL = (Stall(), (LedColor.GREEN, LedColor.BLUE))
 
     FIND_LINKUP_AGAIN = (FindLinkup(), (LedColor.GREEN, LedColor.YELLOW))
 
@@ -120,11 +124,15 @@ class MiniStates(Enum):
 
             (MiniStates.FIND_LINKUP, Events.SUCCESS): MiniStates.CHECKOUT_LINKUP,
 
-            (MiniStates.CHECKOUT_LINKUP, Events.SUCCESS): MiniStates.FIND_LINKUP_AGAIN,
+            (MiniStates.CHECKOUT_LINKUP, Events.SUCCESS): MiniStates.SPIN_MAPPING,
             (MiniStates.CHECKOUT_LINKUP, Events.STALL): MiniStates.CHECKOUT_LINKUP_STALL,
             (MiniStates.CHECKOUT_LINKUP, Events.NO_PATH): MiniStates.CHECKOUT_LINKUP_NO_PATH,
             (MiniStates.CHECKOUT_LINKUP_STALL, Events.SUCCESS): MiniStates.CHECKOUT_LINKUP,
             (MiniStates.CHECKOUT_LINKUP_NO_PATH, Events.SUCCESS): MiniStates.CHECKOUT_LINKUP,
+
+            (MiniStates.SPIN_MAPPING, Events.SUCCESS): MiniStates.FIND_LINKUP_AGAIN,
+            (MiniStates.SPIN_MAPPING, Events.STALL): MiniStates.SPIN_MAPPING_STALL,
+            (MiniStates.SPIN_MAPPING_STALL, Events.SUCCESS): MiniStates.SPIN_MAPPING,
 
             (MiniStates.FIND_LINKUP_AGAIN, Events.SUCCESS): MiniStates.LINKUP_HANDSHAKE,
 
