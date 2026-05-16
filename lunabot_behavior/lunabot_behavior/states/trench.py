@@ -38,8 +38,8 @@ class Drive(State):
         
         self.manager = manager
 
-        kp = 0.1
-        ki = 0.001
+        kp = 3.0
+        ki = 0
         kd = 0
         self.pid = ParameterizedPIDController("drive", self.manager, kp, ki, kd, max_output=self.speed)
 
