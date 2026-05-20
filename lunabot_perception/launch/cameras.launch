@@ -5,29 +5,45 @@
   <!-- ============================== -->
 
   <!-- Type of Camera Args -->
-  <arg name="sim"                             default="false"/>
+  <arg name="sim"                           default="false"/>
+  <arg name="lidar"                         default="false"/>
 
-  <let name="serial_no_cam_4"               value="'_053122251286'"/>
-  <arg name="cam_1_name"                    default="d455_front"/>
+  <arg name="robot_num"                     default="0" />
+
+  <arg name="ns" if="$(eval '$(var robot_num) == 1')" default="mini"/>
+  <arg name="ns" if="$(eval '$(var robot_num) == 0')" default=""/>
+  <push_ros_namespace namespace="$(var ns)"/>
+
   <let name="serial_no_cam_1"               value="'141222070808'"/>
+  <arg name="cam_1_name"                    default="d455_front"/>
+  <let name="serial_no_cam_2"               value="'349622073231'"/>
   <arg name="cam_2_name"                    default="d455_back"/>
-  <let name="serial_no_cam_3"               value="'_053122251335'"/>
+
+  <let name="serial_no_cam_3"               value="'339222072367'"/>
   <arg name="cam_3_name"                    default="d455_front"/>
-  <let name="serial_no_cam_2"               value="'939622074382'"/>
+  <let name="serial_no_cam_4"               value="'939622074382'"/>
   <arg name="cam_4_name"                    default="d455_back"/>
-  <arg name="cams"                          default="''"/>
 
-  <arg name="pointcloud"                      default="$(eval 'len($(var cams)) > 1')" />
+  <arg name="cams"                    default="'12'"      if="$(eval '$(var robot_num) == 0')"/> <!-- Camera numbers -->
+  <arg name="cams"                    default="'34'"      if="$(eval '$(var robot_num) == 1')"/> <!-- Camera numbers -->
 
-  <arg name="profile"                         default="424x240x15"/>
+
+  <arg name="pointcloud"                      default="true" />
+
+  <arg name="profile"                         default="424x240x15" if="$(eval '$(var robot_num) == 0')"/>
+  <arg name="profile"                         default="848x480x30" if="$(eval '$(var robot_num) == 1')"/>
+
   <let name="initial_reset"                   value="true"/>
   <let name="decimation"                      value="4"/> 
   <let name="voxel_size"                      value="0.01"/> <!--meters-->
   <let name="noise_filter_radius"             value="0.1"/> <!--meters radius-->
   <let name="max_depth"                       value="2.0"/> <!--meters-->
 
+
   <let name="/ns" if="$(eval 'len(\'$(var ns)\') > 0')" value="/$(var ns)"/>
   <let name="/ns" unless="$(eval 'len(\'$(var ns)\') > 0')" value=""/>
+  <let name="ns/" if="$(eval 'len(\'$(var ns)\') > 0')" value="$(var ns)/"/>
+  <let name="ns/" unless="$(eval 'len(\'$(var ns)\') > 0')" value=""/>
 
   <group if="$(eval '\'1\' in $(var cams)')">
     <group unless="$(var sim)">
@@ -46,17 +62,24 @@
         <arg name="align_depth.enable"            value="true"/>
 
         <arg name="enable_depth"                  value="true"/>
-        <arg name="depth_module.depth_profile"    value="$(var profile)" />
+        <arg name="depth_module.depth_profile"    value="640x480x15"/>
+
+        <arg name="enable_infra"                  value="true"/>
+        <arg name="enable_infra1"                  value="true"/>
+        <arg name="enable_infra2"                  value="true"/>
+
+        <arg name="depth_module.infra_profile"    value="640x480x15"/>
 
         <arg name="enable_color"                  value="true"/>
-        <arg name="rgb_camera.color_profile"      value="$(var profile)" />
+        <arg name="rgb_camera.color_profile"      value="640x480x15"/>
 
         <arg name="decimation_filter.enable"      value="true"/>
 
         <arg name="publish_tf"                    value="true"/>
-        <arg name="tf_publish_rate"               value="0"/>
+        <arg name="tf_publish_rate"               value="0.0"/>
+        <arg name="tf_prefix"                     value="$(var ns/)"/>
 
-        <arg name="clip_distance"                 value="-1"/>
+        <arg name="clip_distance"                 value="-1.0"/>
       </include>
     </group>
     <push_ros_namespace namespace="$(var cam_1_name)"/>
@@ -98,15 +121,22 @@
         <arg name="enable_depth"                  value="true"/>
         <arg name="depth_module.depth_profile"    value="$(var profile)" />
 
+        <arg name="enable_infra"                  value="true"/>
+        <arg name="enable_infra1"                  value="true"/>
+        <arg name="enable_infra2"                  value="true"/>
+
+        <arg name="depth_module.infra_profile"    value="$(var profile)" />
+
         <arg name="enable_color"                  value="true"/>
         <arg name="rgb_camera.color_profile"      value="$(var profile)" />
 
         <arg name="decimation_filter.enable"      value="true"/>
 
         <arg name="publish_tf"                    value="true"/>
-        <arg name="tf_publish_rate"               value="0"/>
+        <arg name="tf_publish_rate"               value="0.0"/>
+        <arg name="tf_prefix"                     value="$(var ns/)"/>
 
-        <arg name="clip_distance"                 value="-1"/>
+        <arg name="clip_distance"                 value="-1.0"/>
       </include>
     </group>
     <push_ros_namespace namespace="$(var cam_2_name)"/>
@@ -148,15 +178,22 @@
         <arg name="enable_depth"                  value="true"/>
         <arg name="depth_module.depth_profile"    value="$(var profile)" />
 
+        <arg name="enable_infra"                  value="true"/>
+        <arg name="enable_infra1"                  value="true"/>
+        <arg name="enable_infra2"                  value="true"/>
+
+        <arg name="depth_module.infra_profile"    value="$(var profile)" />
+
         <arg name="enable_color"                  value="true"/>
         <arg name="rgb_camera.color_profile"      value="$(var profile)" />
 
         <arg name="decimation_filter.enable"      value="true"/>
 
         <arg name="publish_tf"                    value="true"/>
-        <arg name="tf_publish_rate"               value="0"/>
+        <arg name="tf_publish_rate"               value="0.0"/>
+        <arg name="tf_prefix"                     value="$(var ns/)"/>
 
-        <arg name="clip_distance"                 value="-1"/>
+        <arg name="clip_distance"                 value="-1.0"/>
       </include>
     </group>
     <push_ros_namespace namespace="$(var cam_3_name)"/>
@@ -198,15 +235,20 @@
         <arg name="enable_depth"                  value="true"/>
         <arg name="depth_module.depth_profile"    value="$(var profile)" />
 
+        <arg name="enable_infra"                  value="true"/>
+        <arg name="enable_infra1"                  value="true"/>
+        <arg name="enable_infra2"                  value="true"/>
+
         <arg name="enable_color"                  value="true"/>
         <arg name="rgb_camera.color_profile"      value="$(var profile)" />
 
         <arg name="decimation_filter.enable"      value="true"/>
 
         <arg name="publish_tf"                    value="true"/>
-        <arg name="tf_publish_rate"               value="0"/>
+        <arg name="tf_publish_rate"               value="0.0"/>
+        <arg name="tf_prefix"                     value="$(var ns/)"/>
 
-        <arg name="clip_distance"                 value="-1"/>
+        <arg name="clip_distance"                 value="-1.0"/>
       </include>
     </group>
     <push_ros_namespace namespace="$(var cam_4_name)"/>
@@ -231,17 +273,27 @@
 
   <group if="$(var pointcloud)">
     <push_ros_namespace namespace="pointcloud"/>
-
-    
     
     <!-- Aggregate pointclouds from each camera (if using multiple cameras)-->
-    <node pkg="rtabmap_util" exec='point_cloud_aggregator' name="point_cloud_aggregator" respawn="true">
+    <!-- <node pkg="rtabmap_util" exec='point_cloud_aggregator' name="point_cloud_aggregator" respawn="true">
       <remap from="cloud$(eval '$(var cams).find(\'1\')+1')" to="$(var /ns)/$(var cam_1_name)/points" />
       <remap from="cloud$(eval '$(var cams).find(\'2\')+1')" to="$(var /ns)/$(var cam_2_name)/points" />
       <remap from="cloud$(eval '$(var cams).find(\'3\')+1')" to="$(var /ns)/$(var cam_3_name)/points" />
       <remap from="cloud$(eval '$(var cams).find(\'4\')+1')" to="$(var /ns)/$(var cam_4_name)/points" />
       <remap from="combined_cloud" to="depth_combined_cloud"/>       
       <param name="count" value="$(eval 'len($(var cams))')"/>
+      <param name="xyz_output" value="true"/>
+      <param name="fixed_frame_id" value="$(var ns/)base_link" />
+      <param name="approx_sync" value="true"/>
+    </node> -->
+
+    <node pkg="rtabmap_util" exec='point_cloud_aggregator' name="point_cloud_aggregator" respawn="true">
+      <remap from="cloud1" to="$(var /ns)/$(var cam_1_name)/points" />
+      <remap from="cloud2" to="$(var /ns)/$(var cam_2_name)/points" />
+      <remap from="cloud3" to="$(var /ns)/$(var cam_3_name)/points" />
+      <remap from="cloud4" to="$(var /ns)/$(var cam_4_name)/points" />
+      <remap from="combined_cloud" to="depth_combined_cloud"/>       
+      <param name="count" value="2"/> 
       <param name="xyz_output" value="true"/>
       <param name="fixed_frame_id" value="$(var ns)base_link" />
       <param name="approx_sync" value="true"/>

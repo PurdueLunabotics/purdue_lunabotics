@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 
+from lunabot_config.led_colors import LedColor, colorsToInteger
 from rclpy.node import Node
 import threading
 import rclpy
 
-from lunabot_msgs.msg import RobotEffort 
+from lunabot_msgs.msg import RobotEffort, RobotStall 
 from std_msgs.msg import Int8, Int32, Bool
 
 
@@ -17,12 +18,16 @@ class EffortFactory(Node):
         super().__init__('effort_factory_node', **kwargs)
         rclpy.get_global_executor().add_node(self)
 
+        self.DEP_SERVO_CLOSED = 500
+        self.DEP_SERVO_OPEN = 250
+
         self.effort = RobotEffort()
         self.lin_act = 0
         self.left_drive = 0
         self.right_drive = 0
         self.excavate = 0
         self.deposition = 0
+        self.dep_servo = self.DEP_SERVO_CLOSED
         self.should_reset = False
 
         self.autonomy = True
@@ -37,13 +42,26 @@ class EffortFactory(Node):
         self.right_drive_subscriber = self.create_subscription(Int32, "right_drive", self.set_right_drive, 1)
         self.excavate_subscriber = self.create_subscription(Int32, "excavate", self.set_excavate, 1)
         self.deposition_subscriber = self.create_subscription(Int32, "deposition", self.set_deposition, 1)
+        self.gate_subscriber = self.create_subscription(Bool, "gate", self.set_gate, 1)
+        self.led_publisher = self.create_publisher(Int32, "led_color", 10)
+        self.led_subscriber = self.create_subscription(Int32, "led_color", self.led_cb, 1)
+
 
         rate = self.create_rate(50.0, self.get_clock())
 
+        self.last_led_time = self.get_clock().now().seconds_nanoseconds()[0]
+        self.LED_TIMEOUT = 2
+
         while rclpy.ok():
             if (self.autonomy):
+                if self.get_clock().now().seconds_nanoseconds()[0] > self.last_led_time + self.LED_TIMEOUT:
+                    # self.get_logger().warn("pub led")
+                    self.led_publisher.publish(Int32(data= colorsToInteger((LedColor.RED, LedColor.GREEN))))
                 self.publish_effort()
             rate.sleep()
+
+    def led_cb(self, led: Int32):
+        self.last_led_time = self.get_clock().now().seconds_nanoseconds()[0]
 
     def _autonomy_cb(self, autonomy: Bool):
         self.autonomy = autonomy.data
@@ -62,6 +80,12 @@ class EffortFactory(Node):
 
     def set_deposition(self, deposition: Int32):
         self.deposition = deposition.data
+        
+    def set_gate(self, gate: Bool):
+        if gate.data:
+            self.dep_servo = self.DEP_SERVO_OPEN
+        else:
+            self.dep_servo = self.DEP_SERVO_CLOSED
 
     def publish_effort(self):
         # print("published effort")
@@ -70,6 +94,7 @@ class EffortFactory(Node):
         self.effort.right_drive = self.right_drive
         self.effort.excavate = self.excavate
         self.effort.deposit = self.deposition
+        self.effort.dep_servo = self.dep_servo
         self.effort.should_reset = self.should_reset
 
         self.effort_publisher.publish(self.effort)

@@ -13,15 +13,9 @@ extern Sabertooth MC1; // top
 extern Sabertooth MC2; // middle
 extern Sabertooth MC3; // bottom
 
-#define LEFT_DRIVE_MOTOR_ID 0x01 // TODO RJN - set these ids on robot
-#define RIGHT_DRIVE_MOTOR_ID 0x02
-#define EXC_MOTOR_ID 0x03
-#define DEP_MOTOR_ID 0x04
-
 namespace actuation {
-void cb(int8_t lin_act);
-void update(float &);
-
+void cb(int8_t, uint8_t, uint8_t);
+void update(float &, int32_t &, int32_t &);
 } // namespace actuation
 
 namespace drivetrain {
@@ -32,21 +26,13 @@ float update_curr_left();
 float update_curr_right();
 } // namespace drivetrain
 
-namespace uwb {
-void update(float &d0, float &d1, float &d2);
-} // namespace uwb
-
 namespace LEDs {
-void cb(int32_t);
+void cb(int32_t, uint8_t);
 }
-
-namespace load_cell {
-void update(float &);
-} // namespace load_cell
 
 namespace deposition {
 void begin();
-void cb(int32_t, bool);
+void cb(int32_t, int32_t, bool);
 void update(float &);
 float update_curr();
 } // namespace deposition

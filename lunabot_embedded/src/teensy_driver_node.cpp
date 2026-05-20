@@ -11,10 +11,12 @@
 #include <termios.h>
 
 #include "std_msgs/msg/int32.hpp"
+#include "std_msgs/msg/header.hpp"
 
 #include "lunabot_embedded/sensor_proc.h"
 #include "lunabot_msgs/msg/robot_effort.hpp"
 #include "lunabot_msgs/msg/robot_sensors.hpp"
+#include "sensor_msgs/msg/joint_state.hpp"
 
 extern "C" {
 #include "RobotMsgs.pb.h"
@@ -26,12 +28,15 @@ extern "C" {
 using namespace std;
 
 #define BUF_SIZE 64
+#define PA01_PULSES_PER_INCH 533
+
 
 class TeensyDriverNode : public rclcpp::Node {
   private:
     rclcpp::Subscription<lunabot_msgs::msg::RobotEffort>::SharedPtr effort_sub;
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr color_sub;
     rclcpp::Publisher<lunabot_msgs::msg::RobotSensors>::SharedPtr state_pub;
+    rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_pub;
 
     rclcpp::TimerBase::SharedPtr state_timer;
     rclcpp::TimerBase::SharedPtr timer;
@@ -49,6 +54,7 @@ class TeensyDriverNode : public rclcpp::Node {
       effort_sub = this->create_subscription<lunabot_msgs::msg::RobotEffort>("effort", 10, std::bind(&TeensyDriverNode::effort_cb, this, placeholders::_1));
       color_sub = this->create_subscription<std_msgs::msg::Int32>("led_color", 10, std::bind(&TeensyDriverNode::color_cb, this, placeholders::_1));
       state_pub = this->create_publisher<lunabot_msgs::msg::RobotSensors>("sensors", 10);
+      joint_state_pub = this->create_publisher<sensor_msgs::msg::JointState>("/joint_states", 10);
 
       num_read_fails = 0;
 
@@ -106,8 +112,18 @@ class TeensyDriverNode : public rclcpp::Node {
       state_msg.drive_right_vel = state.drive_right_vel;
       state_msg.exc_torque = state.exc_torque;
       state_msg.exc_vel = state.exc_vel;
+      state_msg.act_left_pos = state.act_left_pos / PA01_PULSES_PER_INCH;
+      state_msg.act_right_pos = state.act_right_pos / PA01_PULSES_PER_INCH;
 
       state_pub->publish(state_msg);
+
+      sensor_msgs::msg::JointState joint_state_msg;
+
+      joint_state_msg.name.push_back("excavation_jointstate");
+      joint_state_msg.position.push_back((double) state_msg.act_left_pos);
+      joint_state_msg.velocity.push_back((double) 0.0); // does not apply
+      joint_state_msg.effort.push_back((double) 0.0); // does not apply
+      joint_state_pub->publish(joint_state_msg);
     }
 
     void effort_cb(const lunabot_msgs::msg::RobotEffort &msg) {
@@ -116,7 +132,9 @@ class TeensyDriverNode : public rclcpp::Node {
       effort.right_drive = msg.right_drive;
       effort.excavate = msg.excavate;
       effort.deposit = msg.deposit;
+      effort.dep_servo = msg.dep_servo;
       effort.should_reset = msg.should_reset;
+      effort.should_zero_act_pos = msg.should_zero_act_pos;
     }
 
     void color_cb(const std_msgs::msg::Int32 &msg) { effort.led_color = msg.data; }

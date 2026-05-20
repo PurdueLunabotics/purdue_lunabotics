@@ -1,68 +1,80 @@
+/**/**/global_costmap:
+  ros__parameters: 
+    height: 5
+    width: 5
+    publish_frequency: 1.0
+    robot_radius: 0.4
+    plugins: ["static_layer","denoise_layer", "obstacle_layer" , "inflation_layer"]
+    static_layer:
+      plugin: "nav2_costmap_2d::StaticLayer"
+      enabled: true
+      map_subscribe_transient_local: false
+      subscribe_to_updates: true
+      transform_tolerance: 0.1
+    obstacle_layer:
+      plugin: "nav2_costmap_2d::ObstacleLayer"
+      observation_sources: "crater behavior"
+      enabled: true
+      crater:
+        data_type: "PointCloud2"
+        obstacle_max_range: 10.0
+      behavior:
+        data_type: "PointCloud2"
+        obstacle_max_range: 10.0
+      footprint_clearing_enabled: true
+    denoise_layer:
+      plugin: "nav2_costmap_2d::DenoiseLayer"
+      enabled: true
+      minimal_group_size: 3
+      group_connectivity_type: 8 # 4 is adjacent, 8 includes diagonals
+      footprint_clearing_enabled: true
+    inflation_layer:
+      plugin: "nav2_costmap_2d::InflationLayer"
+      enabled: true
+      inflation_radius: 1.5
+      cost_scaling_factor: 6.0
+      inflate_unknown: true  # should treat unknown as obstacles (maybe change init values)
+      inflate_around_unknown: true
+      footprint_clearing_enabled: true
+
 global_costmap:
   global_costmap:
-    ros__parameters:
-      publish_frequency: 30.0
+    ros__parameters: 
       global_frame: "map"
       robot_base_frame: "base_link"
-      robot_radius: 0.2
-      plugins: ["static_layer", "denoise_layer", "inflation_layer"]
       static_layer:
-        plugin: "nav2_costmap_2d::StaticLayer"
         map_topic: "/rtabmap/map"
-        enabled: true
-        map_subscribe_transient_local: false
-        subscribe_to_updates: true
-        transform_tolerance: 0.1
-      denoise_layer:
-        plugin: "nav2_costmap_2d::DenoiseLayer"
-        enabled: true
-        minimal_group_size: 2
-        group_connectivity_type: 4 # 4 is adjacent, 8 includes diagonals
-      inflation_layer:
-        plugin: "nav2_costmap_2d::InflationLayer"
-        enabled: true
-        inflation_radius: 1.5
-        cost_scaling_factor: 6.0
-        inflate_unknown: true  # should treat unknown as obstacles (maybe change init values)
-        inflate_around_unknown: true
+      obstacle_layer:
+        crater:
+          topic: "/rtabmap/crater"
+        behavior:
+          topic: "/obstacle"
 
 planner_server:
   ros__parameters:
     planner_plugins: ["GridBased"]
     GridBased:
       plugin: "SThetaStarPlanner"
+      remapping_cost_change_percent: 0.25
+      
 
 mini:
   global_costmap:
     global_costmap:
       ros__parameters:
-        publish_frequency: 30.0
-        global_frame: "minimap"
-        robot_base_frame: "minibase_link"
-        robot_radius: 0.2
-        plugins: ["static_layer", "denoise_layer", "inflation_layer"]
+        global_frame: "mini/map"
+        robot_base_frame: "mini/base_link"
         static_layer:
-          plugin: "nav2_costmap_2d::StaticLayer"
           map_topic: "/mini/rtabmap/map"
-          enabled: true
-          map_subscribe_transient_local: false
-          subscribe_to_updates: true
-          transform_tolerance: 0.1
-        denoise_layer:
-          plugin: "nav2_costmap_2d::DenoiseLayer"
-          enabled: true
-          minimal_group_size: 2
-          group_connectivity_type: 4 # 4 is adjacent, 8 includes diagonals
-        inflation_layer:
-          plugin: "nav2_costmap_2d::InflationLayer"
-          enabled: true
-          inflation_radius: 1.5
-          cost_scaling_factor: 6.0
-          inflate_unknown: true  # should treat unknown as obstacles (maybe change init values)
-          inflate_around_unknown: true
+        obstacle_layer:
+          crater:
+            topic: "/mini/rtabmap/crater"
+          behavior:
+            topic: "/mini/obstacle"
 
   planner_server:
     ros__parameters:
       planner_plugins: ["GridBased"]
       GridBased:
         plugin: "SThetaStarPlanner"
+        remapping_cost_change_percent: 0.25

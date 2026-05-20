@@ -5,27 +5,29 @@ point_to_point_node:
       p: 5.0
       i: 0.0
       d: 0.0
-      max_speed: 60.0
+      max_output: 0.349
       tolerance: 10.0
     linear:
       p: 3.0
       i: 0.0
       d: 0.0
-      max_speed: 0.3
+      max_output: 0.15
       tolerance: 0.2
 
 differential_drive_controller_node:
   ros__parameters:
     gearbox_ratio: 50.0
     hz: 20.0
-    max_speed: 1000
+    max_speed: 3000
     max_speed_percentage: 0.8
     wheel_diameter: 0.3429
     width: 0.5588
+    pwm_to_velocity_factor: 3.5
 
 drivetrain_controller_node:
   ros__parameters:
     gearbox_ratio: 50.0
+    do_excavation: true
 
 
 mini:
@@ -36,13 +38,13 @@ mini:
         p: 5.0
         i: 0.0
         d: 0.0
-        max_speed: 60.0
+        max_output: 0.3
         tolerance: 10.0
       linear:
         p: 3.0
         i: 0.0
         d: 0.0
-        max_speed: 1.0
+        max_output: 0.25
         tolerance: 0.2
 
   differential_drive_controller_node:
@@ -53,7 +55,9 @@ mini:
       max_speed_percentage: 0.8
       wheel_diameter: 0.0528
       width: 0.5588
+      pwm_to_velocity_factor: 1.0
 
   drivetrain_controller_node:
     ros__parameters:
       gearbox_ratio: 10.0
+      do_excavation: false

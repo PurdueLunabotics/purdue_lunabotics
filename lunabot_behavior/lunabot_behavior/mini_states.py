@@ -1,0 +1,208 @@
+#!/usr/bin/env python3
+
+from enum import Enum
+from lunabot_msgs.msg import Event
+from geometry_msgs.msg import PoseStamped
+from lunabot_msgs.msg import Event
+import sys
+
+from lunabot_config.led_colors import LedColor
+
+from lunabot_behavior.states.align_to_berm import AlignToBerm
+from lunabot_behavior.states.find_linkup import FindLinkup, TraverseToMiddle
+from lunabot_behavior.states.handshake import Handshake
+from lunabot_behavior.states.align_to_angle import AlignToAngle
+from lunabot_behavior.states.separate_from_main import SeparateFromMainState
+from lunabot_behavior.states.mini_wait_for_first_main_align import MiniWaitForFirstAlignState
+from lunabot_behavior.states.proceed import Proceed
+from lunabot_behavior.states.traverse_to_berm import TraverseToBerm
+from lunabot_behavior.states.traverse import NoPath, Traverse, Stall
+from lunabot_behavior.states.deposit import Deposit
+from lunabot_behavior.states.approach_berm import ApproachBerm
+from lunabot_behavior.states.retreat_berm import RetreatBerm
+from lunabot_behavior.states.find_linkup_secondary import FindLinkupSecondary
+from lunabot_behavior.states.align_to_main_bot import AlignToMainBotState
+from lunabot_behavior.states.mini_wait_for_main_align import MiniWaitForAlignState
+from lunabot_behavior.states.approach_main import ApproachMainState
+from lunabot_behavior.states.wait_for_main_approach import WaitForMainApproachState
+from lunabot_behavior.states.collect import CollectRegolithState
+from lunabot_behavior.states.wait_for_main_diverge import WaitForMainDivergeState
+from lunabot_behavior.states.init import InitRetreat, SetupMap, SetupObstacles
+from lunabot_behavior.states.fullstop import Stop
+from lunabot_behavior.states.mapping_spin import MappingSpin
+
+from lunabot_behavior.state import Events, State
+from lunabot_behavior.state_manager import StateManager
+
+import rclpy
+
+from lunabot_behavior.states.traverse_to_linkup import TraverseToLinkup
+
+class MiniStates(Enum):
+    STOP = (Stop(), (LedColor.RED, LedColor.GREEN))
+
+    # ===== INIT SECTION (1) =====
+    INIT_MAP = (SetupMap(False), (LedColor.GREEN, LedColor.YELLOW))
+    INIT_WAIT = (State(), (LedColor.GREEN, LedColor.GREEN))
+    INIT_MOVE = (InitRetreat(False, 0.2, 1.7), (LedColor.GREEN, LedColor.TEAL))
+    INIT_STALL = (State(), (LedColor.GREEN, LedColor.RED))
+    INIT_OBSTACLES = (SetupObstacles(False), (LedColor.GREEN, LedColor.BLUE))
+
+    FIRST_CYCLE_SYNC = (Handshake(False, "first_cycle"), (LedColor.GREEN, LedColor.BLUE))
+    FIRST_CYCLE_COLLECT = (CollectRegolithState(), (LedColor.YELLOW, LedColor.MAGENTA))
+
+    GO_TO_MIDDLE = (TraverseToMiddle(), (LedColor.GREEN, LedColor.BLUE))
+    GO_TO_MIDDLE_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
+    GO_TO_MIDDLE_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
+    
+    FIND_LINKUP = (FindLinkup(), (LedColor.GREEN, LedColor.YELLOW))
+
+    CHECKOUT_LINKUP = (TraverseToLinkup(False, False), (LedColor.GREEN, LedColor.GREEN))
+    CHECKOUT_LINKUP_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
+    CHECKOUT_LINKUP_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
+
+    SPIN_MAPPING = (MappingSpin(), (LedColor.GREEN, LedColor.BLUE))
+    SPIN_MAPPING_STALL = (Stall(), (LedColor.GREEN, LedColor.BLUE))
+
+    FIND_LINKUP_AGAIN = (FindLinkup(), (LedColor.GREEN, LedColor.YELLOW))
+
+    LINKUP_HANDSHAKE = (Handshake(False, "linkup"), (LedColor.GREEN, LedColor.BLUE))
+    
+    # ===== LINKUP SECTION (2) =====
+
+    WAIT_FOR_ALIGN_AT_LINKUP = (MiniWaitForFirstAlignState(), (LedColor.YELLOW, LedColor.YELLOW))
+    
+    ALIGN_TO_MAIN = (AlignToMainBotState(), (LedColor.YELLOW, LedColor.GREEN))
+    ALIGN_TO_MAIN_STALL = (State(), (LedColor.YELLOW, LedColor.RED))
+
+    WAIT_FOR_MAIN_ALIGN = (MiniWaitForAlignState(), (LedColor.YELLOW, LedColor.TEAL))
+    
+    WAIT_FOR_MAIN_APPROACH = (WaitForMainApproachState(),(LedColor.YELLOW, LedColor.BLUE))
+
+    COLLECT_REGOLITH = (CollectRegolithState(), (LedColor.YELLOW, LedColor.MAGENTA))
+
+    WAIT_FOR_DIVERGE = (WaitForMainDivergeState(), (LedColor.YELLOW, LedColor.WHITE))
+
+    # ===== TRAVERSAL SECTION (3) =====
+
+    TRAVERSE_TO_BERM = (TraverseToBerm(False), (LedColor.BLUE, LedColor.YELLOW))
+    TRAVERSE_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
+    TRAVERSE_TO_BERM_NO_PATH = (NoPath(), (LedColor.BLUE, LedColor.ORANGE))
+
+    ALIGN_TO_BERM = (AlignToBerm(), (LedColor.BLUE, LedColor.GREEN))
+    ALIGN_TO_BERM_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
+    
+    MOVE_TO_STAGING = (TraverseToLinkup(False, True), (LedColor.BLUE, LedColor.TEAL))
+    MOVE_TO_STAGING_STALL = (Stall(), (LedColor.BLUE, LedColor.RED))
+    MOVE_TO_STAGING_NO_PATH = (NoPath(), (LedColor.BLUE, LedColor.ORANGE))
+    # ===== DEPOSIT SECTION (4) =====
+    
+    APPROACH_BERM = (ApproachBerm(), (LedColor.MAGENTA, LedColor.YELLOW))
+    APPROACH_BERM_STALL = (Stall(), (LedColor.MAGENTA, LedColor.RED))
+    
+    DEPOSIT = (Deposit(is_main=False), (LedColor.MAGENTA, LedColor.GREEN))
+    DEPOSIT_STALL = (State(), (LedColor.MAGENTA, LedColor.RED))
+
+    RETREAT_BERM = (RetreatBerm(), (LedColor.MAGENTA, LedColor.TEAL))
+    RETREAT_BERM_STALL = (Stall(), (LedColor.MAGENTA, LedColor.RED))
+
+    @staticmethod
+    def get_transition(state, event: Events):
+        transitions = {
+            (MiniStates.STOP, Events.SUCCESS): MiniStates.INIT_MAP,
+            
+            (MiniStates.INIT_MAP, Events.SUCCESS): MiniStates.INIT_WAIT,
+            (MiniStates.INIT_WAIT, Events.PROCEED): MiniStates.FIRST_CYCLE_SYNC,
+            (MiniStates.INIT_MOVE, Events.SUCCESS): MiniStates.INIT_OBSTACLES,
+            (MiniStates.INIT_MOVE, Events.STALL): MiniStates.INIT_STALL,
+            (MiniStates.INIT_STALL, Events.SUCCESS): MiniStates.INIT_MOVE,
+            (MiniStates.INIT_OBSTACLES, Events.SUCCESS): MiniStates.GO_TO_MIDDLE,
+
+            (MiniStates.FIRST_CYCLE_SYNC, Events.SUCCESS): MiniStates.FIRST_CYCLE_COLLECT,
+            (MiniStates.FIRST_CYCLE_COLLECT, Events.SUCCESS): MiniStates.INIT_MOVE,
+            
+            
+            (MiniStates.GO_TO_MIDDLE, Events.SUCCESS): MiniStates.FIND_LINKUP,
+            (MiniStates.GO_TO_MIDDLE, Events.STALL): MiniStates.GO_TO_MIDDLE_STALL,
+            (MiniStates.GO_TO_MIDDLE, Events.NO_PATH): MiniStates.GO_TO_MIDDLE_NO_PATH,
+            (MiniStates.GO_TO_MIDDLE_STALL, Events.SUCCESS): MiniStates.GO_TO_MIDDLE,
+            (MiniStates.GO_TO_MIDDLE_NO_PATH, Events.SUCCESS): MiniStates.GO_TO_MIDDLE,
+
+            (MiniStates.FIND_LINKUP, Events.SUCCESS): MiniStates.CHECKOUT_LINKUP,
+
+            (MiniStates.CHECKOUT_LINKUP, Events.SUCCESS): MiniStates.SPIN_MAPPING,
+            (MiniStates.CHECKOUT_LINKUP, Events.STALL): MiniStates.CHECKOUT_LINKUP_STALL,
+            (MiniStates.CHECKOUT_LINKUP, Events.NO_PATH): MiniStates.CHECKOUT_LINKUP_NO_PATH,
+            (MiniStates.CHECKOUT_LINKUP_STALL, Events.SUCCESS): MiniStates.CHECKOUT_LINKUP,
+            (MiniStates.CHECKOUT_LINKUP_NO_PATH, Events.SUCCESS): MiniStates.CHECKOUT_LINKUP,
+
+            (MiniStates.SPIN_MAPPING, Events.SUCCESS): MiniStates.FIND_LINKUP_AGAIN,
+            (MiniStates.SPIN_MAPPING, Events.STALL): MiniStates.SPIN_MAPPING_STALL,
+            (MiniStates.SPIN_MAPPING_STALL, Events.SUCCESS): MiniStates.SPIN_MAPPING,
+
+            (MiniStates.FIND_LINKUP_AGAIN, Events.SUCCESS): MiniStates.LINKUP_HANDSHAKE,
+
+            (MiniStates.LINKUP_HANDSHAKE, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
+
+            (MiniStates.MOVE_TO_STAGING, Events.SUCCESS): MiniStates.WAIT_FOR_ALIGN_AT_LINKUP,
+            (MiniStates.MOVE_TO_STAGING, Events.STALL): MiniStates.MOVE_TO_STAGING_STALL,
+            (MiniStates.MOVE_TO_STAGING, Events.NO_PATH): MiniStates.MOVE_TO_STAGING_NO_PATH,
+            (MiniStates.MOVE_TO_STAGING_STALL, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
+            (MiniStates.MOVE_TO_STAGING_NO_PATH, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
+
+            (MiniStates.WAIT_FOR_ALIGN_AT_LINKUP, Events.SUCCESS): MiniStates.ALIGN_TO_MAIN,
+
+            (MiniStates.ALIGN_TO_MAIN, Events.SUCCESS): MiniStates.WAIT_FOR_MAIN_ALIGN,
+            (MiniStates.ALIGN_TO_MAIN, Events.STALL): MiniStates.ALIGN_TO_MAIN_STALL,
+            (MiniStates.ALIGN_TO_MAIN_STALL, Events.SUCCESS): MiniStates.ALIGN_TO_MAIN,
+
+            (MiniStates.WAIT_FOR_MAIN_ALIGN, Events.SUCCESS): MiniStates.WAIT_FOR_MAIN_APPROACH,
+
+            (MiniStates.WAIT_FOR_MAIN_APPROACH, Events.SUCCESS): MiniStates.COLLECT_REGOLITH,
+            (MiniStates.WAIT_FOR_MAIN_APPROACH, Events.NEED_REALIGN): MiniStates.ALIGN_TO_MAIN,
+            
+            (MiniStates.COLLECT_REGOLITH, Events.SUCCESS): MiniStates.WAIT_FOR_DIVERGE,
+
+            (MiniStates.WAIT_FOR_DIVERGE, Events.SUCCESS): MiniStates.TRAVERSE_TO_BERM,
+
+            (MiniStates.TRAVERSE_TO_BERM, Events.SUCCESS): MiniStates.ALIGN_TO_BERM,
+            (MiniStates.TRAVERSE_TO_BERM, Events.STALL): MiniStates.TRAVERSE_TO_BERM_STALL,
+            (MiniStates.TRAVERSE_TO_BERM, Events.NO_PATH): MiniStates.TRAVERSE_TO_BERM_NO_PATH,
+            (MiniStates.TRAVERSE_TO_BERM_STALL, Events.SUCCESS): MiniStates.TRAVERSE_TO_BERM,
+            (MiniStates.TRAVERSE_TO_BERM_NO_PATH, Events.SUCCESS): MiniStates.TRAVERSE_TO_BERM,
+            
+            (MiniStates.ALIGN_TO_BERM, Events.SUCCESS): MiniStates.APPROACH_BERM,
+            (MiniStates.ALIGN_TO_BERM, Events.STALL): MiniStates.ALIGN_TO_BERM_STALL,
+            (MiniStates.ALIGN_TO_BERM_STALL, Events.SUCCESS): MiniStates.ALIGN_TO_BERM,
+            
+            (MiniStates.APPROACH_BERM, Events.SUCCESS): MiniStates.DEPOSIT,
+            (MiniStates.APPROACH_BERM, Events.STALL): MiniStates.APPROACH_BERM_STALL,
+            (MiniStates.APPROACH_BERM_STALL, Events.SUCCESS): MiniStates.APPROACH_BERM,
+            
+            (MiniStates.DEPOSIT, Events.SUCCESS): MiniStates.RETREAT_BERM,
+            (MiniStates.DEPOSIT, Events.STALL): MiniStates.DEPOSIT_STALL,
+            (MiniStates.DEPOSIT_STALL, Events.SUCCESS): MiniStates.DEPOSIT,
+            
+            (MiniStates.RETREAT_BERM, Events.SUCCESS): MiniStates.MOVE_TO_STAGING,
+            (MiniStates.RETREAT_BERM, Events.STALL): MiniStates.RETREAT_BERM_STALL,
+            (MiniStates.RETREAT_BERM_STALL, Events.SUCCESS): MiniStates.RETREAT_BERM,
+        }
+
+        return transitions.get((state, event), None)
+
+def main():
+    rclpy.init(args=sys.argv, signal_handler_options=rclpy.SignalHandlerOptions.NO)
+
+    manager = StateManager(MiniStates, MiniStates.STOP, Events, Event)
+
+    try:
+        rclpy.spin(manager)
+    except KeyboardInterrupt:
+        manager.stop_current_state()
+    finally:
+        manager.destroy_node()
+        rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()

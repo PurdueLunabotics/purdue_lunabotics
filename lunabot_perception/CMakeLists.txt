@@ -19,10 +19,22 @@ install(DIRECTORY
         launch
         DESTINATION share/${PROJECT_NAME}/)
 
+install(PROGRAMS
+  src/crater_generation.py
+  src/hough.py
+  src/hough_transform.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 # Install C++ files
 install(TARGETS
   DESTINATION lib/${PROJECT_NAME})
 
+install(PROGRAMS
+  scripts/apriltag_combine.py
+  scripts/fallback_pointcloud_node.py
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

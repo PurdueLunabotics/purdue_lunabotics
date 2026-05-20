@@ -1,4 +1,8 @@
+#include "StepperLib.hpp"
+#include "interfaces.hpp"
 #include <robot.hpp>
+#include "main.hpp"
+
 
 // sensor wire documentation 2022-2023:
 // https://docs.google.com/spreadsheets/d/1eX79YtawJqBA8VePFFtKJT6RR21gvK4qH1DKJX_vJE0/edit#gid=0
@@ -11,24 +15,35 @@ namespace actuation {
 
 Sabertooth_MotorCtrl act_right_mtr{&MC1, STMotor::M1};
 Sabertooth_MotorCtrl act_left_mtr{&MC1, STMotor::M2};
+Encoder_Bus enc_bus;
 
-constexpr uint8_t ACT_RIGHT_CURR_MUX = 0;
-constexpr uint8_t ACT_LEFT_CURR_MUX = 2;
+constexpr uint8_t ACT_RIGHT_CURR_MUX = 2;
+// constexpr uint8_t ACT_LEFT_CURR_MUX = 1;
 
-void update(float &act_right_curr) {
+void update(float &act_right_curr, int32_t &lin_enc_0, int32_t &lin_enc_1) {
   act_right_curr = ADS1119_Current_Bus::read(ACT_RIGHT_CURR_MUX);
+  //act_right_curr = -1;
+  lin_enc_0 = enc_bus.read(0);
+  lin_enc_1 = enc_bus.read(1);
 }
 
-void cb(int8_t lin_act_volt) {
+void cb(int8_t lin_act_volt, uint8_t should_zero_act_pos, uint8_t is_top) {
   act_left_mtr.write(-lin_act_volt);
   act_right_mtr.write(lin_act_volt);
+  if (should_zero_act_pos) { // maybe need an argument to specify the actuator
+    if (is_top) {
+        enc_bus.init(1); // zeros the actuator position (TOP)
+    }
+    enc_bus.init(0); // zeros the actuator position (BOTTOM)
+  }
 }
 
 } // namespace actuation
 
 namespace drivetrain {
-StepperMotor left_drive_mtr(LEFT_DRIVE_MOTOR_ID);
-StepperMotor right_drive_mtr(RIGHT_DRIVE_MOTOR_ID);
+
+StepperMotor left_drive_mtr(LEFT_DRIVE_MOTOR_ID, LEFT_DRIVE_MOTOR_TYPE, LEFT_DRIVE_MOTOR_DIR_PIN);
+StepperMotor right_drive_mtr(RIGHT_DRIVE_MOTOR_ID, RIGHT_DRIVE_MOTOR_TYPE, RIGHT_DRIVE_MOTOR_DIR_PIN);
 
 void begin() {
   left_drive_mtr.begin();
@@ -36,8 +51,11 @@ void begin() {
 }
 
 void update(float &left_curr, float &right_curr, float &left_torque, float &right_torque, float &left_vel, float &right_vel) {
-  left_curr = -1 * left_drive_mtr.read_current();
-  right_curr = right_drive_mtr.read_current();
+  // left_curr = -1 * left_drive_mtr.read_current();
+  //right_curr = right_drive_mtr.read_current();
+  #pragma message "hi"
+  left_curr = ADS1119_Current_Bus::read(2) + 0.47;
+  right_curr = ADS1119_Current_Bus::read(1) - 10.93;
   left_torque = -1 * left_drive_mtr.read_torque(); // -100; // left_drive_mtr.read_motor_position_radians();
   right_torque = right_drive_mtr.read_torque(); // ; // right_drive_mtr.read_motor_position_radians();
   left_vel = left_drive_mtr.read_velocity();
@@ -63,38 +81,17 @@ void cb(int32_t left_drive_rpm, int32_t right_drive_rpm, bool should_reset) {
   }
 }
 
+
 } // namespace drivetrain
 
-namespace uwb {
-void update(float &d0, float &d1, float &d2) {
-  d0 = M5Stack_UWB_Trncvr::read_uwb(0);
-  d1 = M5Stack_UWB_Trncvr::read_uwb(1);
-  d2 = M5Stack_UWB_Trncvr::read_uwb(2);
-}
-} // namespace uwb
-
-namespace load_cell {
-void update(float &d0) {
-  float val1 = HX711_Bus::read_scale(0);
-  float val2 = HX711_Bus::read_scale(1);
-  if (val1 != -1 && val2 != -1) {
-    d0 = val1 + val2;
-  } else if (val1 != -1) {
-    d0 = val1;
-  } else if (val2 != -1) {
-    d0 = val2;
-  }
-}
-} // namespace load_cell
-
 namespace LEDs {
-  void cb(int32_t color) {
-    Led_Strip::set_color(color);
+  void cb(int32_t color, uint8_t counter) {
+    Led_Strip::set_color(color, counter);
   }
 }
 
 namespace excavation {
-StepperMotor exc_mtr(EXC_MOTOR_ID);
+StepperMotor exc_mtr(EXC_MOTOR_ID, EXC_MOTOR_TYPE);
 
 void begin() {
   exc_mtr.begin();
@@ -120,7 +117,7 @@ void cb(int32_t speed_rpm, bool should_reset) {
 } // namespace excavation
 
 namespace deposition {
-StepperMotor dep_mtr(DEP_MOTOR_ID);
+StepperMotor dep_mtr(DEP_MOTOR_ID, DEP_MOTOR_TYPE, DEP_MOTOR_DIR_PIN); //address on the i2c pwm generator
 
 void begin() {
   dep_mtr.begin();
@@ -134,12 +131,15 @@ float update_curr() {
   return dep_mtr.read_current();
 }
 
-void cb(int32_t speed_rpm, bool should_reset) {
+void cb(int32_t speed_rpm, int32_t servo_pos, bool should_reset) {
   if (should_reset) {
     dep_mtr.clear_errors();
   } else {
     dep_mtr.move_at_speed(-speed_rpm);
   }
+  pwm_servo.setPWM(8, 0, servo_pos);
+  pwm_servo.setPWM(9, 0, 750 - servo_pos);
+
 }
 
 } // namespace deposition

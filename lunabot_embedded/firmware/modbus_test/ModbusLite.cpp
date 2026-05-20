@@ -29,7 +29,7 @@ void modbus_begin() {
     serial_has_started = true;
     pinMode(RS485_TX_CONTROL, OUTPUT);
     digitalWrite(RS485_TX_CONTROL, RS485Receive); // Init Transceiver
-    RS485Serial.begin(19200, SERIAL_8N1);
+    RS485Serial.begin(57600, SERIAL_8N1);
   }
 }
 
@@ -47,11 +47,11 @@ void print_hex_buffer(uint8_t *buf, int len) {
 // returns size of data read
 int modbus_send_rcv(uint8_t *buf_to_send, int len_to_send, uint8_t *buf_to_recv) {
   digitalWrite(RS485_TX_CONTROL, RS485Transmit); // Enable RS485 Transmit
-  delay(10);                                     // Wait for transmit aquired
+  delayMicroseconds(2000);                                     // Wait for transmit aquired
   RS485Serial.write(buf_to_send, len_to_send);   // Send data
   RS485Serial.flush();                           // Wait for data to send
   digitalWrite(RS485_TX_CONTROL, RS485Receive);  // Disable RS485 Transmit
-  delay(10);                                     // Wait for data to come back in
+  delayMicroseconds(5000);                       // Wait for data to come back in
 
   int recv_size = 0;
   while (RS485Serial.available()) {
@@ -92,7 +92,11 @@ int modbus_read_register(uint8_t ID, uint16_t addr, uint16_t num_to_read) {
 
   if (num_to_read == 1) {
     if (recv_size == 9) { // start + stop bits (2), device addr, func code, number of data bits, DATA [2], crc (2)
+      // ISV2 motors
       return buf_to_recv[4] * 0x100 + buf_to_recv[5];
+    } else if (recv_size == 8) {
+      // BLD motor controller
+      return buf_to_recv[3] * 0x100 + buf_to_recv[4];
     } else {
       Serial.print("Error reading from single register - size mismatch. ");
       Serial.println(recv_size);
