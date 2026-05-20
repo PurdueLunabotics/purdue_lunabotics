@@ -52,6 +52,17 @@ class MainStates(Enum):
 
     INIT_RAISE = (Raise(run_exc=False), (LedColor.GREEN, LedColor.TEAL))
 
+    FIRST_CYCLE_PLUNGE = (Plunge(), (LedColor.GREEN, LedColor.TEAL))
+    FIRST_CYCLE_PLUNGE_STALL = (Stall(), (LedColor.GREEN, LedColor.TEAL))
+
+    FIRST_CYCLE_RAISE = (Raise(), (LedColor.GREEN, LedColor.TEAL))
+    FIRST_CYCLE_RAISE_STALL = (Stall(), (LedColor.GREEN, LedColor.TEAL))
+
+    FIRST_CYCLE_SYNC = (Handshake(True, "first_cycle"), (LedColor.GREEN, LedColor.TEAL)),
+
+    FIRST_CYCLE_DEPOSIT = (Deposit(transfer=True), (LedColor.YELLOW, LedColor.MAGENTA))
+    FIRST_CYCLE_DEPOSIT_STALL = (Stall(), (LedColor.YELLOW, LedColor.RED))
+
     INIT_MOVE = (InitRetreat(True, 0.1, 5.0), (LedColor.GREEN, LedColor.TEAL))
     INIT_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
     INIT_OBSTACLES = (SetupObstacles(True), (LedColor.GREEN, LedColor.BLUE))
@@ -153,7 +164,18 @@ class MainStates(Enum):
             (MainStates.INIT_OBSTACLES, Events.SUCCESS): MainStates.INIT_WAIT,
             (MainStates.INIT_WAIT, Events.PROCEED): MainStates.INIT_RAISE,
 
-            (MainStates.INIT_RAISE, Events.SUCCESS): MainStates.INIT_MOVE,
+            (MainStates.INIT_RAISE, Events.SUCCESS): MainStates.FIRST_CYCLE_PLUNGE,
+
+            (MainStates.FIRST_CYCLE_PLUNGE, Events.SUCCESS): MainStates.FIRST_CYCLE_RAISE,
+            (MainStates.FIRST_CYCLE_PLUNGE, Events.STALL): MainStates.FIRST_CYCLE_PLUNGE_STALL,
+            (MainStates.FIRST_CYCLE_PLUNGE_STALL, Events.SUCCESS): MainStates.FIRST_CYCLE_PLUNGE,
+
+            (MainStates.FIRST_CYCLE_RAISE, Events.SUCCESS): MainStates.FIRST_CYCLE_SYNC,
+            (MainStates.FIRST_CYCLE_RAISE, Events.STALL): MainStates.FIRST_CYCLE_RAISE_STALL,
+            (MainStates.FIRST_CYCLE_RAISE_STALL, Events.SUCCESS): MainStates.FIRST_CYCLE_RAISE,
+
+            (MainStates.FIRST_CYCLE_SYNC, Events.SUCCESS): MainStates.FIRST_CYCLE_DEPOSIT,
+            (MainStates.FIRST_CYCLE_DEPOSIT, Events.SUCCESS): MainStates.INIT_MOVE,
             
             (MainStates.INIT_MOVE, Events.SUCCESS_AND_DONT_MINE): MainStates.WAIT_FOR_MINI_GONE,
             (MainStates.INIT_MOVE, Events.SUCCESS): MainStates.STARTING_PLUNGE,

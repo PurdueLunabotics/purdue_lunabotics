@@ -48,6 +48,9 @@ class MiniStates(Enum):
     INIT_STALL = (State(), (LedColor.GREEN, LedColor.RED))
     INIT_OBSTACLES = (SetupObstacles(False), (LedColor.GREEN, LedColor.BLUE))
 
+    FIRST_CYCLE_SYNC = (Handshake(False, "first_cycle"), (LedColor.GREEN, LedColor.BLUE))
+    FIRST_CYCLE_COLLECT = (CollectRegolithState(), (LedColor.YELLOW, LedColor.MAGENTA))
+
     GO_TO_MIDDLE = (TraverseToMiddle(), (LedColor.GREEN, LedColor.BLUE))
     GO_TO_MIDDLE_STALL = (Stall(), (LedColor.GREEN, LedColor.RED))
     GO_TO_MIDDLE_NO_PATH = (NoPath(), (LedColor.GREEN, LedColor.ORANGE))
@@ -109,11 +112,14 @@ class MiniStates(Enum):
             (MiniStates.STOP, Events.SUCCESS): MiniStates.INIT_MAP,
             
             (MiniStates.INIT_MAP, Events.SUCCESS): MiniStates.INIT_WAIT,
-            (MiniStates.INIT_WAIT, Events.PROCEED): MiniStates.INIT_MOVE,
+            (MiniStates.INIT_WAIT, Events.PROCEED): MiniStates.FIRST_CYCLE_SYNC,
             (MiniStates.INIT_MOVE, Events.SUCCESS): MiniStates.INIT_OBSTACLES,
             (MiniStates.INIT_MOVE, Events.STALL): MiniStates.INIT_STALL,
             (MiniStates.INIT_STALL, Events.SUCCESS): MiniStates.INIT_MOVE,
             (MiniStates.INIT_OBSTACLES, Events.SUCCESS): MiniStates.GO_TO_MIDDLE,
+
+            (MiniStates.FIRST_CYCLE_SYNC, Events.SUCCESS): MiniStates.FIRST_CYCLE_COLLECT,
+            (MiniStates.FIRST_CYCLE_COLLECT, Events.SUCCESS): MiniStates.INIT_MOVE,
             
             
             (MiniStates.GO_TO_MIDDLE, Events.SUCCESS): MiniStates.FIND_LINKUP,
