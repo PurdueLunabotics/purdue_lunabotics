@@ -41,6 +41,6 @@ class MiniWaitForAlignState(State):
         
         self.offset_publisher.publish(self.transform)
 
-    def exit(self):
+    def exit(self, event):
         # delete the transform so it's not reused
         self.transform = None

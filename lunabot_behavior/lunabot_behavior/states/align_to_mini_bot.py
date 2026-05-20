@@ -33,17 +33,17 @@ class AlignToMiniBotState(State):
     self.node: Node = None
 
     # PID for angular alignment
-    self.P = 7
-    self.I = 0
+    self.P = 5
+    self.I = 0.01
     self.D = 1
-    self.max_output = 1
+    self.max_output = np.deg2rad(15)
 
     self.last_error = None
     self.total_error = 0
     self.last_time = None
 
     # in rad, how aligned before it returns success
-    self.ANGULAR_ALIGN_THRESHOLD = 0.05
+    self.ANGULAR_ALIGN_THRESHOLD = 0.03
     # how many times we have been well aligned
     self.success_count = 0
     # how many times in a row before we're sure
@@ -105,6 +105,7 @@ class AlignToMiniBotState(State):
         mini_in_apriltag_frame.orientation.w = self.mini_transform_offset.transform.rotation.w
 
         self.mini_pose = do_transform_pose(mini_in_apriltag_frame, transform)
+        self.resetPID()
       except Exception as e:
         # pass
         print("waiting for transform", e)
@@ -214,7 +215,7 @@ class AlignToMiniBotState(State):
     marker.action = Marker.DELETE
     self.visual_publisher.publish(marker)
   
-  def exit(self):
+  def exit(self, event):
     # stop moving
     self.cmd_vel_publisher.publish(Twist())
 

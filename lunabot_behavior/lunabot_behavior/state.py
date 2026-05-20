@@ -7,6 +7,8 @@ class Events(Enum):
     # Interal
     SUCCESS = Event.SUCCESS
     FAIL = Event.FAIL
+    SUCCESS_AND_DONT_MINE = Event.SUCCESS_AND_DONT_MINE
+    NEED_REALIGN = Event.NEED_REALIGN
 
     # External
     STALL = Event.STALL
@@ -25,5 +27,5 @@ class State:
     def periodic(self) -> None | Events:
         return None
 
-    def exit(self):
+    def exit(self, event):
         pass

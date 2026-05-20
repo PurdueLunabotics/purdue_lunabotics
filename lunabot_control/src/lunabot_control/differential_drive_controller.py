@@ -22,6 +22,7 @@ class DifferentialDriveController(Node):
         self.declare_parameter("max_speed", 1000)
         self.declare_parameter("wheel_diameter", 0.3429)
         self.declare_parameter("gearbox_ratio", 50.0)
+        self.declare_parameter("pwm_to_velocity_factor", 1.0) 
 
         self.autonomy = True
         self._autonomy_sub = self.create_subscription(Bool, "autonomy", self._autonomy_cb, 1)
@@ -51,6 +52,8 @@ class DifferentialDriveController(Node):
 
         self.left_error_sum = 0
         self.right_error_sum = 0
+
+        self.pwm_to_velocity_factor = self.get_parameter("pwm_to_velocity_factor").get_parameter_value().double_value
 
         # Variables for PIDF Velocity Control
 
@@ -114,8 +117,7 @@ class DifferentialDriveController(Node):
         self.get_logger().info("Differential Drive Controller: Stopping")
         
     def meters_per_sec_to_rpm(self, vel):
-        return vel * 60 / np.pi / self._wheel_diameter * self._gearbox_ratio
-
+        return vel * 60 * self.pwm_to_velocity_factor / np.pi / self._wheel_diameter * self._gearbox_ratio
 
 def spin_in_background():
     executor = rclpy.get_global_executor()

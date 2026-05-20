@@ -15,7 +15,11 @@ from typing import Literal
 import numpy as np
 import math
 
-DEPOSITION_APRILTAG_ID = 173
+# change for sim
+# sim apriltag - 368
+# irl tag - 126
+DEPOSITION_APRILTAG_ID = 126
+MINI_DEP_APRILTAG_ID = 173
 
 class ApproachMainState(State):
   def __init__(self):
@@ -32,7 +36,7 @@ class ApproachMainState(State):
 
     # PID for linear alignment
     self.P = 1
-    self.I = 0
+    self.I = 0.001
     self.D = 0
 
     self.last_error = None
@@ -52,6 +56,10 @@ class ApproachMainState(State):
     self.success_count = 0
     # how many times in a row before we're sure
     self.SUCCESS_THRESHOLD = 30
+
+    self.MAX_SPEED = 0.10
+
+    self.TIMEOUT_TIME = 30 # in seconds, how long until we give up
 
   def setup(self, manager: Node):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "/mini/cmd_vel", 10)
@@ -86,14 +94,29 @@ class ApproachMainState(State):
     self.resetPID()
     self.lost_count = 0
     self.success_count = 0
+
+    self.start_time = self.node.get_clock().now()
   
   def periodic(self):
 
-    if (self.isApriltagPresent()):
+    elapsed_time = self.node.get_clock().now() - self.start_time
+    elapsed_time = elapsed_time.nanoseconds / 1_000_000_000  # convert to seconds
+
+    if (elapsed_time > self.TIMEOUT_TIME):
+      # if we timeout, return success
+      self.remove_marker()
+      self.publish_aligned_msg()
+      return Events.SUCCESS
+
+    apriltag_present, detections = self.isApriltagPresent()
+    if (apriltag_present):
         # print(self.apriltag_detections)
 
         try:
-            apriltag_in_camera_frame = self.tf_buffer.lookup_transform("mini/d455_back_rgb_link", "main_deposition", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
+            if (DEPOSITION_APRILTAG_ID in detections): # prioritize big tag
+              apriltag_in_camera_frame = self.tf_buffer.lookup_transform("mini/d455_back_rgb_link", "main_deposition", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
+            else:
+              apriltag_in_camera_frame = self.tf_buffer.lookup_transform("mini/d455_back_rgb_link", "main_deposition_small", rclpy.time.Time(seconds=0), Duration(nanoseconds=500_000))
 
             distance = apriltag_in_camera_frame.transform.translation.z 
 
@@ -110,7 +133,7 @@ class ApproachMainState(State):
                 return Events.SUCCESS
             
             velocity = self.runPID(error)
-            velocity = max(-0.2, min(velocity, 0.2))
+            velocity = np.clip(velocity, -self.MAX_SPEED, self.MAX_SPEED)
             self.publish_linear_velocity(velocity)
 
         except Exception as e:
@@ -130,12 +153,19 @@ class ApproachMainState(State):
   
   def isApriltagPresent(self):
     apriltag_present = False
+
+    detections = []
+
     if (self.apriltag_detections != None):
       for detection in self.apriltag_detections.detections:
-        if (detection.id == DEPOSITION_APRILTAG_ID):
-          apriltag_present = True
 
-    return apriltag_present
+        if (detection.id == DEPOSITION_APRILTAG_ID or detection.id == MINI_DEP_APRILTAG_ID):
+          apriltag_present = True
+          
+          if (detection.id not in detections):
+            detections.append(detection.id)
+
+    return apriltag_present, detections
   
   def runPID(self, error: float):
 
@@ -211,7 +241,7 @@ class ApproachMainState(State):
     self.visual_publisher.publish(marker)
 
   
-  def exit(self):
+  def exit(self, event):
     # stop moving
     self.cmd_vel_publisher.publish(Twist())
 

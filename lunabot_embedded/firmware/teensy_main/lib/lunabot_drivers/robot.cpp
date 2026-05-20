@@ -17,12 +17,12 @@ Sabertooth_MotorCtrl act_right_mtr{&MC1, STMotor::M1};
 Sabertooth_MotorCtrl act_left_mtr{&MC1, STMotor::M2};
 Encoder_Bus enc_bus;
 
-constexpr uint8_t ACT_RIGHT_CURR_MUX = 0;
-constexpr uint8_t ACT_LEFT_CURR_MUX = 2;
+constexpr uint8_t ACT_RIGHT_CURR_MUX = 2;
+// constexpr uint8_t ACT_LEFT_CURR_MUX = 1;
 
 void update(float &act_right_curr, int32_t &lin_enc_0, int32_t &lin_enc_1) {
-  //act_right_curr = ADS1119_Current_Bus::read(ACT_RIGHT_CURR_MUX);
-  act_right_curr = -1;
+  act_right_curr = ADS1119_Current_Bus::read(ACT_RIGHT_CURR_MUX);
+  //act_right_curr = -1;
   lin_enc_0 = enc_bus.read(0);
   lin_enc_1 = enc_bus.read(1);
 }
@@ -51,8 +51,11 @@ void begin() {
 }
 
 void update(float &left_curr, float &right_curr, float &left_torque, float &right_torque, float &left_vel, float &right_vel) {
-  left_curr = -1 * left_drive_mtr.read_current();
-  right_curr = right_drive_mtr.read_current();
+  // left_curr = -1 * left_drive_mtr.read_current();
+  //right_curr = right_drive_mtr.read_current();
+  #pragma message "hi"
+  left_curr = ADS1119_Current_Bus::read(2) + 0.47;
+  right_curr = ADS1119_Current_Bus::read(1) - 10.93;
   left_torque = -1 * left_drive_mtr.read_torque(); // -100; // left_drive_mtr.read_motor_position_radians();
   right_torque = right_drive_mtr.read_torque(); // ; // right_drive_mtr.read_motor_position_radians();
   left_vel = left_drive_mtr.read_velocity();

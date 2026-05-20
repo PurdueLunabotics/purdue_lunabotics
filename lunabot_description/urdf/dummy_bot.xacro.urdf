@@ -264,25 +264,61 @@
     <visual>
       <origin rpy="1.57 0 1.57" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://lunabot_sim/models/apriltag_dae/apriltag.dae" scale="0.1524 0.1524 1"/>
+        <mesh filename="package://lunabot_sim/models/apriltag_126_dae/apriltag_126.dae" scale="0.12 0.12 1"/>
       </geometry>
     </visual>
-
   </link> 
 
+  <!-- Small Deposition Apriltag -->
+  <link name="deposition_apriltag_small_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.1"/>
+      <inertia 
+        ixx="0.001" 
+        ixy="0.000" 
+        ixz="0.000"
+        iyy="0.001"
+        iyz="0.000"
+        izz="0.001"
+      />
+    </inertial>
+
+    <visual>
+      <origin rpy="1.57 0 1.57" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://lunabot_sim/models/apriltag_173_dae/apriltag_173.dae" scale="0.025 0.025 1"/>
+      </geometry>
+    </visual>
+  </link> 
 
   <joint name="deposition_apriltag_joint" type="fixed">
-    <origin rpy="0.0 -0.34 3.14" xyz="-0.381 0.0 0.55"/>
+    <origin rpy="0.0 -0.35 3.14" xyz="-0.42 -0.02 0.51"/>
     <parent link="base_link"/>
     <child link="deposition_apriltag_link"/>
   </joint>
 
+  <joint name="deposition_apriltag_small_joint" type="fixed">
+    <origin rpy="0.0 -0.35 3.14" xyz="-0.42 0.09 0.51"/>
+    <parent link="base_link"/>
+    <child link="deposition_apriltag_small_link"/>
+  </joint>
+
   <link name="deposition_apriltag_optical_frame"></link>
+
+  <link name="deposition_apriltag_small_optical_frame"></link>
 
   <joint name="deposition_apriltag_optical_joint" type="fixed">
     <origin rpy="1.57 0.0 1.57" xyz="0.0 0.0 0.0"/>
     <parent link="deposition_apriltag_link"/>
     <child link="deposition_apriltag_optical_frame"/>
+  </joint>
+
+
+  <joint name="deposition_apriltag_small_optical_joint" type="fixed">
+    <origin rpy="1.57 0.0 1.57" xyz="0.0 0.0 0.0"/>
+    <parent link="deposition_apriltag_small_link"/>
+    <child link="deposition_apriltag_small_optical_frame"/>
   </joint>
   
   <!-- Back Camera -->
@@ -319,7 +355,7 @@
   </link>  
 
   <joint name="d455_back_joint" type="fixed">
-    <origin rpy="${pi} 0.7 ${pi}" xyz="-0.44 0.0 0.65"/>
+    <origin rpy="${pi} 0.7 ${pi}" xyz="-0.44 0.02 0.63"/>
     <parent link="base_link"/>
     <child link="d455_back_link"/>
     <axis xyz="0 0 1"/>
@@ -425,7 +461,7 @@
   </link>  
 
   <joint name="d455_front_joint" type="fixed">
-    <origin rpy="${pi} ${-0.55 + pi} 0" xyz="0.3 -0.17 0.0"/>
+    <origin rpy="0 ${-0.663 + pi} 0" xyz="0.3 0.0 -0.15"/>
     <parent link="excavation"/>
     <child link="d455_front_link"/>
     <axis xyz="0 0 1"/>

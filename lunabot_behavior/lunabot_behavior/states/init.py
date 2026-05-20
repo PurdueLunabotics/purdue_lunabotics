@@ -1,11 +1,19 @@
 from rclpy.time import Duration
+from sensor_msgs.msg import PointCloud2
+from sensor_msgs_py import point_cloud2
+from std_msgs.msg import Bool, Header
 from std_msgs.msg import Bool
-from tf2_ros import Time, TransformBroadcaster, TransformListener, Buffer
+from tf2_ros import Time, TransformBroadcaster, TransformListener, Buffer, TransformStamped
+from lunabot_behavior import zones
 from lunabot_behavior.state import Events, State
+from lunabot_behavior.zones import bounding_box
 from apriltag_msgs.msg import AprilTagDetectionArray, AprilTagDetection
 from std_srvs.srv import Empty
 from enum import Enum, auto
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import PoseStamped, Twist
+import numpy as np
+import tf2_geometry_msgs
+import tf_transformations
 
 class Direction(Enum):
   NORTH = auto()
@@ -14,6 +22,25 @@ class Direction(Enum):
   WEST = auto()
 
 direction = None
+
+# sim id - 368
+# irl id = 173
+INIT_TAG_ID_1 = 173
+INIT_TAG_ID_2 = 301
+
+def tf_to_matrix(tf: TransformStamped):
+  translation = tf_transformations.translation_matrix([
+    tf.transform.translation.x,
+    tf.transform.translation.y,
+    tf.transform.translation.z,
+  ])
+  rotation = tf_transformations.quaternion_matrix([
+    tf.transform.rotation.x,
+    tf.transform.rotation.y,
+    tf.transform.rotation.z,
+    tf.transform.rotation.w,
+  ])
+  return tf_transformations.concatenate_matrices(translation, rotation)
 
 class SetupMap(State):
   def __init__(self, is_main: bool):
@@ -37,56 +64,146 @@ class SetupMap(State):
     self.tf_buf = Buffer()
     self.tf_listener = TransformListener(self.tf_buf, self.manager)
     self.tf_broadcaster = TransformBroadcaster(self.manager)
+    self.has_reset = False
 
   def tag_cb(self, detections: AprilTagDetectionArray):
     global direction
     self.detections[detections.header.frame_id] = detections
     if "mini/d455_front" in detections.header.frame_id and len(detections.detections) > 0:
-      direction = Direction.NORTH if detections.detections[0].id == 11 else Direction.EAST
-    elif "mini/d455_back" in detections.header.frame_id  and any(detection.id == 173 for detection in detections.detections):
+      direction = Direction.NORTH if detections.detections[0].id == INIT_TAG_ID_2 else Direction.EAST
+    elif "mini/d455_back" in detections.header.frame_id  and any(detection.id == INIT_TAG_ID_1 for detection in detections.detections):
       self.can_see_main_bot = True
     elif "d455_front" in detections.header.frame_id and len(detections.detections) > 0:
-      direction = Direction.SOUTH if detections.detections[0].id == 11 else Direction.WEST
+      direction = Direction.SOUTH if detections.detections[0].id == INIT_TAG_ID_2 else Direction.WEST
 
   def periodic(self):
     self.manager.get_logger().info(f"SetupMap: can see main: {self.can_see_main_bot}, dir: {direction}")
     if self.can_see_main_bot and self.is_main and (direction == Direction.NORTH or direction == Direction.EAST):
       mini_detections = self.detections["mini/d455_front_color_optical_frame"]
-      mini_detections.header.frame_id = "deposition_apriltag_optical_frame"
+      # mini_detections = self.detections["mini/d455_front_rgb_link"]  # for sim
+      mini_detections.header.frame_id = "deposition_apriltag_small_optical_frame"
       try:
-        main_to_tag = self.tf_buf.lookup_transform("main_deposition", "tag36h11:107" if direction == Direction.EAST else "tag36h11:111", Time())
-        main_to_tag.header.frame_id = "deposition_apriltag_optical_frame"
-        main_to_tag.child_frame_id = "tag36h11:7" if direction == Direction.EAST else "tag36h11:11"
+        main_to_tag = self.tf_buf.lookup_transform("main_deposition_small", "tag36h11:582" if direction == Direction.EAST else "tag36h11:401", Time())
+        main_to_tag.header.frame_id = "deposition_apriltag_small_optical_frame"
+        main_to_tag.child_frame_id = "tag36h11:482" if direction == Direction.EAST else "tag36h11:301"
+        main_to_tag.header.stamp = self.manager.get_clock().now().to_msg()
         self.tf_broadcaster.sendTransform(main_to_tag)
         self.detections_pub.publish(mini_detections)
       except Exception as e:
         self.manager.get_logger().warn(f"failed to send detection: {e}")
         self.ready_time = None
+
     if self.can_see_main_bot and not self.is_main and (direction == Direction.SOUTH or direction == Direction.WEST):
       main_detections = self.detections["d455_front_color_optical_frame"]
-      main_detections.header.frame_id = "main_deposition"
+      main_detections.header.frame_id = "main_deposition_small"
       main_detections.detections[0].id += 100
       try:
-        main_to_tag = self.tf_buf.lookup_transform("deposition_apriltag_optical_frame", "tag36h11:7" if direction == Direction.WEST else "tag36h11:11", Time())
-        main_to_tag.header.frame_id = "main_deposition"
-        main_to_tag.child_frame_id = "tag36h11:107" if direction == Direction.WEST else "tag36h11:111"
+        main_to_tag = self.tf_buf.lookup_transform("deposition_apriltag_small_optical_frame", "tag36h11:482" if direction == Direction.WEST else "tag36h11:301", Time())
+        main_to_tag.header.frame_id = "main_deposition_small"
+        main_to_tag.child_frame_id = "tag36h11:582" if direction == Direction.WEST else "tag36h11:401"
+        main_to_tag.header.stamp = self.manager.get_clock().now().to_msg()
         self.tf_broadcaster.sendTransform(main_to_tag)
         self.detections_pub.publish(main_detections)
       except Exception as e:
         self.manager.get_logger().warn(f"failed to send detection: {e}")
         self.ready_time = None
+
     if not self.can_see_main_bot:
       self.ready_time = None
+
     elif self.ready_time is None:
       self.ready_time = self.manager.get_clock().now()
 
-    if self.ready_time is not None and self.manager.get_clock().now() - self.ready_time > Duration(seconds=10):
+    if self.ready_time is not None and self.manager.get_clock().now() - self.ready_time > Duration(seconds=2) and not self.has_reset:
+      self.manager.get_logger().info("sending map reset")
       self.trigger_new_map_srv.call_async(Empty.Request())
+      self.has_reset = True
+
+    if self.ready_time is not None and self.manager.get_clock().now() - self.ready_time > Duration(seconds=10):
       return Events.SUCCESS
 
-class InitRetreat(State):
+class SetupObstacles(State):
   def __init__(self, is_main: bool):
     self.is_main = is_main
+
+  def setup(self, manager):
+    self.manager = manager
+    ns = manager.get_namespace().lstrip('/')
+    if len(ns) != 0:
+        ns = ns + '/';
+    self.frame = f"{ns}map"
+    self.manager.get_logger().info(f"frame: {self.frame}")
+    self.obstacle_pub = manager.create_publisher(PointCloud2, "obstacle", 10)
+
+    self.tf_buf = Buffer()
+    self.tf_listener = TransformListener(self.tf_buf, self.manager)
+    self.tf_broadcaster = TransformBroadcaster(self.manager)
+    self.has_reset = False
+    self.attempts = 0
+
+  def periodic(self):
+    points = []
+
+    for y in np.arange(bounding_box[1], bounding_box[3], 0.03):
+      points.append([bounding_box[0], y, 0])
+      points.append([bounding_box[2], y, 0])
+
+    for x in np.arange(bounding_box[0], bounding_box[2], 0.03):
+      points.append([x, bounding_box[1], 0])
+      points.append([x, bounding_box[3], 0])
+
+    berm_box = zones.zone_to_poly(zones.berm_zone).bounds
+
+    for y in np.arange(berm_box[1], berm_box[3], 0.03):
+      points.append([berm_box[0], y, 0])
+      points.append([berm_box[2], y, 0])
+
+    for x in np.arange(berm_box[0], berm_box[2], 0.03):
+      points.append([x, berm_box[1], 0])
+      points.append([x, berm_box[3], 0])
+
+    if self.is_main:
+      cloud = point_cloud2.create_cloud_xyz32(Header(frame_id=self.frame, stamp=self.manager.get_clock().now().to_msg()), points)
+      self.obstacle_pub.publish(cloud)
+      return Events.SUCCESS
+    else:
+      try:
+        map_to_main_tag_tf = tf_to_matrix(self.tf_buf.lookup_transform("mini/map", "main_deposition", Time()))
+        main_tag_to_base_tf = tf_to_matrix(self.tf_buf.lookup_transform("deposition_apriltag_optical_frame", "base_link", Time()))
+        tf_matrix = tf_transformations.concatenate_matrices(map_to_main_tag_tf, main_tag_to_base_tf)
+
+        WIDTH = 0.8
+        LENGTH = 0.5
+
+        point = np.zeros(4)
+        point[3] = 1.0
+
+        for y in np.arange(-LENGTH/2, LENGTH/2, 0.03):
+          for x in np.arange(-WIDTH/2, WIDTH/2, 0.03):
+            point[0] = x
+            point[1] = y
+            new_point = tf_matrix @ point
+            points.append([new_point[0], new_point[1], 0])
+
+        cloud = point_cloud2.create_cloud_xyz32(Header(frame_id="mini/map", stamp=self.manager.get_clock().now().to_msg()), points)
+        self.obstacle_pub.publish(cloud)
+
+        return Events.SUCCESS
+      except Exception as e:
+        self.manager.get_logger().warn(f"Failed to lookup transform: {e}")
+      finally:
+        self.attempts += 1
+
+    if self.attempts >= 5:
+      return Events.SUCCESS
+
+    return None
+
+class InitRetreat(State):
+  def __init__(self, is_main: bool, speed: float, duration: float):
+    self.is_main = is_main
+    self.speed = speed
+    self.duration = duration
 
   def setup(self, manager):
     self.manager = manager
@@ -94,6 +211,8 @@ class InitRetreat(State):
     self.ready_pub = manager.create_publisher(Bool, "/init/ready", 10)
     self.ready_sub = manager.create_subscription(Bool, "/init/ready", self.ready_cb, 10)
     self.ready = False
+    self.stalled = False
+    self.elapsed = 0
 
   def ready_cb(self, ready: Bool):
     self.ready = ready.data
@@ -102,17 +221,34 @@ class InitRetreat(State):
     self.is_moving = (self.is_main and (direction == Direction.NORTH or direction == Direction.EAST)) or\
       (not self.is_main and (direction == Direction.SOUTH or direction == Direction.WEST))
     self.starting_time = self.manager.get_clock().now()
+    if self.stalled:
+      self.duration -= self.elapsed
+      self.stalled = False
 
   def periodic(self):
     if self.is_moving:
       output = Twist()
-      output.linear.x = 0.1
+      output.linear.x = self.speed
       self.cmd_vel_publisher.publish(output)
-      if self.manager.get_clock().now() - self.starting_time > Duration(seconds=10):
-        self.ready_pub.publish(Bool(data = True))
+      if self.manager.get_clock().now() - self.starting_time > Duration(seconds=self.duration):
+        for i in range(10):
+          self.ready_pub.publish(Bool(data = True))
+
+        if (direction == Direction.EAST and self.is_main):
+          return Events.SUCCESS_AND_DONT_MINE
+
         return Events.SUCCESS
     elif self.ready:
+      if (direction == Direction.EAST and self.is_main):
+        return Events.SUCCESS_AND_DONT_MINE
+      
       return Events.SUCCESS
 
-  def exit(self):
+  def exit(self, event):
+    self.duration += self.elapsed
+    if event is Events.STALL:
+      self.stalled = True
+      self.elapsed += self.manager.get_clock().now().seconds_nanoseconds()[0] - self.starting_time.seconds_nanoseconds()[0]
+    else:
+      self.elapsed = 0
     self.cmd_vel_publisher.publish(Twist())

@@ -1,0 +1,14 @@
+/**
+    ros_parameters:
+        video_device: "/dev/video6"          
+        io_method: "mmap"                    
+        pixel_format: "yuyv"                  
+        create_suspended: false
+        full_ffmpeg_log: false
+        camera_name: overhead
+        camera_frame_id: usb_cam_link        
+        camera_transport_suffix: image_raw  
+        camera_info_url: package://lunabot_config/config/overhead_calib.yml 
+        image_width: 640
+        image_height: 480
+        framerate: 10                

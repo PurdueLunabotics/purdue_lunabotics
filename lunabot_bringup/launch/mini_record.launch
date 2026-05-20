@@ -4,7 +4,7 @@
   <let name="current_time" value="$(eval '__import__(\'datetime\').datetime.now().strftime(\'%Y-%m-%d-%H-%M-%S\')')" />
   <let name="home_dir" value="$(eval '__import__(\'os\').path.expanduser(\'~\')')"/>
 
-  <executable cmd="ros2 bag record -o $(var home_dir)/bags/mini-$(var exp_name)-$(var current_time)
+  <executable cmd="ros2 bag record -s mcap -o $(var home_dir)/bags/mini-$(var exp_name)-$(var current_time)
 
   /mini/autonomy 
   /mini/led_color
@@ -22,14 +22,18 @@
   /mini/mini_bot/joint_states /mini/mini_bot/robot_description
 
   /mini/d455_back/aligned_depth_to_color/camera_info
-  /mini/d455_back/algined_depth_to_color/image_raw
+  /mini/d455_back/aligned_depth_to_color/image_raw
+  /mini/d455_back/depth/camera_info
+  /mini/d455_back/depth/image_raw
   /mini/d455_back/color/camera_info
   /mini/d455_back/color/image_raw
   /mini/d455_back/detections
   /mini/d455_back/points
 
   /mini/d455_front/aligned_depth_to_color/camera_info
-  /mini/d455_front/algined_depth_to_color/image_raw
+  /mini/d455_front/aligned_depth_to_color/image_raw
+  /mini/d455_back/depth/camera_info
+  /mini/d455_back/depth/image_raw
   /mini/d455_front/color/camera_info
   /mini/d455_front/color/image_raw
   /mini/d455_front/detections
@@ -52,9 +56,23 @@
   /mini/rtabmap/octomap_grid
   /mini/rtabmap/odom
   /mini/rtabmap/tag_detections
+  /mini/rtabmap/map
+
+  /mini/global_costmap/costmap
+  /mini/global_costmap/costmap_updates
+
+  /mini/unilidar/cloud
+  /mini/unilidar/imu
+  /mini/lidar_assembled_cloud
+
+  /mini/rtabmap/crater
+  /mini/rtabmap/ground_plane
 
   /mini/sensors
   /mini/stalled
+
+  /linkup_marker
+  /linkup_pos
   
   /rosout
   /tf

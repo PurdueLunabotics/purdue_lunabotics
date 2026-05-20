@@ -4,7 +4,7 @@
   <let name="current_time" value="$(eval '__import__(\'datetime\').datetime.now().strftime(\'%Y-%m-%d-%H-%M-%S\')')" />
   <let name="home_dir" value="$(eval '__import__(\'os\').path.expanduser(\'~\')')"/>
 
-  <executable cmd="ros2 bag record -o $(var home_dir)/bags/$(var exp_name)-$(var current_time) 
+  <executable cmd="ros2 bag record -s mcap -o $(var home_dir)/bags/$(var exp_name)-$(var current_time) 
 
   /autonomy 
   /led_color
@@ -21,14 +21,14 @@
   /dummy_bot/joint_states /dummy_bot/robot_description
 
   /d455_back/aligned_depth_to_color/camera_info
-  /d455_back/algined_depth_to_color/image_raw
+  /d455_back/aligned_depth_to_color/image_raw
   /d455_back/color/camera_info
   /d455_back/color/image_raw
   /d455_back/detections
   /d455_back/points
 
   /d455_front/aligned_depth_to_color/camera_info
-  /d455_front/algined_depth_to_color/image_raw
+  /d455_front/aligned_depth_to_color/image_raw
   /d455_front/color/camera_info
   /d455_front/color/image_raw
   /d455_front/detections
@@ -51,6 +51,16 @@
   /rtabmap/octomap_grid
   /rtabmap/odom
   /rtabmap/tag_detections
+  /rtabmap/map
+
+  /rtabmap/crater
+  /rtabmap/ground_plane
+
+  /global_costmap/costmap
+  /global_costmap/costmap_updates
+  /global_costmap/costmap_raw
+
+  /trench_marker
 
   /sensors
   /stalled

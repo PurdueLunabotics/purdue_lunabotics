@@ -15,5 +15,5 @@ class Proceed(State):
     def periodic(self) -> None | Events:
         return Events.SUCCESS
 
-    def exit(self):
+    def exit(self, event):
         pass

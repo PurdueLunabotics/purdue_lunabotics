@@ -2,6 +2,7 @@
 
 from geometry_msgs.msg import PoseStamped
 from lunabot_msgs.msg import RobotEffort, RobotStall
+from nav_msgs.msg import Path
 from rcl_interfaces.msg import ParameterType, ParameterValue, Parameter
 import rclpy
 from rclpy.time import Duration
@@ -13,9 +14,10 @@ from rcl_interfaces.srv import SetParameters, GetParameters
 import math
 
 class Traverse(State):
-    def __init__(self, goal: PoseStamped, backwards: bool):
+    def __init__(self, goal: PoseStamped | None, backwards: bool, tolerance: float=0.2):
         self.goal = goal
         self.backwards = backwards
+        self.tolerance = tolerance
 
     def set_goal(self, goal: PoseStamped):
         self.goal = goal
@@ -28,30 +30,57 @@ class Traverse(State):
         self.backwards_pub = manager.create_publisher(Bool, "traversal/backwards", 10)
         self.enabled_pub = manager.create_publisher(Bool, "traversal/enabled", 10)
         self.odom_sub = manager.create_subscription(PoseStamped, "position", self.odom_cb, 10)
+        self.path_sub = manager.create_subscription(Path, "nav_path", self.path_cb, 10)
+        self.path_timeout = manager.create_timer(1.5, self.path_timeout_cb)
+        self.path_timeout.cancel()
         self.odom = None
-        self.tolerance = 0.2
+        self.last_pose: None | PoseStamped = None
+        self.is_planner_alive = False
         self.logger = manager.get_logger()
+        self.manager = manager
+
+    def path_timeout_cb(self):
+        self.is_planner_alive = False
+
+    def path_cb(self, path: Path):
+        self.last_pose = path.poses[-1] # type: ignore
+        self.path_timeout.reset()
+        self.is_planner_alive = True
 
     def odom_cb(self, pose: PoseStamped):
         self.odom = pose
 
     def publish_everything(self):
-        self.goal_pub.publish(self.goal)
+        if self.goal is not None:
+            self.goal_pub.publish(self.goal)
         self.backwards_pub.publish(Bool(data = self.backwards))
         self.enabled_pub.publish(Bool(data = True))
     
     def start(self):
+        self.path_timeout.reset()
         self.publish_everything()
+        self.start_time = self.manager.get_clock().now()
 
     def periodic(self) -> None | Events:
+        if not self.is_planner_alive:
+            self.enabled_pub.publish(Bool(data = False))
+            if self.goal is not None:
+                self.goal_pub.publish(self.goal)
+            return
+
+        if self.odom is None or self.last_pose is None:
+            self.logger.warn("[Traverse] no odom or path")
+            return None
         self.publish_everything()
-        dist = math.sqrt((self.odom.pose.position.x - self.goal.pose.position.x) ** 2 + (self.odom.pose.position.y - self.goal.pose.position.y) ** 2)
-        self.logger.info(f"[Traverse]: distance {dist}")
-        if self.odom != None and dist < self.tolerance:
+        dist = math.sqrt((self.odom.pose.position.x - self.last_pose.pose.position.x) ** 2 + (self.odom.pose.position.y - self.last_pose.pose.position.y) ** 2)
+        self.logger.debug(f"[Traverse]: distance {dist}")
+        elapsed = self.manager.get_clock().now() - self.start_time
+        if dist < self.tolerance and elapsed > Duration(seconds=10):
             return Events.SUCCESS
         return None
 
-    def exit(self):
+    def exit(self, event):
+        self.path_timeout.cancel()
         self.logger.info("[Traverse]: send disable")
         self.enabled_pub.publish(Bool(data = False))
 

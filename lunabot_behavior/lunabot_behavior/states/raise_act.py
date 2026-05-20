@@ -7,6 +7,10 @@ from std_msgs.msg import Int32
 from lunabot_msgs.msg import RobotSensors
 
 class Raise(State):
+    def __init__(self, run_exc: bool = True):
+        super().__init__()
+        self.run_exc = run_exc
+
     def setup(self, manager: Node):
         self.excavation_pub = manager.create_publisher(Int32, "excavate", 10)
         self.linact_pub = manager.create_publisher(Int32, "lin_act", 10)
@@ -16,10 +20,10 @@ class Raise(State):
         self.sensors = None
 
         # Constants  TODO: update these 
-        self.RAISE_TIME = 30  # seconds
+        self.RAISE_TIME = 10  # seconds TODO: change back
         self.MIN_TIME = 2
-        self.EXCAVATION_SPEED = 1500 # rpm
-        self.LIN_ACT_MAX_POWER = -127 # -127 - 127
+        self.EXCAVATION_SPEED = 2000 if self.run_exc else 0 # rpm
+        self.LIN_ACT_MAX_POWER = 127 # -127 - 127
         self.LIN_ACT_CURR_THRESHOLD = 0.1  # Amps; TODO find value
 
     def sensor_callback(self, sensors: RobotSensors):
@@ -32,7 +36,7 @@ class Raise(State):
         if self.sensors is None:
             return None
         
-        self.excavation_pub.publish(Int32(data = 1000))
+        self.excavation_pub.publish(Int32(data = self.EXCAVATION_SPEED))
         self.linact_pub.publish(Int32(data = self.LIN_ACT_MAX_POWER))
         
         elapsed = self.manager.get_clock().now() - self.start_time
@@ -45,7 +49,7 @@ class Raise(State):
         return None
             
     
-    def exit(self):
+    def exit(self, event):
         self.excavation_pub.publish(Int32(data = 0))
         self.linact_pub.publish(Int32(data = 0))
  

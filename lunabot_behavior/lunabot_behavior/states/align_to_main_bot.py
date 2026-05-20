@@ -14,7 +14,10 @@ from typing import Literal
 import numpy as np
 import math
 
-DEPOSITION_APRILTAG_ID = 173
+# change for sim
+# sim apriltag - 368
+# irl tag - 126
+DEPOSITION_APRILTAG_ID = 126
 
 class AlignToMainBotState(State):
   def __init__(self):
@@ -31,7 +34,7 @@ class AlignToMainBotState(State):
 
     # PID for angular alignment
     self.P = 1
-    self.I = 0
+    self.I = 0.05
     self.D = 0
 
     self.last_error = None
@@ -46,10 +49,10 @@ class AlignToMainBotState(State):
     # how many times we tolerate before going to 'search' mode
     self.LOST_APRILTAG_THRESHOLD = 15
 
-    self.SEARCH_SPEED = 0.6 # rad/s
+    self.SEARCH_SPEED = 0.3 # rad/s
 
     # in rad, how aligned before it returns success
-    self.ANGULAR_ALIGN_THRESHOLD = 0.05
+    self.ANGULAR_ALIGN_THRESHOLD = 0.02
     # how many times we have been well aligned
     self.success_count = 0
     # how many times in a row before we're sure
@@ -98,6 +101,7 @@ class AlignToMainBotState(State):
 
       if (self.isApriltagPresent()):
         self.internal_state = 'align'
+        self.resetPID()
         self.success_count = 0
         self.node.get_logger().info("Behavior: Align to main bot: starting align")
         return None
@@ -248,7 +252,7 @@ class AlignToMainBotState(State):
     for i in range(5):
       self.apriltag_offset_publisher.publish(transform)
   
-  def exit(self):
+  def exit(self, event):
     # stop moving
     self.cmd_vel_publisher.publish(Twist())
 

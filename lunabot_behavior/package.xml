@@ -12,7 +12,7 @@
   <test_depend>ament_pep257</test_depend>
   <test_depend>python3-pytest</test_depend>
 
-  <depend>shapely</depend>
+  <depend>python3-shapely</depend>
   <depend>rclpy</depend>
 
   <exec_depend>lunabot_config</exec_depend>

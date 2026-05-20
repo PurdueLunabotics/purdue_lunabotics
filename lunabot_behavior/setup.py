@@ -30,7 +30,16 @@ setup(
             "find_linkup = lunabot_behavior.states.find_linkup:main",
             "main = lunabot_behavior.main_states:main",
             "mini = lunabot_behavior.mini_states:main",
+            "linkup_main = lunabot_behavior.linkup_main_states:main",
+            "linkup_mini = lunabot_behavior.linkup_mini_states:main",
+            "dep_main = lunabot_behavior.dep_only_states_main:main",
+            "dep_mini = lunabot_behavior.dep_only_states_mini:main",
+            "ex = lunabot_behavior.ex_only_states:main",
+            "ex_align = lunabot_behavior.ex_align_states:main",
             "single = lunabot_behavior.single_states:main",
+            "traversal_main = lunabot_behavior.traversal_states_main:main",
+            "traversal_mini = lunabot_behavior.traversal_states_mini:main",
+            "trench = lunabot_behavior.trench_states:main"
         ],
     },
 )
