@@ -11,6 +11,7 @@
   <depend>std_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>map_msgs</depend>
+  <depend>navigation2</depend>
   <depend>lunabot_msgs</depend>
   <export>
     <build_type>ament_cmake</build_type>
