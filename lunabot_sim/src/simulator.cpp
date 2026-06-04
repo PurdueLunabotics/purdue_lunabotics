@@ -1,9 +1,17 @@
-#include "mujoco/mujoco.h"
 #include "rclcpp/rclcpp.hpp"
+#include "geometry_msgs/msg/pose_stamped.hpp"
+#include "mujoco/mujoco.h"
 #include "simulator.hpp"
+#include "sensor_msgs/image_encodings.hpp"
 #include "GLFW/glfw3.h"
+#include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <memory>
+#include <mujoco/mjrender.h>
+#include <mujoco/mjvisualize.h>
+#include <tf2/LinearMath/Quaternion.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 void global_keyboard(GLFWwindow* window, int key, int scancode, int act, int mods) {
     SimulatorNode *node = (SimulatorNode *) glfwGetWindowUserPointer(window);
@@ -29,6 +37,20 @@ SimulatorNode::SimulatorNode(): rclcpp::Node("simulator_node") {
     effort_sub = create_subscription<lunabot_msgs::msg::RobotEffort>("/effort", 10, [this] (lunabot_msgs::msg::RobotEffort effort) {
         this->effort = effort;
     });
+    clock_pub = create_publisher<rosgraph_msgs::msg::Clock>("/clock", 10);
+    odom_pub = create_publisher<geometry_msgs::msg::PoseStamped>("/simulation/odom", 10);
+    joint_state_pub = create_publisher<sensor_msgs::msg::JointState>("/simulator/joint_states", 10);
+
+    front_rgb_camera_info_pub = create_publisher<sensor_msgs::msg::CameraInfo>("/d455_front/color/camera_info", 10);
+    front_depth_camera_info_pub = create_publisher<sensor_msgs::msg::CameraInfo>("/d455_front/aligned_depth_to_color/camera_info", 10);
+    front_depth_camera_pub = create_publisher<sensor_msgs::msg::Image>("/d455_front/aligned_depth_to_color/image_raw", 10);
+    front_rgb_camera_pub = create_publisher<sensor_msgs::msg::Image>("/d455_front/color/image_raw", 10);
+
+    back_rgb_camera_info_pub = create_publisher<sensor_msgs::msg::CameraInfo>("/d455_back/color/camera_info", 10);
+    back_depth_camera_info_pub = create_publisher<sensor_msgs::msg::CameraInfo>("/d455_back/aligned_depth_to_color/camera_info", 10);
+    back_depth_camera_pub = create_publisher<sensor_msgs::msg::Image>("/d455_back/aligned_depth_to_color/image_raw", 10);
+    back_rgb_camera_pub = create_publisher<sensor_msgs::msg::Image>("/d455_back/color/image_raw", 10);
+
     scene_path = declare_parameter<std::string>("scene_path", "/luna_ws/src/purdue_lunabotics/lunabot_sim/mujoco/scene.xml");
     char *error = new char[1024];
     model = mj_loadXML(this->scene_path.c_str(), NULL, error, 1024);
@@ -44,6 +66,8 @@ SimulatorNode::SimulatorNode(): rclcpp::Node("simulator_node") {
             left_act_idx = i;
         } else if (strcmp(act_name, "right") == 0) {
             right_act_idx = i;
+        } else if (strcmp(act_name, "excavation") == 0) {
+            exc_act_idx = i;
         }
     }
 
@@ -53,8 +77,88 @@ SimulatorNode::SimulatorNode(): rclcpp::Node("simulator_node") {
             odom_pos_sensor_idx = i;
         } else if (strcmp(sensor_name, "odom_rot") == 0) {
             odom_rot_sensor_idx = i;
+        } else if (strcmp(sensor_name, "exc_pos") == 0) {
+            exc_pos_sensor_idx = i;
+        } else if (strcmp(sensor_name, "exc_effort") == 0) {
+            exc_effort_sensor_idx = i;
         }
     }
+
+    for (int i = 0; i < model->ncam; i++) {
+        const char *cam_name = &model->names[model->name_camadr[i]];
+        if (strcmp(cam_name, "front") == 0) {
+            front_cam_idx = i;
+        } else if (strcmp(cam_name, "back") == 0) {
+            back_cam_idx = i;
+        }
+    }
+
+    front_cam.type = mjCAMERA_FIXED;
+    front_cam.fixedcamid = front_cam_idx;
+    back_cam.type = mjCAMERA_FIXED;
+    back_cam.fixedcamid = back_cam_idx;
+
+    int *front_cam_res = &model->cam_resolution[front_cam_idx * 2];
+
+    front_rgb_img.width = front_cam_res[0];
+    front_rgb_img.height = front_cam_res[1];
+    front_rgb_img.step = front_rgb_img.width * 3;
+    front_rgb_img.encoding = sensor_msgs::image_encodings::RGB8;
+    front_rgb_img.data.resize(front_rgb_img.width * front_rgb_img.height * 3);
+    front_rgb_img.header.frame_id = "d455_front_sim_link";
+    front_depth_img.width = front_cam_res[0];
+    front_depth_img.height = front_cam_res[1];
+    front_depth_img.step = front_rgb_img.width * sizeof(float);
+    front_depth_img.encoding = sensor_msgs::image_encodings::TYPE_32FC1;
+    front_depth_img.data.resize(front_rgb_img.width * front_rgb_img.height * sizeof(float));
+    front_depth_img.header.frame_id = "d455_front_sim_link";
+
+    front_cam_info.header.frame_id = "d455_front_sim_link";
+    front_cam_info.width = front_cam_res[0];
+    front_cam_info.height = front_cam_res[1];
+    front_cam_info.distortion_model = "plumb_bob";
+    front_cam_info.k.fill(0.0);
+    front_cam_info.r.fill(0.0);
+    front_cam_info.p.fill(0.0);
+    front_cam_info.d.resize(5, 0.0);
+
+    double focal_scaling = (1.0 / std::tan((model->cam_fovy[front_cam_idx] * M_PI / 180.0) / 2.0)) * front_cam_res[1] / 2.0;
+    front_cam_info.k[0] = front_cam_info.p[0] = focal_scaling;
+    front_cam_info.k[2] = front_cam_info.p[2] = static_cast<double>(front_cam_res[0]) / 2.0;
+    front_cam_info.k[4] = front_cam_info.p[5] = focal_scaling;
+    front_cam_info.k[5] = front_cam_info.p[6] = static_cast<double>(front_cam_res[1]) / 2.0;
+    front_cam_info.k[8] = front_cam_info.p[10] = 1.0;
+
+    int *back_cam_res = &model->cam_resolution[back_cam_idx * 2];
+
+    back_rgb_img.width = back_cam_res[0];
+    back_rgb_img.height = back_cam_res[1];
+    back_rgb_img.step = back_rgb_img.width * 3;
+    back_rgb_img.encoding = sensor_msgs::image_encodings::RGB8;
+    back_rgb_img.data.resize(back_rgb_img.width * back_rgb_img.height * 3);
+    back_rgb_img.header.frame_id = "d455_back_sim_link";
+    back_depth_img.width = back_cam_res[0];
+    back_depth_img.height = back_cam_res[1];
+    back_depth_img.step = back_rgb_img.width * sizeof(float);
+    back_depth_img.encoding = sensor_msgs::image_encodings::TYPE_32FC1;
+    back_depth_img.data.resize(back_rgb_img.width * back_rgb_img.height * sizeof(float));
+    back_depth_img.header.frame_id = "d455_back_sim_link";
+
+    back_cam_info.header.frame_id = "d455_back_sim_link";
+    back_cam_info.width = back_cam_res[0];
+    back_cam_info.height = back_cam_res[1];
+    back_cam_info.distortion_model = "plumb_bob";
+    back_cam_info.k.fill(0.0);
+    back_cam_info.r.fill(0.0);
+    back_cam_info.p.fill(0.0);
+    back_cam_info.d.resize(5, 0.0);
+
+    focal_scaling = (1.0 / std::tan((model->cam_fovy[back_cam_idx] * M_PI / 180.0) / 2.0)) * back_cam_res[1] / 2.0;
+    back_cam_info.k[0] = back_cam_info.p[0] = focal_scaling;
+    back_cam_info.k[2] = back_cam_info.p[2] = static_cast<double>(back_cam_res[0]) / 2.0;
+    back_cam_info.k[4] = back_cam_info.p[5] = focal_scaling;
+    back_cam_info.k[5] = back_cam_info.p[6] = static_cast<double>(back_cam_res[1]) / 2.0;
+    back_cam_info.k[8] = back_cam_info.p[10] = 1.0;
 
     if (!glfwInit()) {
         RCLCPP_ERROR(get_logger(), "Could not initialize GLFW");
@@ -77,6 +181,8 @@ SimulatorNode::SimulatorNode(): rclcpp::Node("simulator_node") {
     // create scene and context
     mjv_makeScene(model, &scn, 2000);
     mjr_makeContext(model, &con, mjFONTSCALE_150);
+    mjr_resizeOffscreen(std::max(back_cam_info.width, front_cam_info.width), std::max(back_cam_info.height, front_cam_info.height), &con);
+    row_swap_buf.resize(std::max(back_cam_info.width, front_cam_info.width) * 3);
 
     // install GLFW mouse and keyboard callbacks
     glfwSetKeyCallback(window, global_keyboard);
@@ -97,9 +203,43 @@ void SimulatorNode::run_loop(rclcpp::Node::SharedPtr node) {
             mj_step1(model, data);
             data->ctrl[left_act_idx] = effort.left_drive / 1000.0;
             data->ctrl[right_act_idx] = effort.right_drive / 1000.0;
+            data->ctrl[exc_act_idx] = effort.lin_act / 128.0;
             mj_step2(model, data);
+
+            rosgraph_msgs::msg::Clock clock;
+            clock.clock = get_time();
+            clock_pub->publish(clock);
+
             rclcpp::spin_some(node);
         }
+        geometry_msgs::msg::PoseStamped pose;
+        mjtNum *pos_data = &data->sensordata[model->sensor_adr[odom_pos_sensor_idx]];
+        mjtNum *rot_data = &data->sensordata[model->sensor_adr[odom_rot_sensor_idx]];
+        pose.header.frame_id = "odom";
+        pose.header.stamp = get_time();
+
+        tf2::Quaternion original(rot_data[3], rot_data[0], rot_data[1], rot_data[2]);
+        original.normalize();
+
+        tf2::Quaternion transform;
+        transform.setRPY(0.0, 3.14159, 0.0);
+        transform.normalize();
+        tf2::Quaternion final = transform * original;
+        final.normalize();
+
+        pose.pose.position.x = pos_data[0];
+        pose.pose.position.y = pos_data[1];
+        pose.pose.position.z = pos_data[2] - 0.3;
+        pose.pose.orientation = tf2::toMsg(final);
+        odom_pub->publish(pose);
+
+        sensor_msgs::msg::JointState joint_state;
+        joint_state.header.stamp = get_time();
+        joint_state.name = { "excavation_joint" };
+        joint_state.position = { data->sensordata[model->sensor_adr[exc_pos_sensor_idx]] };
+        joint_state.effort = { data->sensordata[model->sensor_adr[exc_effort_sensor_idx]] / 20.0 };
+
+        joint_state_pub->publish(joint_state);
 
         // get framebuffer viewport
         mjrRect viewport = {0, 0, 0, 0};
@@ -108,6 +248,87 @@ void SimulatorNode::run_loop(rclcpp::Node::SharedPtr node) {
         // update scene and render
         mjv_updateScene(model, data, &opt, NULL, &cam, mjCAT_ALL, &scn);
         mjr_render(viewport, &scn, &con);
+
+        mjrRect front_viewport = {0, 0, (int) front_rgb_img.width, (int) front_rgb_img.height};
+        mjrRect back_viewport = {0, 0, (int) back_rgb_img.width, (int) back_rgb_img.height};
+        if (frame_counter == 0) {
+            mjr_setBuffer(mjFB_OFFSCREEN, &con);
+            mjv_updateScene(model, data, &opt, NULL, &front_cam, mjCAT_ALL, &scn);
+            mjr_render(front_viewport, &scn, &con);
+            float *depth_data = (float *) front_depth_img.data.data();
+            mjr_readPixels(front_rgb_img.data.data(), depth_data, front_viewport, &con);
+            float near = (float) model->vis.map.znear * model->stat.extent;
+            float far = (float) model->vis.map.zfar * model->stat.extent;
+            float depth_scale = 1.0f - near / far;
+            for (unsigned int h = 0; h < front_depth_img.height / 2; h++) {
+                for (unsigned int w = 0; w < front_depth_img.width; w++) {
+                    unsigned int idx = h * front_depth_img.width + w;
+                    unsigned int flipped_idx = (front_depth_img.height - 1 - h) * front_depth_img.width + w;
+                    depth_data[idx] = near / (1.0f - depth_data[idx] * (depth_scale));
+                    depth_data[flipped_idx] = near / (1.0f - depth_data[flipped_idx] * (depth_scale));
+                    float temp = depth_data[idx];
+                    depth_data[idx] = depth_data[flipped_idx];
+                    depth_data[flipped_idx] = temp;
+                }
+            }
+
+            int row_size = front_rgb_img.width * 3;
+            for (unsigned int h = 0; h < front_rgb_img.height / 2; h++) {
+                unsigned int flipped_h = front_rgb_img.height - 1 - h;
+                std::memcpy(row_swap_buf.data(), front_rgb_img.data.data() + h * row_size, row_size);
+                std::memcpy(front_rgb_img.data.data() + h * row_size, front_rgb_img.data.data() + flipped_h * row_size, row_size);
+                std::memcpy(front_rgb_img.data.data() + flipped_h * row_size, row_swap_buf.data(), row_size);
+            }
+
+            front_rgb_img.header.stamp = get_time();
+            front_depth_img.header.stamp = get_time();
+            front_cam_info.header.stamp = get_time();
+
+            front_rgb_camera_pub->publish(front_rgb_img);
+            front_rgb_camera_info_pub->publish(front_cam_info);
+            front_depth_camera_pub->publish(front_depth_img);
+            front_depth_camera_info_pub->publish(front_cam_info);
+
+            mjv_updateScene(model, data, &opt, NULL, &back_cam, mjCAT_ALL, &scn);
+            mjr_render(back_viewport, &scn, &con);
+            depth_data = (float *) back_depth_img.data.data();
+            mjr_readPixels(back_rgb_img.data.data(), depth_data, back_viewport, &con);
+            near = (float) model->vis.map.znear * model->stat.extent;
+            far = (float) model->vis.map.zfar * model->stat.extent;
+            depth_scale = 1.0f - near / far;
+            for (unsigned int h = 0; h < back_depth_img.height / 2; h++) {
+                for (unsigned int w = 0; w < back_depth_img.width; w++) {
+                    unsigned int idx = h * back_depth_img.width + w;
+                    unsigned int flipped_idx = (back_depth_img.height - 1 - h) * back_depth_img.width + w;
+                    depth_data[idx] = near / (1.0f - depth_data[idx] * (depth_scale));
+                    depth_data[flipped_idx] = near / (1.0f - depth_data[flipped_idx] * (depth_scale));
+                    float temp = depth_data[idx];
+                    depth_data[idx] = depth_data[flipped_idx];
+                    depth_data[flipped_idx] = temp;
+                }
+            }
+
+            row_size = back_rgb_img.width * 3;
+            for (unsigned int h = 0; h < back_rgb_img.height / 2; h++) {
+                unsigned int flipped_h = back_rgb_img.height - 1 - h;
+                std::memcpy(row_swap_buf.data(), back_rgb_img.data.data() + h * row_size, row_size);
+                std::memcpy(back_rgb_img.data.data() + h * row_size, back_rgb_img.data.data() + flipped_h * row_size, row_size);
+                std::memcpy(back_rgb_img.data.data() + flipped_h * row_size, row_swap_buf.data(), row_size);
+            }
+
+            back_rgb_img.header.stamp = get_time();
+            back_depth_img.header.stamp = get_time();
+            back_cam_info.header.stamp = get_time();
+
+            back_rgb_camera_pub->publish(back_rgb_img);
+            back_rgb_camera_info_pub->publish(back_cam_info);
+            back_depth_camera_pub->publish(back_depth_img);
+            back_depth_camera_info_pub->publish(back_cam_info);
+
+            mjr_setBuffer(mjFB_WINDOW, &con);
+        }
+        frame_counter++;
+        frame_counter %= 4; // TODO: proper fps counting
 
         // swap OpenGL buffers (blocking call due to v-sync)
         glfwSwapBuffers(window);
@@ -137,6 +358,17 @@ void SimulatorNode::run_loop(rclcpp::Node::SharedPtr node) {
     //         RCLCPP_INFO(get_logger(), "pos data %d: %f", i, pos_data[i]);
     //     }
     // }
+}
+
+builtin_interfaces::msg::Time SimulatorNode::get_time() {
+    builtin_interfaces::msg::Time time;
+
+    float seconds;
+    float fractional = std::modf(data->time, &seconds);
+
+    time.sec = (int) seconds;
+    time.nanosec = (int) (fractional * 1e9);
+    return time;
 }
 
 // keyboard callback
