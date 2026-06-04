@@ -32,7 +32,7 @@
     </visual>
   </link>
 
-  <joint name="excavation_joint" type="fixed">
+  <joint name="excavation_joint" type="prismatic">
     <origin rpy="0 -2.0944 0" xyz="0.4 0 0.2"/>
     <parent link="middle_link"/>
     <child link="excavation"/>
