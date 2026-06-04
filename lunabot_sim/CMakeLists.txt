@@ -7,16 +7,30 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(mujoco_vendor REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(glfw3 REQUIRED)
+find_package(lunabot_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
+
+add_executable(simulator src/simulator.cpp)
+target_link_libraries(simulator mujoco::mujoco glfw)
+
+ament_target_dependencies(simulator rclcpp glfw3 lunabot_msgs)
 
 # Install launch files
 install(DIRECTORY
         launch
         models
         worlds
+        mujoco
         DESTINATION share/${PROJECT_NAME}/)
+
+install(TARGETS
+  simulator
+  DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
