@@ -55,6 +55,6 @@ COPY ./ /luna_ws/src/purdue_lunabotics
 
 RUN source /opt/ros/jazzy/setup.bash && \
     apt update -y && \
-    rosdep install -r --from-paths /luna_ws/src --ignore-src --rosdistro jazzy -y --skip-keys="ros_gz_bridge ros_gz_sim"
+    rosdep install -r --from-paths /luna_ws/src --ignore-src --rosdistro jazzy -y
 
 VOLUME /luna_ws/src/purdue_lunabotics
