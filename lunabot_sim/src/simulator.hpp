@@ -13,6 +13,7 @@
 class SimulatorNode : public rclcpp::Node {
     private:
         std::string scene_path;
+
         mjModel *model;
         mjData *data;
 
@@ -28,10 +29,13 @@ class SimulatorNode : public rclcpp::Node {
         double lasty = 0;
         
         rclcpp::Subscription<lunabot_msgs::msg::RobotEffort>::SharedPtr effort_sub;
+        rclcpp::Subscription<lunabot_msgs::msg::RobotEffort>::SharedPtr mini_effort_sub;
         rclcpp::Publisher<rosgraph_msgs::msg::Clock>::SharedPtr clock_pub;
         rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr odom_pub;
+        rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr mini_odom_pub;
         rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_pub;
         lunabot_msgs::msg::RobotEffort effort;
+        lunabot_msgs::msg::RobotEffort mini_effort;
 
         rclcpp::Publisher<sensor_msgs::msg::CameraInfo>::SharedPtr front_rgb_camera_info_pub;
         rclcpp::Publisher<sensor_msgs::msg::CameraInfo>::SharedPtr front_depth_camera_info_pub;
@@ -43,8 +47,20 @@ class SimulatorNode : public rclcpp::Node {
         rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr back_depth_camera_pub;
         rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr back_rgb_camera_pub;
 
+        rclcpp::Publisher<sensor_msgs::msg::CameraInfo>::SharedPtr mini_front_rgb_camera_info_pub;
+        rclcpp::Publisher<sensor_msgs::msg::CameraInfo>::SharedPtr mini_front_depth_camera_info_pub;
+        rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr mini_front_depth_camera_pub;
+        rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr mini_front_rgb_camera_pub;
+
+        rclcpp::Publisher<sensor_msgs::msg::CameraInfo>::SharedPtr mini_back_rgb_camera_info_pub;
+        rclcpp::Publisher<sensor_msgs::msg::CameraInfo>::SharedPtr mini_back_depth_camera_info_pub;
+        rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr mini_back_depth_camera_pub;
+        rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr mini_back_rgb_camera_pub;
+
         mjvCamera front_cam;
         mjvCamera back_cam;
+        mjvCamera mini_front_cam;
+        mjvCamera mini_back_cam;
 
         sensor_msgs::msg::Image front_depth_img;
         sensor_msgs::msg::Image front_rgb_img;
@@ -52,18 +68,31 @@ class SimulatorNode : public rclcpp::Node {
         sensor_msgs::msg::Image back_depth_img;
         sensor_msgs::msg::Image back_rgb_img;
         sensor_msgs::msg::CameraInfo back_cam_info;
+        sensor_msgs::msg::Image mini_front_depth_img;
+        sensor_msgs::msg::Image mini_front_rgb_img;
+        sensor_msgs::msg::CameraInfo mini_front_cam_info;
+        sensor_msgs::msg::Image mini_back_depth_img;
+        sensor_msgs::msg::Image mini_back_rgb_img;
+        sensor_msgs::msg::CameraInfo mini_back_cam_info;
 
         std::vector<unsigned char> row_swap_buf;
 
         int left_act_idx;
         int right_act_idx;
+        int mini_left_act_idx;
+        int mini_right_act_idx;
         int exc_act_idx;
         int odom_pos_sensor_idx;
         int odom_rot_sensor_idx;
+        int mini_odom_pos_sensor_idx;
+        int mini_odom_rot_sensor_idx;
         int exc_pos_sensor_idx;
         int exc_effort_sensor_idx;
         int front_cam_idx;
         int back_cam_idx;
+        int mini_front_cam_idx;
+        int mini_back_cam_idx;
+
         int frame_counter = 0;
 
     public:
