@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Pull code
         shell: bash
-        run: cd /luna_ws/src && git clone https://github.com/PurdueLunabotics/purdue_lunabotics && cd purdue_lunabotics && git checkout ${{ github.sha }} 
+        run: cd /luna_ws/src && rm -rf purdue_lunabotics && git clone https://github.com/PurdueLunabotics/purdue_lunabotics && cd purdue_lunabotics && git checkout ${{ github.sha }} 
       - name: Install any new deps
         shell: bash
         run: rosdep install -r --from-paths /luna_ws/src --ignore-src --rosdistro jazzy -y
