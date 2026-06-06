@@ -10,8 +10,12 @@ jobs:
     container: ghcr.io/purduelunabotics/development:latest
 
     steps:
+      - name: Pull code
+        shell: bash
+        run: cd /luna_ws/src/purdue_lunabotics && git fetch && git checkout ${{ github.sha }}
       - name: Install any new deps
+        shell: bash
         run: rosdep install -r --from-paths /luna_ws/src --ignore-src --rosdistro jazzy -y
       - name: Test building
         shell: bash
-        run: cd /luna_ws/ && source /opt/ros/jazzy/setup.bash && colcon build
+        run: cd /luna_ws/ && colcon build
