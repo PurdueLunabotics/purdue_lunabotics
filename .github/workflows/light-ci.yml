@@ -6,13 +6,12 @@ on:
 jobs:
   run-build:
     name: Make sure the code builds
-    needs: build-container
     runs-on: ubuntu-latest
     container: ghcr.io/purduelunabotics/development:latest
 
     steps:
       - name: Install any new deps
-        run: rosdep install -r --from-paths /luna_ws/src --ignore-src --rosdistro jazzy -y --skip-keys="ros_gz_bridge ros_gz_sim"
+        run: rosdep install -r --from-paths /luna_ws/src --ignore-src --rosdistro jazzy -y
       - name: Test building
         shell: bash
         run: cd /luna_ws/ && source /opt/ros/jazzy/setup.bash && colcon build
