@@ -20,9 +20,11 @@ find_package(tf2_geometry_msgs REQUIRED)
 # find_package(<dependency> REQUIRED)
 
 add_executable(simulator src/simulator.cpp)
+add_executable(simple_simulator src/simple_simulator.cpp)
 target_link_libraries(simulator mujoco::mujoco glfw)
 
 ament_target_dependencies(simulator rclcpp glfw3 lunabot_msgs sensor_msgs geometry_msgs tf2 tf2_geometry_msgs)
+ament_target_dependencies(simple_simulator rclcpp lunabot_msgs sensor_msgs geometry_msgs tf2 tf2_geometry_msgs)
 
 # Install launch files
 install(DIRECTORY
@@ -31,6 +33,7 @@ install(DIRECTORY
 
 install(TARGETS
   simulator
+  simple_simulator
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)

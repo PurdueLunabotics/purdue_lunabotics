@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <node pkg="lunabot_sim" exec="simple_simulator" output="screen" respawn="true">
+  </node>
+
+  <include file="$(find-pkg-share lunabot_description)/launch/robot_description.launch.py">
+      <arg name="entity_name" value="dummy_bot"/>
+      <arg name="ns" value=""/>
+  </include>
+
+  <node pkg="foxglove_bridge" exec="foxglove_bridge" ros_args="--log-level warn" />
+</launch>
