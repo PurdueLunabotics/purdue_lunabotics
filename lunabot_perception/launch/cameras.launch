@@ -12,7 +12,7 @@
 
   <arg name="ns" if="$(eval '$(var robot_num) == 1')" default="mini"/>
   <arg name="ns" if="$(eval '$(var robot_num) == 0')" default=""/>
-  <push_ros_namespace namespace="$(var ns)"/>
+  <!-- <push_ros_namespace namespace="$(var ns)"/> -->
 
   <let name="serial_no_cam_1"               value="'141222070808'"/>
   <arg name="cam_1_name"                    default="d455_front"/>
