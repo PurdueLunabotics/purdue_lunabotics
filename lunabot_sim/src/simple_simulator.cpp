@@ -28,7 +28,6 @@ class SimpleSimulator: public rclcpp::Node {
         float wheelbase_width = 0.32; // half
         float wheelbase_length = 0.3; // half
         float gear_ratio = 50.0;
-        float turn_slip = 0.5;
 
         float left_rot_amount = 0;
         float right_rot_amount = 0;
@@ -99,11 +98,11 @@ class SimpleSimulator: public rclcpp::Node {
             position += tf2::quatRotate(rotation, tf2::Vector3((float) effort.right_drive * motor_to_distance_factor / 2.0, 0.0, 0.0));
 
             tf2::Quaternion left_rot;
-            left_rot.setRPY(0, 0, (float) -effort.left_drive * motor_to_distance_factor / wheelbase_width / 2.0 * turn_slip);
+            left_rot.setRPY(0, 0, (float) -effort.left_drive * motor_to_distance_factor / wheelbase_width / 2.0);
             left_rot.normalize();
             rotation.normalize();
             tf2::Quaternion right_rot;
-            right_rot.setRPY(0, 0, (float) effort.right_drive * motor_to_distance_factor / wheelbase_width / 2.0 * turn_slip);
+            right_rot.setRPY(0, 0, (float) effort.right_drive * motor_to_distance_factor / wheelbase_width / 2.0);
             right_rot.normalize();
             tf2::Quaternion new_rot = rotation * left_rot * right_rot;
             rotation = new_rot;
