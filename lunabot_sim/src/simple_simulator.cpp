@@ -11,6 +11,18 @@
 #include <tf2_ros/transform_broadcaster.hpp>
 #include <vector>
 
+float limit_accel(float current, float target, float accel, float dt) {
+    if (std::fabs(current - target) < accel * dt) {
+        return target;
+    }
+
+    if (current < target) {
+        return current + accel * dt;
+    } else {
+        return current - accel * dt;
+    }
+}
+
 class SimpleSimulator: public rclcpp::Node {
     private:
         rclcpp::Subscription<lunabot_msgs::msg::RobotEffort>::SharedPtr effort_sub;
@@ -23,11 +35,15 @@ class SimpleSimulator: public rclcpp::Node {
         tf2::Vector3 position;
         std::vector<geometry_msgs::msg::TransformStamped> transforms;
         sensor_msgs::msg::JointState joint_states;
+        float current_left_vel = 0;
+        float current_right_vel = 0;
+        float current_exc_vel = 0;
 
-        float wheel_radius = 0.2;
-        float wheelbase_width = 0.32; // half
-        float wheelbase_length = 0.3; // half
-        float gear_ratio = 50.0;
+        float wheel_radius;
+        float wheelbase_width; // half
+        float gear_ratio;
+        float drive_accel;
+        float exc_accel;
 
         float left_rot_amount = 0;
         float right_rot_amount = 0;
@@ -55,6 +71,12 @@ class SimpleSimulator: public rclcpp::Node {
             joint_states.position.push_back(0);
             joint_states.position.push_back(0);
             joint_states.position.push_back(0);
+
+            wheel_radius = declare_parameter("wheel_radius", 0.2);
+            wheelbase_width = declare_parameter("wheelbase_width", 0.32);
+            gear_ratio = declare_parameter("gear_ratio", 50.0);
+            drive_accel = declare_parameter("drive_accel", 6000.0);
+            exc_accel = declare_parameter("exc_accel", 500.0);
 
             effort_sub = create_subscription<lunabot_msgs::msg::RobotEffort>("effort", 10, [this] (lunabot_msgs::msg::RobotEffort effort) {
                 this->effort = effort;
@@ -93,24 +115,28 @@ class SimpleSimulator: public rclcpp::Node {
         }
 
         void integrate_position(float dt) {
+            current_left_vel = limit_accel(current_left_vel, effort.left_drive, drive_accel, dt);
+            current_right_vel = limit_accel(current_right_vel, effort.right_drive, drive_accel, dt);
+            current_exc_vel = limit_accel(current_exc_vel, effort.lin_act, exc_accel, dt);
+
             float motor_to_distance_factor = 1.0 / gear_ratio / 60.0 * 2.0 * 3.14159 * wheel_radius * dt;
-            position += tf2::quatRotate(rotation, tf2::Vector3((float) effort.left_drive * motor_to_distance_factor / 2.0, 0.0, 0.0));
-            position += tf2::quatRotate(rotation, tf2::Vector3((float) effort.right_drive * motor_to_distance_factor / 2.0, 0.0, 0.0));
+            position += tf2::quatRotate(rotation, tf2::Vector3(current_left_vel * motor_to_distance_factor / 2.0, 0.0, 0.0));
+            position += tf2::quatRotate(rotation, tf2::Vector3(current_right_vel * motor_to_distance_factor / 2.0, 0.0, 0.0));
 
             tf2::Quaternion left_rot;
-            left_rot.setRPY(0, 0, (float) -effort.left_drive * motor_to_distance_factor / wheelbase_width / 2.0);
+            left_rot.setRPY(0, 0, -current_left_vel * motor_to_distance_factor / wheelbase_width / 2.0);
             left_rot.normalize();
             rotation.normalize();
             tf2::Quaternion right_rot;
-            right_rot.setRPY(0, 0, (float) effort.right_drive * motor_to_distance_factor / wheelbase_width / 2.0);
+            right_rot.setRPY(0, 0, current_right_vel * motor_to_distance_factor / wheelbase_width / 2.0);
             right_rot.normalize();
             tf2::Quaternion new_rot = rotation * left_rot * right_rot;
             rotation = new_rot;
             rotation.normalize();
 
-            left_rot_amount += (float) effort.left_drive * motor_to_distance_factor / wheel_radius;
-            right_rot_amount += (float) effort.right_drive * motor_to_distance_factor / wheel_radius;
-            exc_pos += (float) effort.lin_act / 500.0 * dt;
+            left_rot_amount += current_left_vel * motor_to_distance_factor / wheel_radius;
+            right_rot_amount += current_right_vel * motor_to_distance_factor / wheel_radius;
+            exc_pos += current_exc_vel / 500.0 * dt;
 
             if (exc_pos > 0) {
                 exc_pos = 0;
