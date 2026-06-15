@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
-  <node pkg="lunabot_sim" exec="simple_simulator" output="screen" respawn="true">
+  <node pkg="lunabot_sim" exec="simple_simulator" output="screen" respawn="true" />
+
+  <node pkg="lunabot_control" exec="differential_drive_controller_node" output="screen" respawn="true" >
+    <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
   </node>
 
   <include file="$(find-pkg-share lunabot_description)/launch/robot_description.launch.py">
@@ -8,5 +11,36 @@
       <arg name="ns" value=""/>
   </include>
 
+  <node name="planner_server" pkg="nav2_planner" exec="planner_server" output="screen" respawn="true">
+    <param from="$(find-pkg-share lunabot_config)/config/test_planner.yml"/>
+  </node>
+
+  <node name="map_server" pkg="nav2_map_server" exec="map_server" output="screen" respawn="true">
+    <param name="yaml_filename" value="$(find-pkg-share lunabot_config)/config/maps/map_1775505069.yaml"/>
+  </node>
+
+  <node name="lifecycle" pkg="nav2_lifecycle_manager" exec="lifecycle_manager" output="screen">
+    <param name="autostart" value="true"/>
+    <param name="node_names" value="planner_server;map_server" value-sep=";"/>
+  </node>
+
+  <node pkg="lunabot_control" exec="effort_factory_node" output="screen" respawn="true" />
+
   <node pkg="foxglove_bridge" exec="foxglove_bridge" ros_args="--log-level warn" />
+
+  <node name="nav2_bridge" pkg="lunabot_nav" exec="nav2_bridge_node" output="screen" respawn="true">
+    <remap from="nav_path" to="nav_path"/>
+    <param name="use_sim_time" value="$(var sim)"/>
+  </node>
+
+  <node name="point_to_point_node" pkg="lunabot_control" exec="point_to_point_node" output="screen" respawn="true" >
+    <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
+
+    <remap from="odom" to="position"/>
+    <remap from="global_path" to="nav_path"/>
+    <remap from="backwards" to="traversal/backwards"/>
+    <remap from="traversal_enabled" to="traversal/enabled"/>
+
+    <remap from="cmd_vel" to="cmd_vel"/>
+  </node>
 </launch>
