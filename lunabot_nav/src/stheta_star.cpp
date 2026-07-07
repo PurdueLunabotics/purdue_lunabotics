@@ -318,7 +318,7 @@ double SThetaStar::calculatePathCost(PathMsg path) {
     cost +=
         traversal_cost +
         getDistance(dx, dy) * options.driving_cost +
-        alpha_cost * options.driving_cost +
+        alpha_cost * options.turning_cost +
         options.node_cost;
   }
 
