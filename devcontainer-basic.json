@@ -1,0 +1,7 @@
+{
+  "image": "ghcr.io/purduelunabotics/development:latest",
+  "workspaceFolder": "/luna_ws/src/purdue_lunabotics",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/luna_ws/src/purdue_lunabotics,type=bind",
+  "forwardPorts": [ 8765 ]
+}
+
