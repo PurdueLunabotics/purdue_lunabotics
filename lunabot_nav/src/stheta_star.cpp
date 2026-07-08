@@ -105,7 +105,7 @@ PathMsg SThetaStar::retracePath(Vertex vertex) {
 }
 
 PathMsg SThetaStar::createPlan(const PoseStampedMsg &start,
-                               const PoseStampedMsg &originalGoal) {
+                               const PoseStampedMsg &originalGoal, std::function<bool()> cancel_checker) {
   if (costmap->getSizeInCellsX() != width ||
       costmap->getSizeInCellsY() != height) {
     updateVertexList();
@@ -147,6 +147,10 @@ PathMsg SThetaStar::createPlan(const PoseStampedMsg &start,
       PriorityItem(initial, nullptr, 0, goal_x, goal_y, options));
 
   while (!queue.empty()) {
+    if (cancel_checker()) {
+      return PathMsg();
+    }
+
     PriorityItem item = queue.top();
     queue.pop();
     if (item.vertex->visited) {
