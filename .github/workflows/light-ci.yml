@@ -10,6 +10,8 @@ jobs:
     container: ghcr.io/purduelunabotics/development:latest
 
     steps:
+      - name: Enable Problem Matchers
+        run: echo "::add-matcher::.github/matchers/gcc.json"
       - name: Pull code
         shell: bash
         run: cd /luna_ws/src/purdue_lunabotics && git fetch && git checkout ${{ github.sha }} 
