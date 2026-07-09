@@ -2,18 +2,15 @@ FROM ros:jazzy
 
 EXPOSE 8765
 
-SHELL ["/bin/bash", "-c"]
-
-RUN apt update && apt install -y ros-jazzy-rmw-zenoh-cpp clang libusb-dev curl lsb-release gnupg
+RUN apt update && apt install -y ros-jazzy-rmw-zenoh-cpp clang libusb-dev curl lsb-release gnupg ca-certificates
 
 RUN cat <<EOF > ~/.bashrc
 source /opt/ros/jazzy/setup.bash
 source /luna_ws/install/setup.bash
 
-export GZ_SIM_RESOURCE_PATH=\$GZ_SIM_RESOURCE_PATH:\$(ros2 pkg prefix lunabot_sim)/share
 export ZENOH_ROUTER_CHECK_ATTEMPTS=0
 export ZENOH_SESSION_CONFIG_URI="/luna_ws/src/purdue_lunabotics/session_config.json5"
-export RMW_IMPLEMENTATION=rmw_zenoh_cpp
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 EOF
 
 RUN source /opt/ros/jazzy/setup.bash && \
