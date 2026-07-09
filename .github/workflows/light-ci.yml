@@ -18,4 +18,4 @@ jobs:
         run: rosdep update && rosdep install -r --from-paths /luna_ws/src --ignore-src --rosdistro jazzy -y
       - name: Test building
         shell: bash
-        run: cd /luna_ws/ && colcon build
+        run: cd /luna_ws/ && source /opt/ros/jazzy/setup.bash && colcon build
