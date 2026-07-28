@@ -8,4 +8,6 @@
   </include>
 
   <node pkg="foxglove_bridge" exec="foxglove_bridge" ros_args="--log-level warn" />
+
+  <include file="$(find-pkg-share lunabot_onboarding)/launch/onboarding.launch.py" />
 </launch>
