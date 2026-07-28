@@ -411,12 +411,12 @@ meters per second and the angular components are in radians per second.
 
 #### Creating another node
 
-Start by following the instructions in [Creating a basic node] to make a node
+Start by following the instructions in [Creating a basic node](#creating-a-basic-node) to make a node
 that's called `DriveController`.
 
 #### Create the publishers and subscriptions
 
-Like in [Creating the subscriptions] and [Creating the publisher], we need to
+Like in [Creating the subscriptions](#creating-the-subscriptions) and [Creating the publisher](#creating-the-publisher), we need to
 subscribe to `cmd_vel` and publish to `left_drive` and `right_drive`. Just like
 we did previously, store `cmd_vel` in a local variable.
 
@@ -463,7 +463,7 @@ We can now make our completed function to convert units. I called my function
 
 #### Implementing the logic
 
-Like in [Creating the loop], make another timer and loop callback. You can use
+Like in [Creating the loop](#creating-the-loop), make another timer and loop callback. You can use
 the same 10 hertz period. The logic in this node is a little more complicated
 than the effort factory because we need to transform the linear x and angular
 z commands into a left and right command. We can start by imagining the simplest
