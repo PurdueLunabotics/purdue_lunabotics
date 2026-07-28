@@ -5,7 +5,7 @@
 Welcome to Software! Before we begin working on our main projects for the season
 we need to set up and learn to use the tools we use to program our robot. We’ll
 go over the basics of ROS(Robot Operating System), talk about the general
-structure of our software, then set up a linux container to run the simulator
+structure of our software, then set up a Linux container to run the simulator
 and other tests in. 
 
 Throughout onboarding you will implement a couple of ROS nodes to allow you to
@@ -101,7 +101,7 @@ allows [nodes](https://docs.ros.org/en/jazzy/Concepts/Basic/About-Nodes.html),
 which are basically programs, to talk to other nodes through [topics, services,
 and actions](https://docs.ros.org/en/jazzy/Concepts/Basic/Interfaces-Topics-Services-Actions.html).
 Topics are channels where any number of publishers can send data to any number
-of subscribers. Topics and identified by names, so you can have any number of
+of subscribers. Topics are identified by name, so you can have any number of
 them. Services are like function calls. One node can call a service defined by
 another node with a request and get a response. Services are also identified by
 name, but not the node they are called on, so you cannot have two nodes that
@@ -167,17 +167,17 @@ onboarding and possibly as a full replacement of Rviz and Rqt.
 We use Git and GitHub to collaborate. Git is a version control system which
 allows different developers to write and organize code in the same code base
 then combine their code together when needed. The git tutorial is located
-[here](https://git-scm.com/docs/gittutorial), and can also be opened in a linux
+[here](https://git-scm.com/docs/gittutorial), and can also be opened in a Linux
 terminal with `man gittutorial`. There is also a [list of everyday useful
 commands](https://git-scm.com/docs/giteveryday) or `man giteveryday`. Git has
-3 many areas, the working tree, the staging area, and the repository. The
+3 main areas, the working tree, the staging area, and the repository. The
 working tree is the current state of the file system, the staging area is where
-changes are moved too while they are being prepared for the repository, and the
+changes are moved to while they are being prepared for the repository, and the
 repository is where changes are saved to by commits. The repository can then be
 pushed to a host like GitHub. In order to get access to our repository, download
 it using `git clone https://github.com/PurdueLunabotics/purdue_lunabotics.git`.
 Then make changes using your editor. When you are done making changes you can
-move those changes into staging with `git add <the path to a file or directory
+move those changes into the staging area with `git add <the path to a file or directory
 you want to stage>`. Finally commit with `git commit` which will open a window
 that prompts for a commit message. Then to upload the code to GitHub, run `git
 push`.  Code can be separated onto branches, so that commits onto a branch will
@@ -239,7 +239,7 @@ class EffortFactory(Node):
         super().__init__("effort_factory") # call the node constructor and set the nodes names
 ```
 
-Now that we have created a very basic node, we need a way to run it. For than
+Now that we have created a very basic node, we need a way to run it. For that
 we will add a main function to the effort factory file.
 
 ```python
@@ -354,7 +354,7 @@ period and a callback as the arguments:
 self.timer = self.create_timer(0.1, self.loop) # 10 hertz
 ```
 
-Now we need to make a callback that creates an effort message and publishes its;
+Now we need to make a callback that creates an effort message and publishes it:
 
 ```python
 def loop(self):
@@ -367,7 +367,7 @@ def loop(self):
 Now when we run the node we can publish to left and right drive and the robot
 moves! (Use the individual tab above the effort publisher)
 
-### Creating a drive train controller
+### Creating a drivetrain controller
 
 Right now we are publishing direct motor speeds to control our robots velocity,
 but if we wanted a more generic way to control the robot, like drive forward at
