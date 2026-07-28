@@ -1,4 +1,22 @@
-# Software Onboarding
+---
+title: "Software Onboarding"
+colorlinks: true
+linkcolor: blue
+urlcolor: blue
+toc: true
+linestretch: 1.3
+
+geometry:
+  - top=1in
+  - bottom=1in
+  - left=1in
+  - right=1in
+
+header-includes:
+    - \renewcommand{\familydefault}{\sfdefault}
+---
+
+\newpage
 
 ## Onboarding Process
 
@@ -235,8 +253,10 @@ written in python in the lunabot_onboarding package. Create
 from rclpy.node import Node
 
 class EffortFactory(Node):
-    def __init__(self): # this is the constructor
-        super().__init__("effort_factory") # call the node constructor and set the nodes names
+    # this is the constructor
+    def __init__(self):
+        # call the node constructor and set the nodes names
+        super().__init__("effort_factory")
 ```
 
 Now that we have created a very basic node, we need a way to run it. For that
@@ -246,9 +266,13 @@ we will add a main function to the effort factory file.
 import rclpy
 
 def main():
-    rclpy.init() # setup the ros runtime
+    # setup the ros runtime
+    rclpy.init()
     effort_factory = EffortFactory()
-    rclpy.spin(effort_factory) # Tells the runtime to wait and process messages and timers for this node until the node is stopped
+
+    # Tells the runtime to wait and process messages and timers for this node
+    # until the node is stopped
+    rclpy.spin(effort_factory)
     rclpy.shutdown()
 ```
 
@@ -290,7 +314,8 @@ service has several options about how ROS should send messages around, for now
 we will set it to the default with a 10 message buffer. Add the following to `__init__`:
 
 ```python
-self.left_drive_sub = self.create_subscription(Int32, "left_drive", self.left_drive_cb, 10)
+self.left_drive_sub = self.create_subscription(Int32, "left_drive",
+    self.left_drive_cb, 10)
 ```
 
 We are using `Int32` as the type, so we must import it with `from std_msgs.msg import Int32`.
@@ -298,7 +323,8 @@ We also need to create the callback, so add the following into the class:
 
 ```python
 def left_drive_cb(self, left_drive: Int32):
-    self.left_drive = left_drive.data # Int32 is not actually a number, so we must access the data inside
+    # Int32 is not actually a number, so we must access the data inside
+    self.left_drive = left_drive.data
 ```
 
 We are just going to save the left drive into a variable. Make sure you
@@ -316,7 +342,8 @@ class EffortFactory(Node):
         super().__init__("effort_factory")
 
         self.left_drive = 0
-        self.left_drive_sub = self.create_subscription(Int32, "left_drive", self.left_drive_cb, 10)
+        self.left_drive_sub = self.create_subscription(Int32, "left_drive",
+            self.left_drive_cb, 10)
 
     def left_drive_cb(self, left_drive: Int32):
         self.left_drive = left_drive.data
@@ -387,7 +414,8 @@ the velocity of something. You can view the structure of any message with the
 command `ros2 interface show <the type>`. The output for a twist is shown below.
 
 ```
-# This expresses velocity in free space broken into its linear and angular parts.
+# This expresses velocity in free space broken into its linear and angular
+    parts.
 
 Vector3  linear
 	float64 x
@@ -453,9 +481,12 @@ the type of parameter (eg `double_value` for doubles). Here are the 3 parameters
 (we will use the chassis width later) we need with their default values:
 
 ```python
-self.gear_ratio = self.declare_parameter("gear_ratio", 50.0).get_parameter_value().double_value
-self.wheel_radius = self.declare_parameter("wheel_radius", 0.2).get_parameter_value().double_value
-self.chassis_width = self.declare_parameter("chassis_width", 0.64).get_parameter_value().double_value
+self.gear_ratio = self.declare_parameter("gear_ratio", 50.0)
+    .get_parameter_value().double_value
+self.wheel_radius = self.declare_parameter("wheel_radius", 0.2)
+    .get_parameter_value().double_value
+self.chassis_width = self.declare_parameter("chassis_width", 0.64)
+    .get_parameter_value().double_value
 ```
 
 We can now make our completed function to convert units. I called my function
@@ -472,8 +503,11 @@ the linear x value in to both the left and right speeds after using our
 conversion function. For example:
 
 ```python
-self.left_drive_pub.publish(Int32(data = int(self.speed_to_rpm(self.cmd_vel.linear.x))))
-self.right_drive_pub.publish(Int32(data = int(self.speed_to_rpm(self.cmd_vel.linear.x))))
+left_drive = self.cmd_vel.linear.x
+right_drive = self.cmd_vel.linear.x
+
+self.left_drive_pub.publish(Int32(data = int(self.speed_to_rpm(left_drive))))
+self.right_drive_pub.publish(Int32(data = int(self.speed_to_rpm(right_drive))))
 ```
 
 The angular rotation is slightly more complicated as we need a way to convert
@@ -488,16 +522,21 @@ means the robot rotates counter-clockwise, so left should be negative, and right
 is positive. For example:
 
 ```python
-self.left_drive_pub.publish(Int32(data = int(-self.speed_to_rpm(self.cmd_vel.angular.z * self.chassis_width / 2))))
-self.right_drive_pub.publish(Int32(data = int(self.speed_to_rpm(self.cmd_vel.angular.z * self.chassis_width / 2))))
+left_drive = -self.cmd_vel.angular.z * self.chassis_width / 2
+right_drive = self.cmd_vel.angular.z * self.chassis_width / 2
+
+self.left_drive_pub.publish(Int32(data = int(self.speed_to_rpm(left_drive))))
+self.right_drive_pub.publish(Int32(data = int(self.speed_to_rpm(right_drive))))
 ```
 
 Now to combine those two together, it's as simple as adding the two components
 together. This gives us:
 
 ```python
-left_drive = self.cmd_vel.linear.x - self.cmd_vel.angular.z * self.chassis_width / 2
-right_drive = self.cmd_vel.linear.x + self.cmd_vel.angular.z * self.chassis_width / 2
+left_drive = self.cmd_vel.linear.x
+    - self.cmd_vel.angular.z * self.chassis_width / 2
+right_drive = self.cmd_vel.linear.x
+    + self.cmd_vel.angular.z * self.chassis_width / 2
 
 self.left_drive_pub.publish(Int32(data = int(self.speed_to_rpm(left_drive))))
 self.right_drive_pub.publish(Int32(data = int(self.speed_to_rpm(right_drive))))
