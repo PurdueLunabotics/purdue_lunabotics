@@ -45,27 +45,7 @@ SimulatorNode::SimulatorNode(): rclcpp::Node("simulator_node") {
     mini_odom_pub = create_publisher<geometry_msgs::msg::PoseStamped>("/mini/simulation/odom", 10);
     joint_state_pub = create_publisher<sensor_msgs::msg::JointState>("/simulator/joint_states", 10);
 
-    front_rgb_camera_info_pub = create_publisher<sensor_msgs::msg::CameraInfo>("/d455_front/color/camera_info", 10);
-    front_depth_camera_info_pub = create_publisher<sensor_msgs::msg::CameraInfo>("/d455_front/aligned_depth_to_color/camera_info", 10);
-    front_depth_camera_pub = create_publisher<sensor_msgs::msg::Image>("/d455_front/aligned_depth_to_color/image_raw", 10);
-    front_rgb_camera_pub = create_publisher<sensor_msgs::msg::Image>("/d455_front/color/image_raw", 10);
-
-    back_rgb_camera_info_pub = create_publisher<sensor_msgs::msg::CameraInfo>("/d455_back/color/camera_info", 10);
-    back_depth_camera_info_pub = create_publisher<sensor_msgs::msg::CameraInfo>("/d455_back/aligned_depth_to_color/camera_info", 10);
-    back_depth_camera_pub = create_publisher<sensor_msgs::msg::Image>("/d455_back/aligned_depth_to_color/image_raw", 10);
-    back_rgb_camera_pub = create_publisher<sensor_msgs::msg::Image>("/d455_back/color/image_raw", 10);
-
-    mini_front_rgb_camera_info_pub = create_publisher<sensor_msgs::msg::CameraInfo>("/mini/d455_front/color/camera_info", 10);
-    mini_front_depth_camera_info_pub = create_publisher<sensor_msgs::msg::CameraInfo>("/mini/d455_front/aligned_depth_to_color/camera_info", 10);
-    mini_front_depth_camera_pub = create_publisher<sensor_msgs::msg::Image>("/mini/d455_front/aligned_depth_to_color/image_raw", 10);
-    mini_front_rgb_camera_pub = create_publisher<sensor_msgs::msg::Image>("/mini/d455_front/color/image_raw", 10);
-
-    mini_back_rgb_camera_info_pub = create_publisher<sensor_msgs::msg::CameraInfo>("/mini/d455_back/color/camera_info", 10);
-    mini_back_depth_camera_info_pub = create_publisher<sensor_msgs::msg::CameraInfo>("/mini/d455_back/aligned_depth_to_color/camera_info", 10);
-    mini_back_depth_camera_pub = create_publisher<sensor_msgs::msg::Image>("/mini/d455_back/aligned_depth_to_color/image_raw", 10);
-    mini_back_rgb_camera_pub = create_publisher<sensor_msgs::msg::Image>("/mini/d455_back/color/image_raw", 10);
-
-    scene_path = declare_parameter<std::string>("scene_path", "/luna_ws/src/purdue_lunabotics/lunabot_sim/mujoco/scene.xml");
+    scene_path = declare_parameter<std::string>("scene_path", "");
     char *error = new char[1024];
     model = mj_loadXML(this->scene_path.c_str(), NULL, error, 1024);
     if (model == NULL) {
@@ -73,6 +53,11 @@ SimulatorNode::SimulatorNode(): rclcpp::Node("simulator_node") {
         return;
     }
     data = mj_makeData(model);
+
+    front_camera = std::make_shared<Camera>("front", "d455_front_sim_link", "d455_front", this, model);
+    back_camera = std::make_shared<Camera>("back", "d455_back_sim_link", "d455_back", this, model);
+    mini_front_camera = std::make_shared<Camera>("mini front", "mini/d455_front_sim_link", "mini/d455_front", this, model);
+    mini_back_camera = std::make_shared<Camera>("mini back", "mini/d455_back_sim_link", "mini/d455_back", this, model);
 
     for (int i = 0; i < model->nu; i++) {
         const char *act_name = &model->names[model->name_actuatoradr[i]];
@@ -106,152 +91,6 @@ SimulatorNode::SimulatorNode(): rclcpp::Node("simulator_node") {
         }
     }
 
-    for (int i = 0; i < model->ncam; i++) {
-        const char *cam_name = &model->names[model->name_camadr[i]];
-        if (strcmp(cam_name, "front") == 0) {
-            front_cam_idx = i;
-        } else if (strcmp(cam_name, "back") == 0) {
-            back_cam_idx = i;
-        } else if (strcmp(cam_name, "mini front") == 0) {
-            mini_front_cam_idx = i;
-        } else if (strcmp(cam_name, "mini back") == 0) {
-            mini_back_cam_idx = i;
-        }
-    }
-
-    front_cam.type = mjCAMERA_FIXED;
-    front_cam.fixedcamid = front_cam_idx;
-    back_cam.type = mjCAMERA_FIXED;
-    back_cam.fixedcamid = back_cam_idx;
-    mini_front_cam.type = mjCAMERA_FIXED;
-    mini_front_cam.fixedcamid = mini_front_cam_idx;
-    mini_back_cam.type = mjCAMERA_FIXED;
-    mini_back_cam.fixedcamid = mini_back_cam_idx;
-
-    int *front_cam_res = &model->cam_resolution[front_cam_idx * 2];
-
-    front_rgb_img.width = front_cam_res[0];
-    front_rgb_img.height = front_cam_res[1];
-    front_rgb_img.step = front_rgb_img.width * 3;
-    front_rgb_img.encoding = sensor_msgs::image_encodings::RGB8;
-    front_rgb_img.data.resize(front_rgb_img.width * front_rgb_img.height * 3);
-    front_rgb_img.header.frame_id = "d455_front_sim_link";
-    front_depth_img.width = front_cam_res[0];
-    front_depth_img.height = front_cam_res[1];
-    front_depth_img.step = front_rgb_img.width * sizeof(float);
-    front_depth_img.encoding = sensor_msgs::image_encodings::TYPE_32FC1;
-    front_depth_img.data.resize(front_rgb_img.width * front_rgb_img.height * sizeof(float));
-    front_depth_img.header.frame_id = "d455_front_sim_link";
-
-    front_cam_info.header.frame_id = "d455_front_sim_link";
-    front_cam_info.width = front_cam_res[0];
-    front_cam_info.height = front_cam_res[1];
-    front_cam_info.distortion_model = "plumb_bob";
-    front_cam_info.k.fill(0.0);
-    front_cam_info.r.fill(0.0);
-    front_cam_info.p.fill(0.0);
-    front_cam_info.d.resize(5, 0.0);
-
-    double focal_scaling = (1.0 / std::tan((model->cam_fovy[front_cam_idx] * M_PI / 180.0) / 2.0)) * front_cam_res[1] / 2.0;
-    front_cam_info.k[0] = front_cam_info.p[0] = focal_scaling;
-    front_cam_info.k[2] = front_cam_info.p[2] = static_cast<double>(front_cam_res[0]) / 2.0;
-    front_cam_info.k[4] = front_cam_info.p[5] = focal_scaling;
-    front_cam_info.k[5] = front_cam_info.p[6] = static_cast<double>(front_cam_res[1]) / 2.0;
-    front_cam_info.k[8] = front_cam_info.p[10] = 1.0;
-
-    int *back_cam_res = &model->cam_resolution[back_cam_idx * 2];
-
-    back_rgb_img.width = back_cam_res[0];
-    back_rgb_img.height = back_cam_res[1];
-    back_rgb_img.step = back_rgb_img.width * 3;
-    back_rgb_img.encoding = sensor_msgs::image_encodings::RGB8;
-    back_rgb_img.data.resize(back_rgb_img.width * back_rgb_img.height * 3);
-    back_rgb_img.header.frame_id = "d455_back_sim_link";
-    back_depth_img.width = back_cam_res[0];
-    back_depth_img.height = back_cam_res[1];
-    back_depth_img.step = back_rgb_img.width * sizeof(float);
-    back_depth_img.encoding = sensor_msgs::image_encodings::TYPE_32FC1;
-    back_depth_img.data.resize(back_rgb_img.width * back_rgb_img.height * sizeof(float));
-    back_depth_img.header.frame_id = "d455_back_sim_link";
-
-    back_cam_info.header.frame_id = "d455_back_sim_link";
-    back_cam_info.width = back_cam_res[0];
-    back_cam_info.height = back_cam_res[1];
-    back_cam_info.distortion_model = "plumb_bob";
-    back_cam_info.k.fill(0.0);
-    back_cam_info.r.fill(0.0);
-    back_cam_info.p.fill(0.0);
-    back_cam_info.d.resize(5, 0.0);
-
-    focal_scaling = (1.0 / std::tan((model->cam_fovy[back_cam_idx] * M_PI / 180.0) / 2.0)) * back_cam_res[1] / 2.0;
-    back_cam_info.k[0] = back_cam_info.p[0] = focal_scaling;
-    back_cam_info.k[2] = back_cam_info.p[2] = static_cast<double>(back_cam_res[0]) / 2.0;
-    back_cam_info.k[4] = back_cam_info.p[5] = focal_scaling;
-    back_cam_info.k[5] = back_cam_info.p[6] = static_cast<double>(back_cam_res[1]) / 2.0;
-    back_cam_info.k[8] = back_cam_info.p[10] = 1.0;
-
-    int *mini_front_cam_res = &model->cam_resolution[mini_front_cam_idx * 2];
-
-    mini_front_rgb_img.width = mini_front_cam_res[0];
-    mini_front_rgb_img.height = mini_front_cam_res[1];
-    mini_front_rgb_img.step = mini_front_rgb_img.width * 3;
-    mini_front_rgb_img.encoding = sensor_msgs::image_encodings::RGB8;
-    mini_front_rgb_img.data.resize(mini_front_rgb_img.width * mini_front_rgb_img.height * 3);
-    mini_front_rgb_img.header.frame_id = "mini/d455_front_sim_link";
-    mini_front_depth_img.width = mini_front_cam_res[0];
-    mini_front_depth_img.height = mini_front_cam_res[1];
-    mini_front_depth_img.step = mini_front_rgb_img.width * sizeof(float);
-    mini_front_depth_img.encoding = sensor_msgs::image_encodings::TYPE_32FC1;
-    mini_front_depth_img.data.resize(mini_front_rgb_img.width * mini_front_rgb_img.height * sizeof(float));
-    mini_front_depth_img.header.frame_id = "mini/d455_front_sim_link";
-
-    mini_front_cam_info.header.frame_id = "mini/d455_front_sim_link";
-    mini_front_cam_info.width = mini_front_cam_res[0];
-    mini_front_cam_info.height = mini_front_cam_res[1];
-    mini_front_cam_info.distortion_model = "plumb_bob";
-    mini_front_cam_info.k.fill(0.0);
-    mini_front_cam_info.r.fill(0.0);
-    mini_front_cam_info.p.fill(0.0);
-    mini_front_cam_info.d.resize(5, 0.0);
-
-    focal_scaling = (1.0 / std::tan((model->cam_fovy[mini_front_cam_idx] * M_PI / 180.0) / 2.0)) * mini_front_cam_res[1] / 2.0;
-    mini_front_cam_info.k[0] = mini_front_cam_info.p[0] = focal_scaling;
-    mini_front_cam_info.k[2] = mini_front_cam_info.p[2] = static_cast<double>(mini_front_cam_res[0]) / 2.0;
-    mini_front_cam_info.k[4] = mini_front_cam_info.p[5] = focal_scaling;
-    mini_front_cam_info.k[5] = mini_front_cam_info.p[6] = static_cast<double>(mini_front_cam_res[1]) / 2.0;
-    mini_front_cam_info.k[8] = mini_front_cam_info.p[10] = 1.0;
-
-    int *mini_back_cam_res = &model->cam_resolution[mini_back_cam_idx * 2];
-
-    mini_back_rgb_img.width = mini_back_cam_res[0];
-    mini_back_rgb_img.height = mini_back_cam_res[1];
-    mini_back_rgb_img.step = mini_back_rgb_img.width * 3;
-    mini_back_rgb_img.encoding = sensor_msgs::image_encodings::RGB8;
-    mini_back_rgb_img.data.resize(mini_back_rgb_img.width * mini_back_rgb_img.height * 3);
-    mini_back_rgb_img.header.frame_id = "mini/d455_back_sim_link";
-    mini_back_depth_img.width = mini_back_cam_res[0];
-    mini_back_depth_img.height = mini_back_cam_res[1];
-    mini_back_depth_img.step = mini_back_rgb_img.width * sizeof(float);
-    mini_back_depth_img.encoding = sensor_msgs::image_encodings::TYPE_32FC1;
-    mini_back_depth_img.data.resize(mini_back_rgb_img.width * mini_back_rgb_img.height * sizeof(float));
-    mini_back_depth_img.header.frame_id = "mini/d455_back_sim_link";
-
-    mini_back_cam_info.header.frame_id = "mini/d455_back_sim_link";
-    mini_back_cam_info.width = mini_back_cam_res[0];
-    mini_back_cam_info.height = mini_back_cam_res[1];
-    mini_back_cam_info.distortion_model = "plumb_bob";
-    mini_back_cam_info.k.fill(0.0);
-    mini_back_cam_info.r.fill(0.0);
-    mini_back_cam_info.p.fill(0.0);
-    mini_back_cam_info.d.resize(5, 0.0);
-
-    focal_scaling = (1.0 / std::tan((model->cam_fovy[mini_back_cam_idx] * M_PI / 180.0) / 2.0)) * mini_back_cam_res[1] / 2.0;
-    mini_back_cam_info.k[0] = mini_back_cam_info.p[0] = focal_scaling;
-    mini_back_cam_info.k[2] = mini_back_cam_info.p[2] = static_cast<double>(mini_back_cam_res[0]) / 2.0;
-    mini_back_cam_info.k[4] = mini_back_cam_info.p[5] = focal_scaling;
-    mini_back_cam_info.k[5] = mini_back_cam_info.p[6] = static_cast<double>(mini_back_cam_res[1]) / 2.0;
-    mini_back_cam_info.k[8] = mini_back_cam_info.p[10] = 1.0;
-
     if (!glfwInit()) {
         RCLCPP_ERROR(get_logger(), "Could not initialize GLFW");
         return;
@@ -273,10 +112,9 @@ SimulatorNode::SimulatorNode(): rclcpp::Node("simulator_node") {
     // create scene and context
     mjv_makeScene(model, &scn, 2000);
     mjr_makeContext(model, &con, mjFONTSCALE_150);
-    int max_width = std::max(std::max(back_cam_info.width, front_cam_info.width), std::max(mini_back_cam_info.width, mini_front_cam_info.width));
-    int max_height = std::max(std::max(back_cam_info.height, front_cam_info.height), std::max(mini_back_cam_info.height, mini_front_cam_info.height));
+    int max_width = std::max(std::max(back_camera->width(), front_camera->width()), std::max(mini_back_camera->width(), mini_front_camera->width()));
+    int max_height = std::max(std::max(back_camera->height(), front_camera->height()), std::max(mini_back_camera->height(), mini_front_camera->height()));
     mjr_resizeOffscreen(max_width, max_height, &con);
-    row_swap_buf.resize(max_width * 3);
 
     // install GLFW mouse and keyboard callbacks
     glfwSetKeyCallback(window, global_keyboard);
@@ -361,155 +199,11 @@ void SimulatorNode::run_loop(rclcpp::Node::SharedPtr node) {
         mjr_render(viewport, &scn, &con);
 
         if (frame_counter == 0) {
-            mjrRect front_viewport = {0, 0, (int) front_rgb_img.width, (int) front_rgb_img.height};
-            mjrRect back_viewport = {0, 0, (int) back_rgb_img.width, (int) back_rgb_img.height};
-            mjrRect mini_front_viewport = {0, 0, (int) mini_front_rgb_img.width, (int) mini_front_rgb_img.height};
-            mjrRect mini_back_viewport = {0, 0, (int) mini_back_rgb_img.width, (int) mini_back_rgb_img.height};
             mjr_setBuffer(mjFB_OFFSCREEN, &con);
-            mjv_updateScene(model, data, &opt, NULL, &front_cam, mjCAT_ALL, &scn);
-            mjr_render(front_viewport, &scn, &con);
-            float *depth_data = (float *) front_depth_img.data.data();
-            mjr_readPixels(front_rgb_img.data.data(), depth_data, front_viewport, &con);
-            float near = (float) model->vis.map.znear * model->stat.extent;
-            float far = (float) model->vis.map.zfar * model->stat.extent;
-            float depth_scale = 1.0f - near / far;
-            for (unsigned int h = 0; h < front_depth_img.height / 2; h++) {
-                for (unsigned int w = 0; w < front_depth_img.width; w++) {
-                    unsigned int idx = h * front_depth_img.width + w;
-                    unsigned int flipped_idx = (front_depth_img.height - 1 - h) * front_depth_img.width + w;
-                    depth_data[idx] = near / (1.0f - depth_data[idx] * (depth_scale));
-                    depth_data[flipped_idx] = near / (1.0f - depth_data[flipped_idx] * (depth_scale));
-                    float temp = depth_data[idx];
-                    depth_data[idx] = depth_data[flipped_idx];
-                    depth_data[flipped_idx] = temp;
-                }
-            }
-
-            int row_size = front_rgb_img.width * 3;
-            for (unsigned int h = 0; h < front_rgb_img.height / 2; h++) {
-                unsigned int flipped_h = front_rgb_img.height - 1 - h;
-                std::memcpy(row_swap_buf.data(), front_rgb_img.data.data() + h * row_size, row_size);
-                std::memcpy(front_rgb_img.data.data() + h * row_size, front_rgb_img.data.data() + flipped_h * row_size, row_size);
-                std::memcpy(front_rgb_img.data.data() + flipped_h * row_size, row_swap_buf.data(), row_size);
-            }
-
-            front_rgb_img.header.stamp = get_time();
-            front_depth_img.header.stamp = get_time();
-            front_cam_info.header.stamp = get_time();
-
-            front_rgb_camera_pub->publish(front_rgb_img);
-            front_rgb_camera_info_pub->publish(front_cam_info);
-            front_depth_camera_pub->publish(front_depth_img);
-            front_depth_camera_info_pub->publish(front_cam_info);
-
-            mjv_updateScene(model, data, &opt, NULL, &back_cam, mjCAT_ALL, &scn);
-            mjr_render(back_viewport, &scn, &con);
-            depth_data = (float *) back_depth_img.data.data();
-            mjr_readPixels(back_rgb_img.data.data(), depth_data, back_viewport, &con);
-            near = (float) model->vis.map.znear * model->stat.extent;
-            far = (float) model->vis.map.zfar * model->stat.extent;
-            depth_scale = 1.0f - near / far;
-            for (unsigned int h = 0; h < back_depth_img.height / 2; h++) {
-                for (unsigned int w = 0; w < back_depth_img.width; w++) {
-                    unsigned int idx = h * back_depth_img.width + w;
-                    unsigned int flipped_idx = (back_depth_img.height - 1 - h) * back_depth_img.width + w;
-                    depth_data[idx] = near / (1.0f - depth_data[idx] * (depth_scale));
-                    depth_data[flipped_idx] = near / (1.0f - depth_data[flipped_idx] * (depth_scale));
-                    float temp = depth_data[idx];
-                    depth_data[idx] = depth_data[flipped_idx];
-                    depth_data[flipped_idx] = temp;
-                }
-            }
-
-            row_size = back_rgb_img.width * 3;
-            for (unsigned int h = 0; h < back_rgb_img.height / 2; h++) {
-                unsigned int flipped_h = back_rgb_img.height - 1 - h;
-                std::memcpy(row_swap_buf.data(), back_rgb_img.data.data() + h * row_size, row_size);
-                std::memcpy(back_rgb_img.data.data() + h * row_size, back_rgb_img.data.data() + flipped_h * row_size, row_size);
-                std::memcpy(back_rgb_img.data.data() + flipped_h * row_size, row_swap_buf.data(), row_size);
-            }
-
-            back_rgb_img.header.stamp = get_time();
-            back_depth_img.header.stamp = get_time();
-            back_cam_info.header.stamp = get_time();
-
-            back_rgb_camera_pub->publish(back_rgb_img);
-            back_rgb_camera_info_pub->publish(back_cam_info);
-            back_depth_camera_pub->publish(back_depth_img);
-            back_depth_camera_info_pub->publish(back_cam_info);
-
-            mjv_updateScene(model, data, &opt, NULL, &mini_front_cam, mjCAT_ALL, &scn);
-            mjr_render(mini_front_viewport, &scn, &con);
-            depth_data = (float *) mini_front_depth_img.data.data();
-            mjr_readPixels(mini_front_rgb_img.data.data(), depth_data, mini_front_viewport, &con);
-            near = (float) model->vis.map.znear * model->stat.extent;
-            far = (float) model->vis.map.zfar * model->stat.extent;
-            depth_scale = 1.0f - near / far;
-            for (unsigned int h = 0; h < mini_front_depth_img.height / 2; h++) {
-                for (unsigned int w = 0; w < mini_front_depth_img.width; w++) {
-                    unsigned int idx = h * mini_front_depth_img.width + w;
-                    unsigned int flipped_idx = (mini_front_depth_img.height - 1 - h) * mini_front_depth_img.width + w;
-                    depth_data[idx] = near / (1.0f - depth_data[idx] * (depth_scale));
-                    depth_data[flipped_idx] = near / (1.0f - depth_data[flipped_idx] * (depth_scale));
-                    float temp = depth_data[idx];
-                    depth_data[idx] = depth_data[flipped_idx];
-                    depth_data[flipped_idx] = temp;
-                }
-            }
-
-            row_size = mini_front_rgb_img.width * 3;
-            for (unsigned int h = 0; h < mini_front_rgb_img.height / 2; h++) {
-                unsigned int flipped_h = mini_front_rgb_img.height - 1 - h;
-                std::memcpy(row_swap_buf.data(), mini_front_rgb_img.data.data() + h * row_size, row_size);
-                std::memcpy(mini_front_rgb_img.data.data() + h * row_size, mini_front_rgb_img.data.data() + flipped_h * row_size, row_size);
-                std::memcpy(mini_front_rgb_img.data.data() + flipped_h * row_size, row_swap_buf.data(), row_size);
-            }
-
-            mini_front_rgb_img.header.stamp = get_time();
-            mini_front_depth_img.header.stamp = get_time();
-            mini_front_cam_info.header.stamp = get_time();
-
-            mini_front_rgb_camera_pub->publish(mini_front_rgb_img);
-            mini_front_rgb_camera_info_pub->publish(mini_front_cam_info);
-            mini_front_depth_camera_pub->publish(mini_front_depth_img);
-            mini_front_depth_camera_info_pub->publish(mini_front_cam_info);
-
-            mjv_updateScene(model, data, &opt, NULL, &mini_back_cam, mjCAT_ALL, &scn);
-            mjr_render(mini_back_viewport, &scn, &con);
-            depth_data = (float *) mini_back_depth_img.data.data();
-            mjr_readPixels(mini_back_rgb_img.data.data(), depth_data, mini_back_viewport, &con);
-            near = (float) model->vis.map.znear * model->stat.extent;
-            far = (float) model->vis.map.zfar * model->stat.extent;
-            depth_scale = 1.0f - near / far;
-            for (unsigned int h = 0; h < mini_back_depth_img.height / 2; h++) {
-                for (unsigned int w = 0; w < mini_back_depth_img.width; w++) {
-                    unsigned int idx = h * mini_back_depth_img.width + w;
-                    unsigned int flipped_idx = (mini_back_depth_img.height - 1 - h) * mini_back_depth_img.width + w;
-                    depth_data[idx] = near / (1.0f - depth_data[idx] * (depth_scale));
-                    depth_data[flipped_idx] = near / (1.0f - depth_data[flipped_idx] * (depth_scale));
-                    float temp = depth_data[idx];
-                    depth_data[idx] = depth_data[flipped_idx];
-                    depth_data[flipped_idx] = temp;
-                }
-            }
-
-            row_size = mini_back_rgb_img.width * 3;
-            for (unsigned int h = 0; h < mini_back_rgb_img.height / 2; h++) {
-                unsigned int flipped_h = mini_back_rgb_img.height - 1 - h;
-                std::memcpy(row_swap_buf.data(), mini_back_rgb_img.data.data() + h * row_size, row_size);
-                std::memcpy(mini_back_rgb_img.data.data() + h * row_size, mini_back_rgb_img.data.data() + flipped_h * row_size, row_size);
-                std::memcpy(mini_back_rgb_img.data.data() + flipped_h * row_size, row_swap_buf.data(), row_size);
-            }
-
-            mini_back_rgb_img.header.stamp = get_time();
-            mini_back_depth_img.header.stamp = get_time();
-            mini_back_cam_info.header.stamp = get_time();
-
-            mini_back_rgb_camera_pub->publish(mini_back_rgb_img);
-            mini_back_rgb_camera_info_pub->publish(mini_back_cam_info);
-            mini_back_depth_camera_pub->publish(mini_back_depth_img);
-            mini_back_depth_camera_info_pub->publish(mini_back_cam_info);
-
+            front_camera->render(model, data, &opt, &scn, &con, get_time());
+            back_camera->render(model, data, &opt, &scn, &con, get_time());
+            mini_front_camera->render(model, data, &opt, &scn, &con, get_time());
+            mini_back_camera->render(model, data, &opt, &scn, &con, get_time());
             mjr_setBuffer(mjFB_WINDOW, &con);
         }
         frame_counter++;
