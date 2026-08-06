@@ -11,7 +11,9 @@
   <node args="-d $(var rvizconfig)" name="rviz" pkg="rviz2" exec="rviz2" />
   <node if="$(var two_bots)" args="-d $(var minirvizconfig)" name="mini_rviz" pkg="rviz2" exec="rviz2" />
 
-  <node pkg="lunabot_sim" exec="simulator"/>
+  <node pkg="lunabot_sim" exec="simulator">
+    <param name="scene_path" value="$(find-pkg-share lunabot_sim)/mujoco/scene_all.xml" />
+  </node>
 
   <node if="$(var two_bots)" name="joy_node" pkg="joy" exec="joy_node" output="screen" respawn="true" namespace="mini">
     <param name="device_id" value="1" />

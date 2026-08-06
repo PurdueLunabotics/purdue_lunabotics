@@ -26,10 +26,33 @@ target_link_libraries(simulator mujoco::mujoco glfw)
 ament_target_dependencies(simulator rclcpp glfw3 lunabot_msgs sensor_msgs geometry_msgs tf2 tf2_geometry_msgs)
 ament_target_dependencies(simple_simulator rclcpp lunabot_msgs sensor_msgs geometry_msgs tf2 tf2_geometry_msgs)
 
+set(MUJOCO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/mujoco")
+
+set(GENERATED_ALL_SCENE "${CMAKE_CURRENT_BINARY_DIR}/scene_all.xml")
+set(GENERATED_JUST_MAIN_SCENE "${CMAKE_CURRENT_BINARY_DIR}/scene_just_main.xml")
+
+add_custom_command(
+  OUTPUT "${GENERATED_ALL_SCENE}"
+  COMMAND xacro "${MUJOCO_DIR}/scene.xacro.xml" two_bots:=true > "${GENERATED_ALL_SCENE}"
+  DEPENDS "${MUJOCO_DIR}/scene.xacro.xml" "${MUJOCO_DIR}/main_bot.xacro.xml" "${MUJOCO_DIR}/mini_bot.xacro.xml"
+)
+add_custom_command(
+  OUTPUT "${GENERATED_JUST_MAIN_SCENE}"
+  COMMAND xacro "${MUJOCO_DIR}/scene.xacro.xml" two_bots:=false > "${GENERATED_JUST_MAIN_SCENE}"
+  DEPENDS "${MUJOCO_DIR}/scene.xacro.xml" "${MUJOCO_DIR}/main_bot.xacro.xml"
+)
+
+add_custom_target(scenes ALL DEPENDS "${GENERATED_ALL_SCENE}" "${GENERATED_JUST_MAIN_SCENE}")
+
 # Install launch files
 install(DIRECTORY
         mujoco
         DESTINATION share/${PROJECT_NAME}/)
+
+install(FILES
+  ${GENERATED_ALL_SCENE}
+  ${GENERATED_JUST_MAIN_SCENE}
+  DESTINATION share/${PROJECT_NAME}/mujoco)
 
 install(TARGETS
   simulator
