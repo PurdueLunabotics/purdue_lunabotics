@@ -35,4 +35,6 @@
     <arg name="entity_name" value="mini_bot"/>
     <arg name="odom_from_sim" value="$(var odom_from_sim)"/>
   </include>
+
+  <node pkg="foxglove_bridge" exec="foxglove_bridge" ros_args="--log-level warn" />
 </launch>
