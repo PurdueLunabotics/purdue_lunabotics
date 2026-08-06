@@ -12,6 +12,7 @@
 
 #include "camera.hpp"
 #include "actuator.hpp"
+#include "sensor.hpp"
 
 class SimulatorNode : public rclcpp::Node {
     private:
@@ -51,12 +52,12 @@ class SimulatorNode : public rclcpp::Node {
         Actuator mini_right_act;
         Actuator exc_act;
 
-        int odom_pos_sensor_idx;
-        int odom_rot_sensor_idx;
-        int mini_odom_pos_sensor_idx;
-        int mini_odom_rot_sensor_idx;
-        int exc_pos_sensor_idx;
-        int exc_effort_sensor_idx;
+        Sensor odom_pos_sensor;
+        Sensor odom_rot_sensor;
+        Sensor mini_odom_pos_sensor;
+        Sensor mini_odom_rot_sensor;
+        Sensor exc_pos_sensor;
+        Sensor exc_effort_sensor;
 
         int frame_counter = 0;
 
