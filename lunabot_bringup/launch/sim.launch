@@ -11,8 +11,12 @@
   <node args="-d $(var rvizconfig)" name="rviz" pkg="rviz2" exec="rviz2" />
   <node if="$(var two_bots)" args="-d $(var minirvizconfig)" name="mini_rviz" pkg="rviz2" exec="rviz2" />
 
+  <let name="scene_path" if="$(var two_bots)" value="$(find-pkg-share lunabot_sim)/mujoco/scene_all.xml"/>
+  <let name="scene_path" unless="$(var two_bots)" value="$(find-pkg-share lunabot_sim)/mujoco/scene_just_main.xml"/>
+
   <node pkg="lunabot_sim" exec="simulator">
-    <param name="scene_path" value="$(find-pkg-share lunabot_sim)/mujoco/scene_all.xml" />
+    <param name="scene_path" value="$(var scene_path)" />
+    <param name="two_bots" value="$(var two_bots)" />
   </node>
 
   <node if="$(var two_bots)" name="joy_node" pkg="joy" exec="joy_node" output="screen" respawn="true" namespace="mini">

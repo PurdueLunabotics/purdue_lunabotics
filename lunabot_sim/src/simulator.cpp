@@ -38,6 +38,8 @@ void global_scroll(GLFWwindow* window, double xoffset, double yoffset) {
 SimulatorNode::SimulatorNode(): rclcpp::Node("simulator_node") {
     clock_pub = create_publisher<rosgraph_msgs::msg::Clock>("/clock", 10);
 
+    two_bots = declare_parameter<bool>("two_bots", true);
+
     scene_path = declare_parameter<std::string>("scene_path", "");
     char *error = new char[1024];
     model = mj_loadXML(this->scene_path.c_str(), NULL, error, 1024);
@@ -48,7 +50,9 @@ SimulatorNode::SimulatorNode(): rclcpp::Node("simulator_node") {
     data = mj_makeData(model);
 
     main_bot = std::make_shared<MainRobot>("", model, data, this);
-    mini_bot = std::make_shared<Robot>("mini", model, data, this);
+    if (two_bots) {
+        mini_bot = std::make_shared<Robot>("mini", model, data, this);
+    }
 
     if (!glfwInit()) {
         RCLCPP_ERROR(get_logger(), "Could not initialize GLFW");
@@ -71,8 +75,12 @@ SimulatorNode::SimulatorNode(): rclcpp::Node("simulator_node") {
     // create scene and context
     mjv_makeScene(model, &scn, 2000);
     mjr_makeContext(model, &con, mjFONTSCALE_150);
-    int max_width = std::max(main_bot->max_cam_width(), mini_bot->max_cam_width());
-    int max_height = std::max(main_bot->max_cam_height(), mini_bot->max_cam_height());
+    uint32_t max_width = main_bot->max_cam_width();
+    uint32_t max_height = main_bot->max_cam_height();
+    if (two_bots) {
+        max_width = std::max(max_width, mini_bot->max_cam_width());
+        max_height = std::max(max_height, mini_bot->max_cam_height());
+    }
     mjr_resizeOffscreen(max_width, max_height, &con);
 
     // install GLFW mouse and keyboard callbacks
@@ -93,8 +101,9 @@ void SimulatorNode::run_loop(rclcpp::Node::SharedPtr node) {
         while (data->time - simstart < 1.0/60.0) {
             mj_step1(model, data);
             main_bot->apply_controls();
-            mini_bot->apply_controls();
-            // exc_act.ctrl(effort.lin_act / 128.0);
+            if (two_bots) {
+                mini_bot->apply_controls();
+            }
             mj_step2(model, data);
         }
 
@@ -103,7 +112,9 @@ void SimulatorNode::run_loop(rclcpp::Node::SharedPtr node) {
         clock_pub->publish(clock);
 
         main_bot->publish_odom(get_time());
-        mini_bot->publish_odom(get_time());
+        if (two_bots) {
+            mini_bot->publish_odom(get_time());
+        }
 
         // get framebuffer viewport
         mjrRect viewport = {0, 0, 0, 0};
@@ -116,7 +127,9 @@ void SimulatorNode::run_loop(rclcpp::Node::SharedPtr node) {
         if (frame_counter == 0) {
             mjr_setBuffer(mjFB_OFFSCREEN, &con);
             main_bot->publish_cameras(model, data, &opt, &scn, &con, get_time());
-            mini_bot->publish_cameras(model, data, &opt, &scn, &con, get_time());
+            if (two_bots) {
+                mini_bot->publish_cameras(model, data, &opt, &scn, &con, get_time());
+            }
             mjr_setBuffer(mjFB_WINDOW, &con);
         }
         frame_counter++;

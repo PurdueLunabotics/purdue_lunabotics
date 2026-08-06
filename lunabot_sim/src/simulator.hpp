@@ -17,6 +17,7 @@
 class SimulatorNode : public rclcpp::Node {
     private:
         std::string scene_path;
+        bool two_bots;
 
         mjModel *model;
         mjData *data;
