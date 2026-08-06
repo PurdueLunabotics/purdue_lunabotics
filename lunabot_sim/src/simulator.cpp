@@ -13,6 +13,8 @@
 #include <tf2/LinearMath/Quaternion.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
+// mujoco specific code taken from https://github.com/google-deepmind/mujoco/blob/main/sample/basic.cc
+
 void global_keyboard(GLFWwindow* window, int key, int scancode, int act, int mods) {
     SimulatorNode *node = (SimulatorNode *) glfwGetWindowUserPointer(window);
     node->keyboard(window, key, scancode, act, mods);

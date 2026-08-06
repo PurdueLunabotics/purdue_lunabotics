@@ -5,6 +5,8 @@
 
 static std::vector<unsigned char> row_swap_buf;
 
+// very heavily inspired by https://github.com/ros-controls/mujoco_ros2_control
+
 Camera::Camera(std::string name, std::string frame_id, std::string topic_name, rclcpp::Node* node, mjModel *model) {
     rgb_camera_info_pub = node->create_publisher<sensor_msgs::msg::CameraInfo>("/" + topic_name + "/color/camera_info", 10);
     depth_camera_info_pub = node->create_publisher<sensor_msgs::msg::CameraInfo>("/" + topic_name + "/aligned_depth_to_color/camera_info", 10);
