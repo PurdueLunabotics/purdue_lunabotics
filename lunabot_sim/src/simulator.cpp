@@ -301,13 +301,12 @@ void SimulatorNode::run_loop(rclcpp::Node::SharedPtr node) {
             data->ctrl[mini_right_act_idx] = mini_effort.right_drive / 1000.0;
             data->ctrl[exc_act_idx] = effort.lin_act / 128.0;
             mj_step2(model, data);
-
-            rosgraph_msgs::msg::Clock clock;
-            clock.clock = get_time();
-            clock_pub->publish(clock);
-
-            rclcpp::spin_some(node);
         }
+
+        rosgraph_msgs::msg::Clock clock;
+        clock.clock = get_time();
+        clock_pub->publish(clock);
+
         geometry_msgs::msg::PoseStamped pose;
         mjtNum *pos_data = &data->sensordata[model->sensor_adr[odom_pos_sensor_idx]];
         mjtNum *rot_data = &data->sensordata[model->sensor_adr[odom_rot_sensor_idx]];
@@ -515,6 +514,8 @@ void SimulatorNode::run_loop(rclcpp::Node::SharedPtr node) {
         }
         frame_counter++;
         frame_counter %= 4; // TODO: proper fps counting
+                            //
+        rclcpp::spin_some(node);
 
         // swap OpenGL buffers (blocking call due to v-sync)
         glfwSwapBuffers(window);
