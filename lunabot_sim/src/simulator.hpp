@@ -1,3 +1,4 @@
+#include <memory>
 #include <string>
 #include "rclcpp/rclcpp.hpp"
 #include "mujoco/mujoco.h"
@@ -10,9 +11,8 @@
 #include "GLFW/glfw3.h"
 #include "sensor_msgs/msg/joint_state.hpp"
 
-#include "camera.hpp"
-#include "actuator.hpp"
-#include "sensor.hpp"
+#include "robot.hpp"
+#include "main_robot.hpp"
 
 class SimulatorNode : public rclcpp::Node {
     private:
@@ -32,32 +32,10 @@ class SimulatorNode : public rclcpp::Node {
         double lastx = 0;
         double lasty = 0;
         
-        rclcpp::Subscription<lunabot_msgs::msg::RobotEffort>::SharedPtr effort_sub;
-        rclcpp::Subscription<lunabot_msgs::msg::RobotEffort>::SharedPtr mini_effort_sub;
         rclcpp::Publisher<rosgraph_msgs::msg::Clock>::SharedPtr clock_pub;
-        rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr odom_pub;
-        rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr mini_odom_pub;
-        rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_pub;
-        lunabot_msgs::msg::RobotEffort effort;
-        lunabot_msgs::msg::RobotEffort mini_effort;
-
-        std::shared_ptr<Camera> front_camera;
-        std::shared_ptr<Camera> back_camera;
-        std::shared_ptr<Camera> mini_front_camera;
-        std::shared_ptr<Camera> mini_back_camera;
-
-        Actuator left_act;
-        Actuator right_act;
-        Actuator mini_left_act;
-        Actuator mini_right_act;
-        Actuator exc_act;
-
-        Sensor odom_pos_sensor;
-        Sensor odom_rot_sensor;
-        Sensor mini_odom_pos_sensor;
-        Sensor mini_odom_rot_sensor;
-        Sensor exc_pos_sensor;
-        Sensor exc_effort_sensor;
+        
+        std::shared_ptr<MainRobot> main_bot;
+        std::shared_ptr<Robot> mini_bot;
 
         int frame_counter = 0;
 

@@ -36,16 +36,7 @@ void global_scroll(GLFWwindow* window, double xoffset, double yoffset) {
 }
 
 SimulatorNode::SimulatorNode(): rclcpp::Node("simulator_node") {
-    effort_sub = create_subscription<lunabot_msgs::msg::RobotEffort>("/effort", 10, [this] (lunabot_msgs::msg::RobotEffort effort) {
-        this->effort = effort;
-    });
-    mini_effort_sub = create_subscription<lunabot_msgs::msg::RobotEffort>("/mini/effort", 10, [this] (lunabot_msgs::msg::RobotEffort effort) {
-        this->mini_effort = effort;
-    });
     clock_pub = create_publisher<rosgraph_msgs::msg::Clock>("/clock", 10);
-    odom_pub = create_publisher<geometry_msgs::msg::PoseStamped>("/simulation/odom", 10);
-    mini_odom_pub = create_publisher<geometry_msgs::msg::PoseStamped>("/mini/simulation/odom", 10);
-    joint_state_pub = create_publisher<sensor_msgs::msg::JointState>("/simulator/joint_states", 10);
 
     scene_path = declare_parameter<std::string>("scene_path", "");
     char *error = new char[1024];
@@ -56,23 +47,8 @@ SimulatorNode::SimulatorNode(): rclcpp::Node("simulator_node") {
     }
     data = mj_makeData(model);
 
-    front_camera = std::make_shared<Camera>("front", "d455_front_sim_link", "d455_front", this, model);
-    back_camera = std::make_shared<Camera>("back", "d455_back_sim_link", "d455_back", this, model);
-    mini_front_camera = std::make_shared<Camera>("mini front", "mini/d455_front_sim_link", "mini/d455_front", this, model);
-    mini_back_camera = std::make_shared<Camera>("mini back", "mini/d455_back_sim_link", "mini/d455_back", this, model);
-
-    left_act = Actuator("left", model, data);
-    right_act = Actuator("right", model, data);
-    exc_act = Actuator("excavation", model, data);
-    mini_left_act = Actuator("mini left", model, data);
-    mini_right_act = Actuator("mini right", model, data);
-
-    odom_pos_sensor = Sensor("odom_pos", model, data);
-    odom_rot_sensor = Sensor("odom_rot", model, data);
-    exc_pos_sensor = Sensor("exc_pos", model, data);
-    exc_effort_sensor = Sensor("exc_effort", model, data);
-    mini_odom_pos_sensor = Sensor("mini_odom_pos", model, data);
-    mini_odom_rot_sensor = Sensor("mini_odom_rot", model, data);
+    main_bot = std::make_shared<MainRobot>("", model, data, this);
+    mini_bot = std::make_shared<Robot>("mini", model, data, this);
 
     if (!glfwInit()) {
         RCLCPP_ERROR(get_logger(), "Could not initialize GLFW");
@@ -95,8 +71,8 @@ SimulatorNode::SimulatorNode(): rclcpp::Node("simulator_node") {
     // create scene and context
     mjv_makeScene(model, &scn, 2000);
     mjr_makeContext(model, &con, mjFONTSCALE_150);
-    int max_width = std::max(std::max(back_camera->width(), front_camera->width()), std::max(mini_back_camera->width(), mini_front_camera->width()));
-    int max_height = std::max(std::max(back_camera->height(), front_camera->height()), std::max(mini_back_camera->height(), mini_front_camera->height()));
+    int max_width = std::max(main_bot->max_cam_width(), mini_bot->max_cam_width());
+    int max_height = std::max(main_bot->max_cam_height(), mini_bot->max_cam_height());
     mjr_resizeOffscreen(max_width, max_height, &con);
 
     // install GLFW mouse and keyboard callbacks
@@ -116,11 +92,9 @@ void SimulatorNode::run_loop(rclcpp::Node::SharedPtr node) {
         mjtNum simstart = data->time;
         while (data->time - simstart < 1.0/60.0) {
             mj_step1(model, data);
-            left_act.ctrl(effort.left_drive / 1000.0);
-            right_act.ctrl(effort.right_drive / 1000.0);
-            mini_left_act.ctrl(mini_effort.left_drive / 1000.0);
-            mini_right_act.ctrl(mini_effort.right_drive / 1000.0);
-            exc_act.ctrl(effort.lin_act / 128.0);
+            main_bot->apply_controls();
+            mini_bot->apply_controls();
+            // exc_act.ctrl(effort.lin_act / 128.0);
             mj_step2(model, data);
         }
 
@@ -128,50 +102,8 @@ void SimulatorNode::run_loop(rclcpp::Node::SharedPtr node) {
         clock.clock = get_time();
         clock_pub->publish(clock);
 
-        geometry_msgs::msg::PoseStamped pose;
-        mjtNum *pos_data = odom_pos_sensor.get();
-        mjtNum *rot_data = odom_rot_sensor.get();
-        pose.header.frame_id = "odom";
-        pose.header.stamp = get_time();
-
-        tf2::Quaternion original(rot_data[3], rot_data[0], rot_data[1], rot_data[2]);
-        original.normalize();
-
-        tf2::Quaternion transform;
-        transform.setRPY(0.0, 3.14159, 0.0);
-        transform.normalize();
-        tf2::Quaternion final = transform * original;
-        final.normalize();
-
-        pose.pose.position.x = pos_data[0];
-        pose.pose.position.y = pos_data[1];
-        pose.pose.position.z = pos_data[2] - 0.3;
-        pose.pose.orientation = tf2::toMsg(final);
-        odom_pub->publish(pose);
-
-        pos_data = odom_pos_sensor.get();
-        rot_data = odom_rot_sensor.get();
-        pose.header.frame_id = "mini/odom";
-
-        original.setValue(rot_data[3], rot_data[0], rot_data[1], rot_data[2]);
-        original.normalize();
-
-        final = transform * original;
-        final.normalize();
-
-        pose.pose.position.x = pos_data[0];
-        pose.pose.position.y = pos_data[1];
-        pose.pose.position.z = pos_data[2] - 0.15;
-        pose.pose.orientation = tf2::toMsg(final);
-        mini_odom_pub->publish(pose);
-
-        sensor_msgs::msg::JointState joint_state;
-        joint_state.header.stamp = get_time();
-        joint_state.name = { "excavation_joint" };
-        joint_state.position = { *exc_pos_sensor.get() };
-        joint_state.effort = { *exc_effort_sensor.get() / 20.0 };
-
-        joint_state_pub->publish(joint_state);
+        main_bot->publish_odom(get_time());
+        mini_bot->publish_odom(get_time());
 
         // get framebuffer viewport
         mjrRect viewport = {0, 0, 0, 0};
@@ -183,10 +115,8 @@ void SimulatorNode::run_loop(rclcpp::Node::SharedPtr node) {
 
         if (frame_counter == 0) {
             mjr_setBuffer(mjFB_OFFSCREEN, &con);
-            front_camera->render(model, data, &opt, &scn, &con, get_time());
-            back_camera->render(model, data, &opt, &scn, &con, get_time());
-            mini_front_camera->render(model, data, &opt, &scn, &con, get_time());
-            mini_back_camera->render(model, data, &opt, &scn, &con, get_time());
+            main_bot->publish_cameras(model, data, &opt, &scn, &con, get_time());
+            mini_bot->publish_cameras(model, data, &opt, &scn, &con, get_time());
             mjr_setBuffer(mjFB_WINDOW, &con);
         }
         frame_counter++;
