@@ -59,20 +59,11 @@ SimulatorNode::SimulatorNode(): rclcpp::Node("simulator_node") {
     mini_front_camera = std::make_shared<Camera>("mini front", "mini/d455_front_sim_link", "mini/d455_front", this, model);
     mini_back_camera = std::make_shared<Camera>("mini back", "mini/d455_back_sim_link", "mini/d455_back", this, model);
 
-    for (int i = 0; i < model->nu; i++) {
-        const char *act_name = &model->names[model->name_actuatoradr[i]];
-        if (strcmp(act_name, "left") == 0) {
-            left_act_idx = i;
-        } else if (strcmp(act_name, "right") == 0) {
-            right_act_idx = i;
-        } else if (strcmp(act_name, "excavation") == 0) {
-            exc_act_idx = i;
-        } else if (strcmp(act_name, "mini left") == 0) {
-            mini_left_act_idx = i;
-        } else if (strcmp(act_name, "mini right") == 0) {
-            mini_right_act_idx = i;
-        }
-    }
+    left_act = Actuator("left", model, data);
+    right_act = Actuator("right", model, data);
+    exc_act = Actuator("excavation", model, data);
+    mini_left_act = Actuator("mini left", model, data);
+    mini_right_act = Actuator("mini right", model, data);
 
     for (int i = 0; i < model->nsensor; i++) {
         const char *sensor_name = &model->names[model->name_sensoradr[i]];
@@ -133,11 +124,11 @@ void SimulatorNode::run_loop(rclcpp::Node::SharedPtr node) {
         mjtNum simstart = data->time;
         while (data->time - simstart < 1.0/60.0) {
             mj_step1(model, data);
-            data->ctrl[left_act_idx] = effort.left_drive / 1000.0;
-            data->ctrl[right_act_idx] = effort.right_drive / 1000.0;
-            data->ctrl[mini_left_act_idx] = mini_effort.left_drive / 1000.0;
-            data->ctrl[mini_right_act_idx] = mini_effort.right_drive / 1000.0;
-            data->ctrl[exc_act_idx] = effort.lin_act / 128.0;
+            left_act.ctrl(effort.left_drive / 1000.0);
+            right_act.ctrl(effort.right_drive / 1000.0);
+            mini_left_act.ctrl(mini_effort.left_drive / 1000.0);
+            mini_right_act.ctrl(mini_effort.right_drive / 1000.0);
+            exc_act.ctrl(effort.lin_act / 128.0);
             mj_step2(model, data);
         }
 

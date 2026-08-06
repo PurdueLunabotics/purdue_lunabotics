@@ -11,6 +11,7 @@
 #include "sensor_msgs/msg/joint_state.hpp"
 
 #include "camera.hpp"
+#include "actuator.hpp"
 
 class SimulatorNode : public rclcpp::Node {
     private:
@@ -44,11 +45,12 @@ class SimulatorNode : public rclcpp::Node {
         std::shared_ptr<Camera> mini_front_camera;
         std::shared_ptr<Camera> mini_back_camera;
 
-        int left_act_idx;
-        int right_act_idx;
-        int mini_left_act_idx;
-        int mini_right_act_idx;
-        int exc_act_idx;
+        Actuator left_act;
+        Actuator right_act;
+        Actuator mini_left_act;
+        Actuator mini_right_act;
+        Actuator exc_act;
+
         int odom_pos_sensor_idx;
         int odom_rot_sensor_idx;
         int mini_odom_pos_sensor_idx;
