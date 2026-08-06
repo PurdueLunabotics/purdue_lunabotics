@@ -19,7 +19,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
-add_executable(simulator src/simulator.cpp src/camera.cpp)
+add_executable(simulator src/simulator.cpp src/camera.cpp src/actuator.cpp)
 add_executable(simple_simulator src/simple_simulator.cpp)
 target_link_libraries(simulator mujoco::mujoco glfw)
 
