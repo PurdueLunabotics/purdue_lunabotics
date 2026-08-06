@@ -65,22 +65,12 @@ SimulatorNode::SimulatorNode(): rclcpp::Node("simulator_node") {
     mini_left_act = Actuator("mini left", model, data);
     mini_right_act = Actuator("mini right", model, data);
 
-    for (int i = 0; i < model->nsensor; i++) {
-        const char *sensor_name = &model->names[model->name_sensoradr[i]];
-        if (strcmp(sensor_name, "odom_pos") == 0) {
-            odom_pos_sensor_idx = i;
-        } else if (strcmp(sensor_name, "odom_rot") == 0) {
-            odom_rot_sensor_idx = i;
-        } else if (strcmp(sensor_name, "exc_pos") == 0) {
-            exc_pos_sensor_idx = i;
-        } else if (strcmp(sensor_name, "exc_effort") == 0) {
-            exc_effort_sensor_idx = i;
-        } else if (strcmp(sensor_name, "mini_odom_pos") == 0) {
-            mini_odom_pos_sensor_idx = i;
-        } else if (strcmp(sensor_name, "mini_odom_rot") == 0) {
-            mini_odom_rot_sensor_idx = i;
-        }
-    }
+    odom_pos_sensor = Sensor("odom_pos", model, data);
+    odom_rot_sensor = Sensor("odom_rot", model, data);
+    exc_pos_sensor = Sensor("exc_pos", model, data);
+    exc_effort_sensor = Sensor("exc_effort", model, data);
+    mini_odom_pos_sensor = Sensor("mini_odom_pos", model, data);
+    mini_odom_rot_sensor = Sensor("mini_odom_rot", model, data);
 
     if (!glfwInit()) {
         RCLCPP_ERROR(get_logger(), "Could not initialize GLFW");
@@ -137,8 +127,8 @@ void SimulatorNode::run_loop(rclcpp::Node::SharedPtr node) {
         clock_pub->publish(clock);
 
         geometry_msgs::msg::PoseStamped pose;
-        mjtNum *pos_data = &data->sensordata[model->sensor_adr[odom_pos_sensor_idx]];
-        mjtNum *rot_data = &data->sensordata[model->sensor_adr[odom_rot_sensor_idx]];
+        mjtNum *pos_data = odom_pos_sensor.get();
+        mjtNum *rot_data = odom_rot_sensor.get();
         pose.header.frame_id = "odom";
         pose.header.stamp = get_time();
 
@@ -157,8 +147,8 @@ void SimulatorNode::run_loop(rclcpp::Node::SharedPtr node) {
         pose.pose.orientation = tf2::toMsg(final);
         odom_pub->publish(pose);
 
-        pos_data = &data->sensordata[model->sensor_adr[mini_odom_pos_sensor_idx]];
-        rot_data = &data->sensordata[model->sensor_adr[mini_odom_rot_sensor_idx]];
+        pos_data = odom_pos_sensor.get();
+        rot_data = odom_rot_sensor.get();
         pose.header.frame_id = "mini/odom";
 
         original.setValue(rot_data[3], rot_data[0], rot_data[1], rot_data[2]);
@@ -176,8 +166,8 @@ void SimulatorNode::run_loop(rclcpp::Node::SharedPtr node) {
         sensor_msgs::msg::JointState joint_state;
         joint_state.header.stamp = get_time();
         joint_state.name = { "excavation_joint" };
-        joint_state.position = { data->sensordata[model->sensor_adr[exc_pos_sensor_idx]] };
-        joint_state.effort = { data->sensordata[model->sensor_adr[exc_effort_sensor_idx]] / 20.0 };
+        joint_state.position = { *exc_pos_sensor.get() };
+        joint_state.effort = { *exc_effort_sensor.get() / 20.0 };
 
         joint_state_pub->publish(joint_state);
 
