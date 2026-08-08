@@ -17,9 +17,9 @@ jobs:
         shell: bash
         run: rosdep update && rosdep install -r --from-paths /luna_ws/src --ignore-src --rosdistro jazzy -y
       - name: Add matcher
-        run:
-          - cp /luna_ws/src/purdue_lunabotics/.github/matchers/gcc.json "$HOME/gcc.json"
-          - echo "::add-matcher::$HOME/gcc.json"
+        run: |
+          cp /luna_ws/src/purdue_lunabotics/.github/matchers/gcc.json "$HOME/gcc.json"
+          echo "::add-matcher::$HOME/gcc.json"
       - name: Test building
         shell: bash
         run: cd /luna_ws/ && source /opt/ros/jazzy/setup.bash && colcon build
