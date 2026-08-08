@@ -10,13 +10,14 @@ jobs:
     container: ghcr.io/purduelunabotics/development:latest
 
     steps:
-      - uses: ammaraskar/gcc-problem-matcher@0.3.0
       - name: Pull code
         shell: bash
         run: cd /luna_ws/src/purdue_lunabotics && git fetch && git checkout ${{ github.sha }} 
       - name: Install any new deps
         shell: bash
         run: rosdep update && rosdep install -r --from-paths /luna_ws/src --ignore-src --rosdistro jazzy -y
+      - name: Add matcher
+        run: echo "::add-matcher::.github/matchers/gcc.json"
       - name: Test building
         shell: bash
         run: cd /luna_ws/ && source /opt/ros/jazzy/setup.bash && colcon build
