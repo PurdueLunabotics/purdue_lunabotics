@@ -7,7 +7,7 @@
   </node>
 
   <include file="$(find-pkg-share lunabot_description)/launch/robot_description.launch.py">
-      <arg name="entity_name" value="dummy_bot"/>
+      <arg name="entity_name" value="main_bot"/>
       <arg name="ns" value=""/>
   </include>
 

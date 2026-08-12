@@ -46,7 +46,7 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument(
             'entity_name',
-            default_value='dummy_bot'
+            default_value='main_bot'
         ),
         DeclareLaunchArgument(
             'sim',
