@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<constants xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:property name="body_dim_x" value="0.8"/>
+    <xacro:property name="body_dim_y" value="0.3"/>
+    <xacro:property name="body_dim_z" value="0.1"/>
+    <xacro:property name="body_pos_z" value="0.3"/>
+
+    <xacro:property name="exc_dim_x" value="0.75"/>
+    <xacro:property name="exc_dim_y" value="0.13"/>
+    <xacro:property name="exc_dim_z" value="0.075"/>
+
+    <xacro:property name="exc_pitch" value="-2.0944"/>
+    <xacro:property name="exc_pos_x" value="0.4"/>
+    <xacro:property name="exc_pos_z" value="0.5"/>
+
+    <xacro:property name="wheel_radius" value="0.2"/>
+    <xacro:property name="wheel_width" value="0.125"/>
+
+    <xacro:property name="wheel_pos_x" value="0.3302"/>
+    <xacro:property name="wheel_pos_y" value="0.254"/>
+    <xacro:property name="wheel_pos_z" value="0.178"/>
+    <xacro:property name="back_wheel_pos_x" value="0.228"/>
+
+    <xacro:property name="dep_apriltag_size" value="0.1067"/>
+    <xacro:property name="dep_apriltag_small_size" value="0.0222"/>
+
+    <xacro:property name="dep_apriltag_pos_x" value="-0.42"/>
+    <xacro:property name="dep_apriltag_pos_y" value="-0.02"/>
+    <xacro:property name="dep_apriltag_pos_z" value="0.51"/>
+    <xacro:property name="dep_apriltag_pitch" value="-0.35"/>
+
+    <xacro:property name="dep_apriltag_small_pos_y" value="0.09"/>
+
+    <xacro:property name="camera_dim_x" value="0.03"/>
+    <xacro:property name="camera_dim_y" value="0.1"/>
+    <xacro:property name="camera_dim_z" value="0.03"/>
+
+    <xacro:property name="cam_back_x" value="-0.44"/>
+    <xacro:property name="cam_back_y" value="0.02"/>
+    <xacro:property name="cam_back_z" value="0.63"/>
+    <xacro:property name="cam_back_pitch" value="0.7"/>
+
+    <xacro:property name="cam_front_x" value="0.3"/>
+    <xacro:property name="cam_front_y" value="0.0"/>
+    <xacro:property name="cam_front_z" value="-0.15"/>
+    <xacro:property name="cam_front_pitch" value="-0.663"/>
+</constants>

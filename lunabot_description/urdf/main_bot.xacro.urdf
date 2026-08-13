@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <robot name="main_bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:include filename="./main_bot_constants.xacro.xml" />
+
   <material name="silver">
     <color rgba="0.75 0.75 0.75 1"/>
   </material>
@@ -10,14 +12,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <box size="0.9 0.5 0.1"/>
+        <box size="${body_dim_x} ${body_dim_y} ${body_dim_z}" />
       </geometry>
       <material name="silver"/>
     </visual>
   </link>
 
   <joint name="mid_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0.0 0 0.3"/>
+    <origin rpy="0 0 0" xyz="0.0 0 ${body_pos_z}"/>
     <parent link="base_link"/>
     <child link="middle_link"/>
   </joint>
@@ -26,15 +28,15 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <box size="0.75 0.13 0.1"/>
+        <box size="${exc_dim_x} ${exc_dim_y} ${exc_dim_z}"/>
       </geometry>
       <material name="silver"/>
     </visual>
   </link>
 
   <joint name="excavation_joint" type="prismatic">
-    <origin rpy="0 -2.0944 0" xyz="0.4 0 0.2"/>
-    <parent link="middle_link"/>
+    <origin rpy="0 ${exc_pitch} 0" xyz="${exc_pos_x} 0 ${exc_pos_z}"/>
+    <parent link="base_link"/>
     <child link="excavation"/>
     <axis xyz="1 0 0"/>
     <limit effort="1000.0" lower="-0.2" upper="0.0" velocity="0.5"/>
@@ -43,16 +45,16 @@
 
   <link name="left_front">
     <visual>
-      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
       <geometry>
-        <cylinder radius="0.2" length="0.125"/>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
       </geometry>
       <material name="silver"/>
     </visual>
   </link>
 
   <joint name="left_front_rev" type="continuous">
-    <origin rpy="0 0 0" xyz="0.3302 0.254 0.178"/>
+    <origin rpy="0 0 0" xyz="${wheel_pos_x} ${wheel_pos_y} ${wheel_pos_z}"/>
     <parent link="base_link"/>
     <child link="left_front"/>
     <axis xyz="0 1 0"/>
@@ -60,16 +62,16 @@
 
   <link name="left_back">
     <visual>
-      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
       <geometry>
-      <cylinder radius="0.2" length="0.125"/>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
       </geometry>
       <material name="silver"/>
     </visual>
   </link>
 
   <joint name="left_back_rev" type="continuous">
-    <origin rpy="0 0 0" xyz="-0.228 0.254 0.178"/>
+    <origin rpy="0 0 0" xyz="-${back_wheel_pos_x} ${wheel_pos_y} ${wheel_pos_z}"/>
     <parent link="base_link"/>
     <child link="left_back"/>
     <axis xyz="0 1 0"/>
@@ -77,16 +79,16 @@
 
   <link name="right_front">
     <visual>
-      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
       <geometry>
-      <cylinder radius="0.2" length="0.125"/>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
       </geometry>
       <material name="silver"/>
     </visual>
   </link>
 
   <joint name="right_front_rev" type="continuous">
-    <origin rpy="0 0 0" xyz="0.3302 -0.254 0.178"/>
+    <origin rpy="0 0 0" xyz="${wheel_pos_x} -${wheel_pos_y} ${wheel_pos_z}"/>
     <parent link="base_link"/>
     <child link="right_front"/>
     <axis xyz="0 1 0"/>
@@ -94,16 +96,16 @@
 
   <link name="right_back">
     <visual>
-      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
       <geometry>
-        <cylinder radius="0.2" length="0.125"/>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
       </geometry>
       <material name="silver"/>
     </visual>
   </link>
 
   <joint name="right_back_rev" type="continuous">
-    <origin rpy="0 0 0" xyz="-0.228 -0.254 0.178"/>
+    <origin rpy="0 0 0" xyz="-${back_wheel_pos_x} -${wheel_pos_y} ${wheel_pos_z}"/>
     <parent link="base_link"/>
     <child link="right_back"/>
     <axis xyz="0 1 0"/>
@@ -111,30 +113,32 @@
 
   <link name="deposition_apriltag_link">
     <visual>
-      <origin rpy="1.57 0 1.57" xyz="0 0 0"/>
+      <origin rpy="${pi/2} 0 ${pi/2}" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://lunabot_sim/models/apriltag_126_dae/apriltag_126.dae" scale="0.12 0.12 1"/>
+        <box size="${dep_apriltag_size} ${dep_apriltag_size} 0.001" />
       </geometry>
+      <material name="silver"/>
     </visual>
   </link> 
 
   <link name="deposition_apriltag_small_link">
     <visual>
-      <origin rpy="1.57 0 1.57" xyz="0 0 0"/>
+      <origin rpy="${pi/2} 0 ${pi/2}" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://lunabot_sim/models/apriltag_173_dae/apriltag_173.dae" scale="0.025 0.025 1"/>
+        <box size="${dep_apriltag_small_size} ${dep_apriltag_small_size} 0.001" />
       </geometry>
+      <material name="silver"/>
     </visual>
   </link> 
 
   <joint name="deposition_apriltag_joint" type="fixed">
-    <origin rpy="0.0 -0.35 3.14" xyz="-0.42 -0.02 0.51"/>
+    <origin rpy="0.0 ${dep_apriltag_pitch} ${pi}" xyz="${dep_apriltag_pos_x} ${dep_apriltag_pos_y} ${dep_apriltag_pos_z}"/>
     <parent link="base_link"/>
     <child link="deposition_apriltag_link"/>
   </joint>
 
   <joint name="deposition_apriltag_small_joint" type="fixed">
-    <origin rpy="0.0 -0.35 3.14" xyz="-0.42 0.09 0.51"/>
+    <origin rpy="0.0 ${dep_apriltag_pitch} ${pi}" xyz="${dep_apriltag_pos_x} ${dep_apriltag_small_pos_y} ${dep_apriltag_pos_z}"/>
     <parent link="base_link"/>
     <child link="deposition_apriltag_small_link"/>
   </joint>
@@ -144,14 +148,13 @@
   <link name="deposition_apriltag_small_optical_frame"></link>
 
   <joint name="deposition_apriltag_optical_joint" type="fixed">
-    <origin rpy="1.57 0.0 1.57" xyz="0.0 0.0 0.0"/>
+    <origin rpy="${pi/2} 0.0 ${pi/2}" xyz="0.0 0.0 0.0"/>
     <parent link="deposition_apriltag_link"/>
     <child link="deposition_apriltag_optical_frame"/>
   </joint>
 
-
   <joint name="deposition_apriltag_small_optical_joint" type="fixed">
-    <origin rpy="1.57 0.0 1.57" xyz="0.0 0.0 0.0"/>
+    <origin rpy="${pi/2} 0.0 ${pi/2}" xyz="0.0 0.0 0.0"/>
     <parent link="deposition_apriltag_small_link"/>
     <child link="deposition_apriltag_small_optical_frame"/>
   </joint>
@@ -160,13 +163,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <box size="0.03 0.1 0.03" />
+        <box size="${camera_dim_x} ${camera_dim_y} ${camera_dim_z}" />
       </geometry>
     </visual>
   </link>
 
   <joint name="d455_back_joint" type="fixed">
-    <origin rpy="${pi} 0.7 ${pi}" xyz="-0.44 0.02 0.63"/>
+    <origin rpy="${pi} ${cam_back_pitch} ${pi}" xyz="${cam_back_x} ${cam_back_y} ${cam_back_z}"/>
     <parent link="base_link"/>
     <child link="d455_back_link"/>
     <axis xyz="0 0 1"/>
@@ -176,13 +179,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <box size="0.03 0.1 0.03" />
+        <box size="${camera_dim_x} ${camera_dim_y} ${camera_dim_z}" />
       </geometry>
     </visual>
   </link>
 
   <joint name="d455_front_joint" type="fixed">
-    <origin rpy="0 ${-0.663 + pi} 0" xyz="0.3 0.0 -0.15"/>
+    <origin rpy="0 ${cam_front_pitch + pi} 0" xyz="${cam_front_x} ${cam_front_y} ${cam_front_z}"/>
     <parent link="excavation"/>
     <child link="d455_front_link"/>
   </joint>

@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <mujoco model="robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:include filename="$(find lunabot_description)/urdf/main_bot_constants.xacro.xml" />
+
   <asset>
     <texture type="2d" file="./tag36_11_00126.png" />
     <material name="tag126" texture="tag36_11_00126" />
@@ -9,42 +11,42 @@
 
   <default>
     <default class="wheel">
-        <geom type="cylinder" size="0.2 0.0625" friction="1 0.005 0.0001" />
+        <geom type="cylinder" size="${wheel_radius} ${wheel_width/2}" friction="1 0.005 0.0001" />
     </default>
   </default>
 
   <worldbody>
-    <body pos="3.1 1.285 0.3" name="robot">
+    <body pos="3.1 1.285 0.0" name="robot">
       <freejoint />
-      <geom type="box" size="0.425 0.25 0.05" pos="-0.05 0 0"/>
+      <geom type="box" size="${body_dim_x/2} ${body_dim_y/2} ${body_dim_z/2}" pos="0 0 ${body_pos_z}"/>
 
-      <site type="box" size="0.0111 0.0111 0.001" pos="-0.42 0.09 0.21" euler="0 -70 -90" material="tag173"/>
-      <site type="box" size="0.05335 0.05335 0.001" pos="-0.42 -0.02 0.21" euler="0 -70 -90" material="tag126"/>
+      <site type="box" size="${dep_apriltag_small_size/2} ${dep_apriltag_small_size/2} 0.001" pos="${dep_apriltag_pos_x} ${dep_apriltag_small_pos_y} ${dep_apriltag_pos_z}" euler="0 -${90 + dep_apriltag_pitch * 180 / pi} -90" material="tag173"/>
+      <site type="box" size="${dep_apriltag_size/2} ${dep_apriltag_size/2} 0.001" pos="${dep_apriltag_pos_x} ${dep_apriltag_pos_y} ${dep_apriltag_pos_z}" euler="0 -${90 + dep_apriltag_pitch * 180 / pi} -90" material="tag126"/>
 
-      <camera name="back" fovy="58" resolution="424 240" pos="-0.44 0.02 0.33" euler="0 50 90" />
+      <camera name="back" fovy="58" resolution="424 240" pos="${cam_back_x} ${cam_back_y} ${cam_back_z}" euler="0 ${90 - cam_back_pitch * 180 / pi} 90" />
 
-      <body pos="0.3 0.32 -0.1" euler="-90 0 0">
+      <body pos="${wheel_pos_x} ${wheel_pos_y} ${wheel_pos_z}" euler="-90 0 0">
         <geom class="wheel" />
         <joint name="left front" type="hinge" />
       </body>
-      <body pos="-0.3 0.32 -0.1" euler="-90 0 0">
+      <body pos="-${back_wheel_pos_x} ${wheel_pos_y} ${wheel_pos_z}" euler="-90 0 0">
         <geom class="wheel" />
         <joint name="left back" type="hinge" />
       </body>
-      <body pos="0.3 -0.32 -0.1" euler="-90 0 0">
+      <body pos="${wheel_pos_x} -${wheel_pos_y} ${wheel_pos_z}" euler="-90 0 0">
         <geom class="wheel" />
         <joint name="right front" type="hinge" />
       </body>
-      <body pos="-0.3 -0.32 -0.1" euler="-90 0 0">
+      <body pos="-${back_wheel_pos_x} -${wheel_pos_y} ${wheel_pos_z}" euler="-90 0 0">
         <geom class="wheel" />
         <joint name="right back" type="hinge" />
       </body>
 
-      <body pos="0.4 0 0.2" euler="0 -120 0">
-        <geom type="box" size="0.375 0.065 0.05" />
+      <body pos="${exc_pos_x} 0 ${exc_pos_z}" euler="0 ${exc_pitch * 180 / pi} 0">
+        <geom type="box" size="${exc_dim_x/2} ${exc_dim_y/2} ${exc_dim_z/2}" />
         <joint name="excavation" type="slide" axis="1 0 0" range="-0.2 0" damping="100" />
 
-        <camera name="front" fovy="58" resolution="424 240" pos="0.3 0 -0.15" euler="0 52 90" />
+        <camera name="front" fovy="58" resolution="424 240" pos="${cam_front_x} ${cam_front_y} ${cam_front_z}" euler="0 ${90 + cam_front_pitch * 180 / pi} 90" />
       </body>
     </body>
   </worldbody>

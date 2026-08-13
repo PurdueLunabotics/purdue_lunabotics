@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <robot name="mini_bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:include filename="./mini_bot_constants.xacro.xml" />
+
   <material name="silver">
     <color rgba="0.75 0.75 0.75 1"/>
   </material>
@@ -9,14 +11,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <box size="0.355 0.43 0.1"/>
+        <box size="${body_dim_x} ${body_dim_y} ${body_dim_z}" />
       </geometry>
       <material name="silver"/>
     </visual>
   </link>
 
   <joint name="mid_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0.0 0 0.15"/>
+    <origin rpy="0 0 0" xyz="0.0 0 ${body_pos_z}"/>
     <parent link="base_link"/>
     <child link="middle_link"/>
   </joint>
@@ -26,14 +28,14 @@
   <link name="lidar_link" />
 
   <joint name="lidar_mid_joint" type="fixed">
-    <origin rpy="0 ${-pi/2} ${pi}" xyz="0.16939 -0.051 0.428"/>
+    <origin rpy="0 ${-pi/2} ${pi}" xyz="${lidar_x} ${lidar_y} ${lidar_z}"/>
     <parent link="middle_link"/>
     <child link="lidar_mid_link"/>
     <axis xyz="0 0 1"/>
   </joint>
 
   <joint name="lidar_joint" type="fixed">
-    <origin rpy="0 0 ${pi*0.375}" xyz="0 0 0"/>
+    <origin rpy="0 0 ${lidar_yaw}" xyz="0 0 0"/>
     <parent link="lidar_mid_link"/>
     <child link="lidar_link"/>
     <axis xyz="0 0 1"/>
@@ -42,16 +44,16 @@
 
   <link name="left_front">
     <visual>
-      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
       <geometry>
-        <cylinder radius="0.03" length="0.09"/>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
       </geometry>
       <material name="silver"/>
     </visual>
   </link>
 
   <joint name="left_front_rev" type="continuous">
-    <origin rpy="0 0 0" xyz="0.0532 0.305 0.03"/>
+    <origin rpy="0 0 0" xyz="${wheel_pos_x} ${wheel_pos_y} ${wheel_pos_z}"/>
     <parent link="base_link"/>
     <child link="left_front"/>
     <axis xyz="0 1 0"/>
@@ -59,16 +61,16 @@
 
   <link name="left_back">
     <visual>
-      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
       <geometry>
-        <cylinder radius="0.03" length="0.09"/>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
       </geometry>
       <material name="silver"/>
     </visual>
   </link>
 
   <joint name="left_back_rev" type="continuous">
-    <origin rpy="0 0 0" xyz="-0.2008 0.305 0.03"/>
+    <origin rpy="0 0 0" xyz="-${back_wheel_pos_x} ${wheel_pos_y} ${wheel_pos_z}"/>
     <parent link="base_link"/>
     <child link="left_back"/>
     <axis xyz="0 1 0"/>
@@ -76,16 +78,16 @@
 
   <link name="right_front">
     <visual>
-      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
       <geometry>
-        <cylinder radius="0.03" length="0.09"/>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
       </geometry>
       <material name="silver"/>
     </visual>
   </link>
 
   <joint name="right_front_rev" type="continuous">
-    <origin rpy="0 0 0" xyz="0.0532 -0.305 0.03"/>
+    <origin rpy="0 0 0" xyz="${wheel_pos_x} -${wheel_pos_y} ${wheel_pos_z}"/>
     <parent link="base_link"/>
     <child link="right_front"/>
     <axis xyz="0 1 0"/>
@@ -93,16 +95,16 @@
 
   <link name="right_back">
     <visual>
-      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
       <geometry>
-        <cylinder radius="0.03" length="0.09"/>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
       </geometry>
       <material name="silver"/>
     </visual>
   </link>
 
   <joint name="right_back_rev" type="continuous">
-    <origin rpy="0 0 0" xyz="-0.2008 -0.305 0.03"/>
+    <origin rpy="0 0 0" xyz="-${back_wheel_pos_x} -${wheel_pos_y} ${wheel_pos_z}"/>
     <parent link="base_link"/>
     <child link="right_back"/>
     <axis xyz="0 1 0"/>
@@ -113,13 +115,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <box size="0.03 0.1 0.03" />
+        <box size="${camera_dim_x} ${camera_dim_y} ${camera_dim_z}" />
       </geometry>
     </visual>
   </link>
 
   <joint name="d455_back_joint" type="fixed">
-    <origin rpy="0 0 ${pi}" xyz="-0.155 0 0.51"/>
+    <origin rpy="0 0 ${pi}" xyz="${cam_back_x} ${cam_back_y} ${cam_back_z}"/>
     <parent link="base_link"/>
     <child link="d455_back_link"/>
     <axis xyz="0 0 1"/>
@@ -129,13 +131,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <box size="0.03 0.1 0.03" />
+        <box size="${camera_dim_x} ${camera_dim_y} ${camera_dim_z}" />
       </geometry>
     </visual>
   </link>
 
   <joint name="d455_front_joint" type="fixed">
-    <origin rpy="0 0.523599 0" xyz="0.18939 0.16173 0.52"/>
+    <origin rpy="0 ${cam_front_pitch} 0" xyz="${cam_front_x} ${cam_front_y} ${cam_front_z}"/>
     <parent link="base_link"/>
     <child link="d455_front_link"/>
     <axis xyz="0 0 1"/>
