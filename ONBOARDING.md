@@ -66,7 +66,7 @@ Tuesday, September 12th.
 
 ### Localization and Mapping
 
-- The figures out where the robot is and what the environment around us looks
+- This figures out where the robot is and what the environment around us looks
   like
 - This outputs a 3d representation of the environment and where we are in it
 - This also tells us where we are in relation to the arena
