@@ -43,4 +43,6 @@
 
     <remap from="cmd_vel" to="cmd_vel"/>
   </node>
+
+  <node name="zones_node" pkg="lunabot_behavior" exec="zones" output="screen"/>
 </launch>
