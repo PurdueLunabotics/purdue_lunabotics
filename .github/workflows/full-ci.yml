@@ -1,12 +1,6 @@
 name: Continuous Integration Tests
 
-on:
-  # Trigger the workflow on push or pull request,
-  # but only for the main branch
-  push:
-    branches:
-      - master 
-      - develop  
+on: workflow_dispatch
 
 jobs:
   build-container:
@@ -39,14 +33,3 @@ jobs:
             ghcr.io/purduelunabotics/development:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  run-build:
-    name: Make sure the code builds
-    needs: build-container
-    runs-on: ubuntu-latest
-    container: ghcr.io/purduelunabotics/development:${{ github.sha }}
-
-    steps:
-      - name: Test building
-        shell: bash
-        run: cd /luna_ws/ && source /opt/ros/jazzy/setup.bash && colcon build

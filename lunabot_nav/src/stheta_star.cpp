@@ -236,6 +236,10 @@ bool SThetaStar::hasLineOfSight(Coord initial, Coord end, double &cost) {
   int distance_x = abs(initial.x - end.x);
   int distance_y = abs(initial.y - end.y);
 
+  if (distance_x == 0 && distance_y == 0) {
+    return true;
+  }
+
   int divisor = std::gcd(distance_x, distance_y);
   int dx = (end.x - initial.x) / divisor;
   int dy = (end.y - initial.y) / divisor;
@@ -301,6 +305,10 @@ double SThetaStar::calculatePathCost(PathMsg path) {
     end.x = x;
     end.y = y;
 
+    if (start.x == end.x && start.y == end.y) {
+      continue;
+    }
+
     double traversal_cost = 0;
 
     if (!hasLineOfSight(start, end, traversal_cost)) {
@@ -322,7 +330,7 @@ double SThetaStar::calculatePathCost(PathMsg path) {
     cost +=
         traversal_cost +
         getDistance(dx, dy) * options.driving_cost +
-        alpha_cost * options.driving_cost +
+        alpha_cost * options.turning_cost +
         options.node_cost;
   }
 

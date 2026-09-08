@@ -4,7 +4,7 @@
       "owner": "gcc",
       "pattern": [
         {
-          "regexp": "^(.*):(\\d+):(\\d+):\\s*(?:(?:fatal)?\\s(warning|error)):\\s+(.*)$",
+          "regexp": "^/luna_ws/src/purdue_lunabotics/(.*):(\\d+):(\\d+):\\s*(?:(?:fatal)?\\s(warning|error)):\\s+(.*)$",
           "file": 1,
           "line": 2,
           "column": 3,
