@@ -35,15 +35,12 @@
     <arg name="entity_name" if="$(eval '$(var robot_num) == 0')" default="dummy_bot"/>
     <arg name="entity_name" if="$(eval '$(var robot_num) == 1')" default="mini_bot"/>
 
-    <!-- <let name="entity_name" if="$(eval '$(var robot_num) == 1')" value="mini_bot"/>
-    <let name="entity_name" if="$(eval '$(var robot_num) == 0')" value="dummy_bot"/> -->
-
     <let name="entity_name" if="$(eval '$(var robot_num) == 1')" value="mini_bot"/>
-    <let name="entity_name" if="$(eval '$(var robot_num) == 0')" value="dummy_bot"/>
+    <let name="entity_name" if="$(eval '$(var robot_num) == 0')" value="main_bot"/>
 
     <!-- What to Launch Args -->
     <arg name="autonomy" default="true" />
-    <arg name="record" default="true" />
+    <arg name="record" default="false" />
     <arg name="slam" default="true" />
     <arg name="odom_from_sim" default="false" />
     <arg name="teensy" default="$(var real)" />
@@ -137,10 +134,6 @@
     <!-- <node if="$(var sim)" name="manual_controller_node" pkg="lunabot_control" exec="manual_controller_node" output="screen" respawn="true">
     </node> -->
 
-    <node if="$(var sim)" name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true">
-            <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
-    </node>
-    <node if="$(var sim)" pkg="controller_manager" exec="spawner" args="-p $(find-pkg-share lunabot_config)/config/sim_controller.yaml velocity_controller"/>
     <node pkg="lunabot_slam" exec="map_base_node.py" respawn="true">
         <remap from="odom" to="$(var /ns)/rtabmap/odom"/>
         <remap from="position" to="$(var /ns)/position"/>
@@ -346,18 +339,4 @@
             <remap from="cmd_vel" to="cmd_vel"/>
         </node>
     </group>
-
-    <group if="$(var sim)">
-        <node exec="create" pkg="ros_gz_sim" args="--topic $(var entity_name)/robot_description --name $(var entity_name) -x $(var starting_x) -y $(var starting_y) -z 0.0 -Y $(var starting_yaw)"/>
-
-        <node name="image_bridge_cam_1_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_1_name)/color/image_raw"                  if="$(eval '\'1\' in $(var cams)')"/>
-        <node name="image_bridge_cam_1_depth" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_1_name)/aligned_depth_to_color/image_raw" if="$(eval '\'1\' in $(var cams)')"/>
-        <node name="image_bridge_cam_2_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_2_name)/color/image_raw"                  if="$(eval '\'2\' in $(var cams)')"/>
-        <node name="image_bridge_cam_2_depth" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_2_name)/aligned_depth_to_color/image_raw" if="$(eval '\'2\' in $(var cams)')"/>
-        <node name="image_bridge_cam_3_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_3_name)/color/image_raw"                  if="$(eval '\'3\' in $(var cams)')"/>
-        <node name="image_bridge_cam_3_depth" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_3_name)/aligned_depth_to_color/image_raw" if="$(eval '\'3\' in $(var cams)')"/>
-        <node name="image_bridge_cam_4_color" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_4_name)/color/image_raw"                  if="$(eval '\'4\' in $(var cams)')"/>
-        <node name="image_bridge_cam_4_depth" pkg="ros_gz_image" exec="image_bridge" args="$(var /ns)/$(var cam_4_name)/aligned_depth_to_color/image_raw" if="$(eval '\'4\' in $(var cams)')"/>
-    </group>
-
 </launch>
