@@ -18,8 +18,8 @@ def point_to_shapely(point: Point) -> shp.Point:
 def zone_to_poly(zone: Zone):
     return shp.Polygon(shell=[point_to_shapely(zone.v1), point_to_shapely(zone.v2), point_to_shapely(zone.v3), point_to_shapely(zone.v4)])
 
-WIDTH = 15 * 0.3048
-HEIGHT = 10 * 0.3048
+WIDTH = 5.5
+HEIGHT = 4
 
 # zone geometries - based on guidebook orientations (all measurements in meters)
 class ZoneMeasurements:
@@ -77,17 +77,17 @@ class ZoneMeasurements:
     # BERM_LENGTH_X = 1.5
     # BERM_LENGTH_Y = 0.9
 
-    START_OFFSET_X = -(WIDTH/2 - 1)
+    START_OFFSET_X = WIDTH/2 - 1
     START_OFFSET_Y = HEIGHT/2 - 1
     START_LENGTH_X = 2
     START_LENGTH_Y = 2
 
-    EXC_OFFSET_X = -WIDTH/4
+    EXC_OFFSET_X = WIDTH/4
     EXC_OFFSET_Y = 0
     EXC_LENGTH_X = WIDTH/2
     EXC_LENGTH_Y = HEIGHT
 
-    BERM_OFFSET_X = WIDTH / 2 - .9/2
+    BERM_OFFSET_X = -(WIDTH / 2 - .9/2)
     BERM_OFFSET_Y = -(HEIGHT / 2 - 1.5/2)
     BERM_LENGTH_X = 0.9
     BERM_LENGTH_Y = 1.5
