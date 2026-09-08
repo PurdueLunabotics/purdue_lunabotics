@@ -30,6 +30,7 @@ from lunabot_behavior.states.wait_for_main_diverge import WaitForMainDivergeStat
 from lunabot_behavior.states.init import InitRetreat, SetupMap, SetupObstacles
 from lunabot_behavior.states.fullstop import Stop
 from lunabot_behavior.states.mapping_spin import MappingSpin
+from lunabot_behavior.states.wait import Wait
 
 from lunabot_behavior.state import Events, State
 from lunabot_behavior.state_manager import StateManager
@@ -60,6 +61,8 @@ class MiniStates(Enum):
 
     SPIN_MAPPING = (MappingSpin(), (LedColor.GREEN, LedColor.BLUE))
     SPIN_MAPPING_STALL = (Stall(), (LedColor.GREEN, LedColor.BLUE))
+
+    WAIT_BEFORE_FIND_LINKUP = (Wait(2.0), (LedColor.GREEN, LedColor.BLUE))
 
     FIND_LINKUP_AGAIN = (FindLinkup(), (LedColor.GREEN, LedColor.YELLOW))
 
@@ -130,9 +133,11 @@ class MiniStates(Enum):
             (MiniStates.CHECKOUT_LINKUP_STALL, Events.SUCCESS): MiniStates.CHECKOUT_LINKUP,
             (MiniStates.CHECKOUT_LINKUP_NO_PATH, Events.SUCCESS): MiniStates.CHECKOUT_LINKUP,
 
-            (MiniStates.SPIN_MAPPING, Events.SUCCESS): MiniStates.FIND_LINKUP_AGAIN,
+            (MiniStates.SPIN_MAPPING, Events.SUCCESS): MiniStates.WAIT_BEFORE_FIND_LINKUP,
             (MiniStates.SPIN_MAPPING, Events.STALL): MiniStates.SPIN_MAPPING_STALL,
             (MiniStates.SPIN_MAPPING_STALL, Events.SUCCESS): MiniStates.SPIN_MAPPING,
+
+            (MiniStates.WAIT_BEFORE_FIND_LINKUP, Events.SUCCESS): MiniStates.FIND_LINKUP_AGAIN,
 
             (MiniStates.FIND_LINKUP_AGAIN, Events.SUCCESS): MiniStates.LINKUP_HANDSHAKE,
 
