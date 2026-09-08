@@ -136,10 +136,6 @@
 
     <!-- <node if="$(var sim)" name="manual_controller_node" pkg="lunabot_control" exec="manual_controller_node" output="screen" respawn="true">
     </node> -->
-    <node unless="$(var sim)" name="stall_detection_node" pkg="lunabot_control" exec="stall_detection_node" output="screen" respawn="true">
-
-    </node>
-
     <node if="$(var sim)" name="drivetrain_controller_node" pkg="lunabot_control" exec="drivetrain_controller_node" output="screen" respawn="true">
             <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
     </node>
