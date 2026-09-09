@@ -11,7 +11,7 @@
         ids:    [126, 173, 301, 482, 421, 476, 124, 153, 181, 238, 282, 292, 296]         # tag IDs for which to publish transform 
         frames: ["main_deposition", "main_deposition_small", "tag36h11:301", "tag36h11:482", "tag36h11:421", "tag36h11:476",
           "tag36h11:124", "tag36h11:153", "tag36h11:181", "tag36h11:238", "tag36h11:282", "tag36h11:292", "tag36h11:296"]   # frame names
-        sizes:  [0.09603, 0.02, 0.145, 0.145, 0.4375, 0.4375, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145]     # tag-specific edge size, overrides the default 'size'
+        sizes:  [0.09603, 0.02, 0.145, 0.10767, 0.4375, 0.4375, 0.10767, 0.10767, 0.10767, 0.10767, 0.10767, 0.10767, 0.10767]     # tag-specific edge size, overrides the default 'size'
 /mini/*:
   apriltag:                 # node name
     ros__parameters:
@@ -25,4 +25,4 @@
         ids:    [126, 173, 301, 482, 421, 476, 124, 153, 181, 238, 282, 292, 296]         # tag IDs for which to publish transform
         frames: ["main_deposition", "main_deposition_small", "tag36h11:401", "tag36h11:582", "tag36h11:521", "tag36h11:576",   # frame names
           "tag36h11:224", "tag36h11:253", "tag36h11:281", "tag36h11:338", "tag36h11:382", "tag36h11:392", "tag36h11:396"]   # frame names
-        sizes:  [0.09603, 0.02, 0.145, 0.145, 0.4375, 0.4375]     # tag-specific edge size, overrides the default 'size'
+        sizes:  [0.09603, 0.02, 0.145, 0.10767, 0.4375, 0.4375, 0.10767, 0.10767, 0.10767, 0.10767, 0.10767, 0.10767, 0.10767]     # tag-specific edge size, overrides the default 'size'
