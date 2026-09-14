@@ -1,6 +1,5 @@
 #include "sensor.hpp"
 #include <cstring>
-#include <mujoco/mjtnum.h>
 
 Sensor::Sensor() {
     idx = -1;
