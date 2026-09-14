@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mujoco/mjtnum.h>
 #include <string>
 #include "mujoco/mujoco.h"
 

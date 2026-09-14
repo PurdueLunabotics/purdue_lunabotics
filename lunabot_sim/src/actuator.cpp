@@ -1,6 +1,5 @@
 #include "actuator.hpp"
 #include <cstring>
-#include <mujoco/mjtnum.h>
 
 Actuator::Actuator() {
     idx = -1;
