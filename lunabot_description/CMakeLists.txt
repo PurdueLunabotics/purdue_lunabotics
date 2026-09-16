@@ -17,7 +17,6 @@ find_package(xacro REQUIRED)
 install(DIRECTORY
   launch
   urdf
-  meshes
   DESTINATION share/${PROJECT_NAME}/)
 
 if(BUILD_TESTING)
