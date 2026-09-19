@@ -9,12 +9,12 @@ def capture_loop():
     count = 0
     dir_count = 1
 
-    script_dir = os.path.dirname(os.path.abspath(__file__))
+    script_dir = os.path.dirname(os.path.abspath(__file__)) + "/captured_images"
 
     image_dir = ""
     while True:
         try:
-            image_dir = os.path.join(script_dir, f"captured_images{dir_count}")
+            image_dir = os.path.join(script_dir, f"image_session{dir_count}")
             os.makedirs(image_dir)
             break
         except:
