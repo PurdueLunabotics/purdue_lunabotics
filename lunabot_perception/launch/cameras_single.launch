@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
-    <group if="$(eval '\'1\' in $(var cams)')">
         <group unless="$(var sim)">
         <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py">
             <arg name="camera_name"                   value ="$(var cam_1_name)" />
@@ -55,4 +54,4 @@
         <param name="noise_filter_radius"           value="$(var noise_filter_radius)"/>
         <param name="max_depth"                     value="$(var max_depth)"/>
         </node>
-    </group>
+</launch>
