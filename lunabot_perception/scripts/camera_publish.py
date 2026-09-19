@@ -8,25 +8,28 @@ class CameraPublisher(Node):
     def __init__(self):
         super().__init__("camera_publisher")
 
-        self.publisher_ = self.create_publisher(Image, "camera/image", 10)
+        self.declare_parameter("camera_port", 0)
+        self.camera_port = self.get_parameter("camera_port").get_parameter_value()
+
+        self.get_logger().info(f'Received argument: {self.camera_port}')
+        
+        self.publisher_ = self.create_publisher(Image, 'camera/image', 10)
 
         self.bridge = CvBridge()
 
-        # Initialize the camera, assuming port is at 0
-        # TODO find the actual camera port
-
-        
-        self.camera = cv2.VideoCapture(0)
+        # Initialize with camera port
+        self.camera = cv2.VideoCapture(self.camera_port)
 
         if not self.camera.isOpened():
             self.get_logger().error("Could not open USB camera")
             return
 
+        # Create a timer which publishes 30 fps
         self.timer = self.create_timer(1.0 / 30.0, self.publish_frame)
 
         self.get_logger().info("Camera publisher started")
 
-    def publish_frame(self):
+    def publish_frame_loop(self):
         ret, frame = self.camera.read()
         if not ret:
             self.get_logger().error("Failed to capture image from camera")
