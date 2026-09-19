@@ -6,23 +6,52 @@ from sensor_msgs.msg import Image
 
 class CameraPublisher(Node):
     def __init__(self):
-        super().__init__('camera_publisher')
+        super().__init__("camera_publisher")
 
-        self.publisher_ = self.create_publisher(Image, 'camera/image', 10)
+        self.publisher_ = self.create_publisher(Image, "camera/image", 10)
 
         self.bridge = CvBridge()
+
+        # Initialize the camera, assuming port is at 0
+        # TODO find the actual camera port
+
+        
         self.camera = cv2.VideoCapture(0)
 
         if not self.camera.isOpened():
             self.get_logger().error("Could not open USB camera")
             return
 
-        self.timer = self.create_timer(
-            1.0 / 30.0,
-            self.publish_frame
-        )
+        self.timer = self.create_timer(1.0 / 30.0, self.publish_frame)
 
         self.get_logger().info("Camera publisher started")
-    
+
+    def publish_frame(self):
+        ret, frame = self.camera.read()
+        if not ret:
+            self.get_logger().error("Failed to capture image from camera")
+            return
+
+        msg = self.bridge.cv2_to_imgmsg(frame, encoding="bgr8")
+        self.publisher_.publish(msg)
+
+    def destroy_node(self):
+        self.camera.release()
+        super().destroy_node()
+
+def main():
+    rclpy.init()
+
+    node = CameraPublisher()
+
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+
+    node.destroy_node()
+    rclpy.shutdown()
 
 
+if __name__ == "__main__":
+    main()
