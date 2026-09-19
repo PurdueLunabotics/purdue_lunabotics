@@ -15,6 +15,13 @@
     <param from="$(find-pkg-share lunabot_config)/config/test_planner.yml"/>
   </node>
 
+
+  <node name="controller_server" pkg="nav2_controller" exec="controller_server" output="screen" respawn="true">
+    <param from="$(find-pkg-share lunabot_config)/config/test_planner.yml"/>
+  </node>
+
+
+
   <node name="map_server" pkg="nav2_map_server" exec="map_server" output="screen" respawn="true">
     <param name="yaml_filename" value="$(find-pkg-share lunabot_config)/config/maps/map_1775505069.yaml"/>
   </node>
