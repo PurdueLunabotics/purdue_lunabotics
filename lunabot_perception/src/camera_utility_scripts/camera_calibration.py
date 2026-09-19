@@ -8,15 +8,18 @@ import os
 # ==========================================
 # Number of INSIDE corners on your checkerboard (Width, Height)
 # If your board has 10x7 squares, the inside corners will be 9x6
-CHECKERBOARD_SIZE = (9, 6) 
+CHECKERBOARD_SIZE = (9, 6)
 
 # Real-world size of a single square edge (e.g., in millimeters or meters)
 # Use 1.0 if you only care about the intrinsic matrix and pixel-space distortion
-SQUARE_SIZE = 1.0 
+SQUARE_SIZE = 1.0
 
 # Path to the folder containing your calibration images (e.g., .jpg, .png)
-IMAGES_DIR = "./calibration_images"
+IMAGES_DIR = (
+    os.path.dirname(os.path.abspath(__file__)) + "/captured_images/image_session2"
+)
 # ==========================================
+
 
 def calibrate_camera():
     # Termination criteria for sub-pixel corner refinement
@@ -25,21 +28,25 @@ def calibrate_camera():
     # Prepare 3D object points in the real-world coordinate system
     # E.g., (0,0,0), (1,0,0), (2,0,0) ....,(8,5,0)
     objp = np.zeros((CHECKERBOARD_SIZE[0] * CHECKERBOARD_SIZE[1], 3), np.float32)
-    objp[:, :2] = np.mgrid[0:CHECKERBOARD_SIZE[0], 0:CHECKERBOARD_SIZE[1]].T.reshape(-1, 2)
+    objp[:, :2] = np.mgrid[
+        0 : CHECKERBOARD_SIZE[0], 0 : CHECKERBOARD_SIZE[1]
+    ].T.reshape(-1, 2)
     objp *= SQUARE_SIZE
 
     # Arrays to store object points and image points from all valid images
     object_points = []  # 3d point in real world space
-    image_points = []   # 2d points in image plane.
+    image_points = []  # 2d points in image plane.
 
     # Grab all images from the specified folder
-    image_extensions = ('*.jpg', '*.jpeg', '*.png', '*.bmp')
+    image_extensions = ("*.jpg", "*.jpeg", "*.png", "*.bmp")
     images = []
     for ext in image_extensions:
         images.extend(glob.glob(os.path.join(IMAGES_DIR, ext)))
 
     if not images:
-        print(f"Error: No images found in '{IMAGES_DIR}'. Please check the directory path.")
+        print(
+            f"Error: No images found in '{IMAGES_DIR}'. Please check the directory path."
+        )
         return
 
     print(f"Found {len(images)} images. Processing...")
@@ -65,7 +72,7 @@ def calibrate_camera():
 
             # Optional: Draw and display the corners to verify detection
             cv2.drawChessboardCorners(img, CHECKERBOARD_SIZE, corners2, ret)
-            cv2.imshow('Chessboard Detection Preview', img)
+            cv2.imshow("Chessboard Detection Preview", img)
             cv2.waitKey(100)  # Pause for 100ms per image
         else:
             print(f"Warning: Checkerboard corners not found in image: {fname}")
@@ -73,10 +80,14 @@ def calibrate_camera():
     cv2.destroyAllWindows()
 
     if valid_image_count < 10:
-        print(f"\nWarning: Only {valid_image_count} images were valid. At least 10-20 distinct angles are recommended for good calibration.")
+        print(
+            f"\nWarning: Only {valid_image_count} images were valid. At least 10-20 distinct angles are recommended for good calibration."
+        )
 
     if valid_image_count == 0:
-        print("Error: Could not find checkerboard corners in any of the provided images.")
+        print(
+            "Error: Could not find checkerboard corners in any of the provided images."
+        )
         return
 
     print("\nRunning camera calibration optimization...")
@@ -91,7 +102,9 @@ def calibrate_camera():
     print("\nDistortion Coefficients:\n", dist)
 
     # Save the calibration parameters to a compressed numpy file for future use
-    output_filename = "calibration_data.npz"
+    output_filename = (
+        os.path.dirname(os.path.abspath(__file__)) + "/image_session2_data/calibration_data.npz"
+    )
     np.savez(output_filename, mtx=mtx, dist=dist)
     print(f"\nParameters successfully saved to '{output_filename}'")
 
@@ -101,7 +114,7 @@ def calibrate_camera():
     sample_img_path = images[0]
     img = cv2.imread(sample_img_path)
     h, w = img.shape[:2]
-    
+
     # Refine the camera matrix based on free scaling parameter (alpha)
     new_camera_mtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
 
@@ -110,14 +123,15 @@ def calibrate_camera():
 
     # Crop the image based on ROI to remove black padding boundaries
     x, y, w_box, h_box = roi
-    undistorted_img_cropped = undistorted_img[y:y+h_box, x:x+w_box]
+    undistorted_img_cropped = undistorted_img[y : y + h_box, x : x + w_box]
 
     # Display side-by-side comparison
-    cv2.imshow('Original Image', img)
-    cv2.imshow('Undistorted Image', undistorted_img_cropped)
+    cv2.imshow("Original Image", img)
+    cv2.imshow("Undistorted Image", undistorted_img_cropped)
     print("\nPress any key on the image windows to close and exit.")
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
     calibrate_camera()
