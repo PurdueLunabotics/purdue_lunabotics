@@ -2,7 +2,6 @@
 <launch>
     <arg name="camera_name" />
     <arg name="serial_no" />
-    <arg name="initial_reset" />
     <arg name="tf_prefix" />
 
     <group unless="$(var sim)">
@@ -14,7 +13,7 @@
 
             <arg name="serial_no"                     value="$(var serial_no)"/>
 
-            <arg name="initial_reset"                 value="$(var initial_reset)"/>
+            <arg name="initial_reset"                 value="true"/>
 
             <arg name="pointcloud.enable"             value="false"/>
             <arg name="enable_sync"                   value="true"/>
