@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <group if="$(eval '\'1\' in $(var cams)')">
+        <group unless="$(var sim)">
+        <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py">
+            <arg name="camera_name"                   value ="$(var cam_1_name)" />
+            <arg name="camera_namespace"              value ="" />
+            <arg name="base_frame_id"                 value ="link" />
+
+
+            <arg name="serial_no"                     value="$(var serial_no_cam_1)"/>
+
+            <arg name="initial_reset"                 value="$(var initial_reset)"/>
+
+            <arg name="pointcloud.enable"             value="false"/>
+            <arg name="enable_sync"                   value="true"/>
+            <arg name="align_depth.enable"            value="true"/>
+
+            <arg name="enable_depth"                  value="true"/>
+            <arg name="depth_module.depth_profile"    value="640x480x15"/>
+
+            <arg name="enable_infra"                  value="true"/>
+            <arg name="enable_infra1"                  value="true"/>
+            <arg name="enable_infra2"                  value="true"/>
+
+            <arg name="depth_module.infra_profile"    value="640x480x15"/>
+
+            <arg name="enable_color"                  value="true"/>
+            <arg name="rgb_camera.color_profile"      value="640x480x15"/>
+
+            <arg name="decimation_filter.enable"      value="true"/>
+
+            <arg name="publish_tf"                    value="true"/>
+            <arg name="tf_publish_rate"               value="0.0"/>
+            <arg name="tf_prefix"                     value="$(var ns/)"/>
+
+            <arg name="clip_distance"                 value="-1.0"/>
+        </include>
+        </group>
+        <push_ros_namespace namespace="$(var cam_1_name)"/>
+        <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
+        <arg name="camera_frame"                    value="$(var ns)$(var cam_1_name)_link" />
+        <arg name="camera_topic"                    value="color/image_raw"/>
+
+        <arg name="use_sim_time"                    value="$(var sim)"/>
+        </include>
+
+        <node pkg="rtabmap_util" exec='point_cloud_xyz' name="point_cloud_xyz" respawn="true">
+            <remap from="depth/camera_info"             to="aligned_depth_to_color/camera_info" />
+            <remap from="depth/image"                   to="aligned_depth_to_color/image_raw" />
+        <remap from="cloud"                         to="points" /> <!-- output-->
+
+        <param name="decimation"                    value="$(var decimation)"/>
+        <param name="voxel_size"                    value="$(var voxel_size)"/>
+        <param name="noise_filter_radius"           value="$(var noise_filter_radius)"/>
+        <param name="max_depth"                     value="$(var max_depth)"/>
+        </node>
+    </group>
