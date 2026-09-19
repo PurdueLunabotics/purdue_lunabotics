@@ -3,6 +3,7 @@
     <arg name="camera_name" />
     <arg name="serial_no" />
     <arg name="tf_prefix" />
+    <arg name="profile"                               default="640x480x15"/>
 
     <group unless="$(var sim)">
         <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py">
@@ -20,16 +21,16 @@
             <arg name="align_depth.enable"            value="true"/>
 
             <arg name="enable_depth"                  value="true"/>
-            <arg name="depth_module.depth_profile"    value="640x480x15"/>
+            <arg name="depth_module.depth_profile"    value="$(var profile)"/>
 
             <arg name="enable_infra"                  value="true"/>
             <arg name="enable_infra1"                  value="true"/>
             <arg name="enable_infra2"                  value="true"/>
 
-            <arg name="depth_module.infra_profile"    value="640x480x15"/>
+            <arg name="depth_module.infra_profile"    value="$(var profile)"/>
 
             <arg name="enable_color"                  value="true"/>
-            <arg name="rgb_camera.color_profile"      value="640x480x15"/>
+            <arg name="rgb_camera.color_profile"      value="$(var profile)"/>
 
             <arg name="decimation_filter.enable"      value="true"/>
 
