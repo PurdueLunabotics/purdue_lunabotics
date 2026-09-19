@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
-        <group unless="$(var sim)">
+        <group unless="">
         <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py">
-            <arg name="camera_name"                   value ="$(var cam_1_name)" />
+            <arg name="camera_name"                   value ="" />
             <arg name="camera_namespace"              value ="" />
             <arg name="base_frame_id"                 value ="link" />
 
 
-            <arg name="serial_no"                     value="$(var serial_no_cam_1)"/>
+            <arg name="serial_no"                     value=""/>
 
-            <arg name="initial_reset"                 value="$(var initial_reset)"/>
+            <arg name="initial_reset"                 value=""/>
 
             <arg name="pointcloud.enable"             value="false"/>
             <arg name="enable_sync"                   value="true"/>
@@ -31,17 +31,17 @@
 
             <arg name="publish_tf"                    value="true"/>
             <arg name="tf_publish_rate"               value="0.0"/>
-            <arg name="tf_prefix"                     value="$(var ns/)"/>
+            <arg name="tf_prefix"                     value=""/>
 
             <arg name="clip_distance"                 value="-1.0"/>
         </include>
         </group>
         <push_ros_namespace namespace="$(var cam_1_name)"/>
         <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
-        <arg name="camera_frame"                    value="$(var ns)$(var cam_1_name)_link" />
+        <arg name="camera_frame"                    value="" />
         <arg name="camera_topic"                    value="color/image_raw"/>
 
-        <arg name="use_sim_time"                    value="$(var sim)"/>
+        <arg name="use_sim_time"                    value=""/>
         </include>
 
         <node pkg="rtabmap_util" exec='point_cloud_xyz' name="point_cloud_xyz" respawn="true">
@@ -49,9 +49,9 @@
             <remap from="depth/image"                   to="aligned_depth_to_color/image_raw" />
         <remap from="cloud"                         to="points" /> <!-- output-->
 
-        <param name="decimation"                    value="$(var decimation)"/>
-        <param name="voxel_size"                    value="$(var voxel_size)"/>
-        <param name="noise_filter_radius"           value="$(var noise_filter_radius)"/>
-        <param name="max_depth"                     value="$(var max_depth)"/>
+        <param name="decimation"                    value=""/>
+        <param name="voxel_size"                    value=""/>
+        <param name="noise_filter_radius"           value=""/>
+        <param name="max_depth"                     value=""/>
         </node>
 </launch>
