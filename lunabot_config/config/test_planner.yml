@@ -32,5 +32,13 @@ planner_server:
   ros__parameters:
     planner_plugins: ["GridBased"]
     GridBased:
-      plugin: "SThetaStarPlanner"
-      remapping_cost_change_percent: 0.01
+      plugin: "nav2_smac_planner::SmacPlannerHybrid"
+      tolerance: 0.25
+      downsample_costmap: false
+      downsampling_factor: 1
+      minimum_turning_radius: 0.4
+      motion_model_for_search: "REEDS_SHEPP"
+      angle_quantization_factor: 72
+      analytic_expansion_max_length: 3.0
+      allow_unknown: true
+      cost_penalty: 2.0
