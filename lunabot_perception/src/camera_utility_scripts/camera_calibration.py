@@ -14,12 +14,13 @@ CHECKERBOARD_SIZE = (9, 6)
 # Use 1.0 if you only care about the intrinsic matrix and pixel-space distortion
 SQUARE_SIZE = 1.0
 
+IMAGE_SESSION = 1
 # Path to the folder containing your calibration images (e.g., .jpg, .png)
 IMAGES_DIR = (
-    os.path.dirname(os.path.abspath(__file__)) + "/captured_images/image_session2"
+    os.path.dirname(os.path.abspath(__file__)) + "/captured_images/image_session" + str(IMAGE_SESSION)
 )
 # ==========================================
-
+DATA_DIR = os.path.dirname(os.path.abspath(__file__)) + "/image_session_data"
 
 def calibrate_camera():
     # Termination criteria for sub-pixel corner refinement
@@ -101,9 +102,11 @@ def calibrate_camera():
     print("\nCamera Matrix (Intrinsic parameters):\n", mtx)
     print("\nDistortion Coefficients:\n", dist)
 
+    if not os.path.isdir(DATA_DIR):
+        os.makedirs(DATA_DIR)
     # Save the calibration parameters to a compressed numpy file for future use
     output_filename = (
-        os.path.dirname(os.path.abspath(__file__)) + "/image_session2_data/calibration_data.npz"
+        os.path.dirname(os.path.abspath(__file__)) + "/image_session_data" + f"/session{IMAGE_SESSION}_calibration_data.npz"
     )
     np.savez(output_filename, mtx=mtx, dist=dist)
     print(f"\nParameters successfully saved to '{output_filename}'")
