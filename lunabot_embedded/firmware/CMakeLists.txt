@@ -8,6 +8,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(teensy_package)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 cmake_minimum_required(VERSION 3.20)
 project(firmware LANGUAGES C CXX)
 
@@ -15,3 +17,6 @@ add_subdirectory(teensyduino)
 add_subdirectory(hid_test)
 add_subdirectory(libs)
 add_subdirectory(modbus_test)
+add_subdirectory(teensy_main)
+add_subdirectory(teensy_mini)
+add_subdirectory(teensy_system_test)

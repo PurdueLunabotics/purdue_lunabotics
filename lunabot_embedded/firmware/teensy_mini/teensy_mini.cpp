@@ -95,3 +95,12 @@ void loop() {
     n = RawHID.send(buffer, 0);
   }
 }
+
+extern "C" int main(void)
+{
+	setup();
+	while (1) {
+		loop();
+		yield();
+	}
+}

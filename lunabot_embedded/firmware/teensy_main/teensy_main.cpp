@@ -1,4 +1,5 @@
 // include ROS and all messages
+#include <Arduino.h>
 #include <RobotMsgs.pb.h>
 #include <pb_decode.h>
 #include <pb_encode.h>
@@ -108,4 +109,13 @@ void loop() {
     send();
     n = RawHID.send(buffer, 0);
   }
+}
+
+extern "C" int main(void)
+{
+	setup();
+	while (1) {
+		loop();
+		yield();
+	}
 }

@@ -29,3 +29,12 @@ void loop() {
     MC4_M1.write(-125);
     delay(1000);
 }
+
+extern "C" int main(void)
+{
+	setup();
+	while (1) {
+		loop();
+		yield();
+	}
+}

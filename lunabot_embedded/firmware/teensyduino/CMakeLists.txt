@@ -41,9 +41,34 @@ function(create_arduino_lib DIRECTORY LIBRARIES_DIRS)
 endfunction()
 
 file(GLOB arduino_libs_dirs "${teensy_package_SOURCE_DIR}/libraries/*")
+
+FetchContent_Declare(
+    arduino_stepper
+    GIT_REPOSITORY https://github.com/arduino-libraries/Stepper.git
+    GIT_TAG        1.1.3
+)
+FetchContent_MakeAvailable(arduino_stepper)
+
+list(APPEND arduino_libs_dirs ${arduino_stepper_SOURCE_DIR})
+
 foreach(arduino_lib ${arduino_libs_dirs})
     if(IS_DIRECTORY "${arduino_lib}")
         create_arduino_lib(${arduino_lib} "${arduino_libs_dirs}")
     endif()
 endforeach()
 
+find_program(TEENSY_LOADER_CLI teensy_loader_cli REQUIRED)
+
+function(make_hex target_name)
+    set(HEX_FILE "${CMAKE_CURRENT_BINARY_DIR}/${target_name}.hex")
+
+    add_custom_command(
+        TARGET ${target_name}
+        POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY} -O ihex -R .eeprom $<TARGET_FILE:${target_name}> ${HEX_FILE}
+    )
+    add_custom_target(flash_${target_name}
+        COMMAND ${TEENSY_LOADER_CLI} --mcu=TEENSY41 -wv ${HEX_FILE}
+        DEPENDS ${target_name}
+    )
+endfunction()
