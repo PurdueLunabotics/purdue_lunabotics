@@ -1,1 +1,1 @@
-../firmware/teensy_main/lib/lunabot_drivers/RobotMsgs.pb.h
+../firmware/libs/RobotMsgs.pb.h
