@@ -12,3 +12,4 @@ cmake_minimum_required(VERSION 3.20)
 project(firmware LANGUAGES C CXX)
 
 add_subdirectory(teensyduino)
+add_subdirectory(hid_test)

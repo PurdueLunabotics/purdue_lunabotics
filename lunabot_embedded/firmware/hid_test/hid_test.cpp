@@ -10,6 +10,8 @@
   This example code is in the public domain.
 */
 
+#include <Arduino.h>
+
 void setup() {
     Serial.begin(9600);
     Serial.println(F("RawHID Example"));
@@ -66,4 +68,13 @@ void loop() {
             Serial.println(F("Unable to transmit packet"));
         }
     }
+}
+
+extern "C" int main(void)
+{
+	setup();
+	while (1) {
+		loop();
+		yield();
+	}
 }
