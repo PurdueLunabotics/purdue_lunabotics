@@ -1,4 +1,4 @@
-#include "ModbusLite.hpp"
+#include <ModbusLite.hpp>
 
 bool serial_has_started = false; // only begin serial once
 

@@ -13,3 +13,5 @@ project(firmware LANGUAGES C CXX)
 
 add_subdirectory(teensyduino)
 add_subdirectory(hid_test)
+add_subdirectory(libs)
+add_subdirectory(modbus_test)

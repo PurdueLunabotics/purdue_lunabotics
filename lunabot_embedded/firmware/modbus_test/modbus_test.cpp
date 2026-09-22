@@ -59,3 +59,12 @@ void loop(void) {
   // Serial.println(MyMotor.read_regen_load_ratio());
   delay(100);
 }
+
+extern "C" int main(void)
+{
+	setup();
+	while (1) {
+		loop();
+		yield();
+	}
+}
