@@ -85,7 +85,7 @@
     <push_ros_namespace namespace="$(var cam_1_name)"/>
     <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
       <arg name="camera_frame"                    value="$(var ns)$(var cam_1_name)_link" />
-      <arg name="camera_topic"                    value="color/image_raw"/>
+      <arg name="camera_topic"                    value="camera/image"/>
 
       <arg name="use_sim_time"                    value="$(var sim)"/>
     </include>
