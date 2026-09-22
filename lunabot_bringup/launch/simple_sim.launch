@@ -20,7 +20,13 @@
     <param from="$(find-pkg-share lunabot_config)/config/test_planner.yml"/>
   </node>
 
+  <node name="behavior_server" pkg="nav2_behaviors" exec="behavior_server" output="screen" respawn="true" > 
+    <param from="$(find-pkg-share lunabot_config)/config/test_planner.yml"/>
+  </node>
 
+  <node name="bt_navigator" pkg="nav2_bt_navigator" exec="bt_navigator" output="screen" respawn="true">
+    <param from="$(find-pkg-share lunabot_config)/config/test_planner.yml"/>
+  </node>
 
   <node name="map_server" pkg="nav2_map_server" exec="map_server" output="screen" respawn="true">
     <param name="yaml_filename" value="$(find-pkg-share lunabot_config)/config/maps/map_1775505069.yaml"/>
@@ -28,7 +34,7 @@
 
   <node name="lifecycle" pkg="nav2_lifecycle_manager" exec="lifecycle_manager" output="screen">
     <param name="autostart" value="true"/>
-    <param name="node_names" value="planner_server;map_server" value-sep=";"/>
+    <param name="node_names" value="planner_server;controller_server;behavior_server;bt_navigator;map_server" value-sep=";"/>
   </node>
 
   <node pkg="lunabot_control" exec="effort_factory_node" output="screen" respawn="true" />

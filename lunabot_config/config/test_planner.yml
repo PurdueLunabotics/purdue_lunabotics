@@ -93,10 +93,5 @@ controller_server:
 
 bt_navigator:
   ros__parameters:
-    global_frame: map
-    robot_base_frame: base_link
-
-    navigators: ["navigate_to_pose"]
-
-    navigate_to_pose:
-      plugin: "nav2_bt_navigator::NavigateToPoseNavigator"
+    use_sim_time: true
+    global_frame: map   
