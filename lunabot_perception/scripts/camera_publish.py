@@ -29,7 +29,7 @@ class CameraPublisher(Node):
 
         self.get_logger().info("Camera publisher started")
 
-    def publish_frame_loop(self):
+    def publish_frame(self):
         ret, frame = self.camera.read()
         if not ret:
             self.get_logger().error("Failed to capture image from camera")
