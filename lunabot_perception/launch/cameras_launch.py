@@ -66,7 +66,7 @@ def generate_launch_description():
                 'camera_topic': 'color/image_raw',
                 'use_sim_time': LaunchConfiguration('sim')
             }
-        )
+        ),
         
         Node(
             package='rtabmap_util',
