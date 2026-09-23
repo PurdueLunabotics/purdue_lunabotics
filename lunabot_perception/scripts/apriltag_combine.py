@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node, ParameterDescriptor, ParameterType
 from apriltag_msgs.msg import AprilTagDetectionArray
 import rclpy
@@ -26,7 +26,16 @@ class ApriltagCombine(Node):
 def main():
     rclpy.init()
     node = ApriltagCombine()
-    rclpy.spin(node)
+    try:
+        rclpy.spin(node)
+    except (KeyboardInterrupt, ExternalShutdownException):
+        pass
+    finally:
+        node.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
+
+
 
 if __name__ == "__main__":
     main()
