@@ -178,7 +178,7 @@
         <let name="id_offset" if="$(eval '$(var robot_num) == 0')" value="0"/>
         <node pkg="lunabot_perception" exec="apriltag_combine.py" respawn="true">
             <remap from="detections"         to="rtabmap/apriltag/detections"/>
-            <param name="input_topics" value="d455_back/detections;d455_front/detections" value-sep=";"/>
+            <param name="input_topics" value="d455_back/detections;d455_front/detections;usb_front/detections" value-sep=";"/>
             <param name="id_offset" value="$(var id_offset)"/>
         </node>
 

@@ -16,6 +16,7 @@
   <depend>apriltag_ros</depend>
   <depend>unitree_lidar_ros2</depend>
   <depend>python3-sklearn</depend>
+  <depend>usb_cam</depend>
 
   <!-- Used for launch files -->
   <exec_depend>ros2launch</exec_depend> 

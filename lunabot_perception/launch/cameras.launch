@@ -85,7 +85,7 @@
     <push_ros_namespace namespace="$(var cam_1_name)"/>
     <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
       <arg name="camera_frame"                    value="$(var ns)$(var cam_1_name)_link" />
-      <arg name="camera_topic"                    value="camera/image"/>
+      <arg name="camera_topic"                    value="color/image_raw"/>
 
       <arg name="use_sim_time"                    value="$(var sim)"/>
     </include>
@@ -298,6 +298,32 @@
       <param name="fixed_frame_id" value="$(var ns)base_link" />
       <param name="approx_sync" value="true"/>
     </node>
+  </group>
+
+    <!-- USB camera -->
+  <group>
+    <push_ros_namespace namespace="usb_front"/>
+
+    <node pkg="usb_cam"
+          exec="usb_cam_node_exe"
+          name="usb_cam"
+          output="screen">
+      <param name="video_device" value="/dev/video0"/>
+      <param name="image_width" value="640"/>
+      <param name="image_height" value="480"/>
+      <param name="framerate" value="30.0"/>
+      <param name="pixel_format" value="yuyv"/>
+      <param name="camera_frame_id" value="usb_front_link"/>
+      <param name="camera_info_url"
+            value="file://$(find-pkg-share lunabot_perception)/src/camera_utility_scripts/image_session_data/session1_calibration_data.npz"/>
+    </node>
+
+    <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
+      <arg name="camera_frame" value="usb_front_link"/>
+      <arg name="camera_topic" value="image_raw"/>
+      <arg name="camera_info_topic" value="camera_info"/>
+      <arg name="use_sim_time" value="$(var sim)"/>
+    </include>
   </group>
 
 </launch>
