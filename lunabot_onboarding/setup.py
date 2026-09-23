@@ -20,6 +20,7 @@ setup(
     extras_require={ },
     entry_points={
         'console_scripts': [
+            'effort_factory_node = lunabot_onboarding.effort_factory.main',
         ],
     },
 )
