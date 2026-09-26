@@ -36,9 +36,9 @@ You will need Docker to run the containerized workspace.
 }
 ```
 
-#### 5. Click 'Open a Remote Window' in the bottom left
+#### 6. Click 'Open a Remote Window' in the bottom left
 
-#### 6. Click 'Reopen in Container'.
+#### 7. Click 'Reopen in Container'.
 
 > Alternatively, you can run the docker container manually and work without VS Code.
 
