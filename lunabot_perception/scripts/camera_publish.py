@@ -7,12 +7,17 @@ from sensor_msgs.msg import Image, CameraInfo
 import os
 import yaml
 
+# TODO: Delete this and use v4l2 for the basic camera
 class CameraPublisher(Node):
     def __init__(self):
         super().__init__("camera_publisher")
 
         self.declare_parameter("camera_port", 0)
-        self.camera_port = self.get_parameter("camera_port").get_parameter_value()
+        self.declare_parameter("camera_name", "name")
+
+        self.camera_name = self.get_parameter("camera_name").get_parameter("camera_name").value()
+        self.camera_port = self.get_parameter("camera_port").get_parameter_value().integer_value()
+
         self.get_logger().info(f'Received argument: {self.camera_port}')
 
         self.image_publisher = self.create_publisher(Image, 'camera/image', 10)
@@ -36,6 +41,7 @@ class CameraPublisher(Node):
 
         self.get_logger().info("Camera publisher started")
 
+<<<<<<< Updated upstream
     def load_camera_info(self, yaml_path):
         msg = CameraInfo()
 
@@ -62,6 +68,20 @@ class CameraPublisher(Node):
         ret, frame = self.camera.read()
         if not ret:
             self.get_logger().error("Failed to capture image from camera")
+=======
+    def capture_frame(self):
+        success, frame = self.camera.read()
+        if not success:
+            self.get_logger().error(f"Could not read camera image on camera:{self.camera_name}, port:{self.camera_port}")
+            return None
+        return frame
+
+
+    def publish_frame(self):
+        frame = self.capture_frame()
+
+        if frame is None:
+>>>>>>> Stashed changes
             return
 
         image_msg = self.bridge.cv2_to_imgmsg(frame, encoding="bgr8")
