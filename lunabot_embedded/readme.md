@@ -30,12 +30,3 @@ cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=./teensyduino/toolchain.cmake
 cmake --build build
 cmake --build build --target flash_teensy_main # This also rebuilds so you don't need the above command if you are going to flash
 ```
-
-## Regenerate Proto files
-
-```bash
-pip3 install nanopb
-pip3 install grpcio-tools
-cd lunabot_embedded/firmware/teensy_main/lib/lunabot_drivers
-python3 -m nanopb.generator.nanopb_generator -L quote RobotMsgs.proto
-```
