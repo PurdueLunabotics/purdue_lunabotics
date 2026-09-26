@@ -68,7 +68,7 @@ function(make_hex target_name)
         COMMAND ${CMAKE_OBJCOPY} -O ihex -R .eeprom $<TARGET_FILE:${target_name}> ${HEX_FILE}
     )
     add_custom_target(flash_${target_name}
-        COMMAND ${TEENSY_LOADER_CLI} --mcu=TEENSY41 -wv ${HEX_FILE}
+        COMMAND ${TEENSY_LOADER_CLI} --mcu=TEENSY41 -wvs ${HEX_FILE}
         DEPENDS ${target_name}
     )
 endfunction()
