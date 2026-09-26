@@ -1,6 +1,6 @@
 import cv2
 import os
-import camera_calibration
+from camera_calibration import calibrate_camera
 
 GRID_SIZE = (9, 6)
 
@@ -87,4 +87,4 @@ def capture_loop():
 if __name__ == "__main__":
     camera_name, cal_num = capture_loop()
     if (SHOULD_CALIBRATE_AFTER):
-        camera_calibration.calibrate_camera(camera_name, cal_num)
+        calibrate_camera(camera_name, cal_num)
