@@ -315,7 +315,7 @@
       <param name="pixel_format" value="yuyv"/>
       <param name="camera_frame_id" value="usb_front_link"/>
       <param name="camera_info_url"
-            value="file://$(find-pkg-share lunabot_perception)/src/camera_utility_scripts/image_session_data/session1_calibration_data.npz"/>
+            value="file://$(find-pkg-share lunabot_perception)/calibrations/usb_front_calibration_data1.yaml"/>
     </node>
 
     <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
