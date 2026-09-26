@@ -48,7 +48,7 @@ def generate_launch_description():
                         'tf_publish_rate': 0.0,
                         'tf_prefix': LaunchConfiguration('tf_prefix'),
                         'clip_distance': -1.0
-                    }
+                    }.items()
                 )
             ]
         ),
@@ -65,7 +65,7 @@ def generate_launch_description():
                 'camera_frame': [LaunchConfiguration('tf_prefix'), LaunchConfiguration('camera_name'), '_link'],
                 'camera_topic': 'color/image_raw',
                 'use_sim_time': LaunchConfiguration('sim')
-            }
+            }.items()
         ),
         
         Node(
