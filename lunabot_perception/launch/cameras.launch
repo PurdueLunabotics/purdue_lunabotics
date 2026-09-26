@@ -24,9 +24,12 @@
   <let name="serial_no_cam_4"               value="'939622074382'"/>
   <arg name="cam_4_name"                    default="d455_back"/>
 
-  <arg name="cams"                    default="'12'"      if="$(eval '$(var robot_num) == 0')"/> <!-- Camera numbers -->
-  <arg name="cams"                    default="'34'"      if="$(eval '$(var robot_num) == 1')"/> <!-- Camera numbers -->
+  <!--<arg name="cams"                    default="'12'"      if="$(eval '$(var robot_num) == 0')"/> Camera numbers -->
+  <!--<arg name="cams"                    default="'34'"      if="$(eval '$(var robot_num) == 1')"/> Camera numbers -->
 
+  <!--Can't enter values from the command line, but scales with infinitely many cameras-->
+  <let name="camera_list" default="['1', '2']" if="$(eval '$(var robot_num) == 0')" />
+  <let name="camera_list" default="['3', '4']" if="$(eval '$(var robot_num) == 1')" />
 
   <arg name="pointcloud"                      default="true" />
 
@@ -45,7 +48,7 @@
   <let name="ns/" if="$(eval 'len(\'$(var ns)\') > 0')" value="$(var ns)/"/>
   <let name="ns/" unless="$(eval 'len(\'$(var ns)\') > 0')" value=""/>
 
-  <group if="$(eval '\'1\' in $(var cams)')">
+  <group if="$(eval '\'1\' in $(var camera_list)')">
     <include file="$(find-pkg-share lunabot_perception)/launch/cameras_single.launch">
       <arg name="camera_name"                   value="$(var cam_1_name)"/>
       <arg name="serial_no"                     value="$(var serial_no_cam_1)"/>
@@ -53,7 +56,7 @@
     </include>
   </group>
 
-  <group if="$(eval '\'2\' in $(var cams)')">
+  <group if="$(eval '\'2\' in $(var camera_list)')">
     <include file="$(find-pkg-share lunabot_perception)/launch/cameras_single.launch">
       <arg name="camera_name"                 value="$(var cam_2_name)"/>
       <arg name="serial_no"                   value="$(var serial_no_cam_2)"/>
@@ -61,7 +64,7 @@
     </include>
   </group>
 
-  <group if="$(eval '\'3\' in $(var cams)')">
+  <group if="$(eval '\'3\' in $(var camera_list)')">
     <include file="$(find-pkg-share lunabot_perception)/launch/cameras_single.launch">
       <arg name="camera_name"                 value="$(var cam_3_name)"/>
       <arg name="serial_no"                   value="$(var serial_no_cam_3)"/>
@@ -69,7 +72,7 @@
     </include>
   </group>
 
-  <group if="$(eval '\'4\' in $(var cams)')">
+  <group if="$(eval '\'4\' in $(var camera_list)')">
     <include file="$(find-pkg-share lunabot_perception)/launch/cameras_single.launch">
       <arg name="camera_name"                 value="$(var cam_4_name)"/>
       <arg name="serial_no"                   value="$(var serial_no_cam_4)"/>
