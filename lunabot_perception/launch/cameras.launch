@@ -46,7 +46,7 @@
   <let name="ns/" unless="$(eval 'len(\'$(var ns)\') > 0')" value=""/>
 
   <group if="$(eval '\'1\' in $(var cams)')">
-    <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py">
+    <include file="$(find-pkg-share lunabot_perception)/launch/cameras_single.launch">
       <arg name="camera_name"                   value="$(var cam_1_name)"/>
       <arg name="serial_no"                     value="$(var serial_no_cam_1)"/>
       <arg name="tf_prefix"                     value="$(var ns/)"/>
@@ -54,25 +54,25 @@
   </group>
 
   <group if="$(eval '\'2\' in $(var cams)')">
-    <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py">
+    <include file="$(find-pkg-share lunabot_perception)/launch/cameras_single.launch">
       <arg name="camera_name"                 value="$(var cam_2_name)"/>
-      <arg name="camera_name"                 value="$(var serial_no_cam_2)"/>
+      <arg name="serial_no"                   value="$(var serial_no_cam_2)"/>
       <arg name="tf_prefix"                   value="$(var ns/)"/>
     </include>
   </group>
 
   <group if="$(eval '\'3\' in $(var cams)')">
-    <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py">
+    <include file="$(find-pkg-share lunabot_perception)/launch/cameras_single.launch">
       <arg name="camera_name"                 value="$(var cam_3_name)"/>
-      <arg name="camera_name"                 value="$(var serial_no_cam_3)"/>
+      <arg name="serial_no"                   value="$(var serial_no_cam_3)"/>
       <arg name="tf_prefix"                   value="$(var ns/)"/>
     </include>
   </group>
 
   <group if="$(eval '\'4\' in $(var cams)')">
-    <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py">
+    <include file="$(find-pkg-share lunabot_perception)/launch/cameras_single.launch">
       <arg name="camera_name"                 value="$(var cam_4_name)"/>
-      <arg name="camera_name"                 value="$(var serial_no_cam_4)"/>
+      <arg name="serial_no"                   value="$(var serial_no_cam_4)"/>
       <arg name="tf_prefix"                   value="$(var ns/)"/>
     </include>
   </group>
