@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import glob
 import os
+import yaml
 
 # ==========================================
 # CONFIGURATION
@@ -110,11 +111,43 @@ def calibrate_camera(camera_name: str, calibration_number: int):
 
     if not os.path.isdir(DATA_DIR):
         os.makedirs(DATA_DIR)
-    # Save the calibration parameters to a compressed numpy file for future use
+
     output_filename = (
-            f"lunabot_perception/calibrations/{camera_name}_calibration_data{calibration_number}.npz"
+        f"lunabot_perception/calibrations/{camera_name}_calibration_data{calibration_number}.yaml"
     )
-    np.savez(output_filename, mtx=mtx, dist=dist)
+
+    calibration_data = {
+        "image_width": int(gray.shape[1]),
+        "image_height": int(gray.shape[0]),
+        "camera_name": camera_name,
+        "camera_matrix": {
+            "rows": 3,
+            "cols": 3,
+            "data": mtx.reshape(-1).tolist(),
+        },
+        "distortion_model": "plumb_bob",
+        "distortion_coefficients": {
+            "rows": 1,
+            "cols": 5,
+            "data": dist.reshape(-1).tolist(),
+        },
+        "rectification_matrix": {
+            "rows": 3,
+            "cols": 3,
+            "data": [1, 0, 0, 0, 1, 0, 0, 0, 1],
+        },
+        "projection_matrix": {
+            "rows": 3,
+            "cols": 4,
+            "data": [mtx[0,0], 0, mtx[0,2], 0,
+                    0, mtx[1,1], mtx[1,2], 0,
+                    0, 0, 1, 0],
+        },
+    }
+
+    with open(output_filename, "w") as f:
+        yaml.safe_dump(calibration_data, f, default_flow_style=False, sort_keys=False)
+
     print(f"\nParameters successfully saved to '{output_filename}'")
 
     # ==========================================

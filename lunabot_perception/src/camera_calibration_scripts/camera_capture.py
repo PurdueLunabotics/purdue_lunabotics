@@ -23,7 +23,7 @@ def capture_loop():
     image_count = 0
 
     # Create the directory for writing captured images to -->
-    script_dir_path = os.path.dirname(os.path.abspath(__file__)) + "/captured_images"
+    script_dir_path = os.path.dirname(os.path.abspath(__file__)) + "/captured_images"   
 
     image_dir = ""
     dir_count = 1
