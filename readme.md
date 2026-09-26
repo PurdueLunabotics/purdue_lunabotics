@@ -65,8 +65,7 @@ From this point on, work in the docker container.
 1. You should see the simulator running in real time. (You may have to adjust
 foxglove's settings to change what's visible.)
 
-<img alt="Simple Sim Running Foxglove" src="https://github.com/user-attachments/assets/c86649d7-26db-49d3-9362-409dc8af932a" />
-
+![Simple sim running foxglove](https://github.com/user-attachments/assets/c86649d7-26db-49d3-9362-409dc8af932a)
 
 ## Important docs to read
 - [Contributing Guidelines](contributing.md)
