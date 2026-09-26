@@ -43,20 +43,29 @@ You will need Docker to run the containerized workspace.
 > Alternatively, you can run the docker container manually and work without VS Code.
 
 ## Building and Running the workspace
+From this point on, work in the docker container.
 
-1. Run the sim
+1. Go to the main directory
+    * `cd /luna_ws`
+1. Build the project
+    * `colcon build --symlink-install`
+    * You should see all packages built successfully. Some output to `stderr` is normal.
+1. Set environment variables needed for ROS to function
+    * `source /luna_ws/install/setup.bash`
+    * You can add this to your `.bashrc` if not already present, so it runs every time you open a new terminal window.
+1. Run the simulated robot
+    * `ros2 launch lunabot_bringup simple_sim.launch`
 
-```
-ros2 launch lunabot_bringup sim.launch
-```
-> you should see two new windows pop up: once called gazebo and one called rviz
+    * This will start the simple simulation backend. The easiest way to view 
+      the results is with [Foxglove](https://app.foxglove.dev). 
+1. Open [Foxglove](https://app.foxglove.dev) in a browser, sign in, and click 'open connection.'
 
-2. Set goal waypoint in rviz and watch the robot navigate
-![mpc_fix_gazebo_skid_steer](https://github.com/PurdueLunabotics/purdue_lunabotics/assets/41026849/a5cdaf41-f482-4b47-bd7b-bc8b7cb88880)
+1. Select 'Foxglove Websocket' and make sure the URL is `ws://localhost:8765`. Click 'open.'
 
-<!-- TODO: fix any links once these things exist -->
+1. You should see the simulator running in real time. (You may have to adjust
+foxglove's settings to change what's visible.)
+
+![simple_sim_running_foxglove](todo)
+
 ## Important docs to read
-- [contributing guidelines](contributing.md)
-- [running_the_robot](https://github.com/PurdueLunabotics/purdue_lunabotics/blob/master/running_the_robot.md) 
-- [firmware setup](https://github.com/PurdueLunabotics/purdue_lunabotics/blob/master/lunabot_embedded/readme.md)
-- [simulated arena docs](https://github.com/PurdueLunabotics/lunabot_sim/blob/master/README.md)
+- [Contributing Guidelines](contributing.md)
