@@ -41,7 +41,6 @@ class CameraPublisher(Node):
 
         self.get_logger().info("Camera publisher started")
 
-<<<<<<< Updated upstream
     def load_camera_info(self, yaml_path):
         msg = CameraInfo()
 
@@ -68,7 +67,6 @@ class CameraPublisher(Node):
         ret, frame = self.camera.read()
         if not ret:
             self.get_logger().error("Failed to capture image from camera")
-=======
     def capture_frame(self):
         success, frame = self.camera.read()
         if not success:
@@ -81,7 +79,6 @@ class CameraPublisher(Node):
         frame = self.capture_frame()
 
         if frame is None:
->>>>>>> Stashed changes
             return
 
         image_msg = self.bridge.cv2_to_imgmsg(frame, encoding="bgr8")
