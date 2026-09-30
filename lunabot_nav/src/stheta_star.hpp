@@ -63,7 +63,7 @@ class SThetaStar {
 
   public:
     SThetaStar(nav2_costmap_2d::Costmap2D *costmap, std::string frame_id, Options options);
-    PathMsg createPlan(const PoseStampedMsg &start, const PoseStampedMsg &goal);
+    PathMsg createPlan(const PoseStampedMsg &start, const PoseStampedMsg &goal, std::function<bool()> cancel_checker);
     void updateOptions(Options options);
     Options getOptions();
 

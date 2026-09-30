@@ -22,7 +22,6 @@ def launch_setup(context):
             package='robot_state_publisher',
             executable='robot_state_publisher',
             name='robot_state_publisher',
-            namespace=entity_name,
         parameters=[{'frame_prefix': frame_ns, 'use_sim_time': LaunchConfiguration('sim'), 'robot_description': Command(['xacro ', robot_desc_path, ' robot_name:=', entity_name])}],
         output="screen"
     )
@@ -31,8 +30,7 @@ def launch_setup(context):
             package='joint_state_publisher',
             executable='joint_state_publisher',
             name='joint_state_publisher',
-            namespace=entity_name,
-            parameters=[{'frame_prefix': frame_ns, 'use_sim_time': LaunchConfiguration('sim'), 'robot_description': Command(['xacro ', robot_desc_path, ' robot_name:=', entity_name]), 'source_list': [f"{ns}/joint_states"]}],
+            parameters=[{'frame_prefix': frame_ns, 'use_sim_time': LaunchConfiguration('sim'), 'robot_description': Command(['xacro ', robot_desc_path, ' robot_name:=', entity_name]), 'source_list': [f"/simulator/joint_states"]}],
         output="screen"
     )
     
@@ -48,7 +46,7 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument(
             'entity_name',
-            default_value='dummy_bot'
+            default_value='main_bot'
         ),
         DeclareLaunchArgument(
             'sim',

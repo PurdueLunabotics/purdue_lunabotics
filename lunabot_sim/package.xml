@@ -17,6 +17,9 @@
   <depend>ros_gz_sim</depend>
   <depend>sensor_msgs</depend>
   <depend>tf2</depend>
+  <depend>mujoco_vendor</depend>
+  <depend>libglfw3-dev</depend>
+  <depend>lunabot_msgs</depend>
 
   <depend>lunabot_description</depend>
   <depend>lunabot_config</depend>

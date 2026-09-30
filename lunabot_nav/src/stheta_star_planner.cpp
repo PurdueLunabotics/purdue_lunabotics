@@ -126,8 +126,9 @@ class SThetaStarPlanner : public nav2_core::GlobalPlanner {
   }
 
   nav_msgs::msg::Path createPlan(const PoseStampedMsg &start,
-                                 const PoseStampedMsg &goal) override {
-    return algorithm->createPlan(start, goal);
+                                 const PoseStampedMsg &goal,
+                                 std::function<bool()> cancel_checker) override {
+    return algorithm->createPlan(start, goal, cancel_checker);
   }
 };
 
