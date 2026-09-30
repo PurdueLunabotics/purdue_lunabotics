@@ -24,8 +24,7 @@
   <let name="serial_no_cam_4"               value="'939622074382'"/>
   <arg name="cam_4_name"                    default="d455_back"/>
 
-  <!--<arg name="cams"                    default="'12'"      if="$(eval '$(var robot_num) == 0')"/> Camera numbers -->
-  <!--<arg name="cams"                    default="'34'"      if="$(eval '$(var robot_num) == 1')"/> Camera numbers -->
+  
 
   <!--Can't enter values from the command line, but scales with infinitely many cameras-->
   <let name="camera_list" default="['1', '2']" if="$(eval '$(var robot_num) == 0')" />
