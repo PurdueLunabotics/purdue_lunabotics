@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(teensyduino VERSION 1.0 LANGUAGES C CXX)
+find_package(Python3 REQUIRED)
 
 file(GLOB_RECURSE teensy4_core_src CONFIGURE_DEPENDS
     "${teensy_package_SOURCE_DIR}/cores/teensy4/*.c"
@@ -32,7 +33,7 @@ function(create_arduino_lib DIRECTORY LIBRARIES_DIRS)
     endif()
     target_link_libraries(${TARGET_NAME} PUBLIC teensy4_core)
     execute_process(
-        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/find_deps.py ${DIRECTORY} "${LIBRARIES_DIRS}"
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/find_deps.py ${DIRECTORY} "${LIBRARIES_DIRS}"
         OUTPUT_VARIABLE deps
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
@@ -57,7 +58,7 @@ foreach(arduino_lib ${arduino_libs_dirs})
     endif()
 endforeach()
 
-find_program(TEENSY_LOADER_CLI teensy_loader_cli REQUIRED)
+find_program(TEENSY_LOADER_CLI teensy_loader_cli)
 
 function(make_hex target_name)
     set(HEX_FILE "${CMAKE_CURRENT_BINARY_DIR}/${target_name}.hex")
