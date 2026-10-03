@@ -38,6 +38,8 @@
   </node>
 
   <node pkg="lunabot_control" exec="effort_factory_node" output="screen" respawn="true" />
+  
+  <node pkg="lunabot_control" exec="click_to_move_node" output="screen" respawn="true" />
 
   <node pkg="foxglove_bridge" exec="foxglove_bridge" ros_args="--log-level warn" />
 

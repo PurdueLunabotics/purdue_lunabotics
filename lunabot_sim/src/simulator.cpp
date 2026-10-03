@@ -218,14 +218,14 @@ void SimulatorNode::mouse_move(GLFWwindow* window, double xpos, double ypos) {
     }
 
     // move camera
-    mjv_moveCamera(model, action, dx/height, dy/height, &scn, &cam);
+    mjv_moveCamera(model, action, dx/height, dy/height, &cam);
 }
 
 
 // scroll callback
 void SimulatorNode::scroll(GLFWwindow* window, double xoffset, double yoffset) {
     // emulate vertical mouse motion = 5% of window height
-    mjv_moveCamera(model, mjMOUSE_ZOOM, 0, -0.05*yoffset, &scn, &cam);
+    mjv_moveCamera(model, mjMOUSE_ZOOM, 0, -0.05*yoffset, &cam);
 }
 
 int main(int argc, char **argv) {
