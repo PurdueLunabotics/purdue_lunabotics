@@ -34,7 +34,7 @@ class Drive(State):
         self.odom_sub = manager.create_subscription(PoseStamped, "position", self.odom_cb, 1)
         self.odom = None
         self.position: None | tuple[float, float] = None
-        self.elapsed = 0
+        self.elapsed = 0.0
         
         self.manager = manager
 
