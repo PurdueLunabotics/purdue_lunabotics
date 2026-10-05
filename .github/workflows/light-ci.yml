@@ -23,8 +23,9 @@ jobs:
       - name: Test building
         shell: bash
         run: cd /luna_ws/ && source /opt/ros/jazzy/setup.bash && colcon build
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v5
+      - name: Install ty
+        shell: bash
+        run: curl -LsSf https://astral.sh/ty/install.sh | sh
       - name: Python type checking
         shell: bash
-        run: cd /luna_ws/src/purdue_lunabotics && source /opt/ros/jazzy/setup.bash && source /luna_ws/install/setup.bash && uvx ty check --exclude test_firmware --exclude lunabot_perception/src/ --output-format github
+        run: cd /luna_ws/src/purdue_lunabotics && source /opt/ros/jazzy/setup.bash && source /luna_ws/install/setup.bash && ty check --exclude test_firmware --exclude lunabot_perception/src/ --output-format github
