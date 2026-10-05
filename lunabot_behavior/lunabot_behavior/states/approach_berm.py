@@ -15,7 +15,7 @@ class ApproachBerm(State):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "cmd_vel", 10)
     manager.create_subscription(PoseStamped, "position", self.odom_cb, 1)
     self.manager = manager
-    self.robot_pose = (None, None)
+    self.robot_pose: None | tuple[float, float] = None
     self.linear_speed = 0.1 #m/s
     self.target_y = ZoneMeasurements.BERM_OFFSET_Y
 
@@ -36,7 +36,7 @@ class ApproachBerm(State):
       self.target_y = ZoneMeasurements.BERM_OFFSET_Y + OFFSET_FROM_CENTER
   
   def periodic(self):
-    if self.robot_pose[0] == None:
+    if self.robot_pose is None:
       return None
     
     if not self.berm_up:
@@ -64,7 +64,7 @@ class ApproachBermBackwards(State):
     self.cmd_vel_publisher = manager.create_publisher(Twist, "cmd_vel", 10)
     manager.create_subscription(PoseStamped, "position", self.odom_cb, 1)
     self.manager = manager
-    self.robot_pose = (None, None)
+    self.robot_pose: None | tuple[float, float] = None
     self.linear_speed = 0.1 #m/s
     self.target_y = ZoneMeasurements.BERM_OFFSET_Y
 
@@ -85,7 +85,7 @@ class ApproachBermBackwards(State):
       self.target_y = ZoneMeasurements.BERM_OFFSET_Y + OFFSET_FROM_CENTER
   
   def periodic(self):
-    if self.robot_pose[0] == None:
+    if self.robot_pose is None:
       return None
     
     if not self.berm_up:

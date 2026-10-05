@@ -30,9 +30,9 @@ class ApproachMainState(State):
     self.tf_buffer = Buffer()
     self.tf_listener = None
 
-    self.apriltag_detections: AprilTagDetectionArray = None
+    self.apriltag_detections: AprilTagDetectionArray | None = None
 
-    self.node: Node = None
+    self.node: Node | None = None
 
     # PID for linear alignment
     self.P = 1
@@ -89,6 +89,7 @@ class ApproachMainState(State):
     self.apriltag_detections = msg
     
   def start(self):
+    assert self.node
     self.node.get_logger().info("Behavior: Approaching main bot" )
     self.apriltag_detections = None
     self.resetPID()
@@ -98,6 +99,7 @@ class ApproachMainState(State):
     self.start_time = self.node.get_clock().now()
   
   def periodic(self):
+    assert self.node
 
     elapsed_time = self.node.get_clock().now() - self.start_time
     elapsed_time = elapsed_time.nanoseconds / 1_000_000_000  # convert to seconds
@@ -168,6 +170,7 @@ class ApproachMainState(State):
     return apriltag_present, detections
   
   def runPID(self, error: float):
+    assert self.node
 
     if (self.last_time is not None):
       dt = self.node.get_clock().now() - self.last_time
@@ -209,6 +212,7 @@ class ApproachMainState(State):
 
 
   def visualize_alignment(self, main_bot_pose: Pose):
+    assert self.node and self.robot_pose
     marker = Marker()
     marker.header.frame_id = "mini/map"
     marker.header.stamp = self.node.get_clock().now().to_msg()
@@ -231,6 +235,7 @@ class ApproachMainState(State):
     self.visual_publisher.publish(marker)
   
   def remove_marker(self):
+    assert self.node
     marker = Marker()
     marker.header.frame_id = "mini/map"
     marker.header.stamp = self.node.get_clock().now().to_msg()

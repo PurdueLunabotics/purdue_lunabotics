@@ -94,7 +94,7 @@ class CraterGeneration(Node):
         stahp = False
         
         try:
-            ground = point_cloud2.read_points(self.ground, field_names = ("x", "y", "z"), skip_nans=True)
+            ground = point_cloud2.read_points(self.ground, field_names = ["x", "y", "z"], skip_nans=True)
             for p in ground: 
                 ground_trainxy.append([p[0], p[1]]) 
                 ground_trainz.append([p[2]])
@@ -170,7 +170,7 @@ class CraterGeneration(Node):
         obst = []
         try:
             #self.get_logger
-            vals = point_cloud2.read_points(self.pointCloud, field_names = ("x", "y", "z"), skip_nans=True)
+            vals = point_cloud2.read_points(self.pointCloud, field_names = ["x", "y", "z"], skip_nans=True)
             for p in vals:
                 obst.append([p[0], p[1], p[2]]) 
         except Exception as inst:
@@ -184,7 +184,7 @@ class CraterGeneration(Node):
         
         ground_vals = []
         try:
-            ground = point_cloud2.read_points(self.ground_planes, field_names = ("x", "y", "z"), skip_nans=True)
+            ground = point_cloud2.read_points(self.ground_planes, field_names = ["x", "y", "z"], skip_nans=True)
             for p in ground: 
                 ground_vals.append([p[0], p[1], p[2]]) 
 

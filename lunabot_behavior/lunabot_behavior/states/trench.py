@@ -33,7 +33,7 @@ class Drive(State):
         self.cmd_vel_pub = manager.create_publisher(Twist, "cmd_vel", 10)
         self.odom_sub = manager.create_subscription(PoseStamped, "position", self.odom_cb, 1)
         self.odom = None
-        self.position = (None, None)
+        self.position: None | tuple[float, float] = None
         self.elapsed = 0
         
         self.manager = manager
@@ -49,19 +49,19 @@ class Drive(State):
 
     def start(self):
         self.start_time = self.manager.get_clock().now().nanoseconds / 1e9
-        self.position = (None, None)
+        self.position = None
         self.starting_pos = self.position
         if self.stalled:
             self.timeout -= self.elapsed
             self.stalled = False
 
-        self.last_position = (None, None)
+        self.last_position: None | tuple[float, float] = None
 
     def periodic(self) -> None | Events:
-        if (self.position != (None, None) and self.starting_pos == (None, None)): # position got updated by odom
-            self.starting_pos = self.position
+        if (self.position is not None):
+            if (self.starting_pos is None): # position got updated by odom
+                self.starting_pos = self.position
 
-        if (self.position != (None, None)):
             distance = np.sqrt((self.position[0] - self.starting_pos[0])**2 + (self.position[1] - self.starting_pos[1])**2)
             self.manager.get_logger().info(f"[DRIVE] Dist: {distance:.2f} | Target Dist: {self.target_distance:.2f}")
 

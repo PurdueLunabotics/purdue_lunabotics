@@ -40,7 +40,7 @@ class DriveToMainExcTarget(Drive):
     def periodic(self):
         # self.state_manager.get_logger().info(f"Target Dist Computed: {self.position} {self.target_dist_computed}")
 
-        if self.position[0] is not None and self.position[1] is not None and self.linkup_pos is not None:
+        if self.position is not None and self.linkup_pos is not None:
             l_x = self.linkup_pos.main_target.x
             l_y = self.linkup_pos.main_target.y
             self.target_distance = np.sqrt((l_x - self.position[0]) ** 2 + (l_y - self.position[1]) ** 2)

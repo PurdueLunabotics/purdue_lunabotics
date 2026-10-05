@@ -12,7 +12,7 @@ class LedColor(Enum):
     WHITE = 8
     RAINBOW = 9
 
-def colorsToInteger(colors: tuple[LedColor] | LedColor):
+def colorsToInteger(colors: tuple[LedColor, ...] | LedColor):
     # pack color sequence into an integer. Each digit is a color, 10 possible options
 
     # if one single color, return its value

@@ -23,3 +23,8 @@ jobs:
       - name: Test building
         shell: bash
         run: cd /luna_ws/ && source /opt/ros/jazzy/setup.bash && colcon build
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+      - name: Python type checking
+        shell: bash
+        run: cd /luna_ws/src/purdue_lunabotics && uvx ty check --exclude test_firmware --exclude lunabot_perception/src/ --output-format github
