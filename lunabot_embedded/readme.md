@@ -8,45 +8,25 @@
 
 ## Teensy Firmware
 
-code in `firmware/teensy_main/`
-
-### Supported Platforms
-- Linux
-  - use WSL2 if on Windows or dual-boot
-- MacOS 12.3+ (Monterey)
-
-### Prerequisites
-- [Install arduino-cli compilation toolchain](https://arduino.github.io/arduino-cli/0.35/installation/#use-the-install-script)
-- ROS is NOT required
+code in `firmware/`
 
 ### Quick start
 
 1. Setup development environment 
 
-```
+```bash
 cd lunabot_embedded/firmware
 ./setup_teensy_toolchain.sh
 ```
 
-2. Add aliases to simplify compilation (in `.bashrc` or `.zshrc`):
-```
-alias teensy_compile="arduino-cli compile --build-path build --libraries lib --fqbn teensy:avr:teensy41:usb=rawhid teensy_main.ino"
-alias teensy_upload="teensy_loader_cli --mcu=TEENSY41 -wv build/teensy_main.ino.hex"
+2. Setup CMake (run this in the firmware folder)
+```bash
+cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=./teensyduino/toolchain.cmake
 ```
 
 3. Compile (no hardware needed) + Upload
 
-```
-cd lunabot_embedded/firmware/teensy_main
-teensy_compile
-teensy_upload
-```
-
-## Regenerate Proto files
-
-```
-pip3 install nanopb
-pip3 install grpcio-tools
-cd lunabot_embedded/firmware/teensy_main/lib/lunabot_drivers
-python3 -m nanopb.generator.nanopb_generator -L quote RobotMsgs.proto
+```bash
+cmake --build build
+cmake --build build --target flash_teensy_main # This also rebuilds so you don't need the above command if you are going to flash
 ```
