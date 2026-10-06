@@ -8,9 +8,9 @@ from std_msgs.msg import Bool
 
 class MainWaitForMiniGoneState(State):
     def __init__(self):
-        self.mini_position: PoseStamped = None
-        self.position: PoseStamped = None
-        self.node: Node = None
+        self.mini_position: PoseStamped | None = None
+        self.position: PoseStamped | None = None
+        self.node: Node | None = None
 
         self.DIST_THRESHOLD = 3 # in meters, how far the main/mini separation has to be
 
@@ -29,12 +29,14 @@ class MainWaitForMiniGoneState(State):
         self.position = msg
     
     def start(self):
+        assert self.node
         self.mini_position = None
         self.position = None
 
         self.start_time = self.node.get_clock().now()
 
     def periodic(self) -> None | Events:
+        assert self.node
         elapsed_time = self.node.get_clock().now() - self.start_time
         elapsed_time = elapsed_time.nanoseconds / 1_000_000_000  # convert to seconds
 

@@ -28,9 +28,9 @@ class AlignToMainBotState(State):
     self.tf_buffer = Buffer()
     self.tf_listener = None
 
-    self.apriltag_detections: AprilTagDetectionArray = None
+    self.apriltag_detections: AprilTagDetectionArray | None = None
 
-    self.node: Node = None
+    self.node: Node | None = None
 
     # PID for angular alignment
     self.P = 1
@@ -87,6 +87,7 @@ class AlignToMainBotState(State):
     self.apriltag_detections = msg
     
   def start(self):
+    assert self.node
     self.node.get_logger().info("Behavior: Align to main bot: starting search" )
     self.internal_state = 'search'
     self.apriltag_detections = None
@@ -95,6 +96,10 @@ class AlignToMainBotState(State):
     self.success_count = 0
   
   def periodic(self):
+    assert self.node
+    if not self.robot_pose:
+      self.node.get_logger().warn("Behavior: Align to main bot: no odom" )
+      return
 
     if (self.internal_state == 'search'):
       # spin in circle until you see main bot's apriltag
@@ -183,7 +188,7 @@ class AlignToMainBotState(State):
     return apriltag_present
   
   def runPID(self, error: float):
-
+    assert self.node
     if (self.last_time is not None):
       dt = self.node.get_clock().now() - self.last_time
     else:
@@ -217,6 +222,7 @@ class AlignToMainBotState(State):
 
 
   def visualize_alignment(self, main_bot_pose: Pose):
+    assert self.node and self.robot_pose
     marker = Marker()
     marker.header.frame_id = "mini/map"
     marker.header.stamp = self.node.get_clock().now().to_msg()
@@ -239,6 +245,7 @@ class AlignToMainBotState(State):
     self.visual_publisher.publish(marker)
   
   def remove_marker(self):
+    assert self.node
     marker = Marker()
     marker.header.frame_id = "mini/map"
     marker.header.stamp = self.node.get_clock().now().to_msg()

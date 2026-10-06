@@ -131,4 +131,3 @@ def main():
     t = threading.Thread(target=spin_in_background)
     t.start()
     controller = DifferentialDriveController()
-    controller.run_node()

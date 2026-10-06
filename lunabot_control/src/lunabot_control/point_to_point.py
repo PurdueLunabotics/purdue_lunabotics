@@ -40,8 +40,8 @@ class PointToPoint(Node):
         self.ANGULAR_TOLERANCE_RAD = np.deg2rad(self.ANGULAR_TOLERANCE_DEG)
         self.angular_pid = ParameterizedPIDController("angular", self)
 
-        self.robot_pose = [None, None, None]  # x, y, heading (rad)
-        self.last_pose = [None, None, None]  # for velocity calculations
+        self.robot_pose: None | tuple[float, float, float] = None  # x, y, heading (rad)
+        self.last_pose: None | tuple[float, float, float] = None  # for velocity calculations
 
         self.FREQUENCY = self.get_parameter("frequency").get_parameter_value().double_value
         self.pid_dt = 1 / self.FREQUENCY
@@ -52,7 +52,7 @@ class PointToPoint(Node):
         self.angular_vel = 0
         self.linear_vel = 0
 
-        self.odom_velocity = [None, None]
+        self.odom_velocity: None | tuple[float, float] = None
 
         self.at_angle_target = True
         self.at_linear_target = True
@@ -64,7 +64,7 @@ class PointToPoint(Node):
         self.prev_linear_error = float("inf")
 
         self.target_pose_index = 0
-        self.target_pose = [None, None, None]
+        self.target_pose: None | tuple[float, float, float] = None
         self.path = []
 
         self.state = States.AT_DESTINATION
@@ -157,24 +157,25 @@ class PointToPoint(Node):
         self.prev_odom_time = self.get_clock().now().seconds_nanoseconds()[0]
 
         if (
-            self.robot_pose != [None, None, None]
-            and self.last_pose != [None, None, None]
+            self.robot_pose is not None
+            and self.last_pose is not None
             and self.odom_dt != 0
         ):
             if self.odom_dt == 0 or self.odom_dt is None:
                 self.odom_dt = 1 / self.FREQUENCY  # ensure no div by 0 errors
 
             # linear velocity
-            self.odom_velocity[0] = (
+            vel_lin = float(
                 np.linalg.norm(
                     np.array(self.robot_pose[:2]) - np.array(self.last_pose[:2])
                 )
                 / self.odom_dt
             )
             # angular velocity
-            self.odom_velocity[1] = (
+            vel_ang = float((
                 self.robot_pose[2] - self.last_pose[2]
-            ) / self.odom_dt
+            ) / self.odom_dt)
+            self.odom_velocity = (vel_lin, vel_ang)
 
         # update last position
         self.last_pose = self.robot_pose
@@ -182,10 +183,10 @@ class PointToPoint(Node):
     def __path_callback(self, msg: Path):
         if len(msg.poses) == 0:
             self.__visualize_line_path([])
-            self.target_pose = [None, None, None]
+            self.target_pose = None
             return
 
-        self.path = []  # create list for storing all d* poses
+        self.path: list[tuple[float, float, float]] = []  # create list for storing all d* poses
         for pose in msg.poses:
             angles = euler_from_quaternion(
                 [
@@ -197,7 +198,7 @@ class PointToPoint(Node):
             )
 
             # add all points to complex path
-            self.path.append([pose.pose.position.x, pose.pose.position.y, angles[2]])
+            self.path.append((pose.pose.position.x, pose.pose.position.y, angles[2]))
 
         # initialize target point
         self.target_pose_index = 0
@@ -225,6 +226,7 @@ class PointToPoint(Node):
             pose (list-like): current robot 2D pose in format (x, y, theta)
             path (list-like): sequence of target poses in the path, each of which are in format (x, y, theta)
         """
+        assert self.target_pose
 
         # store x and y coords of pose in a location variable
         current_location = np.array(current_pose[:2])
@@ -238,9 +240,9 @@ class PointToPoint(Node):
         ## CALCULATE WHETHER AT LINEAR TARGET -------
         ## -------------------------------------------------
         # calculate distance to target as error
-        self.linear_error = np.linalg.norm(
+        self.linear_error = float(np.linalg.norm(
             np.array(self.target_pose[:2]) - current_location
-        )
+        ))
 
         # check if robot linear position is within tolerance - if so, terminate linear motion
         self.at_linear_target = np.abs(self.linear_error) < self.LINEAR_TOLERANCE
@@ -364,12 +366,7 @@ class PointToPoint(Node):
         marker.pose.orientation.z = 0.0
         marker.pose.orientation.w = 1.0
 
-        if (
-            self.robot_pose[0] == None
-            or self.robot_pose[1] == None
-            or self.target_pose[0] == None
-            or self.target_pose[1] == None
-        ):
+        if (self.robot_pose is None or self.target_pose is None):
             return
         start_point = Point(
             x=float(self.robot_pose[0]), y=float(self.robot_pose[1]), z=0.0
@@ -439,18 +436,16 @@ class PointToPoint(Node):
         vel.linear.x *= -1 if self.is_moving_backwards else 1
         self.cmd_vel_publisher.publish(vel)
 
-        try:
+        if self.target_pose:
             # target pose publishing
             pose = Pose2D()
             pose.x = self.target_pose[0]
             pose.y = self.target_pose[1]
             pose.theta = self.target_pose[2]
             self.target_publisher.publish(pose)
-        except:
-            pass
 
         # visualize path to target
-        if self.target_pose != [None, None]:
+        if self.target_pose is not None:
             self.__visualize_path_to_target()
 
     def run_node(self):
@@ -472,11 +467,7 @@ class PointToPoint(Node):
                 if self.pid_dt == 0 or self.pid_dt is None:  # ensure no div by 0 errors
                     self.pid_dt = 1 / self.FREQUENCY
 
-                if self.target_pose != [None, None, None] and pose != [
-                    None,
-                    None,
-                    None,
-                ]:
+                if self.target_pose is not None and pose is not None:
                     self.__update_state(pose)
                     self.__move_to_point()
                 else:

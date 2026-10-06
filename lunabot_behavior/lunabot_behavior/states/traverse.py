@@ -14,7 +14,7 @@ from rcl_interfaces.srv import SetParameters, GetParameters
 import math
 
 class Traverse(State):
-    def __init__(self, goal: PoseStamped | None, backwards: bool, tolerance: float=0.2):
+    def __init__(self, goal: PoseStamped, backwards: bool, tolerance: float=0.2):
         self.goal = goal
         self.backwards = backwards
         self.tolerance = tolerance
@@ -43,7 +43,7 @@ class Traverse(State):
         self.is_planner_alive = False
 
     def path_cb(self, path: Path):
-        self.last_pose = path.poses[-1] # type: ignore
+        self.last_pose = path.poses[-1]
         self.path_timeout.reset()
         self.is_planner_alive = True
 
@@ -181,7 +181,7 @@ class Stall(State):
         self.start_time = self.manager.get_clock().now()
 
     def periodic(self) -> None | Events:
-        duration: Duration = self.manager.get_clock().now() - self.start_time
+        duration: Duration = self.manager.get_clock().now() - self.start_time # ty: ignore
         if duration.nanoseconds / 1e9 > self.manager.get_parameter("stall.wait_duration_seconds").get_parameter_value().double_value:
             return Events.SUCCESS
         return None

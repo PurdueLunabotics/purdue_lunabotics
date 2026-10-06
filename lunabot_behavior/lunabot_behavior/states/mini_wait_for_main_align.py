@@ -7,7 +7,7 @@ from std_msgs.msg import Bool
 
 class MiniWaitForAlignState(State):
     def __init__(self):
-        self.transform: TransformStamped = None
+        self.transform: TransformStamped | None = None
 
         self.received_aligned_msg = False
 
