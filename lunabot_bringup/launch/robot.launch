@@ -329,6 +329,9 @@
             <param from="$(find-pkg-share lunabot_config)/config/test_planner.yml"/>
         </node>
 
+        
+        <node pkg="lunabot_control" exec="click_to_move_node" output="screen" respawn="true" />
+
 
         <node name="lifecycle" pkg="nav2_lifecycle_manager" exec="lifecycle_manager" output="screen">
           <param name="autostart" value="true"/>
