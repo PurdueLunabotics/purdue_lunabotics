@@ -317,6 +317,19 @@
           <param name="use_sim_time" value="$(var sim)"/>
         </node>
 
+        <node name="controller_server" pkg="nav2_controller" exec="controller_server" output="screen" respawn="true">
+            <param from="$(find-pkg-share lunabot_config)/config/test_planner.yml"/>
+        </node>
+
+        <node name="behavior_server" pkg="nav2_behaviors" exec="behavior_server" output="screen" respawn="true" > 
+            <param from="$(find-pkg-share lunabot_config)/config/test_planner.yml"/>
+        </node>
+
+        <node name="bt_navigator" pkg="nav2_bt_navigator" exec="bt_navigator" output="screen" respawn="true">
+            <param from="$(find-pkg-share lunabot_config)/config/test_planner.yml"/>
+        </node>
+
+
         <node name="lifecycle" pkg="nav2_lifecycle_manager" exec="lifecycle_manager" output="screen">
           <param name="autostart" value="true"/>
           <param name="node_names" value="planner_server" value-sep=";"/>
