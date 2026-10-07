@@ -139,11 +139,13 @@ def calibrate_camera(camera_name: str, calibration_number: int):
         "projection_matrix": {
             "rows": 3,
             "cols": 4,
-            "data": [mtx[0,0], 0, mtx[0,2], 0,
-                    0, mtx[1,1], mtx[1,2], 0,
+            "data": [float(mtx[0,0]), 0, float(mtx[0,2]), 0,
+                    0, float(mtx[1,1]), float(mtx[1,2]), 0,
                     0, 0, 1, 0],
         },
     }
+
+    print(calibration_data)
 
     with open(output_filename, "w") as f:
         yaml.safe_dump(calibration_data, f, default_flow_style=False, sort_keys=False)
@@ -176,4 +178,4 @@ def calibrate_camera(camera_name: str, calibration_number: int):
 
 
 if __name__ == "__main__":
-    calibrate_camera("front_camera", 1)
+    calibrate_camera("front_camera", 3)

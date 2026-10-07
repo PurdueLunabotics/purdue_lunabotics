@@ -5,14 +5,14 @@ from camera_calibration import calibrate_camera
 GRID_SIZE = (9, 6)
 
 # Default port, run detect_camera to find cameras on other ports
-CAMERA_PORT = 0
+CAMERA_PORT = 1
 
 CAMERA_NAME = "front_camera"
 
 # Termination critieria
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
-SHOULD_CALIBRATE_AFTER = True
+SHOULD_CALIBRATE_AFTER = False
 
 def capture_loop():
 
