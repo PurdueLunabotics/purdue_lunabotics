@@ -8,7 +8,8 @@ class ApriltagCombine(Node):
     def __init__(self, **kwargs):
         super().__init__("apriltag_combine_node", **kwargs)
 
-        # declare param for list of input topics to subscribe to which is front and back cameras
+        # declare param for list of input topics to subscribe to which is front and back depth cams
+        # will need to add normal cams to these input topics as well, once they're in the launch files
         self.declare_parameter("input_topics", ["/d455_front/apriltag/detections", "/d455_back/apriltag/detections"], ParameterDescriptor(type = ParameterType.PARAMETER_STRING_ARRAY))
         self.declare_parameter("input_tags", [301, 482, 421], ParameterDescriptor(type = ParameterType.PARAMETER_INTEGER_ARRAY))
         self.declare_parameter("id_offset", 0, ParameterDescriptor(type = ParameterType.PARAMETER_INTEGER))
