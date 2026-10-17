@@ -315,12 +315,18 @@
       <param name="pixel_format" value="yuyv"/>
       <param name="camera_frame_id" value="usb_front_link"/>
       <param name="camera_info_url"
-            value="file://$(find-pkg-share lunabot_perception)/calibrations/usb_front_calibration_data1.yaml"/>
+            value="file://$(find-pkg-share lunabot_perception)/calibrations/front_camera_calibration_data7.yaml"/>
+    </node>
+
+    <node pkg="image_proc" exec="rectify_node" name="rectify_color" output="screen">
+      <remap from="image" to="image_raw"/>
+      <remap from="camera_info" to="camera_info"/>
+      <remap from="image_rect" to="image_rect"/>
     </node>
 
     <include file="$(find-pkg-share lunabot_perception)/launch/apriltag.launch">
       <arg name="camera_frame" value="usb_front_link"/>
-      <arg name="camera_topic" value="image_raw"/>
+      <arg name="camera_topic" value="image_rect"/>
       <arg name="camera_info_topic" value="camera_info"/>
       <arg name="use_sim_time" value="$(var sim)"/>
     </include>
