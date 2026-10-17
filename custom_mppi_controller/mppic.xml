@@ -1,0 +1,7 @@
+<class_libraries>
+  <library path="mppi_controller">
+    <class type="custom_mppi_controller::CustomMPPIController" base_class_type="nav2_core::Controller">
+      <description>MPPI Controller for Nav2 (custom)</description>
+    </class>
+  </library>
+</class_libraries>
