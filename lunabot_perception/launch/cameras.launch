@@ -332,5 +332,14 @@
     </include>
   </group>
 
+  <!-- AprilTag Combiner node (checks if using minibot first for time being) -->
+  <!-- NOTE: will not work on main bot due to this, I'm assuming we will only test on mini -->
+  <group if="$(eval '$(var robot_num) == 1')">
+    <node pkg="lunabot_perception" exec="apriltag_combine_node" name="apriltag_combiner" output="screen">
+      <param name="input_topics" value='["/mini/d455_front/apriltag/detections", "/mini/d455_back/apriltag/detections"]' value-type="string_array" />
+      <param name="id_offset" value="0" value-type="int" />
+    </node>
+  </group>
+
 </launch>
 
