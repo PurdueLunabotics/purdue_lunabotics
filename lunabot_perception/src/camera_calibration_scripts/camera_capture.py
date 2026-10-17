@@ -12,7 +12,7 @@ CAMERA_NAME = "front_camera"
 # Termination critieria
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
-SHOULD_CALIBRATE_AFTER = False
+SHOULD_CALIBRATE_AFTER = True
 
 def capture_loop():
 
@@ -42,6 +42,11 @@ def capture_loop():
     
     while True:
         ret, img = camera.read()
+
+        if not ret:
+            print("Camera was not detected")
+            raise ModuleNotFoundError
+
         save_copy = img.copy()
 
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

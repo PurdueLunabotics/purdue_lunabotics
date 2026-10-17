@@ -178,4 +178,4 @@ def calibrate_camera(camera_name: str, calibration_number: int):
 
 
 if __name__ == "__main__":
-    calibrate_camera("front_camera", 3)
+    calibrate_camera("front_camera", 5)
