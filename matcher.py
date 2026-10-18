@@ -10,6 +10,8 @@ import numpy as np
 import torch
 import os
 from lightglue import LightGlue
+from time import perf_counter
+import sys
 
 torch.set_grad_enabled(False)
 
@@ -23,6 +25,7 @@ def init(descriptorDim, matchThreshold, iterations, cuda, model):
     matcher = LightGlue(features="disk").eval()
     if use_cuda:
         matcher = matcher.cuda()
+    matcher.compile()
 
 def to_dev(tensor: torch.Tensor):
     global use_cuda
@@ -30,7 +33,8 @@ def to_dev(tensor: torch.Tensor):
         return tensor.cuda()
     return tensor
 
-def detect(kptsFrom, kptsTo, scoresFrom, scoresTo, descriptorsFrom, descriptorsTo, imageWidth, imageHeight):
+def match(kptsFrom, kptsTo, scoresFrom, scoresTo, descriptorsFrom, descriptorsTo, imageWidth, imageHeight):
+    start = perf_counter()
     global matcher
     assert matcher
 
@@ -51,4 +55,6 @@ def detect(kptsFrom, kptsTo, scoresFrom, scoresTo, descriptorsFrom, descriptorsT
     
     # rtabmap expects format:
     #   matches: array Nx2 (type=9 or uint64)
+    end = perf_counter()
+    print(f"Matching took: {end - start} seconds", file=sys.stderr)
     return matches['matches'][0].numpy()
