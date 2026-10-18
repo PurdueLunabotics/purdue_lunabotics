@@ -1,0 +1,6 @@
+names:
+  rtabmap:
+    cmake-args:
+      - "-DCMAKE_PREFIX_PATH=/rtabmap_ws/src/LightGlue/env/"
+      - "-DWITH_PYTHON=ON"
+      - "-DWITH_QT=OFF"
