@@ -33,11 +33,11 @@ def detect(imageBuffer):
     assert detector
     feats = detector.extract(image)
 
-    points = feats['keypoints'].numpy()[0]
-    scores = feats['keypoint_scores'].numpy()[0]
+    points = feats['keypoints'].cpu().numpy()[0]
+    scores = feats['keypoint_scores'].cpu().numpy()[0]
     points = np.hstack((points, scores[:, np.newaxis]))
 
-    descs = feats['descriptors'].numpy()[0]
+    descs = feats['descriptors'].cpu().numpy()[0]
     
     # rtabmap expects format:
     #   pts:         array Nx3 (type=11 or float)

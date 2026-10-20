@@ -57,4 +57,4 @@ def match(kptsFrom, kptsTo, scoresFrom, scoresTo, descriptorsFrom, descriptorsTo
     #   matches: array Nx2 (type=9 or uint64)
     end = perf_counter()
     print(f"Matching took: {end - start} seconds", file=sys.stderr)
-    return matches['matches'][0].numpy()
+    return matches['matches'][0].cpu().numpy()
