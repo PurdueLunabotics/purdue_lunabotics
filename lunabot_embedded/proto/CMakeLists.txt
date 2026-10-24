@@ -6,6 +6,7 @@ FetchContent_Declare(
   NANOPB_CONTENT
   GIT_REPOSITORY https://github.com/nanopb/nanopb.git
   GIT_TAG        0.4.92
+  EXCLUDE_FROM_ALL
 )
 FetchContent_MakeAvailable(NANOPB_CONTENT)
 
