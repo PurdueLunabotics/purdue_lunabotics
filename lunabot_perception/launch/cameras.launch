@@ -337,7 +337,7 @@
   <!-- also, this only uses depth cams for now bc normal cams aren't made in launch files yet -->
   <group if="$(eval '$(var robot_num) == 1')">
     <node pkg="lunabot_perception" exec="apriltag_combine_node" name="apriltag_combiner" output="screen">
-      <param name="input_topics" value='["/mini/d455_front/apriltag/detections", "/mini/d455_back/apriltag/detections"]' value-type="string_array" />
+      <param name="input_topics" value='["/mini/d455_front/apriltag/detections", "/mini/d455_back/apriltag/detections", /usb_front/detections"]' value-type="string_array" />
       <param name="id_offset" value="0" value-type="int" />
     </node>
   </group>
