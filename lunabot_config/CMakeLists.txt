@@ -12,6 +12,7 @@ find_package(ament_cmake REQUIRED)
 # find_package(<dependency> REQUIRED)
 
 find_package(ament_cmake_python REQUIRED)
+find_package(nav2_smac_planner  REQUIRED)
 
 # Install config files
 install(DIRECTORY
