@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <include file="$(find-pkg-share rtabmap_launch)/launch/rtabmap.launch.py">
+        <arg name="use_sim_time" value="true"/>
+        <arg name="rtabmap_args" value="--delete_db_on_start" />
+        <arg name="rgb_topic" value="/mini/d455_front/color/image_raw" />
+        <arg name="depth_topic" value="/mini/d455_front/aligned_depth_to_color/image_raw" />
+        <arg name="camera_info_topic" value="/mini/d455_front/color/camera_info" />
+        <arg name="frame_id" value="mini/d455_front_link" />
+        <arg name="cfg" value="$(find-pkg-share lunabot_config)/config/rtabmap.ini" />
+    </include>
+</launch>
