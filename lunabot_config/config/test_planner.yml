@@ -6,7 +6,7 @@ global_costmap:
       publish_frequency: 1.0
       update_frequency: 1.0
       always_send_full_costmap: true
-      robot_radius: 0.4
+      footprint: "[[0.5, 0.3], [0.5, -0.3], [-0.5, -0.3], [-0.5, 0.3]]"
       plugins: ["static_layer","denoise_layer", "inflation_layer"]
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
