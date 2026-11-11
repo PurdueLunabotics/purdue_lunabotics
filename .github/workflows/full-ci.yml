@@ -5,12 +5,12 @@ on:
   # but only for the main branch
   push:
     branches:
-      - master 
-      - develop  
+      - master
+      - develop
   pull_request:
     branches:
-      - master 
-      - develop  
+      - master
+      - develop
 
 jobs:
   build-container:
