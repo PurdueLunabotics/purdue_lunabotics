@@ -115,7 +115,7 @@
     </include>
 
     <!-- Launch Cameras -->
-    <include if="$(var cameras)" file="$(find-pkg-share lunabot_perception)/launch/cameras.launch">
+    <include if="$(var cameras)" file="$(find-pkg-share lunabot_perception)/launch/cameras.launch.py">
         <arg name="ns" value="$(var ns)"/>
         <arg name="sim" value="$(var sim)"/>
         <arg name="lidar" value="$(var lidar)"/>
