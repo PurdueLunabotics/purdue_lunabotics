@@ -13,7 +13,8 @@
     <param name="local_ip" value="192.168.1.2"/>
     <param name="cloud_frame" value="mini/lidar_link"/>
     <param name="cloud_topic" value="unilidar/cloud"/>
-    <param name="imu_frame" value="mini/unilidar_imu"/>
+    <!-- The IMU is rigidly mounted in the lidar; use the lidar TF frame. -->
+    <param name="imu_frame" value="mini/lidar_link"/>
     <param name="imu_topic" value="unilidar/imu"/>
   </node>
 
