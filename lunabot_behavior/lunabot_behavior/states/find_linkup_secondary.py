@@ -113,7 +113,7 @@ class FindLinkupSecondary(State):
         linkup_msg = self.build_linkup_msg(segment)
         self.linkup_pub.publish(linkup_msg)
 
-    def build_linkup_msg(self, linkup_segment: list[np.array]):
+    def build_linkup_msg(self, linkup_segment):
         linkup = Linkup()
         if linkup_segment is not None:
             # main target should be closer to exc (low dist), mini target closer to berm (high dist)
@@ -159,7 +159,7 @@ class FindLinkupSecondary(State):
 
         return linkup
 
-    def crosses_exc_edge(self, segment: list[np.array]):
+    def crosses_exc_edge(self, segment):
         segment_shape = LineString(segment)
 
         intersection_geom = self.excavation_edge.intersection(segment_shape)
@@ -169,17 +169,17 @@ class FindLinkupSecondary(State):
 
         return is_valid_intersection
     
-    def get_exc_edge_intersection(self, segment: list[np.array]) -> np.array:
+    def get_exc_edge_intersection(self, segment):
         segment_shape = LineString(segment)
 
         intersection_geom = self.excavation_edge.intersection(segment_shape)
         return np.array(list(intersection_geom.coords)[0])
     
-    def linkup_seg_from_path(self, path=Path) -> list[np.array]:
+    def linkup_seg_from_path(self, path: Path):
         if path is not None:
             # self.get_logger().info("finding linkup")
 
-            prev_waypoint: np.array = None
+            prev_waypoint = None
             linkup_segment = None
 
             poses: list[PoseStamped] = path.poses
@@ -239,13 +239,13 @@ class FindLinkupSecondary(State):
         # can't do anything if path doesn't exist
         return None
     
-    def is_viable_segment(self, segment: list[np.array], min_segment_len):
+    def is_viable_segment(self, segment, min_segment_len):
         dist = np.linalg.norm(segment[0] - segment[1])
         return dist >= min_segment_len
     
     # VISUALIZATION HELPERS ==========================================================================
     
-    def visualize_line_segment(self, segment: list[np.array], publisher, r=1.0, g=0.0, b=0.0):
+    def visualize_line_segment(self, segment, publisher, r=1.0, g=0.0, b=0.0):
         marker = Marker()
         marker.header.frame_id = self.frame
         marker.header.stamp = self.manager.get_clock().now().to_msg()

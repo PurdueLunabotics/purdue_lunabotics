@@ -11,15 +11,19 @@
   <node args="-d $(var rvizconfig)" name="rviz" pkg="rviz2" exec="rviz2" />
   <node if="$(var two_bots)" args="-d $(var minirvizconfig)" name="mini_rviz" pkg="rviz2" exec="rviz2" />
 
-  <include if="$(var gui)" file="$(find-pkg-share lunabot_sim)/launch/gazebo.launch.py"/>
-  <include unless="$(var gui)" file="$(find-pkg-share lunabot_sim)/launch/gazebo_no_gui.launch.py"/>
-  
+  <let name="scene_path" if="$(var two_bots)" value="$(find-pkg-share lunabot_sim)/mujoco/scene_all.xml"/>
+  <let name="scene_path" unless="$(var two_bots)" value="$(find-pkg-share lunabot_sim)/mujoco/scene_just_main.xml"/>
 
-  <node name="joy_node" pkg="joy" exec="joy_node" output="screen" respawn="true" namespace="mini">
+  <node pkg="lunabot_sim" exec="simulator">
+    <param name="scene_path" value="$(var scene_path)" />
+    <param name="two_bots" value="$(var two_bots)" />
+  </node>
+
+  <node if="$(var two_bots)" name="joy_node" pkg="joy" exec="joy_node" output="screen" respawn="true" namespace="mini">
     <param name="device_id" value="1" />
   </node>
 
-  <node if="$(var two_bots)" name="joy_node" pkg="joy" exec="joy_node" output="screen" respawn="true" namespace="">
+  <node name="joy_node" pkg="joy" exec="joy_node" output="screen" respawn="true" namespace="">
     <param name="device_id" value="0" />
   </node>
 
@@ -35,4 +39,6 @@
     <arg name="entity_name" value="mini_bot"/>
     <arg name="odom_from_sim" value="$(var odom_from_sim)"/>
   </include>
+
+  <node pkg="foxglove_bridge" exec="foxglove_bridge" ros_args="--log-level warn" />
 </launch>

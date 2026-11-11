@@ -5,6 +5,8 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+add_subdirectory(proto)
+
 # find dependencies
 find_package(ament_cmake REQUIRED) # build tool for C++
 
@@ -15,13 +17,9 @@ find_package(sensor_msgs REQUIRED)
 
 add_executable(teensy_driver_node
   src/teensy_driver_node.cpp
-  src/hid.c
-  src/pb_common.c
-  src/pb_encode.c
-  src/pb_decode.c
-  src/RobotMsgs.pb.c)
+  src/hid.c)
 
-target_link_libraries(teensy_driver_node usb)
+target_link_libraries(teensy_driver_node usb proto)
 
 target_include_directories(teensy_driver_node
   PUBLIC

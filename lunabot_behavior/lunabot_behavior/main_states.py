@@ -58,7 +58,7 @@ class MainStates(Enum):
     FIRST_CYCLE_RAISE = (Raise(), (LedColor.GREEN, LedColor.TEAL))
     FIRST_CYCLE_RAISE_STALL = (Stall(), (LedColor.GREEN, LedColor.TEAL))
 
-    FIRST_CYCLE_SYNC = (Handshake(True, "first_cycle"), (LedColor.GREEN, LedColor.TEAL)),
+    FIRST_CYCLE_SYNC = (Handshake(True, "first_cycle"), (LedColor.GREEN, LedColor.TEAL))
 
     FIRST_CYCLE_DEPOSIT = (Deposit(transfer=True), (LedColor.YELLOW, LedColor.MAGENTA))
     FIRST_CYCLE_DEPOSIT_STALL = (Stall(), (LedColor.YELLOW, LedColor.RED))

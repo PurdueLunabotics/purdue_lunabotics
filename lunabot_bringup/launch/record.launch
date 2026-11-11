@@ -18,7 +18,7 @@
   /nav/failed
   /nav_path
 
-  /dummy_bot/joint_states /dummy_bot/robot_description
+  /main_bot/joint_states /main_bot/robot_description
 
   /d455_back/aligned_depth_to_color/camera_info
   /d455_back/aligned_depth_to_color/image_raw

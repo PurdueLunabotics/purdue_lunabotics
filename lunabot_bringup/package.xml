@@ -17,6 +17,10 @@
   <depend>rtabmap_launch</depend>
   <depend>foxglove_bridge</depend>
   <depend>ros2_controllers</depend>
+  <depend>rviz2</depend>
+  <depend>rqt</depend>
+  <depend>rqt_common_plugins</depend>
+  <depend>rqt_tf_tree</depend>
 
 
   <test_depend>ament_lint_auto</test_depend>

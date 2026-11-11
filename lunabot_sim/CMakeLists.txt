@@ -7,16 +7,57 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(mujoco_vendor REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(glfw3 REQUIRED)
+find_package(lunabot_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
+add_executable(simulator src/simulator.cpp src/camera.cpp src/actuator.cpp src/sensor.cpp src/robot.cpp src/main_robot.cpp)
+add_executable(simple_simulator src/simple_simulator.cpp)
+target_link_libraries(simulator mujoco::mujoco glfw)
+
+ament_target_dependencies(simulator rclcpp glfw3 lunabot_msgs sensor_msgs geometry_msgs tf2 tf2_geometry_msgs)
+ament_target_dependencies(simple_simulator rclcpp lunabot_msgs sensor_msgs geometry_msgs tf2 tf2_geometry_msgs)
+
+set(MUJOCO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/mujoco")
+
+set(GENERATED_ALL_SCENE "${CMAKE_CURRENT_BINARY_DIR}/scene_all.xml")
+set(GENERATED_JUST_MAIN_SCENE "${CMAKE_CURRENT_BINARY_DIR}/scene_just_main.xml")
+
+add_custom_command(
+  OUTPUT "${GENERATED_ALL_SCENE}"
+  COMMAND xacro "${MUJOCO_DIR}/scene.xacro.xml" two_bots:=true > "${GENERATED_ALL_SCENE}"
+  DEPENDS "${MUJOCO_DIR}/scene.xacro.xml" "${MUJOCO_DIR}/main_bot.xacro.xml" "${MUJOCO_DIR}/mini_bot.xacro.xml"
+)
+add_custom_command(
+  OUTPUT "${GENERATED_JUST_MAIN_SCENE}"
+  COMMAND xacro "${MUJOCO_DIR}/scene.xacro.xml" two_bots:=false > "${GENERATED_JUST_MAIN_SCENE}"
+  DEPENDS "${MUJOCO_DIR}/scene.xacro.xml" "${MUJOCO_DIR}/main_bot.xacro.xml"
+)
+
+add_custom_target(scenes ALL DEPENDS "${GENERATED_ALL_SCENE}" "${GENERATED_JUST_MAIN_SCENE}")
+
 # Install launch files
 install(DIRECTORY
-        launch
-        models
-        worlds
+        mujoco
         DESTINATION share/${PROJECT_NAME}/)
+
+install(FILES
+  ${GENERATED_ALL_SCENE}
+  ${GENERATED_JUST_MAIN_SCENE}
+  DESTINATION share/${PROJECT_NAME}/mujoco)
+
+install(TARGETS
+  simulator
+  simple_simulator
+  DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
