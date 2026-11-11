@@ -9,6 +9,8 @@ import shapely.geometry as shp
 import time
 
 from rclpy.node import Node
+import rclpy.time
+import rclpy.publisher
 
 import numpy as np
 
@@ -116,15 +118,15 @@ berm_zone = make_zone(
 bounding_box = shp.MultiPolygon([zone_to_poly(start_zone), zone_to_poly(exc_zone), zone_to_poly(berm_zone)]).bounds
 
 # TODO: replace with actual point to line calculation
-def get_distance_from_start(p: np.array):
+def get_distance_from_start(p):
     start_center = np.array([ZoneMeasurements.START_OFFSET_X, ZoneMeasurements.START_OFFSET_Y])
     return np.linalg.norm(p - start_center)
 
-def get_distance_from_exc(p: np.array):
+def get_distance_from_exc(p):
     start_center = np.array([ZoneMeasurements.EXC_OFFSET_X, ZoneMeasurements.EXC_OFFSET_Y])
     return np.linalg.norm(p - start_center)
 
-def get_distance_from_berm(p: np.array):
+def get_distance_from_berm(p):
     start_center = np.array([ZoneMeasurements.BERM_OFFSET_X, ZoneMeasurements.BERM_OFFSET_Y])
     return np.linalg.norm(p - start_center)
 

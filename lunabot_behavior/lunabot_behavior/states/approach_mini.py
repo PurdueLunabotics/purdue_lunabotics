@@ -27,9 +27,9 @@ class ApproachMiniState(State):
     self.tf_buffer = Buffer()
     self.tf_listener = None
 
-    self.apriltag_detections: AprilTagDetectionArray = None
+    self.apriltag_detections: AprilTagDetectionArray | None = None
 
-    self.manager: Node = None
+    self.manager: Node | None = None
 
     # PID for linear alignment
     self.P = 1
@@ -79,6 +79,7 @@ class ApproachMiniState(State):
     self.apriltag_detections = msg
     
   def start(self):
+    assert self.manager
     self.manager.get_logger().info("Behavior: Approaching mini bot" )
     self.apriltag_detections = None
     self.resetPID()
@@ -89,6 +90,7 @@ class ApproachMiniState(State):
     self.start_time = self.manager.get_clock().now()
   
   def periodic(self):
+    assert self.manager
 
     elapsed_time = self.manager.get_clock().now() - self.start_time
     elapsed_time = elapsed_time.nanoseconds / 1_000_000_000  # convert to seconds
@@ -171,6 +173,7 @@ class ApproachMiniState(State):
     return apriltag_present, detections
   
   def runPID(self, error: float):
+    assert self.manager
 
     if (self.last_time is not None):
       dt = self.manager.get_clock().now() - self.last_time

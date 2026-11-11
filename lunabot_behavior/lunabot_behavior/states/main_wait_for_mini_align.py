@@ -7,7 +7,7 @@ from std_msgs.msg import Bool
 
 class MainWaitForAlignState(State):
     def __init__(self):
-        self.mini_offset: TransformStamped = None
+        self.mini_offset: TransformStamped | None = None
 
     def setup(self, manager: Node) -> Future | None:
         self.aligned_msg_publisher = manager.create_publisher(Bool, "/behavior/main_first_aligned", 10)

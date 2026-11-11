@@ -25,12 +25,12 @@ class AlignToMiniBotState(State):
     self.tf_listener = None
 
     # transform of the mini bot in the apriltag frame
-    self.mini_transform_offset: TransformStamped = None
+    self.mini_transform_offset: TransformStamped | None = None
 
     # pose of minibot in the map frame
-    self.mini_pose: Pose = None
+    self.mini_pose: Pose | None = None
 
-    self.node: Node = None
+    self.node: Node | None = None
 
     # PID for angular alignment
     self.P = 5
@@ -77,6 +77,7 @@ class AlignToMiniBotState(State):
     self.mini_transform_offset = msg
 
   def start(self):
+    assert self.node
     self.node.get_logger().info("Behavior: Align to mini bot: starting alignment" )
     self.resetPID()
     self.success_count = 0
@@ -84,6 +85,10 @@ class AlignToMiniBotState(State):
     self.mini_transform_offset = None
   
   def periodic(self):
+    assert self.node
+    if not self.robot_pose:
+      self.node.get_logger().warn("Behavior: Align to mini bot: no odom" )
+      return
 
     # if we don't have the target pose yet, find it
     if (self.mini_pose is None):
@@ -142,6 +147,7 @@ class AlignToMiniBotState(State):
 
   
   def runPID(self, error: float):
+    assert self.node
 
     if (self.last_time is not None):
       dt = self.node.get_clock().now() - self.last_time
@@ -184,6 +190,7 @@ class AlignToMiniBotState(State):
       self.aligned_msg_publisher.publish(msg)
 
   def visualize_alignment(self, mini_pose: Pose):
+    assert self.node and self.robot_pose
     marker = Marker()
     marker.header.frame_id = "map"
     marker.header.stamp = self.node.get_clock().now().to_msg()
@@ -206,6 +213,7 @@ class AlignToMiniBotState(State):
     self.visual_publisher.publish(marker)
   
   def remove_marker(self):
+    assert self.node
     marker = Marker()
     marker.header.frame_id = "map"
     marker.header.stamp = self.node.get_clock().now().to_msg()

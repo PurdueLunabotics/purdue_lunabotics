@@ -71,6 +71,10 @@ class AlignTrench(AlignToAngle):
     self.request_valid_angles()
 
   def periodic(self):
+    if not self.robot_pose:
+      self.manager.get_logger().warn("Behavior: align trench: no odom")
+      return
+
     if (self.no_paths):
       return Events.NO_PATH
 
@@ -131,7 +135,7 @@ class AlignTrench(AlignToAngle):
         return
     costmap: Costmap = result.map
 
-    if self.robot_pose != (None, None, None) and self.robot_pose is not None:
+    if self.robot_pose is not None:
       angles = self.valid_angles.copy()
       self.manager.get_logger().info(f"{len(angles)} {len(self.valid_angles)}")
       for angle in angles:
@@ -175,6 +179,7 @@ class AlignTrench(AlignToAngle):
     self.request_valid_angles() # reevaluate safe options
   
   def evaluate_angle(self, costmap: Costmap, target_angle: float, exc_approach_dist: float):
+    assert self.robot_pose
     a_x = self.robot_pose[0]
     a_y = self.robot_pose[1]
     a = shp.Point(a_x, a_y)

@@ -62,7 +62,7 @@ class StateManager(Node):
         
     def process_event(self, event):
         self.get_logger().info(f"got event {event} @ {self.state}")
-        next_state = self.states.get_transition(self.state, event)
+        next_state = self.states.get_transition(self.state, event) # ty: ignore
 
         if next_state is not None:
             self.get_logger().info(f"switching to state {next_state}")
