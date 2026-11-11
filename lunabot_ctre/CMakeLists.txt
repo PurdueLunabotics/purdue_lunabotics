@@ -8,6 +8,7 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
 
 add_executable(ctre_motor_node
   src/ctre_motor_node.cpp
@@ -20,6 +21,7 @@ target_include_directories(ctre_motor_node PUBLIC
 
 ament_target_dependencies(ctre_motor_node
   rclcpp
+  std_msgs
 )
 
 install(TARGETS ctre_motor_node
