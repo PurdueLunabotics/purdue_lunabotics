@@ -182,7 +182,7 @@ build/
 debug/
 log/
 .devcontainer/devcontainer.json
-unilidar_sdk2/
+
 
 local/
 **/**/compile_commands.json
