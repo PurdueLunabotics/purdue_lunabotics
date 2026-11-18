@@ -57,5 +57,8 @@
     <param from="$(find-pkg-share lunabot_config)/config/control.yml"/>
   </node>
 
+  <node name="goalToNav2Bridge" pkg="lunabot_nav" exec="goal_to_nav2_bridge_node" output="screen" respawn="true">
+  </node>
+
   <node name="zones_node" pkg="lunabot_behavior" exec="zones" output="screen"/>
 </launch>

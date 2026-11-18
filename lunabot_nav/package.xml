@@ -6,15 +6,22 @@
   <description>Lunabotics nav files</description>
   <maintainer email="lunabotics@todo.todo">Purdue Lunabotics</maintainer>
   <license>None</license>
+
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
+
   <depend>rclcpp</depend>
+  <depend>rclcpp_action</depend>
   <depend>std_msgs</depend>
   <depend>nav_msgs</depend>
+  <depend>nav2_msgs</depend>
+  <depend>geometry_msgs</depend>
   <depend>map_msgs</depend>
   <depend>navigation2</depend>
   <depend>lunabot_msgs</depend>
+
   <export>
     <build_type>ament_cmake</build_type>
     <nav2_core plugin="${prefix}/stheta_star_planner.xml"/>
   </export>
+
 </package>

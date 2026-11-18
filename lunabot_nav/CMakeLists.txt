@@ -33,10 +33,13 @@ find_package(lunabot_msgs REQUIRED)
 add_library(stheta_star_planner SHARED src/stheta_star_planner.cpp src/stheta_star.cpp)
 add_executable(nav2_bridge_node src/nav2_bridge.cpp)
 add_executable(planner_test_node src/planner_test_node.cpp)
+add_executable(goal_to_nav2_bridge_node src/goal_to_nav2_bridge.cpp)
 
 ament_target_dependencies(stheta_star_planner rclcpp std_msgs nav_msgs map_msgs tf2_ros nav2_core nav2_costmap_2d nav2_util)
 ament_target_dependencies(nav2_bridge_node rclcpp std_msgs nav_msgs rclcpp_action nav2_msgs lunabot_msgs)
 ament_target_dependencies(planner_test_node rclcpp std_msgs nav_msgs rclcpp_action nav2_msgs)
+ament_target_dependencies(goal_to_nav2_bridge_node rclcpp std_msgs geometry_msgs rclcpp_action nav2_msgs)
+
 
 # Install files
 
@@ -48,11 +51,11 @@ install(FILES stheta_star_planner.xml
 
 # Link Libraries
 
-
 # Install Programs
 install(TARGETS
   nav2_bridge_node
   planner_test_node
+  goal_to_nav2_bridge_node
   DESTINATION lib/${PROJECT_NAME})
 
 install(TARGETS stheta_star_planner
