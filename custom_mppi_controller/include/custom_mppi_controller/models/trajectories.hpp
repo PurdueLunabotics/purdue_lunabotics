@@ -27,23 +27,30 @@ namespace mppi::models
 {
 
 /**
+ * @struct mppi::models::State
+ * @brief One state of the robot
+ */
+struct State
+{
+  float x, y, yaw, vx, wz;
+};
+
+constexpr unsigned int STATE_SIZE = sizeof(State) / sizeof(float);
+
+/**
  * @class mppi::models::Trajectories
- * @brief Candidate Trajectories
+ * @brief A collection of Trajectories stored as an array of shape (batchSize, timesteps, STATE_SIZE)
  */
 struct Trajectories
 {
-  xt::xtensor<float, 2> x;
-  xt::xtensor<float, 2> y;
-  xt::xtensor<float, 2> yaws;
+  xt::xtensor<float, 3> trajectories;
 
   /**
-    * @brief Reset state data
+    * @brief Reset trajectories to zero
     */
   void reset(unsigned int batch_size, unsigned int time_steps)
   {
-    x = xt::zeros<float>({batch_size, time_steps});
-    y = xt::zeros<float>({batch_size, time_steps});
-    yaws = xt::zeros<float>({batch_size, time_steps});
+    trajectories = xt::zeros<float>({batch_size, time_steps, STATE_SIZE});
   }
 };
 

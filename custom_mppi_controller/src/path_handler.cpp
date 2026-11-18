@@ -45,9 +45,7 @@ void PathHandler::initialize(
   }
 }
 
-std::pair<nav_msgs::msg::Path, PathIterator>
-PathHandler::getGlobalPlanConsideringBoundsInCostmapFrame(
-  const geometry_msgs::msg::PoseStamped & global_pose)
+std::pair<nav_msgs::msg::Path, PathIterator> PathHandler::getGlobalPlanConsideringBoundsInCostmapFrame(const geometry_msgs::msg::PoseStamped & global_pose)
 {
   using nav2_util::geometry_utils::euclidean_distance;
 
@@ -55,9 +53,9 @@ PathHandler::getGlobalPlanConsideringBoundsInCostmapFrame(
 
   // Limit the search for the closest pose up to max_robot_pose_search_dist on the path
   auto closest_pose_upper_bound =
-    nav2_util::geometry_utils::first_after_integrated_distance(
-    global_plan_up_to_inversion_.poses.begin(), global_plan_up_to_inversion_.poses.end(),
-    max_robot_pose_search_dist_);
+    nav2_util::geometry_utils::first_after_integrated_distance(global_plan_up_to_inversion_.poses.begin(), 
+                                                               global_plan_up_to_inversion_.poses.end(),
+                                                               max_robot_pose_search_dist_);
 
   // Find closest point to the robot
   auto closest_point = nav2_util::geometry_utils::min_by(

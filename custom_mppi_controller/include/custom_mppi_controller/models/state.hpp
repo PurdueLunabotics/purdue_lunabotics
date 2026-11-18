@@ -29,17 +29,15 @@ namespace mppi::models
 {
 
 /**
- * @struct mppi::models::State
- * @brief State information: velocities, controls, poses, speed
+ * @struct mppi::models::MPPIState
+ * @brief Algorithm state for MPPI - velocities, controls, current pose, and current velocity
  */
-struct State
+struct MPPIState
 {
   xt::xtensor<float, 2> vx;
-  xt::xtensor<float, 2> vy;
   xt::xtensor<float, 2> wz;
 
   xt::xtensor<float, 2> cvx;
-  xt::xtensor<float, 2> cvy;
   xt::xtensor<float, 2> cwz;
 
   geometry_msgs::msg::PoseStamped pose;
@@ -51,11 +49,9 @@ struct State
   void reset(unsigned int batch_size, unsigned int time_steps)
   {
     vx = xt::zeros<float>({batch_size, time_steps});
-    vy = xt::zeros<float>({batch_size, time_steps});
     wz = xt::zeros<float>({batch_size, time_steps});
 
     cvx = xt::zeros<float>({batch_size, time_steps});
-    cvy = xt::zeros<float>({batch_size, time_steps});
     cwz = xt::zeros<float>({batch_size, time_steps});
   }
 };

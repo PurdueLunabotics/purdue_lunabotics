@@ -77,17 +77,18 @@ public:
 
   /**
     * @brief Add an optimal trajectory to visualize
-    * @param trajectory Optimal trajectory
+    * @param trajectory Optimal trajectory, an array of shape (timesteps, 3), with columns x,y,yaw
     */
-  void add(
+  void addTrajectory(
     const xt::xtensor<float, 2> & trajectory, const std::string & marker_namespace,
     const builtin_interfaces::msg::Time & cmd_stamp);
 
   /**
     * @brief Add candidate trajectories to visualize
     * @param trajectories Candidate trajectories
+    * @param costs An array of shape (num trajectories, 1) with the cost for each trajectory
     */
-  void add(const models::Trajectories & trajectories, const std::string & marker_namespace);
+  void addTrajectories(const models::Trajectories & trajectories, const std::string & marker_namespace, xt::xtensor<float, 1> costs);
 
   /**
     * @brief Visualize the plan
@@ -102,8 +103,7 @@ public:
 
 protected:
   std::string frame_id_;
-  std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<visualization_msgs::msg::MarkerArray>>
-  trajectories_publisher_;
+  std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<visualization_msgs::msg::MarkerArray>> trajectories_publisher_;
   std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<nav_msgs::msg::Path>> transformed_path_pub_;
   std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<nav_msgs::msg::Path>> optimal_path_pub_;
 

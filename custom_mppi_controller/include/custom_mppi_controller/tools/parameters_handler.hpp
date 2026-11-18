@@ -54,8 +54,7 @@ public:
     * @brief Constructor for mppi::ParametersHandler
     * @param parent Weak ptr to node
     */
-  explicit ParametersHandler(
-    const rclcpp_lifecycle::LifecycleNode::WeakPtr & parent);
+  explicit ParametersHandler(const rclcpp_lifecycle::LifecycleNode::WeakPtr & parent);
 
   /**
     * @brief Destructor for mppi::ParametersHandler
@@ -72,8 +71,7 @@ public:
     * @param parameter Parameter changes to process
     * @return Set Parameter Result
     */
-  rcl_interfaces::msg::SetParametersResult dynamicParamsCallback(
-    std::vector<rclcpp::Parameter> parameters);
+  rcl_interfaces::msg::SetParametersResult dynamicParamsCallback(std::vector<rclcpp::Parameter> parameters);
 
   /**
     * @brief Get an object to retreive parameters
@@ -153,15 +151,13 @@ protected:
 
   std::mutex parameters_change_mutex_;
   rclcpp::Logger logger_{rclcpp::get_logger("MPPIController")};
-  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr
-    on_set_param_handler_;
+  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr on_set_param_handler_;
   rclcpp_lifecycle::LifecycleNode::WeakPtr node_;
   std::string node_name_;
 
   bool verbose_{false};
 
-  std::unordered_map<std::string, std::function<get_param_func_t>>
-  get_param_callbacks_;
+  std::unordered_map<std::string, std::function<get_param_func_t>> get_param_callbacks_;
 
   std::vector<std::function<pre_callback_t>> pre_callbacks_;
   std::vector<std::function<post_callback_t>> post_callbacks_;

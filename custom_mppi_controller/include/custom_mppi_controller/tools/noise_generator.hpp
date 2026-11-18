@@ -52,13 +52,10 @@ public:
   /**
    * @brief Initialize noise generator with settings and model types
    * @param settings Settings of controller
-   * @param is_holonomic If base is holonomic
    * @param name Namespace for configs
    * @param param_handler Get parameters util
    */
-  void initialize(
-    mppi::models::OptimizerSettings & settings,
-    bool is_holonomic, const std::string & name, ParametersHandler * param_handler);
+  void initialize(mppi::models::OptimizerSettings & settings, const std::string & name, ParametersHandler * param_handler);
 
   /**
    * @brief Shutdown noise generator thread
@@ -72,17 +69,15 @@ public:
   void generateNextNoises();
 
   /**
-   * @brief set noised control_sequence to state controls
-   * @return noises vx, vy, wz
+   * @brief set the controls of the current MPPI state with noise applied to the given control sequence
    */
-  void setNoisedControls(models::State & state, const models::ControlSequence & control_sequence);
+  void setNoisedControls(models::MPPIState& state, const models::ControlSequence & control_sequence);
 
   /**
    * @brief Reset noise generator with settings and model types
    * @param settings Settings of controller
-   * @param is_holonomic If base is holonomic
    */
-  void reset(mppi::models::OptimizerSettings & settings, bool is_holonomic);
+  void reset(mppi::models::OptimizerSettings & settings);
 
 protected:
   /**
@@ -91,20 +86,16 @@ protected:
   void noiseThread();
 
   /**
-   * @brief Generate random controls by gaussian noise with mean in
-   * control_sequence_
+   * @brief Generate random noise for controls around mean zero
    *
-   * @return tensor of shape [ batch_size_, time_steps_, 2]
-   * where 2 stands for v, w
+   * Sets noises_ member variables to tensors of shape [ batch_size_, time_steps_]
    */
   void generateNoisedControls();
 
   xt::xtensor<float, 2> noises_vx_;
-  xt::xtensor<float, 2> noises_vy_;
   xt::xtensor<float, 2> noises_wz_;
 
   mppi::models::OptimizerSettings settings_;
-  bool is_holonomic_;
 
   std::thread noise_thread_;
   std::condition_variable noise_cond_;

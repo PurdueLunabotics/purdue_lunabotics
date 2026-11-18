@@ -300,8 +300,8 @@ auto shortest_angular_distance(
  */
 inline size_t findPathFurthestReachedPoint(const CriticData & data)
 {
-  const auto traj_x = xt::view(data.trajectories.x, xt::all(), -1, xt::newaxis());
-  const auto traj_y = xt::view(data.trajectories.y, xt::all(), -1, xt::newaxis());
+  const auto traj_x = xt::view(data.trajectories.trajectories, xt::all(), -1, 0);
+  const auto traj_y = xt::view(data.trajectories.trajectories, xt::all(), -1, 1);
 
   const auto dx = data.path.x - traj_x;
   const auto dy = data.path.y - traj_y;
@@ -502,9 +502,6 @@ inline void savitskyGolayFilter(
     control_sequence.vx, initial_control_sequence.vx, control_history[0].vx,
     control_history[1].vx, control_history[2].vx, control_history[3].vx);
   applyFilterOverAxis(
-    control_sequence.vy, initial_control_sequence.vy, control_history[0].vy,
-    control_history[1].vy, control_history[2].vy, control_history[3].vy);
-  applyFilterOverAxis(
     control_sequence.wz, initial_control_sequence.wz, control_history[0].wz,
     control_history[1].wz, control_history[2].wz, control_history[3].wz);
 
@@ -515,7 +512,6 @@ inline void savitskyGolayFilter(
   control_history[2] = control_history[3];
   control_history[3] = {
     control_sequence.vx(offset),
-    control_sequence.vy(offset),
     control_sequence.wz(offset)};
 }
 

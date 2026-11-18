@@ -43,7 +43,7 @@ void CriticManager::loadCritics()
 {
   if (!loader_) {
     loader_ = std::make_unique<pluginlib::ClassLoader<critics::CriticFunction>>(
-      "nav2_mppi_controller", "mppi::critics::CriticFunction");
+      "custom_mppi_controller", "mppi::critics::CriticFunction");
   }
 
   critics_.clear();
@@ -64,10 +64,9 @@ std::string CriticManager::getFullName(const std::string & name)
   return "mppi::critics::" + name;
 }
 
-void CriticManager::evalTrajectoriesScores(
-  CriticData & data) const
+void CriticManager::evalTrajectoriesScores(CriticData& data) const
 {
-  for (const auto & critic : critics_) {
+  for (const auto& critic : critics_) {
     if (data.fail_flag) {
       break;
     }

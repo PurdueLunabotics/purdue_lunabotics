@@ -27,7 +27,7 @@ namespace mppi::models
 
 /**
  * @struct mppi::models::Path
- * @brief Path represented as a tensor
+ * @brief Path represented as collection of x, y, and yaw arrays
  */
 struct Path
 {

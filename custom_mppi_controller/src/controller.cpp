@@ -72,10 +72,9 @@ void CustomMPPIController::reset()
   optimizer_.reset(false /*Don't reset zone-based speed limits between requests*/);
 }
 
-geometry_msgs::msg::TwistStamped CustomMPPIController::computeVelocityCommands(
-  const geometry_msgs::msg::PoseStamped & robot_pose,
-  const geometry_msgs::msg::Twist & robot_speed,
-  nav2_core::GoalChecker * goal_checker)
+geometry_msgs::msg::TwistStamped CustomMPPIController::computeVelocityCommands(const geometry_msgs::msg::PoseStamped & robot_pose,
+                                                                               const geometry_msgs::msg::Twist & robot_speed,
+                                                                               nav2_core::GoalChecker * goal_checker)
 {
 
 #ifdef BENCHMARK_TESTING
@@ -90,13 +89,16 @@ geometry_msgs::msg::TwistStamped CustomMPPIController::computeVelocityCommands(
   nav2_costmap_2d::Costmap2D* costmap = costmap_ros_->getCostmap();
   std::unique_lock<nav2_costmap_2d::Costmap2D::mutex_t> costmap_lock(*(costmap->getMutex()));
 
-  geometry_msgs::msg::TwistStamped cmd = optimizer_.evalControl(robot_pose, robot_speed, transformed_plan, goal, goal_checker);
+  geometry_msgs::msg::TwistStamped cmd = optimizer_.computeControl(robot_pose, robot_speed, transformed_plan, goal, goal_checker);
+  // RCLCPP_INFO(this->logger_, "cmd vel x %lf, z %lf", cmd.twist.linear.x, cmd.twist.angular.z);
 
 #ifdef BENCHMARK_TESTING
   auto end = std::chrono::system_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
   RCLCPP_INFO(logger_, "Control loop execution time: %ld [ms]", duration);
 #endif
+
+#undef BENCHMARK_TESTING
 
   if (visualize_) {
     visualize(std::move(transformed_plan), cmd.header.stamp);
@@ -105,12 +107,10 @@ geometry_msgs::msg::TwistStamped CustomMPPIController::computeVelocityCommands(
   return cmd;
 }
 
-void CustomMPPIController::visualize(
-  nav_msgs::msg::Path transformed_plan,
-  const builtin_interfaces::msg::Time & cmd_stamp)
+void CustomMPPIController::visualize(nav_msgs::msg::Path transformed_plan, const builtin_interfaces::msg::Time & cmd_stamp)
 {
-  trajectory_visualizer_.add(optimizer_.getGeneratedTrajectories(), "Candidate Trajectories");
-  trajectory_visualizer_.add(optimizer_.getOptimizedTrajectory(), "Optimal Trajectory", cmd_stamp);
+  trajectory_visualizer_.addTrajectories(optimizer_.getGeneratedTrajectories(), "Candidate Trajectories", optimizer_.getCosts());
+  trajectory_visualizer_.addTrajectory(optimizer_.getOptimizedTrajectory(), "Optimal Trajectory", cmd_stamp);
   trajectory_visualizer_.visualize(std::move(transformed_plan));
 }
 

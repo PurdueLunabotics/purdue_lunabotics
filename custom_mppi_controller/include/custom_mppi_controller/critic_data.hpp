@@ -43,12 +43,12 @@ namespace mppi
  */
 struct CriticData
 {
-  const models::State & state;
+  const models::MPPIState & state;
   const models::Trajectories & trajectories;
   const models::Path & path;
   const geometry_msgs::msg::Pose & goal;
 
-  xt::xtensor<float, 1> & costs;
+  xt::xtensor<float, 1>& costs;
   float & model_dt;
 
   bool fail_flag;

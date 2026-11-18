@@ -93,7 +93,7 @@ public:
    * @param goal_checker Object to check if goal is completed
    * @return TwistStamped of the MPPI control
    */
-  geometry_msgs::msg::TwistStamped evalControl(
+  geometry_msgs::msg::TwistStamped computeControl(
     const geometry_msgs::msg::PoseStamped & robot_pose,
     const geometry_msgs::msg::Twist & robot_speed, const nav_msgs::msg::Path & plan,
     const geometry_msgs::msg::Pose & goal, nav2_core::GoalChecker * goal_checker);
@@ -123,6 +123,11 @@ public:
    */
   void reset(bool reset_dynamic_speed_limits = true);
 
+  /**
+   * @brief Get costs
+   */
+  xt::xtensor<float, 1> getCosts();
+
 protected:
   /**
    * @brief Main function to generate, score, and return trajectories
@@ -148,10 +153,9 @@ protected:
   void getParams();
 
   /**
-   * @brief Set the motion model of the vehicle platform
-   * @param model Model string to use
+   * @brief Initialize the motion model
    */
-  void setMotionModel(const std::string & model);
+  void initializeMotionModel();
 
   /**
    * @brief Shift the optimal control sequence after processing for
@@ -174,20 +178,20 @@ protected:
    * @brief  Update velocities in state
    * @param state fill state with velocities on each step
    */
-  void updateStateVelocities(models::State & state) const;
+  void updateStateVelocities(models::MPPIState & state) const;
 
   /**
    * @brief  Update initial velocity in state
    * @param state fill state
    */
-  void updateInitialStateVelocities(models::State & state) const;
+  void updateInitialStateVelocities(models::MPPIState & state) const;
 
   /**
    * @brief predict velocities in state using model
    * for time horizon equal to timesteps
    * @param state fill state
    */
-  void propagateStateVelocitiesFromInitials(models::State & state) const;
+  void propagateStateVelocitiesFromInitials(models::MPPIState & state) const;
 
   /**
    * @brief Rollout velocities in state to poses
@@ -196,7 +200,7 @@ protected:
    */
   void integrateStateVelocities(
     models::Trajectories & trajectories,
-    const models::State & state) const;
+    const models::MPPIState & state) const;
 
   /**
    * @brief Rollout velocities in state to poses
@@ -220,12 +224,6 @@ protected:
    */
   geometry_msgs::msg::TwistStamped
   getControlFromSequenceAsTwist(const builtin_interfaces::msg::Time & stamp);
-
-  /**
-   * @brief Whether the motion model is holonomic
-   * @return Bool if holonomic to populate `y` axis of state
-   */
-  bool isHolonomic() const;
 
   /**
    * @brief Using control frequence and time step size, determine if trajectory
@@ -253,7 +251,7 @@ protected:
 
   models::OptimizerSettings settings_;
 
-  models::State state_;
+  models::MPPIState state_;
   models::ControlSequence control_sequence_;
   std::array<mppi::models::Control, 4> control_history_;
   models::Trajectories generated_trajectories_;

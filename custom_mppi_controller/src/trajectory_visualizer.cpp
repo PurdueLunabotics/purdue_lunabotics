@@ -62,17 +62,14 @@ void TrajectoryVisualizer::on_deactivate()
   optimal_path_pub_->on_deactivate();
 }
 
-void TrajectoryVisualizer::add(
-  const xt::xtensor<float, 2> & trajectory,
-  const std::string & marker_namespace,
-  const builtin_interfaces::msg::Time & cmd_stamp)
+void TrajectoryVisualizer::addTrajectory(const xt::xtensor<float, 2>& trajectory, const std::string& marker_namespace, const builtin_interfaces::msg::Time& cmd_stamp)
 {
   if (optimal_path_pub_->get_subscription_count() == 0 &&
-    trajectories_publisher_->get_subscription_count() == 0)
+      trajectories_publisher_->get_subscription_count() == 0)
   {
     return;
   }
-
+ 
   auto & size = trajectory.shape()[0];
   if (!size) {
     return;
@@ -87,8 +84,7 @@ void TrajectoryVisualizer::add(
         utils::createScale(0.03, 0.03, 0.07) :
         utils::createScale(0.07, 0.07, 0.09);
       auto color = utils::createColor(0, component, component, 1);
-      auto marker = utils::createMarker(
-        marker_id_++, pose, scale, color, frame_id_, marker_namespace);
+      auto marker = utils::createMarker(marker_id_++, pose, scale, color, frame_id_, marker_namespace);
       points_->markers.push_back(marker);
 
       // populate optimal path
@@ -110,28 +106,31 @@ void TrajectoryVisualizer::add(
   }
 }
 
-void TrajectoryVisualizer::add(
-  const models::Trajectories & trajectories, const std::string & marker_namespace)
+void TrajectoryVisualizer::addTrajectories(const models::Trajectories & trajectories, const std::string & marker_namespace, xt::xtensor<float, 1> costs)
 {
   if (trajectories_publisher_->get_subscription_count() == 0) {
     return;
   }
 
-  auto & shape = trajectories.x.shape();
-  const float shape_1 = static_cast<float>(shape[1]);
+  auto& shape = trajectories.trajectories.shape();
+  // const float numTimesteps = static_cast<float>(shape[1]);
+
+  auto maxCost = xt::amax(costs)();
   points_->markers.reserve(floor(shape[0] / trajectory_step_) * floor(shape[1] * time_step_));
 
   for (size_t i = 0; i < shape[0]; i += trajectory_step_) {
     for (size_t j = 0; j < shape[1]; j += time_step_) {
-      const float j_flt = static_cast<float>(j);
-      float blue_component = 1.0f - j_flt / shape_1;
-      float green_component = j_flt / shape_1;
 
-      auto pose = utils::createPose(trajectories.x(i, j), trajectories.y(i, j), 0.03);
+      // const float j_flt = static_cast<float>(j);
+      // float blue_component = 1.0f - j_flt / numTimesteps;
+      // float green_component = j_flt / numTimesteps;
+
+      float redComponent = costs(i) / maxCost;
+
+      auto pose = utils::createPose(trajectories.trajectories(i,j,0), trajectories.trajectories(i,j,1), 0.03);
       auto scale = utils::createScale(0.03, 0.03, 0.03);
-      auto color = utils::createColor(0, green_component, blue_component, 1);
-      auto marker = utils::createMarker(
-        marker_id_++, pose, scale, color, frame_id_, marker_namespace);
+      auto color = utils::createColor(redComponent, 0, 0, 1);
+      auto marker = utils::createMarker(marker_id_++, pose, scale, color, frame_id_, marker_namespace);
 
       points_->markers.push_back(marker);
     }

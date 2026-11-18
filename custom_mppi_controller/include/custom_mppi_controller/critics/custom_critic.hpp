@@ -24,10 +24,10 @@ namespace mppi::critics
 {
 
 /**
- * @class mppi::critics::ConstraintCritic
+ * @class mppi::critics::CustomCritic
  * @brief Critic objective function for driving towards goal
  */
-class GoalCritic : public CriticFunction
+class CustomCritic : public CriticFunction
 {
 public:
   /**
@@ -43,9 +43,7 @@ public:
   void score(CriticData & data) override;
 
 protected:
-  unsigned int power_{0};
   float weight_{0};
-  float threshold_to_consider_{0};
 };
 
 }  // namespace mppi::critics
