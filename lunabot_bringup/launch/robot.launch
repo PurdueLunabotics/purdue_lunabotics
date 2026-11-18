@@ -183,7 +183,7 @@
         </node>
 
         <node name="stall_detection_node" pkg="lunabot_control" exec="stall_detection_node" output="screen" respawn="true" unless="$(var sim)">
-            <param name="~waitTime" value="2"/> 
+            <param name="~waitTime" value="2"/>
         </node> 
 
         
