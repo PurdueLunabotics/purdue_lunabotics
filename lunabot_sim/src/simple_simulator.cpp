@@ -72,17 +72,19 @@ class SimpleSimulator: public rclcpp::Node {
             joint_states.position.push_back(0);
             joint_states.position.push_back(0);
 
-            wheel_radius = declare_parameter("wheel_radius", 0.2);
+            wheel_radius = declare_parameter("wheel_radius", 0.17145);
             wheelbase_width = declare_parameter("wheelbase_width", 0.32);
             gear_ratio = declare_parameter("gear_ratio", 50.0);
             drive_accel = declare_parameter("drive_accel", 6000.0);
             exc_accel = declare_parameter("exc_accel", 500.0);
 
             effort_sub = create_subscription<lunabot_msgs::msg::RobotEffort>("effort", 10, [this] (lunabot_msgs::msg::RobotEffort effort) {
-                this->effort = effort;
-            });
+                                                                                             this->effort = effort;
+                                                                                           });
+
             pose_pub = create_publisher<geometry_msgs::msg::PoseStamped>("position", 10);
             joint_state_pub = create_publisher<sensor_msgs::msg::JointState>("simulator/joint_states", 10);
+
             timer = create_timer(std::chrono::milliseconds(50), [this] () {
                 integrate_position(50.0 / 1000.0);
 
@@ -119,23 +121,23 @@ class SimpleSimulator: public rclcpp::Node {
             current_right_vel = limit_accel(current_right_vel, effort.right_drive, drive_accel, dt);
             current_exc_vel = limit_accel(current_exc_vel, effort.lin_act, exc_accel, dt);
 
-            float motor_to_distance_factor = 1.0 / gear_ratio / 60.0 * 2.0 * 3.14159 * wheel_radius * dt;
-            position += tf2::quatRotate(rotation, tf2::Vector3(current_left_vel * motor_to_distance_factor / 2.0, 0.0, 0.0));
-            position += tf2::quatRotate(rotation, tf2::Vector3(current_right_vel * motor_to_distance_factor / 2.0, 0.0, 0.0));
+            float rpm_to_distance_factor = (1.0 / 60.0) / gear_ratio * 2.0 * 3.14159 * wheel_radius * dt;
+            position += tf2::quatRotate(rotation, tf2::Vector3(current_left_vel * rpm_to_distance_factor / 2.0, 0.0, 0.0));
+            position += tf2::quatRotate(rotation, tf2::Vector3(current_right_vel * rpm_to_distance_factor / 2.0, 0.0, 0.0));
 
             tf2::Quaternion left_rot;
-            left_rot.setRPY(0, 0, -current_left_vel * motor_to_distance_factor / wheelbase_width / 2.0);
+            left_rot.setRPY(0, 0, -current_left_vel * rpm_to_distance_factor / wheelbase_width / 2.0);
             left_rot.normalize();
-            rotation.normalize();
             tf2::Quaternion right_rot;
-            right_rot.setRPY(0, 0, current_right_vel * motor_to_distance_factor / wheelbase_width / 2.0);
+            right_rot.setRPY(0, 0, current_right_vel * rpm_to_distance_factor / wheelbase_width / 2.0);
             right_rot.normalize();
+            rotation.normalize();
             tf2::Quaternion new_rot = rotation * left_rot * right_rot;
             rotation = new_rot;
             rotation.normalize();
 
-            left_rot_amount += current_left_vel * motor_to_distance_factor / wheel_radius;
-            right_rot_amount += current_right_vel * motor_to_distance_factor / wheel_radius;
+            left_rot_amount += current_left_vel * rpm_to_distance_factor / wheel_radius;
+            right_rot_amount += current_right_vel * rpm_to_distance_factor / wheel_radius;
             exc_pos += current_exc_vel / 500.0 * dt;
 
             if (exc_pos > 0) {
