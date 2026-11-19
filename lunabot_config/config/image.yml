@@ -1,0 +1,53 @@
+/usb_cam:
+  ros__parameters:
+    auto_white_balance: true
+    autoexposure: true
+    autofocus: false
+    av_device_format: YUV422P
+    brightness: 50
+    camera_info_url: ''
+    camera_name: default_cam
+    contrast: -1
+    exposure: 100
+    focus: -1
+    frame_id: default_cam
+    framerate: 30.0
+    gain: -1
+    image_height: 480
+    image_raw:
+      enable_pub_plugins:
+      - image_transport/ffmpeg
+      - image_transport/raw
+      - image_transport/theora
+      ffmpeg:
+        bit_rate: 1000000
+        encoder: hevc_vaapi
+        encoder_av_options: 'rc_mode:CBR,compression_level:0'
+        encoder_measure_performance: false
+        gop_size: 10
+        max_b_frames: 0
+        pixel_format: ''
+        qmax: -1
+    image_width: 640
+    io_method: mmap
+    pixel_format: yuyv
+    saturation: -1
+    sharpness: -1
+    video_device: /dev/video0
+    white_balance: 4000
+
+/image_republisher:
+  ros__parameters:
+    in_transport: ffmpeg
+    out_transport: raw
+    in:
+      ffmpeg:
+        output_encoding: bgr8
+        decoders:
+          hevc_nv12_bgr8_yuv422_yuy2: hevc
+
+
+/image_republisher2:
+  ros__parameters:
+    in_transport: theora
+    out_transport: raw

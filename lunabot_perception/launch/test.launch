@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <node pkg="usb_cam" exec="usb_cam_node_exe">
+      <param from="$(find-pkg-share lunabot_config)/config/image.yml"/>
+    </node>
+    <node pkg="image_transport" exec="republish">
+      <param from="$(find-pkg-share lunabot_config)/config/image.yml"/>
+      <remap from="in/ffmpeg" to="image_raw/ffmpeg" />
+      <remap from="out" to="out/ffmpeg" />
+    </node>
+    <node pkg="image_transport" exec="republish" name="image_republisher2">
+      <param from="$(find-pkg-share lunabot_config)/config/image.yml"/>
+      <remap from="in/theora" to="image_raw/theora" />
+      <remap from="out" to="out/theora" />
+    </node>
+    <node pkg="foxglove_bridge" exec="foxglove_bridge" ros_args="--log-level warn" />
+</launch>
