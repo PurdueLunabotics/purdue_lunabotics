@@ -1,0 +1,135 @@
+{
+  "nodes": {
+    "flake-utils": {
+      "inputs": {
+        "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "nix-ros-overlay": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": "nixpkgs",
+        "rosdistro": "rosdistro"
+      },
+      "locked": {
+        "lastModified": 1794039692,
+        "narHash": "sha256-LxoRIHc9WMcpcGpfmj1sYbwuBa8HjHenE+3N2iUgKTg=",
+        "owner": "lopsided98",
+        "repo": "nix-ros-overlay",
+        "rev": "971fa9ca86c79a4997e7c6b2f9df0cb754e7256a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lopsided98",
+        "ref": "master",
+        "repo": "nix-ros-overlay",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1790578696,
+        "narHash": "sha256-ZoxIApko70jCdbH3l20HWXOBaT2HZd87orzd2yJ9dVE=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "7a0f122f5090cf4c2ade2a13a0e229d4e19ba71f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nix-ros-overlay": "nix-ros-overlay",
+        "nixpkgs": [
+          "nix-ros-overlay",
+          "nixpkgs"
+        ],
+        "rtabmap": "rtabmap",
+        "rtabmap_ros": "rtabmap_ros"
+      }
+    },
+    "rosdistro": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1791856650,
+        "narHash": "sha256-CwJlC/+WJgk02mEAn2/DJu67EVlnHjdSORE/IF8WBjs=",
+        "owner": "ros",
+        "repo": "rosdistro",
+        "rev": "2080626b0e2090677be8c0b5f14953ca22fa18e6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ros",
+        "repo": "rosdistro",
+        "type": "github"
+      }
+    },
+    "rtabmap": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794934066,
+        "narHash": "sha256-bl9YHcjrfbNkPzKwKSJqgfvQVLRcBaZleZOzWoYhwK4=",
+        "owner": "introlab",
+        "repo": "rtabmap",
+        "rev": "832eaaff2444282789cdfc9eef2332c5a7830f7b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "introlab",
+        "repo": "rtabmap",
+        "type": "github"
+      }
+    },
+    "rtabmap_ros": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794796442,
+        "narHash": "sha256-rpIVQofz1uLGFBt0jDV1vfRROtU3pLzGmiknFY/VgQw=",
+        "owner": "introlab",
+        "repo": "rtabmap_ros",
+        "rev": "3e1cdcb072ad21fa2b129412332760bd3e456279",
+        "type": "github"
+      },
+      "original": {
+        "owner": "introlab",
+        "repo": "rtabmap_ros",
+        "type": "github"
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

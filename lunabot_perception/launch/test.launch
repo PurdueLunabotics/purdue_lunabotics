@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py">
+    <arg name="camera_name"                   value ="camera1" />
+
+    <arg name="serial_no"                     value="'141222070808'"/>
+
+    <arg name="initial_reset"                 value="true"/>
+
+    <arg name="pointcloud.enable"             value="false"/>
+    <arg name="enable_sync"                   value="true"/>
+    <arg name="align_depth.enable"            value="true"/>
+
+    <arg name="enable_color"                  value="true"/>
+    <arg name="rgb_camera.color_profile"      value="848x480x30"/>
+
+    <arg name="enable_depth"                  value="true"/>
+    <arg name="depth_module.depth_profile"    value="848x480x30"/>
+  </include>
+
+  <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py">
+    <arg name="camera_name"                   value ="camera2" />
+
+    <arg name="serial_no"                     value="'349622073231'"/>
+
+    <arg name="initial_reset"                 value="true"/>
+
+    <arg name="pointcloud.enable"             value="false"/>
+    <arg name="enable_sync"                   value="true"/>
+    <arg name="align_depth.enable"            value="true"/>
+
+    <arg name="enable_color"                  value="true"/>
+    <arg name="rgb_camera.color_profile"      value="848x480x30"/>
+
+    <arg name="enable_depth"                  value="true"/>
+    <arg name="depth_module.depth_profile"    value="848x480x30"/>
+  </include>
+
+  <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py">
+    <arg name="camera_name"                   value ="camera3" />
+
+    <arg name="serial_no"                     value="'339222072367'"/>
+
+    <arg name="initial_reset"                 value="true"/>
+
+    <arg name="pointcloud.enable"             value="false"/>
+    <arg name="enable_sync"                   value="true"/>
+    <arg name="align_depth.enable"            value="true"/>
+
+    <arg name="enable_color"                  value="true"/>
+    <arg name="rgb_camera.color_profile"      value="848x480x30"/>
+
+    <arg name="enable_depth"                  value="true"/>
+    <arg name="depth_module.depth_profile"    value="848x480x30"/>
+  </include>
+  
+  <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py">
+    <arg name="camera_name"                   value ="camera4" />
+
+    <arg name="serial_no"                     value="'939622074382'"/>
+
+    <arg name="initial_reset"                 value="true"/>
+
+    <arg name="pointcloud.enable"             value="false"/>
+    <arg name="enable_sync"                   value="true"/>
+    <arg name="align_depth.enable"            value="true"/>
+
+    <arg name="enable_color"                  value="true"/>
+    <arg name="rgb_camera.color_profile"      value="848x480x30"/>
+
+    <arg name="enable_depth"                  value="true"/>
+    <arg name="depth_module.depth_profile"    value="848x480x30"/>
+  </include>
+</launch>
