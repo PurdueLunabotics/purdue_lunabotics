@@ -4,6 +4,7 @@
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <tf2/LinearMath/Matrix3x3.hpp>
 #include <tf2/LinearMath/Quaternion.hpp>
+#include <limits>
 #include "geometry_msgs/msg/twist_stamped.hpp"
 #include "pid.hpp"
 
@@ -45,7 +46,9 @@ public:
       : logger(rclcpp::get_logger("PointToPointController")),
         linear(1, 0, 0, 0.25),
         angular(1, 0, 0, 0.5),
-        state(State::Done) {}
+        state(State::Done),
+        speed_limit(0),
+        speed_percentage(false) {}
 
   void configure(
     const rclcpp_lifecycle::LifecycleNode::WeakPtr &parent,
@@ -126,6 +129,10 @@ public:
     else if (angle_error < -pi)
       angle_error += 2 * pi;
 
+    if (segment >= path.poses.size()) {
+      return angle_error;
+    }
+
     if (angle_error > pi / 2) {
       backwards = true;
       angle_error = pi - angle_error;
@@ -138,6 +145,10 @@ public:
   }
 
   double getLinearError(const geometry_msgs::msg::PoseStamped & pose) {
+    if (segment >= path.poses.size()) {
+      return std::numeric_limits<float>::infinity();
+    }
+
     return std::sqrt(
         std::pow(pose.pose.position.x - path.poses[segment].pose.position.x,
                  2) +
@@ -168,7 +179,7 @@ public:
         linear_error = getLinearError(pose);
       } else if (state == State::Angular && std::abs(angular_error) < angular_inner_tolerance) {
         state = segment < path.poses.size() ? State::Linear : State::Done;
-      } else if (state == State::Linear && std::abs(linear_error) < angular_outer_tolerance) {
+      } else if (state == State::Linear && std::abs(angular_error) > angular_outer_tolerance) {
         state = State::Angular;
       } else {
         break;
@@ -179,9 +190,9 @@ public:
     output.header.frame_id = pose.header.frame_id;
     output.header.stamp = time;
     if (state == State::Angular) {
-      output.twist.angular.z = angular.calculate(angular_error, (prev_time - time).seconds()) * (backwards ? -1 : 1);
-    } else {
-      output.twist.linear.x = linear.calculate(linear_error, (prev_time - time).seconds(), speed_limit, speed_percentage) * (backwards ? -1 : 1);
+      output.twist.angular.z = angular.calculate(angular_error, (time - prev_time).seconds()) * (backwards ? -1 : 1);
+    } else if (state == State::Linear) {
+      output.twist.linear.x = linear.calculate(linear_error, (time - prev_time).seconds(), speed_limit, speed_percentage) * (backwards ? -1 : 1);
     }
     prev_time = time;
 

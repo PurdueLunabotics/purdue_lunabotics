@@ -4,7 +4,7 @@
 
 using namespace lunabot_nav;
 
-PID::PID(double p, double i, double d, double max_output) : p(p), i(i), d(d), max_output(max_output) {
+PID::PID(double p, double i, double d, double max_output) : p(p), i(i), d(d), max_output(max_output), logger(rclcpp::get_logger("PID")) {
   reset();
 }
 
@@ -15,6 +15,8 @@ void PID::configure(std::string name, std::shared_ptr<rclcpp_lifecycle::Lifecycl
   max_output = nav2_util::declare_or_get_parameter(node, name + ".max_output", max_output);
 
   param_handler = std::make_shared<rclcpp::ParameterEventHandler>(node);
+
+  logger = node->get_logger().get_child(name);
 
   cb_handles[0] = param_handler->add_parameter_callback(name + ".p", [this](const rclcpp::Parameter &p) {
     this->p = p.as_double();
