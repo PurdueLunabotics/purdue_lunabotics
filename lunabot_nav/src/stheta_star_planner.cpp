@@ -7,12 +7,15 @@
 #include <rclcpp/logging.hpp>
 #include <rclcpp/parameter_value.hpp>
 
+namespace lunabot_nav {
+
 class SThetaStarPlanner : public nav2_core::GlobalPlanner {
   std::unique_ptr<SThetaStar> algorithm;
   rclcpp_lifecycle::LifecycleNode::WeakPtr parent;
   std::string name;
   rclcpp::Logger logger;
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr params_handler;
+  std::shared_ptr<nav2_costmap_2d::Costmap2DROS> costmap_ros;
 
  public:
   SThetaStarPlanner() : logger(rclcpp::get_logger("SThetaStarPlanner")) { }
@@ -25,6 +28,7 @@ class SThetaStarPlanner : public nav2_core::GlobalPlanner {
 
     this->parent = parent;
     this->name = name;
+    this->costmap_ros = costmap_ros;
 
     auto node = parent.lock();
     this->logger = node->get_logger();
@@ -132,5 +136,7 @@ class SThetaStarPlanner : public nav2_core::GlobalPlanner {
   }
 };
 
+};
+
 #include "pluginlib/class_list_macros.hpp"
-PLUGINLIB_EXPORT_CLASS(SThetaStarPlanner, nav2_core::GlobalPlanner)
+PLUGINLIB_EXPORT_CLASS(lunabot_nav::SThetaStarPlanner, nav2_core::GlobalPlanner)
