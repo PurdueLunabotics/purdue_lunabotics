@@ -37,20 +37,37 @@
     controller_plugins:
     - FollowPath
     FollowPath:
-      angular:
-        d: 0.0
-        i: 0.0
-        max_output: 0.5
-        p: 2.0
-      angular_inner_tolerance: 0.075
-      angular_outer_tolerance: 0.15
-      linear:
-        d: 0.0
-        i: 0.0
-        max_output: 0.5
-        p: 2.0
-      linear_tolerance: 0.2
-      plugin: lunabot_nav::PointToPointController
+      plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
+      allow_reversing: false  
+      approach_velocity_scaling_dist: 0.6
+      cancel_deceleration: 3.2     
+      cost_scaling_dist: 0.6                                                        
+      cost_scaling_gain: 1.0              
+      curvature_lookahead_dist: 0.6                                                 
+      desired_linear_vel: 0.5    
+      inflation_cost_scaling_factor: 3.0                                            
+      interpolate_curvature_after_goal: false
+      lookahead_dist: 0.6
+      lookahead_time: 1.5     
+      max_allowed_time_to_collision_up_to_carrot: 1.0
+      max_angular_accel: 3.2
+      max_lookahead_dist: 0.9
+      max_robot_pose_search_dist: 1.4875
+      min_approach_linear_velocity: 0.05
+      min_lookahead_dist: 0.3
+      regulated_linear_scaling_min_radius: 0.9  
+      regulated_linear_scaling_min_speed: 0.25
+      rotate_to_heading_angular_vel: 1.8
+      rotate_to_heading_min_angle: 0.785
+      stateful: true          
+      transform_tolerance: 0.1
+      use_cancel_deceleration: false
+      use_collision_detection: true     
+      use_cost_regulated_linear_velocity_scaling: true
+      use_fixed_curvature_lookahead: false
+      use_regulated_linear_velocity_scaling: true
+      use_rotate_to_heading: true
+      use_velocity_scaled_lookahead_dist: false
     goal_checker_plugins:
     - goal_checker
     goal_checker:
@@ -74,14 +91,41 @@
     planner_plugins:
     - GridBased
     GridBased:
-      costmap_exponential: 2.0
-      driving_cost: 1.0
-      max_goal_adjustment_meters: 0.75
-      node_cost: 2.0
-      plugin: lunabot_nav::SThetaStarPlanner
-      remapping_cost_change_percent: 0.01
-      traversal_cost: 20.0
-      turning_cost: 1.2
+      plugin: "nav2_smac_planner::SmacPlannerHybrid"
+
+      tolerance: 0.25
+      downsample_costmap: false
+      downsampling_factor: 1
+      allow_unknown: true                
+      max_iterations: 1000000             
+      max_on_approach_iterations: 1000    
+      terminal_checking_interval: 5000     
+      max_planning_time: 3.5              
+
+      motion_model_for_search: "REEDS_SHEPP"
+      minimum_turning_radius: 0.4
+      angle_quantization_bins: 72         
+      cost_travel_multiplier: 2.0         
+
+      cost_penalty: 2.0                   
+      reverse_penalty: 2.1                
+      change_penalty: 0.0                 
+      non_straight_penalty: 1.10          
+      retrospective_penalty: 0.025        
+      rotation_penalty: 5.0               
+
+      lookup_table_size: 20.0               
+      cache_obstacle_heuristic: True      
+      allow_reverse_expansion: False      
+      debug_visualizations: True                
+
+      smooth_path: True                   
+      smoother:
+        max_iterations: 1000
+        w_smooth: 0.3
+        w_data: 0.2
+        tolerance: 1.0e-10
+        do_refinement: true               
 
 /global_costmap/global_costmap:
   ros__parameters:
