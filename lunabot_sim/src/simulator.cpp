@@ -13,6 +13,14 @@
 #include <tf2/LinearMath/Quaternion.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
+std::optional<rclcpp::Logger> glfwLogger;
+
+void error_callback(int error, const char* description) {
+    assert(glfwLogger.has_value());
+
+    RCLCPP_ERROR(glfwLogger.value(), "GLFW (%d): %s", error, description);
+}
+
 // mujoco specific code taken from https://github.com/google-deepmind/mujoco/blob/main/sample/basic.cc
 
 void global_keyboard(GLFWwindow* window, int key, int scancode, int act, int mods) {
@@ -54,6 +62,9 @@ SimulatorNode::SimulatorNode(): rclcpp::Node("simulator_node") {
         mini_bot = std::make_shared<Robot>("mini", model, data, this);
     }
 
+    glfwLogger = get_logger();
+    glfwSetErrorCallback(error_callback);
+
     if (!glfwInit()) {
         RCLCPP_ERROR(get_logger(), "Could not initialize GLFW");
         return;
@@ -61,6 +72,10 @@ SimulatorNode::SimulatorNode(): rclcpp::Node("simulator_node") {
 
     // create window, make OpenGL context current, request v-sync
     window = glfwCreateWindow(1200, 900, "MuJoCo", NULL, NULL);
+    if (!window) {
+        RCLCPP_ERROR(get_logger(), "Could not create window");
+        return;
+    }
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
