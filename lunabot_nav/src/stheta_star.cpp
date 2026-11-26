@@ -6,6 +6,8 @@
 #include <tf2/LinearMath/Quaternion.hpp>
 #include <angles/angles.h>
 
+using namespace lunabot_nav;
+
 const int LETHAL_COST = 252;
 
 Coord::Coord(int x, int y) {

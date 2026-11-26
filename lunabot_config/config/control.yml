@@ -20,9 +20,9 @@ differential_drive_controller_node:
     hz: 20.0
     max_speed: 3000
     max_speed_percentage: 0.8
-    wheel_diameter: 0.3429
-    width: 0.5588
-    pwm_to_velocity_factor: 3.5
+    wheel_diameter: 0.4
+    width: 0.64
+    pwm_to_velocity_factor: 1.0
 
 drivetrain_controller_node:
   ros__parameters:

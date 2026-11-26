@@ -1,0 +1,8 @@
+<library path="lunabot_nav">
+    <class name="lunabot_nav::SThetaStarPlanner" type="lunabot_nav::SThetaStarPlanner" base_class_type="nav2_core::GlobalPlanner">
+        <description>S-Theta* planner</description>
+    </class>
+    <class name="lunabot_nav::PointToPointController" type="lunabot_nav::PointToPointController" base_class_type="nav2_core::Controller">
+        <description>Point to point controller</description>
+    </class>
+</library>

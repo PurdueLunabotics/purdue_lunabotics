@@ -1,10 +1,12 @@
 #ifndef STHETA_STAR_HPP
 #define STHETA_STAR_HPP
 
-#include "nav2_costmap_2d/costmap_2d.hpp"
-#include "geometry_msgs/msg/pose_stamped.hpp"
-#include "nav_msgs/msg/path.hpp"
-#include "rclcpp/rclcpp.hpp"
+#include <nav2_costmap_2d/costmap_2d.hpp>
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <nav_msgs/msg/path.hpp>
+#include <rclcpp/rclcpp.hpp>
+
+namespace lunabot_nav {
 
 typedef geometry_msgs::msg::PoseStamped PoseStampedMsg;
 typedef nav_msgs::msg::Path PathMsg;
@@ -77,6 +79,8 @@ class SThetaStar {
     bool hasLineOfSight(Coord initial, Coord end, double &cost);
     double calculatePathCost(PathMsg path);
     PoseStampedMsg moveGoal(PoseStampedMsg start, PoseStampedMsg goal);
+};
+
 };
 
 #endif
