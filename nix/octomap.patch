@@ -1,6 +1,6 @@
 diff -Naur octomap-release-release-jazzy-octomap-1.10.0-4/include/octomap/OcTreeKey.h octomap-new/include/octomap/OcTreeKey.h
---- octomap-release-release-jazzy-octomap-1.10.0-4/include/octomap/OcTreeKey.h 2024-04-18 20:57:49.000000000 -0400
-+++ octomap-new/include/octomap/OcTreeKey.h    2026-11-25 21:31:21.901490894 -0500
+--- octomap-release-release-jazzy-octomap-1.10.0-4/include/octomap/OcTreeKey.h	2024-04-18 20:57:49.000000000 -0400
++++ octomap-new/include/octomap/OcTreeKey.h	2026-11-25 21:31:21.901490894 -0500
 @@ -34,10 +34,7 @@
  #ifndef OCTOMAP_OCTREE_KEY_H
  #define OCTOMAP_OCTREE_KEY_H
@@ -14,18 +14,17 @@ diff -Naur octomap-release-release-jazzy-octomap-1.10.0-4/include/octomap/OcTree
  #include <assert.h>
  
 diff -Naur octomap-release-release-jazzy-octomap-1.10.0-4/src/Pointcloud.cpp octomap-new/src/Pointcloud.cpp
---- octomap-release-release-jazzy-octomap-1.10.0-4/src/Pointcloud.cpp  2024-04-18 20:57:49.000000000 -0400
-+++ octomap-new/src/Pointcloud.cpp     2026-11-25 21:31:09.250412982 -0500
+--- octomap-release-release-jazzy-octomap-1.10.0-4/src/Pointcloud.cpp	2024-04-18 20:57:49.000000000 -0400
++++ octomap-new/src/Pointcloud.cpp	2026-11-25 21:31:09.250412982 -0500
 @@ -31,10 +31,7 @@
   * POSSIBILITY OF SUCH DAMAGE.
   */
  
 -/* According to c++ standard including this header has no practical effect
 - * but it can be used to determine the c++ standard library implementation.
-- */  
+- */ 
 -#include <ciso646>
 +#include <version>
-  
+ 
  #if defined(_MSC_VER) || defined(_LIBCPP_VERSION)
    #include <algorithm>
-
