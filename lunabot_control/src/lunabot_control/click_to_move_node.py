@@ -11,9 +11,9 @@ class ClickToMoveNode(Node):
     def __init__(self):
         super().__init__('click_to_move')
 
-        self.action_client = ActionClient(self,NavigateToPose,'/navigate_to_pose')
+        self.action_client = ActionClient(self,NavigateToPose,'navigate_to_pose')
 
-        self.create_subscription(PoseStamped,'/goal',self.goal_callback,10)
+        self.create_subscription(PoseStamped,'goal',self.goal_callback,10)
 
     def goal_callback(self, pose):
         goal = NavigateToPose.Goal()
