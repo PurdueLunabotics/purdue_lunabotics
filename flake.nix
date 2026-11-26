@@ -51,6 +51,14 @@
                   patches = (prev_attrs.patches or []) ++ [ ./nix/octomap.patch ];
                 });
 
+                usb-cam = prev_ros.usb-cam.overrideAttrs (final_attrs: prev_attrs: {
+                  patches = (prev_attrs.patches or []) ++ [ ./nix/usb-cam.patch ];
+                });
+
+                nav2-navfn-planner = prev_ros.nav2-navfn-planner.overrideAttrs (final_attrs: prev_attrs: {
+                  patches = (prev_attrs.patches or []) ++ [ ./nix/navfn.patch ];
+                });
+
                 rtabmap = prev_ros.rtabmap.overrideAttrs (final_attrs: prev_attrs: {
                   src = inputs.rtabmap;
                   cmakeFlags = (prev_attrs.cmakeFlags or []) ++ [
@@ -79,7 +87,14 @@
         devShells.default = import ./shell.nix {
           inherit pkgs rosDistro;
           extraPkgs = {  };
-          extraPaths = [ (pkgs.python3.withPackages (ps: with ps; [ lightglue ])) pkgs.rosPackages.jazzy.usb-cam pkgs.rosPackages.jazzy.ffmpeg-image-transport ];
+          extraPaths = [
+            (pkgs.python3.withPackages (ps: with ps; [ lightglue protobuf ]))
+            pkgs.rosPackages.jazzy.usb-cam
+            pkgs.rosPackages.jazzy.ffmpeg-image-transport
+            pkgs.librsvg
+            pkgs.gdk-pixbuf
+            pkgs.wrapGAppsHook3
+          ];
         };
       });
 

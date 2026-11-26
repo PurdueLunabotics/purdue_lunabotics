@@ -11,6 +11,7 @@
   <depend>std_msgs</depend>
   <depend>lunabot_msgs</depend>
   <depend>sensor_msgs</depend>
+  <depend>protobuf-dev</depend>
 
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
 

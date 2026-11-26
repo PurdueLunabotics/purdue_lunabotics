@@ -1,0 +1,83 @@
+diff -Naur a/include/usb_cam/formats/mjpeg.hpp b/include/usb_cam/formats/mjpeg.hpp
+--- a/include/usb_cam/formats/mjpeg.hpp	2024-05-02 10:24:53.000000000 -0400
++++ b/include/usb_cam/formats/mjpeg.hpp	2026-11-26 13:35:03.183251874 -0500
+@@ -244,8 +244,6 @@
+   size_t m_avframe_rgb_size;
+   char * m_averror_str;
+   int m_result = 0;
+-  int m_counter = 0;
+-  const int * m_linesize;
+ 
+   const int m_align = 32;
+ };
+diff -Naur a/include/usb_cam/formats/pixel_format_base.hpp b/include/usb_cam/formats/pixel_format_base.hpp
+--- a/include/usb_cam/formats/pixel_format_base.hpp	2024-05-02 10:24:53.000000000 -0400
++++ b/include/usb_cam/formats/pixel_format_base.hpp	2026-11-26 13:35:03.183344418 -0500
+@@ -50,11 +50,11 @@
+ /// arguments for future pixel format(s) that are added.
+ typedef struct
+ {
+-  std::string name = "";
+-  int width = 640;
+-  int height = 480;
+-  size_t pixels = 640 * 480;
+-  std::string av_device_format_str = "AV_PIX_FMT_YUV422P";
++  std::string name;
++  int width;
++  int height;
++  size_t pixels;
++  std::string av_device_format_str;
+ } format_arguments_t;
+ 
+ 
+@@ -74,6 +74,8 @@
+     m_requires_conversion(requires_conversion)
+   {}
+ 
++  virtual ~pixel_format_base() {}
++
+   /// @brief Name of pixel format. Used in the parameters file to select this format
+   /// @return
+   inline std::string name() {return m_name;}
+diff -Naur a/include/usb_cam/usb_cam.hpp b/include/usb_cam/usb_cam.hpp
+--- a/include/usb_cam/usb_cam.hpp	2024-05-02 10:24:53.000000000 -0400
++++ b/include/usb_cam/usb_cam.hpp	2026-11-26 13:36:20.529407061 -0500
+@@ -96,13 +96,13 @@
+   return fmts;
+ }
+ 
+-typedef struct
++typedef struct capture_format_t
+ {
+   struct v4l2_fmtdesc format;
+   struct v4l2_frmivalenum v4l2_fmt;
+ } capture_format_t;
+ 
+-typedef struct
++typedef struct parameters_t
+ {
+   std::string camera_name;  // can be anything
+   std::string device_name;  // usually /dev/video0 or something similiar
+@@ -132,7 +132,7 @@
+   bool autofocus;
+ } parameters_t;
+ 
+-typedef struct
++typedef struct image_t
+ {
+   char * data;
+   size_t width;
+@@ -401,13 +401,10 @@
+   image_t m_image;
+ 
+   AVFrame * m_avframe;
+-  int m_avframe_size;
+   AVCodec * m_avcodec;
+-  AVCodecID m_codec_id;
+   AVDictionary * m_avoptions;
+   AVCodecContext * m_avcodec_context;
+ 
+-  int64_t m_buffer_time_us;
+   bool m_is_capturing;
+   int m_framerate;
+   const time_t m_epoch_time_shift_us;

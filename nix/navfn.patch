@@ -1,0 +1,23 @@
+diff -Naur a/src/navfn.cpp b/src/navfn.cpp
+--- a/src/navfn.cpp	2026-08-21 18:23:56.000000000 -0400
++++ b/src/navfn.cpp	2026-11-26 13:43:51.101790103 -0500
+@@ -249,8 +249,7 @@
+   COSTTYPE * cm = costarr;
+   if (isROS) {  // ROS-type cost array
+     for (int i = 0; i < ny; i++) {
+-      int k = i * nx;
+-      for (int j = 0; j < nx; j++, k++, cmap++, cm++) {
++      for (int j = 0; j < nx; j++, cmap++, cm++) {
+         // This transforms the incoming cost values:
+         // COST_OBS                 -> COST_OBS (incoming "lethal obstacle")
+         // COST_OBS_ROS             -> COST_OBS (incoming "inscribed inflated obstacle")
+@@ -271,8 +270,7 @@
+     }
+   } else {  // not a ROS map, just a PGM
+     for (int i = 0; i < ny; i++) {
+-      int k = i * nx;
+-      for (int j = 0; j < nx; j++, k++, cmap++, cm++) {
++      for (int j = 0; j < nx; j++, cmap++, cm++) {
+         *cm = COST_OBS;
+         if (i < 7 || i > ny - 8 || j < 7 || j > nx - 8) {
+           continue;  // don't do borders

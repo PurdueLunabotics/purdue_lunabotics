@@ -12,8 +12,6 @@
   <depend>rclpy</depend>
   <depend>tf2_ros</depend>
   <depend>geometry_msgs</depend>
-  <depend>plotjuggler</depend>
-  <depend>plotjuggler_ros</depend>
   <depend>nav_msgs</depend>
   <depend>nav2_msgs</depend>
   <depend>joy</depend>

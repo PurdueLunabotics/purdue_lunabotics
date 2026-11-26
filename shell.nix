@@ -49,8 +49,6 @@ pkgs.mkShell {
             nav-msgs
             nav2-msgs
             navigation2
-            plotjuggler
-            plotjuggler-ros
             python3Packages.pytest
             python3Packages.scikit-learn
             python3Packages.shapely
@@ -75,6 +73,7 @@ pkgs.mkShell {
             tf2-ros
             xacro
             libusb-compat-0_1
+            protobuf
           ]
         )
         ++ builtins.attrValues extraPkgs
