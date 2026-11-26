@@ -47,6 +47,10 @@
               ];
 
               rosPackages = applyDistroOverlay (final_ros: prev_ros: {
+                octomap = prev_ros.octomap.overrideAttrs (final_attrs: prev_attrs: {
+                  patches = (prev_attrs.patches or []) ++ [ ./nix/octomap.patch ];
+                });
+
                 rtabmap = prev_ros.rtabmap.overrideAttrs (final_attrs: prev_attrs: {
                   src = inputs.rtabmap;
                   cmakeFlags = (prev_attrs.cmakeFlags or []) ++ [
@@ -78,4 +82,10 @@
           extraPaths = [ (pkgs.python3.withPackages (ps: with ps; [ lightglue ])) pkgs.rosPackages.jazzy.usb-cam pkgs.rosPackages.jazzy.ffmpeg-image-transport ];
         };
       });
+
+  nixConfig = {
+    extra-substituters = [
+      "ssh-ng://luna-nix"
+    ];
+  };
 }

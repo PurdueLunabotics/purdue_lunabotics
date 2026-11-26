@@ -57,9 +57,6 @@ pkgs.mkShell {
             rclcpp
             rclpy
             robot-state-publisher
-            ros-gz-bridge
-            ros-gz-image
-            ros-gz-sim
             ros2-controllers
             ros2launch
             rosidl-default-generators
@@ -90,5 +87,13 @@ pkgs.mkShell {
     # Setup ROS 2 shell completion. Doing it in direnv is useless.
     eval "$(${pkgs.python3Packages.argcomplete}/bin/register-python-argcomplete ros2)"
     eval "$(${pkgs.python3Packages.argcomplete}/bin/register-python-argcomplete colcon)"
+
+    export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath [
+      pkgs.libGL
+      pkgs.libglvnd
+      pkgs.mesa
+      pkgs.wayland
+      pkgs.libxkbcommon
+    ]}:$LD_LIBRARY_PATH
   '' + extraShellHook;
 }
